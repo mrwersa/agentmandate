@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.3.1 - 2026-07-28
+
+### Changed
+
+- The README opens with the compound-authority problem in plain language and
+  separates per-call policy, reviewed decision evidence, and runtime-control
+  evidence without weakening their boundaries.
+
 ## 0.3.0 - 2026-07-28
 
 ### Added
