@@ -9,7 +9,7 @@ This is direction, not a release promise.
 
 ## Current foundation: trustworthy authority analysis
 
-Version 0.3.1 makes the existing gate dependable:
+Version 0.3.2 makes the existing gate dependable:
 
 - fail-closed replay when control evidence is missing
 - tool-contract and run-limit comparison across releases
