@@ -110,12 +110,29 @@ usage error.
 
 ## Deliberate overlap
 
-`lint` covers ground that AgentWard, AgentShield, and AgentGuard already cover.
+`lint` covers ground that AgentWard, AgentShield, AgentGuard, and Policy in
+Amazon Bedrock AgentCore already cover.
 That is on purpose. A tool that reported only compound findings would need one
 of those running alongside it to be usable at all, and the first thing anyone
 does with a new analysis tool is run it on its own.
 
 The overlap is the floor. The contribution is `reach` and the diff built on it.
+
+Policy in AgentCore is worth naming precisely, because it is the strongest
+reason an AWS team would ask why this exists. It evaluates Cedar on every
+gateway tool invocation with default-deny and forbid-wins semantics, and its
+Cedar analysis uses automated reasoning to flag policies that always allow or
+always deny. That is real analysis, and it is analysis of one policy at a time.
+
+Cedar has no notion of a call sequence. "May this principal invoke
+`issue_refund` now" is a different question from "do four individually
+permitted calls compose into a 1,000 GBP breach", and no per-decision engine
+answers the second by construction. Neither does any of them answer whether a
+release widened reachable authority, because that needs two manifests and a
+reachability computation over both.
+
+So the split is enforcement against offline analysis, and per-decision against
+compound. Running both is the intended shape.
 
 ## What was left out, and why
 

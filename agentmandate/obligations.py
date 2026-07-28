@@ -43,6 +43,10 @@ class Obligation:
     subject: str
     reason: str
     decision: str = ""
+    # Probe texts a reviewer wrote to reach this decision. A generated suite
+    # needs real inputs, and inventing them would produce a file that runs and
+    # measures nothing.
+    cases: tuple[str, ...] = ()
 
     @property
     def identifier(self) -> str:
@@ -51,7 +55,13 @@ class Obligation:
 
     @property
     def reviewed(self) -> bool:
-        return bool(self.decision)
+        """Whether a human has supplied both the decision and a probe.
+
+        A decision without a case is half a review. The suite it generates
+        would carry placeholder text that AgentVerity happily runs, producing
+        numbers about nothing.
+        """
+        return bool(self.decision) and bool(self.cases)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -60,6 +70,7 @@ class Obligation:
             "subject": self.subject,
             "reason": self.reason,
             "decision": self.decision,
+            "cases": list(self.cases),
         }
 
     @classmethod
@@ -76,6 +87,7 @@ class Obligation:
             subject=str(value["subject"]),
             reason=str(value.get("reason", "")),
             decision=str(value.get("decision", "")),
+            cases=tuple(str(case) for case in value.get("cases", ())),
         )
 
 
@@ -102,10 +114,19 @@ class ObligationSet:
             lines.append("  none: no consequential authority is reachable")
             return "\n".join(lines)
         for obligation in self.obligations:
-            mapped = obligation.decision or "REVIEW: map a decision"
             lines.append(f"  {obligation.identifier}")
             lines.append(f"    why:      {obligation.reason}")
-            lines.append(f"    decision: {mapped}")
+            lines.append(
+                f"    decision: {obligation.decision or 'REVIEW: map a decision'}"
+            )
+            lines.append(
+                "    cases:    "
+                + (
+                    ", ".join(obligation.cases)
+                    if obligation.cases
+                    else "REVIEW: write at least one probe that reaches it"
+                )
+            )
         if self.unreviewed:
             lines.append("")
             lines.append(
@@ -198,6 +219,41 @@ def derive(mandate: Mandate, depth: int | None = None) -> ObligationSet:
     return ObligationSet(agent=mandate.agent, obligations=tuple(obligations))
 
 
+def reconcile(current: ObligationSet, reviewed: ObligationSet) -> ObligationSet:
+    """Carry reviewed decisions onto obligations derived from the live manifest.
+
+    A reviewed file is a record of decisions somebody mapped, not a substitute
+    for the manifest. Trusting it on its own lets a stale or unrelated review
+    generate a suite for authority the agent no longer has, which is the exact
+    drift this package exists to catch.
+
+    Matching is by stable identifier, so:
+
+    - an obligation that still exists keeps its reviewed decision and cases
+    - an obligation the manifest no longer reaches is dropped
+    - a newly reachable obligation appears unreviewed, and blocks generation
+      until somebody looks at it
+    """
+    mapped = {o.identifier: o for o in reviewed.obligations}
+    return ObligationSet(
+        agent=current.agent,
+        obligations=tuple(
+            (
+                Obligation(
+                    kind=obligation.kind,
+                    subject=obligation.subject,
+                    reason=obligation.reason,
+                    decision=mapped[obligation.identifier].decision,
+                    cases=mapped[obligation.identifier].cases,
+                )
+                if obligation.identifier in mapped
+                else obligation
+            )
+            for obligation in current.obligations
+        ),
+    )
+
+
 def to_decision_suite(
     obligations: ObligationSet, *, critical: bool = True
 ) -> dict[str, Any]:
@@ -212,14 +268,24 @@ def to_decision_suite(
     """
     if obligations.unreviewed:
         raise ValueError(
-            "these obligations have no reviewed decision yet: "
+            "these obligations are not fully reviewed yet: "
             + ", ".join(obligations.unreviewed)
-            + ". Map each to the decision your agent returns, then regenerate."
+            + ". Each needs the decision your agent returns and at least one "
+            "probe that reaches it. A suite generated from placeholders would "
+            "run and measure nothing."
         )
 
     decisions = obligations.decisions
     if not decisions:
         raise ValueError("no obligations to generate a suite from")
+    seen: set[str] = set()
+    for obligation in obligations.obligations:
+        duplicates = seen & set(obligation.cases)
+        if duplicates:
+            raise ValueError(
+                "the same probe is reviewed twice: " + ", ".join(sorted(duplicates))
+            )
+        seen.update(obligation.cases)
 
     contract: dict[str, Any] = {
         "allowed": list(decisions),
@@ -240,12 +306,13 @@ def to_decision_suite(
     return {
         "schema": "agentverity.decision-suite/v1",
         "contract": contract,
-        # Inputs are the one thing authority analysis cannot supply. A probe
-        # that reaches a decision is a piece of domain writing, so the suite
-        # ships the shape and leaves the writing.
+        # Inputs come from the reviewer. Authority analysis cannot invent a
+        # probe that reaches a decision, and shipping placeholder text would
+        # produce a suite AgentVerity runs happily while measuring nothing.
         "cases": [
-            {"input": f"REVIEW: write a case that reaches {decision}", "expected": decision}
-            for decision in decisions
+            {"input": case, "expected": obligation.decision}
+            for obligation in obligations.obligations
+            for case in obligation.cases
         ],
     }
 

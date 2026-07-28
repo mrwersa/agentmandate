@@ -102,8 +102,21 @@ class TestDecisionsAreNeverInvented:
         assert all(not o.reviewed for o in derive(loads(MANDATE)).obligations)
 
     def test_a_suite_cannot_be_generated_before_review(self):
-        with pytest.raises(ValueError, match="no reviewed decision yet"):
+        with pytest.raises(ValueError, match="not fully reviewed yet"):
             to_decision_suite(derive(loads(MANDATE)))
+
+    def test_a_decision_without_a_probe_is_only_half_reviewed(self):
+        """A suite of placeholder inputs runs happily and measures nothing,
+        which is worse than a file that refuses to load."""
+        half = ObligationSet(
+            agent="a",
+            obligations=(
+                Obligation("irreversible", "pay", "why", decision="paid"),
+            ),
+        )
+        assert half.unreviewed == ("irreversible:pay",)
+        with pytest.raises(ValueError, match="at least one probe"):
+            to_decision_suite(half)
 
     def test_the_refusal_names_the_unmapped_obligations(self):
         with pytest.raises(ValueError) as info:
@@ -111,7 +124,63 @@ class TestDecisionsAreNeverInvented:
         assert "irreversible:issue_refund" in str(info.value)
 
     def test_the_render_marks_each_unmapped_row(self):
-        assert "REVIEW: map a decision" in derive(loads(MANDATE)).render()
+        rendered = derive(loads(MANDATE)).render()
+        assert "REVIEW: map a decision" in rendered
+        assert "REVIEW: write at least one probe" in rendered
+
+
+class TestReconciliation:
+    """A reviewed file records decisions somebody mapped. It is not a
+    substitute for the manifest, and trusting it alone lets a stale review
+    generate a suite for authority the agent no longer has."""
+
+    @staticmethod
+    def fully_reviewed():
+        return ObligationSet(
+            agent="dispute-resolver",
+            obligations=tuple(
+                Obligation(o.kind, o.subject, o.reason, decision="refund_approved",
+                           cases=(f"probe for {o.identifier}",))
+                for o in derive(loads(MANDATE)).obligations
+            ),
+        )
+
+    def test_a_matching_review_carries_over_by_identifier(self):
+        from agentmandate.obligations import reconcile
+
+        result = reconcile(derive(loads(MANDATE)), self.fully_reviewed())
+        assert result.unreviewed == ()
+
+    def test_an_obligation_the_manifest_no_longer_reaches_is_dropped(self):
+        from agentmandate.obligations import reconcile
+
+        shrunk = MANDATE.replace("    principal: service\n", "")
+        result = reconcile(derive(loads(shrunk)), self.fully_reviewed())
+
+        assert not any(o.kind == "service-principal" for o in result.obligations)
+
+    def test_a_newly_reachable_obligation_appears_unreviewed(self):
+        """The point of reconciling: new authority blocks generation until
+        somebody has looked at it."""
+        from agentmandate.obligations import reconcile
+
+        grown = MANDATE + (
+            "  - name: close_account\n"
+            "    effect: irreversible\n"
+            "    requires: [case]\n"
+        )
+        result = reconcile(derive(loads(grown)), self.fully_reviewed())
+
+        assert "irreversible:close_account" in result.unreviewed
+
+    def test_a_renamed_tool_loses_its_review(self):
+        from agentmandate.obligations import reconcile
+
+        renamed = MANDATE.replace("issue_refund", "issue_payout")
+        result = reconcile(derive(loads(renamed)), self.fully_reviewed())
+
+        assert result.unreviewed != ()
+        assert any("issue_payout" in name for name in result.unreviewed)
 
 
 class TestSuiteGeneration:
@@ -120,8 +189,13 @@ class TestSuiteGeneration:
         return ObligationSet(
             agent="dispute-resolver",
             obligations=tuple(
-                Obligation(kind=o.kind, subject=o.subject, reason=o.reason,
-                           decision=mapping.get(o.kind, "refund_approved"))
+                Obligation(
+                    kind=o.kind,
+                    subject=o.subject,
+                    reason=o.reason,
+                    decision=mapping.get(o.kind, "refund_approved"),
+                    cases=(f"a reviewed probe for {o.identifier}",),
+                )
                 for o in derive(loads(MANDATE)).obligations
             ),
         )
@@ -146,11 +220,24 @@ class TestSuiteGeneration:
         suite = to_decision_suite(self.reviewed({}), critical=False)
         assert "critical" not in suite["contract"]
 
-    def test_case_inputs_are_left_for_a_human_to_write(self):
-        """A probe that reaches a decision is domain writing, so the suite
-        ships the shape and leaves the writing."""
+    def test_case_inputs_come_from_the_reviewer(self):
+        """Authority analysis cannot invent a probe that reaches a decision,
+        so the suite carries what a human wrote rather than a placeholder."""
         suite = to_decision_suite(self.reviewed({}))
-        assert suite["cases"][0]["input"].startswith("REVIEW:")
+
+        assert all(not c["input"].startswith("REVIEW") for c in suite["cases"])
+        assert suite["cases"][0]["input"].startswith("a reviewed probe for")
+
+    def test_the_same_probe_reviewed_twice_is_refused(self):
+        duplicated = ObligationSet(
+            agent="a",
+            obligations=(
+                Obligation("irreversible", "pay", "why", decision="paid", cases=("same",)),
+                Obligation("value-bearing", "pay", "why", decision="paid", cases=("same",)),
+            ),
+        )
+        with pytest.raises(ValueError, match="reviewed twice"):
+            to_decision_suite(duplicated)
 
     def test_an_empty_reviewed_set_is_refused(self):
         with pytest.raises(ValueError, match="no obligations"):

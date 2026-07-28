@@ -14,6 +14,7 @@ from .manifest import ManifestError, load
 from .obligations import (
     derive,
     load_obligations,
+    reconcile,
     to_decision_suite,
 )
 from .reach import analyse
@@ -150,11 +151,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_USAGE
 
     if args.command == "obligations":
-        obligations = (
-            load_obligations(args.reviewed)
-            if args.reviewed
-            else derive(mandate, depth=args.depth)
-        )
+        obligations = derive(mandate, depth=args.depth)
+        if args.reviewed:
+            # Reconciled against the live manifest rather than trusted on its
+            # own. A stale review would otherwise generate a suite for
+            # authority the agent no longer has.
+            try:
+                obligations = reconcile(obligations, load_obligations(args.reviewed))
+            except ValueError as exc:
+                print(f"error: {exc}", file=sys.stderr)
+                return EXIT_USAGE
         if args.suite:
             try:
                 print(json.dumps(to_decision_suite(obligations), indent=2))

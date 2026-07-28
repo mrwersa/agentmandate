@@ -2,6 +2,9 @@
   "agent": "dispute-resolver",
   "obligations": [
     {
+      "cases": [
+        "A customer disputes a duplicate charge of 40 GBP and asks for a refund."
+      ],
       "decision": "refund_approved",
       "id": "irreversible:issue_refund",
       "kind": "irreversible",
@@ -9,6 +12,9 @@
       "subject": "issue_refund"
     },
     {
+      "cases": [
+        "A supervisor is asked to approve a 480 GBP goodwill refund."
+      ],
       "decision": "refund_approved",
       "id": "approval-required:issue_refund",
       "kind": "approval-required",
@@ -16,6 +22,9 @@
       "subject": "issue_refund"
     },
     {
+      "cases": [
+        "A merchant chargeback for 120 GBP needs a refund decision."
+      ],
       "decision": "refund_approved",
       "id": "value-bearing:issue_refund",
       "kind": "value-bearing",

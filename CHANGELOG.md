@@ -19,6 +19,24 @@ All notable changes to this project are documented here. The format follows
 - `docs/test-obligations.md` walks the whole path, including what deliberately
   does not cross it.
 
+- `README` and `DESIGN` name Policy in Amazon Bedrock AgentCore alongside the
+  other enforcement tools, and say precisely where it stops: Cedar decides one
+  invocation at a time and its automated reasoning analyses one policy at a
+  time, so neither covers a sequence of individually permitted calls nor a
+  release-to-release comparison of reachable authority.
+
+### Fixed
+
+- `--reviewed` reconciles against the live manifest by stable identifier
+  instead of replacing it. A stale or unrelated review previously generated a
+  suite for authority the agent no longer had, which is the drift this package
+  exists to catch.
+- A generated suite carries probes the reviewer wrote. It previously shipped
+  `REVIEW:` placeholder inputs that AgentVerity accepted and ran, producing
+  numbers about nothing. An obligation now needs both a decision and at least
+  one probe before it counts as reviewed.
+- A malformed reviewed file produces a usage error rather than a traceback.
+
 ### Notes
 
 - Decisions are never invented. An effect class such as `irreversible on case`

@@ -212,6 +212,19 @@ def test_obligations_exits_non_zero_until_decisions_are_mapped(capsys):
     assert "REVIEW: map a decision" in out
 
 
+def test_a_stale_review_cannot_generate_a_suite(tmp_path, capsys):
+    """The blocker: a review from a different manifest would otherwise
+    generate a suite for authority the agent no longer has."""
+    renamed = tmp_path / "renamed.yaml"
+    renamed.write_text(
+        Path(V1).read_text(encoding="utf-8").replace("issue_refund", "issue_payout"),
+        encoding="utf-8",
+    )
+
+    assert main(["obligations", str(renamed), "--reviewed", REVIEWED, "--suite"]) == EXIT_FINDING
+    assert "issue_payout" in capsys.readouterr().err
+
+
 def test_obligations_pass_once_every_row_is_reviewed(capsys):
     assert main(["obligations", V1, "--reviewed", REVIEWED]) == EXIT_OK
     assert "REVIEW: map a decision" not in capsys.readouterr().out
@@ -227,10 +240,18 @@ def test_obligations_emit_a_decision_suite_from_reviewed_rows(capsys):
 
 def test_a_suite_is_refused_before_review(capsys):
     assert main(["obligations", V1, "--suite"]) == EXIT_FINDING
-    assert "no reviewed decision yet" in capsys.readouterr().err
+    assert "not fully reviewed yet" in capsys.readouterr().err
 
 
 def test_obligations_emit_parseable_json(capsys):
     main(["obligations", V1, "--json"])
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema"].startswith("agentmandate.obligations/")
+
+
+def test_a_malformed_reviewed_file_is_a_usage_error(tmp_path, capsys):
+    bad = tmp_path / "reviewed.json"
+    bad.write_text("{not json", encoding="utf-8")
+
+    assert main(["obligations", V1, "--reviewed", str(bad)]) == EXIT_USAGE
+    assert "cannot load obligations" in capsys.readouterr().err
