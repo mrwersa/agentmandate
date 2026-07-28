@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.2.0 - 2026-07-28
+
 ### Added
 
 - Tests for every control the fail-closed work introduced. The diff rules for
@@ -38,6 +40,14 @@ All notable changes to this project are documented here. The format follows
 - Manifest parsing now rejects non-finite amounts, string-valued booleans,
   empty scope names, and Boolean search depths, and wraps JSON or YAML parser
   failures as `ManifestError`.
+
+### Documentation
+
+- The README now opens on the worked payment-dispute path and includes a
+  diagram showing how a read-only case search makes two valid refunds
+  reachable.
+- `ROADMAP.md` separates adoption work from planned extensions to the
+  authority model.
 
 ## 0.1.0 - 2026-07-28
 
