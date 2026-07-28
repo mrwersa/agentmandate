@@ -6,23 +6,6 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
-### Added
-
-- `mandate scan`, which derives a manifest skeleton from an MCP `tools/list`
-  catalogue. Effects are guessed from the tool name and default to
-  `irreversible`, and every guess carries a `REVIEW` marker, because a tool
-  schema cannot supply reversibility, the value argument, or the scope a
-  ceiling is measured against.
-- A second breach class in `reach`: an irreversible effect reachable with no
-  approval is now reported with the call sequence that reaches it, rather than
-  only as a name in the authority summary.
-- `mandate diff --record`, a markdown change record for a change advisory
-  board, with the authority section derived rather than asserted.
-- A `currency_mismatch` violation in `verify`, so a call spending one currency
-  against a ceiling declared in another is reported rather than silently summed.
-- Status badges, an exit-code table, and the pull-request workflow snippet for
-  gating on an authority diff against the default branch.
-
 ## 0.1.0 - 2026-07-28
 
 First release.
@@ -45,4 +28,18 @@ First release.
   against.
 - Worked examples for a payment-dispute agent, including the release pair where
   adding one read-only tool takes extractable value from 500 to 2000 GBP.
-- `--json` on every command, and exit codes suitable for a CI gate.
+- `--json` on every analysis command, and exit codes suitable for a CI gate.
+- `mandate scan`, which derives a manifest skeleton from an MCP `tools/list`
+  catalogue. Effects are guessed from the tool name and default to
+  `irreversible`, and every guess carries a `REVIEW` marker, because a tool
+  schema cannot supply reversibility, the value argument, or the scope a
+  ceiling is measured against.
+- A second breach class in `reach`: an irreversible effect reachable with no
+  approval is now reported with the call sequence that reaches it, rather than
+  only as a name in the authority summary.
+- `mandate diff --record`, a markdown change record for a change advisory
+  board, with the authority section derived rather than asserted.
+- A `currency_mismatch` violation in `verify`, so a call spending one currency
+  against a ceiling declared in another is reported rather than silently summed.
+- Status badges, an exit-code table, and the pull-request workflow snippet for
+  gating on an authority diff against the default branch.
