@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.3.2 - 2026-07-28
+
+### Changed
+
+- The README scopes every finding to permitted reachability under the reviewed
+  manifest and bounded abstraction, rather than observed model behaviour or
+  undeclared downstream enforcement.
+- The roadmap makes external tool-graph validation a prerequisite for model
+  growth, then ranks bounded cardinality, reviewed resource relationships, and
+  non-monetary effect budgets as evidence-dependent candidates.
+
 ## 0.3.1 - 2026-07-28
 
 ### Changed
