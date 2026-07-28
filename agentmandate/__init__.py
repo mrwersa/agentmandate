@@ -19,6 +19,7 @@ from .diff import Change, Delta, compare
 from .lint import Finding, check
 from .manifest import Mandate, ManifestError, Money, Tool, load, loads
 from .reach import Authority, Breach, Step, analyse
+from .scan import Proposal, propose, render, scan_file
 from .verify import Conformance, Observation, Violation, replay, replay_file
 
 __all__ = [
@@ -32,6 +33,7 @@ __all__ = [
     "ManifestError",
     "Money",
     "Observation",
+    "Proposal",
     "Step",
     "Tool",
     "Violation",
@@ -41,6 +43,9 @@ __all__ = [
     "compare",
     "load",
     "loads",
+    "propose",
+    "render",
     "replay",
     "replay_file",
+    "scan_file",
 ]

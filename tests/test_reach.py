@@ -177,3 +177,52 @@ def test_a_read_only_addition_can_widen_reach():
     )
     assert before.breaches == ()
     assert after.breaches != ()
+
+
+UNGATED = """
+agent: a
+tools:
+  - name: open_case
+    effect: read
+    produces: case
+  - name: shred_case
+    effect: irreversible
+    requires: [case]
+"""
+
+
+def test_an_ungated_irreversible_effect_is_reported_with_the_path_to_it():
+    """Knowing the tool exists is lint. Knowing the agent can get to it, and
+    how, is what decides whether it matters."""
+    authority = analyse(loads(UNGATED))
+    breach = next(b for b in authority.breaches if b.kind == "ungated_effect")
+    assert breach.path[-1].tool == "shred_case"
+    assert [s.tool for s in breach.path] == ["open_case", "shred_case"]
+    assert "reachable in 2 call(s)" in breach.detail
+
+
+def test_an_unreachable_ungated_effect_produces_no_breach():
+    mandate = loads(
+        """
+        agent: a
+        tools:
+          - name: shred
+            effect: irreversible
+            requires: [never_minted]
+        """
+    )
+    authority = analyse(mandate)
+    assert authority.breaches == ()
+    assert authority.ungated_irreversible == frozenset()
+
+
+def test_each_ungated_tool_is_reported_once():
+    mandate = loads(UNGATED + "  - name: purge\n    effect: irreversible\n    requires: [case]\n")
+    kinds = [b for b in analyse(mandate).breaches if b.kind == "ungated_effect"]
+    assert {b.path[-1].tool for b in kinds} == {"shred_case", "purge"}
+    assert len(kinds) == 2
+
+
+def test_a_gated_irreversible_effect_is_not_a_breach():
+    gated = UNGATED + "    requires_approval: true\n"
+    assert analyse(loads(gated)).breaches == ()

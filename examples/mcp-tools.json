@@ -1,0 +1,10 @@
+{"tools": [
+  {"name": "search_cases", "description": "Find dispute cases matching a query.",
+   "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}}},
+  {"name": "get_case", "description": "Read one case by id.",
+   "inputSchema": {"type": "object", "properties": {"case_id": {"type": "string"}}}},
+  {"name": "issue_refund", "description": "Refund a customer against a dispute case.",
+   "inputSchema": {"type": "object", "properties": {"case_id": {"type": "string"}, "amount": {"type": "number"}}}},
+  {"name": "update_case_notes", "description": "Append a note.",
+   "inputSchema": {"type": "object", "properties": {"case_id": {"type": "string"}, "note": {"type": "string"}}}}
+]}

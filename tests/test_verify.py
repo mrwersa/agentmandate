@@ -123,3 +123,21 @@ def test_a_violation_renders_the_tool_and_line():
     assert "VIOLATION" in rendered
     assert "nope" in rendered
     assert "line 1" in rendered
+
+
+def test_a_currency_mismatch_is_reported_rather_than_converted():
+    assert "currency_mismatch" in kinds(
+        '{"tool": "issue_refund", "scope": "c1", "value": "10",'
+        ' "currency": "USD", "approved": true}'
+    )
+
+
+def test_a_matching_currency_passes():
+    assert kinds(
+        '{"tool": "issue_refund", "scope": "c1", "value": "10",'
+        ' "currency": "gbp", "approved": true}'
+    ) == []
+
+
+def test_currency_is_optional():
+    assert kinds('{"tool": "issue_refund", "scope": "c1", "value": "10", "approved": true}') == []

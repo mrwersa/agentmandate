@@ -14,7 +14,7 @@ Agent security scanners check tools one at a time. That catches the tool with no
 
 AgentMandate answers two questions that need the whole graph:
 
-- Is there a legal call sequence that breaches a limit? `mandate reach` returns the sequence.
+- Is there a legal call sequence that breaches a limit, or that reaches an irreversible effect with no approval? `mandate reach` returns the sequence.
 - Did this release widen what the agent can reach? `mandate diff` compares effective authority, not configuration text.
 
 Alpha. Apache-2.0.
@@ -77,6 +77,34 @@ A pull request shows what somebody typed. It does not show what the agent can no
 
 That is the same reason `git diff` never replaced type checking. The question is not what changed, it is what the change makes possible.
 
+## Starting from an existing agent
+
+You do not have to write the first manifest by hand:
+
+```console
+$ mandate scan examples/mcp-tools.json --agent dispute-resolver > mandate.yaml
+```
+
+The skeleton is loadable straight away, and every judgement the catalogue could
+not supply is marked:
+
+```yaml
+  - name: issue_refund
+    # REVIEW: effect guessed from the name. read | write | irreversible
+    effect: irreversible
+    # REVIEW: does this spend the caller's authority or a service account?
+    principal: caller
+    requires: [case]
+    # REVIEW: amount looks like a value argument. A ceiling needs scope_key too.
+    # value_arg: amount
+    # scope_key: case
+    # ceiling: { amount: 0, currency: GBP }
+    requires_approval: true
+```
+
+Unrecognised verbs are proposed as `irreversible`, because under-calling an
+effect is the more expensive mistake.
+
 ## The manifest
 
 Reachability needs three facts per tool that an ordinary tool schema does not carry: the effect class, which argument spends value, and which scope the ceiling is measured against.
@@ -113,12 +141,13 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 
 | Command | What it does |
 |---|---|
+| `mandate scan` | Derives a manifest skeleton from an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
 | `mandate reach` | Bounded search for a legal call sequence that breaches a limit, reported as a counterexample |
-| `mandate diff` | Effective-authority comparison of two manifests, classified widening / narrowing / neutral |
+| `mandate diff` | Effective-authority comparison of two manifests, classified widening / narrowing / neutral. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and reports where reality exceeded the declaration |
 
-Every command takes `--json` and exits non-zero on a finding, so all four drop into CI unchanged.
+Every analysis command takes `--json` and exits non-zero on a finding, so they drop into CI unchanged. `scan` writes a manifest to standard output and is a one-off, not a gate.
 
 | Exit code | Meaning |
 |---|---|
@@ -155,7 +184,7 @@ What this does not do, on purpose:
 - **No enforcement.** No proxy, no runtime interception, no blocking.
 - **No data-flow reachability.** Finding that a read tool feeds an exfiltration path needs taint labels the manifest does not carry. Cumulative value and scope minting are what the current model supports honestly.
 - **No model behaviour.** Whether the agent *would* take a path is a different question from whether it *may*. This measures permission.
-- **No extraction yet.** Manifests are hand-authored. An MCP extractor is the next thing worth building.
+- **No inference of the fields that matter.** `mandate scan` reads an MCP catalogue and writes the skeleton, but it cannot know whether an effect is reversible or what a ceiling is measured against. It guesses conservatively and marks every guess `REVIEW`. Extract then annotate, never extract and trust.
 
 Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none exists at depth 20, and the report says when it truncated.
 
