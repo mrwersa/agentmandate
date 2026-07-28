@@ -1,3 +1,5 @@
+import pytest
+
 from agentmandate import compare, loads
 from agentmandate.diff import NARROWING, NEUTRAL, WIDENING
 
@@ -157,3 +159,124 @@ def test_the_change_record_says_so_when_nothing_widened():
 def test_the_change_record_carries_the_caveat_about_unchanged_manifests():
     """The record is evidence about the manifest, not about the deployment."""
     assert "unchanged manifest does not prove" in compare(loads(V1), loads(V2)).record()
+
+
+def test_raising_the_run_limit_is_widening_even_when_the_graph_is_unchanged():
+    raised = V1.replace("total: { amount: 500", "total: { amount: 1000")
+    delta = compare(loads(V1), loads(raised))
+    assert delta.widened is True
+    assert any(
+        change.kind == "run limit" and "500 -> 1000 GBP" in change.detail
+        for change in delta.changes
+    )
+
+
+def test_removing_the_run_limit_is_widening():
+    removed = V1.replace("limits:\n  total: { amount: 500, currency: GBP }\n", "")
+    delta = compare(loads(V1), loads(removed))
+    assert delta.widened is True
+    assert any(
+        change.kind == "run limit" and "removed limit" in change.detail
+        for change in delta.changes
+    )
+
+
+def test_cross_currency_amounts_are_not_compared_numerically():
+    changed = V1.replace("500, currency: GBP", "1, currency: USD")
+    delta = compare(loads(V1), loads(changed))
+    assert delta.widened is True
+    assert any(
+        "amounts are not comparable" in change.detail for change in delta.changes
+    )
+
+
+def test_removing_a_required_scope_is_widening():
+    relaxed = V1.replace("    requires: [case]\n", "")
+    delta = compare(loads(V1), loads(relaxed))
+    assert delta.widened is True
+    assert any(
+        change.kind == "precondition" and "removed required scope case" in change.detail
+        for change in delta.changes
+    )
+
+
+def test_adding_a_required_scope_is_narrowing_not_widening():
+    restricted = V1.replace("    requires: [case]\n", "    requires: [case, approval]\n")
+    # Give the released and proposed graphs the binding so the tool remains
+    # reachable and only the contract change is under comparison.
+    seed = "  - name: grant_approval\n    effect: read\n    produces: approval\n"
+    before = V1.replace("tools:\n", f"tools:\n{seed}")
+    after = restricted.replace("tools:\n", f"tools:\n{seed}")
+    delta = compare(loads(before), loads(after))
+    assert delta.direction == NARROWING
+    assert any(
+        change.kind == "precondition" and "added required scope approval" in change.detail
+        for change in delta.changes
+    )
+
+
+def test_removing_approval_from_a_write_tool_is_widening():
+    gated = V1 + (
+        "  - name: note_case\n"
+        "    effect: write\n"
+        "    requires: [case]\n"
+        "    requires_approval: true\n"
+    )
+    relaxed = gated.replace(
+        "    effect: write\n    requires: [case]\n    requires_approval: true\n",
+        "    effect: write\n    requires: [case]\n",
+    )
+    delta = compare(loads(gated), loads(relaxed))
+    assert delta.widened is True
+    assert any(
+        change.kind == "approval" and "note_case: approval removed" in change.detail
+        for change in delta.changes
+    )
+
+
+def test_lowering_the_default_search_depth_cannot_hide_authority():
+    deep = V2.replace(
+        "  total: { amount: 500, currency: GBP }\n",
+        "  total: { amount: 500, currency: GBP }\n  depth: 8\n",
+    )
+    shallow = deep.replace("  depth: 8", "  depth: 1")
+    delta = compare(loads(deep), loads(shallow))
+    assert delta.before.depth == 8
+    assert delta.after.depth == 8
+    assert delta.widened is True
+    assert any(change.kind == "analysis depth" for change in delta.changes)
+
+
+def test_comparison_uses_the_larger_default_depth_on_both_sides():
+    shallow = V1.replace(
+        "  total: { amount: 500, currency: GBP }\n",
+        "  total: { amount: 500, currency: GBP }\n  depth: 2\n",
+    )
+    delta = compare(loads(shallow), loads(V1))
+    assert delta.before.depth == 8
+    assert delta.after.depth == 8
+
+
+def test_different_agents_are_not_comparable():
+    with pytest.raises(ValueError, match="cannot compare different agents"):
+        compare(loads(V1), loads(V1.replace("agent: dispute", "agent: another")))
+
+
+def test_removing_or_changing_workload_identity_needs_review():
+    identified = V1.replace("agent: dispute\n", "agent: dispute\nidentity: spiffe://a\n")
+    removed = compare(loads(identified), loads(V1))
+    changed = compare(
+        loads(identified),
+        loads(identified.replace("spiffe://a", "spiffe://b")),
+    )
+    assert removed.widened is True
+    assert changed.widened is True
+    assert any(change.kind == "workload identity" for change in removed.changes)
+    assert any(change.kind == "workload identity" for change in changed.changes)
+
+
+def test_changing_the_value_argument_needs_review():
+    changed = V1.replace("    value_arg: amount", "    value_arg: refund_amount")
+    delta = compare(loads(V1), loads(changed))
+    assert delta.widened is True
+    assert any(change.kind == "value argument" for change in delta.changes)

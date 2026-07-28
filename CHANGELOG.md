@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Fixed
+
+- `verify` now rejects malformed trace fields and reports missing principal,
+  scope, value, or currency evidence instead of silently treating an
+  incomplete record as conformant. Empty traces no longer pass vacuously.
+- `diff` now compares run limits and reachable tool contracts, including
+  preconditions, approvals, effects, ceilings, produced scopes, and unbounded
+  minting. Cross-currency amounts are sent for review rather than compared as
+  bare numerals.
+- `diff` now searches both releases at one depth, blocks reductions to the
+  manifest's default search depth, rejects comparisons between different
+  agents, and reports workload-identity or value-argument changes.
+- `scan` now quotes catalogue-derived YAML scalars, flattens untrusted
+  descriptions to comments, and rejects duplicate or control-character tool
+  names.
+- Manifest parsing now rejects non-finite amounts, string-valued booleans,
+  empty scope names, and Boolean search depths, and wraps JSON or YAML parser
+  failures as `ManifestError`.
+
 ## 0.1.0 - 2026-07-28
 
 First release.

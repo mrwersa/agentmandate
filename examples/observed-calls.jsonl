@@ -1,4 +1,4 @@
 {"tool": "open_case", "scope": "case-4471", "principal": "caller"}
-{"tool": "issue_refund", "scope": "case-4471", "value": "500", "approved": true, "principal": "caller"}
-{"tool": "issue_refund", "scope": "case-4471", "value": "250", "approved": true, "principal": "caller"}
+{"tool": "issue_refund", "scope": "case-4471", "value": "500", "currency": "GBP", "approved": true, "principal": "caller"}
+{"tool": "issue_refund", "scope": "case-4471", "value": "250", "currency": "GBP", "approved": true, "principal": "caller"}
 {"tool": "export_case_bundle", "scope": "case-4471", "principal": "service"}

@@ -155,16 +155,23 @@ lines beginning with `#` are skipped.
 
 ```jsonl
 {"tool": "open_case", "scope": "case-4471", "principal": "caller"}
-{"tool": "issue_refund", "scope": "case-4471", "value": "500", "approved": true}
+{"tool": "issue_refund", "scope": "case-4471", "value": "500", "currency": "GBP", "approved": true, "principal": "caller"}
 ```
 
 | Field | Meaning |
 |---|---|
 | `tool` | The tool called. One the manifest does not declare is a violation |
-| `scope` | The resource instance acted on. Ceilings accumulate per scope |
-| `value` | Value spent, read as an exact decimal |
+| `scope` | The resource instance acted on. Required for a tool with a ceiling. Ceilings accumulate per scope |
+| `value` | Value spent, read as an exact, finite, non-negative decimal. Required for a tool with a ceiling |
+| `currency` | Three-letter currency code. Required for a tool with a ceiling |
 | `approved` | Whether an approval was recorded |
-| `principal` | Which identity the call ran as |
+| `principal` | Which identity the call ran as. Required for every declared tool |
 
 Unlike a manifest, these records carry real identifiers, because they come from
 real runs. Handle the file as you would the traces it was derived from.
+
+`verify` fails closed when evidence needed by a declared control is absent. A
+spending call without its scope, value, or currency is non-conformant. A call
+without its principal is also non-conformant. Malformed field types are usage
+errors rather than values the verifier guesses or coerces. An empty trace
+cannot establish conformance.

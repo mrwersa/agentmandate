@@ -30,10 +30,11 @@ def kinds(lines):
 
 
 def test_a_conformant_run_reports_no_violation():
-    lines = """
-    {"tool": "open_case", "scope": "c1", "principal": "caller"}
-    {"tool": "issue_refund", "scope": "c1", "value": "500", "approved": true}
-    """
+    lines = (
+        '{"tool": "open_case", "scope": "c1", "principal": "caller"}\n'
+        '{"tool": "issue_refund", "scope": "c1", "value": "500", '
+        '"currency": "GBP", "approved": true, "principal": "caller"}\n'
+    )
     conformance = replay(MANDATE, parse_observations(lines))
     assert conformance.conformant is True
     assert conformance.observed == 2
@@ -46,23 +47,28 @@ def test_an_undeclared_tool_is_a_violation():
 
 def test_a_missing_approval_is_a_violation():
     assert "missing_approval" in kinds(
-        '{"tool": "issue_refund", "scope": "c1", "value": "10"}'
+        '{"tool": "issue_refund", "scope": "c1", "value": "10", "currency": "GBP",'
+        ' "principal": "caller"}'
     )
 
 
 def test_a_cumulative_ceiling_breach_is_detected_across_calls():
-    lines = """
-    {"tool": "issue_refund", "scope": "c1", "value": "300", "approved": true}
-    {"tool": "issue_refund", "scope": "c1", "value": "300", "approved": true}
-    """
+    lines = (
+        '{"tool": "issue_refund", "scope": "c1", "value": "300", '
+        '"currency": "GBP", "approved": true, "principal": "caller"}\n'
+        '{"tool": "issue_refund", "scope": "c1", "value": "300", '
+        '"currency": "GBP", "approved": true, "principal": "caller"}\n'
+    )
     assert "ceiling_exceeded" in kinds(lines)
 
 
 def test_the_same_value_split_across_scopes_stays_under_each_ceiling():
-    lines = """
-    {"tool": "issue_refund", "scope": "c1", "value": "300", "approved": true}
-    {"tool": "issue_refund", "scope": "c2", "value": "300", "approved": true}
-    """
+    lines = (
+        '{"tool": "issue_refund", "scope": "c1", "value": "300", '
+        '"currency": "GBP", "approved": true, "principal": "caller"}\n'
+        '{"tool": "issue_refund", "scope": "c2", "value": "300", '
+        '"currency": "GBP", "approved": true, "principal": "caller"}\n'
+    )
     found = kinds(lines)
     assert "ceiling_exceeded" not in found
     # It still breaks the run limit, which is exactly the compound shape.
@@ -85,6 +91,14 @@ def test_blank_and_comment_lines_are_skipped():
     assert observations[0].line == 3
 
 
+def test_an_empty_trace_cannot_establish_conformance():
+    conformance = replay(MANDATE, parse_observations("\n# no calls\n"))
+    assert conformance.conformant is False
+    assert [violation.kind for violation in conformance.violations] == [
+        "no_observations"
+    ]
+
+
 def test_invalid_json_names_the_line():
     with pytest.raises(ValueError, match="line 1"):
         parse_observations("{not json}")
@@ -95,9 +109,9 @@ def test_a_non_object_line_is_rejected():
         parse_observations("[1, 2]")
 
 
-def test_an_unparseable_value_is_ignored_rather_than_crashing():
-    observation = Observation.parse({"tool": "t", "value": "abc"}, 1)
-    assert observation.value is None
+def test_an_unparseable_value_is_rejected():
+    with pytest.raises(ValueError, match="line 1: value is not a number"):
+        Observation.parse({"tool": "t", "value": "abc"}, 1)
 
 
 def test_a_numeric_value_is_read_as_decimal():
@@ -128,16 +142,43 @@ def test_a_violation_renders_the_tool_and_line():
 def test_a_currency_mismatch_is_reported_rather_than_converted():
     assert "currency_mismatch" in kinds(
         '{"tool": "issue_refund", "scope": "c1", "value": "10",'
-        ' "currency": "USD", "approved": true}'
+        ' "currency": "USD", "approved": true, "principal": "caller"}'
     )
 
 
 def test_a_matching_currency_passes():
     assert kinds(
         '{"tool": "issue_refund", "scope": "c1", "value": "10",'
-        ' "currency": "gbp", "approved": true}'
+        ' "currency": "gbp", "approved": true, "principal": "caller"}'
     ) == []
 
 
-def test_currency_is_optional():
-    assert kinds('{"tool": "issue_refund", "scope": "c1", "value": "10", "approved": true}') == []
+def test_control_evidence_is_required_for_a_spending_call():
+    found = kinds('{"tool": "issue_refund", "approved": true}')
+    assert found == ["missing_principal", "missing_scope", "missing_value", "missing_currency"]
+
+
+def test_principal_is_required_even_when_the_tool_only_reads():
+    assert kinds('{"tool": "open_case", "scope": "c1"}') == ["missing_principal"]
+
+
+@pytest.mark.parametrize(
+    "payload, message",
+    [
+        ({"tool": "pay", "approved": "false"}, "approved must be"),
+        ({"tool": "pay", "value": "-1"}, "must not be negative"),
+        ({"tool": "pay", "value": "NaN"}, "must be finite"),
+        ({"tool": ""}, "tool must be"),
+        ({"tool": "pay", "currency": "12"}, "three-letter"),
+    ],
+)
+def test_malformed_observation_fields_are_rejected(payload, message):
+    with pytest.raises(ValueError, match=message):
+        Observation.parse(payload, 7)
+
+
+def test_value_on_a_tool_without_a_declared_ceiling_is_a_violation():
+    assert kinds(
+        '{"tool": "open_case", "scope": "c1", "principal": "caller",'
+        ' "value": "10", "currency": "GBP"}'
+    ) == ["unexpected_value"]

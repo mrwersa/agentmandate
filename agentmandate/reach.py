@@ -193,6 +193,8 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
     found within the depth bound, shortest counterexample first.
     """
     limit = depth if depth is not None else mandate.limits.depth
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+        raise ValueError("depth must be a positive integer")
     total_cap = mandate.limits.total
 
     reachable: set[str] = set()

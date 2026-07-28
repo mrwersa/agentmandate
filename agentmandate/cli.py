@@ -20,6 +20,13 @@ EXIT_FINDING = 1
 EXIT_USAGE = 2
 
 
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
 def _add_manifest(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("manifest", help="path to a mandate manifest (YAML or JSON)")
 
@@ -47,7 +54,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_manifest(reach_parser)
     reach_parser.add_argument(
-        "--depth", type=int, default=None, help="override the manifest search depth"
+        "--depth",
+        type=_positive_int,
+        default=None,
+        help="override the manifest search depth",
     )
     reach_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
@@ -56,7 +66,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     diff_parser.add_argument("before", help="the released manifest")
     diff_parser.add_argument("after", help="the proposed manifest")
-    diff_parser.add_argument("--depth", type=int, default=None)
+    diff_parser.add_argument("--depth", type=_positive_int, default=None)
     diff_parser.add_argument("--json", action="store_true", help="machine-readable output")
     diff_parser.add_argument(
         "--record",
@@ -155,7 +165,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_FINDING if authority.breaches else EXIT_OK
 
     if args.command == "diff":
-        delta = compare(before, after, depth=args.depth)
+        try:
+            delta = compare(before, after, depth=args.depth)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return EXIT_USAGE
         text = (
             delta.record(args.before, args.after)
             if args.record
@@ -164,7 +178,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         _emit(delta.as_dict(), args.json, text)
         return EXIT_FINDING if delta.widened else EXIT_OK
 
-    conformance = replay_file(mandate, args.traces)
+    try:
+        conformance = replay_file(mandate, args.traces)
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
     _emit(conformance.as_dict(), args.json, conformance.render())
     return EXIT_OK if conformance.conformant else EXIT_FINDING
 

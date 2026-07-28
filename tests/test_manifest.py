@@ -40,9 +40,9 @@ def test_load_reports_a_missing_file(tmp_path):
     [
         ("[]", "expected a mapping"),
         ('{"agent": "a", "tools": []}', "non-empty list"),
-        ('{"tools": [{"name": "t", "effect": "read"}]}', "agent is required"),
+        ('{"tools": [{"name": "t", "effect": "read"}]}', "agent must be a non-empty string"),
         ('{"agent": "a", "version": 9, "tools": [{"name": "t"}]}', "schema version"),
-        ('{"agent": "a", "tools": [{"effect": "read"}]}', "name is required"),
+        ('{"agent": "a", "tools": [{"effect": "read"}]}', "name must be a non-empty string"),
         ('{"agent": "a", "tools": [{"name": "t", "effect": "nope"}]}', "effect must be"),
         (
             '{"agent": "a", "tools": [{"name": "t", "effect": "read", "principal": "x"}]}',
@@ -132,8 +132,12 @@ def test_scope_key_must_be_a_string():
         ("nope", "expected a mapping"),
         ({"amount": 1}, "missing currency"),
         ({"amount": "x", "currency": "GBP"}, "not a number"),
+        ({"amount": "NaN", "currency": "GBP"}, "must be finite"),
+        ({"amount": "Infinity", "currency": "GBP"}, "must be finite"),
         ({"amount": -1, "currency": "GBP"}, "must not be negative"),
         ({"amount": 1, "currency": "POUNDS"}, "three-letter"),
+        ({"amount": 1, "currency": 123}, "three-letter"),
+        ({"amount": 1, "currency": "£££"}, "three-letter"),
     ],
 )
 def test_money_validation(raw, message):
@@ -182,3 +186,42 @@ def test_spends_value_reflects_a_complete_ceiling():
     )
     assert mandate.tool("pay").spends_value is True
     assert mandate.tool("look").spends_value is False
+
+
+@pytest.mark.parametrize(
+    "field, value, message",
+    [
+        ("unbounded", "false", "unbounded must be true or false"),
+        ("requires_approval", "false", "requires_approval must be true or false"),
+    ],
+)
+def test_boolean_fields_do_not_coerce_strings(field, value, message):
+    with pytest.raises(ManifestError, match=message):
+        Mandate.parse(
+            {
+                "agent": "a",
+                "tools": [{"name": "t", "effect": "read", field: value}],
+            }
+        )
+
+
+def test_boolean_depth_is_not_an_integer():
+    with pytest.raises(ManifestError, match="positive integer"):
+        loads(
+            '{"agent": "a", "limits": {"depth": true}, '
+            '"tools": [{"name": "t", "effect": "read"}]}'
+        )
+
+
+def test_empty_scope_names_are_rejected():
+    with pytest.raises(ManifestError, match="requires must be"):
+        loads(
+            '{"agent": "a", "tools": '
+            '[{"name": "t", "effect": "read", "requires": [""]}]}'
+        )
+
+
+@pytest.mark.parametrize("body, message", [("{bad", "invalid JSON"), ("agent: [", "invalid YAML")])
+def test_parser_errors_are_wrapped_as_manifest_errors(body, message):
+    with pytest.raises(ManifestError, match=message):
+        loads(body)

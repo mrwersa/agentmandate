@@ -110,9 +110,40 @@ def test_the_skeleton_is_a_parseable_manifest_once_yaml_reads_it():
 def test_scan_file_reads_from_disk(tmp_path):
     path = tmp_path / "tools.json"
     path.write_text(json.dumps(CATALOGUE), encoding="utf-8")
-    assert "agent: x" in scan_file(path, "x")
+    assert 'agent: "x"' in scan_file(path, "x")
 
 
 def test_a_catalogue_with_no_scopes_omits_the_scope_warning():
     text = render(propose([{"name": "get_status"}]), "a")
     assert "Scopes referenced" not in text
+
+
+def test_untrusted_catalogue_text_cannot_inject_yaml():
+    catalogue = {
+        "tools": [
+            {
+                "name": "get_case: privileged",
+                "description": "Safe line\n- name: injected\n  effect: irreversible",
+            }
+        ]
+    }
+    text = render(propose(catalogue), "agent: privileged")
+    mandate = loads(text)
+    assert mandate.agent == "agent: privileged"
+    assert mandate.tool_names == ("get_case: privileged",)
+    assert "\n  - name: injected" not in text
+
+
+def test_control_characters_in_tool_names_are_rejected():
+    with pytest.raises(ValueError, match="control character"):
+        propose([{"name": "get_ok\nprincipal: service"}])
+
+
+def test_duplicate_tool_names_are_rejected_before_rendering():
+    with pytest.raises(ValueError, match="duplicate name"):
+        propose([{"name": "get_case"}, {"name": "get_case"}])
+
+
+def test_an_empty_catalogue_does_not_emit_an_invalid_manifest():
+    with pytest.raises(ValueError, match="no named tools"):
+        render(propose([]), "a")

@@ -5,8 +5,8 @@ and reports every one that the mandate does not permit, which is the only thing
 that keeps the declaration honest as the implementation drifts away from it.
 
 Input is a JSON Lines file of observed calls. The shape is deliberately close
-to the OpenTelemetry GenAI tool-call attributes so an exporter can be pointed at
-it without a translation layer, but nothing here requires OpenTelemetry.
+to OpenTelemetry GenAI tool-call attributes, with principal and control fields
+added by the exporter. Nothing here requires OpenTelemetry.
 """
 
 from __future__ import annotations
@@ -19,7 +19,13 @@ from pathlib import Path
 from .manifest import Mandate
 
 VIOLATION_KINDS = (
+    "no_observations",
     "undeclared_tool",
+    "missing_principal",
+    "missing_scope",
+    "missing_value",
+    "missing_currency",
+    "unexpected_value",
     "ceiling_exceeded",
     "missing_approval",
     "wrong_principal",
@@ -42,20 +48,54 @@ class Observation:
 
     @classmethod
     def parse(cls, raw: dict, line: int) -> Observation:
+        tool = raw.get("tool")
+        if not isinstance(tool, str) or not tool.strip():
+            raise ValueError(f"line {line}: tool must be a non-empty string")
+
+        scope = raw.get("scope")
+        if scope is not None and (not isinstance(scope, str) or not scope.strip()):
+            raise ValueError(f"line {line}: scope must be a non-empty string")
+
         value = raw.get("value")
         parsed: Decimal | None = None
         if value is not None:
             try:
                 parsed = Decimal(str(value))
-            except InvalidOperation:
-                parsed = None
+            except InvalidOperation as exc:
+                raise ValueError(f"line {line}: value is not a number") from exc
+            if not parsed.is_finite():
+                raise ValueError(f"line {line}: value must be finite")
+            if parsed < 0:
+                raise ValueError(f"line {line}: value must not be negative")
+
+        approved = raw.get("approved", False)
+        if not isinstance(approved, bool):
+            raise ValueError(f"line {line}: approved must be true or false")
+
+        principal = raw.get("principal")
+        if principal is not None and (
+            not isinstance(principal, str) or not principal.strip()
+        ):
+            raise ValueError(f"line {line}: principal must be a non-empty string")
+
+        currency = raw.get("currency")
+        if currency is not None:
+            if (
+                not isinstance(currency, str)
+                or len(currency) != 3
+                or not currency.isascii()
+                or not currency.isalpha()
+            ):
+                raise ValueError(f"line {line}: currency must be a three-letter code")
+            currency = currency.upper()
+
         return cls(
-            tool=str(raw.get("tool", "")),
-            scope=raw.get("scope"),
+            tool=tool,
+            scope=scope,
             value=parsed,
-            approved=bool(raw.get("approved", False)),
-            principal=raw.get("principal"),
-            currency=(str(raw["currency"]).upper() if raw.get("currency") else None),
+            approved=approved,
+            principal=principal,
+            currency=currency,
             line=line,
         )
 
@@ -88,7 +128,10 @@ class Conformance:
         else:
             lines.extend(v.render() for v in self.violations)
             lines.append("")
-            lines.append(f"{len(self.violations)} call(s) exceeded the declaration")
+            lines.append(
+                f"{len(self.violations)} violation(s) across "
+                f"{self.observed} observed call(s)"
+            )
         return "\n".join(lines)
 
     def as_dict(self) -> dict:
@@ -130,6 +173,15 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
     spent: dict[tuple[str, str | None], Decimal] = {}
     total = Decimal(0)
 
+    if not observations:
+        violations.append(
+            Violation(
+                "no_observations",
+                Observation(tool="<trace>", line=0),
+                "the trace contains no calls, so it cannot establish conformance",
+            )
+        )
+
     for observation in observations:
         tool = mandate.tool(observation.tool)
         if tool is None:
@@ -143,6 +195,24 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
             )
             continue
 
+        if observation.principal is None:
+            violations.append(
+                Violation(
+                    "missing_principal",
+                    observation,
+                    "the record does not identify which principal executed the call",
+                )
+            )
+        elif observation.principal != tool.principal:
+            violations.append(
+                Violation(
+                    "wrong_principal",
+                    observation,
+                    f"declared principal is {tool.principal!r} but the call ran as "
+                    f"{observation.principal!r}",
+                )
+            )
+
         if tool.requires_approval and not observation.approved:
             violations.append(
                 Violation(
@@ -153,20 +223,53 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 )
             )
 
-        if observation.principal is not None and observation.principal != tool.principal:
+        if tool.spends_value and observation.scope is None:
             violations.append(
                 Violation(
-                    "wrong_principal",
+                    "missing_scope",
                     observation,
-                    f"declared principal is {tool.principal!r} but the call ran as "
-                    f"{observation.principal!r}",
+                    f"the record omits the {tool.scope_key!r} scope used by the ceiling",
                 )
             )
 
-        if observation.value is not None:
+        if tool.spends_value and observation.value is None:
+            violations.append(
+                Violation(
+                    "missing_value",
+                    observation,
+                    f"the record omits the declared value argument {tool.value_arg!r}",
+                )
+            )
+
+        if tool.spends_value and observation.currency is None:
+            violations.append(
+                Violation(
+                    "missing_currency",
+                    observation,
+                    "the record omits the currency, so its value cannot be compared "
+                    "with the declared ceiling",
+                )
+            )
+
+        if not tool.spends_value and observation.value is not None:
+            violations.append(
+                Violation(
+                    "unexpected_value",
+                    observation,
+                    "the call records spending but the tool declares no value argument "
+                    "or ceiling",
+                )
+            )
+
+        complete_spend = (
+            tool.spends_value
+            and observation.value is not None
+            and observation.scope is not None
+            and observation.currency is not None
+        )
+        if complete_spend:
             if (
                 tool.ceiling is not None
-                and observation.currency is not None
                 and observation.currency != tool.ceiling.currency
             ):
                 # Summing across currencies would make the run total a
@@ -179,8 +282,24 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                         f"declared in {tool.ceiling.currency}",
                     )
                 )
+                continue
+
+            if (
+                mandate.limits.total is not None
+                and observation.currency != mandate.limits.total.currency
+            ):
+                violations.append(
+                    Violation(
+                        "currency_mismatch",
+                        observation,
+                        f"the call spent {observation.currency} against a run limit "
+                        f"declared in {mandate.limits.total.currency}",
+                    )
+                )
+                continue
+
             total += observation.value
-            if tool.ceiling is not None:
+            if tool.ceiling is not None and observation.scope is not None:
                 key = (tool.name, observation.scope)
                 spent[key] = spent.get(key, Decimal(0)) + observation.value
                 if spent[key] > tool.ceiling.amount:

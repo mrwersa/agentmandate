@@ -8,7 +8,7 @@ prompt that asks nicely. Nobody can answer "what can this agent do" by reading
 any single one of those, and nobody can answer "what changed" by reading a pull
 request, because reachability composes and text does not.
 
-Existing agent scanners check one tool at a time. That finds the tool with no
+Many agent scanners check one tool at a time. That finds the tool with no
 approval gate, which is worth finding. It cannot find the case where every tool
 passes and a sequence of them does not, because that defect does not live in
 any one tool.
@@ -80,6 +80,18 @@ Effective authority is summarised as reachable tools, effect-on-scope pairs,
 ungated irreversible effects, service-principal tools, maximum extractable
 value, and reachable breach kinds. A gain in any of those is widening.
 
+The diff also compares the contract of every tool reachable in both releases.
+Removing a precondition or approval, raising or removing a ceiling, increasing
+an effect class, enabling unbounded scope minting, or raising the run limit is
+widening even when the set of reachable tool names does not change. Amounts in
+different currencies are not ordered. A currency change is sent for review
+rather than being called narrower because its numeral is smaller.
+
+Both releases are searched to the same depth, using the larger manifest
+default unless the caller supplies `--depth`. Reducing a manifest's default
+depth is itself widening because it weakens future analysis. Manifests naming
+different agents are not comparable.
+
 ## Why `verify` ships in the first version
 
 A declaration nobody checks is a wish. The implementation drifts from the
@@ -90,6 +102,11 @@ weeks ago.
 `verify` replays recorded calls and reports what the mandate does not permit.
 It is the cheapest available answer to "why should I believe your manifest",
 and without it the rest would be a YAML linter with opinions.
+
+Conformance is fail closed. A record cannot establish a ceiling without its
+scope, finite value, and currency, or establish identity use without the
+executing principal. Missing evidence is a violation. Malformed evidence is a
+usage error.
 
 ## Deliberate overlap
 
