@@ -30,9 +30,9 @@
 
   <rect x="630" y="214" width="130" height="58" rx="6" fill="#e8f1fb" stroke="#3978b8" stroke-width="2"/>
   <text x="695" y="249" text-anchor="middle" fill="#174a7a" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600">open_case</text>
-  <rect x="630" y="305" width="130" height="58" rx="6" fill="#fff0e8" stroke="#dc6b3c" stroke-width="2"/>
+  <rect id="added-tool" x="630" y="305" width="130" height="58" rx="6" fill="#fff0e8" stroke="#dc6b3c" stroke-width="2"/>
   <text x="695" y="330" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600">search_cases</text>
-  <text x="695" y="350" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="12">read only</text>
+  <text x="695" y="350" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="12">new · read only</text>
 
   <line x1="760" y1="243" x2="816" y2="243" stroke="#607080" stroke-width="3"/>
   <polygon points="816,243 804,236 804,250" fill="#607080"/>
@@ -41,23 +41,25 @@
   <text x="788" y="228" text-anchor="middle" fill="#53606d" font-family="Inter, Arial, sans-serif" font-size="12">case #1</text>
   <text x="788" y="319" text-anchor="middle" fill="#53606d" font-family="Inter, Arial, sans-serif" font-size="12">case #2</text>
 
-  <rect x="820" y="210" width="260" height="66" rx="6" fill="#fff0e8" stroke="#dc6b3c" stroke-width="2"/>
-  <text x="950" y="237" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600">issue_refund</text>
-  <text x="950" y="259" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="13">approved · £500</text>
-  <rect x="820" y="305" width="260" height="66" rx="6" fill="#fff0e8" stroke="#dc6b3c" stroke-width="2"/>
-  <text x="950" y="332" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600">issue_refund</text>
-  <text x="950" y="354" text-anchor="middle" fill="#8b3d20" font-family="Inter, Arial, sans-serif" font-size="13">approved · £500</text>
+  <rect id="existing-refund-1" x="820" y="210" width="260" height="66" rx="6" fill="#e9f6ef" stroke="#278657" stroke-width="2"/>
+  <text x="950" y="237" text-anchor="middle" fill="#17633f" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600">issue_refund</text>
+  <text x="950" y="259" text-anchor="middle" fill="#37604d" font-family="Inter, Arial, sans-serif" font-size="13">approved · £500</text>
+  <rect id="existing-refund-2" x="820" y="305" width="260" height="66" rx="6" fill="#e9f6ef" stroke="#278657" stroke-width="2"/>
+  <text x="950" y="332" text-anchor="middle" fill="#17633f" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600">issue_refund</text>
+  <text x="950" y="354" text-anchor="middle" fill="#37604d" font-family="Inter, Arial, sans-serif" font-size="13">approved · £500</text>
 
-  <rect x="630" y="395" width="450" height="55" rx="6" fill="#fdecea"/>
-  <text x="652" y="429" fill="#842f23" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600">Reachable total £1,000 &gt; £500 run limit</text>
+  <rect id="breach-summary" x="630" y="395" width="450" height="55" rx="6" fill="#fdecea"/>
+  <text x="652" y="429" fill="#842f23" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600">First breaching path £1,000 &gt; £500 run limit</text>
 
   <line x1="600" y1="520" x2="1140" y2="520" stroke="#b8c2cc" stroke-width="2"/>
-  <rect x="60" y="505" width="480" height="76" rx="8" fill="#17202a"/>
-  <text x="84" y="536" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700">AgentMandate in CI</text>
-  <text x="84" y="561" fill="#d8e0e7" font-family="Inter, Arial, sans-serif" font-size="14">Finds the legal sequence and blocks the widening release for review</text>
+  <rect x="60" y="495" width="480" height="95" rx="8" fill="#17202a"/>
+  <text x="84" y="525" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700">AgentMandate in CI</text>
+  <text x="84" y="550" fill="#d8e0e7" font-family="Inter, Arial, sans-serif" font-size="14">Shows the exact call sequence</text>
+  <text x="84" y="573" fill="#d8e0e7" font-family="Inter, Arial, sans-serif" font-size="14">Blocks the widened release for review</text>
   <line x1="540" y1="543" x2="585" y2="543" stroke="#17202a" stroke-width="3"/>
   <polygon points="585,543 573,536 573,550" fill="#17202a"/>
-  <rect x="600" y="505" width="540" height="76" rx="8" fill="#fdecea" stroke="#c84b3a" stroke-width="2"/>
-  <text x="624" y="536" fill="#842f23" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" font-weight="700">verdict: WIDENING</text>
-  <text x="624" y="561" fill="#842f23" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13">search_cases → refund(case #1) → refund(case #2)</text>
+  <rect x="600" y="495" width="540" height="95" rx="8" fill="#fdecea" stroke="#c84b3a" stroke-width="2"/>
+  <text x="624" y="525" fill="#842f23" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" font-weight="700">verdict: WIDENING</text>
+  <text x="624" y="550" fill="#842f23" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12.5">open_case → search_cases → issue_refund(case #1)</text>
+  <text x="624" y="573" fill="#842f23" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12.5">→ issue_refund(case #2)</text>
 </svg>
