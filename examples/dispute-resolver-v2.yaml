@@ -1,0 +1,36 @@
+# Release v2. The only change is one new read-only tool so an agent can find
+# existing cases instead of always opening a new one. It reads. It writes
+# nothing. It went through review as a read-only addition.
+version: 1
+agent: dispute-resolver
+identity: spiffe://bank/agents/dispute-resolver
+
+limits:
+  total: { amount: 500, currency: GBP }
+  depth: 8
+
+tools:
+  - name: open_case
+    effect: read
+    principal: caller
+    produces: case
+
+  - name: search_cases
+    effect: read
+    principal: caller
+    produces: case
+    unbounded: true
+
+  - name: fetch_case
+    effect: read
+    principal: caller
+    requires: [case]
+
+  - name: issue_refund
+    effect: irreversible
+    principal: caller
+    requires: [case]
+    value_arg: amount
+    scope_key: case
+    ceiling: { amount: 500, currency: GBP }
+    requires_approval: true

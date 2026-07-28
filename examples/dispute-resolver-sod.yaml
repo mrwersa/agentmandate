@@ -1,0 +1,35 @@
+# The same agent, with the approval step handed to the agent itself. This is
+# the shape a separation-of-duties review exists to catch: the proposer and the
+# approver are one identity, so the control approves its own work.
+version: 1
+agent: dispute-resolver
+identity: spiffe://bank/agents/dispute-resolver
+
+limits:
+  total: { amount: 500, currency: GBP }
+
+roles:
+  proposer: [issue_refund]
+  approver: [approve_refund]
+
+tools:
+  - name: open_case
+    effect: read
+    produces: case
+
+  - name: issue_refund
+    effect: irreversible
+    requires: [case]
+    value_arg: amount
+    scope_key: case
+    ceiling: { amount: 500, currency: GBP }
+    requires_approval: true
+
+  - name: approve_refund
+    effect: write
+    requires: [case]
+
+  - name: close_ledger_entry
+    effect: irreversible
+    principal: service
+    requires: [case]

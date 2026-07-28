@@ -1,0 +1,32 @@
+# Release v1 of a payment-dispute agent.
+#
+# Every tool passes an individual control review. Refunds are capped at 500 GBP
+# against a case, every refund is gated by human approval, the run limit is
+# 500 GBP, and no tool spends a service account.
+version: 1
+agent: dispute-resolver
+identity: spiffe://bank/agents/dispute-resolver
+
+limits:
+  total: { amount: 500, currency: GBP }
+  depth: 8
+
+tools:
+  - name: open_case
+    effect: read
+    principal: caller
+    produces: case
+
+  - name: fetch_case
+    effect: read
+    principal: caller
+    requires: [case]
+
+  - name: issue_refund
+    effect: irreversible
+    principal: caller
+    requires: [case]
+    value_arg: amount
+    scope_key: case
+    ceiling: { amount: 500, currency: GBP }
+    requires_approval: true

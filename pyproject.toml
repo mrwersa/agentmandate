@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentmandate"
+version = "0.1.0"
+description = "Compound-path and cross-release analysis of what an AI agent is permitted to do"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+    { name = "Saeed Aghaee" },
+]
+keywords = [
+    "ai-agents",
+    "agent-security",
+    "authorization",
+    "least-privilege",
+    "separation-of-duties",
+    "policy-analysis",
+    "reachability",
+    "governance",
+    "llm",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.optional-dependencies]
+yaml = ["pyyaml>=6"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pyyaml>=6",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+mandate = "agentmandate.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mrwersa/agentmandate"
+Repository = "https://github.com/mrwersa/agentmandate"
+Issues = "https://github.com/mrwersa/agentmandate/issues"
+Changelog = "https://github.com/mrwersa/agentmandate/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/mrwersa/agentmandate#documentation"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agentmandate"]
+# PEP 561: ship the marker so type checkers in consuming projects read the
+# annotations instead of treating the package as untyped.
+artifacts = ["agentmandate/py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"
+
+[tool.ruff]
+line-length = 100
+
+# Pinned explicitly so a ruff upgrade cannot change what CI enforces.
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "RET", "PLR1730", "FURB"]
+ignore = [
+    # Manifest problems surface as ManifestError, which is a ValueError so a
+    # caller can catch either. Splitting type problems into TypeError would
+    # make the public contract worse, not better.
+    "TRY004",
+]
