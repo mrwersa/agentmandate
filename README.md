@@ -1,5 +1,13 @@
 # AgentMandate
 
+> **Compound-path and cross-release analysis of what an AI agent is permitted to do.**
+
+[![PyPI](https://img.shields.io/pypi/v/agentmandate.svg)](https://pypi.org/project/agentmandate/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/mrwersa/agentmandate/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwersa/agentmandate/actions/workflows/ci.yml)
+[![Coverage: 90%+](https://img.shields.io/badge/coverage-90%25%2B-brightgreen.svg)](#development)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
+
 Analyse what an AI agent is permitted to do, and what changed between two releases.
 
 Agent security scanners check tools one at a time. That catches the tool with no approval gate and the one running as a service account, which is worth catching. It misses the defect where every tool passes review and a legal sequence of them does not.
@@ -111,6 +119,22 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate verify` | Replays recorded tool calls against the manifest and reports where reality exceeded the declaration |
 
 Every command takes `--json` and exits non-zero on a finding, so all four drop into CI unchanged.
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Clean |
+| `1` | A finding: lint error, reachable breach, widening diff, or a non-conformant replay |
+| `2` | Usage error or a malformed manifest |
+
+In a pull request, the useful gate is `diff` against the manifest on the default
+branch, so a change that widens authority stops and gets a named reviewer:
+
+```yaml
+- name: Authority diff
+  run: |
+    git show origin/main:mandate.yaml > /tmp/released.yaml
+    mandate diff /tmp/released.yaml mandate.yaml
+```
 
 `verify` is what keeps the rest honest. A manifest nobody checks is a wish, and the declaration drifts from the implementation the moment someone ships a connector change.
 
