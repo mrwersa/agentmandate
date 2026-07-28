@@ -193,3 +193,10 @@ def test_reach_reports_an_ungated_irreversible_path(capsys):
     # The value of this over the lint rule is the route, so the route has to
     # be in the output.
     assert "1. open_case" in out
+
+
+def test_a_non_positive_depth_is_a_usage_error(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(["reach", V2, "--depth", "0"])
+    assert exit_info.value.code == EXIT_USAGE
+    assert "positive integer" in capsys.readouterr().err

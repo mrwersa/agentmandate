@@ -225,3 +225,8 @@ def test_empty_scope_names_are_rejected():
 def test_parser_errors_are_wrapped_as_manifest_errors(body, message):
     with pytest.raises(ManifestError, match=message):
         loads(body)
+
+
+def test_a_tool_name_with_a_control_character_is_rejected():
+    with pytest.raises(ManifestError, match="must not contain control characters"):
+        loads('{"agent": "a", "tools": [{"name": "t\\nx", "effect": "read"}]}')

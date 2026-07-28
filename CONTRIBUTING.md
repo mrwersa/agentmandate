@@ -16,7 +16,7 @@ AgentMandate uses a pull-request-only workflow for `main`.
 
    ```bash
    python -m pytest -q
-   python -m pytest -q --cov=agentmandate --cov-fail-under=90
+   python -m pytest -q --cov=agentmandate --cov-fail-under=100
    ruff check .
    ```
 

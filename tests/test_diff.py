@@ -280,3 +280,204 @@ def test_changing_the_value_argument_needs_review():
     delta = compare(loads(V1), loads(changed))
     assert delta.widened is True
     assert any(change.kind == "value argument" for change in delta.changes)
+
+
+# The controls below are the reason this PR exists, so each direction is
+# pinned. An untested widening rule is a gate that might not be there.
+
+BASE = """
+agent: a
+limits: {total: {amount: 500, currency: GBP}}
+tools:
+  - name: seed
+    effect: read
+    produces: case
+  - name: act
+    effect: read
+    requires: [case]
+"""
+
+
+def only(changes, kind):
+    return [c for c in changes if c.kind == kind]
+
+
+def test_strengthening_an_effect_class_is_widening():
+    after = BASE.replace("  - name: act\n    effect: read", "  - name: act\n    effect: write")
+    delta = compare(loads(BASE), loads(after))
+    change = only(delta.changes, "effect class")[0]
+    assert change.detail == "act: read -> write"
+    assert change.direction == WIDENING
+
+
+def test_weakening_an_effect_class_is_narrowing():
+    stronger = BASE.replace("  - name: act\n    effect: read", "  - name: act\n    effect: write")
+    change = only(compare(loads(stronger), loads(BASE)).changes, "effect class")[0]
+    assert change.direction == NARROWING
+
+
+def test_letting_a_tool_mint_bindings_is_widening():
+    """`unbounded` is the field that decides whether a ceiling means anything,
+    so a release that flips it must not pass silently."""
+    after = BASE.replace("    produces: case", "    produces: case\n    unbounded: true")
+    change = only(compare(loads(BASE), loads(after)).changes, "scope minting")[0]
+    assert change.detail == "seed: can now mint fresh bindings"
+    assert change.direction == WIDENING
+
+
+def test_removing_scope_minting_is_narrowing():
+    unbounded = BASE.replace("    produces: case", "    produces: case\n    unbounded: true")
+    change = only(compare(loads(unbounded), loads(BASE)).changes, "scope minting")[0]
+    assert change.detail == "seed: can no longer mint fresh bindings"
+    assert change.direction == NARROWING
+
+
+def test_changing_the_produced_scope_needs_review():
+    after = BASE.replace("    produces: case", "    produces: ledger")
+    change = only(compare(loads(BASE), loads(after)).changes, "produced scope on seed")[0]
+    assert change.direction == WIDENING
+    assert "needs review" in change.detail
+
+
+def test_adding_a_produced_scope_is_widening():
+    plain = BASE.replace("    produces: case\n", "")
+    change = only(compare(loads(plain), loads(BASE)).changes, "produced scope on seed")[0]
+    assert change.direction == WIDENING
+    assert change.detail == "added case"
+
+
+def test_removing_a_produced_scope_is_narrowing():
+    plain = BASE.replace("    produces: case\n", "")
+    change = only(compare(loads(BASE), loads(plain)).changes, "produced scope on seed")[0]
+    assert change.direction == NARROWING
+
+
+CEILINGED = """
+agent: a
+limits: {total: {amount: 500, currency: GBP}}
+tools:
+  - name: seed
+    effect: read
+    produces: case
+  - name: pay
+    effect: irreversible
+    requires: [case]
+    value_arg: amount
+    scope_key: case
+    ceiling: {amount: 100, currency: GBP}
+    requires_approval: true
+"""
+
+
+LEDGER_SCOPED = """
+agent: a
+limits: {total: {amount: 500, currency: GBP}}
+tools:
+  - name: seed
+    effect: read
+    produces: case
+  - name: seed_ledger
+    effect: read
+    produces: ledger
+  - name: pay
+    effect: irreversible
+    requires: [ledger]
+    value_arg: amount
+    scope_key: ledger
+    ceiling: {amount: 100, currency: GBP}
+    requires_approval: true
+"""
+
+
+def test_changing_the_ceiling_scope_makes_limits_incomparable():
+    """Two ceilings of 100 measured against different scopes are not the same
+    control, so the amounts must not be compared as if they were."""
+    change = only(compare(loads(CEILINGED), loads(LEDGER_SCOPED)).changes, "ceiling scope")[0]
+    assert change.direction == WIDENING
+    assert "not comparable" in change.detail
+
+
+# scope_key is kept on both sides so the comparison isolates the ceiling.
+# Dropping it too would route to the "ceiling scope" rule above instead.
+UNCAPPED = CEILINGED.replace(
+    "    value_arg: amount\n    scope_key: case\n"
+    "    ceiling: {amount: 100, currency: GBP}\n",
+    "    scope_key: case\n",
+)
+
+
+def test_removing_a_ceiling_is_widening():
+    change = only(compare(loads(CEILINGED), loads(UNCAPPED)).changes, "ceiling on pay")[0]
+    assert change.direction == WIDENING
+    assert "removed limit" in change.detail
+
+
+def test_adding_a_ceiling_is_narrowing():
+    change = only(compare(loads(UNCAPPED), loads(CEILINGED)).changes, "ceiling on pay")[0]
+    assert change.direction == NARROWING
+    assert "added limit" in change.detail
+
+
+def test_an_effect_reaching_a_newly_reachable_scope_is_reported():
+    after = BASE + "  - name: post\n    effect: write\n    requires: [case]\n"
+    changes = compare(loads(BASE), loads(after)).changes
+    assert any(c.kind == "effect" and c.detail == "gained write on case" for c in changes)
+
+
+def test_an_effect_lost_with_its_tool_is_reported():
+    richer = BASE + "  - name: post\n    effect: write\n    requires: [case]\n"
+    changes = compare(loads(richer), loads(BASE)).changes
+    assert any(c.kind == "effect" and c.detail == "lost write on case" for c in changes)
+
+
+def test_comparing_different_agents_is_refused():
+    """Pointing diff at the wrong file produces a meaningless verdict, so it
+    fails rather than reporting noise."""
+    with pytest.raises(ValueError, match="cannot compare different agents"):
+        compare(loads(BASE), loads(BASE.replace("agent: a", "agent: b")))
+
+
+NO_MONEY = """
+agent: a
+tools:
+  - name: seed
+    effect: read
+    produces: case
+"""
+
+WITH_MONEY = """
+agent: a
+limits: {total: {amount: 50, currency: GBP}}
+tools:
+  - name: seed
+    effect: read
+    produces: case
+  - name: pay
+    effect: irreversible
+    requires: [case]
+    value_arg: amount
+    scope_key: case
+    ceiling: {amount: 50, currency: GBP}
+    requires_approval: true
+"""
+
+
+def test_an_agent_that_could_spend_nothing_and_now_can_is_widening():
+    change = only(compare(loads(NO_MONEY), loads(WITH_MONEY)).changes, "extractable value")[0]
+    assert change.direction == WIDENING
+    assert change.detail == "gained 50 GBP"
+
+
+def test_an_agent_that_can_no_longer_spend_is_narrowing():
+    change = only(compare(loads(WITH_MONEY), loads(NO_MONEY)).changes, "extractable value")[0]
+    assert change.direction == NARROWING
+    assert change.detail == "removed 50 GBP"
+
+
+def test_declaring_a_workload_identity_is_narrowing():
+    """Naming the identity an agent runs as constrains it, so it is not a
+    widening change even though the manifest gained a line."""
+    identified = NO_MONEY.replace("agent: a", "agent: a\nidentity: spiffe://bank/agents/a")
+    change = only(compare(loads(NO_MONEY), loads(identified)).changes, "workload identity")[0]
+    assert change.direction == NARROWING
+    assert change.detail == "declared spiffe://bank/agents/a"

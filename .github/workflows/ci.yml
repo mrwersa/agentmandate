@@ -68,7 +68,7 @@ jobs:
           python -m pytest -q
           --cov=agentmandate
           --cov-report=term-missing
-          --cov-fail-under=90
+          --cov-fail-under=100
 
   no-dependency-install:
     name: Core has no runtime dependency

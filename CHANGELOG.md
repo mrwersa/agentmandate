@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Tests for every control the fail-closed work introduced. The diff rules for
+  effect-class changes, `unbounded` flips, produced-scope changes, ceiling
+  add and remove, extractable-value appearance and disappearance, and a
+  declared workload identity all shipped without one, and an untested
+  widening rule is a gate that might not be there.
+
+### Changed
+
+- The coverage floor is 100%, up from 90%. The package was at 100% and drifted
+  to 97% in a single change without CI noticing, and the lines that slipped
+  were the new controls rather than incidental code.
+
 ### Fixed
 
 - `verify` now rejects malformed trace fields and reports missing principal,

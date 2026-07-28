@@ -147,3 +147,20 @@ def test_duplicate_tool_names_are_rejected_before_rendering():
 def test_an_empty_catalogue_does_not_emit_an_invalid_manifest():
     with pytest.raises(ValueError, match="no named tools"):
         render(propose([]), "a")
+
+
+def test_a_blank_tool_name_is_skipped():
+    assert propose([{"name": "   "}, {"name": "get_x"}]) == propose([{"name": "get_x"}])
+
+
+@pytest.mark.parametrize("agent", ["", "   "])
+def test_a_blank_agent_name_is_rejected(agent):
+    with pytest.raises(ValueError, match="agent name must be a non-empty string"):
+        render(propose([{"name": "get_x"}]), agent)
+
+
+def test_an_agent_name_with_a_control_character_is_rejected():
+    """The skeleton is rendered as text, so a newline in the agent name would
+    let the caller write their own YAML."""
+    with pytest.raises(ValueError, match="must not contain control characters"):
+        render(propose([{"name": "get_x"}]), "demo\n  effect: read")

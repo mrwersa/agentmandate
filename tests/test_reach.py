@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+import pytest
+
 from agentmandate import analyse, loads
 from agentmandate.reach import Step
 
@@ -226,3 +228,8 @@ def test_each_ungated_tool_is_reported_once():
 def test_a_gated_irreversible_effect_is_not_a_breach():
     gated = UNGATED + "    requires_approval: true\n"
     assert analyse(loads(gated)).breaches == ()
+
+
+def test_a_non_positive_depth_is_rejected():
+    with pytest.raises(ValueError, match="depth must be a positive integer"):
+        analyse(loads(CAPPED), depth=0)

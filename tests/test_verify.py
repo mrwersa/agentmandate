@@ -182,3 +182,53 @@ def test_value_on_a_tool_without_a_declared_ceiling_is_a_violation():
         '{"tool": "open_case", "scope": "c1", "principal": "caller",'
         ' "value": "10", "currency": "GBP"}'
     ) == ["unexpected_value"]
+
+
+def test_a_blank_scope_is_rejected_rather_than_treated_as_absent():
+    with pytest.raises(ValueError, match="scope must be a non-empty string"):
+        parse_observations('{"tool": "open_case", "scope": "   "}')
+
+
+def test_a_blank_principal_is_rejected():
+    with pytest.raises(ValueError, match="principal must be a non-empty string"):
+        parse_observations('{"tool": "open_case", "principal": ""}')
+
+
+def test_a_value_on_a_tool_that_declares_none_is_reported():
+    assert "unexpected_value" in kinds(
+        '{"tool": "open_case", "scope": "c1", "principal": "caller", "value": "10"}'
+    )
+
+
+def test_a_currency_that_matches_the_ceiling_but_not_the_run_limit_is_reported():
+    """`lint` warns about a manifest whose ceiling and run limit disagree, but
+    the manifest still parses, and the run total is summed across tools. A
+    call that clears its own ceiling can still make that total meaningless."""
+    mandate = loads(
+        """
+        agent: mixed
+        limits: {total: {amount: 500, currency: GBP}}
+        tools:
+          - name: seed
+            effect: read
+            produces: case
+          - name: pay
+            effect: irreversible
+            requires: [case]
+            value_arg: amount
+            scope_key: case
+            ceiling: {amount: 100, currency: USD}
+            requires_approval: true
+        """
+    )
+    conformance = replay(
+        mandate,
+        parse_observations(
+            '{"tool": "pay", "scope": "c1", "principal": "caller",'
+            ' "value": "10", "currency": "USD", "approved": true}'
+        ),
+    )
+
+    kinds_found = [v.kind for v in conformance.violations]
+    assert kinds_found == ["currency_mismatch"]
+    assert "run limit" in conformance.violations[0].message

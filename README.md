@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/agentmandate.svg)](https://pypi.org/project/agentmandate/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/mrwersa/agentmandate/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwersa/agentmandate/actions/workflows/ci.yml)
-[![Coverage: 90%+](https://img.shields.io/badge/coverage-90%25%2B-brightgreen.svg)](#development)
+[![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
 
 Analyse what an AI agent is permitted to do, and what changed between two releases.
@@ -204,7 +204,7 @@ Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none
 ```bash
 python -m pip install -e ".[dev]"
 python -m pytest -q
-python -m pytest -q --cov=agentmandate --cov-fail-under=90
+python -m pytest -q --cov=agentmandate --cov-fail-under=100
 ruff check .
 ```
 
