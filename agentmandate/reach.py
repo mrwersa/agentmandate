@@ -223,6 +223,24 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
                     effects.add((tool.effect, scope))
             if tool.effect == IRREVERSIBLE and not tool.requires_approval:
                 ungated.add(tool.name)
+                # Reported as a path rather than a bare name. Knowing an
+                # ungated irreversible tool exists is a lint finding. Knowing
+                # the agent can actually get to it, and how, is the thing that
+                # decides whether it matters.
+                if not any(
+                    b.kind == "ungated_effect" and b.path[-1].tool == tool.name
+                    for b in breaches
+                ):
+                    breaches.append(
+                        Breach(
+                            kind="ungated_effect",
+                            detail=(
+                                f"{tool.name} is irreversible and needs no approval, "
+                                f"reachable in {len(path) + 1} call(s)"
+                            ),
+                            path=path + (Step(tool=tool.name),),
+                        )
+                    )
             if tool.principal == "service":
                 service.add(tool.name)
 

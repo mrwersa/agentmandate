@@ -12,6 +12,7 @@ from .diff import compare
 from .lint import ERROR, check
 from .manifest import ManifestError, load
 from .reach import analyse
+from .scan import scan_file
 from .verify import replay_file
 
 EXIT_OK = 0
@@ -57,6 +58,11 @@ def build_parser() -> argparse.ArgumentParser:
     diff_parser.add_argument("after", help="the proposed manifest")
     diff_parser.add_argument("--depth", type=int, default=None)
     diff_parser.add_argument("--json", action="store_true", help="machine-readable output")
+    diff_parser.add_argument(
+        "--record",
+        action="store_true",
+        help="emit a markdown change record for a change advisory board",
+    )
 
     verify_parser = subparsers.add_parser(
         "verify", help="replay recorded calls against the manifest"
@@ -66,6 +72,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--traces", required=True, help="JSON Lines file of observed tool calls"
     )
     verify_parser.add_argument("--json", action="store_true", help="machine-readable output")
+
+    scan_parser = subparsers.add_parser(
+        "scan",
+        help="derive a manifest skeleton from an MCP tools/list catalogue",
+    )
+    scan_parser.add_argument("catalogue", help="JSON file holding an MCP tools/list payload")
+    scan_parser.add_argument(
+        "--agent", default="unnamed-agent", help="agent name to write into the skeleton"
+    )
 
     return parser
 
@@ -80,6 +95,14 @@ def _emit(payload: dict, as_json: bool, text: str) -> None:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "scan":
+        try:
+            print(scan_file(args.catalogue, args.agent), end="")
+        except (OSError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return EXIT_USAGE
+        return EXIT_OK
 
     try:
         if args.command == "diff":
@@ -133,7 +156,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "diff":
         delta = compare(before, after, depth=args.depth)
-        _emit(delta.as_dict(), args.json, delta.render(args.before, args.after))
+        text = (
+            delta.record(args.before, args.after)
+            if args.record
+            else delta.render(args.before, args.after)
+        )
+        _emit(delta.as_dict(), args.json, text)
         return EXIT_FINDING if delta.widened else EXIT_OK
 
     conformance = replay_file(mandate, args.traces)

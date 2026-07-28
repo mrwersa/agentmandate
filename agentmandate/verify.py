@@ -23,6 +23,7 @@ VIOLATION_KINDS = (
     "ceiling_exceeded",
     "missing_approval",
     "wrong_principal",
+    "currency_mismatch",
     "total_exceeded",
 )
 
@@ -36,6 +37,7 @@ class Observation:
     value: Decimal | None = None
     approved: bool = False
     principal: str | None = None
+    currency: str | None = None
     line: int = 0
 
     @classmethod
@@ -53,6 +55,7 @@ class Observation:
             value=parsed,
             approved=bool(raw.get("approved", False)),
             principal=raw.get("principal"),
+            currency=(str(raw["currency"]).upper() if raw.get("currency") else None),
             line=line,
         )
 
@@ -161,6 +164,21 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
             )
 
         if observation.value is not None:
+            if (
+                tool.ceiling is not None
+                and observation.currency is not None
+                and observation.currency != tool.ceiling.currency
+            ):
+                # Summing across currencies would make the run total a
+                # meaningless number, so this is reported rather than converted.
+                violations.append(
+                    Violation(
+                        "currency_mismatch",
+                        observation,
+                        f"the call spent {observation.currency} against a ceiling "
+                        f"declared in {tool.ceiling.currency}",
+                    )
+                )
             total += observation.value
             if tool.ceiling is not None:
                 key = (tool.name, observation.scope)

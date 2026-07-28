@@ -40,6 +40,7 @@ class Delta:
     before: Authority
     after: Authority
     changes: tuple[Change, ...]
+    after_agent: str = "agent"
 
     @property
     def direction(self) -> str:
@@ -63,6 +64,54 @@ class Delta:
         lines.append(f"verdict: {self.direction.upper()}")
         if self.widened:
             lines.append("a widening change needs named review before release")
+        return "\n".join(lines)
+
+    def record(self, before_label: str = "before", after_label: str = "after") -> str:
+        """A change record in the shape a change advisory board asks for.
+
+        The point of emitting this from the tool rather than leaving it to a
+        human is that the authority section is then derived rather than
+        asserted. A change record where somebody typed "no permission changes"
+        is worth very little.
+        """
+        widening = [c for c in self.changes if c.direction == WIDENING]
+        narrowing = [c for c in self.changes if c.direction == NARROWING]
+        lines = [
+            "# Agent authority change record",
+            "",
+            f"- **Agent:** {self.after_agent}",
+            f"- **Compared:** `{before_label}` against `{after_label}`",
+            f"- **Verdict:** {self.direction.upper()}",
+            f"- **Search depth:** {self.after.depth}"
+            + (" (truncated)" if self.after.truncated else ""),
+            "",
+            "## Authority gained",
+            "",
+        ]
+        lines.extend([f"- {c.kind}: {c.detail}" for c in widening] or ["- none"])
+        lines.extend(["", "## Authority removed", ""])
+        lines.extend([f"- {c.kind}: {c.detail}" for c in narrowing] or ["- none"])
+        lines.extend(["", "## Reachable breaches after this change", ""])
+        lines.extend(
+            [f"- {b.detail}" for b in self.after.breaches]
+            or ["- none within the search depth"]
+        )
+        lines.extend(["", "## Review", ""])
+        if self.widened:
+            lines.append(
+                "This change widens what the agent is permitted to do. It needs a "
+                "named reviewer who accepts the gained authority above."
+            )
+        else:
+            lines.append(
+                "This change does not widen what the agent is permitted to do."
+            )
+        lines.append("")
+        lines.append(
+            "Authority is computed from the manifests by bounded reachability. "
+            "An unchanged manifest does not prove unchanged authority if a tool "
+            "implementation, connector, or downstream role changed."
+        )
         return "\n".join(lines)
 
     def as_dict(self) -> dict:
@@ -135,4 +184,6 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
     after_breaches = frozenset(b.kind for b in rhs.breaches)
     changes.extend(_set_change("reachable breach", before_breaches, after_breaches))
 
-    return Delta(before=lhs, after=rhs, changes=tuple(changes))
+    return Delta(
+        before=lhs, after=rhs, changes=tuple(changes), after_agent=after.agent
+    )

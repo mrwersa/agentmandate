@@ -126,3 +126,34 @@ def test_change_render_marks_direction():
     delta = compare(loads(V1), loads(V2))
     assert any(c.render().strip().startswith("+") for c in delta.changes)
     assert compare(loads(V2), loads(V1)).changes[0].render().strip().startswith("-")
+
+
+def test_the_change_record_names_the_agent_and_the_verdict():
+    record = compare(loads(V1), loads(V2)).record("v1.yaml", "v2.yaml")
+    assert "# Agent authority change record" in record
+    assert "**Agent:** dispute" in record
+    assert "**Verdict:** WIDENING" in record
+    assert "`v1.yaml` against `v2.yaml`" in record
+
+
+def test_the_change_record_separates_gained_from_removed():
+    record = compare(loads(V1), loads(V2)).record()
+    gained = record.split("## Authority gained")[1].split("## Authority removed")[0]
+    removed = record.split("## Authority removed")[1].split("## Reachable breaches")[0]
+    assert "gained search_cases" in gained
+    assert "none" in removed
+
+
+def test_the_change_record_asks_for_a_named_reviewer_when_widening():
+    assert "named reviewer" in compare(loads(V1), loads(V2)).record()
+
+
+def test_the_change_record_says_so_when_nothing_widened():
+    record = compare(loads(V1), loads(V1)).record()
+    assert "does not widen" in record
+    assert "none within the search depth" in record
+
+
+def test_the_change_record_carries_the_caveat_about_unchanged_manifests():
+    """The record is evidence about the manifest, not about the deployment."""
+    assert "unchanged manifest does not prove" in compare(loads(V1), loads(V2)).record()
