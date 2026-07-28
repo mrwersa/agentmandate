@@ -11,6 +11,11 @@ from . import __version__
 from .diff import compare
 from .lint import ERROR, check
 from .manifest import ManifestError, load
+from .obligations import (
+    derive,
+    load_obligations,
+    to_decision_suite,
+)
 from .reach import analyse
 from .scan import scan_file
 from .verify import replay_file
@@ -74,6 +79,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="emit a markdown change record for a change advisory board",
     )
 
+    obligations_parser = subparsers.add_parser(
+        "obligations",
+        help="derive reviewable test obligations from reachable authority",
+    )
+    _add_manifest(obligations_parser)
+    obligations_parser.add_argument("--depth", type=_positive_int, default=None)
+    obligations_parser.add_argument(
+        "--json", action="store_true", help="machine-readable output"
+    )
+    obligations_parser.add_argument(
+        "--suite",
+        action="store_true",
+        help="render reviewed obligations as an AgentVerity decision suite",
+    )
+    obligations_parser.add_argument(
+        "--reviewed",
+        default=None,
+        help="an obligations file whose decisions have been filled in",
+    )
+
     verify_parser = subparsers.add_parser(
         "verify", help="replay recorded calls against the manifest"
     )
@@ -123,6 +148,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ManifestError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
+
+    if args.command == "obligations":
+        obligations = (
+            load_obligations(args.reviewed)
+            if args.reviewed
+            else derive(mandate, depth=args.depth)
+        )
+        if args.suite:
+            try:
+                print(json.dumps(to_decision_suite(obligations), indent=2))
+            except ValueError as exc:
+                print(f"error: {exc}", file=sys.stderr)
+                return EXIT_FINDING
+            return EXIT_OK
+        _emit(obligations.to_dict(), args.json, obligations.render())
+        return EXIT_FINDING if obligations.unreviewed else EXIT_OK
 
     if args.command == "lint":
         findings = check(mandate)

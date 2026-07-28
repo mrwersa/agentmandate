@@ -6,6 +6,28 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- `mandate obligations` derives reviewable test obligations from the authority
+  a manifest actually makes reachable: irreversible effects, approval gates,
+  service-account principals, and value-bearing calls. A tool nobody can reach
+  produces no obligation, because listing it would pad a review with work that
+  protects nothing.
+- `--reviewed` accepts an obligations file whose decisions have been mapped by
+  a human, and `--suite` renders those into an `agentverity.decision-suite/v1`
+  skeleton that AgentVerity loads directly.
+- `docs/test-obligations.md` walks the whole path, including what deliberately
+  does not cross it.
+
+### Notes
+
+- Decisions are never invented. An effect class such as `irreversible on case`
+  is an authority fact; a decision such as `refund_approved` is an application
+  label somebody chose. No parsing turns one into the other, so the command
+  exits non-zero until every row carries a reviewed decision.
+- Compound breaches do not cross the bridge. A cumulative-value path is a
+  multi-call sequence, which is scenario testing rather than decision coverage.
+
 ## 0.2.0 - 2026-07-28
 
 ### Added

@@ -18,6 +18,15 @@ __version__ = "0.2.0"
 from .diff import Change, Delta, compare
 from .lint import Finding, check
 from .manifest import Mandate, ManifestError, Money, Tool, load, loads
+from .obligations import (
+    OBLIGATIONS_SCHEMA,
+    Obligation,
+    ObligationSet,
+    derive,
+    load_obligations,
+    save_obligations,
+    to_decision_suite,
+)
 from .reach import Authority, Breach, Step, analyse
 from .scan import Proposal, propose, render, scan_file
 from .verify import Conformance, Observation, Violation, replay, replay_file
@@ -31,7 +40,10 @@ __all__ = [
     "Finding",
     "Mandate",
     "ManifestError",
+    "OBLIGATIONS_SCHEMA",
     "Money",
+    "Obligation",
+    "ObligationSet",
     "Observation",
     "Proposal",
     "Step",
@@ -40,9 +52,13 @@ __all__ = [
     "__version__",
     "analyse",
     "check",
+    "derive",
     "compare",
     "load",
+    "load_obligations",
     "loads",
+    "save_obligations",
+    "to_decision_suite",
     "propose",
     "render",
     "replay",

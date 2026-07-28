@@ -200,3 +200,37 @@ def test_a_non_positive_depth_is_a_usage_error(capsys):
         main(["reach", V2, "--depth", "0"])
     assert exit_info.value.code == EXIT_USAGE
     assert "positive integer" in capsys.readouterr().err
+
+
+REVIEWED = str(EXAMPLES / "reviewed-obligations.json")
+
+
+def test_obligations_exits_non_zero_until_decisions_are_mapped(capsys):
+    assert main(["obligations", V1]) == EXIT_FINDING
+    out = capsys.readouterr().out
+    assert "irreversible:issue_refund" in out
+    assert "REVIEW: map a decision" in out
+
+
+def test_obligations_pass_once_every_row_is_reviewed(capsys):
+    assert main(["obligations", V1, "--reviewed", REVIEWED]) == EXIT_OK
+    assert "REVIEW: map a decision" not in capsys.readouterr().out
+
+
+def test_obligations_emit_a_decision_suite_from_reviewed_rows(capsys):
+    assert main(["obligations", V1, "--reviewed", REVIEWED, "--suite"]) == EXIT_OK
+    suite = json.loads(capsys.readouterr().out)
+
+    assert suite["schema"] == "agentverity.decision-suite/v1"
+    assert suite["contract"]["allowed"] == ["refund_approved"]
+
+
+def test_a_suite_is_refused_before_review(capsys):
+    assert main(["obligations", V1, "--suite"]) == EXIT_FINDING
+    assert "no reviewed decision yet" in capsys.readouterr().err
+
+
+def test_obligations_emit_parseable_json(capsys):
+    main(["obligations", V1, "--json"])
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema"].startswith("agentmandate.obligations/")
