@@ -82,12 +82,40 @@ class Obligation:
             raise ValueError(
                 "obligation is missing " + ", ".join(sorted(missing))
             )
+        kind = value["kind"]
+        subject = value["subject"]
+        reason = value.get("reason", "")
+        decision = value.get("decision", "")
+        cases = value.get("cases", [])
+        for field, item in (
+            ("kind", kind),
+            ("subject", subject),
+            ("reason", reason),
+            ("decision", decision),
+        ):
+            if not isinstance(item, str):
+                raise ValueError(f"obligation {field} must be a string")
+        if not kind.strip() or not subject.strip():
+            raise ValueError("obligation kind and subject must not be blank")
+        if decision and not decision.strip():
+            raise ValueError("obligation decision must not be whitespace")
+        if not isinstance(cases, list) or any(
+            not isinstance(case, str) or not case.strip() for case in cases
+        ):
+            raise ValueError("obligation cases must be a list of non-blank strings")
+        if len(cases) != len(set(cases)):
+            raise ValueError("obligation cases must not contain duplicates")
+        identifier = f"{kind}:{subject}"
+        if "id" in value and value["id"] != identifier:
+            raise ValueError(
+                f"obligation id {value['id']!r} does not match {identifier!r}"
+            )
         return cls(
-            kind=str(value["kind"]),
-            subject=str(value["subject"]),
-            reason=str(value.get("reason", "")),
-            decision=str(value.get("decision", "")),
-            cases=tuple(str(case) for case in value.get("cases", ())),
+            kind=kind,
+            subject=subject,
+            reason=reason,
+            decision=decision,
+            cases=tuple(cases),
         )
 
 

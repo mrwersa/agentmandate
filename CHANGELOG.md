@@ -20,10 +20,10 @@ All notable changes to this project are documented here. The format follows
   does not cross it.
 
 - `README` and `DESIGN` name Policy in Amazon Bedrock AgentCore alongside the
-  other enforcement tools, and say precisely where it stops: Cedar decides one
-  invocation at a time and its automated reasoning analyses one policy at a
-  time, so neither covers a sequence of individually permitted calls nor a
-  release-to-release comparison of reachable authority.
+  other enforcement tools, and say precisely where it stops: the engine
+  evaluates all applicable Cedar policies for one invocation, while its
+  documented analysis is policy-level. Neither models a sequence of permitted
+  calls or a release-to-release comparison of reachable authority.
 
 ### Fixed
 

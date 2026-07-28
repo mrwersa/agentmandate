@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -275,6 +276,58 @@ class TestRoundTrip:
                 {"schema": OBLIGATIONS_SCHEMA, "obligations": [{"kind": "x"}]},
                 "missing subject",
             ),
+            (
+                {
+                    "schema": OBLIGATIONS_SCHEMA,
+                    "obligations": [
+                        {"kind": "x", "subject": "y", "decision": None}
+                    ],
+                },
+                "decision must be a string",
+            ),
+            (
+                {
+                    "schema": OBLIGATIONS_SCHEMA,
+                    "obligations": [
+                        {"kind": "x", "subject": "y", "cases": [""]}
+                    ],
+                },
+                "cases must be a list of non-blank strings",
+            ),
+            (
+                {
+                    "schema": OBLIGATIONS_SCHEMA,
+                    "obligations": [
+                        {"id": "wrong", "kind": "x", "subject": "y"}
+                    ],
+                },
+                "does not match",
+            ),
+            (
+                {
+                    "schema": OBLIGATIONS_SCHEMA,
+                    "obligations": [{"kind": " ", "subject": "y"}],
+                },
+                "must not be blank",
+            ),
+            (
+                {
+                    "schema": OBLIGATIONS_SCHEMA,
+                    "obligations": [
+                        {"kind": "x", "subject": "y", "decision": " "}
+                    ],
+                },
+                "decision must not be whitespace",
+            ),
+            (
+                {
+                    "schema": OBLIGATIONS_SCHEMA,
+                    "obligations": [
+                        {"kind": "x", "subject": "y", "cases": ["same", "same"]}
+                    ],
+                },
+                "cases must not contain duplicates",
+            ),
         ],
     )
     def test_malformed_files_are_rejected(self, payload, message):
@@ -294,3 +347,10 @@ class TestRoundTrip:
 
         assert json.dumps(suite)  # serialisable
         assert reviewed.unreviewed == ()
+
+    def test_the_guide_never_ships_an_executable_review_placeholder(self):
+        root = Path(__file__).resolve().parent.parent
+        guide = (root / "docs/test-obligations.md").read_text(encoding="utf-8")
+
+        assert '"input": "REVIEW:' not in guide
+        assert "Case inputs are left blank" not in guide

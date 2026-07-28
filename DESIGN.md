@@ -119,10 +119,11 @@ does with a new analysis tool is run it on its own.
 The overlap is the floor. The contribution is `reach` and the diff built on it.
 
 Policy in AgentCore is worth naming precisely, because it is the strongest
-reason an AWS team would ask why this exists. It evaluates Cedar on every
-gateway tool invocation with default-deny and forbid-wins semantics, and its
-Cedar analysis uses automated reasoning to flag policies that always allow or
-always deny. That is real analysis, and it is analysis of one policy at a time.
+reason an AWS team would ask why this exists. It evaluates all applicable
+Cedar policies for every gateway tool invocation with default-deny and
+forbid-wins semantics. Its documented automated analysis flags policy-level
+problems such as policies that always allow or always deny. That is real
+analysis, but it does not model a sequence of individually permitted calls.
 
 Cedar has no notion of a call sequence. "May this principal invoke
 `issue_refund` now" is a different question from "do four individually

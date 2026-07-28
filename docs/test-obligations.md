@@ -51,8 +51,9 @@ nothing.
 
 ## Review
 
-The `decision` field is blank on purpose and the command exits non-zero until
-every row is filled.
+Both `decision` and `cases` are blank on purpose. The command exits non-zero
+until every row maps the authority fact to an application decision and carries
+at least one probe written by a reviewer.
 
 `irreversible on case` is an **authority fact**. `refund_approved` is an
 **application label** somebody chose when designing the router. No parsing
@@ -61,7 +62,8 @@ about someone else's domain. Extract then annotate, the same discipline `scan`
 follows.
 
 Identifiers are stable, so regenerating after a manifest change does not lose
-the mapping work already done.
+the mapping work already done. Dropped authority disappears, while newly
+reachable authority returns as unreviewed and blocks suite generation.
 
 ## Generate
 
@@ -78,7 +80,11 @@ $ mandate obligations mandate.yaml --reviewed reviewed.json --suite > suite.json
     "critical": ["refund_approved"]
   },
   "cases": [
-    {"input": "REVIEW: write a case that reaches refund_approved",
+    {"input": "A customer disputes a duplicate charge of 40 GBP and asks for a refund.",
+     "expected": "refund_approved"},
+    {"input": "A supervisor is asked to approve a 480 GBP goodwill refund.",
+     "expected": "refund_approved"},
+    {"input": "A merchant chargeback for 120 GBP needs a refund decision.",
      "expected": "refund_approved"}
   ]
 }
@@ -89,8 +95,9 @@ obligations become `critical` decisions; approval gates and service principals
 are control concerns rather than consequence classes, so their decisions are
 required but not critical.
 
-Case inputs are left blank. A probe that reaches a decision is a piece of
-domain writing, so the suite ships the shape and leaves the writing.
+Case inputs come from the review file. Authority analysis cannot invent a
+probe that reaches an application decision, and placeholder text would let a
+test runner produce impressive numbers about nothing.
 
 ## What does not cross the bridge
 
@@ -103,3 +110,8 @@ adequacy tool into a job it does not do. Those findings stay in `mandate reach`.
 AgentMandate says what may happen; AgentVerity says whether the evidence is
 repeatable and the contract was exercised. Whether `refund_approved` was the
 correct answer is still yours.
+
+**Tool execution.** Decision coverage shows that the reviewed decision point
+was reached. It does not prove that a downstream refund tool ran or that its
+approval and ceiling controls held. Use `mandate verify` on runtime records for
+that separate claim.
