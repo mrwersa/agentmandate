@@ -252,7 +252,7 @@ ruff check .
 
 ## Status
 
-Alpha, version 0.2.0. The authority model is the part most likely to change,
+Alpha, version 0.3.0. The authority model is the part most likely to change,
 because it has not yet been pointed at enough real tool graphs to know where it
 is too coarse. Issues describing a graph it models badly are the most useful
 thing you can file.

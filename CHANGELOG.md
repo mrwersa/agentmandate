@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.3.0 - 2026-07-28
+
 ### Added
 
 - `mandate obligations` derives reviewable test obligations from the authority
