@@ -116,7 +116,11 @@ makes both harder to reason about.
 question from whether it *may*. This measures permission. The behavioural
 question needs the agent in the loop and belongs in a testing tool.
 
-**Manifest extraction.** Manifests are hand-authored today. An MCP extractor is
-the obvious next piece, and it will only ever get part of the way, because the
-three fields the model needs are exactly the ones a tool schema omits. Expect
-extract-then-annotate, not extract.
+**Inferring the fields that matter.** `mandate scan` reads an MCP catalogue and
+writes the skeleton, which removes the typing. It cannot remove the thinking,
+because the three fields the model needs are exactly the ones a tool schema
+omits. It guesses conservatively, defaults anything that is not clearly a read
+to `irreversible`, and marks every guess `REVIEW`. Extract then annotate, never
+extract and trust. Inferring reversibility from a description with a model was
+considered and rejected: a confident wrong answer about whether an action can be
+undone is worse than no answer.
