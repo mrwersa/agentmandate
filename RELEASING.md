@@ -5,9 +5,9 @@ No long-lived PyPI token is stored in GitHub.
 
 ## One-time PyPI setup
 
-Register a *pending* trusted publisher on PyPI before the first release, since
-the project does not exist there yet. Publishing the first version creates the
-project and promotes it to a normal publisher, so this does not need repeating.
+The trusted publisher was registered for the first release. Publishing that
+version created the project and promoted the pending publisher, so this setup
+does not need repeating.
 
 - PyPI project: `agentmandate`
 - GitHub owner: `mrwersa`
@@ -27,7 +27,7 @@ account plan permits it.
 
    ```bash
    python -m pytest -q
-   python -m pytest -q --cov=agentmandate --cov-fail-under=90
+   python -m pytest -q --cov=agentmandate --cov-fail-under=100
    ruff check .
    python -m pip install build twine
    python -m build

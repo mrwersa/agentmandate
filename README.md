@@ -10,12 +10,26 @@
 
 Analyse what an AI agent is permitted to do, and what changed between two releases.
 
-Agent security scanners check tools one at a time. That catches the tool with no approval gate and the one running as a service account, which is worth catching. It misses the defect where every tool passes review and a legal sequence of them does not.
+Imagine a payment-dispute agent that can open a case and issue a
+human-approved refund. Each refund is capped at 500 GBP per case, and the
+whole run is capped at 500 GBP. Release 2 adds one read-only tool:
+`search_cases`.
 
-AgentMandate answers two questions that need the whole graph:
+That tool spends nothing. It does, however, give the agent more case bindings.
+Two separately valid refunds become reachable, so effective authority rises
+from 500 to 1,000 GBP even though every individual call still looks permitted.
 
-- Is there a legal call sequence that breaches a limit, or that reaches an irreversible effect with no approval? `mandate reach` returns the sequence.
-- Did this release widen what the agent can reach? `mandate diff` compares effective authority, not configuration text.
+![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
+
+AgentMandate builds the tool graph and answers the questions a per-tool check
+cannot:
+
+- **What legal sequence breaks a limit?** `mandate reach` returns the path, not
+  a risk score.
+- **What did this release make possible?** `mandate diff` compares effective
+  authority, not configuration text.
+- **Does runtime evidence match the declaration?** `mandate verify` fails
+  closed when a required control field is absent.
 
 Alpha. Apache-2.0.
 
@@ -25,7 +39,9 @@ Alpha. Apache-2.0.
 pip install "agentmandate[yaml]"
 ```
 
-A payment-dispute agent. Refunds are capped at 500 GBP per case, every refund is gated by human approval, the run limit is 500 GBP, nothing spends a service account. It passes:
+The repository includes that payment-dispute agent. In release 1, refunds are
+capped at 500 GBP per case, every refund requires human approval, the whole run
+is capped at 500 GBP, and nothing spends through a service account. It passes:
 
 ```console
 $ mandate lint examples/dispute-resolver.yaml
@@ -35,7 +51,8 @@ $ mandate reach examples/dispute-resolver.yaml
 no reachable breach within depth 8. 3 tool(s) reachable, most extractable 500 GBP
 ```
 
-Now release v2, which adds one read-only tool so the agent can find existing cases instead of always opening a new one. It reads. It writes nothing. It goes through review as a read-only addition:
+Release 2 adds one read-only tool so the agent can find existing cases instead
+of always opening a new one. A conventional review sees no write effect:
 
 ```yaml
   - name: search_cases
@@ -56,7 +73,9 @@ BREACH  cumulative value 1000 GBP exceeds limit 500 GBP
   4. issue_refund(case#2, 500 GBP)
 ```
 
-The lint is still clean, because no single tool is wrong. The ceiling was measured against a case, and the new tool lets the agent obtain cases at will, so the ceiling now bounds nothing. In CI:
+The lint is still clean because no single tool is wrong. The refund ceiling is
+measured against one case, and the new tool lets the agent obtain fresh cases,
+so the per-case ceiling no longer bounds the whole run. In CI:
 
 ```console
 $ mandate diff examples/dispute-resolver.yaml examples/dispute-resolver-v2.yaml
@@ -69,7 +88,8 @@ verdict: WIDENING
 a widening change needs named review before release
 ```
 
-Exit code 1. The config diff was five lines and read-only. The authority diff was four times the money.
+Exit code 1. The configuration change was read-only. The effective authority
+was not.
 
 ## Why a config diff is not an authority diff
 
@@ -197,6 +217,7 @@ Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none
 - [CONTRIBUTING.md](CONTRIBUTING.md) — branch and review workflow
 - [SECURITY.md](SECURITY.md) — reporting, and what a manifest may contain
 - [STABILITY.md](STABILITY.md) — what is guaranteed before 1.0
+- [ROADMAP.md](ROADMAP.md) — adoption work, planned model extensions, and the path to 1.0
 - [CHANGELOG.md](CHANGELOG.md)
 
 ## Development
@@ -212,4 +233,7 @@ ruff check .
 
 ## Status
 
-Alpha, version 0.1.0. The authority model is the part most likely to change, because it has not yet been pointed at enough real tool graphs to know where it is too coarse. Issues describing a graph it models badly are the most useful thing you can file.
+Alpha, version 0.2.0. The authority model is the part most likely to change,
+because it has not yet been pointed at enough real tool graphs to know where it
+is too coarse. Issues describing a graph it models badly are the most useful
+thing you can file.
