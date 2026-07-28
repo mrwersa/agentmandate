@@ -1,0 +1,36 @@
+{
+  "agent": "dispute-resolver",
+  "obligations": [
+    {
+      "cases": [
+        "A customer disputes a duplicate charge of 40 GBP and asks for a refund."
+      ],
+      "decision": "refund_approved",
+      "id": "irreversible:issue_refund",
+      "kind": "irreversible",
+      "reason": "an irreversible effect is reachable, so some reviewed case should exercise the decision that leads to it",
+      "subject": "issue_refund"
+    },
+    {
+      "cases": [
+        "A supervisor is asked to approve a 480 GBP goodwill refund."
+      ],
+      "decision": "refund_approved",
+      "id": "approval-required:issue_refund",
+      "kind": "approval-required",
+      "reason": "an approval gate is reachable, and a gate no test reaches has never been shown to hold",
+      "subject": "issue_refund"
+    },
+    {
+      "cases": [
+        "A merchant chargeback for 120 GBP needs a refund decision."
+      ],
+      "decision": "refund_approved",
+      "id": "value-bearing:issue_refund",
+      "kind": "value-bearing",
+      "reason": "this call spends value up to 500 GBP, so the decision that authorises it deserves reviewed cases",
+      "subject": "issue_refund"
+    }
+  ],
+  "schema": "agentmandate.obligations/v1"
+}

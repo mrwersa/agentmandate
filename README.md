@@ -30,6 +30,8 @@ cannot:
   authority, not configuration text.
 - **Does runtime evidence match the declaration?** `mandate verify` fails
   closed when a required control field is absent.
+- **What must the tests exercise?** `mandate obligations` turns reachable
+  authority into reviewable test obligations.
 
 Alpha. Apache-2.0.
 
@@ -166,6 +168,7 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate reach` | Bounded search for a legal call sequence that breaches a limit, reported as a counterexample |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing |
+| `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |
 
 Every analysis command takes `--json` and exits non-zero on a finding, so they drop into CI unchanged. `scan` writes a manifest to standard output and is a one-off, not a gate.
 
@@ -194,9 +197,25 @@ does not pass as an empty value.
 
 This is analysis, not enforcement. It runs in CI against a manifest, it does not sit in the request path.
 
-[AgentWard](https://github.com/agentward-ai/agentward) is a runtime proxy that enforces policy on each call and can diff two policy files. [AgentShield](https://github.com/affaan-m/agentshield) scans agent configuration and MCP servers, with a drift gate over scan findings. [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) implements attribute-based access control for tool calls. [OPA](https://www.openpolicyagent.org/docs) and [Cedar](https://docs.cedarpolicy.com/) decide one authorisation at a time.
+| Tool | What it does | Relationship |
+|---|---|---|
+| [Policy in Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html) | Evaluates all applicable Cedar policies for each gateway tool invocation, with default-deny, forbid-wins, and analysis that flags always-allow and always-deny policies | Enforces each invocation. Its documented analysis is policy-level, not a model of a sequence of permitted calls |
+| [AgentWard](https://github.com/agentward-ai/agentward) | Runtime proxy enforcing policy per call, diffs two policy files | Enforces. Diffs declared text rather than reachable authority |
+| [AgentShield](https://github.com/affaan-m/agentshield) | Scans agent configuration and MCP servers, drift gate over findings | Scans. Drift is over finding counts, not permission direction |
+| [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) | Attribute-based access control for tool calls | Enforces |
+| [OPA](https://www.openpolicyagent.org/docs), [Cedar](https://docs.cedarpolicy.com/) | Decide one authorisation at a time | Enforces |
 
-Use those to enforce. AgentMandate complements them by analysing compound sequences and comparing *effective* authority across releases. The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
+Use those to enforce. AgentMandate is the offline half: it analyses sequences of individually permitted calls and compares *effective* authority across releases.
+
+**If you already run AgentCore Policy**, the gap is specific. The policy engine
+answers "may this principal invoke this tool now" by evaluating all applicable
+policies, and its documented analysis catches policy-level problems such as an
+unconditional allow. It does not model whether four separately permitted calls
+compose into a 1,000 GBP breach or whether a release widened what the agent can
+reach. AgentMandate is vendor-neutral and runs in CI before deployment, so it
+complements the gateway rather than duplicating it.
+
+The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
 
 The `lint` command deliberately overlaps the scanners above. A tool that reported only compound findings would need one of them running alongside it to be usable at all.
 
