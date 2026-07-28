@@ -30,6 +30,11 @@ identifiers and real amounts from production runs, so the input file deserves
 the same handling as the traces it came from. Nothing from the trace is written
 back into a report except the tool name, the line number, and the violation.
 
+MCP catalogues passed to `scan` are untrusted input. AgentMandate quotes names
+as YAML scalars and collapses descriptions to one comment line so catalogue
+text cannot add manifest fields. The generated file still requires human
+review because quoting prevents injection, not incorrect annotations.
+
 ## What this tool is not
 
 AgentMandate is static analysis over a declaration. It does not enforce

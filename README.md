@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/agentmandate.svg)](https://pypi.org/project/agentmandate/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/mrwersa/agentmandate/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwersa/agentmandate/actions/workflows/ci.yml)
-[![Coverage: 90%+](https://img.shields.io/badge/coverage-90%25%2B-brightgreen.svg)](#development)
+[![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
 
 Analyse what an AI agent is permitted to do, and what changed between two releases.
@@ -144,8 +144,8 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate scan` | Derives a manifest skeleton from an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
 | `mandate reach` | Bounded search for a legal call sequence that breaches a limit, reported as a counterexample |
-| `mandate diff` | Effective-authority comparison of two manifests, classified widening / narrowing / neutral. `--record` emits a change record |
-| `mandate verify` | Replays recorded tool calls against the manifest and reports where reality exceeded the declaration |
+| `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
+| `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing |
 
 Every analysis command takes `--json` and exits non-zero on a finding, so they drop into CI unchanged. `scan` writes a manifest to standard output and is a one-off, not a gate.
 
@@ -166,6 +166,9 @@ branch, so a change that widens authority stops and gets a named reviewer:
 ```
 
 `verify` is what keeps the rest honest. A manifest nobody checks is a wish, and the declaration drifts from the implementation the moment someone ships a connector change.
+For a spending tool, each trace record must carry the scope, value, currency,
+approval state, and executing principal. Missing or malformed control evidence
+does not pass as an empty value.
 
 ## Where it fits, and what already exists
 
@@ -173,7 +176,7 @@ This is analysis, not enforcement. It runs in CI against a manifest, it does not
 
 [AgentWard](https://github.com/agentward-ai/agentward) is a runtime proxy that enforces policy on each call and can diff two policy files. [AgentShield](https://github.com/affaan-m/agentshield) scans agent configuration and MCP servers, with a drift gate over scan findings. [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) implements attribute-based access control for tool calls. [OPA](https://www.openpolicyagent.org/docs) and [Cedar](https://docs.cedarpolicy.com/) decide one authorisation at a time.
 
-Use those to enforce. The gap AgentMandate fills is the one none of them cover: neither compound sequences nor a diff of *effective* authority across releases. The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
+Use those to enforce. AgentMandate complements them by analysing compound sequences and comparing *effective* authority across releases. The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
 
 The `lint` command deliberately overlaps the scanners above. A tool that reported only compound findings would need one of them running alongside it to be usable at all.
 
@@ -201,7 +204,7 @@ Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none
 ```bash
 python -m pip install -e ".[dev]"
 python -m pytest -q
-python -m pytest -q --cov=agentmandate --cov-fail-under=90
+python -m pytest -q --cov=agentmandate --cov-fail-under=100
 ruff check .
 ```
 

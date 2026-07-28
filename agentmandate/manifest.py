@@ -43,6 +43,14 @@ class ManifestError(ValueError):
     """Raised when a manifest cannot be read as a well-formed mandate."""
 
 
+def _required_name(raw: Any, where: str) -> str:
+    if not isinstance(raw, str) or not raw.strip():
+        raise ManifestError(f"{where} must be a non-empty string")
+    if any(character in raw for character in "\r\n\x00"):
+        raise ManifestError(f"{where} must not contain control characters")
+    return raw
+
+
 @dataclass(frozen=True)
 class Money:
     """An amount in a single currency.
@@ -66,10 +74,15 @@ class Money:
             amount = Decimal(str(raw["amount"]))
         except InvalidOperation as exc:
             raise ManifestError(f"{where}: amount is not a number") from exc
+        if not amount.is_finite():
+            raise ManifestError(f"{where}: amount must be finite")
         if amount < 0:
             raise ManifestError(f"{where}: amount must not be negative")
-        currency = str(raw["currency"]).upper()
-        if len(currency) != 3:
+        raw_currency = raw["currency"]
+        if not isinstance(raw_currency, str):
+            raise ManifestError(f"{where}: currency must be a three-letter code")
+        currency = raw_currency.upper()
+        if len(currency) != 3 or not currency.isascii() or not currency.isalpha():
             raise ManifestError(f"{where}: currency must be a three-letter code")
         return cls(amount=amount, currency=currency)
 
@@ -104,9 +117,7 @@ class Tool:
         where = f"tools[{index}]"
         if not isinstance(raw, dict):
             raise ManifestError(f"{where}: expected a mapping")
-        name = raw.get("name")
-        if not isinstance(name, str) or not name:
-            raise ManifestError(f"{where}: name is required")
+        name = _required_name(raw.get("name"), f"{where}: name")
         where = f"tool {name!r}"
 
         effect = raw.get("effect")
@@ -122,11 +133,15 @@ class Tool:
         requires = raw.get("requires", [])
         if isinstance(requires, str):
             requires = [requires]
-        if not isinstance(requires, list) or not all(isinstance(r, str) for r in requires):
+        if not isinstance(requires, list) or not all(
+            isinstance(scope, str) and scope.strip() for scope in requires
+        ):
             raise ManifestError(f"{where}: requires must be a list of scope names")
 
         produces = raw.get("produces")
-        if produces is not None and not isinstance(produces, str):
+        if produces is not None and (
+            not isinstance(produces, str) or not produces.strip()
+        ):
             raise ManifestError(f"{where}: produces must be a scope name")
 
         ceiling = None
@@ -134,7 +149,9 @@ class Tool:
             ceiling = Money.parse(raw["ceiling"], f"{where}.ceiling")
 
         value_arg = raw.get("value_arg")
-        if value_arg is not None and not isinstance(value_arg, str):
+        if value_arg is not None and (
+            not isinstance(value_arg, str) or not value_arg.strip()
+        ):
             raise ManifestError(f"{where}: value_arg must be an argument name")
         if (value_arg is None) != (ceiling is None):
             raise ManifestError(
@@ -143,7 +160,9 @@ class Tool:
             )
 
         scope_key = raw.get("scope_key")
-        if scope_key is not None and not isinstance(scope_key, str):
+        if scope_key is not None and (
+            not isinstance(scope_key, str) or not scope_key.strip()
+        ):
             raise ManifestError(f"{where}: scope_key must be a scope name")
         if value_arg is not None and scope_key is None:
             raise ManifestError(
@@ -151,17 +170,24 @@ class Tool:
                 "so the analysis knows what the ceiling is measured against"
             )
 
+        unbounded = raw.get("unbounded", False)
+        if not isinstance(unbounded, bool):
+            raise ManifestError(f"{where}: unbounded must be true or false")
+        requires_approval = raw.get("requires_approval", False)
+        if not isinstance(requires_approval, bool):
+            raise ManifestError(f"{where}: requires_approval must be true or false")
+
         return cls(
             name=name,
             effect=effect,
             principal=principal,
             requires=tuple(requires),
             produces=produces,
-            unbounded=bool(raw.get("unbounded", False)),
+            unbounded=unbounded,
             value_arg=value_arg,
             ceiling=ceiling,
             scope_key=scope_key,
-            requires_approval=bool(raw.get("requires_approval", False)),
+            requires_approval=requires_approval,
         )
 
 
@@ -180,7 +206,7 @@ class Limits:
             raise ManifestError("limits: expected a mapping")
         total = Money.parse(raw["total"], "limits.total") if "total" in raw else None
         depth = raw.get("depth", DEFAULT_DEPTH)
-        if not isinstance(depth, int) or depth < 1:
+        if isinstance(depth, bool) or not isinstance(depth, int) or depth < 1:
             raise ManifestError("limits.depth must be a positive integer")
         return cls(total=total, depth=depth)
 
@@ -212,15 +238,13 @@ class Mandate:
             raise ManifestError("manifest: expected a mapping at the top level")
 
         version = raw.get("version", SCHEMA_VERSION)
-        if version != SCHEMA_VERSION:
+        if isinstance(version, bool) or version != SCHEMA_VERSION:
             raise ManifestError(
                 f"manifest: unsupported schema version {version!r}, "
                 f"this build reads version {SCHEMA_VERSION}"
             )
 
-        agent = raw.get("agent")
-        if not isinstance(agent, str) or not agent:
-            raise ManifestError("manifest: agent is required")
+        agent = _required_name(raw.get("agent"), "manifest: agent")
 
         raw_tools = raw.get("tools")
         if not isinstance(raw_tools, list) or not raw_tools:
@@ -242,16 +266,19 @@ class Mandate:
             raise ManifestError("roles: expected a mapping of role name to tools")
         roles: dict[str, tuple[str, ...]] = {}
         for role, members in raw_roles.items():
+            role = _required_name(role, "roles: role name")
             if isinstance(members, str):
                 members = [members]
-            if not isinstance(members, list):
+            if not isinstance(members, list) or not all(
+                isinstance(member, str) and member.strip() for member in members
+            ):
                 raise ManifestError(f"roles.{role}: expected a list of tool names")
             unknown = [m for m in members if m not in seen]
             if unknown:
                 raise ManifestError(
                     f"roles.{role}: unknown tool(s) {', '.join(sorted(unknown))}"
                 )
-            roles[str(role)] = tuple(str(m) for m in members)
+            roles[role] = tuple(members)
 
         identity = raw.get("identity")
         if identity is not None and not isinstance(identity, str):
@@ -276,7 +303,11 @@ def loads(text: str, source: str | None = None) -> Mandate:
     """
     stripped = text.lstrip()
     if stripped.startswith("{"):
-        return Mandate.parse(json.loads(text), source=source)
+        try:
+            raw = json.loads(text)
+        except json.JSONDecodeError as exc:
+            raise ManifestError(f"manifest: invalid JSON: {exc}") from exc
+        return Mandate.parse(raw, source=source)
     try:
         import yaml
     except ImportError as exc:  # pragma: no cover - exercised via the CLI path
@@ -284,7 +315,11 @@ def loads(text: str, source: str | None = None) -> Mandate:
             "reading a YAML manifest needs PyYAML: pip install 'agentmandate[yaml]'. "
             "A JSON manifest works with no extra dependency."
         ) from exc
-    return Mandate.parse(yaml.safe_load(text), source=source)
+    try:
+        raw = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise ManifestError(f"manifest: invalid YAML: {exc}") from exc
+    return Mandate.parse(raw, source=source)
 
 
 def load(path: str | Path) -> Mandate:

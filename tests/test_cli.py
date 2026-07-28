@@ -65,7 +65,10 @@ def test_verify_reports_violations_against_recorded_calls(capsys):
 
 def test_verify_passes_on_a_conformant_record(tmp_path, capsys):
     path = tmp_path / "ok.jsonl"
-    path.write_text('{"tool": "open_case", "scope": "c1"}\n', encoding="utf-8")
+    path.write_text(
+        '{"tool": "open_case", "scope": "c1", "principal": "caller"}\n',
+        encoding="utf-8",
+    )
     assert main(["verify", V1, "--traces", str(path)]) == EXIT_OK
     assert "within the declared mandate" in capsys.readouterr().out
 
@@ -104,6 +107,30 @@ def test_a_malformed_manifest_on_the_diff_path_is_a_usage_error(tmp_path, capsys
     assert "error:" in capsys.readouterr().err
 
 
+def test_diff_of_different_agents_is_a_usage_error(tmp_path, capsys):
+    other = tmp_path / "other.yaml"
+    other.write_text(
+        Path(V1).read_text(encoding="utf-8").replace(
+            "agent: dispute-resolver", "agent: another"
+        ),
+        encoding="utf-8",
+    )
+    assert main(["diff", V1, str(other)]) == EXIT_USAGE
+    assert "cannot compare different agents" in capsys.readouterr().err
+
+
+def test_a_malformed_trace_is_a_usage_error(tmp_path, capsys):
+    path = tmp_path / "bad.jsonl"
+    path.write_text('{"tool": "open_case", "approved": "yes"}\n', encoding="utf-8")
+    assert main(["verify", V1, "--traces", str(path)]) == EXIT_USAGE
+    assert "approved must be true or false" in capsys.readouterr().err
+
+
+def test_a_missing_trace_is_a_usage_error(capsys):
+    assert main(["verify", V1, "--traces", "no-such-trace.jsonl"]) == EXIT_USAGE
+    assert "error:" in capsys.readouterr().err
+
+
 def test_version_is_reported(capsys):
     with pytest.raises(SystemExit) as exit_info:
         main(["--version"])
@@ -123,7 +150,7 @@ CATALOGUE = str(EXAMPLES / "mcp-tools.json")
 def test_scan_emits_a_manifest_skeleton(capsys):
     assert main(["scan", CATALOGUE, "--agent", "dispute-resolver"]) == EXIT_OK
     out = capsys.readouterr().out
-    assert "agent: dispute-resolver" in out
+    assert 'agent: "dispute-resolver"' in out
     assert "REVIEW" in out
 
 
@@ -136,7 +163,7 @@ def test_scan_output_is_a_loadable_manifest(capsys):
 
 def test_scan_defaults_the_agent_name(capsys):
     main(["scan", CATALOGUE])
-    assert "agent: unnamed-agent" in capsys.readouterr().out
+    assert 'agent: "unnamed-agent"' in capsys.readouterr().out
 
 
 def test_scan_reports_a_missing_catalogue(capsys):
@@ -166,3 +193,10 @@ def test_reach_reports_an_ungated_irreversible_path(capsys):
     # The value of this over the lint rule is the route, so the route has to
     # be in the output.
     assert "1. open_case" in out
+
+
+def test_a_non_positive_depth_is_a_usage_error(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(["reach", V2, "--depth", "0"])
+    assert exit_info.value.code == EXIT_USAGE
+    assert "positive integer" in capsys.readouterr().err

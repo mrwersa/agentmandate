@@ -14,9 +14,8 @@ advisory board actually wants.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
 
-from .manifest import Mandate
+from .manifest import EFFECT_RANK, Mandate, Money, Tool
 from .reach import Authority, analyse
 
 WIDENING = "widening"
@@ -137,11 +136,209 @@ def _set_change(
     return changes
 
 
+def _money_change(kind: str, before: Money | None, after: Money | None) -> list[Change]:
+    if before is None and after is None:
+        return []
+    if before is None:
+        return [Change(NARROWING, kind, f"added limit {after}")]
+    if after is None:
+        return [Change(WIDENING, kind, f"removed limit {before}")]
+    if before.currency != after.currency:
+        return [
+            Change(
+                WIDENING,
+                kind,
+                f"currency changed {before.currency} -> {after.currency}; "
+                "amounts are not comparable",
+            )
+        ]
+    if before.amount == after.amount:
+        return []
+    direction = WIDENING if after.amount > before.amount else NARROWING
+    return [
+        Change(
+            direction,
+            kind,
+            f"{before.amount} -> {after.amount} {after.currency}",
+        )
+    ]
+
+
+def _money_quantity_change(
+    kind: str, before: Money | None, after: Money | None
+) -> list[Change]:
+    if before is None and after is None:
+        return []
+    if before is None:
+        return [Change(WIDENING, kind, f"gained {after}")]
+    if after is None:
+        return [Change(NARROWING, kind, f"removed {before}")]
+    if before.currency != after.currency:
+        return [
+            Change(
+                WIDENING,
+                kind,
+                f"currency changed {before.currency} -> {after.currency}; "
+                "amounts are not comparable",
+            )
+        ]
+    if before.amount == after.amount:
+        return []
+    direction = WIDENING if after.amount > before.amount else NARROWING
+    return [
+        Change(
+            direction,
+            kind,
+            f"{before.amount} -> {after.amount} {after.currency}",
+        )
+    ]
+
+
+def _optional_value_change(
+    kind: str, before: str | None, after: str | None
+) -> list[Change]:
+    if before == after:
+        return []
+    if before is None:
+        return [Change(WIDENING, kind, f"added {after}")]
+    if after is None:
+        return [Change(NARROWING, kind, f"removed {before}")]
+    return [
+        Change(
+            WIDENING,
+            kind,
+            f"changed {before} -> {after}; the new scope needs review",
+        )
+    ]
+
+
+def _tool_contract_changes(before: Tool, after: Tool) -> list[Change]:
+    """Compare controls on one reachable tool, independent of graph shape."""
+    changes: list[Change] = []
+    subject = before.name
+
+    if before.effect != after.effect:
+        direction = (
+            WIDENING
+            if EFFECT_RANK[after.effect] > EFFECT_RANK[before.effect]
+            else NARROWING
+        )
+        changes.append(
+            Change(
+                direction,
+                "effect class",
+                f"{subject}: {before.effect} -> {after.effect}",
+            )
+        )
+
+    removed_requirements = set(before.requires) - set(after.requires)
+    added_requirements = set(after.requires) - set(before.requires)
+    for scope in sorted(removed_requirements):
+        changes.append(
+            Change(WIDENING, "precondition", f"{subject}: removed required scope {scope}")
+        )
+    for scope in sorted(added_requirements):
+        changes.append(
+            Change(NARROWING, "precondition", f"{subject}: added required scope {scope}")
+        )
+
+    changes.extend(
+        _optional_value_change(
+            f"produced scope on {subject}", before.produces, after.produces
+        )
+    )
+
+    if before.unbounded != after.unbounded:
+        direction = WIDENING if after.unbounded else NARROWING
+        detail = (
+            "can now mint fresh bindings"
+            if after.unbounded
+            else "can no longer mint fresh bindings"
+        )
+        changes.append(Change(direction, "scope minting", f"{subject}: {detail}"))
+
+    if before.requires_approval != after.requires_approval:
+        direction = NARROWING if after.requires_approval else WIDENING
+        detail = "approval added" if after.requires_approval else "approval removed"
+        changes.append(Change(direction, "approval", f"{subject}: {detail}"))
+
+    if before.scope_key != after.scope_key and (
+        before.ceiling is not None or after.ceiling is not None
+    ):
+        changes.append(
+            Change(
+                WIDENING,
+                "ceiling scope",
+                f"{subject}: changed {before.scope_key or 'none'} -> "
+                f"{after.scope_key or 'none'}; limits are not comparable",
+            )
+        )
+    else:
+        changes.extend(
+            _money_change(f"ceiling on {subject}", before.ceiling, after.ceiling)
+        )
+
+    if before.value_arg != after.value_arg:
+        changes.append(
+            Change(
+                WIDENING,
+                "value argument",
+                f"{subject}: changed {before.value_arg or 'none'} -> "
+                f"{after.value_arg or 'none'}; controls need review",
+            )
+        )
+
+    return changes
+
+
+def _tool_effects(tool: Tool) -> set[str]:
+    scopes = set(tool.requires)
+    if tool.produces is not None:
+        scopes.add(tool.produces)
+    return {f"{tool.effect} on {scope}" for scope in scopes}
+
+
 def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
     """Diff the reachable authority of two mandates."""
-    lhs = analyse(before, depth=depth)
-    rhs = analyse(after, depth=depth)
+    if before.agent != after.agent:
+        raise ValueError(
+            f"cannot compare different agents: {before.agent!r} and {after.agent!r}"
+        )
+
+    comparison_depth = (
+        depth if depth is not None else max(before.limits.depth, after.limits.depth)
+    )
+    lhs = analyse(before, depth=comparison_depth)
+    rhs = analyse(after, depth=comparison_depth)
     changes: list[Change] = []
+
+    if after.limits.depth < before.limits.depth:
+        changes.append(
+            Change(
+                WIDENING,
+                "analysis depth",
+                f"reduced {before.limits.depth} -> {after.limits.depth}; "
+                "future default scans could miss longer paths",
+            )
+        )
+
+    if before.identity != after.identity:
+        if before.identity is None:
+            changes.append(
+                Change(NARROWING, "workload identity", f"declared {after.identity}")
+            )
+        elif after.identity is None:
+            changes.append(
+                Change(WIDENING, "workload identity", f"removed {before.identity}")
+            )
+        else:
+            changes.append(
+                Change(
+                    WIDENING,
+                    "workload identity",
+                    f"changed {before.identity} -> {after.identity}; needs review",
+                )
+            )
 
     changes.extend(_set_change("tool", lhs.reachable_tools, rhs.reachable_tools))
     changes.extend(
@@ -159,26 +356,34 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
         )
     )
 
-    before_effects = frozenset(f"{effect} on {scope}" for effect, scope in lhs.effects)
-    after_effects = frozenset(f"{effect} on {scope}" for effect, scope in rhs.effects)
-    changes.extend(_set_change("effect", before_effects, after_effects))
+    for name in sorted(rhs.reachable_tools - lhs.reachable_tools):
+        tool = after.tool(name)
+        if tool is not None:
+            existing = {f"{effect} on {scope}" for effect, scope in lhs.effects}
+            for effect in sorted(_tool_effects(tool) - existing):
+                changes.append(Change(WIDENING, "effect", f"gained {effect}"))
+    for name in sorted(lhs.reachable_tools - rhs.reachable_tools):
+        tool = before.tool(name)
+        if tool is not None:
+            remaining = {f"{effect} on {scope}" for effect, scope in rhs.effects}
+            for effect in sorted(_tool_effects(tool) - remaining):
+                changes.append(Change(NARROWING, "effect", f"lost {effect}"))
 
-    lhs_max = lhs.max_extractable.amount if lhs.max_extractable else Decimal(0)
-    rhs_max = rhs.max_extractable.amount if rhs.max_extractable else Decimal(0)
-    if rhs_max != lhs_max:
-        currency = (
-            rhs.max_extractable.currency
-            if rhs.max_extractable
-            else (lhs.max_extractable.currency if lhs.max_extractable else "")
+    common_tools = lhs.reachable_tools & rhs.reachable_tools
+    for name in sorted(common_tools):
+        before_tool = before.tool(name)
+        after_tool = after.tool(name)
+        if before_tool is not None and after_tool is not None:
+            changes.extend(_tool_contract_changes(before_tool, after_tool))
+
+    changes.extend(
+        _money_quantity_change(
+            "extractable value", lhs.max_extractable, rhs.max_extractable
         )
-        direction = WIDENING if rhs_max > lhs_max else NARROWING
-        changes.append(
-            Change(
-                direction,
-                "extractable value",
-                f"{lhs_max} -> {rhs_max} {currency}".strip(),
-            )
-        )
+    )
+    changes.extend(
+        _money_change("run limit", before.limits.total, after.limits.total)
+    )
 
     before_breaches = frozenset(b.kind for b in lhs.breaches)
     after_breaches = frozenset(b.kind for b in rhs.breaches)
