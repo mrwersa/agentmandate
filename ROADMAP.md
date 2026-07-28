@@ -7,15 +7,16 @@ runtime proxy or general agent-security scanner.
 
 This is direction, not a release promise.
 
-## Now: trustworthy authority analysis
+## Current foundation: trustworthy authority analysis
 
-Version 0.2 makes the existing gate dependable:
+Version 0.3.1 makes the existing gate dependable:
 
 - fail-closed replay when control evidence is missing
 - tool-contract and run-limit comparison across releases
 - one search depth on both sides of a diff
 - safe ingestion of untrusted MCP catalogues
 - explicit handling of incomparable currencies and different agents
+- reviewed test obligations reconciled against current reachable authority
 
 ## Next: easier adoption
 
@@ -34,6 +35,39 @@ These features overlap with mature CI and security tooling deliberately. The
 new value remains the authority graph and its counterexamples.
 
 ## Then: widen the model where evidence demands it
+
+Do not implement every candidate below in parallel. First collect tool graphs
+from independent users and identify which abstraction forces them to distort a
+real control. Expressiveness increases the search state and the annotation
+burden, so a feature needs a concrete graph and counterexample before it earns
+that cost.
+
+### Bounded scope cardinality
+
+The current `unbounded` flag distinguishes one binding from an unlimited
+source. Real tools often expose a finite collection, such as at most ten cases
+or one refund per transaction. A reviewed `max_bindings` bound is the first
+candidate extension because it sharpens the existing scope model without
+turning the manifest into a full application specification.
+
+Per-customer or relational limits come later. They require resource identity
+and relationships, not another integer placed beside the current type count.
+
+### Resource relationships
+
+Scope counts deliberately forget which customer owns a case or whether two
+bindings refer to the same object. If real graphs show that this creates false
+or missed paths, add a small reviewed relation vocabulary and preserve binding
+provenance through tool transitions. Do not jump directly to arbitrary
+preconditions and postconditions.
+
+### Non-monetary effect budgets
+
+Some authority limits count irreversible actions rather than currency, such as
+accounts closed, credentials rotated, or external messages sent. Generalise
+the current cumulative-value mechanism only when those limits share a clear,
+reviewable accumulation rule. Confidentiality and data flow remain a separate
+model rather than being disguised as a numeric budget.
 
 ### Data-flow reachability
 

@@ -30,7 +30,7 @@ whole run is capped at 500 GBP. Release 2 adds one read-only tool:
 
 That tool spends nothing. It does, however, let the agent get hold of more
 cases, and the 500 GBP cap is measured *per case*. Two separately valid refunds
-become possible, so reachable extraction doubles to 1,000 GBP
+become reachable under the manifest, so reachable extraction doubles to 1,000 GBP
 while every individual call still looks permitted.
 
 ![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
@@ -235,6 +235,10 @@ The `lint` command deliberately overlaps the scanners above. A tool that reporte
 
 ## Scope
 
+Read every finding as **permitted by the reviewed manifest within this bounded
+abstraction**. It is not proof that the model will choose the path or that an
+undeclared downstream invariant will accept it.
+
 What this does not do, on purpose:
 
 - **No enforcement.** No proxy, no runtime interception, no blocking.
@@ -266,7 +270,7 @@ ruff check .
 
 ## Status
 
-Alpha, version 0.3.0. The authority model is the part most likely to change,
+Alpha, version 0.3.1. The authority model is the part most likely to change,
 because it has not yet been pointed at enough real tool graphs to know where it
 is too coarse. Issues describing a graph it models badly are the most useful
 thing you can file.
