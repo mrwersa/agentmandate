@@ -20,7 +20,8 @@ offline, so it catches the gaps that only appear across a sequence.
 |---|---|
 | Cedar, OPA, AgentCore Policy, AgentWard | May this agent make this call, right now? |
 | **AgentMandate** | **What can it reach by combining permitted calls, and did this release widen that?** |
-| Your tests, [AgentVerity](https://github.com/mrwersa/agentverity) | Does it actually behave that way when you run it? |
+| [AgentVerity](https://github.com/mrwersa/agentverity) | Were the reviewed decision routes exercised repeatably? |
+| Your tests and runtime traces | Did the tools execute and the declared controls hold? |
 
 Imagine a payment-dispute agent that can open a case and issue a
 human-approved refund. Each refund is capped at 500 GBP per case, and the
@@ -29,7 +30,7 @@ whole run is capped at 500 GBP. Release 2 adds one read-only tool:
 
 That tool spends nothing. It does, however, let the agent get hold of more
 cases, and the 500 GBP cap is measured *per case*. Two separately valid refunds
-become possible, so what the agent can actually extract doubles to 1,000 GBP
+become possible, so reachable extraction doubles to 1,000 GBP
 while every individual call still looks permitted.
 
 ![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
