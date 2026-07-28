@@ -1,6 +1,6 @@
 # AgentMandate
 
-> **Compound-path and cross-release analysis of what an AI agent is permitted to do.**
+> **What is your AI agent actually allowed to do?**
 
 [![PyPI](https://img.shields.io/pypi/v/agentmandate.svg)](https://pypi.org/project/agentmandate/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
@@ -8,16 +8,30 @@
 [![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
 
-Analyse what an AI agent is permitted to do, and what changed between two releases.
+A Python library and CLI that reads a short description of your agent's tools,
+called a **manifest**, and finds the limits it can slip past by combining
+actions that are each permitted on their own. It also tells you when a release
+widened what the agent can reach, before that release ships.
+
+Policy engines decide one call at a time. This looks at the whole tool graph
+offline, so it catches the gaps that only appear across a sequence.
+
+| What you run | Question it answers |
+|---|---|
+| Cedar, OPA, AgentCore Policy, AgentWard | May this agent make this call, right now? |
+| **AgentMandate** | **What can it reach by combining permitted calls, and did this release widen that?** |
+| [AgentVerity](https://github.com/mrwersa/agentverity) | Were the reviewed decision routes exercised repeatably? |
+| Your tests and runtime traces | Did the tools execute and the declared controls hold? |
 
 Imagine a payment-dispute agent that can open a case and issue a
 human-approved refund. Each refund is capped at 500 GBP per case, and the
 whole run is capped at 500 GBP. Release 2 adds one read-only tool:
 `search_cases`.
 
-That tool spends nothing. It does, however, give the agent more case bindings.
-Two separately valid refunds become reachable, so effective authority rises
-from 500 to 1,000 GBP even though every individual call still looks permitted.
+That tool spends nothing. It does, however, let the agent get hold of more
+cases, and the 500 GBP cap is measured *per case*. Two separately valid refunds
+become possible, so reachable extraction doubles to 1,000 GBP
+while every individual call still looks permitted.
 
 ![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
 
