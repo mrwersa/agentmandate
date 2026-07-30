@@ -63,6 +63,24 @@ That is the correct outcome rather than an inconvenience. The trace genuinely
 does not establish that the approval held, so reporting a pass would be a
 claim the evidence never supported.
 
+## What is not replayed, and why
+
+Three kinds of span are deliberately excluded, because including them produces
+a ceiling breach that never happened. A gate that cries wolf gets switched off,
+so a false positive costs more here than a missed finding.
+
+| Excluded | Reason |
+|---|---|
+| A span whose `gen_ai.operation.name` is anything other than `execute_tool` | Instrumentations often attach `gen_ai.tool.name` to the **chat** span that requested the call. Counting it doubles the value of one refund |
+| A span whose status is an error | A call that errored did not produce the effect a mandate governs |
+| A repeat of a `gen_ai.tool.call.id` already seen | One call instrumented at both client and server is one call |
+
+Each is counted and reported rather than silently dropped.
+
+One residual risk cannot be settled from a trace: a call that timed out **after**
+its write landed looks identical to one that never took effect. If that matters
+for a control, the effect needs its own record, not a span.
+
 ## The counts are part of the result
 
 The summary prints before the verdict for a reason. Three observations

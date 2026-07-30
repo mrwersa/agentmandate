@@ -289,3 +289,111 @@ class TestAttributeEdgeCases:
             {"key": "app.case.id", "value": {"bytesValue": "x"}}]})
         result = convert(payload, {"scope": "app.case.id"})
         assert result.observations[0].scope is None
+
+
+class TestFalseBreachesAreTheFailureThatMatters:
+    """Every defect in this class produced a ceiling breach that never
+    happened. A gate that cries wolf gets switched off, so a false positive
+    costs more than a missed finding here."""
+
+    def test_a_chat_span_carrying_a_tool_name_is_not_an_execution(self):
+        """Instrumentations commonly attach the tool name to the LLM span
+        that REQUESTED the call. Counting it doubles the value."""
+        payload = doc(
+            {"name": "chat", "startTimeUnixNano": "100", "attributes": [
+                attr("gen_ai.operation.name", "chat"),
+                attr("gen_ai.tool.name", "issue_refund"),
+                attr("app.amount", "500")]},
+            tool("issue_refund", 200, [attr("app.amount", "500")]),
+        )
+        result = convert(payload, {"value": "app.amount"})
+
+        assert result.tool_spans == 1
+        assert [str(o.value) for o in result.observations] == ["500"]
+
+    def test_an_explicit_operation_is_authoritative_over_a_tool_name(self):
+        payload = doc({"name": "x", "startTimeUnixNano": "100", "attributes": [
+            attr("gen_ai.operation.name", "invoke_agent"),
+            attr("gen_ai.tool.name", "issue_refund")]})
+        assert convert(payload).observations == ()
+
+    def test_a_failed_call_does_not_spend_budget(self):
+        """A refund that timed out moved no money. Replaying its value would
+        report a breach that did not happen."""
+        payload = doc(
+            {"name": "e", "startTimeUnixNano": "100",
+             "status": {"code": "STATUS_CODE_ERROR", "message": "timeout"},
+             "attributes": [attr("gen_ai.operation.name", "execute_tool"),
+                            attr("gen_ai.tool.name", "issue_refund"),
+                            attr("app.amount", "500")]})
+        result = convert(payload, {"value": "app.amount"})
+
+        assert result.observations == ()
+        assert result.failed == 1
+        assert "did not produce the effect" in result.summary
+
+    @pytest.mark.parametrize("code", ["STATUS_CODE_ERROR", 2, "2"])
+    def test_error_status_is_recognised_in_either_encoding(self, code):
+        payload = doc({"name": "e", "startTimeUnixNano": "100",
+                       "status": {"code": code},
+                       "attributes": [attr("gen_ai.tool.name", "t")]})
+        assert convert(payload).failed == 1
+
+    @pytest.mark.parametrize("code", ["STATUS_CODE_OK", "STATUS_CODE_UNSET", 0, 1])
+    def test_a_successful_or_unset_status_is_replayed(self, code):
+        payload = doc({"name": "e", "startTimeUnixNano": "100",
+                       "status": {"code": code},
+                       "attributes": [attr("gen_ai.tool.name", "t")]})
+        assert len(convert(payload).observations) == 1
+
+    def test_one_call_instrumented_twice_is_collapsed_by_call_id(self):
+        """A client span and a server span for the same call share the tool
+        call id and are one logical call."""
+        def span(start):
+            return tool("issue_refund", start, [
+                attr("gen_ai.tool.call.id", "call_abc"),
+                attr("app.amount", "500")])
+        result = convert(doc(span(100), span(110)), {"value": "app.amount"})
+
+        assert len(result.observations) == 1
+        assert result.duplicates == 1
+        assert "collapsed by" in result.summary
+
+    def test_distinct_call_ids_are_kept_as_separate_calls(self):
+        payload = doc(
+            tool("issue_refund", 100, [attr("gen_ai.tool.call.id", "a")]),
+            tool("issue_refund", 200, [attr("gen_ai.tool.call.id", "b")]),
+        )
+        result = convert(payload)
+        assert len(result.observations) == 2
+        assert result.duplicates == 0
+
+    def test_calls_without_an_id_are_never_collapsed(self):
+        """Two genuine refunds with no call id must stay two refunds."""
+        payload = doc(tool("issue_refund", 100), tool("issue_refund", 200))
+        result = convert(payload)
+
+        assert len(result.observations) == 2
+        assert result.duplicates == 0
+
+    def test_the_first_of_a_duplicate_pair_is_the_one_kept(self):
+        payload = doc(
+            tool("issue_refund", 100, [attr("gen_ai.tool.call.id", "a"),
+                                       attr("app.amount", "500")]),
+            tool("issue_refund", 200, [attr("gen_ai.tool.call.id", "a"),
+                                       attr("app.amount", "999")]),
+        )
+        result = convert(payload, {"value": "app.amount"})
+        assert [str(o.value) for o in result.observations] == ["500"]
+
+
+def test_a_span_with_no_operation_and_no_tool_name_is_ignored():
+    """Not every span in a trace is a GenAI span at all. An HTTP or database
+    span carries neither attribute and must pass through untouched."""
+    payload = doc({"name": "GET /health", "startTimeUnixNano": "100",
+                   "attributes": [attr("http.route", "/health")]})
+    result = convert(payload)
+
+    assert result.observations == ()
+    assert result.total_spans == 1
+    assert result.tool_spans == 0

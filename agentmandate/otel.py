@@ -39,6 +39,9 @@ TOOL_OP = "execute_tool"
 TOOL_NAME_ATTR = "gen_ai.tool.name"
 TOOL_CALL_ID_ATTR = "gen_ai.tool.call.id"
 
+# OTLP encodes span status as either the enum name or its ordinal.
+ERROR_STATUS = {"STATUS_CODE_ERROR", 2, "2"}
+
 # Fields a mandate needs that no GenAI convention supplies. Each must be
 # pointed at an attribute by the caller, or it stays absent.
 MAPPABLE = ("scope", "value", "currency", "principal", "approved")
@@ -103,6 +106,8 @@ class Conversion:
     total_spans: int
     tool_spans: int
     unmapped: tuple[str, ...]
+    failed: int = 0
+    duplicates: int = 0
 
     @property
     def summary(self) -> str:
@@ -110,6 +115,19 @@ class Conversion:
             f"read {self.total_spans} span(s), {self.tool_spans} tool call(s), "
             f"{len(self.observations)} observation(s)"
         ]
+        if self.failed:
+            lines.append(
+                f"  {self.failed} tool call(s) failed and were not replayed. "
+                "A call that errored did not produce the effect a mandate "
+                "governs, so counting its value would report a breach that "
+                "did not happen."
+            )
+        if self.duplicates:
+            lines.append(
+                f"  {self.duplicates} duplicate span(s) collapsed by "
+                f"{TOOL_CALL_ID_ATTR}. One call instrumented at both client "
+                "and server is one call."
+            )
         if self.unmapped:
             lines.append(
                 "  no attribute mapped for: " + ", ".join(self.unmapped)
@@ -139,19 +157,43 @@ def convert(payload: Any, mapping: dict[str, str] | None = None) -> Conversion:
 
     spans = iter_spans(payload)
     tool_spans = []
+    failed = 0
+    duplicates = 0
+    seen_call_ids: set[str] = set()
     for index, span in enumerate(spans):
         attrs = attributes(span)
         name = attrs.get(TOOL_NAME_ATTR)
-        # Accept either the operation marker or a bare tool name, because
-        # exporters vary in whether they set the operation on tool spans.
-        is_tool = attrs.get(OP_ATTR) == TOOL_OP or bool(name)
-        if not is_tool:
+        operation = attrs.get(OP_ATTR)
+        if operation is not None:
+            # An explicit operation is authoritative. Instrumentations often
+            # attach the tool name to the chat span that REQUESTED the call,
+            # and treating that as an execution double-counts its value and
+            # reports a ceiling breach that never happened.
+            if operation != TOOL_OP:
+                continue
+        elif not name:
+            # No operation attribute at all, so fall back to a bare tool name.
             continue
         if not isinstance(name, str) or not name.strip():
             raise TraceError(
                 f"a span marked {TOOL_OP} has no {TOOL_NAME_ATTR}. "
                 "The tool cannot be identified, so the call cannot be checked."
             )
+        status = span.get("status") or {}
+        if isinstance(status, dict) and status.get("code") in ERROR_STATUS:
+            # The call did not have its effect, so replaying its value would
+            # spend budget nothing spent. The residual risk is a call that
+            # timed out after the write landed, which no trace can settle.
+            failed += 1
+            continue
+
+        call_id = attrs.get(TOOL_CALL_ID_ATTR)
+        if isinstance(call_id, str) and call_id:
+            if call_id in seen_call_ids:
+                duplicates += 1
+                continue
+            seen_call_ids.add(call_id)
+
         start = span.get("startTimeUnixNano")
         try:
             order = int(start)
@@ -188,6 +230,8 @@ def convert(payload: Any, mapping: dict[str, str] | None = None) -> Conversion:
         total_spans=len(spans),
         tool_spans=len(tool_spans),
         unmapped=unmapped,
+        failed=failed,
+        duplicates=duplicates,
     )
 
 

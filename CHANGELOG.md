@@ -25,6 +25,12 @@ All notable changes to this project are documented here. The format follows
   inspection, and re-running them through `--traces` gives identical results.
 - Spans are ordered by start time, because cumulative ceilings accumulate in
   call order rather than collector write order.
+- Spans that would produce a false ceiling breach are excluded and counted: a
+  span whose operation is not `execute_tool` even when it carries a tool name,
+  a span whose status is an error, and a repeat of a `gen_ai.tool.call.id`
+  already seen. Instrumentations commonly attach the tool name to the chat
+  span that requested the call, an errored call produced no effect, and one
+  call instrumented at both client and server is one call.
 - `docs/traces.md` and a runnable `examples/otel-trace.json`.
 
 ### Changed
