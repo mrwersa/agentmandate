@@ -6,6 +6,8 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
 
 from . import __version__
 from .diff import compare
@@ -17,6 +19,7 @@ from .obligations import (
     reconcile,
     to_decision_suite,
 )
+from .otel import MAPPABLE, TraceError, load_trace, parse_mapping
 from .reach import analyse
 from .scan import scan_file
 from .scenarios import (
@@ -25,7 +28,7 @@ from .scenarios import (
     reconcile_scenarios,
     save_scenarios,
 )
-from .verify import replay_file
+from .verify import replay, replay_file
 
 EXIT_OK = 0
 EXIT_FINDING = 1
@@ -130,8 +133,30 @@ def build_parser() -> argparse.ArgumentParser:
         "verify", help="replay recorded calls against the manifest"
     )
     _add_manifest(verify_parser)
+    # Exactly one source, so a run can never silently verify the wrong file.
+    verify_source = verify_parser.add_mutually_exclusive_group(required=True)
+    verify_source.add_argument(
+        "--traces", help="JSON Lines file of observed tool calls"
+    )
+    verify_source.add_argument(
+        "--otel", help="OTLP JSON trace, converted to observations before replay"
+    )
     verify_parser.add_argument(
-        "--traces", required=True, help="JSON Lines file of observed tool calls"
+        "--map",
+        dest="mapping",
+        action="append",
+        default=None,
+        metavar="FIELD=ATTRIBUTE",
+        help=(
+            "where a control field lives in the trace, for example "
+            "scope=app.case.id. repeatable. fields: "
+            + ", ".join(MAPPABLE)
+        ),
+    )
+    verify_parser.add_argument(
+        "--emit",
+        default=None,
+        help="write the converted observations here, for inspection",
     )
     verify_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
@@ -145,6 +170,26 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     return parser
+
+
+def _observation_to_dict(observation: Any) -> dict:
+    """Render one observation back to the replay format, omitting absences.
+
+    An absent field must stay absent rather than becoming null, so the emitted
+    file means exactly what the trace supported.
+    """
+    record: dict[str, Any] = {"tool": observation.tool}
+    if observation.scope is not None:
+        record["scope"] = observation.scope
+    if observation.value is not None:
+        record["value"] = str(observation.value)
+    if observation.currency is not None:
+        record["currency"] = observation.currency
+    if observation.principal is not None:
+        record["principal"] = observation.principal
+    if observation.approved:
+        record["approved"] = True
+    return record
 
 
 def _emit(payload: dict, as_json: bool, text: str) -> None:
@@ -277,8 +322,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_FINDING if delta.widened else EXIT_OK
 
     try:
-        conformance = replay_file(mandate, args.traces)
-    except (OSError, ValueError) as exc:
+        if args.otel:
+            conversion = load_trace(args.otel, parse_mapping(args.mapping))
+            # Printed before the verdict, because two observations recovered
+            # from four hundred spans is usually a mapping mistake, and a
+            # clean report on almost no evidence should not read as success.
+            if not args.json:
+                print(conversion.summary)
+                print()
+            if args.emit:
+                Path(args.emit).write_text(
+                    "".join(
+                        json.dumps(_observation_to_dict(o)) + "\n"
+                        for o in conversion.observations
+                    ),
+                    encoding="utf-8",
+                )
+            conformance = replay(mandate, list(conversion.observations))
+        else:
+            conformance = replay_file(mandate, args.traces)
+    except (OSError, ValueError, TraceError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     _emit(conformance.as_dict(), args.json, conformance.render())

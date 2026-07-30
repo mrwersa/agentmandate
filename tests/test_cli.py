@@ -325,3 +325,72 @@ def test_a_malformed_reviewed_file_is_a_usage_error(tmp_path, capsys):
 
     assert main(["obligations", V1, "--reviewed", str(bad)]) == EXIT_USAGE
     assert "cannot load obligations" in capsys.readouterr().err
+
+
+OTEL = str(EXAMPLES / "otel-trace.json")
+OTEL_MAP = [
+    "--map", "scope=app.case.id", "--map", "value=app.refund.amount",
+    "--map", "currency=app.currency", "--map", "approved=app.approved",
+    "--map", "principal=app.principal",
+]
+
+
+def test_verify_reads_an_otel_trace_directly(capsys):
+    assert main(["verify", V1, "--otel", OTEL, *OTEL_MAP]) == EXIT_FINDING
+    out = capsys.readouterr().out
+    assert "3 tool call(s)" in out
+    assert "ceiling_exceeded" in out
+
+
+def test_the_conversion_summary_precedes_the_verdict(capsys):
+    """Two observations recovered from four hundred spans is usually a
+    mapping mistake, and a clean report on almost no evidence should not
+    read as success."""
+    main(["verify", V1, "--otel", OTEL, *OTEL_MAP])
+    out = capsys.readouterr().out
+    assert out.index("read 5 span(s)") < out.index("replayed")
+
+
+def test_an_unmapped_trace_fails_closed_and_says_which_fields(capsys):
+    assert main(["verify", V1, "--otel", OTEL]) == EXIT_FINDING
+    out = capsys.readouterr().out
+    assert "no attribute mapped for" in out
+    assert "missing_principal" in out
+
+
+def test_emit_round_trips_to_the_plain_replay_format(tmp_path, capsys):
+    out_path = tmp_path / "observed.jsonl"
+    main(["verify", V1, "--otel", OTEL, *OTEL_MAP, "--emit", str(out_path)])
+    capsys.readouterr()
+
+    lines = [json.loads(x) for x in out_path.read_text().splitlines()]
+    assert [row["tool"] for row in lines] == ["open_case", "issue_refund", "issue_refund"]
+    # an absent field stays absent rather than becoming null
+    assert "value" not in lines[0]
+
+    assert main(["verify", V1, "--traces", str(out_path)]) == EXIT_FINDING
+    assert "ceiling_exceeded" in capsys.readouterr().out
+
+
+def test_a_trace_and_a_jsonl_file_cannot_both_be_given():
+    with pytest.raises(SystemExit) as exit_info:
+        main(["verify", V1, "--traces", TRACES, "--otel", OTEL])
+    assert exit_info.value.code == EXIT_USAGE
+
+
+def test_one_source_is_required():
+    with pytest.raises(SystemExit) as exit_info:
+        main(["verify", V1])
+    assert exit_info.value.code == EXIT_USAGE
+
+
+def test_a_malformed_trace_file_is_a_usage_error(tmp_path, capsys):
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json", encoding="utf-8")
+    assert main(["verify", V1, "--otel", str(bad)]) == EXIT_USAGE
+    assert "cannot load trace" in capsys.readouterr().err
+
+
+def test_a_malformed_mapping_is_a_usage_error(capsys):
+    assert main(["verify", V1, "--otel", OTEL, "--map", "nonsense"]) == EXIT_USAGE
+    assert "malformed mapping" in capsys.readouterr().err

@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- `mandate verify --otel trace.json` reads OpenTelemetry traces directly.
+  `verify` is the command that keeps a manifest honest and it previously
+  needed a bespoke JSON Lines file nobody had, while every team already has
+  traces.
+- `gen_ai.operation.name`, `gen_ai.tool.name`, and span start time are read
+  automatically. The fields a mandate needs that no GenAI convention carries,
+  which are scope, value, currency, principal, and approval, each require an
+  explicit `--map`. Nothing is guessed.
+- An unmapped trace fails closed and names the fields, because a trace that
+  does not record the approval has not established that the approval held.
+- The conversion summary prints before the verdict. Three observations
+  recovered from four hundred spans is usually a mapping mistake, and a clean
+  report over almost no evidence should not read as success.
+- `--emit` writes the converted observations in the plain replay format for
+  inspection, and re-running them through `--traces` gives identical results.
+- Spans are ordered by start time, because cumulative ceilings accumulate in
+  call order rather than collector write order.
+- `docs/traces.md` and a runnable `examples/otel-trace.json`.
+
+### Changed
+
+- `verify` now requires exactly one of `--traces` or `--otel`, so a run cannot
+  silently verify a different file from the one intended.
+
 ## 0.4.0 - 2026-07-30
 
 ### Added
