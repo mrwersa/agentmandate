@@ -104,7 +104,11 @@ test runner produce impressive numbers about nothing.
 **Compound breaches.** A cumulative-value path is a multi-call sequence —
 open a case, refund, open another, refund again. That is scenario testing, not
 decision coverage, and pushing it into a decision suite would drag a test
-adequacy tool into a job it does not do. Those findings stay in `mandate reach`.
+adequacy tool into a job it does not do. Those findings stay out of the
+decision suite. Use `mandate scenarios` to preserve the static witness as a
+neutral scenario skeleton, then supply the environment, agent input, and
+expected control boundary by human review. See the
+[evaluation-loop guide](evaluation-loop.md).
 
 **Correctness.** Neither tool judges whether a decision was right.
 AgentMandate says what may happen; AgentVerity says whether the evidence is

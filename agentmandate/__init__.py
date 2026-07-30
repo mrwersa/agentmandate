@@ -13,7 +13,7 @@ against the declaration, so it is usable without another tool alongside it.
 
 from __future__ import annotations
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 from .diff import Change, Delta, compare
 from .lint import Finding, check
@@ -29,6 +29,16 @@ from .obligations import (
 )
 from .reach import Authority, Breach, Step, analyse
 from .scan import Proposal, propose, render, scan_file
+from .scenarios import (
+    SCENARIOS_SCHEMA,
+    Scenario,
+    ScenarioSet,
+    ScenarioStep,
+    derive_scenarios,
+    load_scenarios,
+    reconcile_scenarios,
+    save_scenarios,
+)
 from .verify import Conformance, Observation, Violation, replay, replay_file
 
 __all__ = [
@@ -46,6 +56,10 @@ __all__ = [
     "ObligationSet",
     "Observation",
     "Proposal",
+    "SCENARIOS_SCHEMA",
+    "Scenario",
+    "ScenarioSet",
+    "ScenarioStep",
     "Step",
     "Tool",
     "Violation",
@@ -53,15 +67,19 @@ __all__ = [
     "analyse",
     "check",
     "derive",
+    "derive_scenarios",
     "compare",
     "load",
     "load_obligations",
+    "load_scenarios",
     "loads",
     "save_obligations",
+    "save_scenarios",
     "to_decision_suite",
     "propose",
     "render",
     "replay",
     "replay_file",
+    "reconcile_scenarios",
     "scan_file",
 ]

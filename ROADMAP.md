@@ -18,6 +18,11 @@ Version 0.3.2 makes the existing gate dependable:
 - explicit handling of incomparable currencies and different agents
 - reviewed test obligations reconciled against current reachable authority
 
+## In progress: evaluation-loop bridge
+
+- neutral scenario skeletons derived from compound counterexample paths, with
+  application input, environment, and expected control left for human review
+
 ## Next: easier adoption
 
 1. **Framework inventory adapters.** Import tool catalogues from common agent
@@ -33,6 +38,10 @@ Version 0.3.2 makes the existing gate dependable:
 
 These features overlap with mature CI and security tooling deliberately. The
 new value remains the authority graph and its counterexamples.
+
+The scenario exporter is the first evaluation-loop bridge. Keep execution in
+the team's existing harness. The next adoption work should make manifests and
+traces easier to obtain, not add a bundled judge or scenario runner.
 
 ## Then: widen the model where evidence demands it
 

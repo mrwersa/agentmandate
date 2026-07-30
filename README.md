@@ -46,6 +46,8 @@ cannot:
   closed when a required control field is absent.
 - **What must the tests exercise?** `mandate obligations` turns reachable
   authority into reviewable test obligations.
+- **Which compound risks need scenarios?** `mandate scenarios` preserves each
+  counterexample as a neutral test skeleton without inventing an agent prompt.
 
 Alpha. Apache-2.0.
 
@@ -183,6 +185,7 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing |
 | `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |
+| `mandate scenarios` | Exports reachable breach paths with blank environment, agent-input, and expected-control fields for human review and execution by an external evaluation harness |
 
 Every analysis command takes `--json` and exits non-zero on a finding, so they drop into CI unchanged. `scan` writes a manifest to standard output and is a one-off, not a gate.
 
@@ -206,6 +209,28 @@ branch, so a change that widens authority stops and gets a named reviewer:
 For a spending tool, each trace record must carry the scope, value, currency,
 approval state, and executing principal. Missing or malformed control evidence
 does not pass as an empty value.
+
+## From authority to evaluation
+
+AgentMandate produces two different test inputs:
+
+- `obligations` names consequential decision points that reviewed bounded
+  decision tests should reach
+- `scenarios` preserves compound counterexample paths that a multi-step
+  scenario test should attempt
+
+It does not execute either test. Promptfoo, LangSmith, AgentCore Evaluations,
+pytest, or an internal harness owns behaviour and outcome grading. AgentVerity
+can qualify the repeated bounded decisions after correctness passes.
+
+```text
+reachability -> reviewed obligations and scenarios -> external evaluation
+      ^                                               |
+      |                                               v
+manifest <- reviewed production incidents <- runtime policy and traces
+```
+
+[Read the complete evaluation-loop workflow](docs/evaluation-loop.md).
 
 ## Where it fits, and what already exists
 
@@ -251,6 +276,8 @@ Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none
 ## Documentation
 
 - [DESIGN.md](DESIGN.md) — the authority model, why the search is shaped this way, and what was left out
+- [docs/evaluation-loop.md](docs/evaluation-loop.md) — how authority analysis, scenario evaluation, runtime policy, and production feedback remain distinct
+- [docs/test-obligations.md](docs/test-obligations.md) — decision-point obligations and the AgentVerity bridge
 - [CONTRIBUTING.md](CONTRIBUTING.md) — branch and review workflow
 - [SECURITY.md](SECURITY.md) — reporting, and what a manifest may contain
 - [STABILITY.md](STABILITY.md) — what is guaranteed before 1.0
@@ -270,7 +297,7 @@ ruff check .
 
 ## Status
 
-Alpha, version 0.3.2. The authority model is the part most likely to change,
+Alpha, version 0.4.0. The authority model is the part most likely to change,
 because it has not yet been pointed at enough real tool graphs to know where it
 is too coarse. Issues describing a graph it models badly are the most useful
 thing you can file.

@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.4.0 - 2026-07-30
+
+### Added
+
+- `mandate scenarios` exports each reachable breach as a versioned, structured
+  scenario-test skeleton. It preserves the counterexample while leaving the
+  environment, agent input, and expected control boundary for human review.
+- Reviewed scenario fields reconcile against the current reachable witnesses.
+  Disappearing paths are removed and newly reachable paths return unreviewed.
+- An evaluation-loop guide separates permitted reachability, observed agent
+  behaviour, per-call enforcement, and runtime conformance.
+
+### Changed
+
+- The README and test-obligation guide connect decision-point obligations to
+  AgentVerity and compound paths to external scenario evaluators without
+  turning AgentMandate into a runner.
+
 ## 0.3.2 - 2026-07-28
 
 ### Changed
