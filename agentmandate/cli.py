@@ -19,6 +19,12 @@ from .obligations import (
 )
 from .reach import analyse
 from .scan import scan_file
+from .scenarios import (
+    derive_scenarios,
+    load_scenarios,
+    reconcile_scenarios,
+    save_scenarios,
+)
 from .verify import replay_file
 
 EXIT_OK = 0
@@ -100,6 +106,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="an obligations file whose decisions have been filled in",
     )
 
+    scenarios_parser = subparsers.add_parser(
+        "scenarios",
+        help="export reachable breaches as reviewed scenario-test skeletons",
+    )
+    _add_manifest(scenarios_parser)
+    scenarios_parser.add_argument("--depth", type=_positive_int, default=None)
+    scenarios_parser.add_argument(
+        "--json", action="store_true", help="machine-readable output"
+    )
+    scenarios_parser.add_argument(
+        "--reviewed",
+        default=None,
+        help="a scenario file whose application-specific fields were reviewed",
+    )
+    scenarios_parser.add_argument(
+        "--output",
+        default=None,
+        help="write the reconciled JSON scenario skeleton to this path",
+    )
+
     verify_parser = subparsers.add_parser(
         "verify", help="replay recorded calls against the manifest"
     )
@@ -170,6 +196,31 @@ def main(argv: Sequence[str] | None = None) -> int:
             return EXIT_OK
         _emit(obligations.to_dict(), args.json, obligations.render())
         return EXIT_FINDING if obligations.unreviewed else EXIT_OK
+
+    if args.command == "scenarios":
+        scenarios = derive_scenarios(mandate, depth=args.depth)
+        if args.reviewed:
+            try:
+                scenarios = reconcile_scenarios(
+                    scenarios,
+                    load_scenarios(args.reviewed),
+                )
+            except ValueError as exc:
+                print(f"error: {exc}", file=sys.stderr)
+                return EXIT_USAGE
+        if args.output:
+            try:
+                save_scenarios(scenarios, args.output)
+            except OSError as exc:
+                print(f"error: cannot write scenarios: {exc}", file=sys.stderr)
+                return EXIT_USAGE
+            print(
+                f"wrote {len(scenarios.scenarios)} scenario(s) to {args.output}; "
+                f"{len(scenarios.unreviewed)} need review"
+            )
+        else:
+            _emit(scenarios.to_dict(), args.json, scenarios.render())
+        return EXIT_FINDING if scenarios.scenarios else EXIT_OK
 
     if args.command == "lint":
         findings = check(mandate)

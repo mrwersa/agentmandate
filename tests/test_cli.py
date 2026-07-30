@@ -249,6 +249,76 @@ def test_obligations_emit_parseable_json(capsys):
     assert payload["schema"].startswith("agentmandate.obligations/")
 
 
+def test_scenarios_export_the_reachable_breach_for_review(capsys):
+    assert main(["scenarios", V2]) == EXIT_FINDING
+    output = capsys.readouterr().out
+
+    assert "cumulative_value:" in output
+    assert "open_case -> search_cases -> issue_refund" in output
+    assert "REVIEW: write the input" in output
+
+
+def test_scenarios_emit_parseable_json(capsys):
+    assert main(["scenarios", V2, "--json"]) == EXIT_FINDING
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["schema"] == "agentmandate.scenarios/v1"
+    assert payload["scenarios"][0]["agent_input"] == ""
+
+
+def test_scenarios_write_a_neutral_file(tmp_path, capsys):
+    output = tmp_path / "scenarios.json"
+
+    assert main(["scenarios", V2, "--output", str(output)]) == EXIT_FINDING
+
+    payload = json.loads(output.read_text())
+    assert payload["scenarios"]
+    assert "need review" in capsys.readouterr().out
+
+
+def test_scenarios_reconcile_reviewed_application_fields(tmp_path, capsys):
+    from agentmandate import (
+        Scenario,
+        ScenarioSet,
+        derive_scenarios,
+        load,
+        save_scenarios,
+    )
+
+    scenarios = derive_scenarios(load(V2))
+    reviewed = ScenarioSet(
+        scenarios.agent,
+        scenarios.depth,
+        scenarios.truncated,
+        tuple(
+            Scenario(
+                scenario.kind,
+                scenario.detail,
+                scenario.path,
+                environment=("two approved cases exist",),
+                agent_input="Refund both cases.",
+                expected_control="block the second refund",
+            )
+            for scenario in scenarios.scenarios
+        ),
+    )
+    review_path = tmp_path / "reviewed.json"
+    save_scenarios(reviewed, review_path)
+
+    assert main(["scenarios", V2, "--reviewed", str(review_path)]) == EXIT_FINDING
+    assert "REVIEW:" not in capsys.readouterr().out
+
+
+def test_scenarios_report_bad_review_and_output_paths(tmp_path, capsys):
+    assert main(["scenarios", V2, "--reviewed", "missing.json"]) == EXIT_USAGE
+    assert "cannot load scenarios" in capsys.readouterr().err
+
+    directory = tmp_path / "directory"
+    directory.mkdir()
+    assert main(["scenarios", V2, "--output", str(directory)]) == EXIT_USAGE
+    assert "cannot write scenarios" in capsys.readouterr().err
+
+
 def test_a_malformed_reviewed_file_is_a_usage_error(tmp_path, capsys):
     bad = tmp_path / "reviewed.json"
     bad.write_text("{not json", encoding="utf-8")
