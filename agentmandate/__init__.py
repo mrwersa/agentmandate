@@ -13,7 +13,7 @@ against the declaration, so it is usable without another tool alongside it.
 
 from __future__ import annotations
 
-__version__ = "0.4.0"
+__version__ = "0.5.1"
 
 from .diff import Change, Delta, compare
 from .lint import Finding, check

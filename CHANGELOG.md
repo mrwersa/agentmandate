@@ -6,6 +6,28 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.5.1 - 2026-07-31
+
+### Fixed
+
+- `agentmandate.__version__` reported `0.4.0` in the `0.5.0` release. The
+  number lived in `pyproject.toml` and in `agentmandate/__init__.py`, the
+  release checklist said to edit both, and only one was edited. The package
+  now declares a dynamic version read from `agentmandate/__init__.py`, so
+  there is one literal and the two cannot disagree.
+- The `0.5.0` changelog described errored spans as excluded because "an
+  errored call produced no effect". That was the reasoning the release itself
+  corrected. An errored effect-bearing call is carried as incomplete evidence.
+
+### Changed
+
+- Releases are now cut by merging the version bump. The workflow tags the
+  commit, builds the release notes from that version's changelog section, and
+  publishes. The changelog is the only place the prose lives, rather than
+  being written once there and again by hand in the GitHub Release.
+- The release build checks the built wheel and sdist filenames against the
+  tag, because the artefact users install is the thing worth checking.
+
 ## 0.5.0 - 2026-07-31
 
 ### Added
@@ -51,10 +73,9 @@ All notable changes to this project are documented here. The format follows
   rather than silently ignored.
 - Spans that would produce a false ceiling breach are excluded and counted: a
   span whose operation is not `execute_tool` even when it carries a tool name,
-  a span whose status is an error, and a repeat of a `gen_ai.tool.call.id`
-  already seen. Instrumentations commonly attach the tool name to the chat
-  span that requested the call, an errored call produced no effect, and one
-  call instrumented at both client and server is one call.
+  and a repeat of a `gen_ai.tool.call.id` already seen. Instrumentations
+  commonly attach the tool name to the chat span that requested the call, and
+  one call instrumented at both client and server is still one call.
 - `docs/traces.md` and a runnable `examples/otel-trace.json`.
 
 ### Changed
