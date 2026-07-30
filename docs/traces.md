@@ -32,6 +32,11 @@ OpenTelemetry's GenAI semantic conventions describe what a tool call **was**:
 | `gen_ai.tool.name` | which tool ran | yes |
 | `startTimeUnixNano` | call order | yes |
 
+Both attributes are required on a tool-execution span by the convention, and
+both are required here. A span carrying only a name is not treated as an
+execution unless you pass `--lenient-tool-spans`, because inferring one from
+the other is a guess.
+
 They do not describe what a mandate needs in order to check a **control**:
 
 | Field | Why a mandate needs it | Source |
@@ -63,23 +68,48 @@ That is the correct outcome rather than an inconvenience. The trace genuinely
 does not establish that the approval held, so reporting a pass would be a
 claim the evidence never supported.
 
-## What is not replayed, and why
+## Each trace is a separate run
 
-Three kinds of span are deliberately excluded, because including them produces
-a ceiling breach that never happened. A gate that cries wolf gets switched off,
-so a false positive costs more here than a missed finding.
+An OTLP export can contain many traces. A cumulative limit bounds **one run**,
+so replaying a whole export as a single sequence would accumulate one run's
+spending against another's and report a breach neither run committed.
 
-| Excluded | Reason |
-|---|---|
-| A span whose `gen_ai.operation.name` is anything other than `execute_tool` | Instrumentations often attach `gen_ai.tool.name` to the **chat** span that requested the call. Counting it doubles the value of one refund |
-| A span whose status is an error | A call that errored did not produce the effect a mandate governs |
-| A repeat of a `gen_ai.tool.call.id` already seen | One call instrumented at both client and server is one call |
+Spans are partitioned by `traceId` and each trace is verified independently.
+Duplicate detection is scoped the same way, because the same tool call id in
+two runs is two calls.
 
-Each is counted and reported rather than silently dropped.
+## What is excluded, and what is carried
 
-One residual risk cannot be settled from a trace: a call that timed out **after**
-its write landed looks identical to one that never took effect. If that matters
-for a control, the effect needs its own record, not a span.
+| Span | Treatment | Reason |
+|---|---|---|
+| `gen_ai.operation.name` is not `execute_tool` | excluded | Instrumentations often attach `gen_ai.tool.name` to the **chat** span that requested the call. Counting it doubles the value of one refund |
+| A repeat of a `gen_ai.tool.call.id` within one trace | excluded | One call instrumented at both client and server is one call |
+| Status is an error, on an **effect-bearing** tool | **carried as `errored`** | see below |
+| Status is an error, on a read | carried, no finding | A read that failed changed nothing |
+
+Every exclusion is counted and reported rather than silently dropped.
+
+### An errored call is incomplete evidence, not an absent call
+
+OpenTelemetry's error status means the **operation** ended with an error. It
+does not establish that an irreversible effect failed to commit, and a timeout
+is precisely the case where the write may already have landed.
+
+So an errored write or value-bearing call produces an `errored_effect` finding
+and a non-zero exit:
+
+```text
+VIOLATION  errored_effect   issue_refund   line 2
+           the call ended in an error, and an error does not establish that
+           the effect was not applied. This evidence cannot show the control
+           held. Record whether the effect committed, or replay an
+           authoritative effect log.
+```
+
+Its value is not accumulated either, because whether it was spent is exactly
+what the evidence fails to establish. To exclude it properly, record whether
+the effect committed as an application attribute, or replay an authoritative
+effect log rather than a trace.
 
 ## The counts are part of the result
 
@@ -105,10 +135,29 @@ document order.
 
 ## Scope
 
-This reads OTLP JSON, the format the OTLP/HTTP exporter and `otel-cli` produce
-and every collector accepts. AgentMandate consumes traces. It does not become
-an observability backend, store them, or query one.
+This reads an OTLP `ExportTraceServiceRequest` in JSON, either as one object or
+as newline-delimited objects, which is what OpenTelemetry's file exporter
+writes. It does not read protobuf, and it does not query a backend.
+
+AgentMandate consumes traces. It does not become an observability backend,
+store them, or query one.
 
 The convention attribute names are pinned in one place in `agentmandate/otel.py`,
 because most `gen_ai.*` attributes still carry Development stability badges and
 can change without a major version bump.
+
+## Machine-readable output
+
+`--json` returns the conversion counts alongside the conformance result, so CI
+sees the warnings that explain a suspiciously clean report:
+
+```json
+{
+  "schema": "agentmandate.verify/v1",
+  "conversion": {
+    "total_spans": 5, "tool_calls": 3, "observations": 3,
+    "traces": 1, "errored": 0, "duplicates": 0, "unmapped": []
+  },
+  "conformance": { "observed": 3, "conformant": false, "violations": [] }
+}
+```

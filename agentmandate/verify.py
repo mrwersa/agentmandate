@@ -16,10 +16,11 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
-from .manifest import Mandate
+from .manifest import IRREVERSIBLE, WRITE, Mandate
 
 VIOLATION_KINDS = (
     "no_observations",
+    "errored_effect",
     "undeclared_tool",
     "missing_principal",
     "missing_scope",
@@ -44,6 +45,11 @@ class Observation:
     approved: bool = False
     principal: str | None = None
     currency: str | None = None
+    # The call ended in an error. For a read that is uninteresting. For a call
+    # that changes something it is ambiguous: an error means the operation
+    # ended badly, not that the effect failed to commit, and a timeout is
+    # exactly the case where the write may already have landed.
+    errored: bool = False
     line: int = 0
 
     @classmethod
@@ -72,6 +78,10 @@ class Observation:
         if not isinstance(approved, bool):
             raise ValueError(f"line {line}: approved must be true or false")
 
+        errored = raw.get("errored", False)
+        if not isinstance(errored, bool):
+            raise ValueError(f"line {line}: errored must be true or false")
+
         principal = raw.get("principal")
         if principal is not None and (
             not isinstance(principal, str) or not principal.strip()
@@ -94,6 +104,7 @@ class Observation:
             scope=scope,
             value=parsed,
             approved=approved,
+            errored=errored,
             principal=principal,
             currency=currency,
             line=line,
@@ -212,6 +223,23 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                     f"{observation.principal!r}",
                 )
             )
+
+        if observation.errored and (
+            tool.effect in {WRITE, IRREVERSIBLE} or tool.spends_value
+        ):
+            violations.append(
+                Violation(
+                    "errored_effect",
+                    observation,
+                    "the call ended in an error, and an error does not "
+                    "establish that the effect was not applied. This evidence "
+                    "cannot show the control held. Record whether the effect "
+                    "committed, or replay an authoritative effect log.",
+                )
+            )
+            # Its value is not accumulated, because whether it was spent is
+            # exactly what the evidence fails to establish.
+            continue
 
         if tool.requires_approval and not observation.approved:
             violations.append(

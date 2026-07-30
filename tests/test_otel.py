@@ -28,9 +28,10 @@ def attr(key, value, kind="stringValue"):
     return {"key": key, "value": {kind: value}}
 
 
-def tool(name, start, extra=()):
+def tool(name, start, extra=(), trace="trace-1"):
     return {
         "name": f"execute_tool {name}",
+        "traceId": trace,
         "startTimeUnixNano": str(start),
         "attributes": [
             attr("gen_ai.operation.name", "execute_tool"),
@@ -62,11 +63,18 @@ class TestOnlyToolCallsBecomeObservations:
                        "attributes": [attr("gen_ai.operation.name", "invoke_agent")]})
         assert convert(payload).observations == ()
 
-    def test_a_bare_tool_name_is_accepted_without_the_operation_marker(self):
-        """Exporters vary in whether they set the operation on tool spans."""
+    def test_a_bare_tool_name_is_ignored_by_default(self):
+        """The convention requires both attributes on a tool span. Inferring
+        an execution from a name alone is a guess."""
         payload = doc({"name": "t", "startTimeUnixNano": "100",
                        "attributes": [attr("gen_ai.tool.name", "open_case")]})
-        assert [o.tool for o in convert(payload).observations] == ["open_case"]
+        assert convert(payload).observations == ()
+
+    def test_a_bare_tool_name_is_accepted_only_when_asked(self):
+        payload = doc({"name": "t", "startTimeUnixNano": "100",
+                       "attributes": [attr("gen_ai.tool.name", "open_case")]})
+        result = convert(payload, lenient=True)
+        assert [o.tool for o in result.observations] == ["open_case"]
 
     def test_a_tool_span_with_no_name_is_refused(self):
         payload = doc({"name": "t", "startTimeUnixNano": "100",
@@ -166,7 +174,9 @@ class TestOrdering:
         assert [o.tool for o in convert(payload).observations] == ["a", "b"]
 
     def test_a_missing_start_time_does_not_crash(self):
-        payload = doc({"name": "t", "attributes": [attr("gen_ai.tool.name", "x")]})
+        payload = doc({"name": "t", "traceId": "t1", "attributes": [
+            attr("gen_ai.operation.name", "execute_tool"),
+            attr("gen_ai.tool.name", "x")]})
         assert [o.tool for o in convert(payload).observations] == ["x"]
 
 
@@ -220,7 +230,8 @@ class TestMalformedDocuments:
     @pytest.mark.parametrize(
         "payload, message",
         [
-            ([], "must be an OTLP JSON object"),
+            ([], "no OTLP requests"),
+            ([[]], "must be an OTLP JSON object"),
             ({"spans": []}, "no 'resourceSpans'"),
             ({"resourceSpans": "nope"}, "no 'resourceSpans'"),
         ],
@@ -238,10 +249,16 @@ class TestMalformedDocuments:
         with pytest.raises(TraceError, match="cannot load trace"):
             load_trace(tmp_path / "absent.json")
 
-    def test_malformed_json_is_a_trace_error(self, tmp_path):
+    def test_malformed_json_names_the_expected_shape(self, tmp_path):
         path = tmp_path / "t.json"
         path.write_text("{not json", encoding="utf-8")
-        with pytest.raises(TraceError, match="cannot load trace"):
+        with pytest.raises(TraceError, match="ExportTraceServiceRequest"):
+            load_trace(path)
+
+    def test_an_empty_file_is_refused(self, tmp_path):
+        path = tmp_path / "t.json"
+        path.write_text("   \n", encoding="utf-8")
+        with pytest.raises(TraceError, match="empty"):
             load_trace(path)
 
 
@@ -266,8 +283,10 @@ def test_the_shipped_example_trace_converts_and_finds_the_breach():
 class TestAttributeEdgeCases:
     def test_a_plain_attribute_value_is_passed_through(self):
         """Some exporters write a bare value rather than an AnyValue wrapper."""
-        payload = doc({"name": "t", "startTimeUnixNano": "1",
-                       "attributes": [{"key": "gen_ai.tool.name", "value": "open_case"}]})
+        payload = doc({"name": "t", "traceId": "t1", "startTimeUnixNano": "1",
+                       "attributes": [
+                           {"key": "gen_ai.operation.name", "value": "execute_tool"},
+                           {"key": "gen_ai.tool.name", "value": "open_case"}]})
         assert [o.tool for o in convert(payload).observations] == ["open_case"]
 
     def test_an_array_attribute_is_unwrapped(self):
@@ -284,7 +303,8 @@ class TestAttributeEdgeCases:
         assert attributes(span)["app.odd"] is None
 
     def test_an_attribute_explicitly_set_to_null_is_treated_as_absent(self):
-        payload = doc({"name": "t", "startTimeUnixNano": "1", "attributes": [
+        payload = doc({"name": "t", "traceId": "t1", "startTimeUnixNano": "1", "attributes": [
+            {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
             {"key": "gen_ai.tool.name", "value": {"stringValue": "pay"}},
             {"key": "app.case.id", "value": {"bytesValue": "x"}}]})
         result = convert(payload, {"scope": "app.case.id"})
@@ -300,7 +320,7 @@ class TestFalseBreachesAreTheFailureThatMatters:
         """Instrumentations commonly attach the tool name to the LLM span
         that REQUESTED the call. Counting it doubles the value."""
         payload = doc(
-            {"name": "chat", "startTimeUnixNano": "100", "attributes": [
+            {"name": "chat", "traceId": "t", "startTimeUnixNano": "100", "attributes": [
                 attr("gen_ai.operation.name", "chat"),
                 attr("gen_ai.tool.name", "issue_refund"),
                 attr("app.amount", "500")]},
@@ -312,39 +332,41 @@ class TestFalseBreachesAreTheFailureThatMatters:
         assert [str(o.value) for o in result.observations] == ["500"]
 
     def test_an_explicit_operation_is_authoritative_over_a_tool_name(self):
-        payload = doc({"name": "x", "startTimeUnixNano": "100", "attributes": [
+        payload = doc({"name": "x", "traceId": "t", "startTimeUnixNano": "100", "attributes": [
             attr("gen_ai.operation.name", "invoke_agent"),
             attr("gen_ai.tool.name", "issue_refund")]})
         assert convert(payload).observations == ()
 
-    def test_a_failed_call_does_not_spend_budget(self):
-        """A refund that timed out moved no money. Replaying its value would
-        report a breach that did not happen."""
+    def test_an_errored_call_is_carried_as_incomplete_evidence(self):
+        """An error means the operation failed, not that the effect was not
+        applied. A timeout is exactly the case where the write may have
+        landed, so the call must not vanish into a clean report."""
         payload = doc(
-            {"name": "e", "startTimeUnixNano": "100",
+            {"name": "e", "traceId": "t", "startTimeUnixNano": "100",
              "status": {"code": "STATUS_CODE_ERROR", "message": "timeout"},
              "attributes": [attr("gen_ai.operation.name", "execute_tool"),
                             attr("gen_ai.tool.name", "issue_refund"),
                             attr("app.amount", "500")]})
         result = convert(payload, {"value": "app.amount"})
 
-        assert result.observations == ()
-        assert result.failed == 1
-        assert "did not produce the effect" in result.summary
+        assert len(result.observations) == 1
+        assert result.observations[0].errored is True
+        assert result.errored == 1
+        assert "not that the effect was not applied" in result.summary
 
     @pytest.mark.parametrize("code", ["STATUS_CODE_ERROR", 2, "2"])
     def test_error_status_is_recognised_in_either_encoding(self, code):
-        payload = doc({"name": "e", "startTimeUnixNano": "100",
-                       "status": {"code": code},
-                       "attributes": [attr("gen_ai.tool.name", "t")]})
-        assert convert(payload).failed == 1
+        payload = doc({**tool("t", 100), "status": {"code": code}})
+        result = convert(payload)
+        assert result.errored == 1
+        assert result.observations[0].errored is True
 
     @pytest.mark.parametrize("code", ["STATUS_CODE_OK", "STATUS_CODE_UNSET", 0, 1])
-    def test_a_successful_or_unset_status_is_replayed(self, code):
-        payload = doc({"name": "e", "startTimeUnixNano": "100",
-                       "status": {"code": code},
-                       "attributes": [attr("gen_ai.tool.name", "t")]})
-        assert len(convert(payload).observations) == 1
+    def test_a_successful_or_unset_status_is_not_marked_errored(self, code):
+        payload = doc({**tool("t", 100), "status": {"code": code}})
+        result = convert(payload)
+        assert result.errored == 0
+        assert result.observations[0].errored is False
 
     def test_one_call_instrumented_twice_is_collapsed_by_call_id(self):
         """A client span and a server span for the same call share the tool
@@ -397,3 +419,35 @@ def test_a_span_with_no_operation_and_no_tool_name_is_ignored():
     assert result.observations == ()
     assert result.total_spans == 1
     assert result.tool_spans == 0
+
+
+def test_a_span_without_a_trace_id_still_groups():
+    """Not every exporter writes traceId at the span level. Those calls share
+    one unnamed run rather than being dropped."""
+    payload = doc({"name": "e", "startTimeUnixNano": "1", "attributes": [
+        attr("gen_ai.operation.name", "execute_tool"), attr("gen_ai.tool.name", "x")]})
+    result = convert(payload)
+
+    assert len(result.runs) == 1
+    assert result.runs[0][0] == ""
+    assert len(result.observations) == 1
+
+
+def test_a_non_string_trace_id_is_normalised():
+    payload = doc({"name": "e", "traceId": 7, "startTimeUnixNano": "1", "attributes": [
+        attr("gen_ai.operation.name", "execute_tool"), attr("gen_ai.tool.name", "x")]})
+    assert convert(payload).runs[0][0] == ""
+
+
+def test_a_span_that_is_not_a_dict_is_skipped():
+    payload = {"resourceSpans": [{"scopeSpans": [{"spans": ["not a span"]}]}]}
+    assert convert(payload).total_spans == 0
+
+
+def test_blank_lines_between_requests_are_skipped(tmp_path):
+    """A file exporter may separate requests with a blank line."""
+    one = json.dumps(doc(tool("open_case", 100)))
+    path = tmp_path / "nd.json"
+    path.write_text(one + "\n\n" + one + "\n", encoding="utf-8")
+
+    assert len(load_trace(path).observations) == 2

@@ -388,9 +388,118 @@ def test_a_malformed_trace_file_is_a_usage_error(tmp_path, capsys):
     bad = tmp_path / "bad.json"
     bad.write_text("{not json", encoding="utf-8")
     assert main(["verify", V1, "--otel", str(bad)]) == EXIT_USAGE
-    assert "cannot load trace" in capsys.readouterr().err
+    assert "ExportTraceServiceRequest" in capsys.readouterr().err
 
 
 def test_a_malformed_mapping_is_a_usage_error(capsys):
     assert main(["verify", V1, "--otel", OTEL, "--map", "nonsense"]) == EXIT_USAGE
     assert "malformed mapping" in capsys.readouterr().err
+
+
+def test_two_independent_traces_do_not_share_a_budget(tmp_path, capsys):
+    """The blocker: two runs each under the ceiling were combined into one
+    breach that neither run committed."""
+    def refund(trace, start):
+        return {
+            "name": "execute_tool issue_refund", "traceId": trace,
+            "startTimeUnixNano": str(start),
+            "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "issue_refund"}},
+                {"key": "app.case.id", "value": {"stringValue": "c1"}},
+                {"key": "app.refund.amount", "value": {"stringValue": "300"}},
+                {"key": "app.currency", "value": {"stringValue": "GBP"}},
+                {"key": "app.approved", "value": {"boolValue": True}},
+                {"key": "app.principal", "value": {"stringValue": "caller"}},
+            ],
+        }
+    def opener(trace, start):
+        return {
+            "name": "execute_tool open_case", "traceId": trace,
+            "startTimeUnixNano": str(start),
+            "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "open_case"}},
+                {"key": "app.case.id", "value": {"stringValue": "c1"}},
+                {"key": "app.principal", "value": {"stringValue": "caller"}},
+            ],
+        }
+    path = tmp_path / "two.json"
+    path.write_text(json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [
+        opener("A", 100), refund("A", 200), opener("B", 300), refund("B", 400)]}]}]}),
+        encoding="utf-8")
+
+    assert main(["verify", V1, "--otel", str(path), *OTEL_MAP]) == EXIT_OK
+    out = capsys.readouterr().out
+    assert "2 trace(s)" in out
+    assert "verified separately" in out
+    assert "ceiling_exceeded" not in out
+
+
+def test_json_output_carries_the_conversion_counts(tmp_path, capsys):
+    """CI reads the JSON. Omitting the counts hides the warnings that explain
+    a suspiciously clean result."""
+    main(["verify", V1, "--otel", OTEL, *OTEL_MAP, "--json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["schema"].startswith("agentmandate.verify/")
+    assert payload["conversion"]["total_spans"] == 5
+    assert payload["conversion"]["tool_calls"] == 3
+    assert payload["conversion"]["traces"] >= 1
+    assert "unmapped" in payload["conversion"]
+    assert "conformance" in payload
+
+
+def test_otel_only_flags_are_refused_with_a_jsonl_file(capsys):
+    assert main(["verify", V1, "--traces", TRACES, "--map", "scope=x"]) == EXIT_USAGE
+    assert "--otel only" in capsys.readouterr().err
+
+
+def test_lenient_mode_is_opt_in(tmp_path, capsys):
+    path = tmp_path / "bare.json"
+    path.write_text(json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [{
+        "name": "t", "traceId": "t1", "startTimeUnixNano": "1", "attributes": [
+            {"key": "gen_ai.tool.name", "value": {"stringValue": "open_case"}}]}]}]}]}),
+        encoding="utf-8")
+
+    main(["verify", V1, "--otel", str(path)])
+    assert "0 tool call(s)" in capsys.readouterr().out
+
+    main(["verify", V1, "--otel", str(path), "--lenient-tool-spans"])
+    assert "1 tool call(s)" in capsys.readouterr().out
+
+
+def test_newline_delimited_requests_are_accepted(tmp_path, capsys):
+    """OpenTelemetry's file exporter writes one request per line."""
+    one = json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [{
+        "name": "e", "traceId": "t1", "startTimeUnixNano": "1", "attributes": [
+            {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+            {"key": "gen_ai.tool.name", "value": {"stringValue": "open_case"}},
+            {"key": "app.principal", "value": {"stringValue": "caller"}}]}]}]}]})
+    path = tmp_path / "ndjson.json"
+    path.write_text(one + "\n" + one + "\n", encoding="utf-8")
+
+    main(["verify", V1, "--otel", str(path), *OTEL_MAP])
+    assert "2 tool call(s)" in capsys.readouterr().out
+
+
+def test_an_errored_call_survives_the_emit_round_trip(tmp_path, capsys):
+    """The errored flag has to reach the emitted file, or a re-run from it
+    would silently pass where the trace did not."""
+    path = tmp_path / "err.json"
+    path.write_text(json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [{
+        "name": "e", "traceId": "t1", "startTimeUnixNano": "1",
+        "status": {"code": "STATUS_CODE_ERROR"},
+        "attributes": [
+            {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+            {"key": "gen_ai.tool.name", "value": {"stringValue": "issue_refund"}},
+            {"key": "app.principal", "value": {"stringValue": "caller"}}]}]}]}]}),
+        encoding="utf-8")
+    out_path = tmp_path / "observed.jsonl"
+
+    main(["verify", V1, "--otel", str(path), *OTEL_MAP, "--emit", str(out_path)])
+    capsys.readouterr()
+
+    assert json.loads(out_path.read_text().splitlines()[0])["errored"] is True
+    assert main(["verify", V1, "--traces", str(out_path)]) == EXIT_FINDING
+    assert "errored_effect" in capsys.readouterr().out

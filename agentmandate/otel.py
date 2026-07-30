@@ -75,15 +75,16 @@ def attributes(span: dict) -> dict[str, Any]:
 
 
 def iter_spans(payload: Any) -> list[dict]:
-    """Walk an OTLP JSON document and yield every span, in document order."""
+    """Walk one OTLP request object and return every span in document order."""
     if not isinstance(payload, dict):
         raise TraceError("trace root must be an OTLP JSON object")
     spans: list[dict] = []
     resource_spans = payload.get("resourceSpans")
     if not isinstance(resource_spans, list):
         raise TraceError(
-            "no 'resourceSpans' in the document. This reader expects OTLP JSON, "
-            "the format the OTLP/HTTP exporter and otel-cli produce."
+            "no 'resourceSpans' in the document. This reader expects an OTLP "
+            "ExportTraceServiceRequest in JSON, either as one object or as "
+            "newline-delimited objects."
         )
     for resource in resource_spans:
         for scope in (resource or {}).get("scopeSpans", []) or []:
@@ -91,6 +92,34 @@ def iter_spans(payload: Any) -> list[dict]:
                 if isinstance(span, dict):
                     spans.append(span)
     return spans
+
+
+def read_document(text: str) -> list[dict]:
+    """Parse one OTLP request, or newline-delimited requests.
+
+    OpenTelemetry's file exporter writes one request per line, so a reader
+    that only accepts a single object rejects its output.
+    """
+    stripped = text.strip()
+    if not stripped:
+        raise TraceError("the trace file is empty")
+    try:
+        return [json.loads(stripped)]
+    except json.JSONDecodeError:
+        pass
+    requests = []
+    for number, line in enumerate(stripped.splitlines(), start=1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            requests.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            raise TraceError(
+                f"line {number} is not valid JSON: {exc}. Expected an OTLP "
+                "ExportTraceServiceRequest, or one per line."
+            ) from exc
+    return requests
 
 
 @dataclass(frozen=True)
@@ -102,25 +131,39 @@ class Conversion:
     reporting only the two would let it pass as success.
     """
 
-    observations: tuple[Observation, ...]
+    runs: tuple[tuple[str, tuple[Observation, ...]], ...]
     total_spans: int
     tool_spans: int
     unmapped: tuple[str, ...]
-    failed: int = 0
+    errored: int = 0
     duplicates: int = 0
+
+    @property
+    def observations(self) -> tuple[Observation, ...]:
+        """Every observation across every run, for callers that want one list.
+
+        Replaying this flattened list would accumulate one run's spending
+        against another's, so `runs` is what `verify` uses.
+        """
+        return tuple(o for _, group in self.runs for o in group)
 
     @property
     def summary(self) -> str:
         lines = [
             f"read {self.total_spans} span(s), {self.tool_spans} tool call(s), "
-            f"{len(self.observations)} observation(s)"
+            f"{len(self.observations)} observation(s) across "
+            f"{len(self.runs)} trace(s)"
         ]
-        if self.failed:
+        if len(self.runs) > 1:
             lines.append(
-                f"  {self.failed} tool call(s) failed and were not replayed. "
-                "A call that errored did not produce the effect a mandate "
-                "governs, so counting its value would report a breach that "
-                "did not happen."
+                "  each trace is verified separately, because a cumulative "
+                "limit bounds one run rather than a whole export."
+            )
+        if self.errored:
+            lines.append(
+                f"  {self.errored} tool call(s) ended in an error and are "
+                "carried as incomplete evidence. An error means the operation "
+                "failed, not that the effect was not applied."
             )
         if self.duplicates:
             lines.append(
@@ -136,13 +179,22 @@ class Conversion:
         return "\n".join(lines)
 
 
-def convert(payload: Any, mapping: dict[str, str] | None = None) -> Conversion:
+def convert(
+    payload: Any,
+    mapping: dict[str, str] | None = None,
+    *,
+    lenient: bool = False,
+) -> Conversion:
     """Convert an OTLP document into observations.
 
     Args:
         payload: A parsed OTLP JSON document.
         mapping: Attribute names for the fields the conventions do not carry,
             for example ``{"scope": "app.case.id", "value": "app.refund.amount"}``.
+        lenient: Also treat a span carrying ``gen_ai.tool.name`` but no
+            operation attribute as a tool execution. The convention requires
+            both on a tool span, so this is off by default and exists for
+            older instrumentation.
 
     Spans are ordered by start time so cumulative ceilings accumulate in the
     order the calls actually happened. Ties keep document order.
@@ -155,11 +207,15 @@ def convert(payload: Any, mapping: dict[str, str] | None = None) -> Conversion:
             + ". mappable fields are: " + ", ".join(MAPPABLE)
         )
 
-    spans = iter_spans(payload)
+    documents = payload if isinstance(payload, list) else [payload]
+    if not documents:
+        raise TraceError("the trace contains no OTLP requests")
+    spans = [s for document in documents for s in iter_spans(document)]
     tool_spans = []
-    failed = 0
+    errored = 0
     duplicates = 0
-    seen_call_ids: set[str] = set()
+    # Scoped per trace, because the same call id in two runs is two calls.
+    seen_call_ids: set[tuple[str, str]] = set()
     for index, span in enumerate(spans):
         attrs = attributes(span)
         name = attrs.get(TOOL_NAME_ATTR)
@@ -171,41 +227,50 @@ def convert(payload: Any, mapping: dict[str, str] | None = None) -> Conversion:
             # reports a ceiling breach that never happened.
             if operation != TOOL_OP:
                 continue
-        elif not name:
-            # No operation attribute at all, so fall back to a bare tool name.
+        elif not (lenient and name):
+            # The convention requires both attributes on a tool-execution
+            # span. Inferring one from a bare name is a guess, and this module
+            # does not guess unless asked.
             continue
         if not isinstance(name, str) or not name.strip():
             raise TraceError(
                 f"a span marked {TOOL_OP} has no {TOOL_NAME_ATTR}. "
                 "The tool cannot be identified, so the call cannot be checked."
             )
+        trace_id = span.get("traceId") or ""
+        if not isinstance(trace_id, str):
+            trace_id = ""
+
         status = span.get("status") or {}
-        if isinstance(status, dict) and status.get("code") in ERROR_STATUS:
-            # The call did not have its effect, so replaying its value would
-            # spend budget nothing spent. The residual risk is a call that
-            # timed out after the write landed, which no trace can settle.
-            failed += 1
-            continue
+        span_errored = isinstance(status, dict) and status.get("code") in ERROR_STATUS
+        if span_errored:
+            errored += 1
 
         call_id = attrs.get(TOOL_CALL_ID_ATTR)
         if isinstance(call_id, str) and call_id:
-            if call_id in seen_call_ids:
+            key = (trace_id, call_id)
+            if key in seen_call_ids:
                 duplicates += 1
                 continue
-            seen_call_ids.add(call_id)
+            seen_call_ids.add(key)
 
         start = span.get("startTimeUnixNano")
         try:
             order = int(start)
         except (TypeError, ValueError):
             order = 0
-        tool_spans.append((order, index, name, attrs))
+        tool_spans.append((trace_id, order, index, name, attrs, span_errored))
 
-    tool_spans.sort(key=lambda row: (row[0], row[1]))
+    # Ordered within a trace. Cumulative ceilings accumulate in call order,
+    # and calls from different runs never share a budget.
+    tool_spans.sort(key=lambda row: (row[0], row[1], row[2]))
 
-    observations = []
-    for line, (_, _, name, attrs) in enumerate(tool_spans, start=1):
+    grouped: dict[str, list[Observation]] = {}
+    for trace_id, _, _, name, attrs, span_errored in tool_spans:
+        group = grouped.setdefault(trace_id, [])
         record: dict[str, Any] = {"tool": name}
+        if span_errored:
+            record["errored"] = True
         for field in MAPPABLE:
             key = mapping.get(field)
             if key is None:
@@ -222,26 +287,31 @@ def convert(payload: Any, mapping: dict[str, str] | None = None) -> Conversion:
                 record[field] = bool(value)
             else:
                 record[field] = value
-        observations.append(Observation.parse(record, line))
+        group.append(Observation.parse(record, len(group) + 1))
 
     unmapped = tuple(f for f in MAPPABLE if f not in mapping)
     return Conversion(
-        observations=tuple(observations),
+        runs=tuple((trace, tuple(group)) for trace, group in grouped.items()),
         total_spans=len(spans),
         tool_spans=len(tool_spans),
         unmapped=unmapped,
-        failed=failed,
+        errored=errored,
         duplicates=duplicates,
     )
 
 
-def load_trace(path: str | Path, mapping: dict[str, str] | None = None) -> Conversion:
+def load_trace(
+    path: str | Path,
+    mapping: dict[str, str] | None = None,
+    *,
+    lenient: bool = False,
+) -> Conversion:
     """Read an OTLP JSON file from disk."""
     try:
-        payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        text = Path(path).read_text(encoding="utf-8")
+    except OSError as exc:
         raise TraceError(f"cannot load trace: {exc}") from exc
-    return convert(payload, mapping)
+    return convert(read_document(text), mapping, lenient=lenient)
 
 
 def parse_mapping(pairs: list[str] | None) -> dict[str, str]:

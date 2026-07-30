@@ -25,6 +25,28 @@ All notable changes to this project are documented here. The format follows
   inspection, and re-running them through `--traces` gives identical results.
 - Spans are ordered by start time, because cumulative ceilings accumulate in
   call order rather than collector write order.
+- Each `traceId` is verified as its own run. An OTLP export can hold many
+  traces, and a cumulative limit bounds one run, so replaying a whole export as
+  one sequence reported a breach that neither run committed. Duplicate
+  detection is scoped per trace for the same reason.
+- An errored effect-bearing call is carried as incomplete evidence and produces
+  an `errored_effect` finding. OpenTelemetry's error status means the operation
+  ended with an error, not that an irreversible effect failed to commit, and a
+  timeout is exactly the case where the write may already have landed. Its
+  value is not accumulated, because whether it was spent is what the evidence
+  fails to establish. An errored read produces no finding.
+- `Observation` gains `errored`, so the replay format can express the
+  distinction and an emitted file re-runs identically.
+- Strict by default. A span carrying `gen_ai.tool.name` with no operation
+  attribute is no longer treated as an execution, because the convention
+  requires both. `--lenient-tool-spans` restores the old behaviour for older
+  instrumentation.
+- Newline-delimited OTLP requests are accepted, which is what OpenTelemetry's
+  file exporter writes.
+- `--json` returns a versioned object carrying the conversion counts alongside
+  the conformance result, so CI sees the warnings rather than only the verdict.
+- `--map`, `--emit`, and `--lenient-tool-spans` are refused with `--traces`
+  rather than silently ignored.
 - Spans that would produce a false ceiling breach are excluded and counted: a
   span whose operation is not `execute_tool` even when it carries a tool name,
   a span whose status is an error, and a repeat of a `gen_ai.tool.call.id`
