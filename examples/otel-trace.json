@@ -1,0 +1,211 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "dispute-resolver"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "agentcore"
+          },
+          "spans": [
+            {
+              "name": "invoke_agent dispute-resolver",
+              "startTimeUnixNano": "1000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "invoke_agent"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "dispute-resolver"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "execute_tool open_case",
+              "spanId": "00000000000007d0",
+              "startTimeUnixNano": "2000",
+              "endTimeUnixNano": "3000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "open_case"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_2000"
+                  }
+                },
+                {
+                  "key": "app.case.id",
+                  "value": {
+                    "stringValue": "case-4471"
+                  }
+                },
+                {
+                  "key": "app.principal",
+                  "value": {
+                    "stringValue": "caller"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "chat",
+              "startTimeUnixNano": "2500",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "claude"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "execute_tool issue_refund",
+              "spanId": "0000000000000bb8",
+              "startTimeUnixNano": "3000",
+              "endTimeUnixNano": "4000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "issue_refund"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_3000"
+                  }
+                },
+                {
+                  "key": "app.case.id",
+                  "value": {
+                    "stringValue": "case-4471"
+                  }
+                },
+                {
+                  "key": "app.refund.amount",
+                  "value": {
+                    "stringValue": "500"
+                  }
+                },
+                {
+                  "key": "app.currency",
+                  "value": {
+                    "stringValue": "GBP"
+                  }
+                },
+                {
+                  "key": "app.approved",
+                  "value": {
+                    "boolValue": true
+                  }
+                },
+                {
+                  "key": "app.principal",
+                  "value": {
+                    "stringValue": "caller"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "execute_tool issue_refund",
+              "spanId": "0000000000000fa0",
+              "startTimeUnixNano": "4000",
+              "endTimeUnixNano": "5000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "issue_refund"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_4000"
+                  }
+                },
+                {
+                  "key": "app.case.id",
+                  "value": {
+                    "stringValue": "case-4471"
+                  }
+                },
+                {
+                  "key": "app.refund.amount",
+                  "value": {
+                    "stringValue": "250"
+                  }
+                },
+                {
+                  "key": "app.currency",
+                  "value": {
+                    "stringValue": "GBP"
+                  }
+                },
+                {
+                  "key": "app.approved",
+                  "value": {
+                    "boolValue": true
+                  }
+                },
+                {
+                  "key": "app.principal",
+                  "value": {
+                    "stringValue": "caller"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

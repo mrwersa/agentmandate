@@ -232,3 +232,73 @@ def test_a_currency_that_matches_the_ceiling_but_not_the_run_limit_is_reported()
     kinds_found = [v.kind for v in conformance.violations]
     assert kinds_found == ["currency_mismatch"]
     assert "run limit" in conformance.violations[0].message
+
+
+def test_a_bad_errored_flag_is_rejected():
+    with pytest.raises(ValueError, match="errored must be"):
+        Observation.parse({"tool": "t", "errored": "yes"}, 1)
+
+
+class TestErroredEffectsAreIncompleteEvidence:
+    """An OpenTelemetry error status means the operation ended with an error.
+    It does not establish that an irreversible effect failed to commit, and a
+    timeout is exactly the case where the write may already have landed."""
+
+    MANDATE = loads(
+        """
+        agent: a
+        limits: {total: {amount: 500, currency: GBP}}
+        tools:
+          - name: look
+            effect: read
+            produces: case
+          - name: note
+            effect: write
+            requires: [case]
+          - name: pay
+            effect: irreversible
+            requires: [case]
+            value_arg: amount
+            scope_key: case
+            ceiling: {amount: 500, currency: GBP}
+            requires_approval: true
+        """
+    )
+
+    def test_an_errored_irreversible_call_is_a_violation(self):
+        conformance = replay(self.MANDATE, [
+            Observation(tool="look", principal="caller", line=1),
+            Observation(tool="pay", scope="c1", value=Decimal(300), currency="GBP",
+                        approved=True, principal="caller", errored=True, line=2),
+        ])
+        assert [v.kind for v in conformance.violations] == ["errored_effect"]
+        assert "not that the effect was not applied" not in conformance.render()
+        assert "does not establish" in conformance.render()
+
+    def test_an_errored_write_is_also_a_violation(self):
+        conformance = replay(self.MANDATE, [
+            Observation(tool="look", principal="caller", line=1),
+            Observation(tool="note", principal="caller", errored=True, line=2),
+        ])
+        assert [v.kind for v in conformance.violations] == ["errored_effect"]
+
+    def test_an_errored_read_is_not_a_violation(self):
+        """A read that failed changed nothing, so there is nothing ambiguous
+        about it."""
+        conformance = replay(self.MANDATE, [
+            Observation(tool="look", principal="caller", errored=True, line=1)])
+        assert conformance.conformant is True
+
+    def test_an_errored_call_does_not_accumulate_value(self):
+        """Whether it spent is exactly what the evidence fails to establish,
+        so it must not silently count toward the ceiling either."""
+        conformance = replay(self.MANDATE, [
+            Observation(tool="look", principal="caller", line=1),
+            Observation(tool="pay", scope="c1", value=Decimal(400), currency="GBP",
+                        approved=True, principal="caller", errored=True, line=2),
+            Observation(tool="pay", scope="c1", value=Decimal(400), currency="GBP",
+                        approved=True, principal="caller", line=3),
+        ])
+        kinds = [v.kind for v in conformance.violations]
+        assert kinds == ["errored_effect"]
+        assert "ceiling_exceeded" not in kinds

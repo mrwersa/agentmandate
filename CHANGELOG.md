@@ -6,6 +6,60 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- `mandate verify --otel trace.json` reads OpenTelemetry traces directly.
+  `verify` is the command that keeps a manifest honest and it previously
+  needed a bespoke JSON Lines file nobody had, while every team already has
+  traces.
+- `gen_ai.operation.name`, `gen_ai.tool.name`, and span start time are read
+  automatically. The fields a mandate needs that no GenAI convention carries,
+  which are scope, value, currency, principal, and approval, each require an
+  explicit `--map`. Nothing is guessed.
+- An unmapped trace fails closed and names the fields, because a trace that
+  does not record the approval has not established that the approval held.
+- The conversion summary prints before the verdict. Three observations
+  recovered from four hundred spans is usually a mapping mistake, and a clean
+  report over almost no evidence should not read as success.
+- `--emit` writes the converted observations in the plain replay format for
+  inspection, and re-running them through `--traces` gives identical results.
+- Spans are ordered by start time, because cumulative ceilings accumulate in
+  call order rather than collector write order.
+- Each `traceId` is verified as its own run. An OTLP export can hold many
+  traces, and a cumulative limit bounds one run, so replaying a whole export as
+  one sequence reported a breach that neither run committed. Duplicate
+  detection is scoped per trace for the same reason.
+- An errored effect-bearing call is carried as incomplete evidence and produces
+  an `errored_effect` finding. OpenTelemetry's error status means the operation
+  ended with an error, not that an irreversible effect failed to commit, and a
+  timeout is exactly the case where the write may already have landed. Its
+  value is not accumulated, because whether it was spent is what the evidence
+  fails to establish. An errored read produces no finding.
+- `Observation` gains `errored`, so the replay format can express the
+  distinction and an emitted file re-runs identically.
+- Strict by default. A span carrying `gen_ai.tool.name` with no operation
+  attribute is no longer treated as an execution, because the convention
+  requires both. `--lenient-tool-spans` restores the old behaviour for older
+  instrumentation.
+- Newline-delimited OTLP requests are accepted, which is what OpenTelemetry's
+  file exporter writes.
+- `--json` returns a versioned object carrying the conversion counts alongside
+  the conformance result, so CI sees the warnings rather than only the verdict.
+- `--map`, `--emit`, and `--lenient-tool-spans` are refused with `--traces`
+  rather than silently ignored.
+- Spans that would produce a false ceiling breach are excluded and counted: a
+  span whose operation is not `execute_tool` even when it carries a tool name,
+  a span whose status is an error, and a repeat of a `gen_ai.tool.call.id`
+  already seen. Instrumentations commonly attach the tool name to the chat
+  span that requested the call, an errored call produced no effect, and one
+  call instrumented at both client and server is one call.
+- `docs/traces.md` and a runnable `examples/otel-trace.json`.
+
+### Changed
+
+- `verify` now requires exactly one of `--traces` or `--otel`, so a run cannot
+  silently verify a different file from the one intended.
+
 ## 0.4.0 - 2026-07-30
 
 ### Added
