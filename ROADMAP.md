@@ -9,9 +9,11 @@ This is direction, not a release promise.
 
 ## Where it is now
 
-As of 0.7.0 the loop closes without leaving the package, and a
-[worked example](https://github.com/mrwersa/agent-release-gate) runs the whole
-of it against one agent, offline.
+As of 0.7.0 the loop closes without leaving the package. A
+[worked example](https://github.com/mrwersa/agent-release-gate) runs six of
+these checks against one agent, offline, pinned to 0.6.0. It gains `drift`
+and the SARIF output when 0.7.0 reaches PyPI; saying it already ran "the
+whole of it" would have been a claim about software nobody can install yet.
 
 | | command | what it establishes |
 |---|---|---|
@@ -21,18 +23,15 @@ of it against one agent, offline.
 | **stay honest** | `drift` | whether the manifest still describes the implementation |
 | **hand off** | `obligations`, `scenarios` | reviewable test obligations, an AgentVerity decision suite, and neutral scenario skeletons |
 | **confirm** | `verify --otel` | whether the run that happened stayed inside the mandate |
+| **report** | `reach --sarif`, `--graph` | the finding as a code-scanning annotation, or a diagram GitHub renders |
 
 Each one fails closed. Missing control evidence, an unenumerable tool list, an
 unreviewed decision, and a currency that cannot be compared all produce a
 finding rather than a pass.
 
-## Next: findings where developers already look
+## Next: fewer steps between a finding and a reviewer
 
-1. **SARIF and a graph export.** A widening path should appear beside the pull
-   request that introduced it, in the code-scanning UI, rather than in a log
-   somebody has to open. The compact graph makes the counterexample legible
-   without reading a path listing.
-2. **A GitHub Action.** The gate is six commands and a handful of flags. That
+1. **A GitHub Action.** The gate is six commands and a handful of flags. That
    is a wrapper, not a feature, and it is the difference between a tool people
    try and a tool people run.
 

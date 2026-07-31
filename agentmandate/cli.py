@@ -12,6 +12,7 @@ from typing import Any
 from . import __version__
 from .diff import compare
 from .drift import compare_source
+from .findings import render_sarif, to_mermaid
 from .lint import ERROR, check
 from .manifest import ManifestError, load
 from .obligations import (
@@ -76,6 +77,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="override the manifest search depth",
     )
     reach_parser.add_argument("--json", action="store_true", help="machine-readable output")
+    reach_parser.add_argument(
+        "--sarif",
+        action="store_true",
+        help="emit SARIF 2.1.0 for GitHub code scanning",
+    )
+    reach_parser.add_argument(
+        "--graph",
+        action="store_true",
+        help="emit a Mermaid diagram of the authority graph and the breaching path",
+    )
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -409,7 +420,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                 + (" (search truncated)" if authority.truncated else "")
             )
             text = f"no reachable breach{depth_note}. {reached}{bound}"
-        _emit(authority.as_dict(), args.json, text)
+        chosen = [f for f in ("json", "sarif", "graph") if getattr(args, f)]
+        if len(chosen) > 1:
+            # Each writes to standard output. Emitting two would produce a
+            # file that is neither.
+            print(
+                f"error: choose one output format, not {', '.join('--' + f for f in chosen)}",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if args.sarif:
+            print(render_sarif(authority, args.manifest, __version__))
+        elif args.graph:
+            print(to_mermaid(authority, mandate))
+        else:
+            _emit(authority.as_dict(), args.json, text)
         return EXIT_FINDING if authority.breaches else EXIT_OK
 
     if args.command == "diff":

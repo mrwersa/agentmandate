@@ -23,6 +23,38 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `mandate reach --sarif` emits SARIF 2.1.0, so a reachable breach is
+  annotated on the pull request that introduced it rather than sitting in a
+  log nobody opens. Findings are `error` rather than `warning`, because they
+  already exit non-zero and a UI disagreeing with the exit code is how a gate
+  stops being believed.
+- Each result is anchored at the line declaring the last tool on the path, and
+  the message says that is a convention: a compound breach has no single
+  guilty line. The fingerprint is the kind and the path, so reformatting the
+  manifest does not make GitHub report the same breach as new.
+- `mandate reach --graph` emits Mermaid, which GitHub renders inline. One node
+  per step rather than per tool, since the same tool called twice on different
+  bindings is usually the whole finding and a node per tool draws that as a
+  self-loop. Rounded nodes are reads, boxes change something.
+- Two output formats at once is refused. Both write to standard output, so
+  emitting both would produce a file that is neither.
+- Mermaid labels are escaped. A tool name carrying a quote or a bracket
+  escaped its label and injected arbitrary graph syntax, and tool names reach
+  the diagram from `scan`, which exists to read untrusted MCP catalogues.
+  `scan` already quotes them when writing YAML; this is the same exposure in a
+  second output.
+- Every manifest spelling anchors at the tool it declares: block YAML, flow
+  YAML in either key order, and JSON. Flow style was missed first, then found
+  only when `name` came first, so `- { effect: read, name: pay }` still fell
+  back. Searching the whole line for the key made a comma inside a quoted
+  value look like a key boundary, inventing a tool out of
+  `description: "a, name: b"`, so the reader tracks the quote state. The reader recognised only
+  block YAML, so results on the other two fell back to line 1, which is not a
+  missing answer but a wrong one, since line 1 is usually `version:`.
+- A manifest inside the working directory gets a relative URI. Code scanning
+  resolves the URI against the repository root, so an absolute path attached
+  the finding to nothing.
+
 - `mandate drift manifest.yaml --source src/agent` compares the declared
   mandate against the implementation. A manifest is a claim, and two things
   quietly falsify it: somebody adds a tool to the agent's list and nobody

@@ -160,6 +160,42 @@ not supply is marked:
 Unrecognised verbs are proposed as `irreversible`, because under-calling an
 effect is the more expensive mistake.
 
+## Findings where you already look
+
+```yaml
+# .github/workflows/agent-authority.yml
+- run: mandate reach mandate.yaml --sarif > authority.sarif
+  continue-on-error: true          # let the upload happen, then fail the gate
+- uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: authority.sarif
+- run: mandate reach mandate.yaml   # the actual gate
+```
+
+The breach is then annotated on the pull request that introduced it, rather
+than sitting in a log somebody has to open. Findings are `error`, not
+`warning`: they already exit non-zero, and a UI that disagrees with the exit
+code is how a gate stops being believed.
+
+`--graph` emits Mermaid, which GitHub renders inline in a comment:
+
+```mermaid
+flowchart LR
+  s0(["search_cases<br/>case#1"])
+  s1(["search_cases<br/>case#2"])
+  s0 --> s1
+  s2["issue_refund<br/>case#1 · 500 GBP"]
+  s1 --> s2
+  s3["issue_refund<br/>case#2 · 500 GBP"]
+  s2 --> s3
+  breach["cumulative value 1000 GBP exceeds limit 500 GBP"]
+  s3 --> breach
+```
+
+One node per **step**, not per tool, because the same tool called twice on
+different bindings is usually the whole point. Rounded is a read, boxed
+changes something.
+
 ## Keeping the manifest honest
 
 A manifest is a claim. Two things quietly falsify it: somebody adds a tool to
