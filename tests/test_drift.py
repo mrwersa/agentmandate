@@ -306,3 +306,65 @@ agent = Agent(tools=[open_case, refund, wipe, *load_more()])''',
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
 
     assert {f.kind for f in drift.findings} == {"undeclared", "unresolved"}
+
+
+def test_a_tool_bound_outside_the_scan_is_not_reported_removed(
+    tmp_path: Path,
+) -> None:
+    # The manifest declares fetch_case and the source binds it from a module
+    # the scan never saw. Reporting that as `removed` would contradict the
+    # `unresolved` finding beside it: the tool is given to the agent, the scan
+    # just never read the file that declares it. An absent declaration is not
+    # an absent tool.
+    manifest = MANIFEST + """
+  - name: fetch_case
+    effect: read
+"""
+    source = SOURCE.replace(
+        "from strands import Agent, tool",
+        "from partner_kit import fetch_case\nfrom strands import Agent, tool",
+    ).replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "agent = Agent(tools=[open_case, refund, fetch_case])",
+    )
+
+    drift = compare_source(loads(manifest), write(tmp_path, source))
+
+    assert [(f.kind, f.tool) for f in drift.findings] == [
+        ("unresolved", "fetch_case")
+    ]
+    assert "Widen --source" in drift.findings[0].message
+
+
+def test_a_union_of_several_agents_names_itself_as_the_source(
+    tmp_path: Path,
+) -> None:
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "triage = Agent(tools=[open_case])\nresolver = Agent(tools=[open_case, refund])",
+    )
+    root = write(tmp_path, source)
+
+    drift = compare_source(loads(MANIFEST), root, union=True)
+
+    assert drift.clean
+    assert "union of every agent's tool list" in drift.source
+    assert "union of every agent's tool list" in drift.render()
+
+
+def test_a_single_agent_under_union_flags_still_names_its_binding(
+    tmp_path: Path,
+) -> None:
+    # `--union-bindings` with one agent in source selects that agent, so the
+    # report must name it rather than claim no binding was found.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "resolver = Agent(tools=[open_case, refund])",
+    )
+    root = write(tmp_path, source)
+
+    drift = compare_source(loads(MANIFEST), root, union=True)
+
+    assert drift.clean
+    assert "(resolver)" in drift.source
+    assert "no agent binding" not in drift.render()
