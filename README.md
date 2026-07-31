@@ -51,6 +51,11 @@ cannot:
 
 Alpha. Apache-2.0.
 
+**See the whole thing working:**
+[**agent-release-gate**](https://github.com/mrwersa/agent-release-gate) takes
+one agent from Python source to a gate decision, with every command in this
+README run against it. Six checks, one exit code, offline.
+
 ## Try it
 
 ```bash
