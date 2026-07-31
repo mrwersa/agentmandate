@@ -6,6 +6,114 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Fixed
+
+- `drift` no longer reports a declared tool as `removed` when the source binds
+  it from a module the scan never read. An absent declaration is not an absent
+  tool, so the report now gives only the `unresolved` finding instead of
+  contradicting it. The removal claim is suppressed whenever the read could
+  not enumerate the whole list, whether that is an unreadable binding or a
+  binding outside the scanned path.
+- `drift --union-bindings` names the source side correctly. The union of
+  several agents is reported as the union, and a single agent selected under
+  the flag is named like any other binding. Both previously read as "no agent
+  binding was found", which was false whenever a binding had been chosen.
+
+## 0.7.0 - 2026-07-31
+
+### Added
+
+- `mandate reach --sarif` emits SARIF 2.1.0, so a reachable breach is
+  annotated on the pull request that introduced it rather than sitting in a
+  log nobody opens. Findings are `error` rather than `warning`, because they
+  already exit non-zero and a UI disagreeing with the exit code is how a gate
+  stops being believed.
+- Each result is anchored at the line declaring the last tool on the path, and
+  the message says that is a convention: a compound breach has no single
+  guilty line. The fingerprint is the kind and the path, so reformatting the
+  manifest does not make GitHub report the same breach as new.
+- `mandate reach --graph` emits Mermaid, which GitHub renders inline. One node
+  per step rather than per tool, since the same tool called twice on different
+  bindings is usually the whole finding and a node per tool draws that as a
+  self-loop. Rounded nodes are reads, boxes change something.
+- Two output formats at once is refused. Both write to standard output, so
+  emitting both would produce a file that is neither.
+- Mermaid labels are escaped. A tool name carrying a quote or a bracket
+  escaped its label and injected arbitrary graph syntax, and tool names reach
+  the diagram from `scan`, which exists to read untrusted MCP catalogues.
+  `scan` already quotes them when writing YAML; this is the same exposure in a
+  second output.
+- Every manifest spelling anchors at the tool it declares: block YAML, flow
+  YAML in either key order, and JSON. Flow style was missed first, then found
+  only when `name` came first, so `- { effect: read, name: pay }` still fell
+  back. Searching the whole line for the key made a comma inside a quoted
+  value look like a key boundary, inventing a tool out of
+  `description: "a, name: b"`, so the reader tracks the quote state. The reader recognised only
+  block YAML, so results on the other two fell back to line 1, which is not a
+  missing answer but a wrong one, since line 1 is usually `version:`.
+- A manifest inside the working directory gets a relative URI. Code scanning
+  resolves the URI against the repository root, so an absolute path attached
+  the finding to nothing.
+
+- `mandate drift manifest.yaml --source src/agent` compares the declared
+  mandate against the implementation. A manifest is a claim, and two things
+  quietly falsify it: somebody adds a tool to the agent's list and nobody
+  edits the YAML, or a signature changes and the argument a ceiling was
+  counted against stops existing. Neither looks like a permission change in
+  review.
+- The direction of the error decides the ordering. A tool the agent has and
+  the mandate omits comes first, because it means every clean `reach` report
+  so far described a smaller graph than the real system. A tool the mandate
+  declares and the agent no longer has still fails, because a gate reporting
+  breaches nobody can reach is a gate somebody switches off.
+- A `value_arg` or `scope_key` that no longer names an argument the tool takes
+  is reported. The manifest still parses and the analysis still runs, so
+  nothing else reveals that the ceiling is counted against nothing. A
+  `scope_key` an argument carries, such as `case` against `case_id`, is not
+  reported, since a false finding on every well-formed manifest would make the
+  command useless.
+- A tool list the read cannot enumerate is a finding rather than a clean pass.
+  Reporting no drift from evidence that could not see the whole list would be
+  the false assurance this package exists to prevent.
+- Selecting a binding by a label two agents share is refused. A label is a
+  variable name and `agent` is the most common one there is, so
+  `--binding agent` silently merged two different agents, which is the
+  overstatement `--binding` exists to escape reintroduced through the escape
+  hatch itself. Disambiguate by location instead, which the message shows.
+- `drift --json` gives every finding a `subject` field beside `tool`. They
+  hold the same value for a finding about a tool. They differ for the
+  withheld-removals note, which is about the report rather than about a tool:
+  `subject` carries the `<removals>` sentinel and `tool` is `null`, so a
+  consumer reading `tool` never gets a name no manifest could declare. This
+  is a new field on a command introduced in the same release, so nothing
+  downstream can already depend on the older shape, but a reader diffing JSON
+  between builds will see it.
+- A withheld removal check is named rather than dropped silently. Suppressing
+  it is right; doing it quietly would leave a reader who resolves the
+  unreadable part meeting findings that look new and were only withheld.
+- An unenumerable list also suppresses removals. A removal claims a tool is
+  absent from the agent list, and that claim cannot be made about a list the
+  read could not see into: the tool may be in the part it missed.
+  `tools=[a] if flag else [a, b]` reported two removals beside the unresolved
+  finding, which asserted something positive from evidence already flagged as
+  unreadable. Undeclared tools still report, because a tool seen bound and not
+  declared is real whatever else was missed.
+- The report names which tool list the source side came from. `diff` refuses
+  outright to compare two different agents; this cannot, because nothing in
+  source states the agent's declared name, so identity cannot be established.
+  Naming the binding is what lets a reader see the comparison was against the
+  agent they meant.
+- `Declaration` carries the agent-facing argument names, which is what the
+  argument check reads.
+
+### Changed
+
+- The roadmap describes 0.7.0 rather than 0.3.2, names what each command
+  establishes, and says plainly what is not planned.
+- The README links
+  [agent-release-gate](https://github.com/mrwersa/agent-release-gate), a
+  worked example that runs every command here against one agent, offline.
+
 ## 0.6.0 - 2026-07-31
 
 ### Added

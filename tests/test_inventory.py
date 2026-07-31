@@ -472,8 +472,15 @@ def test_a_dotted_tool_reference_is_resolved_through_its_module(
         """,
     )
 
+    # Both modules assign to `agent`, so the binding is selected by location.
+    # Selecting by the shared label is refused, which is what stops two
+    # different agents being merged by a variable-name collision.
+    where = next(
+        b.where for b in collect(tmp_path, union=True).bindings
+        if b.module.endswith("main.py")
+    )
     assert "draft_email" in [
-        p.name for p in collect(tmp_path, binding="agent").proposals
+        p.name for p in collect(tmp_path, binding=where).proposals
     ]
 
 

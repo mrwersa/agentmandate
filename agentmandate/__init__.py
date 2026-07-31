@@ -13,9 +13,10 @@ against the declaration, so it is usable without another tool alongside it.
 
 from __future__ import annotations
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 from .diff import Change, Delta, compare
+from .drift import Drift, DriftFinding, compare_source
 from .inventory import Binding, Declaration, Inventory, InventoryError, collect
 from .lint import Finding, check
 from .manifest import Mandate, ManifestError, Money, Tool, load, loads
@@ -83,6 +84,9 @@ __all__ = [
     "replay_file",
     "reconcile_scenarios",
     "Binding",
+    "Drift",
+    "DriftFinding",
+    "compare_source",
     "Declaration",
     "Inventory",
     "InventoryError",

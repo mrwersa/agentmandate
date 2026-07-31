@@ -563,3 +563,62 @@ def test_scan_source_refuses_two_agents_and_names_them(tmp_path, capsys):
 
     assert main(["scan", "--source", str(tmp_path), "--binding", "resolver"]) == EXIT_OK
     assert 'name: "b"' in capsys.readouterr().out
+
+
+DRIFT_SOURCE = (
+    "from strands import Agent, tool\n\n\n"
+    "@tool\n"
+    "def open_case(customer_id: str) -> str:\n"
+    '    """Open."""\n\n\n'
+    "@tool\n"
+    "def wipe(case_id: str) -> None:\n"
+    '    """Undeclared."""\n\n\n'
+    "agent = Agent(tools=[open_case, wipe])\n"
+)
+
+
+def test_drift_reports_a_tool_the_mandate_never_declared(tmp_path, capsys):
+    (tmp_path / "agent.py").write_text(DRIFT_SOURCE, encoding="utf-8")
+
+    assert main(["drift", V1, "--source", str(tmp_path)]) == EXIT_FINDING
+    out = capsys.readouterr().out
+    assert "UNDECLARED  wipe" in out
+    assert "smaller graph than the real one" in out
+
+
+def test_drift_emits_parseable_json(tmp_path, capsys):
+    (tmp_path / "agent.py").write_text(DRIFT_SOURCE, encoding="utf-8")
+
+    main(["drift", V1, "--source", str(tmp_path), "--json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["clean"] is False
+    assert "wipe" in payload["discovered"]
+    assert any(f["kind"] == "undeclared" for f in payload["findings"])
+
+
+def test_drift_reports_an_unreadable_source_as_a_usage_error(capsys):
+    assert main(["drift", V1, "--source", "no-such-directory"]) == EXIT_USAGE
+    assert "does not exist" in capsys.readouterr().err
+
+
+def test_reach_emits_sarif(capsys):
+    assert main(["reach", V2, "--sarif"]) == EXIT_FINDING
+    log = json.loads(capsys.readouterr().out)
+
+    assert log["version"] == "2.1.0"
+    assert log["runs"][0]["results"][0]["level"] == "error"
+
+
+def test_reach_emits_a_mermaid_graph(capsys):
+    assert main(["reach", V2, "--graph"]) == EXIT_FINDING
+    out = capsys.readouterr().out
+
+    assert out.startswith("flowchart LR")
+    assert "--> breach" in out
+
+
+def test_reach_refuses_two_output_formats(capsys):
+    # Each writes to stdout. Emitting two would produce a file that is neither.
+    assert main(["reach", V2, "--sarif", "--graph"]) == EXIT_USAGE
+    assert "choose one output format" in capsys.readouterr().err

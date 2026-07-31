@@ -149,6 +149,10 @@ class Declaration:
     symbol: str
     module: str
     origin: str | None
+    # The agent-facing parameter names, in order. Drift detection needs these:
+    # a ceiling counted against an argument the tool no longer takes is not a
+    # ceiling, and nothing else in the manifest reveals that.
+    arguments: tuple[str, ...] = ()
 
     @property
     def name(self) -> str:
@@ -201,6 +205,9 @@ class Inventory:
     """Everything the source said, and everything it did not say."""
 
     proposals: list[Proposal] = field(default_factory=list)
+    # The full declarations behind `proposals`, in the same order. `scan` only
+    # needs the proposal; `drift` needs the signature behind it.
+    declarations: list[Declaration] = field(default_factory=list)
     selected: Binding | None = None
     bindings: list[Binding] = field(default_factory=list)
     unbound: list[str] = field(default_factory=list)
@@ -407,6 +414,7 @@ class _Reader(ast.NodeVisitor):
                     symbol=node.name,
                     module=self.module,
                     origin=self.origins.get(holder or name),
+                    arguments=tuple(properties),
                 )
             )
             break
@@ -576,7 +584,9 @@ def collect(
         # says the list has not been narrowed to one agent.
         selected = declarations
     else:
-        inventory.selected = None if union else chosen[0]
+        # A union of several agents has no single binding to name; one agent,
+        # even under --union-bindings, does.
+        inventory.selected = chosen[0] if len(chosen) == 1 else None
         inventory.united = union and len(chosen) > 1
         selected = []
         for site in chosen:
@@ -631,6 +641,7 @@ def collect(
             continue
         seen[declaration.name] = declaration
         inventory.proposals.append(declaration.proposal)
+        inventory.declarations.append(declaration)
 
     return inventory
 
@@ -645,6 +656,20 @@ def _choose(
             offered = ", ".join(b.label for b in bindings) or "none"
             raise InventoryError(
                 f"no tool binding called {wanted!r}. Found: {offered}"
+            )
+        if len(matched) > 1:
+            # A label is a variable name, and `agent` is the most common one
+            # there is. Two modules each assigning `agent = Agent(...)` would
+            # otherwise be silently merged here, which is the overstatement
+            # --binding exists to escape rather than to reintroduce.
+            sites = "\n".join(
+                f"  {b.where}  ({len(b.references)} tool(s))" for b in matched
+            )
+            raise InventoryError(
+                f"{len(matched)} bindings are called {wanted!r}, and merging "
+                f"them would describe an agent that holds every tool in "
+                f"both.\n\n{sites}\n\nSelect one by location instead, for "
+                f"example --binding {matched[0].where}."
             )
         return matched
 

@@ -165,6 +165,71 @@ not supply is marked:
 Unrecognised verbs are proposed as `irreversible`, because under-calling an
 effect is the more expensive mistake.
 
+## Findings where you already look
+
+```yaml
+# .github/workflows/agent-authority.yml
+- run: mandate reach mandate.yaml --sarif > authority.sarif
+  continue-on-error: true          # let the upload happen, then fail the gate
+- uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: authority.sarif
+- run: mandate reach mandate.yaml   # the actual gate
+```
+
+The breach is then annotated on the pull request that introduced it, rather
+than sitting in a log somebody has to open. Findings are `error`, not
+`warning`: they already exit non-zero, and a UI that disagrees with the exit
+code is how a gate stops being believed.
+
+`--graph` emits Mermaid, which GitHub renders inline in a comment:
+
+```mermaid
+flowchart LR
+  s0(["search_cases<br/>case#1"])
+  s1(["search_cases<br/>case#2"])
+  s0 --> s1
+  s2["issue_refund<br/>case#1 · 500 GBP"]
+  s1 --> s2
+  s3["issue_refund<br/>case#2 · 500 GBP"]
+  s2 --> s3
+  breach["cumulative value 1000 GBP exceeds limit 500 GBP"]
+  s3 --> breach
+```
+
+One node per **step**, not per tool, because the same tool called twice on
+different bindings is usually the whole point. Rounded is a read, boxed
+changes something.
+
+## Keeping the manifest honest
+
+A manifest is a claim. Two things quietly falsify it: somebody adds a tool to
+the agent and nobody edits the YAML, or a signature changes and the argument a
+ceiling was counted against stops existing.
+
+```console
+$ mandate drift mandate.yaml --source src/agent
+  UNDECLARED  issue_credit_note
+      the agent is given this tool and the mandate does not declare it, so
+      every reach and diff run so far analysed a smaller graph than the real one
+
+  ARGUMENT    issue_refund
+      value_arg names 'amount', which is not an argument this tool takes any
+      more (it takes: case_id, total, currency). A ceiling counted against an
+      argument that does not exist is not a ceiling.
+
+  REMOVED     close_case
+      the mandate declares this tool and the agent is not given it in source,
+      so the analysis is defending authority nobody has.
+```
+
+The second finding is the one worth having. The manifest still parses, `reach`
+still runs, and the ceiling counts against nothing.
+
+A tool list the read cannot enumerate, such as `tools=load_tools()`, is itself
+a finding. Reporting no drift from evidence that could not see the whole list
+would be the false assurance this package exists to prevent.
+
 ## The manifest
 
 Reachability needs three facts per tool that an ordinary tool schema does not carry: the effect class, which argument spends value, and which scope the ceiling is measured against.
@@ -202,6 +267,7 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | Command | What it does |
 |---|---|
 | `mandate scan` | Derives a manifest skeleton from agent source (`--source`) or an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
+| `mandate drift` | Compares the declared mandate against the agent's source and fails when the two have separated |
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
 | `mandate reach` | Bounded search for a legal call sequence that breaches a limit, reported as a counterexample |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |

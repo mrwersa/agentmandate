@@ -11,6 +11,8 @@ from typing import Any
 
 from . import __version__
 from .diff import compare
+from .drift import compare_source
+from .findings import render_sarif, to_mermaid
 from .lint import ERROR, check
 from .manifest import ManifestError, load
 from .obligations import (
@@ -75,6 +77,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="override the manifest search depth",
     )
     reach_parser.add_argument("--json", action="store_true", help="machine-readable output")
+    reach_parser.add_argument(
+        "--sarif",
+        action="store_true",
+        help="emit SARIF 2.1.0 for GitHub code scanning",
+    )
+    reach_parser.add_argument(
+        "--graph",
+        action="store_true",
+        help="emit a Mermaid diagram of the authority graph and the breaching path",
+    )
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -167,6 +179,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="write the converted observations here, for inspection",
     )
     verify_parser.add_argument("--json", action="store_true", help="machine-readable output")
+
+    drift_parser = subparsers.add_parser(
+        "drift",
+        help="compare the declared mandate against the agent's source",
+    )
+    drift_parser.add_argument("manifest", help="path to a mandate manifest (YAML or JSON)")
+    drift_parser.add_argument(
+        "--source",
+        required=True,
+        help="Python file or directory declaring the agent's tools",
+    )
+    drift_parser.add_argument(
+        "--binding",
+        help="the tool list to compare against, when the source builds several agents",
+    )
+    drift_parser.add_argument(
+        "--union-bindings",
+        action="store_true",
+        help="compare against every agent's tools merged",
+    )
+    drift_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     scan_parser = subparsers.add_parser(
         "scan",
@@ -287,6 +320,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
 
+    if args.command == "drift":
+        try:
+            drift = compare_source(
+                mandate,
+                args.source,
+                binding=args.binding,
+                union=args.union_bindings,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return EXIT_USAGE
+        if args.json:
+            print(json.dumps(drift.as_dict(), indent=2))
+        else:
+            print(drift.render())
+        return EXIT_OK if drift.clean else EXIT_FINDING
+
     if args.command == "obligations":
         obligations = derive(mandate, depth=args.depth)
         if args.reviewed:
@@ -370,7 +420,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                 + (" (search truncated)" if authority.truncated else "")
             )
             text = f"no reachable breach{depth_note}. {reached}{bound}"
-        _emit(authority.as_dict(), args.json, text)
+        chosen = [f for f in ("json", "sarif", "graph") if getattr(args, f)]
+        if len(chosen) > 1:
+            # Each writes to standard output. Emitting two would produce a
+            # file that is neither.
+            print(
+                f"error: choose one output format, not {', '.join('--' + f for f in chosen)}",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if args.sarif:
+            print(render_sarif(authority, args.manifest, __version__))
+        elif args.graph:
+            print(to_mermaid(authority, mandate))
+        else:
+            _emit(authority.as_dict(), args.json, text)
         return EXIT_FINDING if authority.breaches else EXIT_OK
 
     if args.command == "diff":
