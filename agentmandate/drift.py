@@ -35,6 +35,10 @@ from .manifest import Mandate
 # describe comes first, because it silently invalidates every other answer.
 DRIFT_KINDS = ("undeclared", "argument", "removed", "unresolved")
 
+# The subject of the note explaining that removals were not checked. Not a
+# tool name, and deliberately not one a manifest could declare.
+WITHHELD = "<removals>"
+
 
 @dataclass(frozen=True)
 class DriftFinding:
@@ -158,6 +162,7 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
     # scan never saw it, so declaring it in the manifest must not read as a
     # removal.
     unreadable = bool(inventory.unresolved) or bool(inventory.undeclared)
+    withheld = sorted(set(declared) - set(discovered)) if unreadable else []
     for name in sorted(set(declared) - set(discovered)) if not unreadable else ():
         findings.append(
             DriftFinding(
@@ -192,8 +197,26 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
             )
         )
 
+    # Suppressing the removal check is right, and doing it silently is not: a
+    # reader who resolves the unreadable part would otherwise meet findings
+    # that look new and were only withheld.
+    if withheld:
+        listed = ", ".join(withheld)
+        findings.append(
+            DriftFinding(
+                "unresolved",
+                WITHHELD,
+                f"{len(withheld)} declared tool(s) were not checked for "
+                f"removal, because a tool absent from a list this could not "
+                f"read may simply be in the part it could not see: {listed}. "
+                f"Resolve the findings above and run again.",
+            )
+        )
+
     order = {kind: index for index, kind in enumerate(DRIFT_KINDS)}
-    findings.sort(key=lambda f: (order[f.kind], f.tool))
+    # The withheld-removals note refers to the findings that caused it, so it
+    # sorts last rather than alphabetically among them.
+    findings.sort(key=lambda f: (order[f.kind], f.tool == WITHHELD, f.tool))
 
     selected = inventory.selected
     if selected is not None:
