@@ -21,10 +21,19 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- Releases are now cut by merging the version bump. The workflow tags the
-  commit, builds the release notes from that version's changelog section, and
-  publishes. The changelog is the only place the prose lives, rather than
-  being written once there and again by hand in the GitHub Release.
+- Releases are now cut by merging the version bump. The release notes come
+  from that version's changelog section, so the prose is written once rather
+  than once there and again by hand in the GitHub Release.
+- The release runs when CI finishes on `main` and only when it succeeded, not
+  when the push happens. A push-triggered release runs beside the CI it is
+  supposed to depend on, so it could publish a commit whose tests were still
+  running or had already failed, and it reads the version from the exact
+  commit that passed.
+- Artefacts are built and checked before the tag and the GitHub Release are
+  created. Tagging first leaves a public release behind whenever a build or an
+  upload fails, which is a version users can see and cannot install.
+- The workflow takes a repository-wide lock, so two merges landing together
+  cannot both decide the same tag is free and race to create it.
 - The release build checks the built wheel and sdist filenames against the
   tag, because the artefact users install is the thing worth checking.
 

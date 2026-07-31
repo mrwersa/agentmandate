@@ -34,19 +34,29 @@ No long-lived PyPI token is stored in GitHub.
 
 5. Open a pull request and merge it once every required check passes.
 
-Merging does the rest. The release workflow reads the version, sees no tag for
-it, extracts that changelog section, creates `v<version>` and the GitHub
-Release, then builds and publishes to PyPI. A push whose version is already
-tagged is not a release and stops after the first job.
+Merging does the rest, once CI has passed on the merged commit.
+
+The release workflow runs when CI finishes on `main`, not when the push
+happens, and only when CI concluded successfully. It reads the version from
+the exact commit CI passed on, stops if that version is already tagged,
+extracts the changelog section, builds and checks the artefacts, and only then
+creates the tag and the GitHub Release before publishing to PyPI.
+
+The order matters. Tagging first would leave a public release behind whenever
+a build or an upload failed, which is a version users can see and cannot
+install.
 
 Confirm afterwards that the version appears on PyPI and that
 `pip install agentmandate` resolves it.
 
 ## What the automation refuses to do
 
+- Publish a commit whose CI run did not succeed.
 - Publish a version with no dated changelog section.
 - Publish a wheel or sdist whose filename does not match the tag.
 - Re-release a version that is already tagged.
+- Run two releases at once. The workflow takes a repository-wide lock, so two
+  merges landing together cannot both decide the same tag is free.
 
 ## Publishing from the GitHub UI
 

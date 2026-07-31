@@ -1,17 +1,23 @@
 name: Release
 
-# Two ways in, one way out.
-#
 # Merging a pull request that raises the version in agentmandate/__init__.py
-# tags the commit and creates the GitHub Release from that version's changelog
-# section, then publishes. Nothing is typed by hand at release time, which is
-# what let 0.5.0 ship a wheel whose __version__ still said 0.4.0.
+# releases it. Nothing is typed by hand at release time, which is what let
+# 0.5.0 ship a wheel whose __version__ still said 0.4.0.
+#
+# The trigger is CI finishing on main, not the push itself. A push-triggered
+# release runs beside the CI it is supposed to depend on, so it could publish
+# a commit whose tests were still running, or had already failed. The tag has
+# to mean the gate passed on exactly that commit.
 #
 # A release created in the GitHub UI still publishes. Releases created by
-# GITHUB_TOKEN do not trigger workflows, so the tagging job has to carry on
-# into the build in the same run rather than hand off to a second one.
+# GITHUB_TOKEN do not trigger workflows, so the jobs below carry on within the
+# same run rather than handing off to a second one.
 on:
-  push:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
     branches:
       - main
   release:
@@ -21,30 +27,45 @@ on:
 permissions:
   contents: read
 
+# One release at a time, repository wide. Two merges landing together would
+# otherwise both find the tag absent and both try to create it.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  tag:
-    name: Tag and create the release
+  decide:
+    name: Decide whether a release is due
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    permissions:
-      contents: write
+    # `workflow_run` fires whatever CI concluded, so the conclusion is the
+    # gate. Without this a red build would publish.
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
     outputs:
       due: ${{ steps.decide.outputs.due }}
       tag: ${{ steps.decide.outputs.tag }}
+      sha: ${{ steps.decide.outputs.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
+          # The commit CI actually passed on, not whatever main points at by
+          # the time this runs.
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Decide whether a release is due
+      - name: Decide
         id: decide
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           VERSION="$(python scripts/release_notes.py --print-version)"
           echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
           if git rev-parse --verify --quiet "refs/tags/v${VERSION}" > /dev/null; then
-            echo "v${VERSION} is already tagged, so this push is not a release"
+            echo "v${VERSION} is already tagged, so this commit is not a release"
             echo "due=false" >> "$GITHUB_OUTPUT"
           else
             echo "due=true" >> "$GITHUB_OUTPUT"
@@ -54,32 +75,25 @@ jobs:
         run: |
           TAG="${{ steps.decide.outputs.tag }}"
           python scripts/release_notes.py "${TAG#v}" > release-notes.md
-      - name: Create the tag and the release
+      - uses: actions/upload-artifact@v7
         if: steps.decide.outputs.due == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.decide.outputs.tag }}
-        run: |
-          git tag "${TAG}" "${GITHUB_SHA}"
-          git push origin "${TAG}"
-          gh release create "${TAG}" \
-            --title "AgentMandate ${TAG}" \
-            --notes-file release-notes.md \
-            --verify-tag
+        with:
+          name: release-notes
+          path: release-notes.md
 
   build:
     name: Build distributions
-    needs: tag
-    # always() keeps this reachable when the tag job is skipped, which is the
-    # case for a release published from the GitHub UI.
+    needs: decide
+    # always() keeps this reachable when `decide` is skipped, which is the case
+    # for a release published from the GitHub UI.
     if: >-
       always() &&
-      (github.event_name == 'release' || needs.tag.outputs.due == 'true')
+      (github.event_name == 'release' || needs.decide.outputs.due == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name || needs.tag.outputs.tag }}
+          ref: ${{ github.event.release.tag_name || needs.decide.outputs.sha }}
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
@@ -90,7 +104,7 @@ jobs:
         run: python -m build
       - name: Check the built version matches the tag
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name || needs.tag.outputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || needs.decide.outputs.tag }}
         run: |
           # The wheel is what users install, so the check that matters is on
           # the built artefact rather than on the source it came from.
@@ -103,9 +117,54 @@ jobs:
           name: python-package-distributions
           path: dist/
 
+  tag:
+    name: Tag and create the release
+    # Deliberately after the build. A tag and a public release that no artefact
+    # was ever produced for is a version users can see and cannot install, and
+    # it cannot be withdrawn quietly.
+    needs:
+      - decide
+      - build
+    if: github.event_name == 'workflow_run' && needs.decide.outputs.due == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.decide.outputs.sha }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-notes
+      - uses: actions/download-artifact@v8
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Create the tag and the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.decide.outputs.tag }}
+          SHA: ${{ needs.decide.outputs.sha }}
+        run: |
+          git tag "${TAG}" "${SHA}"
+          git push origin "${TAG}"
+          gh release create "${TAG}" \
+            --title "AgentMandate ${TAG}" \
+            --notes-file release-notes.md \
+            --verify-tag \
+            dist/*
+
   publish:
     name: Publish to PyPI
-    needs: build
+    needs:
+      - build
+      - tag
+    # The tag job is skipped for a release published from the GitHub UI, and
+    # publishing still has to happen on that path.
+    if: >-
+      always() && needs.build.result == 'success' &&
+      (github.event_name == 'release' || needs.tag.result == 'success')
     runs-on: ubuntu-latest
     environment:
       name: pypi
