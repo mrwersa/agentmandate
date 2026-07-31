@@ -146,7 +146,14 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
                 )
             )
 
-    for name in sorted(set(declared) - set(discovered)):
+    # A removal is a claim that a tool is absent from the agent's list. That
+    # claim cannot be made from a list the read could not enumerate: the tool
+    # may well be in the part it could not see. Reporting both `unresolved`
+    # and `removed` was asserting something positive from evidence already
+    # flagged as unreadable, which is the same fail-closed rule this module
+    # applies everywhere else, pointed the other way.
+    unreadable = bool(inventory.unresolved)
+    for name in sorted(set(declared) - set(discovered)) if not unreadable else ():
         findings.append(
             DriftFinding(
                 "removed",
