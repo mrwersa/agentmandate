@@ -535,3 +535,31 @@ def test_an_errored_call_survives_the_emit_round_trip(tmp_path, capsys):
     assert json.loads(out_path.read_text().splitlines()[0])["errored"] is True
     assert main(["verify", V1, "--traces", str(out_path)]) == EXIT_FINDING
     assert "errored_effect" in capsys.readouterr().out
+
+
+def test_binding_flags_are_refused_with_a_catalogue(capsys):
+    assert main(["scan", CATALOGUE, "--binding", "x"]) == EXIT_USAGE
+    assert "apply to --source" in capsys.readouterr().err
+
+
+def test_scan_source_refuses_two_agents_and_names_them(tmp_path, capsys):
+    (tmp_path / "agent.py").write_text(
+        "from strands import Agent, tool\n\n\n"
+        "@tool\n"
+        "def a(case_id: str) -> str:\n"
+        '    """A."""\n\n\n'
+        "@tool\n"
+        "def b(case_id: str) -> str:\n"
+        '    """B."""\n\n\n'
+        "triage = Agent(tools=[a])\n"
+        "resolver = Agent(tools=[b])\n",
+        encoding="utf-8",
+    )
+
+    assert main(["scan", "--source", str(tmp_path)]) == EXIT_USAGE
+    err = capsys.readouterr().err
+    assert "more than one agent" in err
+    assert "triage" in err and "resolver" in err
+
+    assert main(["scan", "--source", str(tmp_path), "--binding", "resolver"]) == EXIT_OK
+    assert 'name: "b"' in capsys.readouterr().out

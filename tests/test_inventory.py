@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from agentmandate.inventory import collect, notes_for
+from agentmandate.inventory import InventoryError, collect, notes_for
 from agentmandate.scan import scan_source
 
 STRANDS_AGENT = '''
@@ -354,7 +354,31 @@ def test_bind_tools_is_read_as_a_binding(tmp_path: Path) -> None:
     assert inventory.unbound == ["delete_case"]
 
 
-def test_bind_tools_with_no_argument_binds_nothing(tmp_path: Path) -> None:
+def test_an_explicitly_empty_tool_list_is_refused(tmp_path: Path) -> None:
+    # The blocker. Branching on whether any symbol was bound, rather than on
+    # whether a list was found, turned `tools=[]` into every declared tool.
+    # The agent has no authority and the manifest granted some.
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def refund(case_id: str, amount: float) -> str:
+            """Refund."""
+
+
+        agent = Agent(tools=[])
+        ''',
+    )
+
+    with pytest.raises(InventoryError, match="is empty"):
+        collect(tmp_path)
+
+
+def test_bind_tools_with_no_argument_lists_nothing(tmp_path: Path) -> None:
     write(
         tmp_path,
         "agent.py",
@@ -371,12 +395,12 @@ def test_bind_tools_with_no_argument_binds_nothing(tmp_path: Path) -> None:
         ''',
     )
 
+    # No list at all is not an empty list. Nothing was said about the tools,
+    # so every declaration is offered and the note says the list is unnarrowed.
     inventory = collect(tmp_path)
 
-    # No list means nothing was bound here, so this falls back to listing every
-    # declared tool and saying so, which over-lists rather than under-lists.
-    assert inventory.bindings == []
     assert [p.name for p in inventory.proposals] == ["get_case"]
+    assert "No agent was found" in " ".join(notes_for(inventory))
 
 
 def test_an_unenumerable_tool_list_is_reported_rather_than_assumed(
@@ -394,15 +418,13 @@ def test_an_unenumerable_tool_list_is_reported_rather_than_assumed(
             """Read a case."""
 
 
-        agent = Agent(tools=load_tools())
         second = Agent(tools=[get_case, *extra_tools])
         ''',
     )
 
-    inventory = collect(tmp_path)
+    inventory = collect(tmp_path, binding="second")
     notes = " ".join(notes_for(inventory))
 
-    assert "load_tools()" in notes
     assert "*extra_tools" in notes
     # Silence here would mean the next release diff called those tools new.
     assert "diff would report them as newly added authority" in notes
@@ -434,7 +456,7 @@ def test_a_bound_tool_declared_outside_the_scanned_path_is_reported(
     assert "Widen --source" in " ".join(notes_for(inventory))
 
 
-def test_a_dotted_tool_reference_is_resolved_by_its_trailing_name(
+def test_a_dotted_tool_reference_is_resolved_through_its_module(
     tmp_path: Path,
 ) -> None:
     write(tmp_path, "pkg/tools.py", STRANDS_AGENT)
@@ -450,10 +472,12 @@ def test_a_dotted_tool_reference_is_resolved_by_its_trailing_name(
         """,
     )
 
-    assert "draft_email" in [p.name for p in collect(tmp_path).proposals]
+    assert "draft_email" in [
+        p.name for p in collect(tmp_path, binding="agent").proposals
+    ]
 
 
-def test_more_than_one_binding_is_declared_a_union(tmp_path: Path) -> None:
+def test_more_than_one_agent_is_refused_rather_than_merged(tmp_path: Path) -> None:
     write(
         tmp_path,
         "agent.py",
@@ -476,12 +500,81 @@ def test_more_than_one_binding_is_declared_a_union(tmp_path: Path) -> None:
         ''',
     )
 
-    notes = " ".join(notes_for(collect(tmp_path)))
+    # A union claims one agent holds every tool in the system, and `reach`
+    # would then compose a path across tools that never share a run. A gate
+    # reporting breaches nobody can reach is a gate that gets switched off.
+    with pytest.raises(InventoryError) as raised:
+        collect(tmp_path)
 
-    # A union of two agents' tools claims one agent can reach both, which is
-    # exactly the overstatement `reach` would then act on.
-    assert "2 tool bindings" in notes
-    assert "union overstates" in notes
+    assert "more than one agent" in str(raised.value)
+    assert "triage" in str(raised.value)
+    assert "resolver" in str(raised.value)
+
+
+def test_a_named_binding_selects_one_agent(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        @tool
+        def delete_case(case_id: str) -> None:
+            """Delete a case."""
+
+
+        triage = Agent(tools=[get_case])
+        resolver = Agent(tools=[delete_case])
+        ''',
+    )
+
+    inventory = collect(tmp_path, binding="resolver")
+
+    assert [p.name for p in inventory.proposals] == ["delete_case"]
+    assert inventory.unbound == ["get_case"]
+    assert "resolver" in notes_for(inventory)[0]
+
+
+def test_a_union_is_available_but_labelled(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        @tool
+        def delete_case(case_id: str) -> None:
+            """Delete a case."""
+
+
+        triage = Agent(tools=[get_case])
+        resolver = Agent(tools=[delete_case])
+        ''',
+    )
+
+    inventory = collect(tmp_path, union=True)
+
+    assert [p.name for p in inventory.proposals] == ["get_case", "delete_case"]
+    assert "union of every agent" in notes_for(inventory)[0]
+
+
+def test_an_unknown_binding_name_lists_what_there_is(tmp_path: Path) -> None:
+    write(tmp_path, "agent.py", STRANDS_AGENT)
+
+    with pytest.raises(InventoryError, match="no tool binding called 'nope'"):
+        collect(tmp_path, binding="nope")
 
 
 def test_no_binding_at_all_says_so(tmp_path: Path) -> None:
@@ -501,7 +594,7 @@ def test_no_binding_at_all_says_so(tmp_path: Path) -> None:
     inventory = collect(tmp_path)
 
     assert [p.name for p in inventory.proposals] == ["get_case"]
-    assert "No `tools=[...]` binding was found" in " ".join(notes_for(inventory))
+    assert "No agent was found" in " ".join(notes_for(inventory))
 
 
 def test_an_unparsable_file_is_named_and_the_rest_survives(tmp_path: Path) -> None:
@@ -579,7 +672,7 @@ def test_scan_source_renders_the_notes_before_the_manifest(tmp_path: Path) -> No
     rendered = scan_source(tmp_path, "refunds")
 
     notes_end = rendered.index("version: 1")
-    assert "Defined but not bound to any agent: draft_email" in rendered[:notes_end]
+    assert "Declared but not given to this agent: draft_email" in rendered[:notes_end]
     assert rendered.index("REVIEW") < notes_end
     assert 'agent: "refunds"' in rendered
 
@@ -611,3 +704,361 @@ def test_the_generated_skeleton_is_a_loadable_manifest_once_reviewed(
 
     assert mandate.agent == "refunds"
     assert {tool.name for tool in mandate.tools} == {"search_cases", "issue_refund"}
+
+
+def test_an_ambiguous_name_is_reported_rather_than_guessed(tmp_path: Path) -> None:
+    # Two modules declaring `refund`, and the binding names neither. Choosing
+    # one would attribute the wrong signature, scope, and ceiling.
+    for name, body in [
+        ("bank.py", "def refund(case_id: str, amount: float) -> str:"),
+        ("support.py", "def refund(ticket_id: str) -> str:"),
+    ]:
+        write(
+            tmp_path,
+            name,
+            f'''
+            from strands import tool
+
+
+            @tool
+            {body}
+                """Refund."""
+            ''',
+        )
+    write(
+        tmp_path,
+        "agent.py",
+        """
+        from strands import Agent
+
+        agent = Agent(tools=[refund])
+        """,
+    )
+
+    inventory = collect(tmp_path)
+
+    assert inventory.proposals == []
+    assert inventory.ambiguous == ["refund (bank.py:refund, support.py:refund)"]
+    assert "wrong signature" in " ".join(notes_for(inventory))
+
+
+def test_the_importing_module_decides_which_declaration_is_meant(
+    tmp_path: Path,
+) -> None:
+    # The defect this replaced picked whichever file sorted first, so the
+    # bank's per-case ceiling was attributed to the support agent's tool.
+    write(
+        tmp_path,
+        "bank.py",
+        '''
+        from strands import tool
+
+
+        @tool
+        def refund(case_id: str, amount: float) -> str:
+            """Bank refund."""
+        ''',
+    )
+    write(
+        tmp_path,
+        "support.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def refund(ticket_id: str) -> str:
+            """Support refund."""
+
+
+        agent = Agent(tools=[refund])
+        ''',
+    )
+
+    proposal = collect(tmp_path).proposals[0]
+
+    assert (proposal.scope, proposal.value_arg) == ("ticket", None)
+    assert collect(tmp_path).unbound == ["bank.py:refund"]
+
+
+def test_an_explicit_import_resolves_across_modules(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "bank.py",
+        '''
+        from strands import tool
+
+
+        @tool
+        def refund(case_id: str, amount: float) -> str:
+            """Bank refund."""
+        ''',
+    )
+    write(
+        tmp_path,
+        "support.py",
+        '''
+        from strands import tool
+
+
+        @tool
+        def refund(ticket_id: str) -> str:
+            """Support refund."""
+        ''',
+    )
+    write(
+        tmp_path,
+        "agent.py",
+        """
+        from strands import Agent
+
+        from .bank import refund
+
+        agent = Agent(tools=[refund])
+        """,
+    )
+
+    proposal = collect(tmp_path).proposals[0]
+
+    assert (proposal.scope, proposal.value_arg) == ("case", "amount")
+
+
+def test_a_tools_keyword_on_a_non_agent_is_not_a_binding(tmp_path: Path) -> None:
+    # `render_panel(tools=[...])` previously decided the whole inventory.
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import tool
+        from ui import render_panel
+
+
+        @tool
+        def wipe_database(confirm: bool) -> None:
+            """Not this agent's authority."""
+
+
+        render_panel(tools=[wipe_database])
+        ''',
+    )
+
+    inventory = collect(tmp_path)
+    notes = " ".join(notes_for(inventory))
+
+    assert inventory.selected is None
+    assert "does not look like an agent" in notes
+    assert "--binding" in notes
+
+
+def test_an_ignored_call_site_can_still_be_selected(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        @tool
+        def delete_case(case_id: str) -> None:
+            """Delete a case."""
+
+
+        support = build_my_own_thing(tools=[get_case])
+        ''',
+    )
+
+    inventory = collect(tmp_path, binding="support")
+
+    assert [p.name for p in inventory.proposals] == ["get_case"]
+    assert inventory.unbound == ["delete_case"]
+
+
+def test_a_decorator_from_an_unknown_module_is_flagged(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from internal_helpers import tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+        ''',
+    )
+
+    notes = " ".join(notes_for(collect(tmp_path)))
+
+    # Re-exported decorators are common, so this is included and questioned
+    # rather than dropped.
+    assert "does not recognise as an agent framework" in notes
+    assert "internal_helpers" in notes
+
+
+def test_a_framework_decorator_is_not_flagged(tmp_path: Path) -> None:
+    write(tmp_path, "agent.py", STRANDS_AGENT)
+
+    assert collect(tmp_path).unconfirmed == []
+
+
+def test_an_import_module_form_is_attributed(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        import strands
+
+
+        @strands.tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+        ''',
+    )
+
+    assert collect(tmp_path).unconfirmed == []
+
+
+def test_a_binding_can_be_selected_by_location(tmp_path: Path) -> None:
+    write(tmp_path, "agent.py", STRANDS_AGENT)
+
+    where = collect(tmp_path).bindings[0].where
+    inventory = collect(tmp_path, binding=where)
+
+    assert [p.name for p in inventory.proposals] == ["search_cases", "issue_refund"]
+
+
+def test_an_unnamed_binding_is_labelled_by_its_callee(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        run(Agent(tools=[get_case]))
+        ''',
+    )
+
+    binding = collect(tmp_path).bindings[0]
+    assert binding.label == f"Agent@{binding.where.split(':')[1]}"
+
+
+def test_an_annotated_assignment_names_the_binding(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        resolver: Agent = Agent(tools=[get_case])
+        ''',
+    )
+
+    assert collect(tmp_path).bindings[0].label == "resolver"
+
+
+def test_a_computed_callee_is_still_recorded(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        FACTORIES[0](tools=[get_case])
+        ''',
+    )
+
+    assert collect(tmp_path).bindings[0].callee == "<expression>"
+
+
+def test_a_renamed_plain_import_is_attributed(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        import strands.tools as st
+
+
+        @st.tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+        ''',
+    )
+
+    assert collect(tmp_path).unconfirmed == []
+
+
+def test_a_tool_list_that_is_a_bare_name_is_reported(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        '''
+        from strands import Agent, tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        agent = Agent(tools=TOOLS)
+        ''',
+    )
+
+    inventory = collect(tmp_path)
+
+    assert inventory.proposals == []
+    assert "TOOLS" in " ".join(notes_for(inventory))
+
+
+def test_one_declaration_across_modules_needs_no_import_to_resolve(
+    tmp_path: Path,
+) -> None:
+    # Only one `refund` exists anywhere, so the reference is unambiguous even
+    # though the binding module never imported it in a form this can see.
+    write(
+        tmp_path,
+        "tools.py",
+        '''
+        from strands import tool
+
+
+        @tool
+        def refund(case_id: str, amount: float) -> str:
+            """Refund."""
+        ''',
+    )
+    write(
+        tmp_path,
+        "agent.py",
+        """
+        from strands import Agent
+        from .tools import *
+
+        agent = Agent(tools=[refund])
+        """,
+    )
+
+    assert [p.name for p in collect(tmp_path).proposals] == ["refund"]

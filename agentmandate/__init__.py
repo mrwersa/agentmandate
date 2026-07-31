@@ -16,7 +16,7 @@ from __future__ import annotations
 __version__ = "0.5.1"
 
 from .diff import Change, Delta, compare
-from .inventory import Inventory, collect
+from .inventory import Binding, Declaration, Inventory, InventoryError, collect
 from .lint import Finding, check
 from .manifest import Mandate, ManifestError, Money, Tool, load, loads
 from .obligations import (
@@ -82,7 +82,10 @@ __all__ = [
     "replay",
     "replay_file",
     "reconcile_scenarios",
+    "Binding",
+    "Declaration",
     "Inventory",
+    "InventoryError",
     "collect",
     "scan_file",
     "scan_source",

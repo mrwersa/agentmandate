@@ -188,6 +188,21 @@ def build_parser() -> argparse.ArgumentParser:
     scan_parser.add_argument(
         "--agent", default="unnamed-agent", help="agent name to write into the skeleton"
     )
+    scan_parser.add_argument(
+        "--binding",
+        help=(
+            "with --source, the tool list to take the inventory from, when the "
+            "source builds more than one agent"
+        ),
+    )
+    scan_parser.add_argument(
+        "--union-bindings",
+        action="store_true",
+        help=(
+            "with --source, merge every agent's tools into one manifest. Only "
+            "correct when they genuinely share authority"
+        ),
+    )
 
     return parser
 
@@ -241,8 +256,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "scan":
         try:
             if args.source is not None:
-                print(scan_source(args.source, args.agent), end="")
+                print(
+                    scan_source(
+                        args.source,
+                        args.agent,
+                        binding=args.binding,
+                        union=args.union_bindings,
+                    ),
+                    end="",
+                )
             else:
+                if args.binding is not None or args.union_bindings:
+                    raise ValueError(
+                        "--binding and --union-bindings apply to --source. An "
+                        "MCP catalogue holds one tool list already."
+                    )
                 print(scan_file(args.catalogue, args.agent), end="")
         except (OSError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)

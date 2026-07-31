@@ -266,11 +266,17 @@ def scan_file(path: str | Path, agent: str) -> str:
     return render(propose(payload), agent)
 
 
-def scan_source(root: str | Path, agent: str) -> str:
+def scan_source(
+    root: str | Path,
+    agent: str,
+    *,
+    binding: str | None = None,
+    union: bool = False,
+) -> str:
     """Derive a skeleton from agent source rather than from a catalogue."""
     from .inventory import collect, notes_for
 
-    inventory = collect(root)
+    inventory = collect(root, binding=binding, union=union)
     if not inventory.proposals:
         raise ValueError(
             "no tool declarations were found. This reads decorators such as "

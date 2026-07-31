@@ -125,10 +125,14 @@ $ mandate scan --source src/agent --agent dispute-resolver > mandate.yaml
 
 That reads `@tool`, `@function_tool`, and `@ai_function` declarations and the
 `tools=[...]` list they are passed to. It is a static read: nothing is
-imported, nothing is executed, and the framework need not be installed. What
-it could not enumerate is reported rather than dropped, because a tool missing
-from today's manifest shows up in tomorrow's diff as authority that was never
-added. See [docs/inventory.md](docs/inventory.md).
+imported, nothing is executed, and the framework need not be installed.
+
+One manifest describes one agent, so a source building two of them is refused
+until you name the one you mean with `--binding`. A union would let `reach`
+compose a path across tools that never share a run. What the read could not
+enumerate is reported rather than dropped, because a tool missing from today's
+manifest shows up in tomorrow's diff as authority that was never added. See
+[docs/inventory.md](docs/inventory.md).
 
 Or from an MCP catalogue:
 

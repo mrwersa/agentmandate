@@ -23,10 +23,33 @@ All notable changes to this project are documented here. The format follows
   framework does not need to be installed. A review runs on a branch whose
   dependencies are absent and whose side effects must not happen, and
   importing a module to learn what it is permitted to do has already done it.
-- The inventory is the tools the agent was given, read from `tools=[...]` and
-  `.bind_tools([...])`. A declared but unbound tool is excluded and named,
-  because a mandate describes one agent's authority rather than every
-  decorated function in the repository.
+- One manifest describes one agent. The inventory is the tools that agent was
+  given, read from `tools=[...]` and `.bind_tools([...])`, and a declared but
+  unbound tool is excluded and named. `reach` searches whatever graph it is
+  given, so a manifest holding two agents' tools produces compound paths no
+  single run could take, and a gate reporting breaches nobody can reach is a
+  gate that gets switched off.
+- A source building more than one agent is refused, naming each one and where
+  it is built, until `--binding NAME` says which is meant.
+  `--union-bindings` merges them for the case where they genuinely share
+  authority, and labels the output so a later reader knows.
+- `Agent(tools=[])` is refused. An empty list means the agent has no tools,
+  and listing every declared tool there would grant authority the source
+  explicitly withholds. No `tools=` list at all is different: nothing was
+  said, so every declaration is offered and the file says the list has not
+  been narrowed.
+- Only a callee that looks like an agent is read as a binding. A `tools=`
+  keyword on any function used to decide the inventory, so an unrelated
+  `render_panel(tools=[...])` could rewrite what the agent was said to hold.
+  Anything else is reported as a candidate that `--binding` can select.
+- The module a reference came through decides which declaration it means.
+  Two modules declaring `refund` is ordinary, and picking whichever file
+  sorted first attributed one agent's signature, scope, and ceiling to
+  another agent's tool. A name that genuinely could be either is reported and
+  neither is used.
+- A tool decorator imported from somewhere unrecognised is included and then
+  questioned by name, since re-exporting a framework decorator through a
+  local module is common but `@tool` from anywhere means nothing on its own.
 - What the read could not enumerate is reported at the top of the file:
   `tools=load_tools()`, a starred element, a bound tool declared outside the
   scanned path, a second binding whose union would overstate what one agent
