@@ -600,3 +600,25 @@ def test_drift_emits_parseable_json(tmp_path, capsys):
 def test_drift_reports_an_unreadable_source_as_a_usage_error(capsys):
     assert main(["drift", V1, "--source", "no-such-directory"]) == EXIT_USAGE
     assert "does not exist" in capsys.readouterr().err
+
+
+def test_reach_emits_sarif(capsys):
+    assert main(["reach", V2, "--sarif"]) == EXIT_FINDING
+    log = json.loads(capsys.readouterr().out)
+
+    assert log["version"] == "2.1.0"
+    assert log["runs"][0]["results"][0]["level"] == "error"
+
+
+def test_reach_emits_a_mermaid_graph(capsys):
+    assert main(["reach", V2, "--graph"]) == EXIT_FINDING
+    out = capsys.readouterr().out
+
+    assert out.startswith("flowchart LR")
+    assert "--> breach" in out
+
+
+def test_reach_refuses_two_output_formats(capsys):
+    # Each writes to stdout. Emitting two would produce a file that is neither.
+    assert main(["reach", V2, "--sarif", "--graph"]) == EXIT_USAGE
+    assert "choose one output format" in capsys.readouterr().err

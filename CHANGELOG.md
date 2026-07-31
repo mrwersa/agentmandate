@@ -10,6 +10,22 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `mandate reach --sarif` emits SARIF 2.1.0, so a reachable breach is
+  annotated on the pull request that introduced it rather than sitting in a
+  log nobody opens. Findings are `error` rather than `warning`, because they
+  already exit non-zero and a UI disagreeing with the exit code is how a gate
+  stops being believed.
+- Each result is anchored at the line declaring the last tool on the path, and
+  the message says that is a convention: a compound breach has no single
+  guilty line. The fingerprint is the kind and the path, so reformatting the
+  manifest does not make GitHub report the same breach as new.
+- `mandate reach --graph` emits Mermaid, which GitHub renders inline. One node
+  per step rather than per tool, since the same tool called twice on different
+  bindings is usually the whole finding and a node per tool draws that as a
+  self-loop. Rounded nodes are reads, boxes change something.
+- Two output formats at once is refused. Both write to standard output, so
+  emitting both would produce a file that is neither.
+
 - `mandate drift manifest.yaml --source src/agent` compares the declared
   mandate against the implementation. A manifest is a claim, and two things
   quietly falsify it: somebody adds a tool to the agent's list and nobody
