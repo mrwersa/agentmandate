@@ -30,9 +30,10 @@ All notable changes to this project are documented here. The format follows
   the diagram from `scan`, which exists to read untrusted MCP catalogues.
   `scan` already quotes them when writing YAML; this is the same exposure in a
   second output.
-- A JSON manifest anchors at the right line. The line reader only recognised
-  the YAML spelling, so every result on a JSON manifest fell back to line 1
-  and annotated the wrong part of the file.
+- Every manifest spelling anchors at the tool it declares: block YAML, flow
+  YAML such as `- { name: pay, ... }`, and JSON. The reader recognised only
+  block YAML, so results on the other two fell back to line 1, which is not a
+  missing answer but a wrong one, since line 1 is usually `version:`.
 - A manifest inside the working directory gets a relative URI. Code scanning
   resolves the URI against the repository root, so an absolute path attached
   the finding to nothing.

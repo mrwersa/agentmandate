@@ -48,12 +48,16 @@ RULES = {
 }
 
 
-# A tool declaration in either format this package reads. YAML admits three
-# quotings and JSON one, and only the line number is wanted, so parsing the
-# document properly to lose the line numbers and then hunt for them again
-# would be worse.
+# A tool declaration in any spelling this package reads: block YAML, flow
+# YAML (`- { name: pay, ... }`), and JSON. Only the line number is wanted, so
+# parsing the document properly to lose the line numbers and then hunt for
+# them again would be worse.
+#
+# Flow style was missed at first and every result on such a manifest anchored
+# at line 1, which is not a missing answer but a wrong one: line 1 is usually
+# `version:`, so the annotation landed somewhere unrelated.
 NAME_LINE = re.compile(
-    r"""^\s*-?\s*(?:"name"|'name'|name)\s*:\s*(?P<name>"[^"]*"|'[^']*'|[^,\s}][^,}]*?)\s*,?\s*$"""
+    r"""^\s*-?\s*\{?\s*(?:"name"|'name'|name)\s*:\s*(?P<name>"[^"]*"|'[^']*'|[^,}\n]+)"""
 )
 
 
@@ -68,7 +72,7 @@ def _tool_lines(manifest: str | Path) -> dict[str, int]:
         match = NAME_LINE.match(line)
         if match is None:
             continue
-        name = match.group("name").strip().strip("\"'")
+        name = match.group("name").strip().rstrip(",}").strip().strip("\"'")
         if name and name not in lines:
             lines[name] = number
     return lines

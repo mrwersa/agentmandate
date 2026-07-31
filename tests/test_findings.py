@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from agentmandate import analyse, load, loads
 from agentmandate.findings import render_sarif, to_mermaid, to_sarif
 
@@ -300,3 +302,49 @@ def test_a_manifest_outside_the_working_directory_keeps_its_path(
     ]["artifactLocation"]["uri"]
 
     assert uri == path.as_posix()
+
+
+@pytest.mark.parametrize("style", ["block", "flow", "json"])
+def test_every_manifest_spelling_anchors_at_the_tool(
+    tmp_path: Path, style: str
+) -> None:
+    # Flow style was missed at first and every result anchored at line 1,
+    # which is not a missing answer but a wrong one: line 1 is `version:`, so
+    # the annotation landed somewhere unrelated to the finding.
+    import json as json_module
+
+    import yaml
+
+    data = yaml.safe_load(V2.read_text(encoding="utf-8"))
+    if style == "block":
+        text = V2.read_text(encoding="utf-8")
+        suffix = "yaml"
+    elif style == "json":
+        text = json_module.dumps(data, indent=2)
+        suffix = "json"
+    else:
+        rows = "".join(
+            "  - { "
+            + ", ".join(
+                f"{k}: {json_module.dumps(v) if isinstance(v, (dict, list)) else v}"
+                for k, v in tool.items()
+            )
+            + " }\n"
+            for tool in data["tools"]
+        )
+        text = (
+            "version: 1\nagent: dispute-resolver\n"
+            "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"
+            f"tools:\n{rows}"
+        )
+        suffix = "yaml"
+
+    path = tmp_path / f"mandate.{suffix}"
+    path.write_text(text, encoding="utf-8")
+
+    region = to_sarif(analyse(load(path)), path)["runs"][0]["results"][0][
+        "locations"
+    ][0]["physicalLocation"]["region"]
+    line = path.read_text(encoding="utf-8").splitlines()[region["startLine"] - 1]
+
+    assert "issue_refund" in line
