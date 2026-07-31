@@ -226,3 +226,83 @@ def test_selecting_one_agent_when_the_source_builds_several(tmp_path: Path) -> N
 
     assert compare_source(loads(MANIFEST), root, binding="resolver").clean
     assert compare_source(loads(MANIFEST), root, union=True).clean
+
+
+def test_the_output_names_which_tool_list_it_compared_against(
+    tmp_path: Path,
+) -> None:
+    # `diff` refuses to compare two different agents. This cannot: nothing in
+    # source states the agent's declared name, so identity cannot be
+    # established. Naming the binding is what lets a reader see that the
+    # comparison was against the agent they meant.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "resolver = Agent(tools=[open_case, refund])",
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert "(resolver)" in drift.source
+    assert "source inventory taken from" in drift.render()
+    assert drift.as_dict()["source"] == drift.source
+
+
+def test_no_binding_at_all_says_the_comparison_is_unnarrowed(
+    tmp_path: Path,
+) -> None:
+    source = SOURCE.replace("agent = Agent(tools=[open_case, refund])", "")
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert drift.source == ""
+    assert "no agent binding was found in source" in drift.render()
+
+
+def test_a_list_the_read_cannot_enumerate_suppresses_removals(
+    tmp_path: Path,
+) -> None:
+    # A removal is a claim that a tool is absent from the agent's list, and
+    # that claim cannot be made from a list the read could not enumerate: the
+    # tool may be in the part it could not see. Reporting both `unresolved`
+    # and `removed` asserted something positive from evidence already flagged
+    # as unreadable.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "agent = Agent(tools=[open_case] if flag else [open_case, refund])",
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert [f.kind for f in drift.findings] == ["unresolved"]
+    assert not drift.clean
+
+
+def test_a_readable_list_still_reports_a_genuine_removal(tmp_path: Path) -> None:
+    # The suppression must not swallow the real case, which is the whole
+    # reason `removed` exists.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "agent = Agent(tools=[open_case])",
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert [f.kind for f in drift.findings] == ["removed"]
+
+
+def test_an_undeclared_tool_survives_an_unreadable_list(tmp_path: Path) -> None:
+    # A tool seen bound and not declared is real whatever else the read
+    # missed, so this direction is not suppressed.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        '''@tool
+def wipe(case_id: str) -> None:
+    """Undeclared."""
+
+
+agent = Agent(tools=[open_case, refund, wipe, *load_more()])''',
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert {f.kind for f in drift.findings} == {"undeclared", "unresolved"}

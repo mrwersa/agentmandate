@@ -57,6 +57,18 @@ All notable changes to this project are documented here. The format follows
 - A tool list the read cannot enumerate is a finding rather than a clean pass.
   Reporting no drift from evidence that could not see the whole list would be
   the false assurance this package exists to prevent.
+- An unenumerable list also suppresses removals. A removal claims a tool is
+  absent from the agent list, and that claim cannot be made about a list the
+  read could not see into: the tool may be in the part it missed.
+  `tools=[a] if flag else [a, b]` reported two removals beside the unresolved
+  finding, which asserted something positive from evidence already flagged as
+  unreadable. Undeclared tools still report, because a tool seen bound and not
+  declared is real whatever else was missed.
+- The report names which tool list the source side came from. `diff` refuses
+  outright to compare two different agents; this cannot, because nothing in
+  source states the agent's declared name, so identity cannot be established.
+  Naming the binding is what lets a reader see the comparison was against the
+  agent they meant.
 - `Declaration` carries the agent-facing argument names, which is what the
   argument check reads.
 

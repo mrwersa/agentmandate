@@ -54,6 +54,12 @@ class Drift:
     declared: tuple[str, ...]
     discovered: tuple[str, ...]
     findings: tuple[DriftFinding, ...]
+    # Which tool list the source side came from. `diff` refuses to compare two
+    # different agents outright, and this cannot: nothing in source states the
+    # agent's declared name, so identity cannot be established. Naming the
+    # binding is what a reader needs to see that the comparison was against
+    # the agent they meant.
+    source: str = ""
 
     @property
     def clean(self) -> bool:
@@ -64,8 +70,15 @@ class Drift:
             f"drift  {self.agent}",
             f"  {len(self.declared)} tool(s) declared, "
             f"{len(self.discovered)} given to the agent in source",
-            "",
         ]
+        if self.source:
+            lines.append(f"  source inventory taken from {self.source}")
+        else:
+            lines.append(
+                "  no agent binding was found in source, so this compares "
+                "against every declared tool"
+            )
+        lines.append("")
         if self.clean:
             lines.append("  the mandate still describes the implementation")
             return "\n".join(lines)
@@ -80,6 +93,7 @@ class Drift:
             "declared": list(self.declared),
             "discovered": list(self.discovered),
             "clean": self.clean,
+            "source": self.source,
             "findings": [
                 {"kind": f.kind, "tool": f.tool, "message": f.message}
                 for f in self.findings
@@ -132,7 +146,14 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
                 )
             )
 
-    for name in sorted(set(declared) - set(discovered)):
+    # A removal is a claim that a tool is absent from the agent's list. That
+    # claim cannot be made from a list the read could not enumerate: the tool
+    # may well be in the part it could not see. Reporting both `unresolved`
+    # and `removed` was asserting something positive from evidence already
+    # flagged as unreadable, which is the same fail-closed rule this module
+    # applies everywhere else, pointed the other way.
+    unreadable = bool(inventory.unresolved)
+    for name in sorted(set(declared) - set(discovered)) if not unreadable else ():
         findings.append(
             DriftFinding(
                 "removed",
@@ -169,11 +190,13 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
     order = {kind: index for index, kind in enumerate(DRIFT_KINDS)}
     findings.sort(key=lambda f: (order[f.kind], f.tool))
 
+    selected = inventory.selected
     return Drift(
         agent=mandate.agent,
         declared=tuple(sorted(declared)),
         discovered=tuple(sorted(discovered)),
         findings=tuple(findings),
+        source=f"{selected.where} ({selected.label})" if selected else "",
     )
 
 
