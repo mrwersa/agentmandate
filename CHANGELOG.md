@@ -6,6 +6,41 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.7.0 - 2026-07-31
+
+### Added
+
+- `mandate drift manifest.yaml --source src/agent` compares the declared
+  mandate against the implementation. A manifest is a claim, and two things
+  quietly falsify it: somebody adds a tool to the agent's list and nobody
+  edits the YAML, or a signature changes and the argument a ceiling was
+  counted against stops existing. Neither looks like a permission change in
+  review.
+- The direction of the error decides the ordering. A tool the agent has and
+  the mandate omits comes first, because it means every clean `reach` report
+  so far described a smaller graph than the real system. A tool the mandate
+  declares and the agent no longer has still fails, because a gate reporting
+  breaches nobody can reach is a gate somebody switches off.
+- A `value_arg` or `scope_key` that no longer names an argument the tool takes
+  is reported. The manifest still parses and the analysis still runs, so
+  nothing else reveals that the ceiling is counted against nothing. A
+  `scope_key` an argument carries, such as `case` against `case_id`, is not
+  reported, since a false finding on every well-formed manifest would make the
+  command useless.
+- A tool list the read cannot enumerate is a finding rather than a clean pass.
+  Reporting no drift from evidence that could not see the whole list would be
+  the false assurance this package exists to prevent.
+- `Declaration` carries the agent-facing argument names, which is what the
+  argument check reads.
+
+### Changed
+
+- The roadmap describes 0.7.0 rather than 0.3.2, names what each command
+  establishes, and says plainly what is not planned.
+- The README links
+  [agent-release-gate](https://github.com/mrwersa/agent-release-gate), a
+  worked example that runs every command here against one agent, offline.
+
 ## 0.6.0 - 2026-07-31
 
 ### Added

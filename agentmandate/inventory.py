@@ -149,6 +149,10 @@ class Declaration:
     symbol: str
     module: str
     origin: str | None
+    # The agent-facing parameter names, in order. Drift detection needs these:
+    # a ceiling counted against an argument the tool no longer takes is not a
+    # ceiling, and nothing else in the manifest reveals that.
+    arguments: tuple[str, ...] = ()
 
     @property
     def name(self) -> str:
@@ -201,6 +205,9 @@ class Inventory:
     """Everything the source said, and everything it did not say."""
 
     proposals: list[Proposal] = field(default_factory=list)
+    # The full declarations behind `proposals`, in the same order. `scan` only
+    # needs the proposal; `drift` needs the signature behind it.
+    declarations: list[Declaration] = field(default_factory=list)
     selected: Binding | None = None
     bindings: list[Binding] = field(default_factory=list)
     unbound: list[str] = field(default_factory=list)
@@ -407,6 +414,7 @@ class _Reader(ast.NodeVisitor):
                     symbol=node.name,
                     module=self.module,
                     origin=self.origins.get(holder or name),
+                    arguments=tuple(properties),
                 )
             )
             break
@@ -631,6 +639,7 @@ def collect(
             continue
         seen[declaration.name] = declaration
         inventory.proposals.append(declaration.proposal)
+        inventory.declarations.append(declaration)
 
     return inventory
 

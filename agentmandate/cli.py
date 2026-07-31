@@ -11,6 +11,7 @@ from typing import Any
 
 from . import __version__
 from .diff import compare
+from .drift import compare_source
 from .lint import ERROR, check
 from .manifest import ManifestError, load
 from .obligations import (
@@ -168,6 +169,27 @@ def build_parser() -> argparse.ArgumentParser:
     )
     verify_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
+    drift_parser = subparsers.add_parser(
+        "drift",
+        help="compare the declared mandate against the agent's source",
+    )
+    drift_parser.add_argument("manifest", help="path to a mandate manifest (YAML or JSON)")
+    drift_parser.add_argument(
+        "--source",
+        required=True,
+        help="Python file or directory declaring the agent's tools",
+    )
+    drift_parser.add_argument(
+        "--binding",
+        help="the tool list to compare against, when the source builds several agents",
+    )
+    drift_parser.add_argument(
+        "--union-bindings",
+        action="store_true",
+        help="compare against every agent's tools merged",
+    )
+    drift_parser.add_argument("--json", action="store_true", help="machine-readable output")
+
     scan_parser = subparsers.add_parser(
         "scan",
         help="derive a manifest skeleton from a tool catalogue or agent source",
@@ -286,6 +308,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ManifestError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
+
+    if args.command == "drift":
+        try:
+            drift = compare_source(
+                mandate,
+                args.source,
+                binding=args.binding,
+                union=args.union_bindings,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return EXIT_USAGE
+        if args.json:
+            print(json.dumps(drift.as_dict(), indent=2))
+        else:
+            print(drift.render())
+        return EXIT_OK if drift.clean else EXIT_FINDING
 
     if args.command == "obligations":
         obligations = derive(mandate, depth=args.depth)

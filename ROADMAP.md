@@ -7,36 +7,47 @@ runtime proxy or general agent-security scanner.
 
 This is direction, not a release promise.
 
-## Current foundation: trustworthy authority analysis
+## Where it is now
 
-Version 0.3.2 makes the existing gate dependable:
+As of 0.7.0 the loop closes without leaving the package, and a
+[worked example](https://github.com/mrwersa/agent-release-gate) runs the whole
+of it against one agent, offline.
 
-- fail-closed replay when control evidence is missing
-- tool-contract and run-limit comparison across releases
-- one search depth on both sides of a diff
-- safe ingestion of untrusted MCP catalogues
-- explicit handling of incomparable currencies and different agents
-- reviewed test obligations reconciled against current reachable authority
+| | command | what it establishes |
+|---|---|---|
+| **obtain** | `scan --source`, `scan` | a manifest skeleton from agent source or an MCP catalogue, every guess marked |
+| **check** | `lint`, `reach` | single-tool rules, and whether permitted calls compose into a breach |
+| **compare** | `diff` | whether this release widened reachable authority, with a record for named review |
+| **stay honest** | `drift` | whether the manifest still describes the implementation |
+| **hand off** | `obligations`, `scenarios` | reviewable test obligations, an AgentVerity decision suite, and neutral scenario skeletons |
+| **confirm** | `verify --otel` | whether the run that happened stayed inside the mandate |
 
-## In progress: evaluation-loop bridge
+Each one fails closed. Missing control evidence, an unenumerable tool list, an
+unreviewed decision, and a currency that cannot be compared all produce a
+finding rather than a pass.
 
-- neutral scenario skeletons derived from compound counterexample paths, with
-  application input, environment, and expected control left for human review
+## Next: findings where developers already look
 
-## Next: easier adoption
+1. **SARIF and a graph export.** A widening path should appear beside the pull
+   request that introduced it, in the code-scanning UI, rather than in a log
+   somebody has to open. The compact graph makes the counterexample legible
+   without reading a path listing.
+2. **A GitHub Action.** The gate is six commands and a handful of flags. That
+   is a wrapper, not a feature, and it is the difference between a tool people
+   try and a tool people run.
 
-1. **Developer-native findings.** Add SARIF and a compact graph export so a
-   widening path appears beside the pull request that introduced it.
-2. **Manifest drift.** Compare the declared tool inventory with the inventory
-   `scan --source` discovers, and fail when the implementation gains a tool the
-   mandate omits. The reader exists; the comparison does not.
+These overlap with mature CI and security tooling deliberately. The new value
+remains the authority graph and its counterexamples; the packaging is only
+there so the counterexamples reach a reviewer.
 
-These features overlap with mature CI and security tooling deliberately. The
-new value remains the authority graph and its counterexamples.
+## Not planned
 
-The scenario exporter is the first evaluation-loop bridge. Keep execution in
-the team's existing harness. The next adoption work should make manifests and
-traces easier to obtain, not add a bundled judge or scenario runner.
+- A bundled judge, scenario runner, or benchmark. Execution stays in the
+  harness a team already has.
+- A runtime proxy or enforcement point. This analyses and reports; the control
+  belongs where the effect happens.
+- Correctness. `reach` reasons about what a reviewed manifest permits under a
+  bounded search, not about what a model tends to do.
 
 ## Then: widen the model where evidence demands it
 
