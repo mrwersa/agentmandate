@@ -21,6 +21,7 @@ code says, and the two disagreeing is how a gate stops being believed.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from .manifest import READ, Mandate
@@ -47,27 +48,58 @@ RULES = {
 }
 
 
-def _tool_lines(manifest: str | Path) -> dict[str, int]:
-    """Find the line each tool is declared on, for anchoring a result.
+# A tool declaration in either format this package reads. YAML admits three
+# quotings and JSON one, and only the line number is wanted, so parsing the
+# document properly to lose the line numbers and then hunt for them again
+# would be worse.
+NAME_LINE = re.compile(
+    r"""^\s*-?\s*(?:"name"|'name'|name)\s*:\s*(?P<name>"[^"]*"|'[^']*'|[^,\s}][^,}]*?)\s*,?\s*$"""
+)
 
-    A deliberately shallow read. The manifest may be JSON or YAML, and this
-    only needs a line number, so parsing it properly to lose the line numbers
-    and then hunting for them again would be worse.
-    """
+
+def _tool_lines(manifest: str | Path) -> dict[str, int]:
+    """Find the line each tool is declared on, for anchoring a result."""
     lines: dict[str, int] = {}
     try:
         text = Path(manifest).read_text(encoding="utf-8")
     except OSError:
         return lines
     for number, line in enumerate(text.splitlines(), start=1):
-        stripped = line.strip().lstrip("-").strip()
-        for prefix in ('name: "', "name: '", "name: "):
-            if stripped.startswith(prefix):
-                name = stripped[len(prefix):].strip().strip("\"',")
-                if name and name not in lines:
-                    lines[name] = number
-                break
+        match = NAME_LINE.match(line)
+        if match is None:
+            continue
+        name = match.group("name").strip().strip("\"'")
+        if name and name not in lines:
+            lines[name] = number
     return lines
+
+
+# Mermaid node labels are delimited by quotes inside brackets, so a name
+# carrying either escapes the label and injects arbitrary graph syntax. Tool
+# names reach here from `scan`, which exists to ingest untrusted MCP
+# catalogues, so this is the same exposure `scan` already quotes against when
+# it writes YAML. Mermaid reads HTML entities, which is what makes escaping
+# possible without mangling the name.
+MERMAID_ESCAPES = (
+    ("&", "#amp;"),
+    ('"', "#quot;"),
+    ("<", "#lt;"),
+    (">", "#gt;"),
+    ("[", "#91;"),
+    ("]", "#93;"),
+    ("(", "#40;"),
+    (")", "#41;"),
+    ("{", "#123;"),
+    ("}", "#125;"),
+)
+
+
+def _label(text: object) -> str:
+    """Render any name as an inert Mermaid label."""
+    cleaned = " ".join(str(text).split())
+    for bad, good in MERMAID_ESCAPES:
+        cleaned = cleaned.replace(bad, good)
+    return cleaned
 
 
 def _path_text(breach: Breach) -> str:
@@ -83,7 +115,13 @@ def to_sarif(
     """Render reachable breaches as a SARIF 2.1.0 log."""
     manifest_path = Path(manifest)
     lines = _tool_lines(manifest_path)
-    uri = manifest_path.as_posix()
+    # Code scanning resolves the uri against the repository root, so an
+    # absolute path attaches the finding to nothing. Relative to the working
+    # directory is what CI actually has.
+    try:
+        uri = manifest_path.resolve().relative_to(Path.cwd().resolve()).as_posix()
+    except ValueError:
+        uri = manifest_path.as_posix()
 
     kinds = {breach.kind for breach in authority.breaches}
     rules = []
@@ -172,7 +210,7 @@ def to_mermaid(authority: Authority, mandate: Mandate) -> str:
     if not authority.breaches:
         lines.append(f'  ok["no reachable breach within depth {authority.depth}"]')
         for index, tool in enumerate(sorted(authority.reachable_tools)):
-            lines.append(f'  t{index}(["{tool}"])')
+            lines.append(f'  t{index}(["{_label(tool)}"])')
         lines.append("  classDef ok fill:#e9f6ef,stroke:#267148,color:#1b5235;")
         lines.append("  class ok ok;")
         return "\n".join(lines)
@@ -187,7 +225,11 @@ def to_mermaid(authority: Authority, mandate: Mandate) -> str:
             detail.append(step.binding)
         if step.spent is not None:
             detail.append(f"{step.spent} {step.currency}")
-        label = step.tool + (f"<br/>{' · '.join(detail)}" if detail else "")
+        label = _label(step.tool)
+        if detail:
+            # The break is ours, added after escaping, so a name carrying
+            # markup cannot contribute any.
+            label += "<br/>" + _label(" · ".join(detail))
         # A rounded node reads as a read, a box as something that changes
         # state. The shape carries the effect class without a legend.
         # `Authority.effects` is (effect class, scope) pairs, not a per-tool
@@ -203,7 +245,7 @@ def to_mermaid(authority: Authority, mandate: Mandate) -> str:
             lines.append(f"  {previous} --> {node}")
         previous = node
 
-    lines.append(f'  breach["{breach.detail}"]')
+    lines.append(f'  breach["{_label(breach.detail)}"]')
     if previous is not None:
         lines.append(f"  {previous} --> breach")
     lines.append("  classDef breach fill:#fdecea,stroke:#a33b33,color:#7a2b24;")
@@ -212,14 +254,14 @@ def to_mermaid(authority: Authority, mandate: Mandate) -> str:
     ungated = sorted(authority.ungated_irreversible)
     if ungated:
         lines.append(
-            f'  note["ungated irreversible: {", ".join(ungated)}"]'
+            f'  note["ungated irreversible: {_label(", ".join(ungated))}"]'
         )
 
     extra = sorted(
         authority.reachable_tools - {step.tool for step in breach.path}
     )
     if extra:
-        lines.append(f'  rest["also reachable: {", ".join(extra)}"]')
+        lines.append(f'  rest["also reachable: {_label(", ".join(extra))}"]')
 
     if len(authority.breaches) > 1:
         lines.append(

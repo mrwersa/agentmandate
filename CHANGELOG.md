@@ -25,6 +25,17 @@ All notable changes to this project are documented here. The format follows
   self-loop. Rounded nodes are reads, boxes change something.
 - Two output formats at once is refused. Both write to standard output, so
   emitting both would produce a file that is neither.
+- Mermaid labels are escaped. A tool name carrying a quote or a bracket
+  escaped its label and injected arbitrary graph syntax, and tool names reach
+  the diagram from `scan`, which exists to read untrusted MCP catalogues.
+  `scan` already quotes them when writing YAML; this is the same exposure in a
+  second output.
+- A JSON manifest anchors at the right line. The line reader only recognised
+  the YAML spelling, so every result on a JSON manifest fell back to line 1
+  and annotated the wrong part of the file.
+- A manifest inside the working directory gets a relative URI. Code scanning
+  resolves the URI against the repository root, so an absolute path attached
+  the finding to nothing.
 
 - `mandate drift manifest.yaml --source src/agent` compares the declared
   mandate against the implementation. A manifest is a claim, and two things

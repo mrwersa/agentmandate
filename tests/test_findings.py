@@ -208,3 +208,95 @@ def test_more_than_one_breach_is_summarised_rather_than_drawn() -> None:
 
     assert len(authority.breaches) > 1
     assert "further reachable breach" in to_mermaid(authority, mandate)
+
+
+def test_a_hostile_tool_name_cannot_inject_graph_syntax() -> None:
+    # Tool names reach here from `mandate scan`, which exists to read
+    # untrusted MCP catalogues. scan.py already quotes them when writing YAML
+    # for exactly this reason; a Mermaid label is the same exposure.
+    mandate = loads(
+        """
+        version: 1
+        agent: victim
+        limits: { total: { amount: 100, currency: GBP }, depth: 6 }
+        tools:
+          - { name: 'seed"] --> evil["OWNED', effect: read, produces: case,
+              unbounded: true }
+          - { name: pay, effect: irreversible, requires: [case],
+              value_arg: amount, scope_key: case,
+              ceiling: { amount: 100, currency: GBP } }
+        """
+    )
+
+    diagram = to_mermaid(analyse(mandate), mandate)
+
+    assert "--> evil" not in diagram
+    assert "#quot;" in diagram
+    # One edge per consecutive pair of steps, and nothing the name smuggled in.
+    assert diagram.count("-->") == len(analyse(mandate).breaches[0].path)
+
+
+def test_the_breach_detail_is_escaped_too() -> None:
+    mandate = loads(
+        """
+        version: 1
+        agent: victim
+        limits: { total: { amount: 10, currency: GBP }, depth: 4 }
+        tools:
+          - { name: 'a"]-->x[', effect: read, produces: case, unbounded: true }
+          - { name: 'b"]-->y[', effect: irreversible, requires: [case],
+              value_arg: amount, scope_key: case,
+              ceiling: { amount: 10, currency: GBP } }
+        """
+    )
+
+    diagram = to_mermaid(analyse(mandate), mandate)
+
+    assert "-->x[" not in diagram
+    assert "-->y[" not in diagram
+
+
+def test_a_json_manifest_anchors_at_the_right_line(tmp_path: Path) -> None:
+    # The docstring claimed JSON worked. It did not: every result fell back to
+    # line 1, which puts the annotation on the wrong part of the file.
+    import json as json_module
+
+    import yaml
+
+    payload = yaml.safe_load(V2.read_text(encoding="utf-8"))
+    path = tmp_path / "mandate.json"
+    path.write_text(json_module.dumps(payload, indent=2), encoding="utf-8")
+
+    authority = analyse(load(path))
+    region = to_sarif(authority, path)["runs"][0]["results"][0]["locations"][0][
+        "physicalLocation"
+    ]["region"]
+    line = path.read_text(encoding="utf-8").splitlines()[region["startLine"] - 1]
+
+    assert "issue_refund" in line
+
+
+def test_a_manifest_inside_the_working_directory_gets_a_relative_uri() -> None:
+    # Code scanning resolves the uri against the repository root, so an
+    # absolute path attaches the finding to nothing.
+    authority = analyse(load(V2))
+
+    uri = to_sarif(authority, V2)["runs"][0]["results"][0]["locations"][0][
+        "physicalLocation"
+    ]["artifactLocation"]["uri"]
+
+    assert not uri.startswith("/")
+    assert uri.endswith("examples/dispute-resolver-v2.yaml")
+
+
+def test_a_manifest_outside_the_working_directory_keeps_its_path(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "mandate.yaml"
+    path.write_text(V2.read_text(encoding="utf-8"), encoding="utf-8")
+
+    uri = to_sarif(analyse(load(path)), path)["runs"][0]["results"][0]["locations"][0][
+        "physicalLocation"
+    ]["artifactLocation"]["uri"]
+
+    assert uri == path.as_posix()
