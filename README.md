@@ -117,7 +117,20 @@ That is the same reason `git diff` never replaced type checking. The question is
 
 ## Starting from an existing agent
 
-You do not have to write the first manifest by hand:
+You do not have to write the first manifest by hand. From agent code:
+
+```console
+$ mandate scan --source src/agent --agent dispute-resolver > mandate.yaml
+```
+
+That reads `@tool`, `@function_tool`, and `@ai_function` declarations and the
+`tools=[...]` list they are passed to. It is a static read: nothing is
+imported, nothing is executed, and the framework need not be installed. What
+it could not enumerate is reported rather than dropped, because a tool missing
+from today's manifest shows up in tomorrow's diff as authority that was never
+added. See [docs/inventory.md](docs/inventory.md).
+
+Or from an MCP catalogue:
 
 ```console
 $ mandate scan examples/mcp-tools.json --agent dispute-resolver > mandate.yaml
@@ -179,7 +192,7 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 
 | Command | What it does |
 |---|---|
-| `mandate scan` | Derives a manifest skeleton from an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
+| `mandate scan` | Derives a manifest skeleton from agent source (`--source`) or an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
 | `mandate reach` | Bounded search for a legal call sequence that breaches a limit, reported as a counterexample |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
@@ -269,7 +282,7 @@ What this does not do, on purpose:
 - **No enforcement.** No proxy, no runtime interception, no blocking.
 - **No data-flow reachability.** Finding that a read tool feeds an exfiltration path needs taint labels the manifest does not carry. Cumulative value and scope minting are what the current model supports honestly.
 - **No model behaviour.** Whether the agent *would* take a path is a different question from whether it *may*. This measures permission.
-- **No inference of the fields that matter.** `mandate scan` reads an MCP catalogue and writes the skeleton, but it cannot know whether an effect is reversible or what a ceiling is measured against. It guesses conservatively and marks every guess `REVIEW`. Extract then annotate, never extract and trust.
+- **No inference of the fields that matter.** `mandate scan` reads agent source or an MCP catalogue and writes the skeleton, but it cannot know whether an effect is reversible or what a ceiling is measured against. It guesses conservatively and marks every guess `REVIEW`. Extract then annotate, never extract and trust.
 
 Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none exists at depth 20, and the report says when it truncated.
 

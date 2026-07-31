@@ -178,6 +178,38 @@ def test_scan_reports_a_payload_that_is_not_a_catalogue(tmp_path, capsys):
     assert "tools/list payload" in capsys.readouterr().err
 
 
+def test_scan_source_reads_agent_code(tmp_path, capsys):
+    source = tmp_path / "agent.py"
+    source.write_text(
+        'from strands import Agent, tool\n\n\n'
+        '@tool\n'
+        'def issue_refund(case_id: str, amount: float) -> str:\n'
+        '    """Refund a case."""\n\n\n'
+        'agent = Agent(tools=[issue_refund])\n',
+        encoding="utf-8",
+    )
+
+    assert main(["scan", "--source", str(tmp_path), "--agent", "refunds"]) == EXIT_OK
+    out = capsys.readouterr().out
+    assert 'name: "issue_refund"' in out
+    assert 'agent: "refunds"' in out
+
+
+def test_scan_source_reports_a_path_with_no_tools(tmp_path, capsys):
+    (tmp_path / "plain.py").write_text("x = 1\n", encoding="utf-8")
+
+    assert main(["scan", "--source", str(tmp_path)]) == EXIT_USAGE
+    assert "no tool declarations" in capsys.readouterr().err
+
+
+def test_scan_requires_exactly_one_input():
+    # Accepting both would silently scan one and ignore the other.
+    with pytest.raises(SystemExit):
+        main(["scan", CATALOGUE, "--source", "src"])
+    with pytest.raises(SystemExit):
+        main(["scan"])
+
+
 def test_diff_record_emits_a_change_record(capsys):
     assert main(["diff", V1, V2, "--record"]) == EXIT_FINDING
     out = capsys.readouterr().out

@@ -21,7 +21,7 @@ from .obligations import (
 )
 from .otel import MAPPABLE, TraceError, load_trace, parse_mapping
 from .reach import analyse
-from .scan import scan_file
+from .scan import scan_file, scan_source
 from .scenarios import (
     derive_scenarios,
     load_scenarios,
@@ -170,9 +170,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     scan_parser = subparsers.add_parser(
         "scan",
-        help="derive a manifest skeleton from an MCP tools/list catalogue",
+        help="derive a manifest skeleton from a tool catalogue or agent source",
     )
-    scan_parser.add_argument("catalogue", help="JSON file holding an MCP tools/list payload")
+    scan_source_group = scan_parser.add_mutually_exclusive_group(required=True)
+    scan_source_group.add_argument(
+        "catalogue",
+        nargs="?",
+        help="JSON file holding an MCP tools/list payload",
+    )
+    scan_source_group.add_argument(
+        "--source",
+        help=(
+            "Python file or directory declaring the agent's tools. Read "
+            "statically: nothing is imported or executed."
+        ),
+    )
     scan_parser.add_argument(
         "--agent", default="unnamed-agent", help="agent name to write into the skeleton"
     )
@@ -228,7 +240,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "scan":
         try:
-            print(scan_file(args.catalogue, args.agent), end="")
+            if args.source is not None:
+                print(scan_source(args.source, args.agent), end="")
+            else:
+                print(scan_file(args.catalogue, args.agent), end="")
         except (OSError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return EXIT_USAGE

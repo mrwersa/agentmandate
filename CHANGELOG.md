@@ -6,6 +6,43 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- `mandate scan --source` derives a manifest skeleton from agent code. `scan`
+  previously needed an MCP `tools/list` catalogue, which a team only has if
+  they run an MCP server, so most agents had no way to get a starting
+  manifest at all.
+- Recognises `@tool`, `@function_tool`, and `@ai_function` across LangChain,
+  LangGraph, Strands Agents, the OpenAI Agents SDK, the Microsoft Agent
+  Framework, CrewAI, and FastMCP. Matching is on the trailing name of the
+  decorator rather than the import path, because every framework is imported
+  differently and half of them are aliased at the import site. A renamed
+  import such as `from strands import tool as strands_tool` is resolved back
+  to the name it was imported under.
+- The read is static. Nothing is imported, nothing is executed, and the
+  framework does not need to be installed. A review runs on a branch whose
+  dependencies are absent and whose side effects must not happen, and
+  importing a module to learn what it is permitted to do has already done it.
+- The inventory is the tools the agent was given, read from `tools=[...]` and
+  `.bind_tools([...])`. A declared but unbound tool is excluded and named,
+  because a mandate describes one agent's authority rather than every
+  decorated function in the repository.
+- What the read could not enumerate is reported at the top of the file:
+  `tools=load_tools()`, a starred element, a bound tool declared outside the
+  scanned path, a second binding whose union would overstate what one agent
+  reaches, and a file that would not parse. Each note says why it matters,
+  which for a missing tool is that the next `diff` reports it as authority
+  that was never added.
+- Annotations narrow the guesses. `Decimal`, `int`, `float`, `Optional[float]`
+  and `Annotated[float, ...]` read as numeric, so a `str` argument called
+  `amount` is not proposed as a value argument. An untyped argument stays a
+  candidate, because no annotation is no evidence either way.
+- Framework plumbing is excluded from the signature. `self`, `ctx`,
+  `tool_context`, and anything annotated `...Context` or `...ContextWrapper`
+  are not agent input, and reading them would invent a scope out of a
+  callback handle.
+- `docs/inventory.md` and a runnable `examples/refund_agent.py`.
+
 ## 0.5.1 - 2026-07-31
 
 ### Fixed

@@ -16,6 +16,7 @@ from __future__ import annotations
 __version__ = "0.5.1"
 
 from .diff import Change, Delta, compare
+from .inventory import Inventory, collect
 from .lint import Finding, check
 from .manifest import Mandate, ManifestError, Money, Tool, load, loads
 from .obligations import (
@@ -28,7 +29,7 @@ from .obligations import (
     to_decision_suite,
 )
 from .reach import Authority, Breach, Step, analyse
-from .scan import Proposal, propose, render, scan_file
+from .scan import Proposal, propose, render, scan_file, scan_source
 from .scenarios import (
     SCENARIOS_SCHEMA,
     Scenario,
@@ -81,5 +82,8 @@ __all__ = [
     "replay",
     "replay_file",
     "reconcile_scenarios",
+    "Inventory",
+    "collect",
     "scan_file",
+    "scan_source",
 ]
