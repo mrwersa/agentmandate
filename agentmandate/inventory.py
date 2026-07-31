@@ -61,21 +61,54 @@ FRAMEWORK_MODULES = (
     "autogen",
 )
 
-# Callees that plausibly construct an agent. A `tools=` keyword on anything
-# else is a coincidence until somebody says otherwise, and letting an
-# unrelated helper decide the inventory would be silent misattribution.
-AGENT_CALLEE_HINTS = (
-    "agent",
-    "swarm",
-    "crew",
-    "team",
-    "assistant",
-    "workflow",
-    "graph",
-    "orchestrator",
-    "supervisor",
-    "executor",
-    "toolnode",
+# Constructors that actually build an agent, named one by one.
+#
+# A word test was tried first and was too loose: `workflow_graph(tools=[...])`
+# or `team_dashboard(tools=[...])` matched, and an unrelated helper deciding
+# the inventory is the silent misattribution this is here to prevent. An
+# unlisted callee is not dropped, it becomes a candidate `--binding` selects,
+# so the cost of this list being incomplete is one flag rather than a wrong
+# manifest.
+AGENT_CONSTRUCTORS = frozenset(
+    {
+        # LangChain and LangGraph
+        "AgentExecutor",
+        "ToolNode",
+        "bind_tools",
+        "create_agent",
+        "create_openai_functions_agent",
+        "create_openai_tools_agent",
+        "create_react_agent",
+        "create_structured_chat_agent",
+        "create_supervisor",
+        "create_swarm",
+        "create_tool_calling_agent",
+        # Strands Agents
+        "Agent",
+        "GraphBuilder",
+        "Swarm",
+        # OpenAI Agents SDK, Pydantic AI, CrewAI
+        "Crew",
+        # Microsoft Agent Framework and Semantic Kernel
+        "AzureAIAgentClient",
+        "ChatAgent",
+        "ChatCompletionAgent",
+        # Google ADK
+        "LlmAgent",
+        "LoopAgent",
+        "ParallelAgent",
+        "SequentialAgent",
+        # AutoGen
+        "AssistantAgent",
+        "ConversableAgent",
+        "UserProxyAgent",
+        # LlamaIndex
+        "AgentWorkflow",
+        "FunctionAgent",
+        "FunctionCallingAgent",
+        "OpenAIAgent",
+        "ReActAgent",
+    }
 )
 
 # Keyword arguments through which a framework accepts an explicit tool name.
@@ -301,9 +334,8 @@ def _callee_name(node: ast.Call) -> str:
     return "<expression>"
 
 
-def _looks_like_an_agent(callee: str) -> bool:
-    lowered = callee.lower().replace("_", "")
-    return any(hint in lowered for hint in AGENT_CALLEE_HINTS)
+def _is_an_agent_constructor(callee: str) -> bool:
+    return callee in AGENT_CONSTRUCTORS
 
 
 class _Reader(ast.NodeVisitor):
@@ -432,8 +464,7 @@ class _Reader(ast.NodeVisitor):
                 references=tuple(references),
                 unresolved=tuple(unresolved),
                 listed=is_list,
-                recognised=_looks_like_an_agent(callee)
-                or callee == "bind_tools",
+                recognised=_is_an_agent_constructor(callee),
             )
         )
 

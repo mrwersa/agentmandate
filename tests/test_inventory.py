@@ -1062,3 +1062,82 @@ def test_one_declaration_across_modules_needs_no_import_to_resolve(
     )
 
     assert [p.name for p in collect(tmp_path).proposals] == ["refund"]
+
+
+@pytest.mark.parametrize(
+    "callee",
+    [
+        # Each of these matched the word test that this replaced, and none of
+        # them builds an agent.
+        "workflow_graph",
+        "team_dashboard",
+        "agent_metrics_panel",
+        "render_swarm_chart",
+        "assistant_docs",
+    ],
+)
+def test_a_lookalike_callee_does_not_decide_the_inventory(
+    tmp_path: Path, callee: str
+) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        f'''
+        from strands import tool
+
+
+        @tool
+        def wipe_database(confirm: bool) -> None:
+            """Not this agent's authority."""
+
+
+        {callee}(tools=[wipe_database])
+        ''',
+    )
+
+    inventory = collect(tmp_path)
+
+    assert inventory.selected is None
+    assert [c.callee for c in inventory.candidates] == [callee]
+
+
+@pytest.mark.parametrize(
+    "callee",
+    [
+        "Agent",
+        "create_react_agent",
+        "LlmAgent",
+        "AssistantAgent",
+        "ChatAgent",
+        "AgentWorkflow",
+        "ToolNode",
+        "Crew",
+        "Swarm",
+    ],
+)
+def test_a_real_constructor_is_the_binding(tmp_path: Path, callee: str) -> None:
+    write(
+        tmp_path,
+        "agent.py",
+        f'''
+        from strands import tool
+
+
+        @tool
+        def get_case(case_id: str) -> dict:
+            """Read a case."""
+
+
+        @tool
+        def delete_case(case_id: str) -> None:
+            """Delete a case."""
+
+
+        agent = {callee}(tools=[get_case])
+        ''',
+    )
+
+    inventory = collect(tmp_path)
+
+    assert [p.name for p in inventory.proposals] == ["get_case"]
+    assert inventory.unbound == ["delete_case"]

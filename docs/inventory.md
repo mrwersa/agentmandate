@@ -90,9 +90,15 @@ smaller graph than the real one.
 
 A `tools=` keyword on any function used to decide the inventory, so an
 unrelated `render_panel(tools=[...])` could rewrite what the agent was said to
-hold. Now the callee has to look like an agent (`Agent`, `create_react_agent`,
-`LlmAgent`, `Swarm`, `Crew`, `bind_tools`, and so on). Anything else is
-reported as a candidate rather than used:
+hold. Now the callee has to be a constructor this knows by name: `Agent`,
+`create_react_agent`, `AgentExecutor`, `ToolNode`, `bind_tools`, `LlmAgent`,
+`SequentialAgent`, `AssistantAgent`, `ChatAgent`, `Crew`, `Swarm`,
+`AgentWorkflow`, `ReActAgent`, and the rest of the same shape.
+
+A word test came first and was too loose. `workflow_graph(tools=[...])` and
+`team_dashboard(tools=[...])` both matched it. An unlisted callee is not
+dropped, it becomes a candidate `--binding` selects, so the cost of the list
+being incomplete is one flag rather than a wrong manifest:
 
 ```yaml
 # REVIEW: app/ui.py:12 passes `tools=` to render_panel, which does not look

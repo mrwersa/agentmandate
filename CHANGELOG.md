@@ -40,10 +40,13 @@ All notable changes to this project are documented here. The format follows
   explicitly withholds. No `tools=` list at all is different: nothing was
   said, so every declaration is offered and the file says the list has not
   been narrowed.
-- Only a callee that looks like an agent is read as a binding. A `tools=`
-  keyword on any function used to decide the inventory, so an unrelated
+- Only a constructor known by name is read as a binding. A `tools=` keyword
+  on any function used to decide the inventory, so an unrelated
   `render_panel(tools=[...])` could rewrite what the agent was said to hold.
-  Anything else is reported as a candidate that `--binding` can select.
+  A word test replaced that and was still too loose, since `workflow_graph`
+  and `team_dashboard` both matched it, so the constructors are named one by
+  one. An unlisted callee is not dropped, it becomes a candidate `--binding`
+  selects, so an incomplete list costs one flag rather than a wrong manifest.
 - The module a reference came through decides which declaration it means.
   Two modules declaring `refund` is ordinary, and picking whichever file
   sorted first attributed one agent's signature, scope, and ceiling to
