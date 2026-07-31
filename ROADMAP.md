@@ -25,16 +25,11 @@ Version 0.3.2 makes the existing gate dependable:
 
 ## Next: easier adoption
 
-1. **Framework inventory adapters.** Import tool catalogues from common agent
-   frameworks while preserving a visible `REVIEW` marker for facts their
-   schemas cannot supply.
-2. **Trace adapters.** Convert OpenTelemetry and selected framework events into
-   the strict replay format. AgentMandate should consume traces, not become an
-   observability backend.
-3. **Developer-native findings.** Add SARIF and a compact graph export so a
+1. **Developer-native findings.** Add SARIF and a compact graph export so a
    widening path appears beside the pull request that introduced it.
-4. **Manifest drift.** Compare the declared tool inventory with a discovered
-   inventory and fail when implementation gains a tool the mandate omits.
+2. **Manifest drift.** Compare the declared tool inventory with the inventory
+   `scan --source` discovers, and fail when the implementation gains a tool the
+   mandate omits. The reader exists; the comparison does not.
 
 These features overlap with mature CI and security tooling deliberately. The
 new value remains the authority graph and its counterexamples.

@@ -178,6 +178,38 @@ def test_scan_reports_a_payload_that_is_not_a_catalogue(tmp_path, capsys):
     assert "tools/list payload" in capsys.readouterr().err
 
 
+def test_scan_source_reads_agent_code(tmp_path, capsys):
+    source = tmp_path / "agent.py"
+    source.write_text(
+        'from strands import Agent, tool\n\n\n'
+        '@tool\n'
+        'def issue_refund(case_id: str, amount: float) -> str:\n'
+        '    """Refund a case."""\n\n\n'
+        'agent = Agent(tools=[issue_refund])\n',
+        encoding="utf-8",
+    )
+
+    assert main(["scan", "--source", str(tmp_path), "--agent", "refunds"]) == EXIT_OK
+    out = capsys.readouterr().out
+    assert 'name: "issue_refund"' in out
+    assert 'agent: "refunds"' in out
+
+
+def test_scan_source_reports_a_path_with_no_tools(tmp_path, capsys):
+    (tmp_path / "plain.py").write_text("x = 1\n", encoding="utf-8")
+
+    assert main(["scan", "--source", str(tmp_path)]) == EXIT_USAGE
+    assert "no tool declarations" in capsys.readouterr().err
+
+
+def test_scan_requires_exactly_one_input():
+    # Accepting both would silently scan one and ignore the other.
+    with pytest.raises(SystemExit):
+        main(["scan", CATALOGUE, "--source", "src"])
+    with pytest.raises(SystemExit):
+        main(["scan"])
+
+
 def test_diff_record_emits_a_change_record(capsys):
     assert main(["diff", V1, V2, "--record"]) == EXIT_FINDING
     out = capsys.readouterr().out
@@ -503,3 +535,31 @@ def test_an_errored_call_survives_the_emit_round_trip(tmp_path, capsys):
     assert json.loads(out_path.read_text().splitlines()[0])["errored"] is True
     assert main(["verify", V1, "--traces", str(out_path)]) == EXIT_FINDING
     assert "errored_effect" in capsys.readouterr().out
+
+
+def test_binding_flags_are_refused_with_a_catalogue(capsys):
+    assert main(["scan", CATALOGUE, "--binding", "x"]) == EXIT_USAGE
+    assert "apply to --source" in capsys.readouterr().err
+
+
+def test_scan_source_refuses_two_agents_and_names_them(tmp_path, capsys):
+    (tmp_path / "agent.py").write_text(
+        "from strands import Agent, tool\n\n\n"
+        "@tool\n"
+        "def a(case_id: str) -> str:\n"
+        '    """A."""\n\n\n'
+        "@tool\n"
+        "def b(case_id: str) -> str:\n"
+        '    """B."""\n\n\n'
+        "triage = Agent(tools=[a])\n"
+        "resolver = Agent(tools=[b])\n",
+        encoding="utf-8",
+    )
+
+    assert main(["scan", "--source", str(tmp_path)]) == EXIT_USAGE
+    err = capsys.readouterr().err
+    assert "more than one agent" in err
+    assert "triage" in err and "resolver" in err
+
+    assert main(["scan", "--source", str(tmp_path), "--binding", "resolver"]) == EXIT_OK
+    assert 'name: "b"' in capsys.readouterr().out

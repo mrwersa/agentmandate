@@ -6,6 +6,71 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.6.0 - 2026-07-31
+
+### Added
+
+- `mandate scan --source` derives a manifest skeleton from agent code. `scan`
+  previously needed an MCP `tools/list` catalogue, which a team only has if
+  they run an MCP server, so most agents had no way to get a starting
+  manifest at all.
+- Recognises `@tool`, `@function_tool`, and `@ai_function` across LangChain,
+  LangGraph, Strands Agents, the OpenAI Agents SDK, the Microsoft Agent
+  Framework, CrewAI, and FastMCP. Matching is on the trailing name of the
+  decorator rather than the import path, because every framework is imported
+  differently and half of them are aliased at the import site. A renamed
+  import such as `from strands import tool as strands_tool` is resolved back
+  to the name it was imported under.
+- The read is static. Nothing is imported, nothing is executed, and the
+  framework does not need to be installed. A review runs on a branch whose
+  dependencies are absent and whose side effects must not happen, and
+  importing a module to learn what it is permitted to do has already done it.
+- One manifest describes one agent. The inventory is the tools that agent was
+  given, read from `tools=[...]` and `.bind_tools([...])`, and a declared but
+  unbound tool is excluded and named. `reach` searches whatever graph it is
+  given, so a manifest holding two agents' tools produces compound paths no
+  single run could take, and a gate reporting breaches nobody can reach is a
+  gate that gets switched off.
+- A source building more than one agent is refused, naming each one and where
+  it is built, until `--binding NAME` says which is meant.
+  `--union-bindings` merges them for the case where they genuinely share
+  authority, and labels the output so a later reader knows.
+- `Agent(tools=[])` is refused. An empty list means the agent has no tools,
+  and listing every declared tool there would grant authority the source
+  explicitly withholds. No `tools=` list at all is different: nothing was
+  said, so every declaration is offered and the file says the list has not
+  been narrowed.
+- Only a constructor known by name is read as a binding. A `tools=` keyword
+  on any function used to decide the inventory, so an unrelated
+  `render_panel(tools=[...])` could rewrite what the agent was said to hold.
+  A word test replaced that and was still too loose, since `workflow_graph`
+  and `team_dashboard` both matched it, so the constructors are named one by
+  one. An unlisted callee is not dropped, it becomes a candidate `--binding`
+  selects, so an incomplete list costs one flag rather than a wrong manifest.
+- The module a reference came through decides which declaration it means.
+  Two modules declaring `refund` is ordinary, and picking whichever file
+  sorted first attributed one agent's signature, scope, and ceiling to
+  another agent's tool. A name that genuinely could be either is reported and
+  neither is used.
+- A tool decorator imported from somewhere unrecognised is included and then
+  questioned by name, since re-exporting a framework decorator through a
+  local module is common but `@tool` from anywhere means nothing on its own.
+- What the read could not enumerate is reported at the top of the file:
+  `tools=load_tools()`, a starred element, a bound tool declared outside the
+  scanned path, a second binding whose union would overstate what one agent
+  reaches, and a file that would not parse. Each note says why it matters,
+  which for a missing tool is that the next `diff` reports it as authority
+  that was never added.
+- Annotations narrow the guesses. `Decimal`, `int`, `float`, `Optional[float]`
+  and `Annotated[float, ...]` read as numeric, so a `str` argument called
+  `amount` is not proposed as a value argument. An untyped argument stays a
+  candidate, because no annotation is no evidence either way.
+- Framework plumbing is excluded from the signature. `self`, `ctx`,
+  `tool_context`, and anything annotated `...Context` or `...ContextWrapper`
+  are not agent input, and reading them would invent a scope out of a
+  callback handle.
+- `docs/inventory.md` and a runnable `examples/refund_agent.py`.
+
 ## 0.5.1 - 2026-07-31
 
 ### Fixed
