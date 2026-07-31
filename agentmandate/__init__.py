@@ -13,7 +13,7 @@ against the declaration, so it is usable without another tool alongside it.
 
 from __future__ import annotations
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 
 from .diff import Change, Delta, compare
 from .inventory import Binding, Declaration, Inventory, InventoryError, collect
