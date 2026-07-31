@@ -43,6 +43,14 @@ All notable changes to this project are documented here. The format follows
 - A tool list the read cannot enumerate is a finding rather than a clean pass.
   Reporting no drift from evidence that could not see the whole list would be
   the false assurance this package exists to prevent.
+- Selecting a binding by a label two agents share is refused. A label is a
+  variable name and `agent` is the most common one there is, so
+  `--binding agent` silently merged two different agents, which is the
+  overstatement `--binding` exists to escape reintroduced through the escape
+  hatch itself. Disambiguate by location instead, which the message shows.
+- A withheld removal check is named rather than dropped silently. Suppressing
+  it is right; doing it quietly would leave a reader who resolves the
+  unreadable part meeting findings that look new and were only withheld.
 - An unenumerable list also suppresses removals. A removal claims a tool is
   absent from the agent list, and that claim cannot be made about a list the
   read could not see into: the tool may be in the part it missed.
