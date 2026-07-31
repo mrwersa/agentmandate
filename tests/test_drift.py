@@ -226,3 +226,33 @@ def test_selecting_one_agent_when_the_source_builds_several(tmp_path: Path) -> N
 
     assert compare_source(loads(MANIFEST), root, binding="resolver").clean
     assert compare_source(loads(MANIFEST), root, union=True).clean
+
+
+def test_the_output_names_which_tool_list_it_compared_against(
+    tmp_path: Path,
+) -> None:
+    # `diff` refuses to compare two different agents. This cannot: nothing in
+    # source states the agent's declared name, so identity cannot be
+    # established. Naming the binding is what lets a reader see that the
+    # comparison was against the agent they meant.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "resolver = Agent(tools=[open_case, refund])",
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert "(resolver)" in drift.source
+    assert "source inventory taken from" in drift.render()
+    assert drift.as_dict()["source"] == drift.source
+
+
+def test_no_binding_at_all_says_the_comparison_is_unnarrowed(
+    tmp_path: Path,
+) -> None:
+    source = SOURCE.replace("agent = Agent(tools=[open_case, refund])", "")
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert drift.source == ""
+    assert "no agent binding was found in source" in drift.render()
