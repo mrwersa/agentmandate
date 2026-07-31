@@ -356,3 +356,25 @@ def test_every_manifest_spelling_anchors_at_the_tool(
     line = path.read_text(encoding="utf-8").splitlines()[region["startLine"] - 1]
 
     assert "issue_refund" in line
+
+
+def test_a_comma_inside_a_quoted_value_does_not_invent_a_tool(
+    tmp_path: Path,
+) -> None:
+    # Searching the whole line, needed so the key need not come first in a
+    # flow mapping, made a comma inside a quoted value look like a key
+    # boundary. Tracking the quote state separates a structural comma from one
+    # inside a string, without a YAML parser for a line number.
+    from agentmandate.findings import _tool_lines
+
+    path = tmp_path / "mandate.yaml"
+    path.write_text(
+        "version: 1\n"
+        "tools:\n"
+        '  - { name: seed, effect: read,\n'
+        '      description: "raises a case, name: bogus" }\n'
+        "  - { effect: irreversible, name: pay }\n",
+        encoding="utf-8",
+    )
+
+    assert _tool_lines(path) == {"seed": 3, "pay": 5}

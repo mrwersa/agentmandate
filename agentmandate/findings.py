@@ -56,13 +56,36 @@ RULES = {
 # Flow style was missed at first and every result on such a manifest anchored
 # at line 1, which is not a missing answer but a wrong one: line 1 is usually
 # `version:`, so the annotation landed somewhere unrelated.
-# Anchored at the start of a line or just after a `{` or `,`, so the key does
-# not have to come first inside a flow mapping. `- { effect: read, name: pay }`
-# is as valid as the other order and used to fall back to line 1.
-NAME_LINE = re.compile(
-    r"""(?:^|[{,])\s*-?\s*\{?\s*(?:"name"|'name'|name)\s*:\s*"""
+# A `name` key, matched at an offset where a mapping key may actually begin.
+# The key itself may be quoted, as it is in JSON.
+NAME_KEY = re.compile(
+    r"""\s*-?\s*\{?\s*(?:"name"|'name'|name)\s*:\s*"""
     r"""(?P<name>"[^"]*"|'[^']*'|[^,}\n]+)"""
 )
+
+
+def _key_offsets(line: str) -> list[int]:
+    """Offsets where a mapping key may begin, ignoring quoted text.
+
+    Searching the whole line was needed so that the key does not have to come
+    first inside a flow mapping, and it introduced a false positive the
+    line-start-only version could not have: a comma inside a quoted value,
+    such as ``description: "a, name: b"``, looked like a key boundary and
+    invented a tool. Tracking the quote state is what separates a structural
+    comma from one inside a string, without pulling in a YAML parser for a
+    line number.
+    """
+    offsets = [0]
+    quote = ""
+    for index, char in enumerate(line):
+        if quote:
+            if char == quote:
+                quote = ""
+        elif char in "\"'":
+            quote = char
+        elif char in "{,":
+            offsets.append(index + 1)
+    return offsets
 
 
 def _tool_lines(manifest: str | Path) -> dict[str, int]:
@@ -73,12 +96,14 @@ def _tool_lines(manifest: str | Path) -> dict[str, int]:
     except OSError:
         return lines
     for number, line in enumerate(text.splitlines(), start=1):
-        match = NAME_LINE.search(line)
-        if match is None:
-            continue
-        name = match.group("name").strip().rstrip(",}").strip().strip("\"'")
-        if name and name not in lines:
-            lines[name] = number
+        for offset in _key_offsets(line):
+            match = NAME_KEY.match(line, offset)
+            if match is None:
+                continue
+            name = match.group("name").strip().rstrip(",}").strip().strip("\"'")
+            if name and name not in lines:
+                lines[name] = number
+            break
     return lines
 
 

@@ -46,7 +46,9 @@ All notable changes to this project are documented here. The format follows
 - Every manifest spelling anchors at the tool it declares: block YAML, flow
   YAML in either key order, and JSON. Flow style was missed first, then found
   only when `name` came first, so `- { effect: read, name: pay }` still fell
-  back. The reader recognised only
+  back. Searching the whole line for the key made a comma inside a quoted
+  value look like a key boundary, inventing a tool out of
+  `description: "a, name: b"`, so the reader tracks the quote state. The reader recognised only
   block YAML, so results on the other two fell back to line 1, which is not a
   missing answer but a wrong one, since line 1 is usually `version:`.
 - A manifest inside the working directory gets a relative URI. Code scanning
