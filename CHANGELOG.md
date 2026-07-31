@@ -44,7 +44,9 @@ All notable changes to this project are documented here. The format follows
   `scan` already quotes them when writing YAML; this is the same exposure in a
   second output.
 - Every manifest spelling anchors at the tool it declares: block YAML, flow
-  YAML such as `- { name: pay, ... }`, and JSON. The reader recognised only
+  YAML in either key order, and JSON. Flow style was missed first, then found
+  only when `name` came first, so `- { effect: read, name: pay }` still fell
+  back. The reader recognised only
   block YAML, so results on the other two fell back to line 1, which is not a
   missing answer but a wrong one, since line 1 is usually `version:`.
 - A manifest inside the working directory gets a relative URI. Code scanning

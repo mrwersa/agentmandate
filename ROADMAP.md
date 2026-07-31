@@ -9,9 +9,11 @@ This is direction, not a release promise.
 
 ## Where it is now
 
-As of 0.7.0 the loop closes without leaving the package, and a
-[worked example](https://github.com/mrwersa/agent-release-gate) runs the whole
-of it against one agent, offline.
+As of 0.7.0 the loop closes without leaving the package. A
+[worked example](https://github.com/mrwersa/agent-release-gate) runs six of
+these checks against one agent, offline, pinned to 0.6.0. It gains `drift`
+and the SARIF output when 0.7.0 reaches PyPI; saying it already ran "the
+whole of it" would have been a claim about software nobody can install yet.
 
 | | command | what it establishes |
 |---|---|---|

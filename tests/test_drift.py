@@ -273,7 +273,12 @@ def test_a_list_the_read_cannot_enumerate_suppresses_removals(
 
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
 
-    assert [f.kind for f in drift.findings] == ["unresolved"]
+    # The unenumerable list, and the note saying the removal check was
+    # withheld because of it. No removal is claimed.
+    assert [(f.kind, f.tool) for f in drift.findings] == [
+        ("unresolved", "agent.py"),
+        ("unresolved", "<removals>"),
+    ]
     assert not drift.clean
 
 
@@ -331,7 +336,8 @@ def test_a_tool_bound_outside_the_scan_is_not_reported_removed(
     drift = compare_source(loads(manifest), write(tmp_path, source))
 
     assert [(f.kind, f.tool) for f in drift.findings] == [
-        ("unresolved", "fetch_case")
+        ("unresolved", "fetch_case"),
+        ("unresolved", "<removals>"),
     ]
     assert "Widen --source" in drift.findings[0].message
 
@@ -368,3 +374,66 @@ def test_a_single_agent_under_union_flags_still_names_its_binding(
     assert drift.clean
     assert "(resolver)" in drift.source
     assert "no agent binding" not in drift.render()
+
+
+def test_a_label_shared_by_two_agents_is_refused(tmp_path: Path) -> None:
+    # A label is a variable name, and `agent` is the most common one there is.
+    # Merging two of them would be the overstatement --binding exists to
+    # escape, reintroduced through the escape hatch itself.
+    for name, tools in (("triage.py", "[open_case]"), ("resolver.py", "[open_case, refund]")):
+        write(tmp_path, SOURCE.replace(
+            "agent = Agent(tools=[open_case, refund])",
+            f"agent = Agent(tools={tools})",
+        ))
+        (tmp_path / name).write_text(
+            (tmp_path / "agent.py").read_text(encoding="utf-8"), encoding="utf-8"
+        )
+    (tmp_path / "agent.py").unlink()
+
+    with pytest.raises(InventoryError, match="bindings are called 'agent'"):
+        compare_source(loads(MANIFEST), tmp_path, binding="agent")
+
+    # And the location form disambiguates, which the message points at.
+    from agentmandate.inventory import collect
+
+    where = next(
+        b.where for b in collect(tmp_path, union=True).bindings
+        if b.module == "resolver.py"
+    )
+    assert compare_source(loads(MANIFEST), tmp_path, binding=where).clean
+
+
+def test_withheld_removals_are_named_rather_than_dropped_silently(
+    tmp_path: Path,
+) -> None:
+    # Suppressing the check is right; doing it silently is not. A reader who
+    # resolves the unreadable part would otherwise meet findings that look new
+    # and were only withheld.
+    source = SOURCE.replace(
+        "from strands import Agent, tool",
+        "from partner_kit import lookup_partner\nfrom strands import Agent, tool",
+    ).replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "agent = Agent(tools=[open_case, lookup_partner])",
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+    kinds = [(f.kind, f.tool) for f in drift.findings]
+
+    assert ("unresolved", "<removals>") in kinds
+    assert not any(kind == "removed" for kind, _ in kinds)
+    note = next(f for f in drift.findings if f.tool == "<removals>")
+    assert "issue_refund" in note.message
+    # It explains the findings above it, so it sorts after them.
+    assert kinds[-1] == ("unresolved", "<removals>")
+
+
+def test_nothing_is_withheld_when_the_list_was_readable(tmp_path: Path) -> None:
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "agent = Agent(tools=[open_case])",
+    )
+
+    drift = compare_source(loads(MANIFEST), write(tmp_path, source))
+
+    assert [(f.kind, f.tool) for f in drift.findings] == [("removed", "issue_refund")]

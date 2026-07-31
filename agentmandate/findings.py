@@ -56,8 +56,12 @@ RULES = {
 # Flow style was missed at first and every result on such a manifest anchored
 # at line 1, which is not a missing answer but a wrong one: line 1 is usually
 # `version:`, so the annotation landed somewhere unrelated.
+# Anchored at the start of a line or just after a `{` or `,`, so the key does
+# not have to come first inside a flow mapping. `- { effect: read, name: pay }`
+# is as valid as the other order and used to fall back to line 1.
 NAME_LINE = re.compile(
-    r"""^\s*-?\s*\{?\s*(?:"name"|'name'|name)\s*:\s*(?P<name>"[^"]*"|'[^']*'|[^,}\n]+)"""
+    r"""(?:^|[{,])\s*-?\s*\{?\s*(?:"name"|'name'|name)\s*:\s*"""
+    r"""(?P<name>"[^"]*"|'[^']*'|[^,}\n]+)"""
 )
 
 
@@ -69,7 +73,7 @@ def _tool_lines(manifest: str | Path) -> dict[str, int]:
     except OSError:
         return lines
     for number, line in enumerate(text.splitlines(), start=1):
-        match = NAME_LINE.match(line)
+        match = NAME_LINE.search(line)
         if match is None:
             continue
         name = match.group("name").strip().rstrip(",}").strip().strip("\"'")

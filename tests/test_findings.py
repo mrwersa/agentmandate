@@ -304,7 +304,7 @@ def test_a_manifest_outside_the_working_directory_keeps_its_path(
     assert uri == path.as_posix()
 
 
-@pytest.mark.parametrize("style", ["block", "flow", "json"])
+@pytest.mark.parametrize("style", ["block", "flow", "flow-name-last", "json"])
 def test_every_manifest_spelling_anchors_at_the_tool(
     tmp_path: Path, style: str
 ) -> None:
@@ -323,15 +323,23 @@ def test_every_manifest_spelling_anchors_at_the_tool(
         text = json_module.dumps(data, indent=2)
         suffix = "json"
     else:
-        rows = "".join(
-            "  - { "
-            + ", ".join(
-                f"{k}: {json_module.dumps(v) if isinstance(v, (dict, list)) else v}"
-                for k, v in tool.items()
+        rows = ""
+        for tool in data["tools"]:
+            items = list(tool.items())
+            if style == "flow-name-last":
+                # The key order inside a flow mapping is free, and an earlier
+                # version only found `name` when it came first.
+                items = [i for i in items if i[0] != "name"] + [
+                    i for i in items if i[0] == "name"
+                ]
+            rows += (
+                "  - { "
+                + ", ".join(
+                    f"{k}: {json_module.dumps(v) if isinstance(v, (dict, list)) else v}"
+                    for k, v in items
+                )
+                + " }\n"
             )
-            + " }\n"
-            for tool in data["tools"]
-        )
         text = (
             "version: 1\nagent: dispute-resolver\n"
             "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"

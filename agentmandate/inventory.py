@@ -657,6 +657,20 @@ def _choose(
             raise InventoryError(
                 f"no tool binding called {wanted!r}. Found: {offered}"
             )
+        if len(matched) > 1:
+            # A label is a variable name, and `agent` is the most common one
+            # there is. Two modules each assigning `agent = Agent(...)` would
+            # otherwise be silently merged here, which is the overstatement
+            # --binding exists to escape rather than to reintroduce.
+            sites = "\n".join(
+                f"  {b.where}  ({len(b.references)} tool(s))" for b in matched
+            )
+            raise InventoryError(
+                f"{len(matched)} bindings are called {wanted!r}, and merging "
+                f"them would describe an agent that holds every tool in "
+                f"both.\n\n{sites}\n\nSelect one by location instead, for "
+                f"example --binding {matched[0].where}."
+            )
         return matched
 
     agentic = [b for b in bindings if b.recognised]
