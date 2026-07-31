@@ -48,10 +48,14 @@ All notable changes to this project are documented here. The format follows
   `--binding agent` silently merged two different agents, which is the
   overstatement `--binding` exists to escape reintroduced through the escape
   hatch itself. Disambiguate by location instead, which the message shows.
-- The withheld-removals note carries `tool: null` in `--json`, with the
-  sentinel under `subject`. It is a note about the report rather than about a
-  tool, and a machine consumer reading `tool` should not get a name no
-  manifest could declare.
+- `drift --json` gives every finding a `subject` field beside `tool`. They
+  hold the same value for a finding about a tool. They differ for the
+  withheld-removals note, which is about the report rather than about a tool:
+  `subject` carries the `<removals>` sentinel and `tool` is `null`, so a
+  consumer reading `tool` never gets a name no manifest could declare. This
+  is a new field on a command introduced in the same release, so nothing
+  downstream can already depend on the older shape, but a reader diffing JSON
+  between builds will see it.
 - A withheld removal check is named rather than dropped silently. Suppressing
   it is right; doing it quietly would leave a reader who resolves the
   unreadable part meeting findings that look new and were only withheld.
