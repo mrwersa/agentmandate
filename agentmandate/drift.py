@@ -99,7 +99,15 @@ class Drift:
             "clean": self.clean,
             "source": self.source,
             "findings": [
-                {"kind": f.kind, "tool": f.tool, "message": f.message}
+                {
+                    # The withheld-removals note is about the report rather
+                    # than about a tool, so a machine consumer reading `tool`
+                    # gets null rather than a name no manifest declares.
+                    "kind": f.kind,
+                    "tool": None if f.tool == WITHHELD else f.tool,
+                    "subject": f.tool,
+                    "message": f.message,
+                }
                 for f in self.findings
             ],
         }

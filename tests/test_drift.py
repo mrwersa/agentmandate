@@ -437,3 +437,22 @@ def test_nothing_is_withheld_when_the_list_was_readable(tmp_path: Path) -> None:
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
 
     assert [(f.kind, f.tool) for f in drift.findings] == [("removed", "issue_refund")]
+
+
+def test_the_withheld_note_is_not_a_tool_in_the_json(tmp_path: Path) -> None:
+    # `<removals>` is a sentinel for display. A consumer reading `tool` should
+    # get null rather than a name no manifest could declare.
+    source = SOURCE.replace(
+        "agent = Agent(tools=[open_case, refund])",
+        "agent = Agent(tools=[open_case, *more()])",
+    )
+
+    findings = compare_source(loads(MANIFEST), write(tmp_path, source)).as_dict()[
+        "findings"
+    ]
+    note = next(f for f in findings if f["subject"] == "<removals>")
+
+    assert note["tool"] is None
+    assert all(
+        f["tool"] == f["subject"] for f in findings if f["subject"] != "<removals>"
+    )
