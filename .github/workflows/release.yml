@@ -59,13 +59,32 @@ jobs:
       - name: Decide
         id: decide
         env:
+          GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           VERSION="$(python scripts/release_notes.py --print-version)"
-          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          TAG="v${VERSION}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
-          if git rev-parse --verify --quiet "refs/tags/v${VERSION}" > /dev/null; then
-            echo "v${VERSION} is already tagged, so this commit is not a release"
+
+          # `workflow_run` events arrive as each CI run finishes, which is not
+          # commit order. Releasing a commit that is no longer the tip would
+          # publish an older version after a newer one, so only the tip
+          # releases and whatever landed on top releases itself.
+          git fetch --quiet origin main
+          TIP="$(git rev-parse origin/main)"
+          if [ "${TIP}" != "${SHA}" ]; then
+            echo "${SHA} is behind main at ${TIP}, so the newer commit releases"
+            echo "due=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # A completed release is a release, not a tag. A tag with no release
+          # behind it is a run that died between pushing one and creating the
+          # other, and treating that as done would strand the version with
+          # nothing published.
+          if gh release view "${TAG}" > /dev/null 2>&1; then
+            echo "${TAG} is already released, so this commit is not a release"
             echo "due=false" >> "$GITHUB_OUTPUT"
           else
             echo "due=true" >> "$GITHUB_OUTPUT"
@@ -147,8 +166,20 @@ jobs:
           TAG: ${{ needs.decide.outputs.tag }}
           SHA: ${{ needs.decide.outputs.sha }}
         run: |
-          git tag "${TAG}" "${SHA}"
-          git push origin "${TAG}"
+          # Resumable. A previous run may have pushed the tag and then failed
+          # before creating the release, and that state has to finish rather
+          # than read as done.
+          if git rev-parse --verify --quiet "refs/tags/${TAG}" > /dev/null; then
+            EXISTING="$(git rev-parse "${TAG}^{commit}")"
+            if [ "${EXISTING}" != "${SHA}" ]; then
+              echo "::error::${TAG} already points at ${EXISTING}, not ${SHA}"
+              exit 1
+            fi
+            echo "${TAG} already exists at this commit, so only the release is missing"
+          else
+            git tag "${TAG}" "${SHA}"
+            git push origin "${TAG}"
+          fi
           gh release create "${TAG}" \
             --title "AgentMandate ${TAG}" \
             --notes-file release-notes.md \

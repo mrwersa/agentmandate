@@ -33,7 +33,16 @@ All notable changes to this project are documented here. The format follows
   created. Tagging first leaves a public release behind whenever a build or an
   upload fails, which is a version users can see and cannot install.
 - The workflow takes a repository-wide lock, so two merges landing together
-  cannot both decide the same tag is free and race to create it.
+  cannot both decide the same tag is free and race to create it. Ordering is
+  handled separately: CI runs finish in whatever order they finish, so only a
+  commit that is still the tip of `main` releases, and anything landing on top
+  releases itself. Releasing a commit that is no longer the tip would publish
+  an older version after a newer one.
+- The decision is keyed on whether a GitHub Release exists, not on whether the
+  tag exists. A run that pushed the tag and then failed before creating the
+  release used to read as finished on the next attempt, stranding a version
+  with a tag and nothing published. Tagging is now resumable, and a tag
+  pointing somewhere other than the commit being released is a hard error.
 - The release build checks the built wheel and sdist filenames against the
   tag, because the artefact users install is the thing worth checking.
 

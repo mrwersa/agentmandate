@@ -52,11 +52,28 @@ Confirm afterwards that the version appears on PyPI and that
 ## What the automation refuses to do
 
 - Publish a commit whose CI run did not succeed.
+- Publish a commit that is no longer the tip of `main`. CI runs finish in
+  whatever order they finish, not commit order, so releasing a commit that
+  something has landed on top of would publish an older version after a newer
+  one. Whatever is on top releases itself.
 - Publish a version with no dated changelog section.
 - Publish a wheel or sdist whose filename does not match the tag.
-- Re-release a version that is already tagged.
-- Run two releases at once. The workflow takes a repository-wide lock, so two
-  merges landing together cannot both decide the same tag is free.
+- Re-release a version that already has a GitHub Release.
+- Run two releases at once. The workflow takes a repository-wide lock.
+
+Two bumps merged in quick succession release the second one only. The first
+version is never the tip long enough to release, and its changes ship inside
+the second. Merge one release at a time if each needs its own version on PyPI.
+
+## When something fails partway
+
+The decision is keyed on whether the **release** exists, not the tag, so a run
+that pushed the tag and then died recreates only what is missing rather than
+reading as finished.
+
+If the PyPI upload is what failed, re-run the failed job from the Actions
+page. The artefacts are already built and attached, and the publish step
+uploads those exact files.
 
 ## Publishing from the GitHub UI
 
