@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Fixed
+
+- `drift` no longer reports a declared tool as `removed` when the source binds
+  it from a module the scan never read. An absent declaration is not an absent
+  tool, so the report now gives only the `unresolved` finding instead of
+  contradicting it. The removal claim is suppressed whenever the read could
+  not enumerate the whole list, whether that is an unreadable binding or a
+  binding outside the scanned path.
+- `drift --union-bindings` names the source side correctly. The union of
+  several agents is reported as the union, and a single agent selected under
+  the flag is named like any other binding. Both previously read as "no agent
+  binding was found", which was false whenever a binding had been chosen.
+
 ## 0.7.0 - 2026-07-31
 
 ### Added

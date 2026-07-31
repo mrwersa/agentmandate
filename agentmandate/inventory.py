@@ -584,7 +584,9 @@ def collect(
         # says the list has not been narrowed to one agent.
         selected = declarations
     else:
-        inventory.selected = None if union else chosen[0]
+        # A union of several agents has no single binding to name; one agent,
+        # even under --union-bindings, does.
+        inventory.selected = chosen[0] if len(chosen) == 1 else None
         inventory.united = union and len(chosen) > 1
         selected = []
         for site in chosen:

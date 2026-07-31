@@ -152,7 +152,12 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
     # and `removed` was asserting something positive from evidence already
     # flagged as unreadable, which is the same fail-closed rule this module
     # applies everywhere else, pointed the other way.
-    unreadable = bool(inventory.unresolved)
+    #
+    # A tool bound from outside the scanned path is just as unreadable as an
+    # unenumerable list: it is absent from the declarations only because the
+    # scan never saw it, so declaring it in the manifest must not read as a
+    # removal.
+    unreadable = bool(inventory.unresolved) or bool(inventory.undeclared)
     for name in sorted(set(declared) - set(discovered)) if not unreadable else ():
         findings.append(
             DriftFinding(
@@ -191,12 +196,18 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
     findings.sort(key=lambda f: (order[f.kind], f.tool))
 
     selected = inventory.selected
+    if selected is not None:
+        source = f"{selected.where} ({selected.label})"
+    elif inventory.united:
+        source = "the union of every agent's tool list"
+    else:
+        source = ""
     return Drift(
         agent=mandate.agent,
         declared=tuple(sorted(declared)),
         discovered=tuple(sorted(discovered)),
         findings=tuple(findings),
-        source=f"{selected.where} ({selected.label})" if selected else "",
+        source=source,
     )
 
 
