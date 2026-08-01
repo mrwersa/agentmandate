@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Changed
+
+- The README shows the GitHub Action above the fold. A Marketplace listing
+  renders this file, so somebody arriving from a search wants the usage before
+  the library tour.
+- `RELEASING.md` records that the Marketplace listing is not automated and
+  cannot be. Listing a release is a web-UI checkbox with no API behind it, so
+  the release workflow will never tick it, and advancing the listing should be
+  a decision rather than a consequence of a version number moving.
+
 ## 0.8.0 - 2026-08-01
 
 ### Added

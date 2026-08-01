@@ -51,6 +51,18 @@ cannot:
 
 Alpha. Apache-2.0.
 
+**In CI, as a GitHub Action:**
+
+```yaml
+- uses: mrwersa/agentmandate@v0.8.0
+  with:
+    manifest: mandate.yaml
+```
+
+The counterexample renders in the job summary as a graph, and the SARIF output
+annotates the pull request that introduced it.
+[Inputs and outputs](#in-a-pull-request).
+
 **See the whole thing working:**
 [**agent-release-gate**](https://github.com/mrwersa/agent-release-gate) takes
 one agent from Python source to a gate decision, with every command in this

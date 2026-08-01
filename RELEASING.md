@@ -49,6 +49,39 @@ install.
 Confirm afterwards that the version appears on PyPI and that
 `pip install agentmandate` resolves it.
 
+## The Marketplace listing is not automated, and cannot be
+
+The action is listed on the GitHub Marketplace so people find it by searching
+rather than by already knowing this repository exists. Listing a release is a
+checkbox on the release form in the web UI, and there is no API for it. The
+release workflow creates releases through the API, so it will never tick that
+box.
+
+That is a genuine gap rather than an oversight worth fixing. Advancing the
+listing to a new version should be a decision somebody makes, not something
+that happens because a version number moved.
+
+After a release that changes the action, if you want the listing to point at
+it:
+
+1. Open the release, choose **Edit**.
+2. Tick **Publish this Action to the GitHub Marketplace**.
+3. Accept the Developer Agreement on the first listing only.
+4. Category: **Security**. Compound authority analysis is what somebody
+   browsing that category is looking for.
+
+Requirements the repository already meets, checked rather than assumed: it is
+public, `action.yml` sits at the root, `branding` declares an icon and a
+colour, and the name matches neither an existing listing nor a GitHub account.
+Publishing needs two-factor authentication on the account.
+
+Once the first listing exists, this badge belongs beside the others in the
+README, and not before, because the link 404s until then:
+
+```markdown
+[![Marketplace](https://img.shields.io/badge/marketplace-agentmandate-2088ff?logo=github)](https://github.com/marketplace/actions/agentmandate)
+```
+
 ## What the automation refuses to do
 
 - Publish a commit whose CI run did not succeed.
