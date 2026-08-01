@@ -1,0 +1,143 @@
+# Real tool graph: Coinbase AgentKit, Strands example chatbot
+# (python/examples/strands-agents-cdp-server-chatbot), provider set wired in
+# chatbot.py action_providers=[...] and nothing else:
+#   cdp_api, erc20, pyth, wallet, weth, wow, compound.
+#
+# Tool set enumerated from source at coinbase-agentkit@v0.1.6, class-scoped
+# to exactly the seven providers the example instantiates. 18 actions, 17
+# distinct (get_balance is declared by both erc20 and wallet; the manifest
+# resolves the collision to one entry).
+#
+# This is the before-manifest for docs/evidence/agentkit/mandate.yaml. The
+# two differ only by what coinbase-agentkit@v0.7.4 changed inside the wired
+# providers: gained approve, get_allowance, get_erc20_token_address,
+# unwrap_eth, fetch_price, fetch_price_feed; removed address_reputation,
+# fetch_price_feed_id, get_price. The x402, onramp and ssh providers are NOT
+# here and NOT in the after-manifest: the example never instantiates them.
+#
+# The controls below are encoded, not shipped: AgentKit itself has no
+# cumulative ceilings, only wallet balance and CDP API keys.
+#
+# Anchoring note (the distortion): the same invented scope anchors as the
+# after-manifest, catalogued in its end-note.
+version: 1
+agent: cdp-wallet-agent
+identity: spiffe://coinbase/agents/cdp-wallet-agent
+
+limits:
+  total: { amount: 700, currency: USD }
+  depth: 8
+
+tools:
+  # cdp_api_action_provider
+  - name: request_faucet_funds
+    effect: write
+    principal: caller
+    produces: eth
+    unbounded: true
+
+  - name: address_reputation
+    effect: read
+    principal: caller
+
+  # erc20_action_provider
+  - name: get_balance
+    effect: read
+    principal: caller
+
+  - name: transfer
+    effect: irreversible
+    principal: caller
+    requires: [weth]
+    value_arg: amount
+    scope_key: weth
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
+
+  # pyth_action_provider (read-only price oracle)
+  - name: fetch_price_feed_id
+    effect: read
+    principal: caller
+
+  - name: get_price
+    effect: read
+    principal: caller
+
+  # wallet_action_provider
+  - name: get_wallet_details
+    effect: read
+    principal: caller
+
+  - name: native_transfer
+    effect: irreversible
+    principal: caller
+    requires: [eth]
+    value_arg: amount
+    scope_key: eth
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
+
+  # weth_action_provider
+  - name: wrap_eth
+    effect: write
+    principal: caller
+    produces: weth
+    unbounded: true
+
+  # wow_action_provider
+  - name: buy_token
+    effect: irreversible
+    principal: caller
+    requires: [token]
+    value_arg: amount
+    scope_key: token
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
+
+  - name: create_token
+    effect: irreversible
+    principal: caller
+    produces: token
+    requires_approval: true
+
+  - name: sell_token
+    effect: irreversible
+    principal: caller
+    requires: [token]
+    value_arg: amount
+    scope_key: token
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
+
+  # compound_action_provider
+  - name: supply
+    effect: write
+    principal: caller
+    produces: supplied
+
+  - name: withdraw
+    effect: write
+    principal: caller
+    requires: [supplied]
+
+  - name: borrow
+    effect: write
+    principal: caller
+    produces: borrowed_asset
+    unbounded: true
+
+  - name: repay
+    effect: irreversible
+    principal: caller
+    requires: [borrowed_asset]
+    value_arg: amount
+    scope_key: borrowed_asset
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
+
+  - name: get_portfolio
+    effect: read
+    principal: caller
+
+# Recorded at the end, as the header promises. Same distortions as the
+# after-manifest (see its end-note), minus the tools v0.7.4 gained.
