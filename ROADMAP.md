@@ -29,15 +29,25 @@ Each one fails closed. Missing control evidence, an unenumerable tool list, an
 unreviewed decision, and a currency that cannot be compared all produce a
 finding rather than a pass.
 
-## Next: fewer steps between a finding and a reviewer
+The adoption set the roadmap opened is complete: traces in 0.5.0, inventory
+in 0.6.0, drift and developer-native findings in 0.7.0, and a GitHub Action
+in 0.8.0. These overlap with mature CI and security tooling deliberately. The
+new value remains the authority graph and its counterexamples; the packaging
+is only there so the counterexamples reach a reviewer.
 
-1. **A GitHub Action.** The gate is six commands and a handful of flags. That
-   is a wrapper, not a feature, and it is the difference between a tool people
-   try and a tool people run.
+## Next: nothing, until a real graph asks for it
 
-These overlap with mature CI and security tooling deliberately. The new value
-remains the authority graph and its counterexamples; the packaging is only
-there so the counterexamples reach a reviewer.
+There is no queued feature. That is a position rather than an omission.
+
+The model has not been pointed at enough real tool graphs to know where it is
+too coarse, and every candidate below costs search state and annotation
+burden. Building any of them now would be guessing at which abstraction
+somebody needs, and the guess would ship with a maintenance bill and a
+migration.
+
+What would change this: a tool graph somebody has to distort to express, with
+the control they actually run and the counterexample the distortion hides.
+That is the most useful thing to file.
 
 ## Not planned
 
