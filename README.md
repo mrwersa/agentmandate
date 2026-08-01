@@ -385,7 +385,8 @@ ruff check .
 
 ## Status
 
-Alpha, version 0.4.0. The authority model is the part most likely to change,
+Alpha. The version is in the badge above and on PyPI, so it is not repeated
+here where it would go stale. The authority model is the part most likely to change,
 because it has not yet been pointed at enough real tool graphs to know where it
 is too coarse. Issues describing a graph it models badly are the most useful
 thing you can file.

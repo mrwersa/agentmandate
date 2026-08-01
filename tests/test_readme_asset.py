@@ -28,3 +28,36 @@ def test_authority_path_uses_colour_for_change_type_not_path_risk() -> None:
     assert refund_1 is not None and refund_1.attrib["fill"] == "#e9f6ef"
     assert refund_2 is not None and refund_2.attrib["fill"] == "#e9f6ef"
     assert breach is not None and breach.attrib["fill"] == "#fdecea"
+
+
+def test_the_readme_names_no_version_that_can_go_stale() -> None:
+    """A version in prose drifts, and this one already had.
+
+    The README said "Alpha, version 0.4.0" while 0.7.0 was the live release,
+    three minors behind, because nothing failed when the number stopped being
+    true. The badge and PyPI carry the version; prose does not need to.
+    """
+    import re
+
+    readme = (ASSET.parents[2] / "README.md").read_text(encoding="utf-8")
+    body = "\n".join(
+        line for line in readme.splitlines() if not line.startswith("[![")
+    )
+    stale = re.findall(r"version \d+\.\d+\.\d+|agentmandate[~=]=\d+\.\d+", body)
+
+    assert not stale, f"the README states a version that will drift: {stale}"
+
+
+def test_every_cli_command_is_discoverable_from_the_readme() -> None:
+    """A command the README never names is a command nobody finds."""
+    from agentmandate.cli import build_parser
+
+    readme = (ASSET.parents[2] / "README.md").read_text(encoding="utf-8")
+    commands = {
+        name
+        for action in build_parser()._subparsers._group_actions
+        for name in action.choices
+    }
+    missing = sorted(c for c in commands if f"mandate {c}" not in readme)
+
+    assert not missing, f"the README never mentions: {', '.join(missing)}"

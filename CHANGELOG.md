@@ -8,6 +8,15 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- The README said "Alpha, version 0.4.0" while 0.7.0 was the live release,
+  three minors behind, because nothing failed when the number stopped being
+  true. The version is in the badge and on PyPI; prose does not repeat it, and
+  a test now refuses any version string in the README that can drift.
+- A test requires every CLI command to be named in the README. A command
+  nobody can discover from the front page is a command nobody finds.
+
+### Fixed
+
 - `drift` no longer reports a declared tool as `removed` when the source binds
   it from a module the scan never read. An absent declaration is not an absent
   tool, so the report now gives only the `unresolved` finding instead of
