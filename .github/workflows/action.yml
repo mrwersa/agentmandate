@@ -1,0 +1,72 @@
+name: Action
+
+# The action runs against this repository's own examples. A wrapper nobody
+# exercises is a wrapper that breaks quietly, and the failure would land in
+# somebody else's pull request rather than here.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  clean:
+    name: A clean manifest passes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - id: gate
+        uses: ./
+        with:
+          manifest: examples/dispute-resolver.yaml
+      - name: The outputs say so
+        env:
+          VERDICT: ${{ steps.gate.outputs.verdict }}
+          FINDINGS: ${{ steps.gate.outputs.findings }}
+        run: |
+          test "${VERDICT}" = "clean"
+          test "${FINDINGS}" = "0"
+
+  breach:
+    name: A reachable breach fails the step
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - id: gate
+        continue-on-error: true
+        uses: ./
+        with:
+          manifest: examples/dispute-resolver-v2.yaml
+          baseline: examples/dispute-resolver.yaml
+      - name: It failed, and said why
+        env:
+          OUTCOME: ${{ steps.gate.outcome }}
+          VERDICT: ${{ steps.gate.outputs.verdict }}
+          SARIF: ${{ steps.gate.outputs.sarif-file }}
+        run: |
+          test "${OUTCOME}" = "failure"
+          test "${VERDICT}" = "findings"
+          python -c "
+          import json, os, sys
+          log = json.load(open(os.environ['SARIF']))
+          assert log['version'] == '2.1.0'
+          assert log['runs'][0]['results'], 'SARIF carried no result'
+          "
+
+  report_only:
+    name: fail-on never reports without blocking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - id: gate
+        uses: ./
+        with:
+          manifest: examples/dispute-resolver-v2.yaml
+          fail-on: never
+      - name: Findings were reported and the step still passed
+        env:
+          VERDICT: ${{ steps.gate.outputs.verdict }}
+        run: test "${VERDICT}" = "findings"

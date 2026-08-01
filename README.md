@@ -165,6 +165,30 @@ not supply is marked:
 Unrecognised verbs are proposed as `irreversible`, because under-calling an
 effect is the more expensive mistake.
 
+## In a pull request
+
+```yaml
+- uses: mrwersa/agentmandate@v0.8.0
+  with:
+    manifest: mandate.yaml
+    baseline: mandate-released.yaml   # optional: did this widen authority?
+    source: src/agent                 # optional: has the manifest drifted?
+```
+
+The counterexample lands in the job summary as a rendered graph rather than a
+log line, and `sarif-file` is an output you hand to
+`github/codeql-action/upload-sarif` so it annotates the diff.
+
+Uploading is deliberately your step, not the action's: it needs
+`security-events: write`, and an action that asks for a token permission it
+could avoid is one more reason for a security team to say no.
+
+`fail-on: never` reports without blocking, which is how to turn this on over
+an existing repository without stopping everyone on the first day.
+
+Only the checks you give inputs for run. A manifest alone is enough for `lint`
+and `reach`.
+
 ## Findings where you already look
 
 ```yaml

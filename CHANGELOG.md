@@ -6,6 +6,42 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.8.0 - 2026-08-01
+
+### Added
+
+- A GitHub Action. The gate was six commands and a handful of flags, which is
+  a wrapper rather than a feature, and it is the difference between a tool
+  people try and a tool people run.
+
+  ```yaml
+  - uses: mrwersa/agentmandate@v0.8.0
+    with:
+      manifest: mandate.yaml
+      baseline: mandate-released.yaml
+      source: src/agent
+  ```
+
+- The counterexample renders in the job summary as a Mermaid graph rather than
+  a log line, beside a table of what each check asked and the output of any
+  that failed. The boundary travels with it: the summary states that findings
+  describe what the manifest permits under a bounded search, not what the
+  model tends to do.
+- Only the checks the caller supplied inputs for run. A manifest is enough for
+  `lint` and `reach`; `drift`, `diff`, and `verify` stay off until given what
+  they need. An action demanding a baseline, agent source, and an OTLP export
+  before saying anything would be adopted by nobody.
+- SARIF is written and its path returned, and uploading it stays the caller's
+  step. Uploading needs `security-events: write`, and an action requesting a
+  token permission it can avoid is one more reason to refuse it.
+- `fail-on: never` reports without failing, so a team can turn this on over an
+  existing repository without blocking everyone on the first day. A gate
+  nobody can adopt incrementally is a gate that gets removed rather than
+  fixed.
+- The action runs against this repository's own examples in CI, including the
+  clean case, the failing case, and the report-only case, because a wrapper
+  nobody exercises breaks quietly in somebody else's pull request.
+
 ### Fixed
 
 - `drift` no longer reports a declared tool as `removed` when the source binds

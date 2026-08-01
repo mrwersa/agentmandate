@@ -1,0 +1,112 @@
+name: AgentMandate
+description: >-
+  Find the limits an AI agent can slip past by combining permitted actions, and
+  fail a pull request that widens what it may do.
+author: Saeed Aghaee
+
+branding:
+  icon: shield
+  color: green
+
+# Composite rather than Docker or JavaScript. There is nothing to compile, a
+# container image would be a second thing to build and trust, and a composite
+# step is readable: anyone can see exactly which commands run against their
+# manifest.
+inputs:
+  manifest:
+    description: Path to the mandate manifest (YAML or JSON).
+    required: true
+  source:
+    description: >-
+      Path to the agent's source. When set, `drift` runs and fails when the
+      manifest has stopped describing the implementation.
+    required: false
+    default: ""
+  baseline:
+    description: >-
+      The manifest as it stood at the last release. When set, `diff` runs and
+      reports whether this change widened reachable authority.
+    required: false
+    default: ""
+  traces:
+    description: >-
+      An OTLP JSON export. When set, `verify` replays it against the manifest.
+    required: false
+    default: ""
+  map:
+    description: >-
+      Newline-separated `field=attribute` pairs for `verify`, for example
+      `scope=app.case.id`. Required when `traces` is set, because nothing in
+      the GenAI conventions carries the fields a control needs.
+    required: false
+    default: ""
+  depth:
+    description: Search depth for reachability.
+    required: false
+    default: "8"
+  sarif:
+    description: >-
+      Write SARIF for code scanning. The file path is returned as an output;
+      uploading it is the caller's step, so this action needs no extra token.
+    required: false
+    default: "true"
+  summary:
+    description: >-
+      Write a job summary, including the authority graph. GitHub renders
+      Mermaid there, so the counterexample is a picture rather than a log.
+    required: false
+    default: "true"
+  fail-on:
+    description: >-
+      `findings` fails the step on any finding. `never` reports and always
+      succeeds, which is how to adopt this on an existing repository without
+      blocking everyone on day one.
+    required: false
+    default: "findings"
+  python-version:
+    description: Python to run the analysis on.
+    required: false
+    default: "3.12"
+
+outputs:
+  verdict:
+    description: '`clean` or `findings`.'
+    value: ${{ steps.gate.outputs.verdict }}
+  findings:
+    description: Total number of findings across every check that ran.
+    value: ${{ steps.gate.outputs.findings }}
+  sarif-file:
+    description: Path to the SARIF file, empty when `sarif` is false.
+    value: ${{ steps.gate.outputs.sarif-file }}
+  report:
+    description: Path to the combined JSON report.
+    value: ${{ steps.gate.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v7
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install AgentMandate
+      shell: bash
+      # From the action's own checkout, so the version that runs is the version
+      # the caller pinned. Resolving a release from PyPI here would let the
+      # analysis drift from the tag in their workflow file.
+      run: python -m pip install --quiet "${{ github.action_path }}[yaml]"
+
+    - name: Analyse
+      id: gate
+      shell: bash
+      env:
+        INPUT_MANIFEST: ${{ inputs.manifest }}
+        INPUT_SOURCE: ${{ inputs.source }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_TRACES: ${{ inputs.traces }}
+        INPUT_MAP: ${{ inputs.map }}
+        INPUT_DEPTH: ${{ inputs.depth }}
+        INPUT_SARIF: ${{ inputs.sarif }}
+        INPUT_SUMMARY: ${{ inputs.summary }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+      run: python "${{ github.action_path }}/scripts/action_gate.py"
