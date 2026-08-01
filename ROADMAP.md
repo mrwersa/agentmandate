@@ -61,9 +61,7 @@ finding can be re-run.
 
 The release-to-release diff is a widening beside a narrowing: six actions
 gained, three lost. The gained ones that matter are ERC-20 authority tools.
-`approve` grants an allowance, so a third party can spend the wallet's tokens
-later without the agent calling anything again. That is authority which
-outlives the run, arriving in a minor bump and invisible in a config diff.
+The gain that matters is `approve`. It grants an ERC-20 allowance, so a third party can spend the wallet's tokens later without the agent calling anything again. That is authority which outlives the run, arriving in a minor bump and invisible in a config diff. The diff also reports `effect: gained write on allowance` and `effect: gained read on allowance`: a new scope with new effect classes, an authority-shape change rather than an inventory change, which a config diff structurally cannot show.
 The other gains (`get_allowance`, `get_erc20_token_address`, `unwrap_eth`,
 and the two pyth renames) and the losses (`address_reputation`, the two pyth
 names) are routine. A one-way widening story would have missed the narrowing.

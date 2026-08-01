@@ -55,9 +55,12 @@ Six gained, three lost, a widening beside a narrowing. The interesting gains
 are ERC-20 authority tools. `approve` grants an allowance: a third party can
 spend the wallet's tokens later, without the agent calling anything again.
 That is authority which outlives the run, arriving in a minor bump and
-invisible in a config diff. The pyth tools were renamed (`get_price` and
-`fetch_price_feed_id` became `fetch_price` and `fetch_price_feed`), and
-`address_reputation` was dropped.
+invisible in a config diff. The diff also reports `effect: gained write on
+allowance` and `effect: gained read on allowance`: `approve` added a new
+scope with new effect classes, an authority-shape change rather than an
+inventory change, which a config diff structurally cannot show. The pyth
+tools were renamed (`get_price` and `fetch_price_feed_id` became
+`fetch_price` and `fetch_price_feed`), and `address_reputation` was dropped.
 
 ## The controls, invented but honest
 
