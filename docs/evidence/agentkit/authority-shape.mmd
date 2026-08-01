@@ -1,0 +1,18 @@
+flowchart TD
+  bump["coinbase-agentkit<br/>v0.1.6 → v0.7.4<br/>one minor bump"]
+
+  bump --> inv["Inventory changed<br/>6 tools gained, 3 lost"]
+  bump --> shape["Authority shape changed<br/>new scope: allowance<br/>+ write · + read"]
+
+  inv --> seen["A reviewer sees this.<br/>Six names in a list."]
+  shape --> unseen["A reviewer does not see this.<br/>A standing permission that<br/>outlives the agent's run."]
+
+  classDef src fill:#e8f1fb,stroke:#3978b8,color:#174a7a,stroke-width:2px;
+  classDef ok fill:#e9f6ef,stroke:#278657,color:#17633f,stroke-width:2px;
+  classDef risk fill:#fdecea,stroke:#a33b33,color:#7a2b24,stroke-width:2px;
+  class bump src;
+  class inv,seen ok;
+  class shape,unseen risk;
+
+  linkStyle 0,2 stroke:#278657,stroke-width:2px;
+  linkStyle 1,3 stroke:#a33b33,stroke-width:2px;

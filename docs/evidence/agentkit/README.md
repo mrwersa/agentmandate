@@ -122,3 +122,17 @@ mandate reach docs/evidence/agentkit/mandate.yaml
 mandate diff docs/evidence/agentkit/mandate-v016.yaml docs/evidence/agentkit/mandate.yaml
 mandate drift docs/evidence/agentkit/mandate.yaml --source <checkout of the AgentKit example>
 ```
+
+## The figure
+
+`authority-shape.png` renders `authority-shape.mmd`. It contrasts the two
+changes one minor bump produced: an inventory change a reviewer sees, and an
+authority-shape change they do not.
+
+```bash
+npx @mermaid-js/mermaid-cli -i docs/evidence/agentkit/authority-shape.mmd \
+  -o docs/evidence/agentkit/authority-shape.png -w 1200 -b white
+```
+
+The Mermaid source is what gets reviewed. The PNG exists because publishing
+surfaces outside GitHub do not render Mermaid.
