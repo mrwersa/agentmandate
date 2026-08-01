@@ -52,11 +52,21 @@ That is the most useful thing to file.
 ### A graph has now asked
 
 The first real graph landed in `docs/evidence/agentkit/`: Coinbase AgentKit,
-`coinbase-agentkit@v0.7.4` against `v0.1.6`, on the Strands example chatbot's
-provider set (`cdp_api`, `erc20`, `pyth`, `wallet`, `weth`, `wow`,
-`compound`). Both manifests, the invented ceilings (500 per call, 700 per
-session), and the breach they permit are committed there so the finding can be
-re-run.
+`coinbase-agentkit@v0.7.4` against `v0.1.6`, on the Strands example chatbot.
+The tool sets are enumerated from source, class-scoped to exactly the seven
+providers the example instantiates (`cdp_api`, `erc20`, `pyth`, `wallet`,
+`weth`, `wow`, `compound`). Both manifests, the invented ceilings (500 per
+call, 700 per session), and the breach they permit are committed there so the
+finding can be re-run.
+
+The release-to-release diff is a widening beside a narrowing: six actions
+gained, three lost. The gained ones that matter are ERC-20 authority tools.
+`approve` grants an allowance, so a third party can spend the wallet's tokens
+later without the agent calling anything again. That is authority which
+outlives the run, arriving in a minor bump and invisible in a config diff.
+The other gains (`get_allowance`, `get_erc20_token_address`, `unwrap_eth`,
+and the two pyth renames) and the losses (`address_reputation`, the two pyth
+names) are routine. A one-way widening story would have missed the narrowing.
 
 **What it asked for:** bounded producers. The manifest can only mark a
 producer `unbounded: true` or leave it at nothing, and the real graph makes
@@ -81,6 +91,13 @@ consequence of the no-imports design, chosen so the command runs in a review
 on a branch whose dependencies are not installed (see `inventory.py`). The
 response is to document the limit, or let the manifest declare the list, not
 to import the agent.
+
+The evidence is itself an example of that gap: the first draft of these
+manifests included tools from providers the example never wires in, and
+`drift` could not catch it because the tool list is dynamic. A tool that
+catches release-to-release drift contained undetected drift, for exactly the
+reason it could not see it. That is the argument for making the list
+declarable.
 
 ## Not planned
 

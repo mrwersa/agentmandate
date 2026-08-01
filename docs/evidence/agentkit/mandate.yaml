@@ -1,6 +1,14 @@
 # Real tool graph: Coinbase AgentKit, Strands example chatbot
-# (python/examples/strands-agents-cdp-server-chatbot), providers wired in:
-# cdp_api, erc20, pyth, wallet, weth, wow, compound.
+# (python/examples/strands-agents-cdp-server-chatbot), provider set wired in
+# chatbot.py action_providers=[...] and nothing else:
+#   cdp_api, erc20, pyth, wallet, weth, wow, compound.
+#
+# Tool set enumerated from source at coinbase-agentkit@v0.7.4
+# (tag dated 2025-10-03), class-scoped to exactly those seven providers:
+# CdpApiActionProvider, ERC20ActionProvider, PythActionProvider,
+# WalletActionProvider, WethActionProvider, WowActionProvider,
+# CompoundActionProvider. 21 actions, 20 distinct (get_balance is declared by
+# both erc20 and wallet; the manifest resolves the collision to one entry).
 #
 # The controls below are encoded, not shipped: AgentKit itself has no
 # cumulative ceilings, only wallet balance and CDP API keys. The per-binding
@@ -23,25 +31,18 @@ limits:
   depth: 8
 
 tools:
-  # wallet_action_provider
-  - name: get_wallet_details
-    effect: read
+  # cdp_api_action_provider
+  - name: request_faucet_funds
+    effect: write
     principal: caller
+    produces: eth
+    unbounded: true
 
+  # erc20_action_provider
   - name: get_balance
     effect: read
     principal: caller
 
-  - name: native_transfer
-    effect: irreversible
-    principal: caller
-    requires: [eth]
-    value_arg: amount
-    scope_key: eth
-    ceiling: { amount: 500, currency: USD }
-    requires_approval: true
-
-  # erc20_action_provider
   - name: transfer
     effect: irreversible
     principal: caller
@@ -66,20 +67,27 @@ tools:
     principal: caller
 
   # pyth_action_provider (read-only price oracle)
-  - name: fetch_price_feed
-    effect: read
-    principal: caller
-
   - name: fetch_price
     effect: read
     principal: caller
 
-  # cdp_api_action_provider
-  - name: request_faucet_funds
-    effect: write
+  - name: fetch_price_feed
+    effect: read
     principal: caller
-    produces: eth
-    unbounded: true
+
+  # wallet_action_provider
+  - name: get_wallet_details
+    effect: read
+    principal: caller
+
+  - name: native_transfer
+    effect: irreversible
+    principal: caller
+    requires: [eth]
+    value_arg: amount
+    scope_key: eth
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
 
   # weth_action_provider
   - name: wrap_eth
@@ -149,32 +157,6 @@ tools:
     effect: read
     principal: caller
 
-  # x402_action_provider (added coinbase-agentkit@v0.7.4)
-  - name: make_http_request
-    effect: read
-    principal: caller
-
-  - name: make_http_request_with_x402
-    effect: irreversible
-    principal: caller
-    requires_approval: true
-
-  - name: retry_http_request_with_x402
-    effect: irreversible
-    principal: caller
-    requires_approval: true
-
-  # onramp_action_provider (added coinbase-agentkit@v0.7.4)
-  - name: get_onramp_buy_url
-    effect: write
-    principal: caller
-
-  # ssh_action_provider (added coinbase-agentkit@v0.7.4)
-  - name: remote_shell
-    effect: irreversible
-    principal: caller
-    requires_approval: true
-
 # Recorded at the end, as the header promises.
 #
 # Three distortions remain, each a finding about the model rather than a bug
@@ -195,3 +177,6 @@ tools:
 #    nets to roughly zero but counts 1000 USD against the total. The model
 #    has no way to declare which the reader is seeing, exposure or turnover.
 #    Gross is defensible, but it should be declarable.
+# 4. The get_balance collision. Both erc20 and wallet declare get_balance.
+#    The manifest resolves to one entry, so one of the two real tools
+#    disappears from the analysis silently.

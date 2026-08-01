@@ -1,19 +1,25 @@
 # Real tool graph: Coinbase AgentKit, Strands example chatbot
-# (python/examples/strands-agents-cdp-server-chatbot), providers wired in:
-# cdp_api, erc20, pyth, wallet, weth, wow, compound.
+# (python/examples/strands-agents-cdp-server-chatbot), provider set wired in
+# chatbot.py action_providers=[...] and nothing else:
+#   cdp_api, erc20, pyth, wallet, weth, wow, compound.
+#
+# Tool set enumerated from source at coinbase-agentkit@v0.1.6, class-scoped
+# to exactly the seven providers the example instantiates. 18 actions, 17
+# distinct (get_balance is declared by both erc20 and wallet; the manifest
+# resolves the collision to one entry).
+#
+# This is the before-manifest for docs/evidence/agentkit/mandate.yaml. The
+# two differ only by what coinbase-agentkit@v0.7.4 changed inside the wired
+# providers: gained approve, get_allowance, get_erc20_token_address,
+# unwrap_eth, fetch_price, fetch_price_feed; removed address_reputation,
+# fetch_price_feed_id, get_price. The x402, onramp and ssh providers are NOT
+# here and NOT in the after-manifest: the example never instantiates them.
 #
 # The controls below are encoded, not shipped: AgentKit itself has no
-# cumulative ceilings, only wallet balance and CDP API keys. The per-binding
-# ceilings and the session total are the controls a team running this agent
-# would actually need, expressed in the only place they can be.
+# cumulative ceilings, only wallet balance and CDP API keys.
 #
-# Anchoring note (the distortion): real transfer/native_transfer/buy/sell take
-# the asset as a free argument, and NO tool produces an 'asset' scope. The
-# manifest model attaches a ceiling only to a scope a prior tool produced, so
-# each value tool is scoped to the binding it actually spends: WETH the agent
-# wrapped, ETH the agent unwrapped or fauchted, the WOW token it created, the
-# asset it borrowed. The fact that this anchoring must be invented is a real
-# model limitation, recorded at the end.
+# Anchoring note (the distortion): the same invented scope anchors as the
+# after-manifest, catalogued in its end-note.
 version: 1
 agent: cdp-wallet-agent
 identity: spiffe://coinbase/agents/cdp-wallet-agent
@@ -23,12 +29,42 @@ limits:
   depth: 8
 
 tools:
-  # wallet_action_provider
-  - name: get_wallet_details
+  # cdp_api_action_provider
+  - name: request_faucet_funds
+    effect: write
+    principal: caller
+    produces: eth
+    unbounded: true
+
+  - name: address_reputation
     effect: read
     principal: caller
 
+  # erc20_action_provider
   - name: get_balance
+    effect: read
+    principal: caller
+
+  - name: transfer
+    effect: irreversible
+    principal: caller
+    requires: [weth]
+    value_arg: amount
+    scope_key: weth
+    ceiling: { amount: 500, currency: USD }
+    requires_approval: true
+
+  # pyth_action_provider (read-only price oracle)
+  - name: fetch_price_feed_id
+    effect: read
+    principal: caller
+
+  - name: get_price
+    effect: read
+    principal: caller
+
+  # wallet_action_provider
+  - name: get_wallet_details
     effect: read
     principal: caller
 
@@ -41,58 +77,12 @@ tools:
     ceiling: { amount: 500, currency: USD }
     requires_approval: true
 
-  # erc20_action_provider
-  - name: transfer
-    effect: irreversible
-    principal: caller
-    requires: [weth]
-    value_arg: amount
-    scope_key: weth
-    ceiling: { amount: 500, currency: USD }
-    requires_approval: true
-
-  - name: approve
-    effect: write
-    principal: caller
-    produces: allowance
-
-  - name: get_allowance
-    effect: read
-    principal: caller
-    requires: [allowance]
-
-  - name: get_erc20_token_address
-    effect: read
-    principal: caller
-
-  # pyth_action_provider (read-only price oracle)
-  - name: fetch_price_feed
-    effect: read
-    principal: caller
-
-  - name: fetch_price
-    effect: read
-    principal: caller
-
-  # cdp_api_action_provider
-  - name: request_faucet_funds
-    effect: write
-    principal: caller
-    produces: eth
-    unbounded: true
-
   # weth_action_provider
   - name: wrap_eth
     effect: write
     principal: caller
     produces: weth
     unbounded: true
-
-  - name: unwrap_eth
-    effect: write
-    principal: caller
-    requires: [weth]
-    produces: eth
 
   # wow_action_provider
   - name: buy_token
@@ -149,8 +139,5 @@ tools:
     effect: read
     principal: caller
 
-# Recorded at the end, as the header promises. This is the before-manifest for
-# docs/evidence/agentkit/mandate.yaml. It carries the same invented scope
-# anchors and the same three model distortions, catalogued in the end-note of
-# that file. The only difference between the two is the five tools that
-# coinbase-agentkit@v0.7.4 adds (x402, onramp, ssh).
+# Recorded at the end, as the header promises. Same distortions as the
+# after-manifest (see its end-note), minus the tools v0.7.4 gained.
