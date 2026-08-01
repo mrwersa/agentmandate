@@ -38,6 +38,20 @@ All notable changes to this project are documented here. The format follows
   existing repository without blocking everyone on the first day. A gate
   nobody can adopt incrementally is a gate that gets removed rather than
   fixed.
+- A lint warning is reported without blocking. `lint` exits zero on a warning
+  and non-zero on an error, and counting both into one number produced
+  `verdict=clean` beside `findings=1`, a self-contradicting pair, with the
+  warning appearing nowhere in the summary. Blocking and advisory findings are
+  counted apart, `notes` is a separate output, and an advisory finding shows
+  as a warning mark rather than a tick. Dropping the count would have made the
+  arithmetic agree by losing a real finding, which is the failure this package
+  is about.
+- Artefacts are written to `RUNNER_TEMP` rather than the checkout. A
+  repository that fails on a dirty tree, or a later step that archives the
+  workspace, would otherwise pick them up, and two jobs would collide on the
+  same filename. Both paths are still returned as outputs.
+- The human-readable output of a check is fetched only when something will
+  show it, so a clean run does not pay for text nobody reads.
 - The action runs against this repository's own examples in CI, including the
   clean case, the failing case, and the report-only case, because a wrapper
   nobody exercises breaks quietly in somebody else's pull request.

@@ -34,6 +34,12 @@ from pathlib import Path
 STEP_SUMMARY = os.environ.get("GITHUB_STEP_SUMMARY")
 STEP_OUTPUT = os.environ.get("GITHUB_OUTPUT")
 WORKSPACE = Path(os.environ.get("GITHUB_WORKSPACE", "."))
+# Artefacts go to the runner's temp directory, not the checkout. A repository
+# that fails on a dirty tree, or a later step that archives or commits the
+# workspace, would otherwise pick these up, and two jobs writing the same
+# filename would collide. Both paths are returned as outputs, so nothing has
+# to guess where they went.
+ARTEFACTS = Path(os.environ.get("RUNNER_TEMP") or WORKSPACE)
 
 
 def run(args: list[str]) -> tuple[int, str]:
@@ -62,6 +68,20 @@ def run_json(args: list[str]) -> tuple[int, object]:
         return code, {"error": out.strip()}
 
 
+def detail_for(check: dict, args: list[str]) -> None:
+    """Fetch the human-readable output, but only when something will show it.
+
+    Each check runs the CLI twice: once for JSON the script reads, once for
+    the text a reviewer reads. Rendering the text from the JSON instead would
+    mean a second copy of the formatting, drifting from the one users see. So
+    the second call stays, and a clean check simply does not make it.
+    """
+    if check["ok"] and not check.get("notes"):
+        check["detail"] = ""
+        return
+    check["detail"] = run(args)[1].strip()
+
+
 def emit(name: str, value: str) -> None:
     if STEP_OUTPUT:
         with open(STEP_OUTPUT, "a", encoding="utf-8") as handle:
@@ -74,30 +94,46 @@ def count(payload: object, key: str) -> int:
     return 0
 
 
+def by_severity(payload: object) -> tuple[int, int]:
+    """Split lint findings into the blocking ones and the advisory ones.
+
+    `lint` exits non-zero on an error and zero on a warning, so counting both
+    into one number produced a report claiming no finding while the finding
+    count sat above zero. Silencing the warning would have made the arithmetic
+    agree by losing a real finding, which is the failure this whole package
+    exists to catch. So they are counted apart and both are shown.
+    """
+    findings = payload.get("findings", []) if isinstance(payload, dict) else []
+    if not isinstance(findings, list):
+        return 0, 0
+    blocking = sum(1 for f in findings if isinstance(f, dict) and f.get("severity") != "warning")
+    return blocking, len(findings) - blocking
+
+
 def main() -> int:
     manifest = os.environ["INPUT_MANIFEST"]
     depth = os.environ.get("INPUT_DEPTH", "8")
     checks: list[dict] = []
 
     code, payload = run_json(["lint", manifest])
-    checks.append(
-        {"name": "lint", "ok": code == 0, "findings": count(payload, "findings"),
-         "detail": run(["lint", manifest])[1].strip()}
-    )
+    blocking, advisory = by_severity(payload)
+    check = {"name": "lint", "ok": code == 0, "findings": blocking, "notes": advisory}
+    detail_for(check, ["lint", manifest])
+    checks.append(check)
 
-    code, reach = run_json(["reach", manifest, "--depth", depth])
-    checks.append(
-        {"name": "reach", "ok": code == 0, "findings": count(reach, "breaches"),
-         "detail": run(["reach", manifest, "--depth", depth])[1].strip()}
-    )
+    args = ["reach", manifest, "--depth", depth]
+    code, reach = run_json(args)
+    check = {"name": "reach", "ok": code == 0, "findings": count(reach, "breaches")}
+    detail_for(check, args)
+    checks.append(check)
 
     source = os.environ.get("INPUT_SOURCE", "").strip()
     if source:
-        code, drift = run_json(["drift", manifest, "--source", source])
-        checks.append(
-            {"name": "drift", "ok": code == 0, "findings": count(drift, "findings"),
-             "detail": run(["drift", manifest, "--source", source])[1].strip()}
-        )
+        args = ["drift", manifest, "--source", source]
+        code, drift = run_json(args)
+        check = {"name": "drift", "ok": code == 0, "findings": count(drift, "findings")}
+        detail_for(check, args)
+        checks.append(check)
 
     baseline = os.environ.get("INPUT_BASELINE", "").strip()
     if baseline:
@@ -111,10 +147,9 @@ def main() -> int:
             for change in (delta.get("changes", []) if isinstance(delta, dict) else [])
             if isinstance(change, dict) and change.get("direction") == "widening"
         ]
-        checks.append(
-            {"name": "diff", "ok": code == 0, "findings": len(widening),
-             "detail": run(args)[1].strip()}
-        )
+        check = {"name": "diff", "ok": code == 0, "findings": len(widening)}
+        detail_for(check, args)
+        checks.append(check)
 
     traces = os.environ.get("INPUT_TRACES", "").strip()
     if traces:
@@ -124,41 +159,59 @@ def main() -> int:
                 args += ["--map", line.strip()]
         code, report = run_json(args)
         conformance = report.get("conformance", {}) if isinstance(report, dict) else {}
-        checks.append(
-            {"name": "verify", "ok": code == 0,
-             "findings": count(conformance, "violations"),
-             "detail": run(args)[1].strip()}
-        )
+        check = {
+            "name": "verify",
+            "ok": code == 0,
+            "findings": count(conformance, "violations"),
+        }
+        detail_for(check, args)
+        checks.append(check)
 
     total = sum(check["findings"] for check in checks)
+    advisory_total = sum(check.get("notes", 0) for check in checks)
     verdict = "clean" if all(check["ok"] for check in checks) else "findings"
 
-    report_path = WORKSPACE / "agentmandate-report.json"
+    report_path = ARTEFACTS / "agentmandate-report.json"
     report_path.write_text(
-        json.dumps({"verdict": verdict, "findings": total, "checks": checks}, indent=2),
+        json.dumps(
+            {
+                "verdict": verdict,
+                "findings": total,
+                "notes": advisory_total,
+                "checks": checks,
+            },
+            indent=2,
+        ),
         encoding="utf-8",
     )
 
     sarif_path = ""
     if os.environ.get("INPUT_SARIF", "true").lower() == "true":
         code, sarif = run(["reach", manifest, "--depth", depth, "--sarif"])
-        target = WORKSPACE / "agentmandate.sarif"
+        target = ARTEFACTS / "agentmandate.sarif"
         target.write_text(sarif, encoding="utf-8")
         sarif_path = str(target)
 
     if os.environ.get("INPUT_SUMMARY", "true").lower() == "true" and STEP_SUMMARY:
         _, graph = run(["reach", manifest, "--depth", depth, "--graph"])
+        # Only the summary shows it, so it is fetched only when written.
         with open(STEP_SUMMARY, "a", encoding="utf-8") as handle:
-            handle.write(summary(checks, verdict, total, graph))
+            handle.write(summary(checks, verdict, total, advisory_total, graph))
 
     emit("verdict", verdict)
     emit("findings", str(total))
+    emit("notes", str(advisory_total))
     emit("sarif-file", sarif_path)
     emit("report", str(report_path))
 
-    print(f"{len(checks)} check(s), {total} finding(s), verdict {verdict}")
+    print(
+        f"{len(checks)} check(s), {total} finding(s), "
+        f"{advisory_total} note(s), verdict {verdict}"
+    )
     for check in checks:
-        print(f"  {'PASS' if check['ok'] else 'FAIL'}  {check['name']}")
+        mark = "PASS" if check["ok"] else "FAIL"
+        trailer = f"  ({check['notes']} note(s))" if check.get("notes") else ""
+        print(f"  {mark}  {check['name']}{trailer}")
 
     if verdict == "clean":
         return 0
@@ -168,9 +221,13 @@ def main() -> int:
     return 1
 
 
-def summary(checks: list[dict], verdict: str, total: int, graph: str) -> str:
+def summary(
+    checks: list[dict], verdict: str, total: int, advisory: int, graph: str
+) -> str:
     """Build the job summary, with the graph GitHub renders inline."""
     head = "No finding" if verdict == "clean" else f"{total} finding(s)"
+    if advisory:
+        head += f", {advisory} note(s)"
     lines = [
         "## AgentMandate",
         "",
@@ -187,7 +244,10 @@ def summary(checks: list[dict], verdict: str, total: int, graph: str) -> str:
         "verify": "Did the recorded run stay inside the mandate?",
     }
     for check in checks:
-        mark = "✅" if check["ok"] else "❌"
+        # A check that passed while raising something advisory is neither a
+        # tick nor a cross. Showing it as a tick is what let a real warning
+        # disappear from this table.
+        mark = "❌" if not check["ok"] else ("⚠️" if check.get("notes") else "✅")
         lines.append(
             f"| {mark} | `{check['name']}` | {questions.get(check['name'], '')} |"
         )
@@ -196,6 +256,20 @@ def summary(checks: list[dict], verdict: str, total: int, graph: str) -> str:
     if failing:
         lines += ["", "### What was found", ""]
         for check in failing:
+            lines += [f"**`{check['name']}`**", "", "```", check["detail"], "```", ""]
+
+    noted = [c for c in checks if c["ok"] and c.get("notes")]
+    if noted:
+        lines += [
+            "",
+            "### Advisory, not blocking",
+            "",
+            "These do not fail the gate. They are here because a report that "
+            "says nothing was found, while something was, is the failure this "
+            "package is about.",
+            "",
+        ]
+        for check in noted:
             lines += [f"**`{check['name']}`**", "", "```", check["detail"], "```", ""]
 
     if graph.strip().startswith("flowchart"):

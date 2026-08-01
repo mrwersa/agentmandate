@@ -73,8 +73,15 @@ outputs:
     description: '`clean` or `findings`.'
     value: ${{ steps.gate.outputs.verdict }}
   findings:
-    description: Total number of findings across every check that ran.
+    description: >-
+      Blocking findings across every check that ran. Agrees with `verdict`:
+      zero here means `clean`.
     value: ${{ steps.gate.outputs.findings }}
+  notes:
+    description: >-
+      Advisory findings that do not fail the gate, such as lint warnings.
+      Reported separately so a clean verdict never means nothing was found.
+    value: ${{ steps.gate.outputs.notes }}
   sarif-file:
     description: Path to the SARIF file, empty when `sarif` is false.
     value: ${{ steps.gate.outputs.sarif-file }}

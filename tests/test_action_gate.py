@@ -33,6 +33,7 @@ def workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     for name in ("dispute-resolver.yaml", "dispute-resolver-v2.yaml", "otel-trace.json"):
         shutil.copy(EXAMPLES / name, tmp_path / name)
     monkeypatch.setattr(action_gate, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(action_gate, "ARTEFACTS", tmp_path)
     monkeypatch.setattr(action_gate, "STEP_SUMMARY", str(tmp_path / "summary.md"))
     monkeypatch.setattr(action_gate, "STEP_OUTPUT", str(tmp_path / "output.txt"))
     for key in list(os.environ):
@@ -107,12 +108,19 @@ def test_narrowing_is_not_counted_as_a_finding(
 ) -> None:
     monkeypatch.setenv("INPUT_MANIFEST", "dispute-resolver.yaml")
     monkeypatch.setenv("INPUT_BASELINE", "dispute-resolver-v2.yaml")
-    action_gate.main()
+
+    # The count alone does not pin the property. What matters is that removing
+    # authority does not block a release, and that rests on `diff` exiting
+    # zero when nothing widened. Asserting the exit code catches a change in
+    # that behaviour; asserting the count would not.
+    assert action_gate.main() == 0
 
     report = json.loads((workspace / "agentmandate-report.json").read_text())
     diff = next(c for c in report["checks"] if c["name"] == "diff")
 
     assert diff["findings"] == 0
+    assert diff["ok"] is True
+    assert outputs(workspace)["verdict"] == "clean"
 
 
 def test_source_adds_drift(workspace: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -256,3 +264,77 @@ def test_the_action_passes_every_declared_input_to_the_body() -> None:
     }
 
     assert expected <= forwarded, f"declared but not forwarded: {expected - forwarded}"
+
+
+def test_a_lint_warning_is_reported_without_blocking(
+    workspace: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A clean verdict must never mean nothing was found.
+
+    `lint` exits zero on a warning and non-zero on an error. Counting both
+    into one number produced `verdict=clean` beside `findings=1`, a
+    self-contradicting pair, and the warning appeared nowhere in the summary.
+    Silencing it would have made the arithmetic agree by losing a real
+    finding, which is the failure this package is about.
+    """
+    (workspace / "warned.yaml").write_text(
+        "version: 1\n"
+        "agent: warner\n"
+        "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"
+        "tools:\n"
+        "  - { name: open_case, effect: read, principal: caller, produces: case }\n"
+        "  - { name: list_notes, effect: read, principal: service, requires: [case] }\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("INPUT_MANIFEST", "warned.yaml")
+
+    assert action_gate.main() == 0
+
+    out = outputs(workspace)
+    assert out["verdict"] == "clean"
+    assert out["findings"] == "0"
+    assert out["notes"] == "1"
+
+    summary = (workspace / "summary.md").read_text(encoding="utf-8")
+    assert "Advisory, not blocking" in summary
+    assert "service-principal" in summary
+    # Neither a tick nor a cross: a tick is what hid it.
+    assert "| ⚠️ | `lint` |" in summary
+
+
+def test_an_error_still_blocks_and_is_not_a_note(
+    workspace: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (workspace / "broken.yaml").write_text(
+        "version: 1\n"
+        "agent: broken\n"
+        "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"
+        "tools:\n"
+        "  - { name: open_case, effect: read, principal: caller, produces: case }\n"
+        "  - { name: pay, effect: irreversible, principal: service, requires: [case] }\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("INPUT_MANIFEST", "broken.yaml")
+
+    assert action_gate.main() == 1
+
+    out = outputs(workspace)
+    assert out["verdict"] == "findings"
+    assert int(out["findings"]) >= 1
+    assert out["notes"] == "0"
+
+
+def test_artefacts_stay_out_of_the_checkout(
+    workspace: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A dirty working tree is somebody else's failing build."""
+    runner_temp = tmp_path / "runner-temp"
+    runner_temp.mkdir()
+    monkeypatch.setattr(action_gate, "ARTEFACTS", runner_temp)
+    monkeypatch.setenv("INPUT_MANIFEST", "dispute-resolver-v2.yaml")
+    action_gate.main()
+
+    assert (runner_temp / "agentmandate.sarif").exists()
+    assert not (workspace / "agentmandate.sarif").exists()
+    assert not (workspace / "agentmandate-report.json").exists()
+    assert outputs(workspace)["sarif-file"].startswith(str(runner_temp))
