@@ -49,6 +49,39 @@ What would change this: a tool graph somebody has to distort to express, with
 the control they actually run and the counterexample the distortion hides.
 That is the most useful thing to file.
 
+### A graph has now asked
+
+The first real graph landed in `docs/evidence/agentkit/`: Coinbase AgentKit,
+`coinbase-agentkit@v0.7.4` against `v0.1.6`, on the Strands example chatbot's
+provider set (`cdp_api`, `erc20`, `pyth`, `wallet`, `weth`, `wow`,
+`compound`). Both manifests, the invented ceilings (500 per call, 700 per
+session), and the breach they permit are committed there so the finding can be
+re-run.
+
+**What it asked for:** bounded producers. The manifest can only mark a
+producer `unbounded: true` or leave it at nothing, and the real graph makes
+both wrong. Compound `borrow` is bounded by the collateral ratio and `wrap_eth`
+is 1:1 with the ETH balance, so marking either unbounded makes `reach` report
+paths nobody can take. A gate that cries wolf gets switched off, so this
+over-expression direction is the expensive failure and it comes first.
+The value tools show the mirror problem: `transfer`, `native_transfer`,
+`buy_token`, and `sell_token` take the asset as a free argument and no tool
+produces an `asset` scope, so a ceiling has nothing to attach to and the
+anchor has to be invented.
+
+**What it also asked for:** gross versus net. Buy then sell of the same token
+nets to roughly zero but counts the full 1000 USD against the session total,
+and the manifest gives no way to declare which the reader is seeing. Gross is
+a defensible choice for a wash-trading scenario, but it should be declarable.
+
+**What it did not ask for:** closing the dynamic-tool-list gap. The example
+binds its tools through `get_strands_tools(agentkit)`, so `drift` cannot
+enumerate the list without importing the agent. That is a deliberate
+consequence of the no-imports design, chosen so the command runs in a review
+on a branch whose dependencies are not installed (see `inventory.py`). The
+response is to document the limit, or let the manifest declare the list, not
+to import the agent.
+
 ## Not planned
 
 - A bundled judge, scenario runner, or benchmark. Execution stays in the
