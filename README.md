@@ -8,86 +8,27 @@
 [![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
 
-A Python library and CLI that reads a short description of your agent's tools,
-called a **manifest**, and finds the limits it can slip past by combining
-actions that are each permitted on their own. It also tells you when a release
-widened what the agent can reach, before that release ships.
-
-Policy engines decide one call at a time. This looks at the whole tool graph
-offline, so it catches the gaps that only appear across a sequence.
-
-| What you run | Question it answers |
-|---|---|
-| Cedar, OPA, AgentCore Policy, AgentWard | May this agent make this call, right now? |
-| **AgentMandate** | **What can it reach by combining permitted calls, and did this release widen that?** |
-| [AgentVerity](https://github.com/mrwersa/agentverity) | Were the reviewed decision routes exercised repeatably? |
-| Your tests and runtime traces | Did the tools execute and the declared controls hold? |
-
-Imagine a payment-dispute agent that can open a case and issue a
-human-approved refund. Each refund is capped at 500 GBP per case, and the
-whole run is capped at 500 GBP. Release 2 adds one read-only tool:
-`search_cases`.
-
-That tool spends nothing. It does, however, let the agent get hold of more
-cases, and the 500 GBP cap is measured *per case*. Two separately valid refunds
-become reachable under the manifest, so reachable extraction doubles to 1,000 GBP
-while every individual call still looks permitted.
-
-![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
-
-AgentMandate builds the tool graph and answers the questions a per-tool check
-cannot:
-
-- **What legal sequence breaks a limit?** `mandate reach` returns the path, not
-  a risk score.
-- **What did this release make possible?** `mandate diff` compares effective
-  authority, not configuration text.
-- **Does runtime evidence match the declaration?** `mandate verify` fails
-  closed when a required control field is absent.
-- **What must the tests exercise?** `mandate obligations` turns reachable
-  authority into reviewable test obligations.
-- **Which compound risks need scenarios?** `mandate scenarios` preserves each
-  counterexample as a neutral test skeleton without inventing an agent prompt.
+Your agent's tools are each safe on their own. AgentMandate finds the limits it
+can slip past by **combining** them, and tells you when a release widened what
+it can reach.
 
 Alpha. Apache-2.0.
 
-**In CI, as a GitHub Action:**
-
-```yaml
-- uses: mrwersa/agentmandate@v0.8.0
-  with:
-    manifest: mandate.yaml
-```
-
-The counterexample renders in the job summary as a graph, and the SARIF output
-annotates the pull request that introduced it.
-[Inputs and outputs](#in-a-pull-request).
-
-**See the whole thing working:**
-[**agent-release-gate**](https://github.com/mrwersa/agent-release-gate) takes
-one agent from Python source to a gate decision, with every command in this
-README run against it. Six checks, one exit code, offline.
-
-## Try it
+## See it in thirty seconds
 
 ```bash
 pip install "agentmandate[yaml]"
 ```
 
-The repository includes that payment-dispute agent. In release 1, refunds are
-capped at 500 GBP per case, every refund requires human approval, the whole run
-is capped at 500 GBP, and nothing spends through a service account. It passes:
+A payment-dispute agent. Refunds are capped at 500 GBP per case, every refund
+needs human approval, and one run may move 500 GBP in total. It passes:
 
 ```console
 $ mandate lint examples/dispute-resolver.yaml
 no single-manifest findings
-
-$ mandate reach examples/dispute-resolver.yaml
-no reachable breach within depth 8. 3 tool(s) reachable, most extractable 500 GBP
 ```
 
-Release 2 adds one read-only tool so the agent can find existing cases instead
-of always opening a new one. A conventional review sees no write effect:
+The next release adds one tool. Read-only, moves no money, changes nothing:
 
 ```yaml
   - name: search_cases
@@ -96,10 +37,10 @@ of always opening a new one. A conventional review sees no write effect:
     unbounded: true
 ```
 
-```console
-$ mandate lint examples/dispute-resolver-v2.yaml
-no single-manifest findings
+Nobody blocks that in review. It still passes `lint`, because no single tool is
+wrong:
 
+```console
 $ mandate reach examples/dispute-resolver-v2.yaml
 BREACH  cumulative value 1000 GBP exceeds limit 500 GBP
   1. open_case(case#1)
@@ -108,9 +49,17 @@ BREACH  cumulative value 1000 GBP exceeds limit 500 GBP
   4. issue_refund(case#2, 500 GBP)
 ```
 
-The lint is still clean because no single tool is wrong. The refund ceiling is
-measured against one case, and the new tool lets the agent obtain fresh cases,
-so the per-case ceiling no longer bounds the whole run. In CI:
+The cap is measured **per case**. The new tool hands the agent cases it did not
+open, and there is no fixed number of them, so a per-case ceiling stops
+bounding the run. Four individually permitted calls, both refunds approved by a
+human, 1,000 GBP reachable.
+
+![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
+
+## Why a config diff is not an authority diff
+
+That change is one read-only tool in a pull request. Here is what it did to the
+agent's effective authority:
 
 ```console
 $ mandate diff examples/dispute-resolver.yaml examples/dispute-resolver-v2.yaml
@@ -123,14 +72,63 @@ verdict: WIDENING
 a widening change needs named review before release
 ```
 
-Exit code 1. The configuration change was read-only. The effective authority
-was not.
+Exit code 1. A pull request shows what somebody typed. It does not show what
+the agent can now do, because reachability composes and text does not. Adding a
+read tool, relaxing an enum in a schema, or removing one precondition can each
+open a path that did not exist, and none of them look like a permission change.
 
-## Why a config diff is not an authority diff
+Same reason `git diff` never replaced type checking. The question is not what
+changed, it is what the change makes possible.
 
-A pull request shows what somebody typed. It does not show what the agent can now do, because reachability composes and text does not. Adding a read tool, relaxing an enum in a schema, or removing one precondition can each open a path that did not exist, and none of them look like a permission change in review.
+## Put it in CI
 
-That is the same reason `git diff` never replaced type checking. The question is not what changed, it is what the change makes possible.
+```yaml
+- uses: mrwersa/agentmandate@v0.8.0
+  with:
+    manifest: mandate.yaml
+    baseline: mandate-released.yaml   # optional: did this widen authority?
+    source: src/agent                 # optional: has the manifest drifted?
+```
+
+Only the checks you give inputs for run, so a manifest alone is enough to
+start. The counterexample renders in the job summary as a graph, and
+`sarif-file` is an output you hand to `github/codeql-action/upload-sarif` so it
+annotates the diff. `fail-on: never` reports without blocking, which is how to
+turn this on over an existing repository without stopping everyone on day one.
+
+Details, including why uploading the SARIF is deliberately your step and not
+the action's: [docs/ci.md](docs/ci.md).
+
+**See the whole thing working:**
+[agent-release-gate](https://github.com/mrwersa/agent-release-gate) takes one
+agent from Python source to a gate decision. Seven checks, one exit code,
+offline.
+
+## Where it fits, and what already exists
+
+This is analysis, not enforcement. It runs in CI against a manifest, it does not sit in the request path.
+
+| Tool | What it does | Relationship |
+|---|---|---|
+| [Policy in Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html) | Evaluates all applicable Cedar policies for each gateway tool invocation, with default-deny, forbid-wins, and analysis that flags always-allow and always-deny policies | Enforces each invocation. Its documented analysis is policy-level, not a model of a sequence of permitted calls |
+| [AgentWard](https://github.com/agentward-ai/agentward) | Runtime proxy enforcing policy per call, diffs two policy files | Enforces. Diffs declared text rather than reachable authority |
+| [AgentShield](https://github.com/affaan-m/agentshield) | Scans agent configuration and MCP servers, drift gate over findings | Scans. Drift is over finding counts, not permission direction |
+| [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) | Attribute-based access control for tool calls | Enforces |
+| [OPA](https://www.openpolicyagent.org/docs), [Cedar](https://docs.cedarpolicy.com/) | Decide one authorisation at a time | Enforces |
+
+Use those to enforce. AgentMandate is the offline half: it analyses sequences of individually permitted calls and compares *effective* authority across releases.
+
+**If you already run AgentCore Policy**, the gap is specific. The policy engine
+answers "may this principal invoke this tool now" by evaluating all applicable
+policies, and its documented analysis catches policy-level problems such as an
+unconditional allow. It does not model whether four separately permitted calls
+compose into a 1,000 GBP breach or whether a release widened what the agent can
+reach. AgentMandate is vendor-neutral and runs in CI before deployment, so it
+complements the gateway rather than duplicating it.
+
+The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
+
+The `lint` command deliberately overlaps the scanners above. A tool that reported only compound findings would need one of them running alongside it to be usable at all.
 
 ## Starting from an existing agent
 
@@ -176,66 +174,6 @@ not supply is marked:
 
 Unrecognised verbs are proposed as `irreversible`, because under-calling an
 effect is the more expensive mistake.
-
-## In a pull request
-
-```yaml
-- uses: mrwersa/agentmandate@v0.8.0
-  with:
-    manifest: mandate.yaml
-    baseline: mandate-released.yaml   # optional: did this widen authority?
-    source: src/agent                 # optional: has the manifest drifted?
-```
-
-The counterexample lands in the job summary as a rendered graph rather than a
-log line, and `sarif-file` is an output you hand to
-`github/codeql-action/upload-sarif` so it annotates the diff.
-
-Uploading is deliberately your step, not the action's: it needs
-`security-events: write`, and an action that asks for a token permission it
-could avoid is one more reason for a security team to say no.
-
-`fail-on: never` reports without blocking, which is how to turn this on over
-an existing repository without stopping everyone on the first day.
-
-Only the checks you give inputs for run. A manifest alone is enough for `lint`
-and `reach`.
-
-## Findings where you already look
-
-```yaml
-# .github/workflows/agent-authority.yml
-- run: mandate reach mandate.yaml --sarif > authority.sarif
-  continue-on-error: true          # let the upload happen, then fail the gate
-- uses: github/codeql-action/upload-sarif@v3
-  with:
-    sarif_file: authority.sarif
-- run: mandate reach mandate.yaml   # the actual gate
-```
-
-The breach is then annotated on the pull request that introduced it, rather
-than sitting in a log somebody has to open. Findings are `error`, not
-`warning`: they already exit non-zero, and a UI that disagrees with the exit
-code is how a gate stops being believed.
-
-`--graph` emits Mermaid, which GitHub renders inline in a comment:
-
-```mermaid
-flowchart LR
-  s0(["search_cases<br/>case#1"])
-  s1(["search_cases<br/>case#2"])
-  s0 --> s1
-  s2["issue_refund<br/>case#1 · 500 GBP"]
-  s1 --> s2
-  s3["issue_refund<br/>case#2 · 500 GBP"]
-  s2 --> s3
-  breach["cumulative value 1000 GBP exceeds limit 500 GBP"]
-  s3 --> breach
-```
-
-One node per **step**, not per tool, because the same tool called twice on
-different bindings is usually the whole point. Rounded is a read, boxed
-changes something.
 
 ## Keeping the manifest honest
 
@@ -311,28 +249,15 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |
 | `mandate scenarios` | Exports reachable breach paths with blank environment, agent-input, and expected-control fields for human review and execution by an external evaluation harness |
 
-Every analysis command takes `--json` and exits non-zero on a finding, so they drop into CI unchanged. `scan` writes a manifest to standard output and is a one-off, not a gate.
+Every analysis command takes `--json` and exits non-zero on a finding, so they
+drop into CI unchanged. `scan` writes a manifest to standard output and is a
+one-off, not a gate. Exit codes and CI wiring: [docs/ci.md](docs/ci.md).
 
-| Exit code | Meaning |
-|---|---|
-| `0` | Clean |
-| `1` | A finding: lint error, reachable breach, widening diff, or a non-conformant replay |
-| `2` | Usage error or a malformed manifest |
-
-In a pull request, the useful gate is `diff` against the manifest on the default
-branch, so a change that widens authority stops and gets a named reviewer:
-
-```yaml
-- name: Authority diff
-  run: |
-    git show origin/main:mandate.yaml > /tmp/released.yaml
-    mandate diff /tmp/released.yaml mandate.yaml
-```
-
-`verify` is what keeps the rest honest. A manifest nobody checks is a wish, and the declaration drifts from the implementation the moment someone ships a connector change.
-For a spending tool, each trace record must carry the scope, value, currency,
-approval state, and executing principal. Missing or malformed control evidence
-does not pass as an empty value.
+`verify` is what keeps the rest honest. A manifest nobody checks is a wish, and
+the declaration drifts from the implementation the moment somebody ships a
+connector change. For a spending tool, each trace record must carry the scope,
+value, currency, approval state, and executing principal. Missing or malformed
+control evidence does not pass as an empty value.
 
 ## From authority to evaluation
 
@@ -355,32 +280,6 @@ manifest <- reviewed production incidents <- runtime policy and traces
 ```
 
 [Read the complete evaluation-loop workflow](docs/evaluation-loop.md).
-
-## Where it fits, and what already exists
-
-This is analysis, not enforcement. It runs in CI against a manifest, it does not sit in the request path.
-
-| Tool | What it does | Relationship |
-|---|---|---|
-| [Policy in Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html) | Evaluates all applicable Cedar policies for each gateway tool invocation, with default-deny, forbid-wins, and analysis that flags always-allow and always-deny policies | Enforces each invocation. Its documented analysis is policy-level, not a model of a sequence of permitted calls |
-| [AgentWard](https://github.com/agentward-ai/agentward) | Runtime proxy enforcing policy per call, diffs two policy files | Enforces. Diffs declared text rather than reachable authority |
-| [AgentShield](https://github.com/affaan-m/agentshield) | Scans agent configuration and MCP servers, drift gate over findings | Scans. Drift is over finding counts, not permission direction |
-| [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) | Attribute-based access control for tool calls | Enforces |
-| [OPA](https://www.openpolicyagent.org/docs), [Cedar](https://docs.cedarpolicy.com/) | Decide one authorisation at a time | Enforces |
-
-Use those to enforce. AgentMandate is the offline half: it analyses sequences of individually permitted calls and compares *effective* authority across releases.
-
-**If you already run AgentCore Policy**, the gap is specific. The policy engine
-answers "may this principal invoke this tool now" by evaluating all applicable
-policies, and its documented analysis catches policy-level problems such as an
-unconditional allow. It does not model whether four separately permitted calls
-compose into a 1,000 GBP breach or whether a release widened what the agent can
-reach. AgentMandate is vendor-neutral and runs in CI before deployment, so it
-complements the gateway rather than duplicating it.
-
-The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
-
-The `lint` command deliberately overlaps the scanners above. A tool that reported only compound findings would need one of them running alongside it to be usable at all.
 
 ## Scope
 
@@ -405,6 +304,7 @@ Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none
 - [CONTRIBUTING.md](CONTRIBUTING.md) — branch and review workflow
 - [SECURITY.md](SECURITY.md) — reporting, and what a manifest may contain
 - [STABILITY.md](STABILITY.md) — what is guaranteed before 1.0
+- [docs/ci.md](docs/ci.md) — the action, SARIF, the diff gate, and exit codes
 - [ROADMAP.md](ROADMAP.md) — adoption work, planned model extensions, and the path to 1.0
 - [CHANGELOG.md](CHANGELOG.md)
 
