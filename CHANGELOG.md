@@ -8,6 +8,20 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- The README is restructured around what a reader needs first. The
+  payment-dispute example was told twice, once in prose and again in console
+  output, and a five-bullet command list announced commands nobody had met yet.
+  Showing beats telling, so the console output does the work and the prose is
+  gone.
+- A reader now reaches the finding inside the first screen: install, a clean
+  lint, one read-only tool added, and a reachable breach. Positioning, the
+  manifest format, and the command reference follow, rather than leading.
+- CI wiring moves to `docs/ci.md`: the action, SARIF, the diff gate, and exit
+  codes. Three sections of the README were CI detail a first-time reader does
+  not need, and a Marketplace listing renders this file as its landing page.
+
+### Changed
+
 - The README shows the GitHub Action above the fold. A Marketplace listing
   renders this file, so somebody arriving from a search wants the usage before
   the library tour.
