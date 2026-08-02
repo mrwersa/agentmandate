@@ -19,9 +19,6 @@ All notable changes to this project are documented here. The format follows
 - CI wiring moves to `docs/ci.md`: the action, SARIF, the diff gate, and exit
   codes. Three sections of the README were CI detail a first-time reader does
   not need, and a Marketplace listing renders this file as its landing page.
-
-### Changed
-
 - The README shows the GitHub Action above the fold. A Marketplace listing
   renders this file, so somebody arriving from a search wants the usage before
   the library tour.
@@ -29,6 +26,15 @@ All notable changes to this project are documented here. The format follows
   cannot be. Listing a release is a web-UI checkbox with no API behind it, so
   the release workflow will never tick it, and advancing the listing should be
   a decision rather than a consequence of a version number moving.
+- `Limits` and `reconcile` are exported from the package root. Both were
+  reachable through `agentmandate.manifest` and `agentmandate.obligations`,
+  and `load(...).limits` handed users a type they could not name from the
+  primary entry point, so the two names that broke the export pattern are now
+  public.
+- The version-pin guard now covers every prose markdown file rather than the
+  README alone. `STABILITY.md` carries the pin the README refuses, and that
+  pin drifted in the sibling project because the guard scanned one file, so a
+  test now checks all of them except the changelog and the release notes.
 
 ## 0.8.0 - 2026-08-01
 
