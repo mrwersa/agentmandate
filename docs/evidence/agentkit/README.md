@@ -125,14 +125,20 @@ mandate drift docs/evidence/agentkit/mandate.yaml --source <checkout of the Agen
 
 ## The figure
 
-`authority-shape.png` renders `authority-shape.mmd`. It contrasts the two
-changes one minor bump produced: an inventory change a reviewer sees, and an
-authority-shape change they do not.
+![A minor version changes both the visible tool inventory and the authority shape](authority-shape.svg)
+
+`authority-shape.svg` and `authority-shape.png` render
+`authority-shape.mmd`. The SVG is used in repository documentation and the
+PNG is retained for Medium. The diagram contrasts the two changes one minor
+bump produced: an inventory change a reviewer sees, and an authority-shape
+change they do not.
 
 ```bash
+npx @mermaid-js/mermaid-cli -i docs/evidence/agentkit/authority-shape.mmd \
+  -o docs/evidence/agentkit/authority-shape.svg -b white
 npx @mermaid-js/mermaid-cli -i docs/evidence/agentkit/authority-shape.mmd \
   -o docs/evidence/agentkit/authority-shape.png -w 1200 -b white
 ```
 
-The Mermaid source is what gets reviewed. The PNG exists because publishing
-surfaces outside GitHub do not render Mermaid.
+The Mermaid source is what gets reviewed. PlantUML would add another renderer
+without adding useful notation for this small comparison.

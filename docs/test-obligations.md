@@ -5,16 +5,18 @@ actually exercised. Nothing connects the two, so a manifest can declare an
 irreversible refund that no test ever approaches, and both artefacts look
 healthy.
 
-```text
-  agentmandate                                    agentverity
-  ────────────                                    ───────────
-  reachable authority
-        │
-        │  mandate obligations
-        ▼
-  test obligations  ──▶  human review  ──▶  decision suite
-  (what must be                (map each        (what gets
-   exercised)                   to a decision)   measured)
+```mermaid
+flowchart LR
+  authority["Reachable authority<br/><i>AgentMandate</i>"] -->|mandate obligations| obligations["Test obligations<br/>what must be exercised"]
+  obligations --> review["Human review<br/>map authority to an application decision"]
+  review --> suite["Decision suite<br/><i>AgentVerity</i>"]
+
+  classDef source fill:#fff0e8,stroke:#dc6b3c,color:#8b3d20,stroke-width:2px
+  classDef human fill:#f4f6f5,stroke:#607080,color:#30404f
+  classDef output fill:#e8f1fb,stroke:#3978b8,color:#174a7a,stroke-width:2px
+  class authority,obligations source
+  class review human
+  class suite output
 ```
 
 ## Derive

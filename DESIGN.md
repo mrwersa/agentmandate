@@ -17,6 +17,12 @@ any one tool.
 
 A mandate is a set of tools over a set of scopes.
 
+AgentMandate sits at the action boundary of an agent loop. The model may sense,
+reason, plan, and propose a tool call. The platform still owns the workload
+identity, authorisation decision, and real-world effect. A prompt can shape
+model behaviour, but it is not an authority boundary. This project analyses
+the tool authority the platform exposes and the paths that authority permits.
+
 A **scope** is a type of resource the agent can hold a binding to, such as
 `case` or `ledger`. Scopes are types, not instances: the analysis reasons about
 "a case", never about case 4471.
@@ -134,6 +140,11 @@ reachability computation over both.
 
 So the split is enforcement against offline analysis, and per-decision against
 compound. Running both is the intended shape.
+
+The same boundary applies to multi-agent systems. A supervisor choosing a
+worker is behaviour. The identity and tools delegated to that worker are
+authority. The current manifest describes one agent or one deliberately
+reviewed union of agents, and it does not yet model delegation between them.
 
 ## What was left out, and why
 
