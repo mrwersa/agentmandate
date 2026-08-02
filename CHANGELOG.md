@@ -19,6 +19,9 @@ All notable changes to this project are documented here. The format follows
 - CI wiring moves to `docs/ci.md`: the action, SARIF, the diff gate, and exit
   codes. Three sections of the README were CI detail a first-time reader does
   not need, and a Marketplace listing renders this file as its landing page.
+
+### Changed
+
 - The README shows the GitHub Action above the fold. A Marketplace listing
   renders this file, so somebody arriving from a search wants the usage before
   the library tour.

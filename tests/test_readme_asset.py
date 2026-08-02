@@ -54,8 +54,8 @@ def test_prose_markdown_pins_the_current_minor_series() -> None:
     The README carries no version because the badge does that, but STABILITY.md
     tells users what to pin. That pin drifted in the sibling project because
     the guard scanned one file, so every prose markdown file must either pin
-    the current series or stay silent. The changelog and the release notes
-    legitimately carry other versions, so they are excluded.
+    the current series exactly or stay silent. The changelog and the release
+    notes legitimately carry other versions, so they are excluded.
     """
     import re
 
@@ -63,18 +63,24 @@ def test_prose_markdown_pins_the_current_minor_series() -> None:
 
     root = ASSET.parents[2]
     major, minor, _ = __version__.split(".")
-    expected = f"{major}.{minor}"
+    expected = f"{major}.{minor}.0"
 
-    stale = []
+    pinned = []
     for path in sorted(root.rglob("*.md")):
         if path.name in {"CHANGELOG.md", "RELEASING.md"}:
             continue
         pins = set(
-            re.findall(r"agentmandate[~=]=(\d+\.\d+)", path.read_text(encoding="utf-8"))
+            re.findall(r"agentmandate[~=]=([\d.]+)", path.read_text(encoding="utf-8"))
         )
-        if pins and pins != {expected}:
-            stale.append(f"{path.relative_to(root)}: {sorted(pins)}")
+        if pins:
+            pinned.append((path, pins))
 
+    assert pinned, "no prose markdown pins the current series"
+    stale = [
+        f"{path.relative_to(root)}: {sorted(pins)}"
+        for path, pins in pinned
+        if pins != {expected}
+    ]
     assert not stale, f"docs pin {', '.join(stale)}; this release is {__version__}"
 
 
