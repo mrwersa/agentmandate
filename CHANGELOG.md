@@ -39,9 +39,10 @@ All notable changes to this project are documented here. The format follows
   example. Its future work follows the distortions found in the real AgentKit
   graph instead of saying both that nothing is next and that a graph has
   already asked for changes.
-- The evaluation-loop and test-obligation guides use reviewable Mermaid flows.
-  AgentMandate is placed at the action boundary: the model proposes a call,
-  while the platform owns identity, authorisation, and the effect.
+- The README, evaluation-loop guide, and test-obligation guide place
+  AgentMandate at the action boundary: the model proposes a call, while the
+  platform owns identity, authorisation, and the effect. The two guides use
+  reviewable Mermaid flows.
 - Simple Mermaid figures now publish an SVG for repository documentation and
   retain a PNG only for Medium. PlantUML is deliberately not added for flows
   that need no extra notation.

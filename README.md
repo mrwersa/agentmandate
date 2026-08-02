@@ -106,7 +106,9 @@ offline.
 
 ## Where it fits, and what already exists
 
-This is analysis, not enforcement. It runs in CI against a manifest, it does not sit in the request path.
+This is analysis, not enforcement. It runs in CI against a manifest, it does
+not sit in the request path. The model proposes a tool call, while the platform
+still owns the workload identity, authorisation decision, and effect.
 
 | Tool | What it does | Relationship |
 |---|---|---|
