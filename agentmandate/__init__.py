@@ -19,13 +19,14 @@ from .diff import Change, Delta, compare
 from .drift import Drift, DriftFinding, compare_source
 from .inventory import Binding, Declaration, Inventory, InventoryError, collect
 from .lint import Finding, check
-from .manifest import Mandate, ManifestError, Money, Tool, load, loads
+from .manifest import Limits, Mandate, ManifestError, Money, Tool, load, loads
 from .obligations import (
     OBLIGATIONS_SCHEMA,
     Obligation,
     ObligationSet,
     derive,
     load_obligations,
+    reconcile,
     save_obligations,
     to_decision_suite,
 )
@@ -82,6 +83,7 @@ __all__ = [
     "render",
     "replay",
     "replay_file",
+    "reconcile",
     "reconcile_scenarios",
     "Binding",
     "Drift",
@@ -90,6 +92,7 @@ __all__ = [
     "Declaration",
     "Inventory",
     "InventoryError",
+    "Limits",
     "collect",
     "scan_file",
     "scan_source",
