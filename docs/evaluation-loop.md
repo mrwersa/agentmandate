@@ -6,26 +6,39 @@ permit the system to do?
 
 Use both:
 
-```text
-tool inventory and policy
-          |
-          v
-AgentMandate reach and diff
-          |
-          +---- decision-point obligations ----> reviewed decision tests
-          |
-          +---- compound counterexamples ------> reviewed scenario tests
-                                                    |
-quality and trajectory evaluator <-----------------+
-          |
-AgentVerity qualifies repeated bounded decisions
-          |
-release -> per-call policy -> runtime traces
-                                  |
-                         AgentMandate verify
-                                  |
-                   reviewed incidents update tests
+```mermaid
+flowchart TD
+  inventory["Tool inventory + reviewed mandate"] --> analysis["AgentMandate<br/>reach + diff"]
+  analysis --> obligations["Decision-point obligations"]
+  analysis --> scenarios["Compound counterexamples"]
+  obligations --> review["Human-reviewed tests"]
+  scenarios --> review
+  review --> evaluation["Quality + trajectory evaluation"]
+  evaluation --> evidence["AgentVerity<br/>qualify bounded decisions"]
+  evidence --> release["Release"]
+  release --> policy["Per-call policy enforcement"]
+  policy --> traces["Runtime traces"]
+  traces --> verify["AgentMandate verify"]
+  verify --> incidents["Reviewed incidents"]
+  incidents --> review
+
+  classDef source fill:#e8f1fb,stroke:#3978b8,color:#174a7a,stroke-width:2px
+  classDef analysis fill:#fff0e8,stroke:#dc6b3c,color:#8b3d20,stroke-width:2px
+  classDef evidence fill:#f4f6f5,stroke:#607080,color:#30404f
+  classDef control fill:#e9f6ef,stroke:#278657,color:#17633f,stroke-width:2px
+  classDef feedback fill:#fdecea,stroke:#a33b33,color:#7a2b24
+  class inventory source
+  class analysis,obligations,scenarios,verify analysis
+  class review,evaluation,evidence evidence
+  class release,policy,traces control
+  class incidents feedback
 ```
+
+The loop has two distinct control points. The model proposes a call, while the
+runtime policy authorises it before the effect. AgentMandate analyses the
+reachable sequence before release and checks recorded control evidence after
+execution. It is not the model's planner and it is not the runtime policy
+engine.
 
 ## Four claims that must not be collapsed
 

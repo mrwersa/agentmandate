@@ -38,7 +38,7 @@ Merging does the rest, once CI has passed on the merged commit.
 
 The release workflow runs when CI finishes on `main`, not when the push
 happens, and only when CI concluded successfully. It reads the version from
-the exact commit CI passed on, stops if that version is already tagged,
+the exact commit CI passed on, stops if that version is already released,
 extracts the changelog section, builds and checks the artefacts, and only then
 creates the tag and the GitHub Release before publishing to PyPI.
 

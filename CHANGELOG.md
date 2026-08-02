@@ -19,9 +19,6 @@ All notable changes to this project are documented here. The format follows
 - CI wiring moves to `docs/ci.md`: the action, SARIF, the diff gate, and exit
   codes. Three sections of the README were CI detail a first-time reader does
   not need, and a Marketplace listing renders this file as its landing page.
-
-### Changed
-
 - The README shows the GitHub Action above the fold. A Marketplace listing
   renders this file, so somebody arriving from a search wants the usage before
   the library tour.
@@ -38,6 +35,22 @@ All notable changes to this project are documented here. The format follows
   README alone. `STABILITY.md` carries the pin the README refuses, and that
   pin drifted in the sibling project because the guard scanned one file, so a
   test now checks all of them except the changelog and the release notes.
+- The roadmap now describes the released 0.8.0 loop and the seven-check worked
+  example. Its future work follows the distortions found in the real AgentKit
+  graph instead of saying both that nothing is next and that a graph has
+  already asked for changes.
+- The evaluation-loop and test-obligation guides use reviewable Mermaid flows.
+  AgentMandate is placed at the action boundary: the model proposes a call,
+  while the platform owns identity, authorisation, and the effect.
+- Simple Mermaid figures now publish an SVG for repository documentation and
+  retain a PNG only for Medium. PlantUML is deliberately not added for flows
+  that need no extra notation.
+
+### Fixed
+
+- The release guide now matches the workflow: an existing GitHub Release, not
+  a tag by itself, marks a version complete. An orphaned tag remains
+  recoverable by design.
 
 ## 0.8.0 - 2026-08-01
 

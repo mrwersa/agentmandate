@@ -9,11 +9,11 @@ This is direction, not a release promise.
 
 ## Where it is now
 
-As of 0.7.0 the loop closes without leaving the package. A
-[worked example](https://github.com/mrwersa/agent-release-gate) runs six of
-these checks against one agent, offline, pinned to 0.6.0. It gains `drift`
-and the SARIF output when 0.7.0 reaches PyPI; saying it already ran "the
-whole of it" would have been a claim about software nobody can install yet.
+As of 0.8.0 the loop closes without leaving the package. A
+[worked example](https://github.com/mrwersa/agent-release-gate) runs seven
+offline checks against one payment-dispute agent, including source inventory,
+compound reachability, release diff, test obligations, and runtime trace
+conformance.
 
 | | command | what it establishes |
 |---|---|---|
@@ -35,21 +35,7 @@ in 0.8.0. These overlap with mature CI and security tooling deliberately. The
 new value remains the authority graph and its counterexamples; the packaging
 is only there so the counterexamples reach a reviewer.
 
-## Next: nothing, until a real graph asks for it
-
-There is no queued feature. That is a position rather than an omission.
-
-The model has not been pointed at enough real tool graphs to know where it is
-too coarse, and every candidate below costs search state and annotation
-burden. Building any of them now would be guessing at which abstraction
-somebody needs, and the guess would ship with a maintenance bill and a
-migration.
-
-What would change this: a tool graph somebody has to distort to express, with
-the control they actually run and the counterexample the distortion hides.
-That is the most useful thing to file.
-
-### A graph has now asked
+## The first real graph asked for a more precise model
 
 The first real graph landed in `docs/evidence/agentkit/`: Coinbase AgentKit,
 `coinbase-agentkit@v0.7.4` against `v0.1.6`, on the Strands example chatbot.
@@ -61,7 +47,13 @@ finding can be re-run.
 
 The release-to-release diff is a widening beside a narrowing: six actions
 gained, three lost. The gained ones that matter are ERC-20 authority tools.
-The gain that matters is `approve`. It grants an ERC-20 allowance, so a third party can spend the wallet's tokens later without the agent calling anything again. That is authority which outlives the run, arriving in a minor bump and invisible in a config diff. The diff also reports `effect: gained write on allowance` and `effect: gained read on allowance`: a new scope with new effect classes, an authority-shape change rather than an inventory change, which a config diff structurally cannot show.
+The gain that matters is `approve`. It grants an ERC-20 allowance, so a third
+party can spend the wallet's tokens later without the agent calling anything
+again. That is authority which outlives the run, arriving in a minor bump and
+invisible in a config diff. The diff also reports `effect: gained write on
+allowance` and `effect: gained read on allowance`: a new scope with new effect
+classes, an authority-shape change rather than an inventory change, which a
+config diff structurally cannot show.
 The other gains (`get_allowance`, `get_erc20_token_address`, `unwrap_eth`,
 and the two pyth renames) and the losses (`address_reputation`, the two pyth
 names) are routine. A one-way widening story would have missed the narrowing.
@@ -82,13 +74,12 @@ nets to roughly zero but counts the full 1000 USD against the session total,
 and the manifest gives no way to declare which the reader is seeing. Gross is
 a defensible choice for a wash-trading scenario, but it should be declarable.
 
-**What it did not ask for:** closing the dynamic-tool-list gap. The example
-binds its tools through `get_strands_tools(agentkit)`, so `drift` cannot
-enumerate the list without importing the agent. That is a deliberate
-consequence of the no-imports design, chosen so the command runs in a review
-on a branch whose dependencies are not installed (see `inventory.py`). The
-response is to document the limit, or let the manifest declare the list, not
-to import the agent.
+**What it asked us not to do:** import the agent to close the dynamic-tool-list
+gap. The example binds its tools through `get_strands_tools(agentkit)`, so
+`drift` cannot enumerate the list statically. The no-imports design is
+deliberate: the command must run in review on a branch whose dependencies are
+not installed. The safer direction is an explicit, reviewed inventory for a
+dynamic binding, not executing application code during analysis.
 
 The evidence is itself an example of that gap: the first draft of these
 manifests included tools from providers the example never wires in, and
@@ -106,13 +97,14 @@ declarable.
 - Correctness. `reach` reasons about what a reviewed manifest permits under a
   bounded search, not about what a model tends to do.
 
-## Then: widen the model where evidence demands it
+## Next: widen the model only where evidence demands it
 
-Do not implement every candidate below in parallel. First collect tool graphs
-from independent users and identify which abstraction forces them to distort a
-real control. Expressiveness increases the search state and the annotation
-burden, so a feature needs a concrete graph and counterexample before it earns
-that cost.
+Do not implement every candidate below in parallel. The AgentKit graph earns
+investigation of bounded producers, explicit dynamic-tool inventory, and
+gross-versus-net value accounting. Shipping any of them still needs a reviewed
+schema change, migration fixtures, and a second graph showing that the concept
+is not specific to one integration. Other candidates wait for an independent
+user to show the distortion and the counterexample it hides.
 
 ### Bounded scope cardinality
 
