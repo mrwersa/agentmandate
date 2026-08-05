@@ -71,6 +71,31 @@ many times it may be walked. Verified two ways:
   is the probe's silence reproduced on a real published graph: the analysis
   either over-expresses the mint or cannot see the trigger at all.
 
+Two checks added while reviewing the run, because the result above is easy to
+read as broader than it is.
+
+**The truncation is not load-bearing.** The search reports itself truncated at
+depth 8, so the reading "searched everything and found nothing" would be wrong.
+Re-running at 12 and 16 gives the same 23 reachable tools and the same zero
+breaches, so a deeper walk is not hiding one and the conclusion does not rest
+on where the search stopped.
+
+**This graph is not one the tool has nothing to say about.** Drop the two
+conservative `requires_approval` flags, which distortion 3 below argues are
+themselves an over-call, and the analysis speaks immediately:
+
+```
+ERROR   effect.ungated-irreversible actions_run_trigger
+ERROR   effect.ungated-irreversible delete_file
+```
+
+Two lint errors and two reachable breaches. So the silence is narrow and worth
+stating precisely: the approval and irreversibility axis works on this graph,
+and the axis that has nothing to attach to is the cumulative one. The model
+cannot say "at most three workflow triggers in a run". It can say the trigger
+is irreversible and ungated, which is a different and smaller claim than the
+one a reader takes from "no reachable breach".
+
 ## The distortions
 
 Recorded in full in the end-note of `mandate.yaml`:
@@ -79,6 +104,9 @@ Recorded in full in the end-note of `mandate.yaml`:
    requires mechanism handles the chain; the cumulative-value mechanism has
    nothing to attach to. This is roadmap item 6 (non-monetary effect budgets)
    with a real published graph behind it instead of a hypothetical.
+   Narrower than it first reads: the approval and irreversibility axis does
+   work here, as the dropped-approval check above shows. What is missing is a
+   count, not a voice.
 2. **The mint is conditional and value-dependent.** Only a path under
    `.github/workflows/` mints an executing workflow, and the path is a free
    argument, so the anchor over-expresses every file write as a mint. The
