@@ -1,0 +1,173 @@
+# Real tool graph: github/github-mcp-server at v1.8.0
+# (tag dated 2026-07-30), class-scoped via GITHUB_TOOLSETS="repos,actions".
+#
+# The catalogue is docs/evidence/github-mcp-server/catalogue-repos-actions.json,
+# captured by running the published v1.8.0 image and reading its live
+# tools/list payload over the MCP stdio protocol. 23 tools, no money anywhere:
+# GitHub's authority surface has no currency, so Limits carries nothing for a
+# cumulative-value mechanism to attach to.
+#
+# Every REVIEW line below records a judgement the catalogue could not supply,
+# and every guess that changed from the scan skeleton is named in the header
+# note. The scan's `requires` guesses (resource/run/job) were method-dispatch
+# input parameters, not scopes a prior tool produces, and were removed.
+#
+# The anchoring note is the finding: the minting chain described in the
+# roadmap models, and reach follows it, but nothing bounds how many times the
+# walked path may be walked. Details at the end.
+version: 1
+agent: gh-mcp-agent
+identity: spiffe://example/agents/gh-mcp-agent
+
+limits:
+  # REVIEW: no currency anywhere in this graph. A total ceiling would have
+  # nothing to attach to, so none is declared. depth is the only bound.
+  depth: 8
+
+tools:
+  # actions_get: read a workflow, run, job, or log resource
+  - name: actions_get
+    effect: read
+    principal: caller
+
+  # actions_list: list workflows or workflow runs
+  - name: actions_list
+    effect: read
+    principal: caller
+
+  # actions_run_trigger: run_workflow | rerun_workflow_run |
+  #   rerun_failed_jobs | cancel_workflow_run | delete_workflow_run_logs
+  # REVIEW: consolidated tool. It flattens a write (run_workflow) and an
+  # irreversible class (cancel_workflow_run, delete_workflow_run_logs) into
+  # one effect, which is a model limitation recorded at the end.
+  - name: actions_run_trigger
+    effect: irreversible
+    principal: caller
+    requires: [workflow]
+    requires_approval: true
+
+  # create_branch: a branch ref, easily reverted
+  - name: create_branch
+    effect: write
+    principal: caller
+
+  # create_or_update_file: write a file in one commit.
+  # ANCHOR (the mint): when path lands under .github/workflows/ this mints a
+  # workflow that executes with GITHUB_TOKEN and repo secrets on the next
+  # trigger. The path is a free argument, so the model cannot express the
+  # condition; the anchor over-expresses every file write as a mint.
+  - name: create_or_update_file
+    effect: write
+    principal: caller
+    produces: workflow
+    unbounded: true
+
+  # create_repository: new repo in the caller's account or an org
+  - name: create_repository
+    effect: write
+    principal: caller
+
+  # delete_file: a commit that deletes the file
+  - name: delete_file
+    effect: irreversible
+    principal: caller
+    requires_approval: true
+
+  # fork_repository: CORRECTED from the scan's irreversible guess. A fork is
+  # deleted as easily as it is created, so it is a write, not irreversible.
+  - name: fork_repository
+    effect: write
+    principal: caller
+
+  - name: get_commit
+    effect: read
+    principal: caller
+
+  - name: get_file_contents
+    effect: read
+    principal: caller
+
+  # get_job_logs: read workflow job logs
+  - name: get_job_logs
+    effect: read
+    principal: caller
+
+  - name: get_latest_release
+    effect: read
+    principal: caller
+
+  - name: get_release_by_tag
+    effect: read
+    principal: caller
+
+  - name: get_tag
+    effect: read
+    principal: caller
+
+  - name: list_branches
+    effect: read
+    principal: caller
+
+  - name: list_commits
+    effect: read
+    principal: caller
+
+  - name: list_releases
+    effect: read
+    principal: caller
+
+  - name: list_repository_collaborators
+    effect: read
+    principal: caller
+
+  - name: list_tags
+    effect: read
+    principal: caller
+
+  # push_files: CORRECTED from the scan's irreversible guess. One commit
+  # adding several files; revertible like any commit, so a write. Like
+  # create_or_update_file it can mint a workflow when a pushed path is
+  # .github/workflows/*, same anchor caveat.
+  - name: push_files
+    effect: write
+    principal: caller
+    produces: workflow
+    unbounded: true
+
+  - name: search_code
+    effect: read
+    principal: caller
+
+  - name: search_commits
+    effect: read
+    principal: caller
+
+  - name: search_repositories
+    effect: read
+    principal: caller
+
+# Recorded at the end, as the header promises.
+#
+# The roadmap predicted a partial success for this graph and it is exactly
+# that. Four findings, each about the model rather than a bug in this file:
+#
+# 1. The minting chain models. create_or_update_file and push_files produce
+#    a `workflow` scope unbounded, actions_run_trigger requires it, and reach
+#    follows produces/requires, so the compound path write-then-trigger is
+#    reachable. The prediction "it finds the path" holds.
+# 2. Nothing bounds the walk. There is no currency, so no total ceiling and
+#    no per-scope ceiling has anything to attach to. The model finds the path
+#    but has no way to say how many times a workflow-with-secrets may be run
+#    in one session. That is roadmap item 6 (non-monetary effect budgets) with
+#    a real published graph behind it instead of a hypothetical.
+# 3. The mint is conditional and value-dependent. Only a path under
+#    .github/workflows/ mints an executing workflow, and the path is a free
+#    argument, so the anchor over-expresses every file write as a mint. The
+#    same under-expression direction as the AgentKit asset anchors, mirrored:
+#    there the value tools could not be anchored, here the producer over-
+#    produces because the model cannot read argument values.
+# 4. The consolidated tool flattens its effect classes. actions_run_trigger
+#    carries run (a write) beside cancel_workflow_run and
+#    delete_workflow_run_logs (irreversible) behind one method argument, and
+#    the manifest cannot split them. The conservative irreversible + approval
+#    choice is recorded, and it hides that running a workflow is ordinary.
