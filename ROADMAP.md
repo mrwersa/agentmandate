@@ -190,6 +190,25 @@ turning the manifest into a full application specification.
 Per-customer or relational limits come later. They require resource identity
 and relationships, not another integer placed beside the current type count.
 
+**Honest test run after item 6, before defaulting into this by number.** Both
+committed graphs were checked for a distortion `max_bindings` would fix, and
+neither has one:
+
+- AgentKit's over-expression (`borrow`, `wrap_eth` marked `unbounded`) reads
+  like it wants a bound, but the bounds are *value* relationships (borrow is
+  bounded by the collateral ratio, wrap_eth is 1:1 with the ETH balance), not
+  *cardinality* of distinct bindings. `max_bindings` counts bindings, not
+  value, so it would not sharpen either. That distortion lives closer to item 5
+  (resource relationships) than here.
+- The GitHub graph's breach was a *call count* (`delete_file` repeated), which
+  item 6 already bounds. A `max_bindings` on `workflow` would bound how many
+  distinct workflows could be minted, but the breach path needs no second
+  distinct workflow, so the result would not change.
+
+So item 2 has a hypothesis but no committed counterexample. Under the precedent
+item 6 set (evidence chooses, not number), it waits on a third graph that
+produces a genuine cardinality distortion, not on effort.
+
 ### 3. Explicit dynamic-tool inventory
 
 The AgentKit graph builds its tool list at runtime, so a static read cannot
