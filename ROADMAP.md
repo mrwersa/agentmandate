@@ -136,6 +136,14 @@ the concepts the model could not express without distortion. A graph that
 needed no correction is also a result, and a more useful one than a second
 payments example.
 
+**Look for a graph with no currency in it.** Both sources the model has been
+reasoned from, AgentKit and the payment-dispute example, are monetary, and
+`Limits` carries exactly `total` and `depth`. A synthetic filesystem catalogue
+in `docs/evidence/probes/` passes `lint` and `reach` completely clean while
+holding three irreversible tools, because with no currency there is no
+cumulative bound to search against. That probe cannot justify a schema change,
+since it was written here rather than found. It can say where to look.
+
 ### 2. Bounded scope cardinality
 
 The current `unbounded` flag distinguishes one binding from an unlimited
@@ -160,12 +168,17 @@ currently a finding that stops the analysis rather than a shape it handles.
 Ordered inside the bucket, because the third item is the one a reader of any
 agent security model asks about first and the other two are not blocking it:
 
-- **distinguish authority held by the caller, the agent workload, and a
-  delegated downstream identity.** Caller-delegated against service-principal
-  execution is the distinction that decides whether a breach is the agent
-  exceeding its own mandate or faithfully carrying a user's. The current model
-  collapses them, so both read as the same finding.
-- model one agent delegating a bounded capability to another
+- **a delegated downstream identity.** Caller and service principal are
+  already modelled: `principal` is on every tool, `lint` refuses a service
+  principal where a caller token belongs, and `reach` tracks which tools spend
+  which. A third identity is not. When one agent hands a bounded capability to
+  another, the receiving agent's authority is invisible, so a breach reached
+  through a delegate reads as the delegator's own.
+
+  External feedback called caller against service principal a missing concept.
+  Half of it ships today, and the half that does not is delegation.
+- model one agent delegating a bounded capability to another, which is the
+  same gap seen from the sending side
 - represent selected state predicates such as case status and time windows
 
 The design constraint is the same as today: enough structure to find a real
