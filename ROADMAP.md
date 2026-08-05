@@ -97,16 +97,89 @@ declarable.
 - Correctness. `reach` reasons about what a reviewed manifest permits under a
   bounded search, not about what a model tends to do.
 
+## Drift is the foundation, not a feature
+
+Every claim this tool makes rests on the manifest describing the agent that
+actually ships. `reach` proves a path is permitted by a reviewed document, and
+that proof is worth exactly as much as the document's correspondence to the
+code. So `drift` is not one entry in the loop above. It is the check that
+makes the other six mean anything, and a mandate that has never been drifted
+against its source is a claim about a file rather than about an agent.
+
+Stated here because it reads as one bullet among seven and it is not. If a
+release has to skip a check, `drift` is the one it cannot skip.
+
 ## Next: widen the model only where evidence demands it
 
-Do not implement every candidate below in parallel. The AgentKit graph earns
-investigation of bounded producers, explicit dynamic-tool inventory, and
-gross-versus-net value accounting. Shipping any of them still needs a reviewed
-schema change, migration fixtures, and a second graph showing that the concept
-is not specific to one integration. Other candidates wait for an independent
-user to show the distortion and the counterexample it hides.
+Ordered. Do not implement these in parallel, and do not start at item 3
+because it is the most interesting. The AgentKit graph earns investigation of
+bounded producers, explicit dynamic-tool inventory, and gross-versus-net value
+accounting. Shipping any of them still needs a reviewed schema change,
+migration fixtures, and a second graph showing that the concept is not
+specific to one integration. Other candidates wait for an independent user to
+show the distortion and the counterexample it hides.
 
-### Bounded scope cardinality
+### 1. A second independent tool graph
+
+Everything below is gated on this, so it is item 1 rather than a precondition
+mentioned in passing. One graph cannot distinguish a general modelling gap
+from a quirk of one integration, and every candidate extension is currently
+justified by the same single source.
+
+This is evidence work rather than code, and the tooling for it already exists:
+`scan` reads an MCP `tools/list` payload today, so the cost is finding a graph
+and reviewing what the skeleton got wrong, not building an importer.
+
+What the run has to record, following `docs/evidence/agentkit/`: the catalogue
+as found, the skeleton `scan` proposed, every guess a reviewer corrected, and
+the concepts the model could not express without distortion. A graph that
+needed no correction is also a result, and a more useful one than a second
+payments example.
+
+**The named target is `github/github-mcp-server`.** GitHub's own MCP server,
+tools defined statically in Go, grouped into toolsets and released against
+versioned images. It is chosen rather than found convenient, for four reasons
+that map onto what this model cannot currently express:
+
+- **No currency anywhere.** GitHub's authority surface has no money in it, so
+  the cumulative-value mechanism has nothing to attach to and the filesystem
+  probe's silence should reproduce on a real published graph.
+- **Irreversible effects are native.** Cancelling a workflow run, deleting run
+  logs, force-pushing over history. These carry a clear accumulation rule and
+  no currency, which is the non-monetary budget candidate with a real example
+  behind it rather than a hypothetical.
+- **Read, write and admin are platform concepts**, so the effect classes have
+  an anchor instead of a reviewer's invention.
+- **Tools mint scopes.** An agent with `contents:write` can commit a workflow
+  file, and that file then executes with a token and repository secrets. A
+  write mints secret-scoped compute.
+
+That last one is the reason to expect a *partial* success rather than a flat
+failure, and it is worth predicting before the run so the result can surprise
+us. `produces`, `unbounded` and `requires` already exist and `reach` follows
+them, so the minting chain should model correctly and the compound path should
+be found. The gap should be narrower than the probe suggested: not that the
+analysis says nothing, but that it finds the path and has no way to bound how
+many times it may be walked. If the minting chain also fails to model, that is
+a bigger finding than expected and changes the order below.
+
+Scope it the way AgentKit was scoped. The full toolset is too large to stay
+reviewer-comprehensible, so class-scope to what one real example wires in, and
+record the `GITHUB_TOOLSETS` configuration as the reviewed inventory boundary.
+That doubles as a live test of the dynamic-tool inventory candidate in item 3.
+
+Runner-up, afterwards and not in parallel: the PostgreSQL MCP server, for
+DDL against DML irreversibility and rows-affected budgets.
+
+**Look for a graph with no currency in it.** Both sources the model has been
+reasoned from, AgentKit and the payment-dispute example, are monetary, and
+`Limits` carries exactly `total` and `depth`. A synthetic filesystem catalogue
+in `docs/evidence/probes/` passes `lint` and `reach` completely clean while
+holding three irreversible tools, because with no currency there is no
+cumulative bound to search against. That probe cannot justify a schema change,
+since it was written here rather than found. It can say where to look.
+
+### 2. Bounded scope cardinality
 
 The current `unbounded` flag distinguishes one binding from an unlimited
 source. Real tools often expose a finite collection, such as at most ten cases
@@ -117,7 +190,36 @@ turning the manifest into a full application specification.
 Per-customer or relational limits come later. They require resource identity
 and relationships, not another integer placed beside the current type count.
 
-### Resource relationships
+### 3. Explicit dynamic-tool inventory
+
+The AgentKit graph builds its tool list at runtime, so a static read cannot
+enumerate it and `scan --source` says so rather than guessing. A reviewed way
+to declare "this list is assembled from these providers" would turn an
+unenumerable inventory into a bounded one, and an unenumerable tool list is
+currently a finding that stops the analysis rather than a shape it handles.
+
+### 4. Conditional and delegated authority
+
+Ordered inside the bucket, because the third item is the one a reader of any
+agent security model asks about first and the other two are not blocking it:
+
+- **a delegated downstream identity.** Caller and service principal are
+  already modelled: `principal` is on every tool, `lint` refuses a service
+  principal where a caller token belongs, and `reach` tracks which tools spend
+  which. A third identity is not. When one agent hands a bounded capability to
+  another, the receiving agent's authority is invisible, so a breach reached
+  through a delegate reads as the delegator's own.
+
+  External feedback called caller against service principal a missing concept.
+  Half of it ships today, and the half that does not is delegation.
+- model one agent delegating a bounded capability to another, which is the
+  same gap seen from the sending side
+- represent selected state predicates such as case status and time windows
+
+The design constraint is the same as today: enough structure to find a real
+compound path, without asking teams to formalise the entire application.
+
+### 5. Resource relationships
 
 Scope counts deliberately forget which customer owns a case or whether two
 bindings refer to the same object. If real graphs show that this creates false
@@ -125,7 +227,7 @@ or missed paths, add a small reviewed relation vocabulary and preserve binding
 provenance through tool transitions. Do not jump directly to arbitrary
 preconditions and postconditions.
 
-### Non-monetary effect budgets
+### 6. Non-monetary effect budgets
 
 Some authority limits count irreversible actions rather than currency, such as
 accounts closed, credentials rotated, or external messages sent. Generalise
@@ -133,7 +235,7 @@ the current cumulative-value mechanism only when those limits share a clear,
 reviewable accumulation rule. Confidentiality and data flow remain a separate
 model rather than being disguised as a numeric budget.
 
-### Data-flow reachability
+### 7. Data-flow reachability
 
 Add reviewed source, transform, and sink labels so the analyser can detect a
 path such as:
@@ -144,16 +246,6 @@ read_customer_record -> summarise -> send_external_message
 
 This is distinct from the current value and scope model. It should ship only
 with counterexamples that remain understandable to a reviewer.
-
-### Conditional and delegated authority
-
-- represent selected state predicates such as case status and time windows
-- model one agent delegating a bounded capability to another
-- distinguish authority held by the caller, the agent workload, and a
-  delegated downstream identity
-
-The design constraint is the same as today: enough structure to find a real
-compound path, without asking teams to formalise the entire application.
 
 ## Path to 1.0
 
