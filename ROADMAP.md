@@ -136,6 +136,41 @@ the concepts the model could not express without distortion. A graph that
 needed no correction is also a result, and a more useful one than a second
 payments example.
 
+**The named target is `github/github-mcp-server`.** GitHub's own MCP server,
+tools defined statically in Go, grouped into toolsets and released against
+versioned images. It is chosen rather than found convenient, for four reasons
+that map onto what this model cannot currently express:
+
+- **No currency anywhere.** GitHub's authority surface has no money in it, so
+  the cumulative-value mechanism has nothing to attach to and the filesystem
+  probe's silence should reproduce on a real published graph.
+- **Irreversible effects are native.** Cancelling a workflow run, deleting run
+  logs, force-pushing over history. These carry a clear accumulation rule and
+  no currency, which is the non-monetary budget candidate with a real example
+  behind it rather than a hypothetical.
+- **Read, write and admin are platform concepts**, so the effect classes have
+  an anchor instead of a reviewer's invention.
+- **Tools mint scopes.** An agent with `contents:write` can commit a workflow
+  file, and that file then executes with a token and repository secrets. A
+  write mints secret-scoped compute.
+
+That last one is the reason to expect a *partial* success rather than a flat
+failure, and it is worth predicting before the run so the result can surprise
+us. `produces`, `unbounded` and `requires` already exist and `reach` follows
+them, so the minting chain should model correctly and the compound path should
+be found. The gap should be narrower than the probe suggested: not that the
+analysis says nothing, but that it finds the path and has no way to bound how
+many times it may be walked. If the minting chain also fails to model, that is
+a bigger finding than expected and changes the order below.
+
+Scope it the way AgentKit was scoped. The full toolset is too large to stay
+reviewer-comprehensible, so class-scope to what one real example wires in, and
+record the `GITHUB_TOOLSETS` configuration as the reviewed inventory boundary.
+That doubles as a live test of the dynamic-tool inventory candidate in item 3.
+
+Runner-up, afterwards and not in parallel: the PostgreSQL MCP server, for
+DDL against DML irreversibility and rows-affected budgets.
+
 **Look for a graph with no currency in it.** Both sources the model has been
 reasoned from, AgentKit and the payment-dispute example, are monetary, and
 `Limits` carries exactly `total` and `depth`. A synthetic filesystem catalogue
