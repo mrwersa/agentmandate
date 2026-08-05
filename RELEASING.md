@@ -17,10 +17,17 @@ mistakes.
 
 Cut a release when any of these is true:
 
-- **A user-visible change has merged.** The public API, the command-line
-  surface, or `README.md`, which is the PyPI description. A name that is
-  importable but missing from `__all__` counts: it is reachable and
-  unnameable, which is a defect a user meets.
+- **A user-visible change has merged.** The public API or the command-line
+  surface. A name that is importable but missing from `__all__` counts: it is
+  reachable and unnameable, which is a defect a user meets.
+- **The README started describing something different.** It is the PyPI
+  description, so a reader there sees the last release's copy. This means a
+  README change that documents a user-visible change, or one that corrects a
+  description which now materially misleads, since a misleading description is
+  itself a defect a user meets. A wording pass, a typo, or a restructure that
+  says the same thing better is not a reason on its own. Copy edits are the
+  most frequent change here, and treating each as a release is the same
+  missing rule in a third shape.
 - **A roadmap item finished.** That is the unit a reader tracks, so it is the
   unit worth publishing against.
 - **A defect that reaches a user is fixed.** Wrong output, a misleading
