@@ -19,7 +19,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.8.0
+agentmandate~=0.9.0
 ```
 
 ## What is most likely to change

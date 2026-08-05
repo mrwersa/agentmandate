@@ -6,16 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.9.0 - 2026-08-05
+
+Roadmap item 6, taken ahead of item 2 because two real graphs asked for it and
+item 2 still has no counterexample. On the GitHub MCP graph the model could
+already say that triggering a workflow is irreversible and ungated. It could
+not say how many times. A count, not a voice.
+
 ### Added
 
 - `limits.effects` bounds how many calls of an effect class one run may make,
   for authority that is counted rather than priced: accounts closed,
   credentials rotated, workflows triggered. Declared only, so a manifest that
   names no budget behaves exactly as before.
-  Roadmap item 6, taken ahead of item 2 because two real graphs asked for it
-  and item 2 still has no counterexample. On the GitHub MCP graph the model
-  could already say that triggering a workflow is irreversible and ungated. It
-  could not say how many times. A count, not a voice.
   The search change is the load-bearing part. A tool that neither mints a scope
   nor spends against a ceiling was skipped as reaching no new state, so an
   irreversible tool with no scope never extended a path and a budget over it
