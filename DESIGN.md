@@ -146,6 +146,64 @@ worker is behaviour. The identity and tools delegated to that worker are
 authority. The current manifest describes one agent or one deliberately
 reviewed union of agents, and it does not yet model delegation between them.
 
+## Counting effects, not only value
+
+Two real graphs now say the same thing about the cumulative model, and it took
+the second one to make it concrete.
+
+`Limits` carried `total`, a `Money` ceiling, and `depth`. Every cumulative
+question the search could ask was therefore a question about currency. On the
+Coinbase AgentKit graph that was the right axis, because the authority being
+compounded was money. On the GitHub MCP graph there is no currency anywhere,
+and `reach` answered "no reachable breach" on an agent that can write a
+workflow, run it with repository secrets, and delete the run logs.
+
+That answer was true. It was also empty, and the distinction matters: the
+approval and irreversibility axis works fine on that graph. Drop the two
+conservative `requires_approval` flags and `lint` immediately reports
+`effect.ungated-irreversible` on `actions_run_trigger` and `delete_file`. What
+the model could not say is **how many times**. Not a missing voice, a missing
+count.
+
+**The decision.** `Limits` gains `effects`, a reviewed maximum number of calls
+per effect class in one run:
+
+```yaml
+limits:
+  effects:
+    irreversible: 3
+```
+
+Declared only. A manifest that names no effect budget behaves exactly as
+before, because inventing a ceiling is the same mistake as inventing a
+reversibility label, and this model already refuses that one.
+
+**The part that needed a search change.** An effect count has to be state, and
+that is not a detail. The walk skips a tool that neither mints a scope nor
+spends against a ceiling, on the correct reasoning that exploring it again
+reaches no state the walk cannot already hit. An irreversible tool with no
+scope, `delete_file` being exactly that, therefore never extended a path. The
+search could not represent deleting twice, so no budget over it could ever have
+been exceeded. Counting calls without making the count part of the state would
+have shipped a limit that silently never fires.
+
+So a call whose effect class carries a declared budget now progresses the walk,
+the same way spending against a ceiling does. The budget makes the repetition
+visible, and without a declared budget nothing changes.
+
+**Why a count per effect class rather than per tool.** A per-tool count is a
+rate limit, and rate limits belong at the tool. What a reviewer wants to bound
+is the blast radius of a class of action, "at most three irreversible things in
+one run", independent of which tools reach it. It also composes with the
+existing model: effect classes are already declared, already linted, and
+already the vocabulary a reviewer reasons in.
+
+**What this is not.** Not a general budget language. The accumulation rule is
+one call, one increment, chosen because it is the only rule that needs no
+further declarations to interpret. Confidentiality and data flow stay a
+separate model rather than being disguised as a numeric budget, which is the
+same boundary `total` already respects.
+
 ## What was left out, and why
 
 **Data-flow reachability.** Finding that a read tool feeds an exfiltration path

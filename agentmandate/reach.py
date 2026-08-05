@@ -120,6 +120,8 @@ class _State:
     counts: tuple[tuple[str, int], ...] = ()
     # (tool, scope, binding index) -> cumulative spend
     spend: tuple[tuple[tuple[str, str, int], Decimal], ...] = ()
+    # effect class -> calls made so far, tracked only for declared budgets
+    effect_calls: tuple[tuple[str, int], ...] = ()
 
     def count(self, scope: str) -> int:
         for name, value in self.counts:
@@ -140,13 +142,33 @@ class _State:
     def with_binding(self, scope: str) -> _State:
         counts = dict(self.counts)
         counts[scope] = counts.get(scope, 0) + 1
-        return _State(counts=_freeze_counts(counts), spend=self.spend)
+        return _State(
+            counts=_freeze_counts(counts),
+            spend=self.spend,
+            effect_calls=self.effect_calls,
+        )
+
+    def calls(self, effect: str) -> int:
+        return dict(self.effect_calls).get(effect, 0)
+
+    def with_call(self, effect: str) -> _State:
+        calls = dict(self.effect_calls)
+        calls[effect] = calls.get(effect, 0) + 1
+        return _State(
+            counts=self.counts,
+            spend=self.spend,
+            effect_calls=tuple(sorted(calls.items())),
+        )
 
     def with_spend(self, tool: str, scope: str, index: int, amount: Decimal) -> _State:
         spend = dict(self.spend)
         key = (tool, scope, index)
         spend[key] = spend.get(key, Decimal(0)) + amount
-        return _State(counts=self.counts, spend=_freeze_spend(spend))
+        return _State(
+            counts=self.counts,
+            spend=_freeze_spend(spend),
+            effect_calls=self.effect_calls,
+        )
 
 
 def _freeze_counts(counts: dict[str, int]) -> tuple[tuple[str, int], ...]:
@@ -196,6 +218,7 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
         raise ValueError("depth must be a positive integer")
     total_cap = mandate.limits.total
+    effect_caps = mandate.limits.effects
 
     reachable: set[str] = set()
     effects: set[tuple[str, str]] = set()
@@ -252,6 +275,15 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
             step_currency = None
             progressed = False
 
+            # A budgeted call moves the walk forward the way spending does.
+            # Without this, an irreversible tool that neither mints nor spends
+            # is skipped as reaching no new state, so the search cannot
+            # represent calling it twice and no budget over it could ever be
+            # exceeded. See DESIGN.md, "Counting effects, not only value".
+            if tool.effect in effect_caps:
+                next_state = next_state.with_call(tool.effect)
+                progressed = True
+
             if _mints(tool, state):
                 next_state = next_state.with_binding(tool.produces)  # type: ignore[arg-type]
                 step_binding = f"{tool.produces}#{state.count(tool.produces) + 1}"
@@ -303,6 +335,24 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
                         path=next_path,
                     )
                 )
+
+            cap = effect_caps.get(tool.effect)
+            if cap is not None:
+                made = next_state.calls(tool.effect)
+                if made > cap and not any(
+                    b.kind == "effect_count" and b.detail.startswith(tool.effect)
+                    for b in breaches
+                ):
+                    breaches.append(
+                        Breach(
+                            kind="effect_count",
+                            detail=(
+                                f"{tool.effect} calls reach {made}, above the "
+                                f"declared budget of {cap} in one run"
+                            ),
+                            path=next_path,
+                        )
+                    )
 
             queue.append((next_state, next_path))
 

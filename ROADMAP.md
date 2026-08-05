@@ -229,11 +229,24 @@ preconditions and postconditions.
 
 ### 6. Non-monetary effect budgets
 
-Some authority limits count irreversible actions rather than currency, such as
-accounts closed, credentials rotated, or external messages sent. Generalise
-the current cumulative-value mechanism only when those limits share a clear,
-reviewable accumulation rule. Confidentiality and data flow remain a separate
-model rather than being disguised as a numeric budget.
+**Shipped**, and taken before item 2 because the evidence pointed here. The
+ordering above was fixed when only the AgentKit graph existed. The GitHub graph
+then produced the concrete counterexample this item needed and item 2 still has
+none, and the rule this list serves is that the model widens where evidence
+demands it, not where a number says.
+
+`limits.effects` declares a maximum number of calls per effect class in one
+run. Declared only: an absent class is unbounded, because inventing a ceiling
+is the same mistake as inventing a reversibility label.
+
+The search needed a change and it was the load-bearing part. A tool that
+neither mints a scope nor spends against a ceiling was skipped as reaching no
+new state, so `delete_file` never extended a path and no budget over it could
+ever have fired. A budgeted call now progresses the walk the way spending does.
+See DESIGN.md, "Counting effects, not only value".
+
+Confidentiality and data flow stay a separate model rather than being disguised
+as a numeric budget, which is the boundary `total` already respects.
 
 ### 7. Data-flow reachability
 

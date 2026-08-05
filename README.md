@@ -218,6 +218,8 @@ identity: spiffe://bank/agents/dispute-resolver
 limits:
   total: { amount: 500, currency: GBP }
   depth: 8
+  effects:                    # optional. an absent class is unbounded
+    irreversible: 3           # at most three irreversible calls in one run
 
 tools:
   - name: open_case

@@ -16,6 +16,7 @@ possible.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -197,6 +198,11 @@ class Limits:
 
     total: Money | None = None
     depth: int = DEFAULT_DEPTH
+    # Reviewed maximum calls per effect class in one run. Declared only: an
+    # absent class is unbounded, because inventing a ceiling is the same
+    # mistake as inventing a reversibility label. See DESIGN.md, "Counting
+    # effects, not only value".
+    effects: Mapping[str, int] = field(default_factory=dict)
 
     @classmethod
     def parse(cls, raw: Any) -> Limits:
@@ -208,7 +214,30 @@ class Limits:
         depth = raw.get("depth", DEFAULT_DEPTH)
         if isinstance(depth, bool) or not isinstance(depth, int) or depth < 1:
             raise ManifestError("limits.depth must be a positive integer")
-        return cls(total=total, depth=depth)
+        return cls(total=total, depth=depth, effects=cls._parse_effects(raw))
+
+    @staticmethod
+    def _parse_effects(raw: dict[str, Any]) -> Mapping[str, int]:
+        """Read `limits.effects`, refusing a class or a count it cannot honour."""
+        declared = raw.get("effects")
+        if declared is None:
+            return {}
+        if not isinstance(declared, dict):
+            raise ManifestError("limits.effects: expected a mapping")
+        budgets: dict[str, int] = {}
+        for name, value in declared.items():
+            if name not in EFFECTS:
+                raise ManifestError(
+                    f"limits.effects.{name}: unknown effect class; expected one "
+                    f"of {', '.join(sorted(EFFECTS))}"
+                )
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ManifestError(
+                    f"limits.effects.{name} must be a whole number of calls, "
+                    "zero or more"
+                )
+            budgets[name] = value
+        return budgets
 
 
 @dataclass(frozen=True)
