@@ -97,16 +97,46 @@ declarable.
 - Correctness. `reach` reasons about what a reviewed manifest permits under a
   bounded search, not about what a model tends to do.
 
+## Drift is the foundation, not a feature
+
+Every claim this tool makes rests on the manifest describing the agent that
+actually ships. `reach` proves a path is permitted by a reviewed document, and
+that proof is worth exactly as much as the document's correspondence to the
+code. So `drift` is not one entry in the loop above. It is the check that
+makes the other six mean anything, and a mandate that has never been drifted
+against its source is a claim about a file rather than about an agent.
+
+Stated here because it reads as one bullet among seven and it is not. If a
+release has to skip a check, `drift` is the one it cannot skip.
+
 ## Next: widen the model only where evidence demands it
 
-Do not implement every candidate below in parallel. The AgentKit graph earns
-investigation of bounded producers, explicit dynamic-tool inventory, and
-gross-versus-net value accounting. Shipping any of them still needs a reviewed
-schema change, migration fixtures, and a second graph showing that the concept
-is not specific to one integration. Other candidates wait for an independent
-user to show the distortion and the counterexample it hides.
+Ordered. Do not implement these in parallel, and do not start at item 3
+because it is the most interesting. The AgentKit graph earns investigation of
+bounded producers, explicit dynamic-tool inventory, and gross-versus-net value
+accounting. Shipping any of them still needs a reviewed schema change,
+migration fixtures, and a second graph showing that the concept is not
+specific to one integration. Other candidates wait for an independent user to
+show the distortion and the counterexample it hides.
 
-### Bounded scope cardinality
+### 1. A second independent tool graph
+
+Everything below is gated on this, so it is item 1 rather than a precondition
+mentioned in passing. One graph cannot distinguish a general modelling gap
+from a quirk of one integration, and every candidate extension is currently
+justified by the same single source.
+
+This is evidence work rather than code, and the tooling for it already exists:
+`scan` reads an MCP `tools/list` payload today, so the cost is finding a graph
+and reviewing what the skeleton got wrong, not building an importer.
+
+What the run has to record, following `docs/evidence/agentkit/`: the catalogue
+as found, the skeleton `scan` proposed, every guess a reviewer corrected, and
+the concepts the model could not express without distortion. A graph that
+needed no correction is also a result, and a more useful one than a second
+payments example.
+
+### 2. Bounded scope cardinality
 
 The current `unbounded` flag distinguishes one binding from an unlimited
 source. Real tools often expose a finite collection, such as at most ten cases
@@ -117,7 +147,31 @@ turning the manifest into a full application specification.
 Per-customer or relational limits come later. They require resource identity
 and relationships, not another integer placed beside the current type count.
 
-### Resource relationships
+### 3. Explicit dynamic-tool inventory
+
+The AgentKit graph builds its tool list at runtime, so a static read cannot
+enumerate it and `scan --source` says so rather than guessing. A reviewed way
+to declare "this list is assembled from these providers" would turn an
+unenumerable inventory into a bounded one, and an unenumerable tool list is
+currently a finding that stops the analysis rather than a shape it handles.
+
+### 4. Conditional and delegated authority
+
+Ordered inside the bucket, because the third item is the one a reader of any
+agent security model asks about first and the other two are not blocking it:
+
+- **distinguish authority held by the caller, the agent workload, and a
+  delegated downstream identity.** Caller-delegated against service-principal
+  execution is the distinction that decides whether a breach is the agent
+  exceeding its own mandate or faithfully carrying a user's. The current model
+  collapses them, so both read as the same finding.
+- model one agent delegating a bounded capability to another
+- represent selected state predicates such as case status and time windows
+
+The design constraint is the same as today: enough structure to find a real
+compound path, without asking teams to formalise the entire application.
+
+### 5. Resource relationships
 
 Scope counts deliberately forget which customer owns a case or whether two
 bindings refer to the same object. If real graphs show that this creates false
@@ -125,7 +179,7 @@ or missed paths, add a small reviewed relation vocabulary and preserve binding
 provenance through tool transitions. Do not jump directly to arbitrary
 preconditions and postconditions.
 
-### Non-monetary effect budgets
+### 6. Non-monetary effect budgets
 
 Some authority limits count irreversible actions rather than currency, such as
 accounts closed, credentials rotated, or external messages sent. Generalise
@@ -133,7 +187,7 @@ the current cumulative-value mechanism only when those limits share a clear,
 reviewable accumulation rule. Confidentiality and data flow remain a separate
 model rather than being disguised as a numeric budget.
 
-### Data-flow reachability
+### 7. Data-flow reachability
 
 Add reviewed source, transform, and sink labels so the analyser can detect a
 path such as:
@@ -144,16 +198,6 @@ read_customer_record -> summarise -> send_external_message
 
 This is distinct from the current value and scope model. It should ship only
 with counterexamples that remain understandable to a reviewer.
-
-### Conditional and delegated authority
-
-- represent selected state predicates such as case status and time windows
-- model one agent delegating a bounded capability to another
-- distinguish authority held by the caller, the agent workload, and a
-  delegated downstream identity
-
-The design constraint is the same as today: enough structure to find a real
-compound path, without asking teams to formalise the entire application.
 
 ## Path to 1.0
 
