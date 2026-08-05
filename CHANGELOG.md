@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.8.1 - 2026-08-05
+
+Everything below has been on `main` since the start of August and reaching
+nobody who installs the package. `Limits` and `reconcile` are the reason to
+publish rather than wait: both are importable and neither was in `__all__`, so
+`load(...).limits` handed back a type a caller could not name from the entry
+point they were told to use.
+
+`RELEASING.md` now says when to cut one, which is the rule whose absence let
+this sit.
+
+
 ### Changed
 
 - The README is restructured around what a reader needs first. The

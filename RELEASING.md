@@ -7,6 +7,38 @@ release time, because the last manually cut release shipped a wheel whose
 AgentMandate publishes from a GitHub Release through PyPI Trusted Publishing.
 No long-lived PyPI token is stored in GitHub.
 
+## When to cut one
+
+Documented because the history says it was not. This project let an API fix
+sit unreleased for four days, and the sibling project let seventeen merged
+pull requests pile up and then published four minor versions inside
+twenty-eight hours. Both are the same missing rule rather than two different
+mistakes.
+
+Cut a release when any of these is true:
+
+- **A user-visible change has merged.** The public API, the command-line
+  surface, or `README.md`, which is the PyPI description. A name that is
+  importable but missing from `__all__` counts: it is reachable and
+  unnameable, which is a defect a user meets.
+- **A roadmap item finished.** That is the unit a reader tracks, so it is the
+  unit worth publishing against.
+- **A defect that reaches a user is fixed.** Wrong output, a misleading
+  message, a refused input that should be accepted.
+
+Do not cut one when:
+
+- Only internal documentation moved. `ROADMAP.md`, `DESIGN.md` and evidence
+  directories are read on GitHub and reach a reader the moment they merge.
+- The changelog would read as tidying. A release nobody can act on spends
+  attention and returns nothing.
+- One landed today already, unless the second fixes the first. Batch within a
+  day and let the changelog carry the whole of it.
+
+The version follows what changed rather than how long it has been. A patch
+preserves the public Python API and the command-line contract, and anything
+that refuses input it used to accept is a minor, however small the diff.
+
 ## Cut a release
 
 1. Create a release branch from current `main`.
