@@ -59,6 +59,12 @@ class Breach:
     kind: str
     detail: str
     path: tuple[Step, ...]
+    #: What the breach is about, when one kind can fire about several things.
+    #: An effect budget reports per class, so the class discriminates. Used to
+    #: report each subject once and deliberately not serialised: the JSON
+    #: contract is kind, detail and path, and this is how the search decides
+    #: it has already said something rather than a fact about the finding.
+    subject: str | None = None
 
     def render(self) -> str:
         lines = [f"BREACH  {self.detail}"]
@@ -339,8 +345,12 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
             cap = effect_caps.get(tool.effect)
             if cap is not None:
                 made = next_state.calls(tool.effect)
+                # Keyed on the subject rather than on the message. Matching a
+                # prefix of `detail` worked only while every message happened
+                # to open with the effect name, so a reworded message would
+                # have quietly produced one breach per extra call.
                 if made > cap and not any(
-                    b.kind == "effect_count" and b.detail.startswith(tool.effect)
+                    b.kind == "effect_count" and b.subject == tool.effect
                     for b in breaches
                 ):
                     breaches.append(
@@ -351,6 +361,7 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
                                 f"declared budget of {cap} in one run"
                             ),
                             path=next_path,
+                            subject=tool.effect,
                         )
                     )
 
