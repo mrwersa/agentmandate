@@ -131,3 +131,40 @@ tools:
     kinds = {b.kind for b in analyse(loads(both)).breaches}
 
     assert "cumulative_value" in kinds
+
+
+def test_two_classes_over_budget_are_reported_once_each():
+    """The dedup keys on the subject, not on how the message is worded.
+
+    It matched a prefix of `detail` while every message happened to open with
+    the effect name. A reworded message would have produced one breach per
+    extra call, and nothing would have failed to say so.
+    """
+    both = """
+agent: two
+limits:
+  depth: 8
+  effects:
+    write: 1
+    irreversible: 1
+tools:
+  - name: edit
+    effect: write
+  - name: wipe
+    effect: irreversible
+    requires_approval: true
+"""
+    breaches = [b for b in analyse(loads(both)).breaches if b.kind == "effect_count"]
+
+    assert sorted(b.subject for b in breaches) == ["irreversible", "write"]
+    assert len(breaches) == 2, "one per class, however many calls exceeded it"
+
+
+def test_the_json_contract_is_unchanged():
+    """`subject` is how the search decides it has already spoken, not a
+    finding. The published shape stays kind, detail and path."""
+    authority = analyse(loads(DESTRUCTIVE))
+
+    payload = authority.as_dict()["breaches"][0]
+
+    assert sorted(payload) == ["detail", "kind", "path"]

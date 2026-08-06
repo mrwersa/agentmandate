@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Fixed
+
+- An effect-budget breach is reported once per class by keying on the class
+  itself rather than on a prefix of the message. Matching `detail` worked only
+  while every message happened to open with the effect name, so a reworded
+  message would have produced one breach per call above the budget and nothing
+  would have failed to say so. The published JSON is unchanged: `kind`,
+  `detail` and `path`.
+
+
 ## 0.9.0 - 2026-08-05
 
 Roadmap item 6, taken ahead of item 2 because two real graphs asked for it and
