@@ -1,295 +1,189 @@
 # Roadmap
 
-AgentMandate's centre stays narrow: derive what an agent may do from its tool
-graph, then show how that authority changes between releases. Integrations are
-useful when they feed that analysis. They are not a reason to become another
-runtime proxy or general agent-security scanner.
+AgentMandate is moving from a single-repository authority analyzer toward an
+open policy control plane for platform-security teams. The centre remains the
+same: derive what an agent may do, find unsafe combinations of permitted
+actions, and show how effective authority changes. The wider product will
+connect that analysis to inventory, existing policy decision points, and
+runtime evidence. It will not become the traffic proxy.
 
-This is direction, not a release promise.
+This is an 18–24 month direction, not a release promise. Research supporting
+the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
-## Where it is now
+## Outcomes and boundaries
 
-As of 0.8.0 the loop closes without leaving the package. A
-[worked example](https://github.com/mrwersa/agent-release-gate) runs seven
-offline checks against one payment-dispute agent, including source inventory,
-compound reachability, release diff, test obligations, and runtime trace
-conformance.
-
-| | command | what it establishes |
-|---|---|---|
-| **obtain** | `scan --source`, `scan` | a manifest skeleton from agent source or an MCP catalogue, every guess marked |
-| **check** | `lint`, `reach` | single-tool rules, and whether permitted calls compose into a breach |
-| **compare** | `diff` | whether this release widened reachable authority, with a record for named review |
-| **stay honest** | `drift` | whether the manifest still describes the implementation |
-| **hand off** | `obligations`, `scenarios` | reviewable test obligations, an AgentVerity decision suite, and neutral scenario skeletons |
-| **confirm** | `verify --otel` | whether the run that happened stayed inside the mandate |
-| **report** | `reach --sarif`, `--graph` | the finding as a code-scanning annotation, or a diagram GitHub renders |
-
-Each one fails closed. Missing control evidence, an unenumerable tool list, an
-unreviewed decision, and a currency that cannot be compared all produce a
-finding rather than a pass.
-
-The adoption set the roadmap opened is complete: traces in 0.5.0, inventory
-in 0.6.0, drift and developer-native findings in 0.7.0, and a GitHub Action
-in 0.8.0. These overlap with mature CI and security tooling deliberately. The
-new value remains the authority graph and its counterexamples; the packaging
-is only there so the counterexamples reach a reviewer.
-
-## The first real graph asked for a more precise model
-
-The first real graph landed in `docs/evidence/agentkit/`: Coinbase AgentKit,
-`coinbase-agentkit@v0.7.4` against `v0.1.6`, on the Strands example chatbot.
-The tool sets are enumerated from source, class-scoped to exactly the seven
-providers the example instantiates (`cdp_api`, `erc20`, `pyth`, `wallet`,
-`weth`, `wow`, `compound`). Both manifests, the invented ceilings (500 per
-call, 700 per session), and the breach they permit are committed there so the
-finding can be re-run.
-
-The release-to-release diff is a widening beside a narrowing: six actions
-gained, three lost. The gained ones that matter are ERC-20 authority tools.
-The gain that matters is `approve`. It grants an ERC-20 allowance, so a third
-party can spend the wallet's tokens later without the agent calling anything
-again. That is authority which outlives the run, arriving in a minor bump and
-invisible in a config diff. The diff also reports `effect: gained write on
-allowance` and `effect: gained read on allowance`: a new scope with new effect
-classes, an authority-shape change rather than an inventory change, which a
-config diff structurally cannot show.
-The other gains (`get_allowance`, `get_erc20_token_address`, `unwrap_eth`,
-and the two pyth renames) and the losses (`address_reputation`, the two pyth
-names) are routine. A one-way widening story would have missed the narrowing.
-
-**What it asked for:** bounded producers. The manifest can only mark a
-producer `unbounded: true` or leave it at nothing, and the real graph makes
-both wrong. Compound `borrow` is bounded by the collateral ratio and `wrap_eth`
-is 1:1 with the ETH balance, so marking either unbounded makes `reach` report
-paths nobody can take. A gate that cries wolf gets switched off, so this
-over-expression direction is the expensive failure and it comes first.
-The value tools show the mirror problem: `transfer`, `native_transfer`,
-`buy_token`, and `sell_token` take the asset as a free argument and no tool
-produces an `asset` scope, so a ceiling has nothing to attach to and the
-anchor has to be invented.
-
-**What it also asked for:** gross versus net. Buy then sell of the same token
-nets to roughly zero but counts the full 1000 USD against the session total,
-and the manifest gives no way to declare which the reader is seeing. Gross is
-a defensible choice for a wash-trading scenario, but it should be declarable.
-
-**What it asked us not to do:** import the agent to close the dynamic-tool-list
-gap. The example binds its tools through `get_strands_tools(agentkit)`, so
-`drift` cannot enumerate the list statically. The no-imports design is
-deliberate: the command must run in review on a branch whose dependencies are
-not installed. The safer direction is an explicit, reviewed inventory for a
-dynamic binding, not executing application code during analysis.
-
-The evidence is itself an example of that gap: the first draft of these
-manifests included tools from providers the example never wires in, and
-`drift` could not catch it because the tool list is dynamic. A tool that
-catches release-to-release drift contained undetected drift, for exactly the
-reason it could not see it. That is the argument for making the list
-declarable.
-
-## Not planned
-
-- A bundled judge, scenario runner, or benchmark. Execution stays in the
-  harness a team already has.
-- A runtime proxy or enforcement point. This analyses and reports; the control
-  belongs where the effect happens.
-- Correctness. `reach` reasons about what a reviewed manifest permits under a
-  bounded search, not about what a model tends to do.
-
-## Drift is the foundation, not a feature
-
-Every claim this tool makes rests on the manifest describing the agent that
-actually ships. `reach` proves a path is permitted by a reviewed document, and
-that proof is worth exactly as much as the document's correspondence to the
-code. So `drift` is not one entry in the loop above. It is the check that
-makes the other six mean anything, and a mandate that has never been drifted
-against its source is a claim about a file rather than about an agent.
-
-Stated here because it reads as one bullet among seven and it is not. If a
-release has to skip a check, `drift` is the one it cannot skip.
-
-## Next: widen the model only where evidence demands it
-
-Ordered. Do not implement these in parallel, and do not start at item 3
-because it is the most interesting. The AgentKit graph earns investigation of
-bounded producers, explicit dynamic-tool inventory, and gross-versus-net value
-accounting. Shipping any of them still needs a reviewed schema change,
-migration fixtures, and a second graph showing that the concept is not
-specific to one integration. Other candidates wait for an independent user to
-show the distortion and the counterexample it hides.
-
-### 1. A second independent tool graph
-
-Everything below is gated on this, so it is item 1 rather than a precondition
-mentioned in passing. One graph cannot distinguish a general modelling gap
-from a quirk of one integration, and every candidate extension is currently
-justified by the same single source.
-
-This is evidence work rather than code, and the tooling for it already exists:
-`scan` reads an MCP `tools/list` payload today, so the cost is finding a graph
-and reviewing what the skeleton got wrong, not building an importer.
-
-What the run has to record, following `docs/evidence/agentkit/`: the catalogue
-as found, the skeleton `scan` proposed, every guess a reviewer corrected, and
-the concepts the model could not express without distortion. A graph that
-needed no correction is also a result, and a more useful one than a second
-payments example.
-
-**The named target is `github/github-mcp-server`.** GitHub's own MCP server,
-tools defined statically in Go, grouped into toolsets and released against
-versioned images. It is chosen rather than found convenient, for four reasons
-that map onto what this model cannot currently express:
-
-- **No currency anywhere.** GitHub's authority surface has no money in it, so
-  the cumulative-value mechanism has nothing to attach to and the filesystem
-  probe's silence should reproduce on a real published graph.
-- **Irreversible effects are native.** Cancelling a workflow run, deleting run
-  logs, force-pushing over history. These carry a clear accumulation rule and
-  no currency, which is the non-monetary budget candidate with a real example
-  behind it rather than a hypothetical.
-- **Read, write and admin are platform concepts**, so the effect classes have
-  an anchor instead of a reviewer's invention.
-- **Tools mint scopes.** An agent with `contents:write` can commit a workflow
-  file, and that file then executes with a token and repository secrets. A
-  write mints secret-scoped compute.
-
-That last one is the reason to expect a *partial* success rather than a flat
-failure, and it is worth predicting before the run so the result can surprise
-us. `produces`, `unbounded` and `requires` already exist and `reach` follows
-them, so the minting chain should model correctly and the compound path should
-be found. The gap should be narrower than the probe suggested: not that the
-analysis says nothing, but that it finds the path and has no way to bound how
-many times it may be walked. If the minting chain also fails to model, that is
-a bigger finding than expected and changes the order below.
-
-Scope it the way AgentKit was scoped. The full toolset is too large to stay
-reviewer-comprehensible, so class-scope to what one real example wires in, and
-record the `GITHUB_TOOLSETS` configuration as the reviewed inventory boundary.
-That doubles as a live test of the dynamic-tool inventory candidate in item 3.
-
-Runner-up, afterwards and not in parallel: the PostgreSQL MCP server, for
-DDL against DML irreversibility and rows-affected budgets.
-
-**Look for a graph with no currency in it.** Both sources the model has been
-reasoned from, AgentKit and the payment-dispute example, are monetary, and
-`Limits` carries exactly `total` and `depth`. A synthetic filesystem catalogue
-in `docs/evidence/probes/` passes `lint` and `reach` completely clean while
-holding three irreversible tools, because with no currency there is no
-cumulative bound to search against. That probe cannot justify a schema change,
-since it was written here rather than found. It can say where to look.
-
-### 2. Bounded scope cardinality
-
-The current `unbounded` flag distinguishes one binding from an unlimited
-source. Real tools often expose a finite collection, such as at most ten cases
-or one refund per transaction. A reviewed `max_bindings` bound is the first
-candidate extension because it sharpens the existing scope model without
-turning the manifest into a full application specification.
-
-Per-customer or relational limits come later. They require resource identity
-and relationships, not another integer placed beside the current type count.
-
-**Honest test run after item 6, before defaulting into this by number.** Both
-committed graphs were checked for a distortion `max_bindings` would fix, and
-neither has one:
-
-- AgentKit's over-expression (`borrow`, `wrap_eth` marked `unbounded`) reads
-  like it wants a bound, but the bounds are *value* relationships (borrow is
-  bounded by the collateral ratio, wrap_eth is 1:1 with the ETH balance), not
-  *cardinality* of distinct bindings. `max_bindings` counts bindings, not
-  value, so it would not sharpen either. That distortion lives closer to item 5
-  (resource relationships) than here.
-- The GitHub graph's breach was a *call count* (`delete_file` repeated), which
-  item 6 already bounds. A `max_bindings` on `workflow` would bound how many
-  distinct workflows could be minted, but the breach path needs no second
-  distinct workflow, so the result would not change.
-
-So item 2 has a hypothesis but no committed counterexample. Under the precedent
-item 6 set (evidence chooses, not number), it waits on a third graph that
-produces a genuine cardinality distortion, not on effort.
-
-### 3. Explicit dynamic-tool inventory
-
-The AgentKit graph builds its tool list at runtime, so a static read cannot
-enumerate it and `scan --source` says so rather than guessing. A reviewed way
-to declare "this list is assembled from these providers" would turn an
-unenumerable inventory into a bounded one, and an unenumerable tool list is
-currently a finding that stops the analysis rather than a shape it handles.
-
-### 4. Conditional and delegated authority
-
-Ordered inside the bucket, because the third item is the one a reader of any
-agent security model asks about first and the other two are not blocking it:
-
-- **a delegated downstream identity.** Caller and service principal are
-  already modelled: `principal` is on every tool, `lint` refuses a service
-  principal where a caller token belongs, and `reach` tracks which tools spend
-  which. A third identity is not. When one agent hands a bounded capability to
-  another, the receiving agent's authority is invisible, so a breach reached
-  through a delegate reads as the delegator's own.
-
-  External feedback called caller against service principal a missing concept.
-  Half of it ships today, and the half that does not is delegation.
-- model one agent delegating a bounded capability to another, which is the
-  same gap seen from the sending side
-- represent selected state predicates such as case status and time windows
-
-The design constraint is the same as today: enough structure to find a real
-compound path, without asking teams to formalise the entire application.
-
-### 5. Resource relationships
-
-Scope counts deliberately forget which customer owns a case or whether two
-bindings refer to the same object. If real graphs show that this creates false
-or missed paths, add a small reviewed relation vocabulary and preserve binding
-provenance through tool transitions. Do not jump directly to arbitrary
-preconditions and postconditions.
-
-### 6. Non-monetary effect budgets
-
-**Shipped**, and taken before item 2 because the evidence pointed here. The
-ordering above was fixed when only the AgentKit graph existed. The GitHub graph
-then produced the concrete counterexample this item needed and item 2 still has
-none, and the rule this list serves is that the model widens where evidence
-demands it, not where a number says.
-
-`limits.effects` declares a maximum number of calls per effect class in one
-run. Declared only: an absent class is unbounded, because inventing a ceiling
-is the same mistake as inventing a reversibility label.
-
-The search needed a change and it was the load-bearing part. A tool that
-neither mints a scope nor spends against a ceiling was skipped as reaching no
-new state, so `delete_file` never extended a path and no budget over it could
-ever have fired. A budgeted call now progresses the walk the way spending does.
-See DESIGN.md, "Counting effects, not only value".
-
-Confidentiality and data flow stay a separate model rather than being disguised
-as a numeric budget, which is the boundary `total` already respects.
-
-### 7. Data-flow reachability
-
-Add reviewed source, transform, and sink labels so the analyser can detect a
-path such as:
+The target workflow is:
 
 ```text
-read_customer_record -> summarise -> send_external_message
+agents + tools + identities + policy
+                  ↓
+       versioned authority IR
+                  ↓
+   reachability + effective diff
+          ↙                 ↘
+policy exports          test obligations
+          ↓                   ↓
+ existing enforcement → decisions and traces
+                  ↓
+        drift and reconciliation
 ```
 
-This is distinct from the current value and scope model. It should ship only
-with counterexamples that remain understandable to a reviewer.
+The open-source core will include the authority format, analysis engine, CLI,
+validation, import/export adapters, and local evidence reconciliation. A future
+commercial layer may add hosted fleet views, enterprise RBAC, managed
+connectors, retention, and support. The public format must remain usable
+without that layer.
 
-## Path to 1.0
+Three boundaries remain firm:
 
-AgentMandate reaches 1.0 after:
+- no general LLM firewall or prompt-injection classifier
+- no bundled behavioral judge, scenario runner, or benchmark
+- no mandatory MCP/A2A proxy, credential broker, or runtime enforcement point
 
-- the manifest and JSON outputs receive a compatibility audit
-- fixtures from every supported schema version are exercised in CI
-- at least one independent agent integration tests the model against a real
-  tool graph
-- search limits and worst-case behaviour are measured and documented
-- security and trace-retention guidance receive an external review
+Exporting policy is not enforcing it. AgentMandate must report the target,
+version, unsupported semantics, and later evidence of activation; it must never
+turn a successful compilation into a claim that a deployment is protected.
 
-The most useful contribution is a real graph the current model cannot describe
-without distortion. Open an issue with that graph before proposing another
-generic scanner rule.
+## How work earns a place
+
+Every model feature needs two things before it becomes a default: a committed
+real graph that the current model distorts, and a counterexample a reviewer can
+understand. Every integration needs a versioned fixture, an explicit
+completeness boundary, and a maintainer. High-confidence work has evidence in
+the repository; medium-confidence work has a verified ecosystem need but not
+yet a model fixture; low-confidence work is a hypothesis and stays behind an
+experiment or design note.
+
+## 0–3 months: authority foundation
+
+Goal: make the current analysis a stable hub for evidence from more than one
+manifest shape.
+
+| Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
+|---|---|---|---|
+| **Two additional real graphs** (high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with reviewer notes and at least one clean result. Not a synthetic benchmark corpus. |
+| **Canonical authority IR with provenance** (high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
+| **Dynamic inventory declarations** (high) | Static scan cannot enumerate provider-built tool lists and must fail closed. Add reviewed inventory boundaries for factories, providers, registries, and deployment configuration. | AgentKit's unresolved binding plus one independent dynamic framework fixture. | Drift can prove a declared dynamic boundary complete or explain exactly why it cannot. Never import or execute application code. |
+| **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** (medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. | Version-pinned fixtures and a mapping note for each format. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation or production policy compilation. |
+
+Dependencies: the IR design follows the new graph evidence, not the reverse.
+Policy experiments may remain disposable until the provenance representation is
+accepted.
+
+## 3–6 months: model real authority
+
+Goal: represent the smallest set of relationships, conditions, delegation, and
+data movement needed by the evidence without turning the manifest into an
+application specification.
+
+| Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
+|---|---|---|---|
+| **Conditional authority** (medium) | Approval, status, time, and request context can change whether an action is permitted. Add a closed, typed predicate vocabulary with explicit unknown handling. | Imported Cedar/Rego examples and two real conditions that change reachability. | A reviewer can see which condition opens a path and an absent value never becomes permission. Not arbitrary code or a second general policy language. |
+| **Delegation chains and attenuation** (high direction, medium shape) | Caller/service is insufficient when agents act for users or delegate to agents. Track actor, subject, delegator, audience, expiry, and the authority passed at each hop. | A2A agent-card and MCP/OAuth token-exchange fixtures; align terminology with stable standards while isolating drafts. | Detect a delegation that widens rather than narrows authority and produce the shortest chain. Not an identity provider, token issuer, or cryptographic verifier. |
+| **Resource relationships and provenance** (medium) | Scope counts forget ownership, containment, and whether two bindings denote the same resource. Add a small typed relation vocabulary and preserve binding lineage. | One real false positive or missed path; validate mapping potential against OpenFGA concepts. | The motivating graph becomes more precise without material search regression. Not a complete ReBAC service or arbitrary first-order logic. |
+| **Bounded producers and quantities** (medium-low) | `unbounded` versus one binding overstates finite collections and cannot express value relationships such as collateral or 1:1 conversion. Separate cardinality bounds from reviewed quantity relations. | One genuine cardinality distortion and one quantity distortion; AgentKit alone does not satisfy both. | Each feature removes a demonstrated false path while preserving existing breach detection. Not a generic optimization or accounting language. |
+| **Reviewed data-flow labels** (medium) | Current analysis cannot connect sensitive reads to external sinks. Add explicit source, transform, classification, trust-zone, and sink labels with conservative propagation. | A real, non-synthetic exfiltration path and an annotation study showing reviewers can supply the labels. | Find the path with a short explanation and no inferred sensitivity presented as fact. Not DLP, content inspection, or prompt-injection detection. |
+
+Dependencies: delegation and relationships build on the provenance-aware IR.
+Data flow stays experimental until annotation burden and false-positive rates
+are measured. Search limits, canonicalization, and truncation reporting are
+part of each feature, not later performance work.
+
+## 6–12 months: policy control-plane preview
+
+Goal: turn reviewed compound analysis into portable enforcement inputs while
+making semantic loss visible.
+
+| Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
+|---|---|---|---|
+| **Policy validation and effective diff** (high) | Syntax-valid per-call policy may still permit an unsafe sequence. Analyze imported policy with tool inventory and compare reachable outcomes across revisions. | Stable IR mappings and executable Cedar/Rego fixtures with known decisions. | Equivalent policies produce the same authority summary; a widening policy change yields a counterexample. Not a replacement for native validators. |
+| **Cedar and Rego exporters** (medium) | Reviewed constraints otherwise need manual re-entry at each PDP. Compile the enforceable subset, emit tests and a machine-readable loss report, and refuse unsafe approximation by default. | Round-trip semantics suite for the supported subset; target versions pinned. | Generated policies pass native validation and decision fixtures; every unsupported compound invariant is explicit. Not a new runtime PDP or silent best-effort translation. |
+| **Policy-versus-agent drift** (high) | Agent bindings, imported policy, gateway exposure, and exported policy can diverge independently. Compare all four and distinguish missing control, stale inventory, and unreachable declaration. | Provenance IR plus at least one gateway configuration fixture. | CI identifies the exact edge and source that drifted without claiming absence from incomplete inventory. Not live asset discovery. |
+| **Explainable counterfactual remediation** (medium) | A breach path says what is wrong but not the smallest safe change. Compute candidate removals or tighter approvals, conditions, budgets, and delegation bounds, ranked by authority impact. | Stable compound models and equivalence tests. | Every suggestion is mechanically rechecked to remove the path and labeled as candidate, not intent. Not autonomous policy authoring or auto-application. |
+| **Named-review CI workflow** (high) | Authority widening needs accountable acceptance rather than a generic green check. Extend change records with owner, reason, expiry, evidence, and target-policy status. | Stable additive JSON contract and threat review of records. | Widening cannot be marked reviewed without named evidence; expired exceptions fail closed. Not a general ticketing or GRC system. |
+
+Dependencies: validation ships before export; export stays preview until native
+target tests and loss reporting are trustworthy. Cedar is first because the
+project already has AgentCore evidence and Cedar is analyzable. Rego follows as
+the portable general-purpose target. OpenFGA export waits for the relationship
+model rather than being forced into this phase by brand coverage.
+
+## 12–18 months: fleet governance
+
+Goal: connect repository decisions to deployed policy and execution evidence
+without building an observability backend.
+
+| Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
+|---|---|---|---|
+| **Federated agent and tool inventory** (medium) | Platform teams cannot govern repositories one at a time. Define an open inventory index over signed IR snapshots, owners, environments, and expiry. | Stable IR identities; prototypes against MCP Registry/subregistry and A2A cards. | Local aggregation answers ownership, exposure, and stale-review queries across repositories. Not network discovery or a proprietary CMDB. |
+| **Decision and OTel reconciliation** (high) | A policy file does not prove that a PEP evaluated a call. Correlate manifest version, export receipt, principal/delegation, decision ID, tool span, and observed effect. | OTel convention adapter plus OPA and one cloud decision-log fixture. | Detect missing, bypassed, stale, or contradictory enforcement with payload capture disabled by default. Not full trace storage, APM, or SIEM. |
+| **Signed evidence bundles** (medium) | Audit evidence loses integrity and context when copied among CI, PDPs, and review systems. Package hashes, provenance, decisions, exceptions, and analysis results with a verifiable manifest. | Threat model, key-rotation design, and one external consumer. | Offline verification detects tampering and missing components. Not a PKI, identity attestation service, or immutable ledger. |
+| **Ownership and time-bounded exceptions** (medium) | Fleet findings need accountable routing and temporary risk acceptance. Keep ownership and exception objects portable in the open format. | Named-review workflow and privacy review. | Every exception has scope, owner, reason, evidence, and expiry; local CLI can enforce it. Not a full enterprise RBAC or workflow UI in core. |
+| **Control evidence mappings** (medium-low) | Security teams repeatedly translate the same technical evidence into governance language. Map artifacts—not verdicts—to selected OWASP, NIST, MITRE, IMDA, and ISO control concepts. | Review by domain experts and public mapping methodology. | Each mapping states what the artifact establishes and what remains organizational. Never issue compliance scores or certification claims. |
+
+Dependencies: fleet inventory can remain file- and API-based. A hosted control
+plane is optional and must consume exactly the same open snapshots and evidence
+bundles. Reconciliation precedes dashboards: collecting more data before the
+identity joins are reliable would create expensive ambiguity.
+
+## 18–24 months: advanced authority
+
+Goal: reason about authority that crosses agents, sessions, and time, then help
+teams reduce it without hiding uncertainty.
+
+| Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
+|---|---|---|---|
+| **Cross-agent and cross-session reachability** (medium-low) | Delegated agents, durable grants, memory, and asynchronous tasks can complete a path no single run contains. Extend state with explicit lifetime and trust boundaries. | Real incident or graph with durable authority plus measured state-space bounds. | Produce a finite, replayable counterexample across named agents/sessions and state the completeness limit. Not simulation of arbitrary model behavior. |
+| **Temporal and revocable capabilities** (medium-low) | Expiry, activation, revocation, and approval windows affect whether a path is reachable. Model a small event vocabulary and verify attenuation over time. | Stable delegation standards and decision evidence containing relevant timestamps/status. | Detect use outside a window or after revocation in fixtures without wall-clock nondeterminism. Not a token service or distributed clock protocol. |
+| **Least-authority synthesis** (low) | Teams need a practical route from a finding to a smaller safe capability set. Find minimal candidate policy changes that preserve declared required scenarios while removing breaches. | Counterfactual remediation plus reviewed positive obligations and performance study. | Candidates are Pareto-ranked, mechanically checked, and require human selection. Not automatic production mutation or proof of business correctness. |
+| **Extension interfaces** (medium) | One project cannot maintain every framework, PDP, and evidence adapter. Publish versioned importer, exporter, finding, and evidence conformance suites. | Three in-tree adapters of each relevant kind and a security model for plugins. | An external adapter can pass conformance without importing private internals. Not arbitrary in-process execution of untrusted plugins. |
+
+Dependencies: these features do not block a useful 1.0. They ship only when
+their counterexamples remain understandable and worst-case behavior is bounded
+or reported honestly.
+
+## Release and measurement gates
+
+The roadmap is successful when external users can demonstrate outcomes, not
+when the feature list is checked off. Track:
+
+- independent real graphs and the modelling distortions they expose
+- reviewed manifests that remain drift-clean across releases
+- true widening changes caught before merge and accepted with named evidence
+- importer completeness and exporter semantic-loss rates
+- counterexample length, analysis time, memory use, and truncation frequency
+- deployed decisions that reconcile to the reviewed manifest and policy build
+- annotation/review time and findings disabled as noise
+- external adapters and policy/evidence consumers
+
+AgentMandate reaches 1.0 when the manifest, IR, CLI, and JSON contracts have a
+compatibility audit; all schema versions have migration fixtures; search limits
+and worst-case behavior are documented; at least four independent graphs cover
+more than one framework and authority domain; and security plus trace-retention
+guidance has external review. Policy export and fleet features may remain
+preview after 1.0 if their contracts have not earned stability.
+
+## Historical evidence retained
+
+The initial adoption loop shipped before this roadmap: `scan` and source
+inventory obtain a reviewed manifest; `lint` and `reach` check it; `diff`
+compares effective authority; `drift` tests correspondence to source;
+`obligations` and `scenarios` hand paths to external evaluation; `verify`
+replays calls and OTel; SARIF, Mermaid, and the GitHub Action put findings in
+review. Each command fails closed where evidence is incomplete.
+
+Two real graphs shaped the current model:
+
+- The Coinbase AgentKit evidence showed authority that outlives a run through
+  token approval, mixed widening and narrowing across releases, dynamic tool
+  inventory, and the difference between gross and net value. It also showed
+  that collateral and 1:1 conversion are quantity relationships, not bounded
+  scope cardinality.
+- The GitHub MCP evidence removed currency from the problem. Repeating
+  irreversible actions required a count, which led to the shipped
+  `limits.effects` model. It also demonstrated tools that mint secret-scoped
+  compute and the importance of a reviewed toolset boundary.
+
+That evidence-first rule is not superseded by the control-plane ambition. A
+market category can justify an experiment; only a real distortion and a clear
+counterexample justify widening the core authority model.
