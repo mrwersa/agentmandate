@@ -102,8 +102,8 @@ Recorded in full in the end-note of `mandate.yaml`:
 
 1. **The minting chain models, and the walk is unbounded.** The produces/
    requires mechanism handles the chain; the cumulative-value mechanism has
-   nothing to attach to. This is roadmap item 6 (non-monetary effect budgets)
-   with a real published graph behind it instead of a hypothetical.
+   nothing to attach to. This is the evidence that justified non-monetary
+   effect budgets, from a real published graph instead of a hypothetical.
    Narrower than it first reads: the approval and irreversibility axis does
    work here, as the dropped-approval check above shows. What is missing is a
    count, not a voice.
@@ -119,13 +119,12 @@ Recorded in full in the end-note of `mandate.yaml`:
    the manifest cannot split them. The conservative irreversible + approval
    choice hides that running a workflow is ordinary.
 
-## What this changes on the roadmap
+## What this changed on the roadmap
 
-Item 6 stays, but it no longer waits on a hypothetical: the unbounded-walk
-finding is exactly the distortion it exists to express. The path to that item
-remains unchanged in shape. It needs a real graph to justify the schema change;
-this is a second real graph, so the candidate can now be investigated with
-both it and AgentKit as evidence. Nothing is shipped from this directory.
+The unbounded-walk finding removed the hypothetical from non-monetary effect
+budgets: it is exactly the distortion that feature exists to express. This
+second real graph justified investigating the schema change alongside the
+AgentKit evidence. Nothing was shipped from this directory itself.
 
 ## Re-run
 

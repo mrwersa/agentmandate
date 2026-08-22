@@ -165,7 +165,8 @@ That difference—not a new policy syntax—is the technical wedge.
 
 This is a crowded category. [Snyk Agent Scan](https://github.com/snyk/agent-scan)
 discovers agent components and scans MCP servers and skills for prompt
-injection, tool poisoning, toxic flows, malware, and secrets. [AgentShield](https://github.com/aiconnai/agentshield)
+injection, tool poisoning, toxic flows, malware, and secrets. [AgentShield
+(aiconnai)](https://github.com/aiconnai/agentshield)
 performs offline SAST across several agent frameworks and produces SARIF.
 [MCTS](https://github.com/MCP-Audit/MCTS) combines static and live MCP analysis.
 Enterprise suites including [Cisco AI Defense](https://www.cisco.com/c/en/us/products/collateral/security/ai-defense/ai-defense-ds.html)
@@ -212,7 +213,7 @@ was found; it does not prove absence.
 | AWS AgentCore Policy | Runtime | Managed gateway/PDP | Cedar over MCP tools | IAM or OAuth user | Per-call analysis | Tool inputs only | Yes | CloudWatch decisions | Cedar yes; service no |
 | Microsoft AGT (preview) | Build, runtime | Library/sidecar/adapters | Agent control policy | Identity components | Budgets/chaining controls | Inspection/sanitization | Yes | Events/audit | MIT |
 | AgentWard | Build, runtime | Proxy/CLI | Tool/argument/data rules | Partial | Chaining rules/probes | Runtime inspection | Yes | Audit/SIEM | Source-available |
-| AgentShield / Snyk Agent Scan / MCTS | Build, CI | Local scanner/action | Detectors/risk rules | Partial inventory | Toxic-flow variants | Static heuristics | No | SARIF/JSON/reports | Yes |
+| AgentShield (aiconnai) / Snyk Agent Scan / MCTS | Build, CI | Local scanner/action | Detectors/risk rules | Partial inventory | Toxic-flow variants | Static heuristics | No | SARIF/JSON/reports | Yes |
 | LangSmith / agent observability | Test, runtime | SDK/SaaS/self-hosted tiers | Evaluators | Trace metadata | Trajectory evaluation | Payload observation | No | Traces/datasets/scores | Mixed |
 | OpenAI Agents SDK | Build, runtime | Framework/library | Guardrail callbacks/approvals | Handoffs/context | Executes trajectories | Guardrail-specific | In-process | Rich traces | Yes |
 | Cisco AI Defense / Prisma AIRS | Lifecycle | Enterprise platform/gateway | Vendor policy/guardrails | Yes, product-specific | Vendor claims action-chain/runtime analysis | Yes | Yes | Central inventory/audit | No |
