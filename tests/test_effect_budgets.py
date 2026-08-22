@@ -1,9 +1,9 @@
 """A declared budget bounds how many calls of an effect class a run may make.
 
-Roadmap item 6. Two real graphs asked for this: `Limits` carried only a `Money`
-ceiling, so every cumulative question the search could ask was a question about
-currency, and a graph with no currency got "no reachable breach" on an agent
-that can write a workflow, run it with secrets, and delete the logs.
+Two real graphs asked for non-monetary effect budgets: `Limits` carried only a
+`Money` ceiling, so every cumulative question the search could ask was a
+question about currency, and a graph with no currency got "no reachable breach"
+on an agent that can write a workflow, run it with secrets, and delete the logs.
 
 See DESIGN.md, "Counting effects, not only value".
 """

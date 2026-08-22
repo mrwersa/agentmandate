@@ -158,7 +158,7 @@ tools:
 # 2. Nothing bounds the walk. There is no currency, so no total ceiling and
 #    no per-scope ceiling has anything to attach to. The model finds the path
 #    but has no way to say how many times a workflow-with-secrets may be run
-#    in one session. That is roadmap item 6 (non-monetary effect budgets) with
+#    in one session. That is the evidence for non-monetary effect budgets, with
 #    a real published graph behind it instead of a hypothetical.
 # 3. The mint is conditional and value-dependent. Only a path under
 #    .github/workflows/ mints an executing workflow, and the path is a free

@@ -18,10 +18,11 @@ All notable changes to this project are documented here. The format follows
 
 ## 0.9.0 - 2026-08-05
 
-Roadmap item 6, taken ahead of item 2 because two real graphs asked for it and
-item 2 still has no counterexample. On the GitHub MCP graph the model could
-already say that triggering a workflow is irreversible and ungated. It could
-not say how many times. A count, not a voice.
+Non-monetary effect budgets shipped before bounded scope cardinality because
+two real graphs asked for a call count and no committed graph yet justified a
+cardinality bound. On the GitHub MCP graph the model could already say that
+triggering a workflow is irreversible and ungated. It could not say how many
+times. A count, not a voice.
 
 ### Added
 
