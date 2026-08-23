@@ -200,6 +200,81 @@ def test_reviewer_and_expiry_stand_or_fall_together():
     assert parsed.evidence.reviewer == "platform-data"
 
 
+@pytest.mark.parametrize(
+    ("reviewer", "expires"),
+    [
+        ("platform-data", None),
+        (None, "2027-01-01"),
+        ("platform-data", "2027-01-01"),
+    ],
+)
+def test_unreviewed_evidence_rejects_accountability_fields(reviewer, expires):
+    raw = json.loads(CONTEXT.read_text(encoding="utf-8"))
+    raw["evidence"] = {
+        "confidence": "exact",
+        "review": "unreviewed",
+        **({"reviewer": reviewer} if reviewer is not None else {}),
+        **({"expires": expires} if expires is not None else {}),
+    }
+
+    with pytest.raises(ConditionFormatError, match="while unreviewed"):
+        ConditionContext.from_json(json.dumps(raw))
+
+
+def test_unreviewed_evidence_without_accountability_fields_is_structurally_valid():
+    raw = json.loads(CONTEXT.read_text(encoding="utf-8"))
+    raw["evidence"] = {"confidence": "unknown", "review": "unreviewed"}
+
+    parsed = ConditionContext.from_json(json.dumps(raw))
+
+    assert parsed.evidence.reviewer is None
+    assert parsed.evidence.expires is None
+
+
+@pytest.mark.parametrize("field", ["scopes", "tools"])
+def test_grant_surface_requires_every_authority_dimension(field):
+    raw = json.loads(GRANT.read_text(encoding="utf-8"))
+    del raw["surface"][field]
+
+    with pytest.raises(ConditionFormatError, match=f"missing field '{field}'"):
+        Grant.from_json(json.dumps(raw))
+
+
+@pytest.mark.parametrize(
+    ("field", "members"),
+    [
+        ("scopes", [""]),
+        ("tools", [" update_issue"]),
+        ("effects", ["read "]),
+    ],
+)
+def test_grant_surface_members_must_be_nonempty_and_stripped(field, members):
+    raw = json.loads(GRANT.read_text(encoding="utf-8"))
+    raw["surface"][field] = members
+
+    with pytest.raises(ConditionFormatError, match="non-empty and stripped"):
+        Grant.from_json(json.dumps(raw))
+
+
+@pytest.mark.parametrize(
+    ("container", "field", "value"),
+    [
+        ("target", "source", ""),
+        ("target", "source", "src\\server.py"),
+        ("source", "locator", ""),
+        ("source", "locator", "captures\\query.sql"),
+    ],
+)
+def test_context_paths_must_be_nonempty_repository_relative_posix_paths(
+    container, field, value
+):
+    raw = json.loads(CONTEXT.read_text(encoding="utf-8"))
+    raw[container][field] = value
+
+    with pytest.raises(ConditionFormatError, match="repository-relative POSIX path"):
+        ConditionContext.from_json(json.dumps(raw))
+
+
 def test_contested_evidence_parses_but_is_marked_for_gate3():
     """Contested evidence is structurally valid; eligibility is analysis work."""
     raw = json.loads(CONTEXT.read_text(encoding="utf-8"))

@@ -131,8 +131,9 @@ Intended semantics:
   reports the unresolved boundary.
 - A condition maps only to a *weaker* declared effect class than the tool's
   default. Widening through conditions is structurally impossible.
-- Conditions carry explicit evidence fields (`confidence`, `review`,
-  optional reviewer and expiry), as shown above. An unevaluable, unaccepted,
+- Conditions carry explicit evidence fields (`confidence` and `review`);
+  accepted or contested evidence also requires a paired reviewer and expiry,
+  as shown above. An unevaluable, unaccepted,
   expired, or context-mismatched condition leaves the tool at its default
   effect, and the counterexample cites which condition was skipped.
 - Approval requirements stay attached to the tool, not the condition: a gated
@@ -153,21 +154,22 @@ separation that keeps inventory captures outside the mandate:
   "surface": {
     "scopes": ["project:read", "issue:write"],
     "tools": ["find_projects", "update_issue"],
-    "effects": ["read", "write"],
-    "irreversible": false
+    "effects": ["read", "write"]
   },
   "issued": "2026-08-01",
   "expires": "2026-11-23",
   "evidence": {
     "confidence": "exact",
     "review": "accepted",
-    "reviewer": "security-platform"
+    "reviewer": "security-platform",
+    "expires": "2026-10-01"
   }
 }
 ```
 
 `surface` is the complete authority the subject conferred: scopes, named
-tools, permitted effect classes, and whether irreversible calls are in scope.
+tools, and permitted effect classes. The effect set is the sole source of
+truth for irreversible authority; there is no second boolean that can disagree.
 Attenuation is the mechanical comparison of each delegated tool's effective
 surface (its declared effect, approval state, and required scopes from the
 manifest) against this object; any excess is `delegation.widens`. The grant's
