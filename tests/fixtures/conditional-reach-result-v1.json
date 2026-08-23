@@ -1,0 +1,46 @@
+{
+  "breaches": [],
+  "conditions": {
+    "applied": [
+      {
+        "condition": "conditions/aws-postgres/select-only",
+        "context": "contexts/aws-postgres/select-only",
+        "default_effect": "irreversible",
+        "effective_effect": "read",
+        "support": [
+          "context:contexts/aws-postgres/select-only#/completeness",
+          "context:contexts/aws-postgres/select-only#/domain/classes",
+          "context:contexts/aws-postgres/select-only#/evidence",
+          "context:contexts/aws-postgres/select-only#/source/content_sha256",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:arg",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:class",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:context",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:effect",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:predicate",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:review_expires",
+          "fact:condition:conditions%2Faws-postgres%2Fselect-only:reviewer",
+          "fact:tool:run_query:target",
+          "source:tool-condition%3Aconditions%2Faws-postgres%2Fselect-only"
+        ],
+        "tool": "run_query"
+      }
+    ],
+    "as_of": "2027-01-01",
+    "findings": [],
+    "schema": "agentmandate.conditions/v1"
+  },
+  "depth": 8,
+  "effects": [
+    [
+      "read",
+      "rows"
+    ]
+  ],
+  "max_extractable": null,
+  "reachable_tools": [
+    "run_query"
+  ],
+  "service_principal_tools": [],
+  "truncated": false,
+  "ungated_irreversible": []
+}

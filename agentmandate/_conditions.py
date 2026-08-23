@@ -1377,7 +1377,10 @@ def reconcile_condition_drift(
     failed_tools: set[str] = set()
     for condition in sorted(canonical_conditions, key=lambda item: item.id):
         if selected is None:
-            message = "source inventory does not identify one selected binding"
+            message = (
+                "source inventory does not identify one selected binding; "
+                "select one with --binding rather than --union-bindings"
+            )
         elif (
             condition.target.source != selected.module
             or condition.target.binding != selected.label

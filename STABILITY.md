@@ -25,10 +25,10 @@ agentmandate~=0.11.0
 
 ## Versioned authority artifacts
 
-The `mandate ir`, `mandate inventory`, and `mandate reach --ir` CLI surfaces
-are public. The Python records remain private and are not exported from
-`agentmandate`. Their explicit artifact versions separate compatibility from
-package releases:
+The `mandate ir`, `mandate inventory`, `mandate conditions`, and
+`mandate reach --ir` CLI surfaces are public. The Python records remain private
+and are not exported from `agentmandate`. Their explicit artifact versions
+separate compatibility from package releases:
 
 - `ir_version` changes when graph records, relations, or canonicalization
   change incompatibly.
@@ -37,6 +37,9 @@ package releases:
 - `result_version` changes when a hashed envelope field is added, removed,
   renamed, reinterpreted, or canonicalized differently. The strict reader does
   not treat additional fields as silently additive.
+- `condition_version` and `context_version` change when their strict artifact
+  records change incompatibly. Conditional command output uses the independent
+  `agentmandate.conditions/v1` presentation schema.
 
 Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
@@ -52,6 +55,12 @@ The same boundary applies to `mandate inventory validate`: it proves only that
 a declaration is structurally valid. `mandate drift` separately checks its
 target, reviewed selection, supplied capture digest, completeness, confidence,
 review, and expiry against an explicit evaluation date.
+
+`mandate conditions validate` likewise proves structure only. Manifest-mode
+`reach` and `drift` separately check profile semantics, reviewed context,
+capture digest, explicit evaluation date, and—during drift—the selected live
+source binding. Conditional JSON is additive and appears only when conditional
+inputs were supplied; legacy output remains unchanged.
 
 ## What is most likely to change
 

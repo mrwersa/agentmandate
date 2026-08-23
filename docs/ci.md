@@ -87,6 +87,26 @@ rather than reparsing an unbound copy:
 - run: mandate reach --ir authority-ir.json --json > authority-result.json
 ```
 
+Reviewed conditional authority stays separate from the manifest. Validate the
+artifacts structurally, then supply the reviewed context and its captured bytes
+with an explicit evaluation date:
+
+```yaml
+- run: mandate conditions validate --condition reviewed-condition.json
+- run: mandate conditions validate --context reviewed-context.json
+- run: >-
+    mandate reach mandate.yaml
+    --condition reviewed-condition.json
+    --condition-context reviewed-context.json
+    --condition-capture reviewed-context.capture
+    --condition-as-of 2027-01-01
+```
+
+The same four flags apply to `mandate drift`. Repeat condition inputs as
+needed; pair every context with one capture in the same argument order. SARIF,
+Mermaid, and `reach --ir` composition are intentionally refused until those
+formats can carry unresolved condition evidence without implying a clean run.
+
 `ir validate` is a structural transport check and exits 0 even when evidence is
 contested or heuristic. `reach --ir` is the trust boundary: unsupported
 adapters, predicates, value shapes, or non-exact/non-accepted evidence exit 2
