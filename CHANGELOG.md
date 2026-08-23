@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+
+## 0.9.1 - 2026-08-23
+
 ### Fixed
 
 - Generated `mandate scan` comments no longer retain a trailing space when
