@@ -18,6 +18,9 @@ Scanner and gateway vendors watch behaviour at one point; the gap itself is the
 unoccupied position, and vendor-neutral provenance is what lets this tool stand
 across frameworks and enforcement points.
 
+This is strategic judgment from the August 2026 landscape survey, not a
+verified absence of competitors; it is revisited each time the survey updates.
+
 The name follows the positioning, not the reverse. "AgentMandate" stays until
 company formation or adoption scale makes a rename worth its release cost;
 product surfaces should lead with the gap framing (what approval cannot see)
