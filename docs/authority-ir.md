@@ -91,12 +91,21 @@ view, but it cannot cancel an accepted edge. The relation registry must declare
 cardinality and these merge semantics before reachability consumes a new
 relation.
 
-The private v1 registry currently permits `acts_as`, `ceiling_on`, `produces`,
-`requires`, and `role_contains`. Snapshot validation checks canonical IDs,
-endpoint kinds, support references, and that the cited fact actually names the
-edge target. It also requires every relationship-valued fact to have its edge,
-so deleting an edge cannot silently narrow analysis. No derived relation is
-permitted yet; gate 3 must register and validate each one before use.
+The private v1 registry separates source and derived relations. Source
+relations are `acts_as`, `ceiling_on`, `produces`, `requires`, and
+`role_contains`. Derived relations are closed and purpose-specific:
+
+| Relation | Endpoints | Required support |
+|---|---|---|
+| `can_reach` | agent → tool | Declared tool membership and source records for its shortest enabling path |
+| `has_effect` | tool → scope | The reachability edge, effect fact, and matching requirement or production edge |
+| `transitions_to` | tool → tool | Reachability of both tools and the next tool's requirements |
+| `has_breach` | agent → breach | The first reachability edge, each distinct counterexample transition, and the violated limit or approval facts |
+
+Snapshot validation checks canonical IDs, endpoint kinds, relation-specific
+support, and an acyclic support chain rooted in source records. It also
+requires every relationship-valued source fact to have its edge, so deleting
+an edge cannot silently narrow analysis.
 
 ## Compatibility and serialization
 
@@ -149,6 +158,14 @@ edge in its shortest counterexample plus the limit it violates. Search depth
 and truncation are analysis parameters in the result envelope, not source
 facts.
 
+The private IR entry point validates the snapshot, projects its exact v1 facts
+into the existing search kernel, and returns the unchanged `Authority` beside
+an augmented IR graph. The graph does not absorb depth or truncation as facts.
+Repeated calls remain explicit in the counterexample path; their canonical
+transition edges are deduplicated. Reconstructing call order therefore requires
+the result envelope's counterexample path; the graph alone records which
+transitions occurred, not their order or repetition count.
+
 Provenance records support an explanation; they are not a proof that a source
 was truthful. Artifact signatures and evidence bundles are later roadmap work.
 
@@ -166,11 +183,12 @@ Implementation is deliberately split so review can stop a bad format early:
 4. Expose import/export through the CLI only after unsupported semantics and
    output stability have been reviewed.
 
-Gates 1 and 2 are implemented privately. The committed v1 fixture covers every
-manifest shorthand and omitted-default path, and tests preserve both `Mandate`
-equality and reachability output across all repository examples and the four
-real evidence graphs. Reachability still consumes `Mandate`, not IR edges, and
-there is no CLI surface.
+Gates 1 through 3 are implemented privately. The committed v1 fixture covers
+every manifest shorthand and omitted-default path, and tests preserve both
+`Mandate` equality and reachability output across all repository examples and
+the four real evidence graphs. Retained paths are replayed against the same
+enabling semantics before provenance is derived, and each derived relation has
+a registry-enforced support shape. There is no CLI surface.
 
 The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary

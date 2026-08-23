@@ -15,6 +15,14 @@ from typing import Any
 from urllib.parse import quote
 
 from .manifest import SCHEMA_VERSION, Limits, Mandate, Money, Tool
+from .reach import (
+    Authority,
+    Step,
+    _analyse_with_trace,
+    _enabled,
+    _mints,
+    _State,
+)
 
 IR_VERSION = 1
 MANIFEST_ADAPTER = "agentmandate.manifest"
@@ -49,15 +57,29 @@ class Relation:
     target_kind: str
     cardinality: str
     merge: str
-    predicate: str
+    predicate: str | None
+    derived: bool = False
+    support_rule: str = "input"
 
 
 RELATIONS = {
     "acts_as": Relation("tool", "principal", "one", "single", "principal"),
+    "can_reach": Relation(
+        "agent", "tool", "many", "union", None, True, "reachable"
+    ),
     "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
+    "has_breach": Relation(
+        "agent", "breach", "many", "union", None, True, "breach"
+    ),
+    "has_effect": Relation(
+        "tool", "scope", "many", "union", None, True, "effect"
+    ),
     "produces": Relation("tool", "scope", "one", "single", "produces"),
     "requires": Relation("tool", "scope", "many", "union", "requires"),
     "role_contains": Relation("role", "tool", "many", "union", "members"),
+    "transitions_to": Relation(
+        "tool", "tool", "many", "union", None, True, "transition"
+    ),
 }
 
 
@@ -232,6 +254,7 @@ class AuthorityIR:
                 if evidence.review not in {"unreviewed", "accepted", "contested"}:
                     raise IRFormatError(f"authority IR has unknown review {evidence.review!r}")
 
+        edges = {edge.id: edge for edge in self.edges}
         actual_edges = {(edge.source, edge.relation, edge.target) for edge in self.edges}
         for edge in self.edges:
             expected_id = _edge_id(edge.source, edge.relation, edge.target)
@@ -248,6 +271,14 @@ class AuthorityIR:
                 raise IRFormatError(f"authority IR edge {edge.id!r} has invalid endpoint kinds")
             if not edge.support:
                 raise IRFormatError(f"authority IR edge {edge.id!r} has no support")
+            if relation.derived:
+                for support_id in edge.support:
+                    if support_id not in facts and support_id not in edges:
+                        raise IRFormatError(
+                            f"authority IR edge {edge.id!r} has unknown support {support_id!r}"
+                        )
+                _validate_derived_edge(edge, entities, facts, edges, relation.support_rule)
+                continue
             establishes_relation = False
             for support_id in edge.support:
                 support = facts.get(support_id)
@@ -268,7 +299,7 @@ class AuthorityIR:
                 )
         for fact in self.facts:
             for relation_name, relation in RELATIONS.items():
-                if fact.predicate != relation.predicate:
+                if relation.derived or fact.predicate != relation.predicate:
                     continue
                 targets = fact.value if isinstance(fact.value, list) else [fact.value]
                 for target in (item for item in targets if item is not None):
@@ -276,6 +307,7 @@ class AuthorityIR:
                         raise IRFormatError(
                             f"authority IR is missing {relation_name} edge from {fact.subject}"
                         )
+        _validate_derived_support(edges, facts)
 
     @classmethod
     def from_json(cls, text: str) -> AuthorityIR:
@@ -294,6 +326,143 @@ class AuthorityIR:
         )
         snapshot.validate()
         return snapshot
+
+
+@dataclass(frozen=True)
+class _IRAnalysis:
+    """Private result envelope keeping analysis parameters out of source facts."""
+
+    authority: Authority
+    graph: AuthorityIR
+
+
+def _validate_derived_edge(
+    edge: Edge,
+    entities: dict[str, Entity],
+    facts: dict[str, Fact],
+    edges: dict[str, Edge],
+    rule: str,
+) -> None:
+    """Check the minimum evidence shape declared by a derived relation."""
+    support = set(edge.support)
+
+    def require(identifier: str) -> None:
+        if identifier not in support:
+            raise IRFormatError(
+                f"authority IR derived edge {edge.id!r} lacks {rule} support {identifier!r}"
+            )
+
+    if rule == "reachable":
+        tools_fact_id = _fact_id(edge.source, "tools")
+        require(tools_fact_id)
+        if edge.target not in facts[tools_fact_id].value:
+            raise IRFormatError(
+                f"authority IR derived edge {edge.id!r} targets an undeclared tool"
+            )
+        require(_fact_id(edge.target, "requires"))
+        if any(
+            support_id in edges
+            and (support_relation := RELATIONS.get(edges[support_id].relation)) is not None
+            and support_relation.derived
+            for support_id in support
+        ):
+            raise IRFormatError(
+                f"authority IR derived edge {edge.id!r} must be rooted in source records"
+            )
+        required_edges = [
+            edges[support_id]
+            for support_id in support
+            if support_id in edges and edges[support_id].relation == "requires"
+        ]
+        for required in required_edges:
+            if not any(
+                support_id in edges
+                and edges[support_id].relation == "produces"
+                and edges[support_id].target == required.target
+                for support_id in support
+            ):
+                raise IRFormatError(
+                    f"authority IR derived edge {edge.id!r} lacks a producer for "
+                    f"{required.target!r}"
+                )
+        return
+    if rule == "effect":
+        require(_edge_id(next(iter(_agents(entities))), "can_reach", edge.source))
+        require(_fact_id(edge.source, "effect"))
+        if not any(
+            support_id in edges
+            and edges[support_id].source == edge.source
+            and edges[support_id].target == edge.target
+            and edges[support_id].relation in {"requires", "produces"}
+            for support_id in support
+        ):
+            raise IRFormatError(
+                f"authority IR derived edge {edge.id!r} lacks effect scope support"
+            )
+        return
+    if rule == "transition":
+        agent = next(iter(_agents(entities)))
+        require(_edge_id(agent, "can_reach", edge.source))
+        require(_edge_id(agent, "can_reach", edge.target))
+        require(_fact_id(edge.target, "requires"))
+        return
+    if rule == "breach":
+        if not any(
+            support_id in edges
+            and edges[support_id].source == edge.source
+            and edges[support_id].relation == "can_reach"
+            for support_id in support
+        ):
+            raise IRFormatError(
+                f"authority IR derived edge {edge.id!r} lacks a reachable path"
+            )
+        name = entities[edge.target].name
+        if name.startswith("cumulative_value:"):
+            require(_fact_id(_entity_id("constraint", "run"), "total"))
+        elif name.startswith("effect_count:"):
+            require(_fact_id(_entity_id("constraint", "run"), "effects"))
+        elif name.startswith("ungated_effect:"):
+            tool_id = _entity_id("tool", name.split(":", maxsplit=1)[1])
+            require(_fact_id(tool_id, "effect"))
+            require(_fact_id(tool_id, "requires_approval"))
+        else:
+            raise IRFormatError(f"authority IR has unknown breach entity {name!r}")
+        return
+    raise IRFormatError(f"authority IR has unknown derived support rule {rule!r}")
+
+
+def _agents(entities: dict[str, Entity]) -> set[str]:
+    agents = {identifier for identifier, entity in entities.items() if entity.kind == "agent"}
+    if len(agents) != 1:
+        raise IRFormatError("authority IR derived relations require exactly one agent")
+    return agents
+
+
+def _validate_derived_support(edges: dict[str, Edge], facts: dict[str, Fact]) -> None:
+    """Require derived provenance to be an acyclic chain rooted in source facts."""
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(identifier: str) -> None:
+        if identifier in facts or identifier in visited:
+            return
+        if identifier in visiting:
+            raise IRFormatError("authority IR derived support contains a cycle")
+        edge = edges[identifier]
+        relation = RELATIONS[edge.relation]
+        if not relation.derived:
+            visited.add(identifier)
+            return
+        visiting.add(identifier)
+        for support_id in edge.support:
+            if support_id in edges:
+                visit(support_id)
+        visiting.remove(identifier)
+        visited.add(identifier)
+
+    for edge in edges.values():
+        if RELATIONS[edge.relation].derived:
+            visit(edge.id)
 
 
 def _source_from_dict(raw: dict[str, Any]) -> Source:
@@ -666,3 +835,167 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
         roles=roles,
         source=locator,
     )
+
+
+def _path_is_enabling(mandate: Mandate, path: tuple[Step, ...]) -> bool:
+    """Replay the authority preconditions used by search for a retained path."""
+    tools = {tool.name: tool for tool in mandate.tools}
+    state = _State()
+    for step in path:
+        tool = tools.get(step.tool)
+        if tool is None or not _enabled(tool, state):
+            return False
+        if _mints(tool, state):
+            state = state.with_binding(tool.produces)  # type: ignore[arg-type]
+    return bool(path)
+
+
+def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
+    """Run reachability from validated IR and attach canonical derived provenance."""
+    snapshot.validate()
+    if any(RELATIONS[edge.relation].derived for edge in snapshot.edges):
+        raise IRFormatError("authority IR analysis input already contains derived edges")
+
+    mandate = _to_mandate(snapshot)
+    authority, trace = _analyse_with_trace(mandate, depth=depth)
+    paths = dict(trace.reachable_paths)
+    if any(not _path_is_enabling(mandate, path) for path in paths.values()):
+        raise IRFormatError("reachability retained a path that does not replay")
+
+    entities = {item.id: item for item in snapshot.entities}
+    input_edges = {
+        (item.source, item.relation, item.target): item for item in snapshot.edges
+    }
+    derived: dict[str, Edge] = {}
+    agent = next(item for item in snapshot.entities if item.kind == "agent")
+    tools = {tool.name: tool for tool in mandate.tools}
+    tool_ids = {name: _entity_id("tool", name) for name in tools}
+
+    def add_edge(
+        source: str, relation: str, target: str, support: set[str]
+    ) -> Edge:
+        identifier = _edge_id(source, relation, target)
+        existing = derived.get(identifier)
+        if existing is not None:
+            support.update(existing.support)
+        edge = Edge(identifier, source, relation, target, tuple(sorted(support)))
+        derived[identifier] = edge
+        return edge
+
+    def path_support(path: tuple[Step, ...]) -> set[str]:
+        support = {_fact_id(agent.id, "tools")}
+        for step in path:
+            tool = tools[step.tool]
+            tool_id = tool_ids[step.tool]
+            support.add(_fact_id(tool_id, "requires"))
+            support.update(
+                input_edges[(tool_id, "requires", _entity_id("scope", scope))].id
+                for scope in tool.requires
+            )
+            support.add(_fact_id(tool_id, "produces"))
+            support.add(_fact_id(tool_id, "unbounded"))
+            if tool.produces is not None:
+                support.add(
+                    input_edges[
+                        (tool_id, "produces", _entity_id("scope", tool.produces))
+                    ].id
+                )
+        return support
+
+    reachable_edges: dict[str, Edge] = {}
+    for tool_name, path in paths.items():
+        reachable_edges[tool_name] = add_edge(
+            agent.id, "can_reach", tool_ids[tool_name], path_support(path)
+        )
+
+    for tool_name in authority.reachable_tools:
+        tool = tools[tool_name]
+        tool_id = tool_ids[tool_name]
+        # Keep this identical to reach.analyse: required scopes describe the
+        # effect when present; a produced scope is the fallback. Broadening it
+        # here would make provenance claim effects the public result omits.
+        scope_names = tool.requires or ((tool.produces,) if tool.produces else ())
+        for scope_name in scope_names:
+            scope_id = _entity_id("scope", scope_name)
+            relation = "requires" if scope_name in tool.requires else "produces"
+            support = {
+                reachable_edges[tool_name].id,
+                _fact_id(tool_id, "effect"),
+                input_edges[(tool_id, relation, scope_id)].id,
+            }
+            add_edge(tool_id, "has_effect", scope_id, support)
+
+    def transition_edges(path: tuple[Step, ...]) -> tuple[Edge, ...]:
+        result: list[Edge] = []
+        for previous, current in zip(path, path[1:], strict=False):
+            current_tool = tools[current.tool]
+            current_id = tool_ids[current.tool]
+            support = {
+                reachable_edges[previous.tool].id,
+                reachable_edges[current.tool].id,
+                _fact_id(current_id, "requires"),
+            }
+            support.update(
+                input_edges[(current_id, "requires", _entity_id("scope", scope))].id
+                for scope in current_tool.requires
+            )
+            result.append(
+                add_edge(
+                    tool_ids[previous.tool],
+                    "transitions_to",
+                    current_id,
+                    support,
+                )
+            )
+        return tuple(result)
+
+    constraint_id = _entity_id("constraint", "run")
+    for breach in authority.breaches:
+        final_tool = breach.path[-1].tool
+        discriminator = breach.subject or (
+            final_tool if breach.kind == "ungated_effect" else "run"
+        )
+        breach_name = f"{breach.kind}:{discriminator}"
+        breach_id = _entity_id("breach", breach_name)
+        entities[breach_id] = Entity(breach_id, "breach", breach_name)
+        support = {reachable_edges[breach.path[0].tool].id}
+        support.update(edge.id for edge in transition_edges(breach.path))
+
+        if breach.kind == "ungated_effect":
+            final_id = tool_ids[final_tool]
+            support.update(
+                {
+                    _fact_id(final_id, "effect"),
+                    _fact_id(final_id, "requires_approval"),
+                }
+            )
+        elif breach.kind == "cumulative_value":
+            support.add(_fact_id(constraint_id, "total"))
+            for step in breach.path:
+                tool_id = tool_ids[step.tool]
+                support.update(
+                    {
+                        _fact_id(tool_id, "ceiling"),
+                        _fact_id(tool_id, "scope_key"),
+                        _fact_id(tool_id, "unbounded"),
+                        _fact_id(tool_id, "value_arg"),
+                    }
+                )
+        elif breach.kind == "effect_count":
+            support.add(_fact_id(constraint_id, "effects"))
+            support.update(
+                _fact_id(tool_ids[step.tool], "effect") for step in breach.path
+            )
+        else:  # pragma: no cover - the closed search vocabulary prevents this
+            raise IRFormatError(f"unsupported reachability breach {breach.kind!r}")
+        add_edge(agent.id, "has_breach", breach_id, support)
+
+    graph = AuthorityIR(
+        ir_version=snapshot.ir_version,
+        sources=snapshot.sources,
+        entities=tuple(sorted(entities.values(), key=lambda item: item.id)),
+        facts=snapshot.facts,
+        edges=tuple(sorted(snapshot.edges + tuple(derived.values()), key=lambda item: item.id)),
+    )
+    graph.validate()
+    return _IRAnalysis(authority=authority, graph=graph)

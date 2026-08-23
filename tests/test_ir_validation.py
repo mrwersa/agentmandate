@@ -11,6 +11,7 @@ from agentmandate._ir import (
     AuthorityIR,
     Evidence,
     IRFormatError,
+    _analyse_ir,
     _edge_id,
     _fact_id,
     _from_mandate,
@@ -189,15 +190,43 @@ def test_invalid_graphs_fail_before_analysis(
 
 def test_relation_registry_declares_cardinality_merge_and_support_predicate() -> None:
     assert {
-        name: (relation.cardinality, relation.merge, relation.predicate)
+        name: (
+            relation.cardinality,
+            relation.merge,
+            relation.predicate,
+            relation.derived,
+            relation.support_rule,
+        )
         for name, relation in RELATIONS.items()
     } == {
-        "acts_as": ("one", "single", "principal"),
-        "ceiling_on": ("one", "single", "scope_key"),
-        "produces": ("one", "single", "produces"),
-        "requires": ("many", "union", "requires"),
-        "role_contains": ("many", "union", "members"),
+        "acts_as": ("one", "single", "principal", False, "input"),
+        "can_reach": ("many", "union", None, True, "reachable"),
+        "ceiling_on": ("one", "single", "scope_key", False, "input"),
+        "has_breach": ("many", "union", None, True, "breach"),
+        "has_effect": ("many", "union", None, True, "effect"),
+        "produces": ("one", "single", "produces", False, "input"),
+        "requires": ("many", "union", "requires", False, "input"),
+        "role_contains": ("many", "union", "members", False, "input"),
+        "transitions_to": ("many", "union", None, True, "transition"),
     }
+
+
+def test_derived_support_must_be_acyclic() -> None:
+    value = _analyse_ir(snapshot()).graph
+    first, second = (edge for edge in value.edges if edge.relation == "has_effect")
+    changed_first = replace(first, support=first.support + (second.id,))
+    changed_second = replace(second, support=second.support + (first.id,))
+    edges = tuple(
+        changed_first
+        if edge == first
+        else changed_second
+        if edge == second
+        else edge
+        for edge in value.edges
+    )
+
+    with pytest.raises(IRFormatError, match="derived support contains a cycle"):
+        replace(value, edges=edges).validate()
 
 
 def test_from_json_validates_the_graph_not_only_the_record_shapes() -> None:
