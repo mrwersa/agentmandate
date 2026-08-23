@@ -1,0 +1,77 @@
+# Reviewed graph: Sentry MCP server 0.37.0, stdio deployment with an operator-
+# supplied User Auth Token, no organization/project constraint, and explicit
+# skills inspect, triage, and project-management. The capture used localhost
+# only to prevent API calls; host selection does not alter these tool schemas.
+version: 1
+agent: sentry-operations-agent
+identity: spiffe://example/agents/sentry-operations-agent
+
+limits:
+  depth: 8
+  # REVIEWED POLICY: at most one call through the destructive meta-tool in a
+  # run. This is a sample control, not an upstream Sentry limit.
+  effects:
+    irreversible: 1
+
+tools:
+  - name: find_organizations
+    effect: read
+    principal: service
+
+  - name: find_projects
+    effect: read
+    principal: service
+
+  # The scanner's `requires: [issue]` guess was removed. issueId is a bearer
+  # argument and does not require an issue binding minted in this session.
+  - name: update_issue
+    effect: write
+    principal: service
+
+  - name: search_events
+    effect: read
+    principal: service
+
+  # The malformed `projectslugor` scope came from treating projectSlugOrId as
+  # a produced binding. `limit` is result cardinality, not financial value.
+  - name: search_issues
+    effect: read
+    principal: service
+
+  # URLs and resource IDs are caller-supplied bearer references. v1 cannot
+  # express their organization/project containment or the returned data class.
+  - name: get_sentry_resource
+    effect: read
+    principal: service
+
+  # Searches a larger skill-filtered catalogue that tools/list does not expose.
+  - name: search_sentry_tools
+    effect: read
+    principal: service
+
+  # VALUE-CONDITIONAL: `name` dispatches to hidden tools ranging from reads to
+  # create_project, create_dsn, update_dsn, update_project, and add_issue_note.
+  # The strongest effect is retained because v1 cannot expand or predicate a
+  # meta-tool. Approval and the sample count apply to every dispatch as a result.
+  - name: execute_sentry_tool
+    effect: irreversible
+    principal: service
+    requires_approval: true
+
+# Review findings:
+#
+# 1. The eight tools/list entries are not the authority inventory. The selected
+#    skills make a larger catalogue executable by name through one meta-tool;
+#    search returns at most 20 matches and is discovery, not authorization.
+# 2. Effect and approval are dispatch-dependent. A hidden read and project or
+#    DSN mutation share execute_sentry_tool, so the conservative label creates
+#    false approval/count findings for reads while preserving the risky branch.
+# 3. `service` is also a distortion: stdio spends a fixed User Auth Token, not a
+#    generic service account or a per-call caller token. The token owner, agent
+#    workload, Sentry scopes, granted skills, and optional tenant constraints
+#    form a delegation chain that the binary principal cannot retain.
+# 4. Organization/project constraints rewrite hidden schemas and exclude tools,
+#    while API scopes and Sentry permissions bound successful calls. Those
+#    deployment facts and their provenance are absent from this manifest.
+# 5. Read tools can return event, trace, replay, attachment, profile, and user
+#    data, but v1 has no reviewed data classification or source-to-sink labels.
