@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Authority IR validation recognizes provenance-bearing `contains_tool` edges
+  used by the private experimental dynamic-inventory profile. No command
+  imports dynamic declarations yet.
+
 ## 0.10.0 - 2026-08-23
 
 ### Added

@@ -1,9 +1,10 @@
 # Dynamic inventory declaration contract
 
-Status: **experimental**. A private v1 reader and canonical AgentKit and Sentry
-fixtures implement the structural gate. This document defines the remaining
-trust and compatibility gates for issue #63. It does not add a manifest field,
-change the Authority IR profile, or make a parsed inventory trustworthy.
+Status: **experimental**. A private v1 reader, dedicated Authority IR inventory
+profile, and drift reconciliation implement gates 1–3 against canonical
+AgentKit and Sentry fixtures. Public CLI and failure-contract review remain
+gated by issue #63. This does not add a manifest field or make a parsed
+inventory trustworthy.
 
 ## Problem boundary
 
@@ -136,10 +137,15 @@ members and every eligible dynamic boundary, and no contributing boundary
 remains unresolved. A captured member absent from the mandate is undeclared
 authority. Neither conclusion is available from incomplete evidence.
 
-The first implementation should project membership into provenance-bearing IR
-facts and edges, but it must use a dedicated inventory profile. The existing
-manifest-v1 profile remains the only path to authority analysis; successful
-inventory validation cannot grant tool effects or make a result analyzable.
+The private implementation projects membership into provenance-bearing IR
+facts and `contains_tool` edges through a dedicated inventory profile. The
+existing manifest-v1 profile remains the only path to authority analysis;
+successful inventory validation cannot grant tool effects or make a result
+analyzable. The graph keeps the reviewed declaration and captured bytes as
+separate sources: declaration facts cite their JSON locations, while member
+facts also cite the captured source root. Reconciliation receives captured
+bytes, the expected selection, and an explicit `as_of` date from its caller.
+It never resolves a locator or reads the wall clock.
 
 ## Failure contract
 
@@ -163,7 +169,8 @@ reviewed and passed to AgentMandate.
    because its captured eight-tool surface omits hidden dispatch targets.
 3. **Reconciliation:** resolve literal and declared dynamic members through the
    same `Inventory`/`drift` path; prove incomplete evidence cannot authorize a
-   removal.
+   removal. **Implemented privately:** complete AgentKit evidence discharges
+   the dynamic binding; partial Sentry and expired evidence remain unresolved.
 4. **Public CLI:** expose declaration input only after failure behavior and
    output stability are reviewed across both fixtures.
 
