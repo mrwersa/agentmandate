@@ -1,9 +1,9 @@
 # Authority IR Gate 4 Review
 
-Status: **hold public exposure**. The initial review was reproduced against
+Status: **approved for CLI exposure**. The initial review was reproduced against
 `ed2e19b` on 23 August 2026. The private analysis-profile and result-envelope
-work now close the first two findings, but a structurally valid IR is still not
-automatically trusted and no public CLI contract has been implemented.
+work closed the first two findings. A structurally valid IR is still not
+automatically trusted; the reviewed CLI contract preserves that boundary.
 
 ## Decision summary
 
@@ -11,7 +11,7 @@ automatically trusted and no public CLI contract has been implemented.
 |---|---|---|
 | Unsupported semantics | Passed in private implementation | Closed, trust-aware manifest-v1 analysis profile ([#55](https://github.com/mrwersa/agentmandate/issues/55)) |
 | Output stability | Passed in private implementation | Versioned, hashed result envelope with canonical fixtures ([#56](https://github.com/mrwersa/agentmandate/issues/56)) |
-| CLI failure behavior | Contract ready; implementation blocked | Implement only after #55 and #56 ([#57](https://github.com/mrwersa/agentmandate/issues/57)) |
+| CLI failure behavior | Passed | Canonical output, exit codes, stderr, and no-partial-output contract ([#57](https://github.com/mrwersa/agentmandate/issues/57)) |
 
 This is a gate working as intended, not a rejection of the IR design. The
 private records preserve manifest semantics and derived provenance. They have
@@ -46,9 +46,8 @@ It uses a closed predicate registry with per-predicate value schemas, requires
 every consumed evidence reference to be `exact` and `accepted`, verifies the
 supported adapter versions and semantic digests, and rejects malformed or
 unsupported semantics with `IRFormatError` before projection. Adversarial tests
-preserve all three reproduced failures as rejection cases. Public exposure
-remains on hold because passing this review does not complete the result
-envelope or CLI gates.
+preserve all three reproduced failures as rejection cases. Passing this review
+alone did not complete the result-envelope or CLI gates.
 
 MCP, policy, inventory, and runtime sources remain valid future IR inputs, but
 must not become trusted policy merely because their records parse.
@@ -83,7 +82,8 @@ re-runs analysis rather than trusting a self-consistent checksum. Canonical
 clean, truncated, and breached fixtures round-trip byte-for-byte, preserve
 ordered repeated calls, and remain stable under reordered source tables,
 evidence, and support. Non-finite JSON and mismatched parameters, authority, or
-graphs fail with `IRFormatError`. Public exposure remains held on the CLI gate.
+graphs fail with `IRFormatError`. Passing this review alone still left the CLI
+gate open.
 
 ## CLI failure-behavior review
 
@@ -92,7 +92,7 @@ finding, and `2` means usage or malformed input. IR commands should preserve
 it, emit diagnostics to stderr, and leave stdout empty on failure. They must
 fully validate before emitting bytes so pipelines never receive partial JSON.
 
-The smallest honest surface is:
+The implemented surface is:
 
 ```text
 mandate ir export MANIFEST
@@ -106,17 +106,16 @@ exclusive with manifest input and must refuse snapshots outside the approved
 analysis profile. Avoid a command named `import`: it misleadingly suggests that
 any structurally valid evidence has been accepted as authority.
 
-Adding these commands is a public CLI change and therefore a minor release.
+Adding these commands is a public CLI change and therefore requires a minor release.
 Parser/help, stdout/stderr, exit code, future-version, unsupported-profile, and
 no-partial-output behavior all need tests before exposure. A public Python API
 is a separate decision and is not implied by the CLI.
 
 ## Sequencing and non-goals
 
-Implement #55 first, because both analysis safety and CLI error normalization
-depend on typed semantics. Implement #56 second, because the CLI must not invent
-an output envelope. Implement #57 last, then re-run the four evidence graphs
-and migration fixtures before closing the parent initiative.
+The #55 → #56 → #57 sequence is complete. Public-boundary tests re-run all four
+evidence graphs and the canonical migration fixture through the CLI before
+closing the parent initiative.
 
 This review does not expand gate 4 into policy-language imports, runtime
 evidence, signatures, arbitrary provenance, or a general execution format.

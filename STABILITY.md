@@ -11,8 +11,9 @@ statement, not a waiver for silent breakage.
   notes in `CHANGELOG.md`.
 - The manifest carries an explicit `version`. A build rejects a schema version
   it does not understand rather than guessing.
-- Exit codes are part of the contract: `0` clean, `1` finding, `2` usage or a
-  malformed manifest. CI depends on these, so they will not move in a patch.
+- Exit codes are part of the contract: `0` clean, `1` finding, `2` usage, I/O,
+  malformed manifest/IR, or unsupported IR semantics. CI depends on these, so
+  they will not move in a patch.
 - `--json` output is additive within a minor series. Fields may be added;
   existing fields will not change meaning.
 
@@ -22,11 +23,11 @@ Production users should pin the current minor series:
 agentmandate~=0.9.0
 ```
 
-## Experimental authority artifacts
+## Versioned authority artifacts
 
-The private Authority IR and analysis-result envelope are not public package or
-CLI contracts yet. Their explicit versions establish the rules to apply before
-exposure:
+The `mandate ir` and `mandate reach --ir` CLI surfaces are public. The Python
+records remain private and are not exported from `agentmandate`. Their explicit
+artifact versions separate compatibility from package releases:
 
 - `ir_version` changes when graph records, relations, or canonicalization
   change incompatibly.
@@ -37,10 +38,14 @@ exposure:
   not treat additional fields as silently additive.
 
 Future presentation metadata may be additive only if it is explicitly outside
-the canonical envelope. Once the CLI exposes these artifacts, adding support
-for a new format version or changing command behavior also requires a package
-minor release and migration notes. These standalone artifact rules are stricter
-than the additive guarantee for existing `--json` command output.
+the canonical envelope. Adding support for a new format version or changing
+command behavior requires a package minor release and migration notes. These
+standalone artifact rules are stricter than the additive guarantee for existing
+`--json` command output.
+
+`mandate ir validate` guarantees structural validity only. Eligibility for
+analysis is a separate, stricter check performed by `mandate reach --ir`; this
+distinction will not be weakened in a patch release.
 
 ## What is most likely to change
 

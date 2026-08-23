@@ -6,6 +6,35 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Authority IR v1 provides a canonical, provenance-bearing representation of
+  agents, tools, scopes, principals, roles, constraints, facts, and authority
+  edges. Facts retain source location, adapter version, confidence, and review
+  state; derived reachability, effect, transition, and breach edges cite their
+  supporting source records.
+- `mandate ir export MANIFEST` writes one canonical source snapshot, including
+  separate content and semantic digests. `mandate ir validate SNAPSHOT` checks
+  structural and graph integrity without treating parsed evidence as reviewed
+  authority. There is intentionally no `import` command.
+- `mandate reach --ir SNAPSHOT` analyzes only the closed manifest-v1 profile:
+  supported adapter versions, complete typed predicates, verified semantic
+  digests, and evidence that is both exact and accepted. Unsupported,
+  contested, unreviewed, heuristic, or malformed semantics fail with exit 2
+  and no partial standard output.
+- `mandate reach --ir SNAPSHOT --json` writes result-envelope v1. It binds the
+  source graph, effective depth, truncation boundary, existing ordered and
+  repeated counterexamples, and augmented provenance graph with a canonical
+  result digest. Reading the envelope re-runs analysis rather than trusting a
+  recomputable checksum.
+
+### Changed
+
+- `mandate reach` now accepts exactly one input: a manifest path or the `--ir`
+  snapshot option. Existing manifest, text, JSON, SARIF, graph, and exit-code
+  behavior is unchanged; canonical result-envelope JSON is specific to the IR
+  input.
+
 
 ## 0.9.1 - 2026-08-23
 

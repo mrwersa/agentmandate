@@ -62,7 +62,7 @@ manifest shape.
 | Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
 |---|---|---|---|
 | **Two additional real graphs** (evidence collected; high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with reviewer notes and at least one clean result. Not a synthetic benchmark corpus. |
-| **Canonical authority IR with provenance** (high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
+| **Canonical authority IR with provenance** (delivered; high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
 | **Dynamic inventory declarations** (high) | Static scan cannot enumerate provider-built tool lists and must fail closed. Add reviewed inventory boundaries for factories, providers, registries, and deployment configuration. | AgentKit's unresolved binding plus one independent dynamic framework fixture. | Drift can prove a declared dynamic boundary complete or explain exactly why it cannot. Never import or execute application code. |
 | **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** (medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. | Version-pinned fixtures and a mapping note for each format. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation or production policy compilation. |
 
@@ -90,15 +90,16 @@ emitting validated, provenance-bearing reachability, effect, transition, and
 breach edges. A private, closed manifest-v1 profile now separates structurally
 valid archival records from records eligible for analysis: only supported
 adapters, complete typed predicates, verified semantic digests, and exact,
-accepted evidence can reach the search kernel. The format remains experimental
-until a stable result envelope and reviewed CLI surface are complete.
+accepted evidence can reach the search kernel. All four delivery gates now
+pass; artifact evolution follows the explicit version rules in `STABILITY.md`.
 
 Gate 4 review is recorded in
 [`docs/authority-ir-gate-4-review.md`](docs/authority-ir-gate-4-review.md). It
-holds public exposure until all three explicit gates pass. The trust-aware
-analyzable profile and versioned result envelope are implemented privately; the
-reviewed CLI contract remains. Structural IR validity alone is not treated as
-authority approval, and a canonical checksum is not treated as a signature.
+held public exposure until all three explicit gates passed. The trust-aware
+analyzable profile and versioned result envelope now sit behind the reviewed
+`ir export`, `ir validate`, and `reach --ir` CLI contract. Structural IR
+validity alone is not treated as authority approval, and a canonical checksum
+is not treated as a signature. The Python records remain deliberately private.
 
 ## 3–6 months: model real authority
 
