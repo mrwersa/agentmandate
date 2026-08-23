@@ -28,11 +28,10 @@ def test_scan_confuses_bearer_ids_and_result_limits_with_authority() -> None:
     assert proposals["execute_sentry_tool"].effect == "irreversible"
 
 
-def test_scan_skeleton_preserves_the_output_with_trailing_space_normalized() -> None:
+def test_scan_skeleton_is_the_exact_scanner_output() -> None:
     generated = render(propose(catalogue()), "sentry-operations-agent")
-    normalized = "\n".join(line.rstrip() for line in generated.splitlines()) + "\n"
 
-    assert (EVIDENCE / "scan-skeleton.yaml").read_text(encoding="utf-8") == normalized
+    assert (EVIDENCE / "scan-skeleton.yaml").read_text(encoding="utf-8") == generated
 
 
 def test_reviewed_graph_exposes_the_meta_tool_budget_counterexample() -> None:

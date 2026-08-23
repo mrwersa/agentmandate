@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Generated `mandate scan` comments no longer retain a trailing space when
+  catalogue prose is truncated at the comment-length limit. Evidence fixtures
+  can now preserve the scanner's byte-exact output without normalizing it.
 - An effect-budget breach is reported once per class by keying on the class
   itself rather than on a prefix of the message. Matching `detail` worked only
   while every message happened to open with the effect name, so a reworded

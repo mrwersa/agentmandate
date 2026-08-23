@@ -141,7 +141,7 @@ def _yaml_scalar(value: str) -> str:
 
 def _comment(value: str, limit: int = 96) -> str:
     """Collapse untrusted catalogue prose to one comment line."""
-    return " ".join(value.split())[:limit]
+    return " ".join(value.split())[:limit].rstrip()
 
 
 def _wrap(text: str, prefix: str, width: int = 76) -> list[str]:
