@@ -403,7 +403,12 @@ class AuthorityIR:
 
 @dataclass(frozen=True)
 class _IRAnalysis:
-    """Private, versioned result envelope around authority and its provenance graph."""
+    """Private, versioned result envelope around authority and provenance.
+
+    Serializing validates by replaying the complete bounded search. Calls to
+    :meth:`as_dict` and :meth:`to_json` are therefore O(full analysis), not
+    passive field reads.
+    """
 
     authority: Authority
     graph: AuthorityIR
@@ -1378,6 +1383,10 @@ def _path_is_enabling(mandate: Mandate, path: tuple[Step, ...]) -> bool:
 
 def _source_graph(graph: AuthorityIR) -> AuthorityIR:
     """Recover the canonical source snapshot from an augmented result graph."""
+    # Gate-3 invariant: breach is the only entity kind minted by analysis.
+    # A future derived entity kind must be added to this extraction explicitly;
+    # retaining it would make profile validation fail rather than silently
+    # treating a derived entity as source input.
     entities = tuple(entity for entity in graph.entities if entity.kind != "breach")
     entity_ids = {entity.id for entity in entities}
     source = AuthorityIR(
