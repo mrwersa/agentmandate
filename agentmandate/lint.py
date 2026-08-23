@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .manifest import CALLER, IRREVERSIBLE, SERVICE, Mandate
+from .manifest import IRREVERSIBLE, SERVICE, Mandate
 
 ERROR = "error"
 WARNING = "warning"
@@ -100,9 +100,16 @@ def check(mandate: Mandate) -> list[Finding]:
                     severity=ERROR if tool.effect != "read" else WARNING,
                     subject=tool.name,
                     message=(
-                        "the call spends a service account rather than the "
-                        f"caller's identity, which is the confused-deputy shape. "
-                        f"Exchange the caller token instead (principal: {CALLER})"
+                        "uses a fixed credential represented as "
+                        f"`{SERVICE}` rather than the caller's identity, which "
+                        "is the confused-deputy shape. Where the platform "
+                        "supports it, exchange the caller's token for each call "
+                        "instead of fixed credentials. Exchange is not always "
+                        "available or sufficient: a credential may be a "
+                        "delegated user token or intersect other principals, and "
+                        "manifest v1 cannot show which. Record the delegated or "
+                        "intersecting identity shape in named review instead of "
+                        "treating the exchange as complete"
                     ),
                 )
             )

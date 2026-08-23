@@ -74,6 +74,24 @@ def test_a_service_principal_on_a_writing_tool_is_an_error():
     assert "confused-deputy" in finding.message
 
 
+def test_service_principal_remediation_names_its_own_limit():
+    text = CLEAN + """
+  - name: ledger
+    effect: write
+    principal: service
+    requires: [case]
+"""
+    finding = next(f for f in check(loads(text)) if f.rule == "identity.service-principal")
+
+    # Actionable for the ordinary service-account case...
+    assert "exchange" in finding.message
+    # ...without claiming token exchange is always available or complete.
+    assert "not always available" in finding.message
+    assert "delegated user token" in finding.message
+    assert "intersect other principals" in finding.message
+    assert "named review" in finding.message
+
+
 def test_a_service_principal_on_a_read_is_only_a_warning():
     text = CLEAN + """
   - name: lookup

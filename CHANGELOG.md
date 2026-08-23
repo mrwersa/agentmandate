@@ -21,6 +21,17 @@ All notable changes to this project are documented here. The format follows
 
 - Dynamic drift JSON adds `inventory_as_of` only when dynamic evidence was
   supplied. Existing drift invocations and output remain unchanged.
+- The `identity.service-principal` remediation no longer presents caller-token
+  exchange as a complete fix: it stays actionable for ordinary service
+  accounts while naming that the fixed credential may be a delegated user
+  token or intersect other principals, which manifest v1 cannot show and only
+  named review can settle. Rule id, severity logic, and JSON schema and fields
+  are unchanged; only the `message` value moves. Consumers matching on the old
+  sentence should match on the rule id instead.
+- Fixed delegated-user and intersecting-principal evidence is recorded in the
+  AWS PostgreSQL and Sentry evidence notes; full modelling of delegation
+  remains roadmap work (conditional authority and delegation chains), so the
+  finding reports its limit rather than implying one.
 
 ## 0.10.0 - 2026-08-23
 
