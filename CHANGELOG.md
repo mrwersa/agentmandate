@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Authority IR validation recognizes provenance-bearing condition and
+  structured-principal relations used by private experimental profiles. The
+  profiles preserve reviewed tool targets and evidence but are not accepted by
+  `mandate reach --ir` as manifest authority.
+
 ### Changed
 
 - The `identity.service-principal` remediation no longer presents caller-token

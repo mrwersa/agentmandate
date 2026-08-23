@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -10,13 +12,39 @@ from agentmandate._conditions import (
     ConditionContext,
     ConditionFormatError,
     Grant,
+    ToolCondition,
+    ToolPrincipal,
+    _profile_digest,
+    _validate_condition_profile,
+    _validate_principal_profile,
 )
+from agentmandate._ir import AuthorityIR, Entity, Fact, _entity_id, _fact_id
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CONTEXT = FIXTURES / "condition-context-select-v1.json"
 CAPTURE = FIXTURES / "condition-context-capture.sql"
 GRANT = FIXTURES / "delegation-grant-v1.json"
 GRANT_CAPTURE = FIXTURES / "delegation-grant-capture.json"
+CONDITION_STATEMENT = FIXTURES / "condition-statement-v1.json"
+CONDITION_DISPATCH = FIXTURES / "condition-dispatch-v1.json"
+PRINCIPAL_INTERSECTING = FIXTURES / "principal-intersecting-v1.json"
+PRINCIPAL_FIXED = FIXTURES / "principal-fixed-user-v1.json"
+PRINCIPAL_DELEGATED = FIXTURES / "principal-delegated-user-v1.json"
+PROJECTION_DIGESTS = {
+    CONDITION_STATEMENT: "eb7ae5abeb7fdfb4b9b7430320d434a62ce4f01de39f5d5d45c6402c8722e4f1",
+    CONDITION_DISPATCH: "eefbf06e8779bf9d240325042e0099b9ce0eb40f38deaae84405673c97a4e58b",
+    PRINCIPAL_FIXED: "21b1edd7d87175ddfe971577817a0b3ea3540c3f7b6c06e28357db2bd2052c29",
+    PRINCIPAL_INTERSECTING: "e37c6c657b27b10c5418c85bf0cf62e872d89e12fddab8e78d50917b5d9c6b35",
+    PRINCIPAL_DELEGATED: "249242e97cfdd8017a1b0e54c4284df94d1eb46af48516c4932ceae89d51a6f4",
+}
+
+
+def rehash_profile(graph: AuthorityIR) -> AuthorityIR:
+    source = replace(
+        graph.sources[0],
+        semantic_sha256=_profile_digest(graph.entities, graph.facts, graph.edges),
+    )
+    return replace(graph, sources=(source, *graph.sources[1:]))
 
 
 def test_canonical_context_fixture_round_trips_byte_stably():
@@ -25,6 +53,7 @@ def test_canonical_context_fixture_round_trips_byte_stably():
     reencoded = ConditionContext.from_json(value.to_json()).to_json()
 
     assert value.version == 1
+    assert value.id == "contexts/aws-postgres/select-only"
     assert value.to_json() == committed
     assert reencoded == committed
     assert value.target_binding == "run_query"
@@ -64,6 +93,7 @@ def test_canonical_grant_fixture_round_trips_byte_stably():
     reencoded = Grant.from_json(grant.to_json()).to_json()
 
     assert grant.version == GRANT_VERSION
+    assert grant.grantor == "authorization-server:sentry"
     assert grant.subject == "user:ada"
     assert grant.actor.startswith("spiffe://")
     assert grant.scopes == ("issue:write", "project:read")
@@ -432,3 +462,464 @@ def test_grant_surface_rejects_empty_effects():
 
     with pytest.raises(ConditionFormatError, match="members must be non-empty"):
         Grant.from_json(json.dumps(raw))
+
+
+@pytest.mark.parametrize("path", [CONDITION_STATEMENT, CONDITION_DISPATCH])
+def test_tool_condition_fixtures_round_trip_and_project_canonically(path: Path):
+    committed = path.read_text(encoding="utf-8")
+    value = ToolCondition.from_json(committed)
+
+    assert value.to_json() == committed
+    graph = value.to_ir()
+    assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
+    assert {edge.relation for edge in graph.edges} == {
+        "has_condition",
+        "narrows_to",
+        "uses_context",
+    }
+    assert {entity.kind for entity in graph.entities} == {
+        "condition",
+        "context",
+        "effect",
+        "tool",
+    }
+    assert all(fact.evidence[0].review == "accepted" for fact in graph.facts)
+
+
+def test_statement_condition_addresses_the_reviewed_context_exactly():
+    context = ConditionContext.from_json(CONTEXT.read_text(encoding="utf-8"))
+    condition = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    )
+
+    assert condition.context == context.id
+    assert (condition.target.source, condition.target.binding) == (
+        context.target_source,
+        context.target_binding,
+    )
+    assert condition.predicate == context.predicate
+    assert condition.arg == context.arg
+    assert condition.value_class in context.classes
+
+
+@pytest.mark.parametrize(
+    ("path", "relations"),
+    [
+        (PRINCIPAL_FIXED, {"acts_as"}),
+        (PRINCIPAL_INTERSECTING, {"acts_as", "constrained_by"}),
+        (PRINCIPAL_DELEGATED, {"acts_as", "under_grant"}),
+    ],
+)
+def test_tool_principal_fixtures_round_trip_and_project_canonically(
+    path: Path, relations: set[str]
+):
+    committed = path.read_text(encoding="utf-8")
+    value = ToolPrincipal.from_json(committed)
+
+    assert value.to_json() == committed
+    graph = value.to_ir()
+    assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
+    assert {edge.relation for edge in graph.edges} == relations
+    assert all(fact.evidence[0].confidence == "exact" for fact in graph.facts)
+
+
+@pytest.mark.parametrize("path", sorted(PROJECTION_DIGESTS), ids=lambda path: path.stem)
+def test_tool_record_projection_bytes_are_stable(path: Path):
+    reader = ToolCondition if path.name.startswith("condition-") else ToolPrincipal
+    graph = reader.from_json(path.read_text(encoding="utf-8")).to_ir()
+
+    assert hashlib.sha256(graph.to_json().encode("utf-8")).hexdigest() == (
+        PROJECTION_DIGESTS[path]
+    )
+
+
+def test_unreviewed_tool_record_stays_visible_without_accountability():
+    raw = json.loads(CONDITION_STATEMENT.read_text(encoding="utf-8"))
+    raw["evidence"] = {"confidence": "unknown", "review": "unreviewed"}
+
+    graph = ToolCondition.from_json(json.dumps(raw)).to_ir()
+    condition = next(entity for entity in graph.entities if entity.kind == "condition")
+    facts = {(fact.subject, fact.predicate): fact for fact in graph.facts}
+
+    assert facts[(condition.id, "reviewer")].value is None
+    assert facts[(condition.id, "review_expires")].value is None
+    assert all(fact.evidence[0].review == "unreviewed" for fact in graph.facts)
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda raw: raw.update(condition_version=True),
+        lambda raw: raw.update(condition_version=2),
+        lambda raw: raw.update(id=""),
+        lambda raw: raw.update(id=" condition"),
+        lambda raw: raw["target"].update(source="../condition.json"),
+        lambda raw: raw["target"].update(binding=""),
+        lambda raw: raw["target"].update(tool=""),
+        lambda raw: raw.update(predicate="argument_matches"),
+        lambda raw: raw.update(effect="execute"),
+        lambda raw: raw.update(effect="irreversible"),
+        lambda raw: raw.update(arg=""),
+        lambda raw: raw.update(**{"class": ""}),
+        lambda raw: raw.update(context=""),
+        lambda raw: raw.update(extra=True),
+    ],
+)
+def test_tool_condition_reader_is_strict(mutate):
+    raw = json.loads(CONDITION_STATEMENT.read_text(encoding="utf-8"))
+    mutate(raw)
+
+    with pytest.raises(ConditionFormatError):
+        ToolCondition.from_json(json.dumps(raw))
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda raw: raw.update(principal_version=False),
+        lambda raw: raw.update(principal_version=2),
+        lambda raw: raw.update(id=""),
+        lambda raw: raw["target"].update(source="/absolute.py"),
+        lambda raw: raw["principal"].update(kind="service"),
+        lambda raw: raw["principal"].update(extra="value"),
+        lambda raw: raw["principal"].update(principals=["one"]),
+        lambda raw: raw["principal"].update(principals=["same", "same"]),
+    ],
+)
+def test_intersecting_principal_reader_is_strict(mutate):
+    raw = json.loads(PRINCIPAL_INTERSECTING.read_text(encoding="utf-8"))
+    mutate(raw)
+
+    with pytest.raises(ConditionFormatError):
+        ToolPrincipal.from_json(json.dumps(raw))
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda raw: raw["principal"].pop("actor"),
+        lambda raw: raw["principal"].update(subject="user:invented"),
+        lambda raw: raw["principal"].update(actor=""),
+    ],
+)
+def test_fixed_principal_has_a_closed_field_set(mutate):
+    raw = json.loads(PRINCIPAL_FIXED.read_text(encoding="utf-8"))
+    mutate(raw)
+
+    with pytest.raises(ConditionFormatError):
+        ToolPrincipal.from_json(json.dumps(raw))
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda raw: raw["principal"].pop("grant"),
+        lambda raw: raw["principal"].update(principals=["one", "two"]),
+        lambda raw: raw["principal"].update(expires="20261123"),
+        lambda raw: raw["principal"].update(expires="2026-13-01"),
+    ],
+)
+def test_delegated_principal_has_a_closed_typed_field_set(mutate):
+    raw = json.loads(PRINCIPAL_DELEGATED.read_text(encoding="utf-8"))
+    mutate(raw)
+
+    with pytest.raises(ConditionFormatError):
+        ToolPrincipal.from_json(json.dumps(raw))
+
+
+def test_condition_profile_rejects_digest_predicate_and_relation_tampering():
+    graph = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    ).to_ir()
+    with pytest.raises(ConditionFormatError, match="semantic digest"):
+        _validate_condition_profile(
+            replace(graph, sources=(replace(graph.sources[0], semantic_sha256="0" * 64),))
+        )
+
+    condition = next(entity for entity in graph.entities if entity.kind == "condition")
+    changed = tuple(
+        replace(fact, value="unknown")
+        if fact.subject == condition.id and fact.predicate == "predicate"
+        else fact
+        for fact in graph.facts
+    )
+    changed_graph = replace(graph, facts=changed)
+    changed_graph = replace(
+        changed_graph,
+        sources=(
+            replace(
+                graph.sources[0],
+                semantic_sha256=_profile_digest(
+                    changed_graph.entities, changed_graph.facts, changed_graph.edges
+                ),
+            ),
+        ),
+    )
+    with pytest.raises(ConditionFormatError):
+        _validate_condition_profile(changed_graph)
+
+
+def test_principal_profile_rejects_structural_tampering():
+    graph = ToolPrincipal.from_json(
+        PRINCIPAL_INTERSECTING.read_text(encoding="utf-8")
+    ).to_ir()
+    with pytest.raises(ConditionFormatError, match="structurally invalid"):
+        _validate_principal_profile(replace(graph, edges=graph.edges[1:]))
+
+
+def test_intersection_rejects_fields_from_other_principal_kinds():
+    raw = json.loads(PRINCIPAL_INTERSECTING.read_text(encoding="utf-8"))
+    raw["principal"]["actor"] = "service:wrong-shape"
+
+    with pytest.raises(ConditionFormatError, match="requires only principals"):
+        ToolPrincipal.from_json(json.dumps(raw))
+
+
+def test_condition_profile_rejects_extra_entities_and_target_mismatch():
+    graph = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    ).to_ir()
+    extra = Entity(_entity_id("tool", "extra"), "tool", "extra")
+    with pytest.raises(ConditionFormatError, match="unsupported entities"):
+        _validate_condition_profile(
+            rehash_profile(replace(graph, entities=graph.entities + (extra,)))
+        )
+
+    tool = next(entity for entity in graph.entities if entity.kind == "tool")
+    facts = tuple(
+        replace(fact, value={**fact.value, "tool": "other"})
+        if fact.subject == tool.id and fact.predicate == "target"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="target does not match"):
+        _validate_condition_profile(rehash_profile(replace(graph, facts=facts)))
+
+
+def test_projection_source_is_closed_and_digest_bound():
+    graph = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    ).to_ir()
+    extra_source = replace(graph.sources[0], id="source:extra")
+    with pytest.raises(ConditionFormatError, match="requires one source"):
+        _validate_condition_profile(
+            replace(graph, sources=graph.sources + (extra_source,))
+        )
+
+    with pytest.raises(ConditionFormatError, match="unsupported source"):
+        _validate_condition_profile(
+            replace(graph, sources=(replace(graph.sources[0], adapter="other"),))
+        )
+
+    with pytest.raises(ConditionFormatError, match="source digest is invalid"):
+        _validate_condition_profile(
+            replace(graph, sources=(replace(graph.sources[0], content_sha256=None),))
+        )
+
+
+def test_projection_profile_rejects_fact_ambiguity():
+    graph = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    ).to_ir()
+    condition = next(entity for entity in graph.entities if entity.kind == "condition")
+    evidence = graph.facts[0].evidence
+    unsupported = Fact(
+        _fact_id(condition.id, "flavor"),
+        condition.id,
+        "flavor",
+        "unknown",
+        evidence,
+    )
+    with pytest.raises(ConditionFormatError, match="unsupported predicate"):
+        _validate_condition_profile(
+            rehash_profile(replace(graph, facts=graph.facts + (unsupported,)))
+        )
+
+    no_evidence = tuple(
+        replace(fact, evidence=()) if fact.predicate == "arg" else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="unsupported evidence"):
+        _validate_condition_profile(rehash_profile(replace(graph, facts=no_evidence)))
+
+    disagreement = tuple(
+        replace(
+            fact,
+            evidence=(replace(fact.evidence[0], review="contested"),),
+        )
+        if fact.predicate == "arg"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="disagree on evidence"):
+        _validate_condition_profile(rehash_profile(replace(graph, facts=disagreement)))
+
+    wrong_name = tuple(
+        replace(fact, value="wrong")
+        if fact.subject == condition.id and fact.predicate == "name"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="entity name does not match"):
+        _validate_condition_profile(rehash_profile(replace(graph, facts=wrong_name)))
+
+    incomplete = tuple(fact for fact in graph.facts if fact.predicate != "arg")
+    with pytest.raises(ConditionFormatError, match="profile is incomplete"):
+        _validate_condition_profile(rehash_profile(replace(graph, facts=incomplete)))
+
+
+def test_projection_profile_rechecks_review_accountability():
+    graph = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    ).to_ir()
+    condition = next(entity for entity in graph.entities if entity.kind == "condition")
+    facts = tuple(
+        replace(fact, value=None)
+        if fact.subject == condition.id and fact.predicate == "reviewer"
+        else fact
+        for fact in graph.facts
+    )
+
+    with pytest.raises(ConditionFormatError, match="requires a reviewer"):
+        _validate_condition_profile(rehash_profile(replace(graph, facts=facts)))
+
+
+def test_principal_profile_rejects_entity_root_kind_and_target_ambiguity():
+    graph = ToolPrincipal.from_json(
+        PRINCIPAL_FIXED.read_text(encoding="utf-8")
+    ).to_ir()
+    extra_kind = Entity(_entity_id("scope", "extra"), "scope", "extra")
+    with pytest.raises(ConditionFormatError, match="unsupported entities"):
+        _validate_principal_profile(
+            rehash_profile(replace(graph, entities=graph.entities + (extra_kind,)))
+        )
+
+    without_kind = tuple(fact for fact in graph.facts if fact.predicate != "kind")
+    with pytest.raises(ConditionFormatError, match="one structured principal"):
+        _validate_principal_profile(
+            rehash_profile(replace(graph, facts=without_kind))
+        )
+
+    extra_tool = Entity(_entity_id("tool", "extra"), "tool", "extra")
+    with pytest.raises(ConditionFormatError, match="requires one tool"):
+        _validate_principal_profile(
+            rehash_profile(replace(graph, entities=graph.entities + (extra_tool,)))
+        )
+
+    root = next(entity for entity in graph.entities if entity.kind == "principal")
+    invalid_kind = tuple(
+        replace(fact, value="unknown")
+        if fact.subject == root.id and fact.predicate == "kind"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="invalid kind"):
+        _validate_principal_profile(
+            rehash_profile(replace(graph, facts=invalid_kind))
+        )
+
+    tool = next(entity for entity in graph.entities if entity.kind == "tool")
+    wrong_target = tuple(
+        replace(fact, value={**fact.value, "tool": "other"})
+        if fact.subject == tool.id and fact.predicate == "target"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="target does not match"):
+        _validate_principal_profile(
+            rehash_profile(replace(graph, facts=wrong_target))
+        )
+
+
+def test_intersection_profile_requires_two_exact_member_entities():
+    graph = ToolPrincipal.from_json(
+        PRINCIPAL_INTERSECTING.read_text(encoding="utf-8")
+    ).to_ir()
+    root = next(
+        entity
+        for entity in graph.entities
+        if entity.kind == "principal" and entity.name.startswith("principals/")
+    )
+    members = [
+        entity
+        for entity in graph.entities
+        if entity.kind == "principal" and entity.id != root.id
+    ]
+    removed, kept = members
+    facts = tuple(
+        replace(fact, value=[kept.id])
+        if fact.subject == root.id and fact.predicate == "principals"
+        else fact
+        for fact in graph.facts
+        if fact.subject != removed.id
+    )
+    edges = tuple(edge for edge in graph.edges if edge.target != removed.id)
+    entities = tuple(entity for entity in graph.entities if entity.id != removed.id)
+    with pytest.raises(ConditionFormatError, match="invalid intersection"):
+        _validate_principal_profile(
+            rehash_profile(replace(graph, entities=entities, facts=facts, edges=edges))
+        )
+
+    extra = Entity(_entity_id("principal", "extra"), "principal", "extra")
+    name_fact = Fact(
+        _fact_id(extra.id, "name"), extra.id, "name", "extra", graph.facts[0].evidence
+    )
+    with pytest.raises(ConditionFormatError, match="members do not match"):
+        _validate_principal_profile(
+            rehash_profile(
+                replace(
+                    graph,
+                    entities=graph.entities + (extra,),
+                    facts=graph.facts + (name_fact,),
+                )
+            )
+        )
+
+
+def test_delegated_profile_rechecks_expiry_and_grant_identity():
+    graph = ToolPrincipal.from_json(
+        PRINCIPAL_DELEGATED.read_text(encoding="utf-8")
+    ).to_ir()
+    root = next(entity for entity in graph.entities if entity.kind == "principal")
+    bad_expiry = tuple(
+        replace(fact, value="2026-13-01")
+        if fact.subject == root.id and fact.predicate == "expires"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ConditionFormatError, match="invalid expiry"):
+        _validate_principal_profile(rehash_profile(replace(graph, facts=bad_expiry)))
+
+    extra = Entity(_entity_id("grant", "extra"), "grant", "extra")
+    name_fact = Fact(
+        _fact_id(extra.id, "name"), extra.id, "name", "extra", graph.facts[0].evidence
+    )
+    with pytest.raises(ConditionFormatError, match="grant does not match"):
+        _validate_principal_profile(
+            rehash_profile(
+                replace(
+                    graph,
+                    entities=graph.entities + (extra,),
+                    facts=graph.facts + (name_fact,),
+                )
+            )
+        )
+
+
+def test_fixed_principal_profile_rejects_a_grant_entity():
+    graph = ToolPrincipal.from_json(PRINCIPAL_FIXED.read_text(encoding="utf-8")).to_ir()
+    extra = Entity(_entity_id("grant", "extra"), "grant", "extra")
+    name_fact = Fact(
+        _fact_id(extra.id, "name"), extra.id, "name", "extra", graph.facts[0].evidence
+    )
+
+    with pytest.raises(ConditionFormatError, match="unexpected grant"):
+        _validate_principal_profile(
+            rehash_profile(
+                replace(
+                    graph,
+                    entities=graph.entities + (extra,),
+                    facts=graph.facts + (name_fact,),
+                )
+            )
+        )

@@ -4,7 +4,14 @@ Status: **proposed and experimental**. This document is gate 1 of the
 Phase-2 initiatives for conditional authority and delegation chains. It
 defines the record shapes, trust rules, and evidence gates to test before
 either becomes a manifest schema change. It does not alter manifest version 1,
-the Authority IR analysis profile, or any shipped CLI behaviour.
+the Authority IR analysis profile, or reachability behaviour. Structural
+`mandate ir validate` recognition of the new relations is additive; it proves
+graph integrity only and does not accept the records as authority.
+
+Gate 2a's context and grant readers and gate 2b's tool-side readers and IR
+projections are implemented privately. Structural projection does not make a
+condition or principal eligible for analysis; gate 3 remains the trust and
+semantics boundary.
 
 ## Problem boundary
 
@@ -57,6 +64,7 @@ mandate:
 ```json
 {
   "context_version": 1,
+  "id": "contexts/aws-postgres/select-only",
   "target": {
     "source": "src/postgres-server/server.py",
     "binding": "run_query"
@@ -148,6 +156,7 @@ separation that keeps inventory captures outside the mandate:
 {
   "grant_version": 1,
   "id": "grants/sentry-2026-11.json",
+  "grantor": "authorization-server:sentry",
   "subject": "user:ada",
   "actor": "spiffe://bank/agents/dispute-resolver",
   "audience": "sentry",
@@ -284,6 +293,32 @@ no committed graph proves one. The committed condition-context and grant
 fixtures are explicitly synthetic samples pending captures with real
 provenance: they pin schema behaviour, not upstream facts.
 
+## Gate 2b projection profiles
+
+Two private version-1 JSON artifacts preserve the tool-side declarations
+without changing manifest v1. A tool condition records one target
+(`source`, `binding`, and reviewed tool name), one closed predicate, argument,
+class, weaker effect, context reference, and evidence. A tool principal records
+the same target plus exactly one of these closed shapes:
+
+- `fixed_user_credential`: actor and audience, with no invented subject or grant;
+- `intersecting`: at least two distinct, jointly bounding principal names;
+- `delegated_user`: subject, actor, audience, grant reference, and grant expiry.
+
+Canonical fixtures live in `tests/fixtures/condition-*-v1.json` and
+`tests/fixtures/principal-*-v1.json`. The AWS and Sentry records are
+evidence-shaped acceptance fixtures; the delegated-user record is synthetic
+and proves transport only.
+
+Projection creates digest-bound, provenance-bearing IR facts and the closed
+relations `has_condition`, `uses_context`, `narrows_to`, `constrained_by`, and
+`under_grant`; structured principals reuse `acts_as`. Every fact cites the
+record and its JSON location. The condition and principal profiles reject
+unknown predicates, incomplete fact sets, inconsistent evidence state,
+non-canonical targets, entity mismatch, and digest drift. They deliberately do
+not evaluate conditions, attest grants, or enter the manifest-v1 analysis
+profile.
+
 ## Gates
 
 1. **Contract:** this document survives challenge against both fixtures.
@@ -292,7 +327,7 @@ provenance: they pin schema behaviour, not upstream facts.
    registered relations. Split for review: gate 2a delivers the context and
    grant artifact readers with canonical synthetic fixtures (done); gate 2b
    delivers tool-side condition and structured-principal records plus their
-   IR projection behind registered relations.
+   IR projection behind registered relations (done).
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
    under conservative defaults.

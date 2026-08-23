@@ -1,0 +1,1 @@
+{"evidence":{"confidence":"exact","expires":"2027-08-01","review":"accepted","reviewer":"security-platform"},"id":"principals/aws-postgres/intersection","principal":{"kind":"intersecting","principals":["aws-role:refund-agent","pg-role:refund_rw"]},"principal_version":1,"target":{"binding":"run_query","source":"src/postgres-server/server.py","tool":"run_query"}}
