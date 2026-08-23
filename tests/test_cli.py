@@ -284,6 +284,33 @@ def test_obligations_emit_parseable_json(capsys):
     assert payload["schema"].startswith("agentmandate.obligations/")
 
 
+def test_lint_json_reports_the_full_service_principal_finding(tmp_path, capsys):
+    text = """
+version: 1
+agent: a
+limits: {depth: 4}
+tools:
+  - name: ledger
+    effect: write
+    principal: service
+    requires: [case]
+"""
+    manifest = tmp_path / "service-principal.yaml"
+    manifest.write_text(text, encoding="utf-8")
+    assert main(["lint", str(manifest), "--json"]) == EXIT_FINDING
+    payload = json.loads(capsys.readouterr().out)
+
+    finding = next(
+        f for f in payload["findings"] if f["rule"] == "identity.service-principal"
+    )
+    assert finding["rule"] == "identity.service-principal"
+    assert finding["severity"] == "error"
+    assert finding["subject"] == "ledger"
+    assert "confused-deputy" in finding["message"]
+    assert "not always available" in finding["message"]
+    assert "named review" in finding["message"]
+
+
 def test_scenarios_export_the_reachable_breach_for_review(capsys):
     assert main(["scenarios", V2]) == EXIT_FINDING
     output = capsys.readouterr().out
