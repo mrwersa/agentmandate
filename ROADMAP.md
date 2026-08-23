@@ -80,7 +80,7 @@ manifest shape.
 
 | Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
 |---|---|---|---|
-| **Two additional real graphs** (evidence collected; high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with reviewer notes and at least one clean result. Not a synthetic benchmark corpus. |
+| **Two additional real graphs** ([delivered under the reassessed evidence gate](docs/evidence-metric-review.md); high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with explicit boundaries, preserved raw evidence, classified reviewer corrections, and linked model or product outcomes. Scanner precision is tracked separately and is not declared solved. Not a synthetic benchmark corpus. |
 | **Canonical authority IR with provenance** (delivered; high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
 | **Dynamic inventory declarations** ([delivered](docs/dynamic-inventory-gate-4-review.md); high) | Static scan cannot enumerate provider-built tool lists and must fail closed. Add reviewed inventory boundaries for factories, providers, registries, and deployment configuration. | The [versioned contract](docs/dynamic-inventory.md), reader, inventory IR profile, drift reconciliation, and reviewed CLI preserve complete AgentKit and partial Sentry evidence. | Public drift proves the AgentKit boundary complete and names the evaluation date; every ineligible variant remains a finding. Sentry's JavaScript binding remains an explicit collector limitation, not a fabricated clean result. Never import or execute application code. |
 | **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** (medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. | Version-pinned fixtures and a mapping note for each format. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation or production policy compilation. |
@@ -89,9 +89,11 @@ Dependencies: the IR design follows the new graph evidence, not the reverse.
 Policy experiments may remain disposable until the provenance representation is
 accepted.
 
-Evidence progress: the four-graph count is met, but the clean-result gate
-remains open because every extracted skeleton required material review
-corrections. The data-system graph is captured in
+Evidence progress: the four-graph diversity gate is delivered. The
+[metric review](docs/evidence-metric-review.md) retires “one clean result” as a
+misleading proxy, without reclassifying any extraction as clean: every current
+graph required material correction, and scanner precision remains separately
+open. The data-system graph is captured in
 [`docs/evidence/aws-postgres-mcp`](docs/evidence/aws-postgres-mcp/README.md).
 It exposes the need to model conditional SQL effects, intersecting AWS/database
 principals, multi-output tools, and deployment-bound resource relationships. The
