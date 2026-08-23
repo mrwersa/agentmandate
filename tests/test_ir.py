@@ -6,6 +6,7 @@ from dataclasses import replace
 
 import pytest
 
+import agentmandate._ir as ir
 from agentmandate import analyse, loads
 from agentmandate._ir import (
     IR_VERSION,
@@ -162,6 +163,23 @@ def test_mandate_adapter_fails_closed_on_conflicting_single_valued_facts() -> No
 
     with pytest.raises(IRFormatError, match="conflicting facts for tool:t.effect"):
         _to_mandate(replace(snapshot, facts=snapshot.facts + (conflict,)))
+
+
+def test_manifest_projection_refuses_an_internal_id_collision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = ir._entity_id
+
+    def collide_scopes(kind: str, name: str) -> str:
+        return "scope:collision" if kind == "scope" else original(kind, name)
+
+    monkeypatch.setattr(ir, "_entity_id", collide_scopes)
+    mandate = loads(
+        "agent: a\ntools:\n  - name: t\n    effect: read\n    requires: [first, second]\n"
+    )
+
+    with pytest.raises(IRFormatError, match="conflicting values for scope:collision.name"):
+        _from_mandate(mandate)
 
 
 def test_mandate_adapter_rejects_a_reference_to_the_wrong_entity_kind() -> None:

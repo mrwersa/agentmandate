@@ -263,6 +263,8 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         )
         if existing is not None:
             index, previous = existing
+            if previous.value != value:
+                raise IRFormatError(f"conflicting values for {subject}.{predicate}")
             facts[index] = Fact(
                 id=previous.id,
                 subject=previous.subject,
