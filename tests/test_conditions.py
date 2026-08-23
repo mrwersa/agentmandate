@@ -3,10 +3,12 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import replace
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
 
+from agentmandate import analyse, loads
 from agentmandate._conditions import (
     GRANT_VERSION,
     ConditionContext,
@@ -17,11 +19,13 @@ from agentmandate._conditions import (
     _profile_digest,
     _validate_condition_profile,
     _validate_principal_profile,
+    analyse_conditions,
 )
 from agentmandate._ir import AuthorityIR, Entity, Fact, _entity_id, _fact_id
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CONTEXT = FIXTURES / "condition-context-select-v1.json"
+CONTEXT_COMPLETE = FIXTURES / "condition-context-select-only-complete-v1.json"
 CAPTURE = FIXTURES / "condition-context-capture.sql"
 GRANT = FIXTURES / "delegation-grant-v1.json"
 GRANT_CAPTURE = FIXTURES / "delegation-grant-capture.json"
@@ -61,6 +65,15 @@ def test_canonical_context_fixture_round_trips_byte_stably():
     assert value.dialect == "postgresql-16"
     assert value.source is not None
     assert value.source.kind == "argument-capture"
+
+
+def test_complete_context_fixture_round_trips_byte_stably():
+    committed = CONTEXT_COMPLETE.read_text(encoding="utf-8")
+    value = ConditionContext.from_json(committed)
+
+    assert value.to_json() == committed
+    assert value.completeness == "complete"
+    assert value.classes == ("select-only",)
 
 
 def test_context_verifies_the_committed_capture_bytes():
@@ -922,4 +935,220 @@ def test_fixed_principal_profile_rejects_a_grant_entity():
                     facts=graph.facts + (name_fact,),
                 )
             )
+        )
+
+
+CONDITIONAL_MANIFEST = """
+agent: conditional
+tools:
+  - name: run_query
+    effect: irreversible
+    produces: rows
+"""
+
+
+def conditional_inputs():
+    mandate = loads(CONDITIONAL_MANIFEST)
+    condition = ToolCondition.from_json(
+        CONDITION_STATEMENT.read_text(encoding="utf-8")
+    )
+    context = ConditionContext.from_json(
+        CONTEXT_COMPLETE.read_text(encoding="utf-8")
+    )
+    captures = {context.id: CAPTURE.read_bytes()}
+    return mandate, condition, context, captures
+
+
+def test_complete_reviewed_sql_context_narrows_existing_reachability():
+    mandate, condition, context, captures = conditional_inputs()
+
+    result = analyse_conditions(
+        mandate,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert analyse(mandate).ungated_irreversible == frozenset({"run_query"})
+    assert result.authority.ungated_irreversible == frozenset()
+    assert result.authority.effects == frozenset({("read", "rows")})
+    assert result.findings == ()
+    assert result.as_of == "2027-01-01"
+    assert len(result.applied) == 1
+    applied = result.applied[0]
+    assert (applied.default_effect, applied.effective_effect) == (
+        "irreversible",
+        "read",
+    )
+    assert any(item.endswith("#/source/content_sha256") for item in applied.support)
+    assert any(item.startswith("fact:condition:") for item in applied.support)
+
+
+def test_representative_context_never_narrows_global_authority():
+    mandate, condition, _, captures = conditional_inputs()
+    context = ConditionContext.from_json(CONTEXT.read_text(encoding="utf-8"))
+
+    result = analyse_conditions(
+        mandate,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2026, 9, 1),
+    )
+
+    assert result.authority == analyse(mandate)
+    assert result.applied == ()
+    assert result.findings[0].message == "condition context is not complete"
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ("missing_tool", "target tool is not present"),
+        ("condition_untrusted", "condition evidence is not exact and accepted"),
+        ("context_untrusted", "context evidence is not exact and accepted"),
+        ("condition_expired", "condition or context review is expired"),
+        ("context_expired", "condition or context review is expired"),
+        ("mixed_classes", "does not exclusively admit"),
+        ("not_attenuating", "does not attenuate"),
+        ("missing_bytes", "capture bytes were not supplied"),
+        ("tampered_bytes", "capture bytes failed verification"),
+    ],
+)
+def test_condition_trust_failures_preserve_the_default_effect(change: str, message: str):
+    mandate, condition, context, captures = conditional_inputs()
+    if change == "missing_tool":
+        condition = replace(condition, target=replace(condition.target, tool="absent"))
+    elif change == "condition_untrusted":
+        condition = replace(
+            condition,
+            evidence=replace(condition.evidence, confidence="heuristic"),
+        )
+    elif change == "context_untrusted":
+        context = replace(
+            context,
+            evidence=replace(context.evidence, review="contested"),
+        )
+    elif change == "condition_expired":
+        condition = replace(
+            condition,
+            evidence=replace(condition.evidence, expires="2026-01-01"),
+        )
+    elif change == "context_expired":
+        context = replace(
+            context,
+            evidence=replace(context.evidence, expires="2026-01-01"),
+        )
+    elif change == "mixed_classes":
+        context = replace(context, classes=("ddl", "select-only"))
+    elif change == "not_attenuating":
+        mandate = replace(
+            mandate,
+            tools=(replace(mandate.tools[0], effect="read"),),
+        )
+    elif change == "missing_bytes":
+        captures = {}
+    elif change == "tampered_bytes":
+        captures = {context.id: b"DROP TABLE payments;\n"}
+
+    result = analyse_conditions(
+        mandate,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert result.authority == analyse(mandate)
+    assert result.applied == ()
+    assert message in result.findings[0].message
+
+
+@pytest.mark.parametrize("field", ["source", "binding", "predicate", "arg"])
+def test_condition_context_operand_mismatch_is_unresolved(field: str):
+    mandate, condition, context, captures = conditional_inputs()
+    if field in {"source", "binding"}:
+        condition = replace(
+            condition,
+            target=replace(condition.target, **{field: f"other-{field}"}),
+        )
+    elif field == "predicate":
+        condition = replace(condition, predicate="dispatch_target")
+    else:
+        condition = replace(condition, **{field: f"other-{field}"})
+
+    result = analyse_conditions(
+        mandate,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert result.authority == analyse(mandate)
+    assert result.findings[0].message == "condition and context operands do not match"
+
+
+def test_missing_duplicate_context_and_condition_conflicts_are_unresolved():
+    mandate, condition, context, captures = conditional_inputs()
+
+    missing = analyse_conditions(
+        mandate, [condition], [], captures, as_of=date(2027, 1, 1)
+    )
+    duplicate_context = analyse_conditions(
+        mandate,
+        [condition],
+        [context, context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+    duplicate_id = analyse_conditions(
+        mandate,
+        [condition, condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+    second = replace(condition, id="conditions/aws-postgres/second")
+    duplicate_tool = analyse_conditions(
+        mandate,
+        [condition, second],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert "missing or declared more than once" in missing.findings[0].message
+    assert "missing or declared more than once" in duplicate_context.findings[0].message
+    assert {item.message for item in duplicate_id.findings} == {
+        "condition id is declared more than once"
+    }
+    assert {item.message for item in duplicate_tool.findings} == {
+        "multiple conditions target the same tool"
+    }
+    assert all(result.authority == analyse(mandate) for result in (
+        missing, duplicate_context, duplicate_id, duplicate_tool
+    ))
+
+
+def test_conditional_consumption_rejects_malformed_records_and_wall_clock_inputs():
+    mandate, condition, context, captures = conditional_inputs()
+    malformed = replace(condition, id=" condition")
+
+    with pytest.raises(ConditionFormatError, match="must be stripped"):
+        analyse_conditions(
+            mandate,
+            [malformed],
+            [context],
+            captures,
+            as_of=date(2027, 1, 1),
+        )
+    with pytest.raises(ConditionFormatError, match="as_of must be a date"):
+        analyse_conditions(
+            mandate,
+            [condition],
+            [context],
+            captures,
+            as_of=datetime(2027, 1, 1),
         )
