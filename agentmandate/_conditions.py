@@ -2,9 +2,8 @@
 
 Gates 2a and 2b of the conditions-and-delegation contract: strict external
 context and grant readers, private tool-side condition and structured-principal
-records, and their closed Authority IR projections. Nothing in this module
-decides eligibility or analysis semantics, and nothing is exported from
-:mod:`agentmandate`.
+records, their closed Authority IR projections, and private trust consumers.
+Nothing is exported from :mod:`agentmandate`.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import date, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ._ir import (
     IR_VERSION,
@@ -32,6 +31,11 @@ from ._ir import (
 from ._ir import Evidence as IREvidence
 from .manifest import EFFECT_RANK, Mandate
 from .reach import Authority, _analyse_with_trace
+
+if TYPE_CHECKING:
+    from ._inventory import InventoryReconciliation
+    from .drift import Drift
+    from .inventory import Inventory
 
 CONDITION_CONTEXT_VERSION = 1
 GRANT_VERSION = 1
@@ -126,6 +130,18 @@ class ConditionalAnalysis:
     findings: tuple[ConditionFinding, ...]
     applied: tuple[AppliedCondition, ...]
     as_of: str
+
+
+@dataclass(frozen=True)
+class ConditionalDrift:
+    """Private Gate 3b result joining source drift and condition decisions."""
+
+    drift: Drift
+    analysis: ConditionalAnalysis
+
+    @property
+    def clean(self) -> bool:
+        return self.drift.clean and not self.analysis.findings
 
 
 def _reject_constant(_: str) -> None:
@@ -1320,6 +1336,91 @@ def analyse_conditions(
         findings=tuple(findings),
         applied=tuple(applied),
         as_of=evaluated_on,
+    )
+
+
+def reconcile_condition_drift(
+    mandate: Mandate,
+    inventory: Inventory,
+    conditions: Sequence[ToolCondition],
+    contexts: Sequence[ConditionContext],
+    source_bytes: Mapping[str, bytes],
+    *,
+    as_of: date,
+    depth: int | None = None,
+    dynamic: InventoryReconciliation | None = None,
+) -> ConditionalDrift:
+    """Reconcile conditional authority against one live source inventory.
+
+    The analysis is computed here rather than accepted from a caller, so a
+    result derived from another mandate or source cannot be attached to this
+    drift report. Source mismatch affects condition eligibility only; it does
+    not suppress the independent tool-removal checks in ordinary drift.
+    """
+    from .drift import compare
+
+    canonical_conditions = tuple(
+        ToolCondition.from_json(item.to_json()) for item in conditions
+    )
+    # Structural projection and its closed profile are rechecked even for a
+    # record whose source target later proves ineligible.
+    for condition in canonical_conditions:
+        _validate_condition_profile(condition.to_ir())
+
+    selected = inventory.selected
+    live_tools = {item.name for item in inventory.declarations}
+    if dynamic is not None:
+        live_tools.update(dynamic.members)
+
+    candidates: list[ToolCondition] = []
+    source_findings: list[ConditionFinding] = []
+    failed_tools: set[str] = set()
+    for condition in sorted(canonical_conditions, key=lambda item: item.id):
+        if selected is None:
+            message = "source inventory does not identify one selected binding"
+        elif (
+            condition.target.source != selected.module
+            or condition.target.binding != selected.label
+        ):
+            message = "condition target does not match the selected source binding"
+        elif condition.target.tool not in live_tools:
+            message = "condition target tool is not present in the reconciled source inventory"
+        else:
+            candidates.append(condition)
+            continue
+        failed_tools.add(condition.target.tool)
+        source_findings.append(
+            ConditionFinding(condition.id, condition.target.tool, message)
+        )
+
+    eligible: list[ToolCondition] = []
+    for condition in candidates:
+        if condition.target.tool not in failed_tools:
+            eligible.append(condition)
+            continue
+        source_findings.append(
+            ConditionFinding(
+                condition.id,
+                condition.target.tool,
+                "another condition targeting this tool failed source reconciliation",
+            )
+        )
+
+    analysis = analyse_conditions(
+        mandate,
+        eligible,
+        contexts,
+        source_bytes,
+        as_of=as_of,
+        depth=depth,
+    )
+    # Duplicate record IDs can produce identical trust failures. Drift names
+    # the collision once while preserving distinct failures and target tools.
+    findings = tuple(dict.fromkeys((*source_findings, *analysis.findings)))
+    combined = replace(analysis, findings=findings)
+    return ConditionalDrift(
+        drift=compare(mandate, inventory, dynamic=dynamic),
+        analysis=combined,
     )
 
 
