@@ -81,6 +81,10 @@ independent SaaS/operations graph in
 skill-filtered authority catalogue hidden behind a destructive meta-tool, fixed
 user-token delegation, tenant constraints, and unlabelled operational data.
 
+IR design progress: the proposed compatibility and provenance contract is in
+[`docs/authority-ir.md`](docs/authority-ir.md). It remains experimental until
+the round-trip and derived-edge evidence gates in that document pass.
+
 ## 3–6 months: model real authority
 
 Goal: represent the smallest set of relationships, conditions, delegation, and
