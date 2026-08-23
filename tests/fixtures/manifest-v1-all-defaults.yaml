@@ -1,0 +1,6 @@
+# Compatibility fixture for the agent-level defaults that the shorthand
+# fixture must populate in order to exercise role membership.
+agent: all-defaults
+tools:
+  - name: get_status
+    effect: read

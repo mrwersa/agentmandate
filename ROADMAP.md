@@ -82,8 +82,11 @@ skill-filtered authority catalogue hidden behind a destructive meta-tool, fixed
 user-token delegation, tenant constraints, and unlabelled operational data.
 
 IR design progress: the proposed compatibility and provenance contract is in
-[`docs/authority-ir.md`](docs/authority-ir.md). It remains experimental until
-the round-trip and derived-edge evidence gates in that document pass.
+[`docs/authority-ir.md`](docs/authority-ir.md). Private records and the
+manifest round-trip gate now cover every example, all four evidence graphs, all
+v1 shorthand/default paths, and a canonical migration fixture. The format
+remains experimental until IR-backed reachability and derived-edge provenance
+pass their gates.
 
 ## 3–6 months: model real authority
 

@@ -1,0 +1,10 @@
+# Compatibility fixture: every manifest v1 shorthand and omitted default.
+agent: compatibility/defaults
+roles:
+  reviewer: inspect_case
+tools:
+  - name: inspect_case
+    effect: read
+    requires: case
+  - name: get_status
+    effect: read

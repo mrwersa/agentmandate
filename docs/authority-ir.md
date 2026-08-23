@@ -151,6 +151,12 @@ Implementation is deliberately split so review can stop a bad format early:
 4. Expose import/export through the CLI only after unsupported semantics and
    output stability have been reviewed.
 
-The format remains experimental until those gates pass. Policy-language
+Gates 1 and 2 are implemented privately. The committed v1 fixture covers every
+manifest shorthand and omitted-default path, and tests preserve both `Mandate`
+equality and reachability output across all repository examples and the four
+real evidence graphs. Reachability still consumes `Mandate`, not IR edges, and
+there is no CLI surface.
+
+The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary
 provenance graphs are explicit non-goals for this first initiative.

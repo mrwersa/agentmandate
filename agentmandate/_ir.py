@@ -18,7 +18,25 @@ from .manifest import SCHEMA_VERSION, Limits, Mandate, Money, Tool
 
 IR_VERSION = 1
 MANIFEST_ADAPTER = "agentmandate.manifest"
-MANIFEST_ADAPTER_VERSION = 1
+MANIFEST_ADAPTER_VERSION = 2
+MANIFEST_DEFAULTS_ADAPTER = "agentmandate.manifest-defaults"
+MANIFEST_DEFAULTS_ADAPTER_VERSION = 1
+_NO_DEFAULT = object()
+_MANIFEST_V1_DEFAULTS = {
+    "agent.identity": None,
+    "agent.roles": [],
+    "limits.depth": 8,
+    "limits.effects": {},
+    "limits.total": None,
+    "tool.ceiling": None,
+    "tool.principal": "caller",
+    "tool.produces": None,
+    "tool.requires": [],
+    "tool.requires_approval": False,
+    "tool.scope_key": None,
+    "tool.unbounded": False,
+    "tool.value_arg": None,
+}
 
 
 class IRFormatError(ValueError):
@@ -237,6 +255,7 @@ def _semantic_payload(
 def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR:
     """Project a parsed v1 mandate into the experimental canonical records."""
     source_id = "source:mandate"
+    defaults_source_id = "source:manifest-v1"
     entities: dict[str, Entity] = {}
     facts: list[Fact] = []
     edges: dict[str, Edge] = {}
@@ -248,15 +267,29 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         fact(identifier, "name", name, location)
         return identifier
 
-    def fact(subject: str, predicate: str, value: Any, location: str) -> str:
+    def fact(
+        subject: str,
+        predicate: str,
+        value: Any,
+        location: str,
+        default: Any = _NO_DEFAULT,
+        default_name: str | None = None,
+    ) -> str:
         identifier = _fact_id(subject, predicate)
-        evidence = Evidence(source=source_id, location=location)
+        evidence_items = [Evidence(source=source_id, location=location)]
+        if default is not _NO_DEFAULT and value == default:
+            evidence_items.append(
+                Evidence(
+                    source=defaults_source_id,
+                    location=f"manifest:v1#/defaults/{default_name}",
+                )
+            )
         candidate = Fact(
             id=identifier,
             subject=subject,
             predicate=predicate,
             value=value,
-            evidence=(evidence,),
+            evidence=tuple(evidence_items),
         )
         existing = next(
             ((index, item) for index, item in enumerate(facts) if item.id == identifier), None
@@ -265,6 +298,7 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
             index, previous = existing
             if previous.value != value:
                 raise IRFormatError(f"conflicting values for {subject}.{predicate}")
+            combined = set(previous.evidence + tuple(evidence_items))
             facts[index] = Fact(
                 id=previous.id,
                 subject=previous.subject,
@@ -272,7 +306,7 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
                 value=previous.value,
                 evidence=tuple(
                     sorted(
-                        set(previous.evidence + (evidence,)),
+                        combined,
                         key=lambda item: item.location,
                     )
                 ),
@@ -294,44 +328,80 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         tool_ids.append(tool_id)
         fact(tool_id, "effect", tool.effect, f"{base}/effect")
         principal_id = entity("principal", tool.principal, f"{base}/principal")
-        principal = fact(tool_id, "principal", principal_id, f"{base}/principal")
+        principal = fact(
+            tool_id,
+            "principal",
+            principal_id,
+            f"{base}/principal",
+            _entity_id("principal", "caller"),
+            "tool.principal",
+        )
         edge(tool_id, "acts_as", principal_id, (principal,))
 
         required_ids = [
             entity("scope", name, f"{base}/requires/{required_index}")
             for required_index, name in enumerate(tool.requires)
         ]
-        required = fact(tool_id, "requires", required_ids, f"{base}/requires")
+        required = fact(
+            tool_id, "requires", required_ids, f"{base}/requires", [], "tool.requires"
+        )
         for scope_id in set(required_ids):
             edge(tool_id, "requires", scope_id, (required,))
 
         produces_id = (
             entity("scope", tool.produces, f"{base}/produces") if tool.produces else None
         )
-        produces = fact(tool_id, "produces", produces_id, f"{base}/produces")
+        produces = fact(
+            tool_id, "produces", produces_id, f"{base}/produces", None, "tool.produces"
+        )
         if produces_id is not None:
             edge(tool_id, "produces", produces_id, (produces,))
 
-        fact(tool_id, "unbounded", tool.unbounded, f"{base}/unbounded")
-        fact(tool_id, "value_arg", tool.value_arg, f"{base}/value_arg")
+        fact(
+            tool_id,
+            "unbounded",
+            tool.unbounded,
+            f"{base}/unbounded",
+            False,
+            "tool.unbounded",
+        )
+        fact(
+            tool_id,
+            "value_arg",
+            tool.value_arg,
+            f"{base}/value_arg",
+            None,
+            "tool.value_arg",
+        )
         ceiling_value = (
             None
             if tool.ceiling is None
             else {"amount": str(tool.ceiling.amount), "currency": tool.ceiling.currency}
         )
-        ceiling = fact(tool_id, "ceiling", ceiling_value, f"{base}/ceiling")
+        ceiling = fact(
+            tool_id, "ceiling", ceiling_value, f"{base}/ceiling", None, "tool.ceiling"
+        )
         scope_key_id = (
             entity("scope", tool.scope_key, f"{base}/scope_key") if tool.scope_key else None
         )
-        scope_key = fact(tool_id, "scope_key", scope_key_id, f"{base}/scope_key")
+        scope_key = fact(
+            tool_id, "scope_key", scope_key_id, f"{base}/scope_key", None, "tool.scope_key"
+        )
         if scope_key_id is not None:
             edge(tool_id, "ceiling_on", scope_key_id, (scope_key, ceiling))
-        fact(tool_id, "requires_approval", tool.requires_approval, f"{base}/requires_approval")
+        fact(
+            tool_id,
+            "requires_approval",
+            tool.requires_approval,
+            f"{base}/requires_approval",
+            False,
+            "tool.requires_approval",
+        )
         # Effect is deliberately a fact rather than an edge: it is a closed,
         # single-valued predicate whose conflicts must stop analysis.
 
     fact(agent_id, "tools", tool_ids, "/tools")
-    fact(agent_id, "identity", mandate.identity, "/identity")
+    fact(agent_id, "identity", mandate.identity, "/identity", None, "agent.identity")
 
     role_ids: list[str] = []
     for role_name, members in mandate.roles.items():
@@ -342,7 +412,7 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         membership = fact(role_id, "members", member_ids, role_pointer)
         for member_id in set(member_ids):
             edge(role_id, "role_contains", member_id, (membership,))
-    fact(agent_id, "roles", role_ids, "/roles")
+    fact(agent_id, "roles", role_ids, "/roles", [], "agent.roles")
 
     limits_id = entity("constraint", "run", "/limits")
     total = (
@@ -353,9 +423,16 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
             "currency": mandate.limits.total.currency,
         }
     )
-    fact(limits_id, "total", total, "/limits/total")
-    fact(limits_id, "depth", mandate.limits.depth, "/limits/depth")
-    fact(limits_id, "effects", dict(sorted(mandate.limits.effects.items())), "/limits/effects")
+    fact(limits_id, "total", total, "/limits/total", None, "limits.total")
+    fact(limits_id, "depth", mandate.limits.depth, "/limits/depth", 8, "limits.depth")
+    fact(
+        limits_id,
+        "effects",
+        dict(sorted(mandate.limits.effects.items())),
+        "/limits/effects",
+        {},
+        "limits.effects",
+    )
 
     ordered_entities = tuple(sorted(entities.values(), key=lambda item: item.id))
     ordered_facts = tuple(sorted(facts, key=lambda item: item.id))
@@ -374,7 +451,23 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         adapter_version=MANIFEST_ADAPTER_VERSION,
         content_sha256=hashlib.sha256(content).hexdigest() if content is not None else None,
     )
-    return AuthorityIR(IR_VERSION, (source,), ordered_entities, ordered_facts, ordered_edges)
+    defaults_source = Source(
+        id=defaults_source_id,
+        kind="manifest-schema",
+        locator="agentmandate:manifest/v1",
+        format_version=SCHEMA_VERSION,
+        producer_version=None,
+        semantic_sha256=hashlib.sha256(_canonical_bytes(_MANIFEST_V1_DEFAULTS)).hexdigest(),
+        adapter=MANIFEST_DEFAULTS_ADAPTER,
+        adapter_version=MANIFEST_DEFAULTS_ADAPTER_VERSION,
+    )
+    return AuthorityIR(
+        IR_VERSION,
+        (source, defaults_source),
+        ordered_entities,
+        ordered_facts,
+        ordered_edges,
+    )
 
 
 def _to_mandate(snapshot: AuthorityIR) -> Mandate:
