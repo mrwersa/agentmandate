@@ -146,7 +146,9 @@ def test_mandate_adapter_rejects_a_snapshot_from_another_ir_version() -> None:
 def test_mandate_adapter_requires_one_agent_and_every_required_fact() -> None:
     snapshot = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n"))
     without_agent = replace(
-        snapshot, entities=tuple(item for item in snapshot.entities if item.kind != "agent")
+        snapshot,
+        entities=tuple(item for item in snapshot.entities if item.kind != "agent"),
+        facts=tuple(item for item in snapshot.facts if item.subject != "agent:a"),
     )
     without_identity = replace(
         snapshot,
@@ -162,7 +164,7 @@ def test_mandate_adapter_requires_one_agent_and_every_required_fact() -> None:
 def test_mandate_adapter_fails_closed_on_conflicting_single_valued_facts() -> None:
     snapshot = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n"))
     effect = next(item for item in snapshot.facts if item.predicate == "effect")
-    conflict = replace(effect, id=effect.id + ":conflict", value="irreversible")
+    conflict = replace(effect, value="irreversible")
 
     with pytest.raises(IRFormatError, match="conflicting facts for tool:t.effect"):
         _to_mandate(replace(snapshot, facts=snapshot.facts + (conflict,)))
@@ -186,13 +188,15 @@ def test_manifest_projection_refuses_an_internal_id_collision(
 
 
 def test_mandate_adapter_rejects_a_reference_to_the_wrong_entity_kind() -> None:
-    snapshot = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n"))
+    snapshot = _from_mandate(
+        loads("agent: a\ntools: [{name: t, effect: read, produces: case}]\n")
+    )
     facts = tuple(
-        replace(item, value="agent:a")
-        if item.subject == "tool:t" and item.predicate == "principal"
+        replace(item, value=["scope:case"])
+        if item.subject == "agent:a" and item.predicate == "tools"
         else item
         for item in snapshot.facts
     )
 
-    with pytest.raises(IRFormatError, match="no principal entity 'agent:a'"):
+    with pytest.raises(IRFormatError, match="no tool entity 'scope:case'"):
         _to_mandate(replace(snapshot, facts=facts))

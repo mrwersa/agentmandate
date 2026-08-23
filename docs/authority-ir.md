@@ -91,6 +91,13 @@ view, but it cannot cancel an accepted edge. The relation registry must declare
 cardinality and these merge semantics before reachability consumes a new
 relation.
 
+The private v1 registry currently permits `acts_as`, `ceiling_on`, `produces`,
+`requires`, and `role_contains`. Snapshot validation checks canonical IDs,
+endpoint kinds, support references, and that the cited fact actually names the
+edge target. It also requires every relationship-valued fact to have its edge,
+so deleting an edge cannot silently narrow analysis. No derived relation is
+permitted yet; gate 3 must register and validate each one before use.
+
 ## Compatibility and serialization
 
 The IR has its own integer `ir_version`, independent of manifest versions and

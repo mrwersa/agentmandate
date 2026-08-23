@@ -44,6 +44,24 @@ class IRFormatError(ValueError):
 
 
 @dataclass(frozen=True)
+class Relation:
+    source_kind: str
+    target_kind: str
+    cardinality: str
+    merge: str
+    predicate: str
+
+
+RELATIONS = {
+    "acts_as": Relation("tool", "principal", "one", "single", "principal"),
+    "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
+    "produces": Relation("tool", "scope", "one", "single", "produces"),
+    "requires": Relation("tool", "scope", "many", "union", "requires"),
+    "role_contains": Relation("role", "tool", "many", "union", "members"),
+}
+
+
+@dataclass(frozen=True)
 class Evidence:
     source: str
     location: str
@@ -169,6 +187,96 @@ class AuthorityIR:
             self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
         ) + "\n"
 
+    def validate(self) -> None:
+        """Reject graph ambiguity before an analysis can consume IR edges."""
+        if self.ir_version != IR_VERSION:
+            raise IRFormatError(f"unsupported authority IR version {self.ir_version!r}")
+
+        tables = {
+            "source": self.sources,
+            "entity": self.entities,
+            "edge": self.edges,
+        }
+        for table, records in tables.items():
+            identifiers = [item.id for item in records]
+            if len(identifiers) != len(set(identifiers)):
+                raise IRFormatError(f"authority IR has a duplicate {table} id")
+
+        sources = {item.id for item in self.sources}
+        entities = {item.id: item for item in self.entities}
+        facts = {item.id: item for item in self.facts}
+        predicates: set[tuple[str, str]] = set()
+        for entity in self.entities:
+            if entity.id != _entity_id(entity.kind, entity.name):
+                raise IRFormatError(f"authority IR entity id does not match {entity.name!r}")
+        for fact in self.facts:
+            if fact.id != _fact_id(fact.subject, fact.predicate):
+                raise IRFormatError(f"authority IR fact id does not match {fact.subject}")
+            if fact.subject not in entities:
+                raise IRFormatError(f"authority IR fact has unknown subject {fact.subject!r}")
+            key = (fact.subject, fact.predicate)
+            if key in predicates:
+                raise IRFormatError(
+                    f"authority IR has conflicting facts for {fact.subject}.{fact.predicate}"
+                )
+            predicates.add(key)
+            for evidence in fact.evidence:
+                if evidence.source not in sources:
+                    raise IRFormatError(
+                        f"authority IR evidence has unknown source {evidence.source!r}"
+                    )
+                if evidence.confidence not in {"exact", "heuristic", "unknown"}:
+                    raise IRFormatError(
+                        f"authority IR has unknown confidence {evidence.confidence!r}"
+                    )
+                if evidence.review not in {"unreviewed", "accepted", "contested"}:
+                    raise IRFormatError(f"authority IR has unknown review {evidence.review!r}")
+
+        actual_edges = {(edge.source, edge.relation, edge.target) for edge in self.edges}
+        for edge in self.edges:
+            expected_id = _edge_id(edge.source, edge.relation, edge.target)
+            if edge.id != expected_id:
+                raise IRFormatError(f"authority IR edge id does not match {expected_id!r}")
+            relation = RELATIONS.get(edge.relation)
+            if relation is None:
+                raise IRFormatError(f"authority IR has unknown relation {edge.relation!r}")
+            source = entities.get(edge.source)
+            target = entities.get(edge.target)
+            if source is None or target is None:
+                raise IRFormatError(f"authority IR edge {edge.id!r} has an unknown endpoint")
+            if source.kind != relation.source_kind or target.kind != relation.target_kind:
+                raise IRFormatError(f"authority IR edge {edge.id!r} has invalid endpoint kinds")
+            if not edge.support:
+                raise IRFormatError(f"authority IR edge {edge.id!r} has no support")
+            establishes_relation = False
+            for support_id in edge.support:
+                support = facts.get(support_id)
+                if support is None:
+                    raise IRFormatError(
+                        f"authority IR edge {edge.id!r} has unknown support {support_id!r}"
+                    )
+                if support.subject != edge.source:
+                    raise IRFormatError(
+                        f"authority IR edge {edge.id!r} cites support from another entity"
+                    )
+                targets = support.value if isinstance(support.value, list) else [support.value]
+                if support.predicate == relation.predicate and edge.target in targets:
+                    establishes_relation = True
+            if not establishes_relation:
+                raise IRFormatError(
+                    f"authority IR edge {edge.id!r} is not established by its support"
+                )
+        for fact in self.facts:
+            for relation_name, relation in RELATIONS.items():
+                if fact.predicate != relation.predicate:
+                    continue
+                targets = fact.value if isinstance(fact.value, list) else [fact.value]
+                for target in (item for item in targets if item is not None):
+                    if (fact.subject, relation_name, target) not in actual_edges:
+                        raise IRFormatError(
+                            f"authority IR is missing {relation_name} edge from {fact.subject}"
+                        )
+
     @classmethod
     def from_json(cls, text: str) -> AuthorityIR:
         raw = json.loads(text)
@@ -177,13 +285,15 @@ class AuthorityIR:
             raise IRFormatError(
                 f"unsupported authority IR version {version!r}; this build reads {IR_VERSION}"
             )
-        return cls(
+        snapshot = cls(
             ir_version=version,
             sources=tuple(_source_from_dict(item) for item in raw["sources"]),
             entities=tuple(Entity(**item) for item in raw["entities"]),
             facts=tuple(_fact_from_dict(item) for item in raw["facts"]),
             edges=tuple(_edge_from_dict(item) for item in raw["edges"]),
         )
+        snapshot.validate()
+        return snapshot
 
 
 def _source_from_dict(raw: dict[str, Any]) -> Source:
@@ -461,28 +571,22 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         adapter=MANIFEST_DEFAULTS_ADAPTER,
         adapter_version=MANIFEST_DEFAULTS_ADAPTER_VERSION,
     )
-    return AuthorityIR(
+    snapshot = AuthorityIR(
         IR_VERSION,
         (source, defaults_source),
         ordered_entities,
         ordered_facts,
         ordered_edges,
     )
+    snapshot.validate()
+    return snapshot
 
 
 def _to_mandate(snapshot: AuthorityIR) -> Mandate:
     """Rebuild a mandate from records emitted by the v1 manifest adapter."""
-    if snapshot.ir_version != IR_VERSION:
-        raise IRFormatError(f"unsupported authority IR version {snapshot.ir_version!r}")
+    snapshot.validate()
     entities = {item.id: item for item in snapshot.entities}
-    facts: dict[tuple[str, str], Any] = {}
-    for item in snapshot.facts:
-        key = (item.subject, item.predicate)
-        if key in facts:
-            raise IRFormatError(
-                f"authority IR has conflicting facts for {item.subject}.{item.predicate}"
-            )
-        facts[key] = item.value
+    facts = {(item.subject, item.predicate): item.value for item in snapshot.facts}
 
     def only(kind: str) -> Entity:
         candidates = [item for item in snapshot.entities if item.kind == kind]
@@ -505,6 +609,7 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
     agent = only("agent")
     tools: list[Tool] = []
     for tool_id in value(agent.id, "tools"):
+        tool_name = name(tool_id, "tool")
         ceiling_raw = value(tool_id, "ceiling")
         ceiling = (
             None
@@ -513,7 +618,7 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
         )
         tools.append(
             Tool(
-                name=name(tool_id, "tool"),
+                name=tool_name,
                 effect=value(tool_id, "effect"),
                 principal=name(value(tool_id, "principal"), "principal"),
                 requires=tuple(name(item, "scope") for item in value(tool_id, "requires")),
