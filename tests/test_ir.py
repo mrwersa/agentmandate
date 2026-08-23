@@ -61,7 +61,8 @@ def test_records_preserve_entity_fact_edge_and_source_provenance() -> None:
     snapshot = _from_mandate(loads(RICH), RICH.encode())
     entities = {item.id: item for item in snapshot.entities}
     facts = {item.id: item for item in snapshot.facts}
-    source = snapshot.sources[0]
+    sources = {item.id: item for item in snapshot.sources}
+    source = sources["source:mandate"]
 
     assert snapshot.ir_version == IR_VERSION
     assert entities["agent:operations%2Fteam"].name == "operations/team"
@@ -74,7 +75,7 @@ def test_records_preserve_entity_fact_edge_and_source_provenance() -> None:
     }
     assert all(set(edge.support) <= set(facts) for edge in snapshot.edges)
     assert all(
-        evidence.source == source.id
+        evidence.source in sources
         and evidence.confidence == "exact"
         and evidence.review == "accepted"
         for fact in snapshot.facts
@@ -90,7 +91,9 @@ def test_records_preserve_entity_fact_edge_and_source_provenance() -> None:
     assert role_name.evidence[0].location == "/roles/operator~1team"
     assert source.content_sha256 == hashlib.sha256(RICH.encode()).hexdigest()
     assert source.adapter == "agentmandate.manifest"
-    assert source.adapter_version == 1
+    assert source.adapter_version == 2
+    assert sources["source:manifest-v1"].adapter == "agentmandate.manifest-defaults"
+    assert sources["source:manifest-v1"].adapter_version == 1
 
 
 def test_canonical_json_orders_tables_evidence_and_edge_support() -> None:

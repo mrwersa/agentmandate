@@ -102,8 +102,16 @@ A source distinguishes `content_sha256`, calculated over captured source bytes,
 from `semantic_sha256`, calculated over the canonical facts produced from it.
 The latter is always available; the former is omitted when a caller supplies
 an already-parsed `Mandate`. The adapter never labels a normalized projection
-as the original artifact. Source locations for version-defined defaults point
-to the manifest-version definition rather than to a key that was absent.
+as the original artifact. Supplying source bytes adds the content digest; it
+does not recover syntax that parsing already discarded.
+
+For a parsed `Mandate`, schema-default evidence means that the normalized value
+equals the manifest v1 default. It does not claim the source key was omitted:
+an explicit `principal: caller` and an omitted `principal` therefore both cite
+the semantic projection and the manifest-version default. A future raw-syntax
+importer may additionally record explicitness and a raw source location, but
+must not rewrite this semantic fact. Default-definition locations point to the
+manifest-version source, never to a raw key that may not exist.
 Every semantic digest records the adapter identifier and adapter version that
 produced the projection. Projection changes require a new adapter version even
 when `ir_version` is unchanged, so consumers can distinguish changed source
@@ -151,6 +159,12 @@ Implementation is deliberately split so review can stop a bad format early:
 4. Expose import/export through the CLI only after unsupported semantics and
    output stability have been reviewed.
 
-The format remains experimental until those gates pass. Policy-language
+Gates 1 and 2 are implemented privately. The committed v1 fixture covers every
+manifest shorthand and omitted-default path, and tests preserve both `Mandate`
+equality and reachability output across all repository examples and the four
+real evidence graphs. Reachability still consumes `Mandate`, not IR edges, and
+there is no CLI surface.
+
+The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary
 provenance graphs are explicit non-goals for this first initiative.
