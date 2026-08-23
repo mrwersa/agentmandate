@@ -87,14 +87,18 @@ manifest round-trip gate now cover every example, all four evidence graphs, all
 v1 shorthand/default paths, and a canonical migration fixture. Private
 IR-backed reachability now preserves the existing authority result while
 emitting validated, provenance-bearing reachability, effect, transition, and
-breach edges. The format remains experimental until its unsupported semantics
-and output stability are reviewed before a CLI surface is proposed.
+breach edges. A private, closed manifest-v1 profile now separates structurally
+valid archival records from records eligible for analysis: only supported
+adapters, complete typed predicates, verified semantic digests, and exact,
+accepted evidence can reach the search kernel. The format remains experimental
+until a stable result envelope and reviewed CLI surface are complete.
 
 Gate 4 review is recorded in
 [`docs/authority-ir-gate-4-review.md`](docs/authority-ir-gate-4-review.md). It
-holds public exposure on three explicit gates: a trust-aware analyzable profile,
-a versioned result envelope, and then the reviewed CLI contract. Structural IR
-validity alone is not treated as authority approval.
+holds public exposure until all three explicit gates pass. The trust-aware
+analyzable profile is implemented privately; the versioned result envelope and
+then the reviewed CLI contract remain. Structural IR validity alone is not
+treated as authority approval.
 
 ## 3–6 months: model real authority
 

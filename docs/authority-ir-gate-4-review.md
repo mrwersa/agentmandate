@@ -8,7 +8,7 @@ is not yet necessarily safe to analyze or sufficient to export as a result.
 
 | Review | Verdict | Exit condition |
 |---|---|---|
-| Unsupported semantics | Blocked | Enforce a closed, trust-aware manifest-v1 analysis profile ([#55](https://github.com/mrwersa/agentmandate/issues/55)) |
+| Unsupported semantics | Passed in private implementation | Closed, trust-aware manifest-v1 analysis profile ([#55](https://github.com/mrwersa/agentmandate/issues/55)) |
 | Output stability | Blocked | Define and fixture a versioned result envelope ([#56](https://github.com/mrwersa/agentmandate/issues/56)) |
 | CLI failure behavior | Contract ready; implementation blocked | Implement only after #55 and #56 ([#57](https://github.com/mrwersa/agentmandate/issues/57)) |
 
@@ -31,7 +31,7 @@ successful while dropping semantics. Conversely, a known predicate with the
 wrong value shape can pass graph validation and raise a raw `TypeError` during
 projection. Record-shape safety is not predicate-shape safety.
 
-The first analyzable profile should be deliberately narrow:
+The private analyzable profile is deliberately narrow:
 
 - accept only the documented manifest and manifest-default adapter versions;
 - enumerate entity kinds, predicates, cardinalities, and value schemas;
@@ -39,6 +39,15 @@ The first analyzable profile should be deliberately narrow:
 - reject contested, unknown, unsupported, or malformed semantics with an
   indexed `IRFormatError`;
 - distinguish “valid for archival/transport” from “eligible for analysis.”
+
+The profile implements these conditions without narrowing the general reader.
+It uses a closed predicate registry with per-predicate value schemas, requires
+every consumed evidence reference to be `exact` and `accepted`, verifies the
+supported adapter versions and semantic digests, and rejects malformed or
+unsupported semantics with `IRFormatError` before projection. Adversarial tests
+preserve all three reproduced failures as rejection cases. Public exposure
+remains on hold because passing this review does not complete the result
+envelope or CLI gates.
 
 MCP, policy, inventory, and runtime sources remain valid future IR inputs, but
 must not become trusted policy merely because their records parse.
