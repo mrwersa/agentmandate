@@ -11,6 +11,14 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from ._conditions import (
+    ConditionalAnalysis,
+    ConditionContext,
+    ConditionFormatError,
+    ToolCondition,
+    analyse_conditions,
+    reconcile_condition_drift,
+)
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
 from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
@@ -51,6 +59,36 @@ def _positive_int(value: str) -> int:
 
 def _add_manifest(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("manifest", help="path to a mandate manifest (YAML or JSON)")
+
+
+def _add_condition_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--condition",
+        action="append",
+        default=None,
+        metavar="CONDITION",
+        help="reviewed tool-condition artifact; repeatable",
+    )
+    parser.add_argument(
+        "--condition-context",
+        action="append",
+        default=None,
+        metavar="CONTEXT",
+        help="reviewed condition-context artifact; repeatable",
+    )
+    parser.add_argument(
+        "--condition-capture",
+        action="append",
+        default=None,
+        metavar="CAPTURE",
+        help="captured bytes paired by order with --condition-context",
+    )
+    parser.add_argument(
+        "--condition-as-of",
+        default=None,
+        metavar="YYYY-MM-DD",
+        help="explicit evaluation date for condition review expiry",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -103,6 +141,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="emit a Mermaid diagram of the authority graph and the breaching path",
     )
+    _add_condition_options(reach_parser)
 
     ir_parser = subparsers.add_parser(
         "ir",
@@ -132,6 +171,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate declaration structure without accepting it as authority",
     )
     inventory_validate.add_argument("declaration", help="path to a declaration")
+
+    conditions_parser = subparsers.add_parser(
+        "conditions",
+        help="structurally validate conditional-authority artifacts",
+    )
+    conditions_subparsers = conditions_parser.add_subparsers(
+        dest="conditions_command", required=True
+    )
+    conditions_validate = conditions_subparsers.add_parser(
+        "validate",
+        help="validate artifact structure without accepting it as authority",
+    )
+    conditions_input = conditions_validate.add_mutually_exclusive_group(required=True)
+    conditions_input.add_argument(
+        "--condition", help="path to one tool-condition artifact"
+    )
+    conditions_input.add_argument(
+        "--context", help="path to one condition-context artifact"
+    )
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -271,6 +329,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="YYYY-MM-DD",
         help="explicit evaluation date for inventory review expiry",
     )
+    _add_condition_options(drift_parser)
 
     scan_parser = subparsers.add_parser(
         "scan",
@@ -384,6 +443,117 @@ def _run_inventory(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _run_conditions(args: argparse.Namespace) -> int:
+    try:
+        if args.condition is not None:
+            value = ToolCondition.from_json(_read_text(args.condition))
+            output = f"valid tool condition v{value.version}\n"
+        else:
+            value = ConditionContext.from_json(_read_text(args.context))
+            output = f"valid condition context v{value.version}\n"
+    except (ConditionFormatError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_OK
+
+
+def _conditions_supplied(args: argparse.Namespace) -> bool:
+    return bool(
+        getattr(args, "condition", None)
+        or getattr(args, "condition_context", None)
+        or getattr(args, "condition_capture", None)
+        or getattr(args, "condition_as_of", None)
+    )
+
+
+def _condition_inputs(
+    args: argparse.Namespace,
+) -> tuple[
+    tuple[ToolCondition, ...],
+    tuple[ConditionContext, ...],
+    dict[str, bytes],
+    date,
+] | None:
+    if not _conditions_supplied(args):
+        return None
+    condition_paths = args.condition or []
+    context_paths = args.condition_context or []
+    captures = args.condition_capture or []
+    if not condition_paths:
+        raise ConditionFormatError("--condition is required")
+    if not context_paths:
+        raise ConditionFormatError("--condition-context is required")
+    if len(context_paths) != len(captures):
+        raise ConditionFormatError(
+            "supply one --condition-capture for each --condition-context"
+        )
+    if args.condition_as_of is None:
+        raise ConditionFormatError("--condition-as-of is required")
+    try:
+        as_of = date.fromisoformat(args.condition_as_of)
+    except ValueError as exc:
+        raise ConditionFormatError("--condition-as-of must be YYYY-MM-DD") from exc
+    if as_of.isoformat() != args.condition_as_of:
+        raise ConditionFormatError("--condition-as-of must be YYYY-MM-DD")
+
+    conditions = tuple(
+        ToolCondition.from_json(_read_text(path)) for path in condition_paths
+    )
+    contexts: list[ConditionContext] = []
+    source_bytes: dict[str, bytes] = {}
+    for context_path, capture_path in zip(context_paths, captures, strict=True):
+        context = ConditionContext.from_json(_read_text(context_path))
+        content = Path(capture_path).read_bytes()
+        previous = source_bytes.get(context.id)
+        if previous is not None and previous != content:
+            raise ConditionFormatError(
+                "contexts with one id supplied different capture bytes"
+            )
+        source_bytes[context.id] = content
+        contexts.append(context)
+    return conditions, tuple(contexts), source_bytes, as_of
+
+
+def _condition_payload(analysis: ConditionalAnalysis) -> dict[str, Any]:
+    return {
+        "schema": "agentmandate.conditions/v1",
+        "as_of": analysis.as_of,
+        "applied": [
+            {
+                "condition": item.condition,
+                "context": item.context,
+                "tool": item.tool,
+                "default_effect": item.default_effect,
+                "effective_effect": item.effective_effect,
+                "support": list(item.support),
+            }
+            for item in analysis.applied
+        ],
+        "findings": [
+            {
+                "condition": item.condition,
+                "tool": item.tool,
+                "message": item.message,
+            }
+            for item in analysis.findings
+        ],
+    }
+
+
+def _render_conditions(analysis: ConditionalAnalysis) -> str:
+    lines = [f"conditions  evaluated as of {analysis.as_of}"]
+    for item in analysis.applied:
+        lines.append(
+            f"  APPLIED     {item.tool}: {item.default_effect} -> "
+            f"{item.effective_effect} ({item.condition})"
+        )
+    for item in analysis.findings:
+        lines.append(f"  UNRESOLVED  {item.tool} ({item.condition})")
+        lines.append(f"      {item.message}")
+    return "\n".join(lines)
+
+
 def _dynamic_inventory(
     args: argparse.Namespace, inventory: Inventory
 ) -> InventoryReconciliation | None:
@@ -446,6 +616,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "inventory":
         return _run_inventory(args)
 
+    if args.command == "conditions":
+        return _run_conditions(args)
+
     if args.command == "scan":
         try:
             if args.source is not None:
@@ -480,9 +653,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return EXIT_USAGE
+        if _conditions_supplied(args) and args.ir_snapshot is not None:
+            print(
+                "error: conditional artifacts require a manifest; standalone "
+                "condition profiles cannot be composed with --ir",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if _conditions_supplied(args) and (args.sarif or args.graph):
+            print(
+                "error: conditional findings currently support human or --json "
+                "output, not --sarif or --graph",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
 
     ir_result = None
     ir_json = None
+    condition_inputs = None
     try:
         if args.command == "diff":
             before = load(args.before)
@@ -494,7 +682,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             mandate = _to_mandate(snapshot)
         else:
             mandate = load(args.manifest)
-    except (IRFormatError, ManifestError, OSError, UnicodeError) as exc:
+        if args.command in {"reach", "drift"}:
+            condition_inputs = _condition_inputs(args)
+    except (
+        ConditionFormatError,
+        IRFormatError,
+        ManifestError,
+        OSError,
+        UnicodeError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
 
@@ -504,15 +700,44 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.source, binding=args.binding, union=args.union_bindings
             )
             dynamic = _dynamic_inventory(args, inventory)
-            drift = compare_drift(mandate, inventory, dynamic=dynamic)
-        except (InventoryFormatError, OSError, UnicodeError, ValueError) as exc:
+            if condition_inputs is None:
+                drift = compare_drift(mandate, inventory, dynamic=dynamic)
+                conditional_drift = None
+            else:
+                conditions, contexts, contents, as_of = condition_inputs
+                conditional_drift = reconcile_condition_drift(
+                    mandate,
+                    inventory,
+                    conditions,
+                    contexts,
+                    contents,
+                    as_of=as_of,
+                    dynamic=dynamic,
+                )
+                drift = conditional_drift.drift
+        except (
+            ConditionFormatError,
+            InventoryFormatError,
+            OSError,
+            UnicodeError,
+            ValueError,
+        ) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return EXIT_USAGE
         if args.json:
-            print(json.dumps(drift.as_dict(), indent=2))
+            payload = drift.as_dict()
+            if conditional_drift is not None:
+                payload["conditions"] = _condition_payload(conditional_drift.analysis)
+                payload["source_drift_clean"] = drift.clean
+                payload["clean"] = conditional_drift.clean
+            print(json.dumps(payload, indent=2))
         else:
-            print(drift.render())
-        return EXIT_OK if drift.clean else EXIT_FINDING
+            text = drift.render()
+            if conditional_drift is not None:
+                text = f"{_render_conditions(conditional_drift.analysis)}\n\n{text}"
+            print(text)
+        clean = drift.clean if conditional_drift is None else conditional_drift.clean
+        return EXIT_OK if clean else EXIT_FINDING
 
     if args.command == "obligations":
         obligations = derive(mandate, depth=args.depth)
@@ -582,11 +807,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_FINDING if any(f.severity == ERROR for f in findings) else EXIT_OK
 
     if args.command == "reach":
-        authority = (
-            ir_result.authority
-            if ir_result is not None
-            else analyse(mandate, depth=args.depth)
-        )
+        if condition_inputs is not None:
+            conditions, contexts, contents, as_of = condition_inputs
+            conditional_analysis = analyse_conditions(
+                mandate,
+                conditions,
+                contexts,
+                contents,
+                as_of=as_of,
+                depth=args.depth,
+            )
+            authority = conditional_analysis.authority
+        else:
+            conditional_analysis = None
+            authority = (
+                ir_result.authority
+                if ir_result is not None
+                else analyse(mandate, depth=args.depth)
+            )
         if authority.breaches:
             text = "\n\n".join(b.render() for b in authority.breaches)
         else:
@@ -610,8 +848,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             assert ir_json is not None
             sys.stdout.write(ir_json)
         else:
-            _emit(authority.as_dict(), args.json, text)
-        return EXIT_FINDING if authority.breaches else EXIT_OK
+            payload = authority.as_dict()
+            if conditional_analysis is not None:
+                payload["conditions"] = _condition_payload(conditional_analysis)
+                text = f"{_render_conditions(conditional_analysis)}\n\n{text}"
+            _emit(payload, args.json, text)
+        finding = bool(authority.breaches) or bool(
+            conditional_analysis is not None and conditional_analysis.findings
+        )
+        return EXIT_FINDING if finding else EXIT_OK
 
     if args.command == "diff":
         try:

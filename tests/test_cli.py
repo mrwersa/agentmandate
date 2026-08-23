@@ -14,6 +14,56 @@ TRACES = str(EXAMPLES / "observed-calls.jsonl")
 ROOT = EXAMPLES.parent
 AGENTKIT_INVENTORY = ROOT / "tests/fixtures/dynamic-inventory-agentkit-v1.json"
 SENTRY_INVENTORY = ROOT / "tests/fixtures/dynamic-inventory-sentry-v1.json"
+CONDITION = ROOT / "tests/fixtures/condition-statement-v1.json"
+CONTEXT = ROOT / "tests/fixtures/condition-context-select-v1.json"
+CONTEXT_COMPLETE = ROOT / "tests/fixtures/condition-context-select-only-complete-v1.json"
+CONDITION_CAPTURE = ROOT / "tests/fixtures/condition-context-capture.sql"
+CONDITIONAL_MANIFEST_PATH = ROOT / "tests/fixtures/conditional-mandate-v1.yaml"
+CONDITIONAL_SOURCE = ROOT / "tests/fixtures/conditional-source"
+CONDITIONAL_REACH_RESULT = ROOT / "tests/fixtures/conditional-reach-result-v1.json"
+CONDITIONAL_DRIFT_RESULT = ROOT / "tests/fixtures/conditional-drift-result-v1.json"
+
+CONDITIONAL_MANIFEST = """
+agent: sql-agent
+tools:
+  - name: run_query
+    effect: irreversible
+    produces: rows
+"""
+
+
+def condition_args(context: Path = CONTEXT_COMPLETE, *, as_of: str = "2027-01-01"):
+    return [
+        "--condition",
+        str(CONDITION),
+        "--condition-context",
+        str(context),
+        "--condition-capture",
+        str(CONDITION_CAPTURE),
+        "--condition-as-of",
+        as_of,
+    ]
+
+
+def write_conditional_manifest(tmp_path: Path) -> Path:
+    path = tmp_path / "mandate.yaml"
+    path.write_text(CONDITIONAL_MANIFEST, encoding="utf-8")
+    return path
+
+
+def write_conditional_source(tmp_path: Path) -> Path:
+    root = tmp_path / "source"
+    module = root / "src/postgres-server/server.py"
+    module.parent.mkdir(parents=True)
+    module.write_text(
+        "from strands import Agent, tool\n\n"
+        "@tool\n"
+        "def run_query(sql: str) -> str:\n"
+        "    return sql\n\n"
+        "run_query = Agent(tools=[run_query])\n",
+        encoding="utf-8",
+    )
+    return root
 
 
 def test_lint_is_clean_on_the_shipped_v1_example(capsys):
@@ -45,6 +95,184 @@ def test_reach_finds_the_compound_breach_in_v2(capsys):
 def test_reach_reports_truncation_at_a_shallow_depth(capsys):
     assert main(["reach", V2, "--depth", "2"]) == EXIT_OK
     assert "search truncated" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    ("flag", "path", "output"),
+    [
+        ("--condition", CONDITION, "valid tool condition v1"),
+        ("--context", CONTEXT_COMPLETE, "valid condition context v1"),
+    ],
+)
+def test_conditions_validate_is_structural_only(flag, path, output, capsys):
+    assert main(["conditions", "validate", flag, str(path)]) == EXIT_OK
+    assert capsys.readouterr().out == f"{output}\n"
+
+
+def test_conditions_validate_failure_emits_no_stdout(tmp_path, capsys):
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text('{"condition_version":1,"unexpected":true}', encoding="utf-8")
+
+    assert main(["conditions", "validate", "--condition", str(invalid)]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "error:" in captured.err
+
+
+def test_reach_applies_reviewed_conditional_authority(tmp_path, capsys):
+    manifest = write_conditional_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *condition_args()]) == EXIT_OK
+    output = capsys.readouterr().out
+    assert "APPLIED     run_query: irreversible -> read" in output
+    assert "no reachable breach" in output
+
+    assert main(["reach", str(manifest), *condition_args(), "--json"]) == EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ungated_irreversible"] == []
+    assert payload["conditions"]["schema"] == "agentmandate.conditions/v1"
+    assert payload["conditions"]["as_of"] == "2027-01-01"
+    assert payload["conditions"]["findings"] == []
+    assert payload["conditions"]["applied"][0]["support"]
+
+
+def test_conditional_public_json_fixtures_are_byte_stable(capsys):
+    assert main(
+        ["reach", str(CONDITIONAL_MANIFEST_PATH), *condition_args(), "--json"]
+    ) == EXIT_OK
+    assert capsys.readouterr().out == CONDITIONAL_REACH_RESULT.read_text(encoding="utf-8")
+
+    assert main(
+        [
+            "drift",
+            str(CONDITIONAL_MANIFEST_PATH),
+            "--source",
+            str(CONDITIONAL_SOURCE),
+            *condition_args(),
+            "--json",
+        ]
+    ) == EXIT_OK
+    assert capsys.readouterr().out == CONDITIONAL_DRIFT_RESULT.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("context", "capture", "as_of", "message"),
+    [
+        (CONTEXT, CONDITION_CAPTURE, "2026-09-01", "not complete"),
+        (CONTEXT_COMPLETE, ROOT / "README.md", "2027-01-01", "failed verification"),
+        (CONTEXT_COMPLETE, CONDITION_CAPTURE, "2028-01-01", "expired"),
+    ],
+)
+def test_reach_condition_uncertainty_is_a_finding_at_full_authority(
+    tmp_path, context, capture, as_of, message, capsys
+):
+    manifest = write_conditional_manifest(tmp_path)
+    args = condition_args(context, as_of=as_of)
+    args[5] = str(capture)
+
+    assert main(["reach", str(manifest), *args, "--json"]) == EXIT_FINDING
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ungated_irreversible"] == ["run_query"]
+    assert message in payload["conditions"]["findings"][0]["message"]
+    assert payload["conditions"]["applied"] == []
+
+
+@pytest.mark.parametrize(
+    ("extra", "message"),
+    [
+        (
+            [
+                "--condition-context",
+                str(CONTEXT_COMPLETE),
+                "--condition-capture",
+                str(CONDITION_CAPTURE),
+                "--condition-as-of",
+                "2027-01-01",
+            ],
+            "--condition is required",
+        ),
+        (["--condition", str(CONDITION)], "--condition-context"),
+        (
+            ["--condition", str(CONDITION), "--condition-context", str(CONTEXT_COMPLETE)],
+            "--condition-capture",
+        ),
+        (
+            [
+                "--condition",
+                str(CONDITION),
+                "--condition-context",
+                str(CONTEXT_COMPLETE),
+                "--condition-capture",
+                str(CONDITION_CAPTURE),
+            ],
+            "--condition-as-of",
+        ),
+        (
+            condition_args(as_of="20270101"),
+            "YYYY-MM-DD",
+        ),
+        (
+            condition_args(as_of="2027-99-01"),
+            "YYYY-MM-DD",
+        ),
+    ],
+)
+def test_incomplete_condition_inputs_are_usage_errors(
+    tmp_path, extra, message, capsys
+):
+    manifest = write_conditional_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *extra]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+def test_one_context_id_cannot_pair_with_different_capture_bytes(tmp_path, capsys):
+    manifest = write_conditional_manifest(tmp_path)
+
+    assert main(
+        [
+            "reach",
+            str(manifest),
+            "--condition",
+            str(CONDITION),
+            "--condition-context",
+            str(CONTEXT_COMPLETE),
+            "--condition-capture",
+            str(CONDITION_CAPTURE),
+            "--condition-context",
+            str(CONTEXT_COMPLETE),
+            "--condition-capture",
+            str(ROOT / "README.md"),
+            "--condition-as-of",
+            "2027-01-01",
+        ]
+    ) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "one id supplied different capture bytes" in captured.err
+
+
+@pytest.mark.parametrize("output", ["--sarif", "--graph"])
+def test_condition_findings_refuse_unsupported_output_formats(
+    tmp_path, output, capsys
+):
+    manifest = write_conditional_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *condition_args(), output]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "human or --json" in captured.err
+
+
+def test_ir_reach_refuses_standalone_condition_composition(capsys):
+    assert main(
+        ["reach", "--ir", "unused.json", *condition_args()]
+    ) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "cannot be composed with --ir" in captured.err
 
 
 def test_diff_flags_the_read_only_addition_as_widening(capsys):
@@ -693,6 +921,78 @@ def test_drift_accepts_complete_reviewed_dynamic_inventory(tmp_path, capsys):
     assert payload["clean"] is True
     assert payload["inventory_as_of"] == "2027-01-01"
     assert len(payload["discovered"]) == 20
+
+
+def test_drift_reconciles_condition_decisions_in_a_separate_output_section(
+    tmp_path, capsys
+):
+    manifest = write_conditional_manifest(tmp_path)
+    source = write_conditional_source(tmp_path)
+    argv = ["drift", str(manifest), "--source", str(source), *condition_args()]
+
+    assert main(argv) == EXIT_OK
+    output = capsys.readouterr().out
+    assert output.startswith("conditions  evaluated as of 2027-01-01")
+    assert "APPLIED     run_query: irreversible -> read" in output
+    assert "\ndrift  sql-agent\n" in output
+
+    assert main([*argv, "--json"]) == EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["clean"] is True
+    assert payload["conditions"]["schema"] == "agentmandate.conditions/v1"
+    assert payload["conditions"]["applied"][0]["tool"] == "run_query"
+    assert payload["conditions"]["findings"] == []
+
+
+def test_condition_finding_makes_combined_drift_json_unclean(tmp_path, capsys):
+    manifest = write_conditional_manifest(tmp_path)
+    source = write_conditional_source(tmp_path)
+
+    assert main(
+        [
+            "drift",
+            str(manifest),
+            "--source",
+            str(source),
+            *condition_args(CONTEXT, as_of="2026-09-01"),
+            "--json",
+        ]
+    ) == EXIT_FINDING
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["clean"] is False
+    assert payload["source_drift_clean"] is True
+    assert payload["conditions"]["applied"] == []
+    assert "not complete" in payload["conditions"]["findings"][0]["message"]
+
+
+def test_multi_agent_condition_drift_explains_how_to_select_a_binding(
+    tmp_path, capsys
+):
+    manifest = write_conditional_manifest(tmp_path)
+    source = write_conditional_source(tmp_path)
+    other = source / "other.py"
+    other.write_text(
+        "from strands import Agent, tool\n\n"
+        "@tool\n"
+        "def lookup() -> str:\n"
+        "    return 'ok'\n\n"
+        "other = Agent(tools=[lookup])\n",
+        encoding="utf-8",
+    )
+
+    assert main(
+        [
+            "drift",
+            str(manifest),
+            "--source",
+            str(source),
+            "--union-bindings",
+            *condition_args(),
+        ]
+    ) == EXIT_FINDING
+    output = capsys.readouterr().out
+    assert "UNRESOLVED  run_query" in output
+    assert "select one with --binding rather than --union-bindings" in output
 
 
 @pytest.mark.parametrize(

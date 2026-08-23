@@ -1,0 +1,5 @@
+agent: sql-agent
+tools:
+  - name: run_query
+    effect: irreversible
+    produces: rows

@@ -355,7 +355,18 @@ once. A source failure for any condition on a tool blocks every sibling
 condition on that tool; gate 3 does not compose multiple conditions. These
 findings make the combined private result unclean, but do not
 withhold tool-removal checks: conditional trust says nothing about whether the
-inventory was complete. Public rendering and CLI inputs remain gate 4 work.
+inventory was complete.
+
+Gate 4 exposes structural validation through `mandate conditions validate` and
+reviewed inputs through manifest-mode `reach` and `drift`. Conditional human
+output is a separate `APPLIED`/`UNRESOLVED` section; JSON adds a conditional
+`conditions` object with schema `agentmandate.conditions/v1`, the evaluation
+date, decisions, and replay support. Conditional drift JSON also records
+`source_drift_clean` separately and makes top-level `clean` the combined
+verdict. Any unresolved decision exits 1 after complete output. Malformed or
+incomplete inputs exit 2 with empty standard output. SARIF, Mermaid, and
+`reach --ir` composition are refused rather than silently dropping conditional
+findings.
 
 ## Gates
 
@@ -371,8 +382,8 @@ inventory was complete. Public rendering and CLI inputs remain gate 4 work.
    under conservative defaults. The private conditional reachability consumer
    and source-drift reconciliation are done; delegation remains pending,
    blocked on genuine chain evidence.
-4. **Public exposure:** CLI and schema-version bump only after failure
-   behaviour and output stability reviews.
+4. **Public exposure:** CLI and conditional presentation schema implemented;
+   failure-behaviour and output-stability review pending.
 
 ## Non-goals
 

@@ -12,6 +12,13 @@ All notable changes to this project are documented here. The format follows
   structured-principal relations used by private experimental profiles. The
   profiles preserve reviewed tool targets and evidence but are not accepted by
   `mandate reach --ir` as manifest authority.
+- `mandate conditions validate` structurally checks tool-condition and
+  condition-context artifacts without treating them as authority. Manifest-mode
+  `mandate reach` and `mandate drift` accept reviewed conditions, paired
+  contexts and capture bytes, and an explicit evaluation date. Unresolved
+  condition trust exits with a finding while retaining the strongest effect;
+  conditional JSON is namespaced as `agentmandate.conditions/v1`, and drift
+  distinguishes its combined `clean` verdict from `source_drift_clean`.
 
 ### Changed
 
