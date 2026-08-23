@@ -119,6 +119,16 @@ class Authority:
 
 
 @dataclass(frozen=True)
+class _ReachTrace:
+    """Shortest enabling call path retained for later IR provenance."""
+
+    reachable_paths: tuple[tuple[str, tuple[Step, ...]], ...] = ()
+
+    def path_for(self, tool: str) -> tuple[Step, ...] | None:
+        return next((path for name, path in self.reachable_paths if name == tool), None)
+
+
+@dataclass(frozen=True)
 class _State:
     """Bindings held and value already spent, canonicalised for memoisation."""
 
@@ -214,8 +224,10 @@ def _best_binding(tool: Tool, state: _State) -> tuple[int, Decimal] | None:
     return best
 
 
-def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
-    """Walk the authority graph and report what the agent can reach.
+def _analyse_with_trace(
+    mandate: Mandate, depth: int | None = None
+) -> tuple[Authority, _ReachTrace]:
+    """Walk the graph and retain shortest enabling paths for provenance.
 
     Returns the effective authority summary plus any cumulative-value breach
     found within the depth bound, shortest counterexample first.
@@ -231,6 +243,7 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
     ungated: set[str] = set()
     service: set[str] = set()
     breaches: list[Breach] = []
+    reachable_paths: dict[str, tuple[Step, ...]] = {}
     max_total = Decimal(0)
     truncated = False
 
@@ -248,6 +261,7 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
             if not _enabled(tool, state):
                 continue
 
+            first_reach = tool.name not in reachable_paths
             reachable.add(tool.name)
             for scope in tool.requires or ((tool.produces,) if tool.produces else ()):
                 if scope:
@@ -306,6 +320,16 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
                 step_currency = tool.ceiling.currency  # type: ignore[union-attr]
                 progressed = True
 
+            step = Step(
+                tool=tool.name,
+                binding=step_binding,
+                spent=step_spent,
+                currency=step_currency,
+            )
+            next_path = path + (step,)
+            if first_reach:
+                reachable_paths[tool.name] = next_path
+
             if not progressed:
                 # A pure read that changes nothing. It is reachable, which is
                 # recorded above, but exploring it again only inflates the
@@ -316,13 +340,6 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
                 continue
             seen.add(next_state)
 
-            step = Step(
-                tool=tool.name,
-                binding=step_binding,
-                spent=step_spent,
-                currency=step_currency,
-            )
-            next_path = path + (step,)
             running = next_state.total
             max_total = max(max_total, running)
 
@@ -368,7 +385,7 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
             queue.append((next_state, next_path))
 
     currency = total_cap.currency if total_cap else _sole_currency(mandate)
-    return Authority(
+    authority = Authority(
         reachable_tools=frozenset(reachable),
         effects=frozenset(effects),
         ungated_irreversible=frozenset(ungated),
@@ -380,6 +397,13 @@ def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
         depth=limit,
         truncated=truncated,
     )
+    trace = _ReachTrace(tuple(sorted(reachable_paths.items())))
+    return authority, trace
+
+
+def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
+    """Walk the authority graph and report what the agent can reach."""
+    return _analyse_with_trace(mandate, depth=depth)[0]
 
 
 def _sole_currency(mandate: Mandate) -> str | None:
