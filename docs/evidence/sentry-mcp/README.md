@@ -80,3 +80,8 @@ This graph supports dynamic inventory declarations first, then provenance-aware
 IR, dispatch-dependent conditions, delegation chains, resource relationships,
 and reviewed data-flow labels. It does not justify importing application code,
 calling Sentry during analysis, or turning AgentMandate into an MCP proxy.
+
+The proposed [conditions and delegation
+contract](../../conditions-delegation.md) defines how the dispatch-dependent
+effect of `execute_sentry_tool` and the fixed User Auth Token may
+eventually be declared; no current manifest version accepts those records.
