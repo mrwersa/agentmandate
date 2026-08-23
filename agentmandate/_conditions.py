@@ -12,8 +12,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import dataclass
-from datetime import date
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, replace
+from datetime import date, datetime
 from typing import Any
 
 from ._ir import (
@@ -29,6 +30,8 @@ from ._ir import (
     _fact_id,
 )
 from ._ir import Evidence as IREvidence
+from .manifest import EFFECT_RANK, Mandate
+from .reach import Authority, _analyse_with_trace
 
 CONDITION_CONTEXT_VERSION = 1
 GRANT_VERSION = 1
@@ -92,6 +95,37 @@ _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 class ConditionFormatError(ValueError):
     """Raised when an experimental condition or grant artifact cannot be read."""
+
+
+@dataclass(frozen=True)
+class ConditionFinding:
+    """Why one reviewed narrowing could not safely be applied."""
+
+    condition: str
+    tool: str
+    message: str
+
+
+@dataclass(frozen=True)
+class AppliedCondition:
+    """One effective narrowing and its replayable artifact provenance."""
+
+    condition: str
+    context: str
+    tool: str
+    default_effect: str
+    effective_effect: str
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ConditionalAnalysis:
+    """Private Gate 3 result: ordinary authority plus trust decisions."""
+
+    authority: Authority
+    findings: tuple[ConditionFinding, ...]
+    applied: tuple[AppliedCondition, ...]
+    as_of: str
 
 
 def _reject_constant(_: str) -> None:
@@ -1123,6 +1157,170 @@ def _principal_to_ir(value: ToolPrincipal) -> AuthorityIR:
     )
     _validate_principal_profile(graph)
     return graph
+
+
+def analyse_conditions(
+    mandate: Mandate,
+    conditions: Sequence[ToolCondition],
+    contexts: Sequence[ConditionContext],
+    source_bytes: Mapping[str, bytes],
+    *,
+    as_of: date,
+    depth: int | None = None,
+) -> ConditionalAnalysis:
+    """Apply only fully reviewed, complete conditional narrowings.
+
+    Every record is serialized, strictly reread, projected, and profile-checked
+    at this consumption boundary. Any trust or context uncertainty retains the
+    manifest's strongest declared effect and becomes a named finding.
+    """
+    if isinstance(as_of, datetime) or not isinstance(as_of, date):
+        raise ConditionFormatError("conditional analysis as_of must be a date")
+    evaluated_on = as_of.isoformat()
+    canonical_conditions = tuple(
+        ToolCondition.from_json(item.to_json()) for item in conditions
+    )
+    canonical_contexts = tuple(
+        ConditionContext.from_json(item.to_json()) for item in contexts
+    )
+    condition_graphs = {
+        item.id: item.to_ir() for item in canonical_conditions
+    }
+    for graph in condition_graphs.values():
+        _validate_condition_profile(graph)
+
+    context_groups: dict[str, list[ConditionContext]] = {}
+    for context in canonical_contexts:
+        context_groups.setdefault(context.id, []).append(context)
+    condition_counts: dict[str, int] = {}
+    tool_counts: dict[str, int] = {}
+    for condition in canonical_conditions:
+        condition_counts[condition.id] = condition_counts.get(condition.id, 0) + 1
+        tool_counts[condition.target.tool] = tool_counts.get(condition.target.tool, 0) + 1
+
+    tools = {tool.name: tool for tool in mandate.tools}
+    effective = dict(tools)
+    findings: list[ConditionFinding] = []
+    applied: list[AppliedCondition] = []
+
+    def unresolved(condition: ToolCondition, message: str) -> None:
+        findings.append(
+            ConditionFinding(condition.id, condition.target.tool, message)
+        )
+
+    for condition in sorted(canonical_conditions, key=lambda item: item.id):
+        tool = tools.get(condition.target.tool)
+        if tool is None:
+            unresolved(condition, "target tool is not present in the mandate")
+            continue
+        if condition_counts[condition.id] != 1:
+            unresolved(condition, "condition id is declared more than once")
+            continue
+        if tool_counts[condition.target.tool] != 1:
+            unresolved(condition, "multiple conditions target the same tool")
+            continue
+        matches = context_groups.get(condition.context, [])
+        if len(matches) != 1:
+            unresolved(
+                condition,
+                "condition context is missing or declared more than once",
+            )
+            continue
+        context = matches[0]
+        if (
+            condition.target.source != context.target_source
+            or condition.target.binding != context.target_binding
+            or condition.predicate != context.predicate
+            or condition.arg != context.arg
+        ):
+            unresolved(condition, "condition and context operands do not match")
+            continue
+        if condition.evidence.confidence != "exact" or condition.evidence.review != "accepted":
+            unresolved(condition, "condition evidence is not exact and accepted")
+            continue
+        if context.evidence.confidence != "exact" or context.evidence.review != "accepted":
+            unresolved(condition, "context evidence is not exact and accepted")
+            continue
+        if (
+            condition.evidence.expires is None
+            or context.evidence.expires is None
+            or condition.evidence.expires < evaluated_on
+            or context.evidence.expires < evaluated_on
+        ):
+            unresolved(condition, "condition or context review is expired")
+            continue
+        if context.completeness != "complete":
+            unresolved(condition, "condition context is not complete")
+            continue
+        if context.classes != (condition.value_class,):
+            unresolved(
+                condition,
+                "condition context does not exclusively admit the selected class",
+            )
+            continue
+        if EFFECT_RANK[condition.effect] >= EFFECT_RANK[tool.effect]:
+            unresolved(condition, "condition does not attenuate the declared effect")
+            continue
+        captured = source_bytes.get(context.id)
+        if captured is None:
+            unresolved(condition, "reviewed context capture bytes were not supplied")
+            continue
+        try:
+            context.verify_source(captured)
+        except ConditionFormatError:
+            unresolved(condition, "reviewed context capture bytes failed verification")
+            continue
+
+        graph = condition_graphs[condition.id]
+        support = tuple(
+            sorted(
+                {
+                    graph.sources[0].id,
+                    *(
+                        fact.id
+                        for fact in graph.facts
+                        if fact.predicate
+                        in {
+                            "arg",
+                            "class",
+                            "context",
+                            "effect",
+                            "predicate",
+                            "review_expires",
+                            "reviewer",
+                            "target",
+                        }
+                    ),
+                    f"context:{context.id}#/completeness",
+                    f"context:{context.id}#/domain/classes",
+                    f"context:{context.id}#/evidence",
+                    f"context:{context.id}#/source/content_sha256",
+                }
+            )
+        )
+        effective[tool.name] = replace(tool, effect=condition.effect)
+        applied.append(
+            AppliedCondition(
+                condition.id,
+                context.id,
+                tool.name,
+                tool.effect,
+                condition.effect,
+                support,
+            )
+        )
+
+    adjusted = replace(
+        mandate,
+        tools=tuple(effective[tool.name] for tool in mandate.tools),
+    )
+    authority, _ = _analyse_with_trace(adjusted, depth=depth)
+    return ConditionalAnalysis(
+        authority=authority,
+        findings=tuple(findings),
+        applied=tuple(applied),
+        as_of=evaluated_on,
+    )
 
 
 def _validate_condition_profile(graph: AuthorityIR) -> None:

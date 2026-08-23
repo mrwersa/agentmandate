@@ -8,10 +8,10 @@ the Authority IR analysis profile, or reachability behaviour. Structural
 `mandate ir validate` recognition of the new relations is additive; it proves
 graph integrity only and does not accept the records as authority.
 
-Gate 2a's context and grant readers and gate 2b's tool-side readers and IR
-projections are implemented privately. Structural projection does not make a
-condition or principal eligible for analysis; gate 3 remains the trust and
-semantics boundary.
+Gate 2a's context and grant readers, gate 2b's tool-side readers and IR
+projections, and the conditional half of gate 3 are implemented privately.
+Structural projection does not make a condition or principal eligible for
+analysis. Delegation semantics and every public surface remain gated.
 
 ## Problem boundary
 
@@ -319,6 +319,32 @@ non-canonical targets, entity mismatch, and digest drift. They deliberately do
 not evaluate conditions, attest grants, or enter the manifest-v1 analysis
 profile.
 
+## Gate 3 conditional trust semantics
+
+The private consumer serializes and strictly rereads every condition and
+context, reruns the closed condition IR profile, and requires a caller-supplied
+evaluation date. It never reads the wall clock. Narrowing occurs only when all
+of these statements hold:
+
+- exactly one condition targets the tool and exactly one context matches its ID;
+- target source and binding, predicate, and argument agree;
+- both artifacts carry exact, accepted, unexpired evidence;
+- the context's captured bytes match its reviewed digest;
+- the context is `complete` and its entire class set is the condition's one class;
+- the selected effect is strictly weaker than the manifest's default effect.
+
+A representative capture, a complete mixed-class context, missing bytes, or
+any trust failure leaves the tool at its strongest manifest effect and emits a
+specific unresolved finding. This distinction matters: observing one `SELECT`
+does not prove that production cannot issue `DROP`. The committed complete
+SELECT-only context is explicitly synthetic and proves conservative analysis
+semantics, not a real deployment restriction.
+
+An applied decision retains the condition source, relevant condition fact IDs,
+and the context completeness, class, evidence, and digest locations. The
+existing reachability kernel then analyzes a temporary attenuated mandate; the
+kernel itself is not forked.
+
 ## Gates
 
 1. **Contract:** this document survives challenge against both fixtures.
@@ -330,7 +356,9 @@ profile.
    IR projection behind registered relations (done).
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
-   under conservative defaults.
+   under conservative defaults. The private conditional reachability consumer
+   is done; drift integration and delegation remain pending, with delegation
+   blocked on genuine chain evidence.
 4. **Public exposure:** CLI and schema-version bump only after failure
    behaviour and output stability reviews.
 
