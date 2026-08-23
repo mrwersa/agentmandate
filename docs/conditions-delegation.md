@@ -253,7 +253,11 @@ that:
 3. `fixed_user_credential` tools remain findings
    (`identity.service-principal`, plus `credential.unproven-delegation`)
    until evidence establishes actual grant semantics.
-4. Profiles remain separate: the manifest analysis profile extends with a
+4. Evidence accountability follows the dynamic-inventory rule:
+   `unreviewed` evidence names neither reviewer nor expiry; `accepted` or
+   `contested` evidence requires both. Partial accountability is a reader
+   rejection, not a warning.
+5. Profiles remain separate: the manifest analysis profile extends with a
    schema-version bump and migration fixtures; inventory profiles never gain
    authority-bearing conditions.
 
@@ -274,14 +278,19 @@ gating on that tool; and any counterexample through a credentialed tool cites
 its principal record. A genuine delegation-chain fixture — an OAuth token
 exchange, MCP delegated authorization, or A2A delegation capture with a
 reviewed grant — remains a roadmap prerequisite for the attenuation rules;
-no committed graph proves one.
+no committed graph proves one. The committed condition-context and grant
+fixtures are explicitly synthetic samples pending captures with real
+provenance: they pin schema behaviour, not upstream facts.
 
 ## Gates
 
 1. **Contract:** this document survives challenge against both fixtures.
 2. **Records:** typed condition/delegation records, the condition-context
    artifact, strict reader, canonical fixtures, IR projection behind new
-   registered relations.
+   registered relations. Split for review: gate 2a delivers the context and
+   grant artifact readers with canonical synthetic fixtures (done); gate 2b
+   delivers tool-side condition and structured-principal records plus their
+   IR projection behind registered relations.
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
    under conservative defaults.
