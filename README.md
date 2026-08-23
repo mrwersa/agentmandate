@@ -247,15 +247,36 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate scan` | Derives a manifest skeleton from agent source (`--source`) or an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
 | `mandate drift` | Compares the declared mandate against the agent's source and fails when the two have separated |
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
-| `mandate reach` | Bounded search for a legal call sequence that breaches a limit, reported as a counterexample |
+| `mandate reach` | Bounded search over a manifest or reviewed `--ir` snapshot for a legal call sequence that breaches a limit, reported as a counterexample |
+| `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing. Reads [OpenTelemetry traces](https://github.com/mrwersa/agentmandate/blob/main/docs/traces.md) with `--otel` |
 | `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |
 | `mandate scenarios` | Exports reachable breach paths with blank environment, agent-input, and expected-control fields for human review and execution by an external evaluation harness |
 
 Every analysis command takes `--json` and exits non-zero on a finding, so they
-drop into CI unchanged. `scan` writes a manifest to standard output and is a
-one-off, not a gate. Exit codes and CI wiring: [docs/ci.md](docs/ci.md).
+drop into CI unchanged. `scan` and `ir export` write artifacts to standard
+output and are not gates. Exit codes and CI wiring: [docs/ci.md](docs/ci.md).
+
+### Canonical authority artifacts
+
+Export reviewed intent once, validate the artifact at a boundary, then analyze
+that exact snapshot:
+
+```bash
+mandate ir export mandate.yaml > authority-ir.json
+mandate ir validate authority-ir.json
+mandate reach --ir authority-ir.json --json > authority-result.json
+```
+
+`ir validate` proves only that the snapshot is structurally valid. It does not
+turn contested, heuristic, or unknown evidence into policy. `reach --ir`
+applies the stricter manifest-v1 analysis profile and refuses anything except
+exact, accepted reviewed facts from supported adapters. Its `--json` output is
+a canonical, hashed result envelope containing the search boundary, ordered
+counterexamples, and provenance graph. There is deliberately no `import`
+command: parsing evidence is not accepting authority. The format and hash
+boundaries are specified in [docs/authority-ir.md](docs/authority-ir.md).
 
 `verify` is what keeps the rest honest. A manifest nobody checks is a wish, and
 the declaration drifts from the implementation the moment somebody ships a

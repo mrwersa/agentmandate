@@ -76,6 +76,23 @@ reviewer:
     mandate diff /tmp/released.yaml mandate.yaml
 ```
 
+## Pinning the analyzed authority artifact
+
+When separate jobs review and analyze a mandate, pass the canonical snapshot
+rather than reparsing an unbound copy:
+
+```yaml
+- run: mandate ir export mandate.yaml > authority-ir.json
+- run: mandate ir validate authority-ir.json
+- run: mandate reach --ir authority-ir.json --json > authority-result.json
+```
+
+`ir validate` is a structural transport check and exits 0 even when evidence is
+contested or heuristic. `reach --ir` is the trust boundary: unsupported
+adapters, predicates, value shapes, or non-exact/non-accepted evidence exit 2
+without writing partial JSON. A reachable breach still writes the complete
+canonical result and exits 1.
+
 ## Exit codes
 
 Every analysis command takes `--json` and exits non-zero on a finding, so they
@@ -86,4 +103,4 @@ one-off, not a gate.
 |---|---|
 | `0` | Clean |
 | `1` | A finding: lint error, reachable breach, widening diff, or a non-conformant replay |
-| `2` | Usage error or a malformed manifest |
+| `2` | Usage or I/O error, malformed manifest/IR, unsupported IR version or analysis profile |

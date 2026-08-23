@@ -10,11 +10,12 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
 from .diff import compare
 from .drift import compare_source
 from .findings import render_sarif, to_mermaid
 from .lint import ERROR, check
-from .manifest import ManifestError, load
+from .manifest import ManifestError, load, loads
 from .obligations import (
     derive,
     load_obligations,
@@ -69,7 +70,18 @@ def build_parser() -> argparse.ArgumentParser:
         "reach",
         help="search for a legal call sequence that breaches a limit",
     )
-    _add_manifest(reach_parser)
+    reach_source = reach_parser.add_mutually_exclusive_group(required=True)
+    reach_source.add_argument(
+        "manifest",
+        nargs="?",
+        help="path to a mandate manifest (YAML or JSON)",
+    )
+    reach_source.add_argument(
+        "--ir",
+        dest="ir_snapshot",
+        metavar="SNAPSHOT",
+        help="an Authority IR source snapshot to validate and analyze",
+    )
     reach_parser.add_argument(
         "--depth",
         type=_positive_int,
@@ -87,6 +99,22 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="emit a Mermaid diagram of the authority graph and the breaching path",
     )
+
+    ir_parser = subparsers.add_parser(
+        "ir",
+        help="export or structurally validate canonical Authority IR",
+    )
+    ir_subparsers = ir_parser.add_subparsers(dest="ir_command", required=True)
+    ir_export = ir_subparsers.add_parser(
+        "export",
+        help="export a manifest as one canonical source snapshot",
+    )
+    _add_manifest(ir_export)
+    ir_validate = ir_subparsers.add_parser(
+        "validate",
+        help="validate snapshot structure without accepting it as authority",
+    )
+    ir_validate.add_argument("snapshot", help="path to an Authority IR snapshot")
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -282,9 +310,33 @@ def _emit(payload: dict, as_json: bool, text: str) -> None:
         print(text)
 
 
+def _read_text(path: str) -> str:
+    return Path(path).read_text(encoding="utf-8")
+
+
+def _run_ir(args: argparse.Namespace) -> int:
+    try:
+        if args.ir_command == "export":
+            path = Path(args.manifest)
+            content = path.read_bytes()
+            mandate = loads(content.decode("utf-8"), source=str(path))
+            output = _from_mandate(mandate, content=content).to_json()
+        else:
+            snapshot = AuthorityIR.from_json(_read_text(args.snapshot))
+            output = f"valid authority IR v{snapshot.ir_version}\n"
+    except (IRFormatError, ManifestError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_OK
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "ir":
+        return _run_ir(args)
 
     if args.command == "scan":
         try:
@@ -310,13 +362,31 @@ def main(argv: Sequence[str] | None = None) -> int:
             return EXIT_USAGE
         return EXIT_OK
 
+    if args.command == "reach":
+        chosen = [name for name in ("json", "sarif", "graph") if getattr(args, name)]
+        if len(chosen) > 1:
+            # Each writes to standard output. Emitting two would produce a
+            # file that is neither.
+            print(
+                f"error: choose one output format, not {', '.join('--' + f for f in chosen)}",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+
+    ir_result = None
+    ir_json = None
     try:
         if args.command == "diff":
             before = load(args.before)
             after = load(args.after)
+        elif args.command == "reach" and args.ir_snapshot is not None:
+            snapshot = AuthorityIR.from_json(_read_text(args.ir_snapshot))
+            ir_result = _analyse_ir(snapshot, depth=args.depth)
+            ir_json = ir_result.to_json() if args.json else None
+            mandate = _to_mandate(snapshot)
         else:
             mandate = load(args.manifest)
-    except ManifestError as exc:
+    except (IRFormatError, ManifestError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
 
@@ -405,7 +475,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_FINDING if any(f.severity == ERROR for f in findings) else EXIT_OK
 
     if args.command == "reach":
-        authority = analyse(mandate, depth=args.depth)
+        authority = (
+            ir_result.authority
+            if ir_result is not None
+            else analyse(mandate, depth=args.depth)
+        )
         if authority.breaches:
             text = "\n\n".join(b.render() for b in authority.breaches)
         else:
@@ -420,19 +494,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 + (" (search truncated)" if authority.truncated else "")
             )
             text = f"no reachable breach{depth_note}. {reached}{bound}"
-        chosen = [f for f in ("json", "sarif", "graph") if getattr(args, f)]
-        if len(chosen) > 1:
-            # Each writes to standard output. Emitting two would produce a
-            # file that is neither.
-            print(
-                f"error: choose one output format, not {', '.join('--' + f for f in chosen)}",
-                file=sys.stderr,
-            )
-            return EXIT_USAGE
         if args.sarif:
-            print(render_sarif(authority, args.manifest, __version__))
+            source_path = args.ir_snapshot or args.manifest
+            print(render_sarif(authority, source_path, __version__))
         elif args.graph:
             print(to_mermaid(authority, mandate))
+        elif args.json and ir_result is not None:
+            assert ir_json is not None
+            sys.stdout.write(ir_json)
         else:
             _emit(authority.as_dict(), args.json, text)
         return EXIT_FINDING if authority.breaches else EXIT_OK

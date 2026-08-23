@@ -239,27 +239,29 @@ Implementation is deliberately split so review can stop a bad format early:
    including omitted version, identity, limits, principal, and boolean fields,
    plus string forms of `requires` and role membership.
 3. Move reachability to the IR and make every derived edge cite its support.
-4. Expose import/export through the CLI only after unsupported semantics and
-   output stability have been reviewed.
+4. Expose canonical export and reviewed IR input through the CLI only after
+   unsupported semantics and output stability have been reviewed.
 
-Gates 1 through 3 are implemented privately. The committed v1 fixture covers
+Gates 1 through 3 are implemented. The committed v1 fixture covers
 every manifest shorthand and omitted-default path, and tests preserve both
 `Mandate` equality and reachability output across all repository examples and
 the four real evidence graphs. Retained paths are replayed against the same
 enabling semantics before provenance is derived, and each derived relation has
-a registry-enforced support shape. There is no CLI surface.
+a registry-enforced support shape.
 
-Gate 4 reader hardening, the private manifest-v1 analysis profile, and the
+Gate 4 reader hardening, the manifest-v1 analysis profile, and the
 versioned result envelope are complete. Committed canonical result fixtures
 cover clean, truncated, and breached analysis, while adversarial fixtures cover
 trust, predicate, value-shape, adapter, digest, parameter, graph, and
-non-canonical-value failures. Public import/export still requires the CLI
-failure-behavior work.
+non-canonical-value failures. The reviewed CLI exposes canonical export,
+structural validation, and IR-backed reachability without exporting a public
+Python API.
 
 That review is recorded in
-[`authority-ir-gate-4-review.md`](authority-ir-gate-4-review.md). Its decision
-is to hold public exposure until the reviewed CLI contract is complete.
+[`authority-ir-gate-4-review.md`](authority-ir-gate-4-review.md). It records why
+exposure was held and the conditions the implemented CLI now meets.
 
-The format remains experimental until all four gates pass. Policy-language
-imports, runtime evidence, signatures, global identifiers, and arbitrary
-provenance graphs are explicit non-goals for this first initiative.
+All four gates now pass. Artifact compatibility follows `STABILITY.md`;
+policy-language imports, runtime evidence, signatures, global identifiers, and
+arbitrary provenance graphs remain explicit non-goals for this first
+initiative.
