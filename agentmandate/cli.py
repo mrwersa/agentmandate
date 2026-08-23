@@ -6,14 +6,18 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 from . import __version__
+from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
+from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
 from .diff import compare
-from .drift import compare_source
+from .drift import compare as compare_drift
 from .findings import render_sarif, to_mermaid
+from .inventory import Inventory, collect
 from .lint import ERROR, check
 from .manifest import ManifestError, load, loads
 from .obligations import (
@@ -115,6 +119,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate snapshot structure without accepting it as authority",
     )
     ir_validate.add_argument("snapshot", help="path to an Authority IR snapshot")
+
+    inventory_parser = subparsers.add_parser(
+        "inventory",
+        help="structurally validate reviewed dynamic-inventory declarations",
+    )
+    inventory_subparsers = inventory_parser.add_subparsers(
+        dest="inventory_command", required=True
+    )
+    inventory_validate = inventory_subparsers.add_parser(
+        "validate",
+        help="validate declaration structure without accepting it as authority",
+    )
+    inventory_validate.add_argument("declaration", help="path to a declaration")
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -228,6 +245,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="compare against every agent's tools merged",
     )
     drift_parser.add_argument("--json", action="store_true", help="machine-readable output")
+    drift_parser.add_argument(
+        "--inventory-declaration",
+        action="append",
+        default=None,
+        metavar="DECLARATION",
+        help="reviewed dynamic-inventory declaration; repeatable",
+    )
+    drift_parser.add_argument(
+        "--inventory-capture",
+        action="append",
+        default=None,
+        metavar="CAPTURE",
+        help="captured bytes paired by order with --inventory-declaration",
+    )
+    drift_parser.add_argument(
+        "--inventory-selection",
+        default=None,
+        metavar="JSON",
+        help="reviewed deployment selection as a JSON object",
+    )
+    drift_parser.add_argument(
+        "--inventory-as-of",
+        default=None,
+        metavar="YYYY-MM-DD",
+        help="explicit evaluation date for inventory review expiry",
+    )
 
     scan_parser = subparsers.add_parser(
         "scan",
@@ -331,12 +374,77 @@ def _run_ir(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _run_inventory(args: argparse.Namespace) -> int:
+    try:
+        declaration = DynamicInventory.from_json(_read_text(args.declaration))
+    except (InventoryFormatError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    print(f"valid dynamic inventory v{declaration.inventory_version}")
+    return EXIT_OK
+
+
+def _dynamic_inventory(
+    args: argparse.Namespace, inventory: Inventory
+) -> InventoryReconciliation | None:
+    paths = args.inventory_declaration or []
+    captures = args.inventory_capture or []
+    supplied = bool(paths or captures or args.inventory_selection or args.inventory_as_of)
+    if not supplied:
+        return None
+    if not paths:
+        raise InventoryFormatError("--inventory-declaration is required")
+    if len(paths) != len(captures):
+        raise InventoryFormatError(
+            "supply one --inventory-capture for each --inventory-declaration"
+        )
+    if args.inventory_selection is None:
+        raise InventoryFormatError("--inventory-selection is required")
+    if args.inventory_as_of is None:
+        raise InventoryFormatError("--inventory-as-of is required")
+    try:
+        selection = json.loads(args.inventory_selection)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise InventoryFormatError("--inventory-selection must be valid JSON") from exc
+    if not isinstance(selection, dict):
+        raise InventoryFormatError("--inventory-selection must be a JSON object")
+    try:
+        as_of = date.fromisoformat(args.inventory_as_of)
+    except ValueError as exc:
+        raise InventoryFormatError("--inventory-as-of must be YYYY-MM-DD") from exc
+    if as_of.isoformat() != args.inventory_as_of:
+        raise InventoryFormatError("--inventory-as-of must be YYYY-MM-DD")
+
+    declarations = []
+    source_contents: dict[str, bytes] = {}
+    for declaration_path, capture_path in zip(paths, captures, strict=True):
+        declaration = DynamicInventory.from_json(_read_text(declaration_path))
+        content = Path(capture_path).read_bytes()
+        previous = source_contents.get(declaration.source.locator)
+        if previous is not None and previous != content:
+            raise InventoryFormatError(
+                "declarations with one source locator supplied different capture bytes"
+            )
+        source_contents[declaration.source.locator] = content
+        declarations.append(declaration)
+    return reconcile_inventory(
+        inventory,
+        declarations,
+        source_contents,
+        selection=selection,
+        as_of=as_of,
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
     if args.command == "ir":
         return _run_ir(args)
+
+    if args.command == "inventory":
+        return _run_inventory(args)
 
     if args.command == "scan":
         try:
@@ -392,13 +500,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "drift":
         try:
-            drift = compare_source(
-                mandate,
-                args.source,
-                binding=args.binding,
-                union=args.union_bindings,
+            inventory = collect(
+                args.source, binding=args.binding, union=args.union_bindings
             )
-        except (OSError, ValueError) as exc:
+            dynamic = _dynamic_inventory(args, inventory)
+            drift = compare_drift(mandate, inventory, dynamic=dynamic)
+        except (InventoryFormatError, OSError, UnicodeError, ValueError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return EXIT_USAGE
         if args.json:

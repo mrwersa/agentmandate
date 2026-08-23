@@ -68,6 +68,9 @@ class Drift:
     # binding is what a reader needs to see that the comparison was against
     # the agent they meant.
     source: str = ""
+    # Present only when reviewed dynamic inventory was reconciled. Keeping it
+    # absent from ordinary output preserves the established drift contract.
+    inventory_as_of: str | None = None
 
     @property
     def clean(self) -> bool:
@@ -86,6 +89,8 @@ class Drift:
                 "  no agent binding was found in source, so this compares "
                 "against every declared tool"
             )
+        if self.inventory_as_of is not None:
+            lines.append(f"  dynamic inventory evaluated as of {self.inventory_as_of}")
         lines.append("")
         if self.clean:
             lines.append("  the mandate still describes the implementation")
@@ -96,7 +101,7 @@ class Drift:
         return "\n".join(lines)
 
     def as_dict(self) -> dict:
-        return {
+        payload = {
             "agent": self.agent,
             "declared": list(self.declared),
             "discovered": list(self.discovered),
@@ -115,6 +120,9 @@ class Drift:
                 for f in self.findings
             ],
         }
+        if self.inventory_as_of is not None:
+            payload["inventory_as_of"] = self.inventory_as_of
+        return payload
 
 
 def compare(
@@ -271,6 +279,7 @@ def compare(
         discovered=tuple(sorted(discovered_names)),
         findings=tuple(findings),
         source=source,
+        inventory_as_of=dynamic.as_of if dynamic is not None else None,
     )
 
 

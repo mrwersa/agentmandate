@@ -25,9 +25,10 @@ agentmandate~=0.10.0
 
 ## Versioned authority artifacts
 
-The `mandate ir` and `mandate reach --ir` CLI surfaces are public. The Python
-records remain private and are not exported from `agentmandate`. Their explicit
-artifact versions separate compatibility from package releases:
+The `mandate ir`, `mandate inventory`, and `mandate reach --ir` CLI surfaces
+are public. The Python records remain private and are not exported from
+`agentmandate`. Their explicit artifact versions separate compatibility from
+package releases:
 
 - `ir_version` changes when graph records, relations, or canonicalization
   change incompatibly.
@@ -46,6 +47,11 @@ standalone artifact rules are stricter than the additive guarantee for existing
 `mandate ir validate` guarantees structural validity only. Eligibility for
 analysis is a separate, stricter check performed by `mandate reach --ir`; this
 distinction will not be weakened in a patch release.
+
+The same boundary applies to `mandate inventory validate`: it proves only that
+a declaration is structurally valid. `mandate drift` separately checks its
+target, reviewed selection, supplied capture digest, completeness, confidence,
+review, and expiry against an explicit evaluation date.
 
 ## What is most likely to change
 
