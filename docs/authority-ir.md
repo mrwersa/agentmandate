@@ -25,7 +25,7 @@ An IR snapshot contains four deterministic tables:
   an empty string. Locators should be repository-relative or stable URIs;
   machine-specific absolute paths are presentation metadata, not identity.
 - **Entities** name agents, tools, scopes, principals, roles, and constraints.
-  IDs are snapshot-local and derived from kind plus the reviewed name. They do
+  IDs are snapshot-local and derived from kind plus the declared name. They do
   not claim global identity.
 - **Facts** assign a typed predicate and value to an entity. Every fact carries
   one or more evidence references, each naming a source and a JSON Pointer or
@@ -81,6 +81,16 @@ fails closed until one is accepted or a conservative rule is explicitly
 defined for that predicate. Unsupported source material is retained as a
 digest-bound observation, not copied wholesale into the core IR.
 
+Edges are positive, multi-valued assertions and combine by union with their
+provenance. Omitting an edge is not evidence that the relation is absent. A
+source may separately declare that a named relation is complete for a named
+subject; only then may omission produce a negative observation. An accepted
+positive edge and an accepted complete-source negative observation conflict
+and stop analysis. Unreviewed or heuristic evidence may widen an inventory
+view, but it cannot cancel an accepted edge. The relation registry must declare
+cardinality and these merge semantics before reachability consumes a new
+relation.
+
 ## Compatibility and serialization
 
 The IR has its own integer `ir_version`, independent of manifest versions and
@@ -94,6 +104,10 @@ The latter is always available; the former is omitted when a caller supplies
 an already-parsed `Mandate`. The adapter never labels a normalized projection
 as the original artifact. Source locations for version-defined defaults point
 to the manifest-version definition rather than to a key that was absent.
+Every semantic digest records the adapter identifier and adapter version that
+produced the projection. Projection changes require a new adapter version even
+when `ir_version` is unchanged, so consumers can distinguish changed source
+semantics from changed importer logic.
 
 The first adapter must satisfy semantic round-trip compatibility:
 
@@ -129,7 +143,10 @@ Implementation is deliberately split so review can stop a bad format early:
 
 1. Add private typed records, canonical JSON, and a lossless manifest adapter.
 2. Validate exact round-trips on every example and all four real evidence
-   graphs; commit one canonical v1 migration fixture.
+   graphs; commit one canonical v1 migration fixture. A separate compatibility
+   fixture must exercise every manifest v1 shorthand and every omitted default,
+   including omitted version, identity, limits, principal, and boolean fields,
+   plus string forms of `requires` and role membership.
 3. Move reachability to the IR and make every derived edge cite its support.
 4. Expose import/export through the CLI only after unsupported semantics and
    output stability have been reviewed.
