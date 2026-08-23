@@ -162,7 +162,9 @@ The private IR entry point validates the snapshot, projects its exact v1 facts
 into the existing search kernel, and returns the unchanged `Authority` beside
 an augmented IR graph. The graph does not absorb depth or truncation as facts.
 Repeated calls remain explicit in the counterexample path; their canonical
-transition edges are deduplicated without losing the sequence.
+transition edges are deduplicated. Reconstructing call order therefore requires
+the result envelope's counterexample path; the graph alone records which
+transitions occurred, not their order or repetition count.
 
 Provenance records support an explanation; they are not a proof that a source
 was truthful. Artifact signatures and evidence bundles are later roadmap work.

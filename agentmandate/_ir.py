@@ -911,6 +911,9 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
     for tool_name in authority.reachable_tools:
         tool = tools[tool_name]
         tool_id = tool_ids[tool_name]
+        # Keep this identical to reach.analyse: required scopes describe the
+        # effect when present; a produced scope is the fallback. Broadening it
+        # here would make provenance claim effects the public result omits.
         scope_names = tool.requires or ((tool.produces,) if tool.produces else ())
         for scope_name in scope_names:
             scope_id = _entity_id("scope", scope_name)
