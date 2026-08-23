@@ -65,13 +65,17 @@ the following intended semantics:
 
 - `boundary.id` is a stable, reviewer-chosen identifier. It must not depend on
   a line number. `kind` is a closed vocabulary: `factory`, `provider`,
-  `registry`, or `deployment`.
+  `registry`, or `deployment`. IDs are unique within one reconciliation input;
+  two boundaries targeting the same binding must still have distinct IDs, and
+  a repeated ID is a conflict rather than an alias.
 - `target` joins the declaration to one source binding. Repository-relative
   source and binding names establish identity; source locations are diagnostic
   metadata only.
-- `selection` records every input that changes membership, such as tenant,
-  environment, enabled skills, toolsets, or provider key. Keys and scalar or
-  string-list values are canonicalized; secrets and credentials are forbidden.
+- `selection` records every input that changes membership. Version 1 accepts
+  only `environment`, `tenant`, `region`, `provider`, `skills`, `toolsets`, and
+  `configuration`; adding a key requires an explicit profile change. Scalar or
+  string-list values are canonicalized. Values are non-secret identifiers;
+  credentials, tokens, passwords, and private material are forbidden.
 - `source` binds the claim to captured bytes and the producer that emitted
   them. `format_version` and `producer_version` are independent. Unknown
   versions are explicit, never empty strings.
@@ -83,8 +87,9 @@ the following intended semantics:
 
 Canonical JSON, hashing, strict-reader errors, and version rejection should
 follow the Authority IR rules. Member order is not semantic. Duplicate member
-names, absolute locators, unknown fields, and secret-shaped selection keys are
-rejected.
+names, absolute locators, unknown fields, and selection keys outside the closed
+v1 vocabulary are rejected. The closed keys make reader behavior mechanical;
+they do not replace fixture review for secrets hidden under an innocuous name.
 
 ## Trust and reconciliation
 
@@ -96,12 +101,21 @@ static boundary only when all of these hold:
 3. its source digest and supported adapter version verify;
 4. completeness is `complete`;
 5. every consumed claim is `exact` and `accepted`; and
-6. the review has not expired.
+6. the review has not expired at the reconciliation evaluation date.
 
 `partial` and `unknown` inventories may widen the observed member set, but
 cannot prove absence or permit removal findings. `heuristic`, `unreviewed`,
 `contested`, expired, or selector-mismatched evidence remains visible and
 produces an `unresolved` finding.
+
+Expiry deliberately makes eligibility time-dependent: a previously clean run
+can become an `unresolved` finding solely because its review expired. The
+reconciler therefore receives an injectable `as_of` date. A future CLI may
+default that value once from the current UTC date, but machine output must
+record the effective date so the result is reproducible. Tests use a frozen
+date, and expiry fixtures must sit clearly before or after it rather than
+depending on the day the suite runs. The declaration's hashed body contains
+the review expiry, never a generated current timestamp.
 
 Version 1 cannot observe the live deployment. “Matches the deployment” means
 that the caller selected a reviewed declaration whose target and selection are
@@ -109,15 +123,16 @@ the configuration under review; the result proves agreement at that declared
 context, not that production loaded it. Runtime reconciliation is later fleet
 governance work.
 
-Positive membership combines by union with provenance. Two eligible complete
-claims for the same boundary, selection, and producer revision must name the
-same set; disagreement is a conflict, not a union. Claims for different
-selectors or revisions are separate observations and must not be silently
-merged. An accepted manifest tool absent from an eligible complete set may be
-reported as removed only when it is absent from the union of literal members
-and every eligible dynamic boundary, and no contributing boundary remains
-unresolved. A captured member absent from the mandate is undeclared authority.
-Neither conclusion is available from incomplete evidence.
+Positive membership combines by union with provenance. Eligible complete
+claims for the same boundary and selection must name the same set;
+disagreement is a conflict even when their producer revisions differ. The
+caller must select one reviewed revision rather than relying on “latest” or a
+union. Claims for different selectors are separate observations and must not
+be silently merged. An accepted manifest tool absent from an eligible complete
+set may be reported as removed only when it is absent from the union of literal
+members and every eligible dynamic boundary, and no contributing boundary
+remains unresolved. A captured member absent from the mandate is undeclared
+authority. Neither conclusion is available from incomplete evidence.
 
 The first implementation should project membership into provenance-bearing IR
 facts and edges, but it must use a dedicated inventory profile. The existing
