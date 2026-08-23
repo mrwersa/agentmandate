@@ -345,6 +345,18 @@ and the context completeness, class, evidence, and digest locations. The
 existing reachability kernel then analyzes a temporary attenuated mandate; the
 kernel itself is not forked.
 
+The private drift reconciler computes that analysis itself rather than
+accepting a result that might belong to another mandate. Before a condition is
+eligible, its source, binding, and tool must also match the selected static or
+reviewed-dynamic inventory. A union with no single attributable binding, a
+target mismatch, or an absent live tool preserves the default effect and adds
+an unresolved condition finding. Duplicate identical failures are reported
+once. A source failure for any condition on a tool blocks every sibling
+condition on that tool; gate 3 does not compose multiple conditions. These
+findings make the combined private result unclean, but do not
+withhold tool-removal checks: conditional trust says nothing about whether the
+inventory was complete. Public rendering and CLI inputs remain gate 4 work.
+
 ## Gates
 
 1. **Contract:** this document survives challenge against both fixtures.
@@ -357,7 +369,7 @@ kernel itself is not forked.
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
    under conservative defaults. The private conditional reachability consumer
-   is done; drift integration and delegation remain pending, with delegation
+   and source-drift reconciliation are done; delegation remains pending,
    blocked on genuine chain evidence.
 4. **Public exposure:** CLI and schema-version bump only after failure
    behaviour and output stability reviews.

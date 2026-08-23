@@ -20,8 +20,11 @@ from agentmandate._conditions import (
     _validate_condition_profile,
     _validate_principal_profile,
     analyse_conditions,
+    reconcile_condition_drift,
 )
+from agentmandate._inventory import InventoryReconciliation
 from agentmandate._ir import AuthorityIR, Entity, Fact, _entity_id, _fact_id
+from agentmandate.inventory import collect
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CONTEXT = FIXTURES / "condition-context-select-v1.json"
@@ -959,6 +962,26 @@ def conditional_inputs():
     return mandate, condition, context, captures
 
 
+def conditional_inventory(tmp_path: Path, tools: str = "[run_query]"):
+    (tmp_path / "agent.py").write_text(
+        "from strands import Agent, tool\n\n"
+        "@tool\n"
+        "def run_query(sql: str) -> str:\n"
+        "    return sql\n\n"
+        f"agent = Agent(tools={tools})\n",
+        encoding="utf-8",
+    )
+    return collect(tmp_path)
+
+
+def live_condition_inputs(tmp_path: Path):
+    mandate, condition, context, captures = conditional_inputs()
+    target = replace(condition.target, source="agent.py", binding="agent")
+    condition = replace(condition, target=target)
+    context = replace(context, target_source="agent.py", target_binding="agent")
+    return mandate, conditional_inventory(tmp_path), condition, context, captures
+
+
 def test_complete_reviewed_sql_context_narrows_existing_reachability():
     mandate, condition, context, captures = conditional_inputs()
 
@@ -1152,3 +1175,160 @@ def test_conditional_consumption_rejects_malformed_records_and_wall_clock_inputs
             captures,
             as_of=datetime(2027, 1, 1),
         )
+
+
+def test_condition_drift_reconciles_against_the_live_binding(tmp_path: Path):
+    mandate, inventory, condition, context, captures = live_condition_inputs(tmp_path)
+
+    result = reconcile_condition_drift(
+        mandate,
+        inventory,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert result.clean
+    assert result.drift.clean
+    assert result.analysis.findings == ()
+    assert result.analysis.authority.ungated_irreversible == frozenset()
+    assert result.analysis.applied[0].tool == "run_query"
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ("source", "does not match the selected source binding"),
+        ("binding", "does not match the selected source binding"),
+        ("missing_tool", "not present in the reconciled source inventory"),
+        ("unselected", "does not identify one selected binding"),
+    ],
+)
+def test_condition_drift_source_failures_never_narrow(
+    tmp_path: Path, change: str, message: str
+):
+    mandate, inventory, condition, context, captures = live_condition_inputs(tmp_path)
+    if change in {"source", "binding"}:
+        condition = replace(
+            condition,
+            target=replace(condition.target, **{change: f"other-{change}"}),
+        )
+    elif change == "missing_tool":
+        inventory = conditional_inventory(tmp_path, tools="[other_tool]")
+    else:
+        inventory.selected = None
+        inventory.united = True
+
+    result = reconcile_condition_drift(
+        mandate,
+        inventory,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert not result.clean
+    assert result.analysis.authority == analyse(mandate)
+    assert result.analysis.applied == ()
+    assert message in result.analysis.findings[0].message
+
+
+def test_condition_drift_collapses_duplicate_source_failures(tmp_path: Path):
+    mandate, inventory, condition, context, captures = live_condition_inputs(tmp_path)
+    condition = replace(
+        condition,
+        target=replace(condition.target, source="another.py"),
+    )
+
+    result = reconcile_condition_drift(
+        mandate,
+        inventory,
+        [condition, condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert len(result.analysis.findings) == 1
+
+
+def test_one_source_failure_prevents_a_second_condition_narrowing_the_same_tool(
+    tmp_path: Path,
+):
+    mandate, inventory, condition, context, captures = live_condition_inputs(tmp_path)
+    mismatched = replace(
+        condition,
+        id="conditions/aws-postgres/mismatched",
+        target=replace(condition.target, source="another.py"),
+    )
+
+    result = reconcile_condition_drift(
+        mandate,
+        inventory,
+        [condition, mismatched],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+    )
+
+    assert result.analysis.authority == analyse(mandate)
+    assert result.analysis.applied == ()
+    assert {item.message for item in result.analysis.findings} == {
+        "condition target does not match the selected source binding",
+        "another condition targeting this tool failed source reconciliation",
+    }
+
+
+def test_condition_drift_keeps_analysis_failures_separate_from_removals(tmp_path: Path):
+    mandate, inventory, condition, _, captures = live_condition_inputs(tmp_path)
+    representative = ConditionContext.from_json(CONTEXT.read_text(encoding="utf-8"))
+    representative = replace(
+        representative,
+        target_source="agent.py",
+        target_binding="agent",
+    )
+
+    result = reconcile_condition_drift(
+        mandate,
+        inventory,
+        [condition],
+        [representative],
+        captures,
+        as_of=date(2026, 9, 1),
+    )
+
+    assert not result.clean
+    assert result.drift.clean
+    assert result.analysis.authority == analyse(mandate)
+    assert result.analysis.findings[0].message == "condition context is not complete"
+
+
+def test_condition_drift_accepts_membership_from_reviewed_dynamic_inventory(
+    tmp_path: Path,
+):
+    mandate, inventory, condition, context, captures = live_condition_inputs(tmp_path)
+    inventory.declarations.clear()
+    dynamic = InventoryReconciliation(
+        as_of="2027-01-01",
+        members=("run_query",),
+        findings=(),
+        complete=True,
+        covers_binding=True,
+        graphs=(),
+    )
+
+    result = reconcile_condition_drift(
+        mandate,
+        inventory,
+        [condition],
+        [context],
+        captures,
+        as_of=date(2027, 1, 1),
+        dynamic=dynamic,
+        depth=1,
+    )
+
+    assert result.clean
+    assert result.analysis.authority.depth == 1
