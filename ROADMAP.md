@@ -90,6 +90,12 @@ emitting validated, provenance-bearing reachability, effect, transition, and
 breach edges. The format remains experimental until its unsupported semantics
 and output stability are reviewed before a CLI surface is proposed.
 
+Gate 4 review is recorded in
+[`docs/authority-ir-gate-4-review.md`](docs/authority-ir-gate-4-review.md). It
+holds public exposure on three explicit gates: a trust-aware analyzable profile,
+a versioned result envelope, and then the reviewed CLI contract. Structural IR
+validity alone is not treated as authority approval.
+
 ## 3–6 months: model real authority
 
 Goal: represent the smallest set of relationships, conditions, delegation, and

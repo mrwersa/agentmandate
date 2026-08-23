@@ -199,6 +199,11 @@ Gate 4 reader hardening is complete, including committed malformed fixtures for
 every record type. Public import/export still requires a separate review of
 unsupported semantics, output stability, and CLI failure behavior.
 
+That review is recorded in
+[`authority-ir-gate-4-review.md`](authority-ir-gate-4-review.md). Its decision
+is to hold public exposure until the analyzable profile, result envelope, and
+reviewed CLI contract are complete.
+
 The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary
 provenance graphs are explicit non-goals for this first initiative.
