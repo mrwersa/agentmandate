@@ -61,7 +61,7 @@ manifest shape.
 
 | Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
 |---|---|---|---|
-| **Two additional real graphs** (high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with reviewer notes and at least one clean result. Not a synthetic benchmark corpus. |
+| **Two additional real graphs** (complete; high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with reviewer notes and at least one clean result. Not a synthetic benchmark corpus. |
 | **Canonical authority IR with provenance** (high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
 | **Dynamic inventory declarations** (high) | Static scan cannot enumerate provider-built tool lists and must fail closed. Add reviewed inventory boundaries for factories, providers, registries, and deployment configuration. | AgentKit's unresolved binding plus one independent dynamic framework fixture. | Drift can prove a declared dynamic boundary complete or explain exactly why it cannot. Never import or execute application code. |
 | **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** (medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. | Version-pinned fixtures and a mapping note for each format. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation or production policy compilation. |
@@ -70,11 +70,15 @@ Dependencies: the IR design follows the new graph evidence, not the reverse.
 Policy experiments may remain disposable until the provenance representation is
 accepted.
 
-Evidence progress: the data-system half of the first initiative is captured in
+Evidence progress: this initiative is complete. The data-system graph is
+captured in
 [`docs/evidence/aws-postgres-mcp`](docs/evidence/aws-postgres-mcp/README.md).
 It exposes the need to model conditional SQL effects, intersecting AWS/database
 principals, multi-output tools, and deployment-bound resource relationships. The
-independent SaaS/operations graph remains outstanding.
+independent SaaS/operations graph in
+[`docs/evidence/sentry-mcp`](docs/evidence/sentry-mcp/README.md) exposes a
+skill-filtered authority catalogue hidden behind a destructive meta-tool, fixed
+user-token delegation, tenant constraints, and unlabelled operational data.
 
 ## 3–6 months: model real authority
 

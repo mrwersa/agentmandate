@@ -1,0 +1,12 @@
+{
+  "name": "agentmandate-sentry-evidence-capture",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "capture": "node capture-catalogue.mjs --server=./node_modules/.bin/sentry-mcp --output=./catalogue.json"
+  },
+  "dependencies": {
+    "@sentry/mcp-server": "0.37.0"
+  }
+}
