@@ -74,3 +74,8 @@ PR: provenance-aware authority IR first; conditional effects, delegation chains,
 multi-output producers, and resource relationships only after more graphs test
 the abstractions. It does not justify executing SQL, importing AWS policy, or
 turning AgentMandate into an MCP proxy.
+
+The proposed [conditions and delegation
+contract](../../conditions-delegation.md) defines how this graph's conditional
+`run_query` effect and intersecting principal may eventually be declared; no
+current manifest version accepts those records.
