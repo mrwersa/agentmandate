@@ -70,6 +70,13 @@ Dependencies: the IR design follows the new graph evidence, not the reverse.
 Policy experiments may remain disposable until the provenance representation is
 accepted.
 
+Evidence progress (23 August 2026): the data-system half of the first
+initiative is captured in
+[`docs/evidence/aws-postgres-mcp`](docs/evidence/aws-postgres-mcp/README.md).
+It demonstrates conditional SQL effects, intersecting AWS/database principals,
+multi-output tools, and deployment-bound resource relationships. The independent
+SaaS/operations graph remains outstanding.
+
 ## 3–6 months: model real authority
 
 Goal: represent the smallest set of relationships, conditions, delegation, and
