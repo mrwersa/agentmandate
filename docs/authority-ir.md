@@ -149,6 +149,11 @@ Every supported `ir_version` needs a committed migration fixture. A reader
 rejects a newer version; it never guesses. Until a second version exists, the
 migration test is a canonical v1 fixture that must remain readable.
 
+The private reader exposes one `IRFormatError` boundary. It checks JSON syntax,
+root and table shapes, exact record fields, scalar types, evidence enums,
+relation names, and duplicate IDs before returning a snapshot. Errors identify
+the table, record index, and field but never repeat the rejected value.
+
 ## Derived authority provenance
 
 A reachability result must be explainable without citing the implementation.
@@ -189,6 +194,10 @@ every manifest shorthand and omitted-default path, and tests preserve both
 the four real evidence graphs. Retained paths are replayed against the same
 enabling semantics before provenance is derived, and each derived relation has
 a registry-enforced support shape. There is no CLI surface.
+
+Gate 4 reader hardening is complete, including committed malformed fixtures for
+every record type. Public import/export still requires a separate review of
+unsupported semantics, output stability, and CLI failure behavior.
 
 The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary

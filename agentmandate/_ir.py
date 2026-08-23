@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any
+from typing import Any, TypeVar
 from urllib.parse import quote
 
 from .manifest import SCHEMA_VERSION, Limits, Mandate, Money, Tool
@@ -30,6 +31,7 @@ MANIFEST_ADAPTER_VERSION = 2
 MANIFEST_DEFAULTS_ADAPTER = "agentmandate.manifest-defaults"
 MANIFEST_DEFAULTS_ADAPTER_VERSION = 1
 _NO_DEFAULT = object()
+_RecordT = TypeVar("_RecordT")
 _MANIFEST_V1_DEFAULTS = {
     "agent.identity": None,
     "agent.roles": [],
@@ -215,89 +217,112 @@ class AuthorityIR:
             raise IRFormatError(f"unsupported authority IR version {self.ir_version!r}")
 
         tables = {
-            "source": self.sources,
-            "entity": self.entities,
-            "edge": self.edges,
+            "source": ("sources", self.sources),
+            "entity": ("entities", self.entities),
+            "edge": ("edges", self.edges),
         }
-        for table, records in tables.items():
-            identifiers = [item.id for item in records]
-            if len(identifiers) != len(set(identifiers)):
-                raise IRFormatError(f"authority IR has a duplicate {table} id")
+        for table, (path, records) in tables.items():
+            identifiers: set[str] = set()
+            for index, item in enumerate(records):
+                if item.id in identifiers:
+                    raise IRFormatError(
+                        f"authority IR has a duplicate {table} id at {path}[{index}].id"
+                    )
+                identifiers.add(item.id)
 
         sources = {item.id for item in self.sources}
         entities = {item.id: item for item in self.entities}
         facts = {item.id: item for item in self.facts}
         predicates: set[tuple[str, str]] = set()
-        for entity in self.entities:
+        for index, entity in enumerate(self.entities):
             if entity.id != _entity_id(entity.kind, entity.name):
-                raise IRFormatError(f"authority IR entity id does not match {entity.name!r}")
-        for fact in self.facts:
+                raise IRFormatError(
+                    f"authority IR entities[{index}].id: entity id does not match kind/name"
+                )
+        for index, fact in enumerate(self.facts):
             if fact.id != _fact_id(fact.subject, fact.predicate):
-                raise IRFormatError(f"authority IR fact id does not match {fact.subject}")
+                raise IRFormatError(
+                    f"authority IR facts[{index}].id: fact id does not match subject/predicate"
+                )
             if fact.subject not in entities:
-                raise IRFormatError(f"authority IR fact has unknown subject {fact.subject!r}")
+                raise IRFormatError(
+                    f"authority IR facts[{index}].subject has unknown subject"
+                )
             key = (fact.subject, fact.predicate)
             if key in predicates:
                 raise IRFormatError(
-                    f"authority IR has conflicting facts for {fact.subject}.{fact.predicate}"
+                    f"authority IR facts[{index}].id has conflicting facts"
                 )
             predicates.add(key)
-            for evidence in fact.evidence:
+            for evidence_index, evidence in enumerate(fact.evidence):
+                evidence_path = f"facts[{index}].evidence[{evidence_index}]"
                 if evidence.source not in sources:
                     raise IRFormatError(
-                        f"authority IR evidence has unknown source {evidence.source!r}"
+                        f"authority IR {evidence_path}.source has unknown source"
                     )
                 if evidence.confidence not in {"exact", "heuristic", "unknown"}:
                     raise IRFormatError(
-                        f"authority IR has unknown confidence {evidence.confidence!r}"
+                        f"authority IR {evidence_path}.confidence has unknown confidence"
                     )
                 if evidence.review not in {"unreviewed", "accepted", "contested"}:
-                    raise IRFormatError(f"authority IR has unknown review {evidence.review!r}")
+                    raise IRFormatError(
+                        f"authority IR {evidence_path}.review has unknown review"
+                    )
 
         edges = {edge.id: edge for edge in self.edges}
         actual_edges = {(edge.source, edge.relation, edge.target) for edge in self.edges}
-        for edge in self.edges:
+        for index, edge in enumerate(self.edges):
+            edge_path = f"edges[{index}]"
             expected_id = _edge_id(edge.source, edge.relation, edge.target)
             if edge.id != expected_id:
-                raise IRFormatError(f"authority IR edge id does not match {expected_id!r}")
+                raise IRFormatError(
+                    f"authority IR {edge_path}.id: edge id does not match endpoints"
+                )
             relation = RELATIONS.get(edge.relation)
             if relation is None:
-                raise IRFormatError(f"authority IR has unknown relation {edge.relation!r}")
+                raise IRFormatError(
+                    f"authority IR {edge_path}.relation has unknown relation"
+                )
             source = entities.get(edge.source)
             target = entities.get(edge.target)
             if source is None or target is None:
-                raise IRFormatError(f"authority IR edge {edge.id!r} has an unknown endpoint")
+                raise IRFormatError(f"authority IR {edge_path} has an unknown endpoint")
             if source.kind != relation.source_kind or target.kind != relation.target_kind:
-                raise IRFormatError(f"authority IR edge {edge.id!r} has invalid endpoint kinds")
+                raise IRFormatError(f"authority IR {edge_path} has invalid endpoint kinds")
             if not edge.support:
-                raise IRFormatError(f"authority IR edge {edge.id!r} has no support")
+                raise IRFormatError(f"authority IR {edge_path} has no support")
             if relation.derived:
-                for support_id in edge.support:
+                for support_index, support_id in enumerate(edge.support):
                     if support_id not in facts and support_id not in edges:
                         raise IRFormatError(
-                            f"authority IR edge {edge.id!r} has unknown support {support_id!r}"
+                            f"authority IR {edge_path}.support[{support_index}] "
+                            "has unknown support"
                         )
-                _validate_derived_edge(edge, entities, facts, edges, relation.support_rule)
+                _validate_derived_edge(
+                    edge, edge_path, entities, facts, edges, relation.support_rule
+                )
                 continue
             establishes_relation = False
-            for support_id in edge.support:
+            for support_index, support_id in enumerate(edge.support):
                 support = facts.get(support_id)
                 if support is None:
                     raise IRFormatError(
-                        f"authority IR edge {edge.id!r} has unknown support {support_id!r}"
+                        f"authority IR {edge_path}.support[{support_index}] "
+                        "has unknown support"
                     )
                 if support.subject != edge.source:
                     raise IRFormatError(
-                        f"authority IR edge {edge.id!r} cites support from another entity"
+                        f"authority IR {edge_path}.support[{support_index}] cites support "
+                        "from another entity"
                     )
                 targets = support.value if isinstance(support.value, list) else [support.value]
                 if support.predicate == relation.predicate and edge.target in targets:
                     establishes_relation = True
             if not establishes_relation:
                 raise IRFormatError(
-                    f"authority IR edge {edge.id!r} is not established by its support"
+                    f"authority IR {edge_path} is not established by its support"
                 )
-        for fact in self.facts:
+        for index, fact in enumerate(self.facts):
             for relation_name, relation in RELATIONS.items():
                 if relation.derived or fact.predicate != relation.predicate:
                     continue
@@ -305,24 +330,40 @@ class AuthorityIR:
                 for target in (item for item in targets if item is not None):
                     if (fact.subject, relation_name, target) not in actual_edges:
                         raise IRFormatError(
-                            f"authority IR is missing {relation_name} edge from {fact.subject}"
+                            f"authority IR facts[{index}] is missing {relation_name} edge"
                         )
         _validate_derived_support(edges, facts)
 
     @classmethod
     def from_json(cls, text: str) -> AuthorityIR:
-        raw = json.loads(text)
-        version = raw.get("ir_version")
-        if isinstance(version, bool) or version != IR_VERSION:
+        try:
+            raw = json.loads(text)
+        except (json.JSONDecodeError, TypeError) as exc:
+            if isinstance(exc, json.JSONDecodeError):
+                detail = f" at line {exc.lineno} column {exc.colno}"
+            else:
+                detail = ""
+            raise IRFormatError(f"authority IR is not valid JSON{detail}") from exc
+        if not isinstance(raw, dict):
+            raise IRFormatError("authority IR root must be an object")
+        if "ir_version" not in raw:
+            raise IRFormatError("authority IR root is missing field 'ir_version'")
+        version = raw["ir_version"]
+        if isinstance(version, bool) or not isinstance(version, int):
+            raise IRFormatError(
+                f"unsupported authority IR version type; this build reads {IR_VERSION}"
+            )
+        if version != IR_VERSION:
             raise IRFormatError(
                 f"unsupported authority IR version {version!r}; this build reads {IR_VERSION}"
             )
+        _record(raw, "root", {"ir_version", "sources", "entities", "facts", "edges"})
         snapshot = cls(
             ir_version=version,
-            sources=tuple(_source_from_dict(item) for item in raw["sources"]),
-            entities=tuple(Entity(**item) for item in raw["entities"]),
-            facts=tuple(_fact_from_dict(item) for item in raw["facts"]),
-            edges=tuple(_edge_from_dict(item) for item in raw["edges"]),
+            sources=_table(raw["sources"], "sources", _source_from_dict),
+            entities=_table(raw["entities"], "entities", _entity_from_dict),
+            facts=_table(raw["facts"], "facts", _fact_from_dict),
+            edges=_table(raw["edges"], "edges", _edge_from_dict),
         )
         snapshot.validate()
         return snapshot
@@ -338,6 +379,7 @@ class _IRAnalysis:
 
 def _validate_derived_edge(
     edge: Edge,
+    path: str,
     entities: dict[str, Entity],
     facts: dict[str, Fact],
     edges: dict[str, Edge],
@@ -349,7 +391,7 @@ def _validate_derived_edge(
     def require(identifier: str) -> None:
         if identifier not in support:
             raise IRFormatError(
-                f"authority IR derived edge {edge.id!r} lacks {rule} support {identifier!r}"
+                f"authority IR {path}.support lacks required {rule} support"
             )
 
     if rule == "reachable":
@@ -357,7 +399,7 @@ def _validate_derived_edge(
         require(tools_fact_id)
         if edge.target not in facts[tools_fact_id].value:
             raise IRFormatError(
-                f"authority IR derived edge {edge.id!r} targets an undeclared tool"
+                f"authority IR {path}.target targets an undeclared tool"
             )
         require(_fact_id(edge.target, "requires"))
         if any(
@@ -367,7 +409,7 @@ def _validate_derived_edge(
             for support_id in support
         ):
             raise IRFormatError(
-                f"authority IR derived edge {edge.id!r} must be rooted in source records"
+                f"authority IR {path}.support must be rooted in source records"
             )
         required_edges = [
             edges[support_id]
@@ -382,8 +424,7 @@ def _validate_derived_edge(
                 for support_id in support
             ):
                 raise IRFormatError(
-                    f"authority IR derived edge {edge.id!r} lacks a producer for "
-                    f"{required.target!r}"
+                    f"authority IR {path}.support lacks a producer for a required scope"
                 )
         return
     if rule == "effect":
@@ -397,7 +438,7 @@ def _validate_derived_edge(
             for support_id in support
         ):
             raise IRFormatError(
-                f"authority IR derived edge {edge.id!r} lacks effect scope support"
+                f"authority IR {path}.support lacks effect scope support"
             )
         return
     if rule == "transition":
@@ -414,7 +455,7 @@ def _validate_derived_edge(
             for support_id in support
         ):
             raise IRFormatError(
-                f"authority IR derived edge {edge.id!r} lacks a reachable path"
+                f"authority IR {path}.support lacks a reachable path"
             )
         name = entities[edge.target].name
         if name.startswith("cumulative_value:"):
@@ -426,7 +467,7 @@ def _validate_derived_edge(
             require(_fact_id(tool_id, "effect"))
             require(_fact_id(tool_id, "requires_approval"))
         else:
-            raise IRFormatError(f"authority IR has unknown breach entity {name!r}")
+            raise IRFormatError(f"authority IR {path}.target has unknown breach entity")
         return
     raise IRFormatError(f"authority IR has unknown derived support rule {rule!r}")
 
@@ -465,37 +506,138 @@ def _validate_derived_support(edges: dict[str, Edge], facts: dict[str, Fact]) ->
             visit(edge.id)
 
 
-def _source_from_dict(raw: dict[str, Any]) -> Source:
+def _record(
+    raw: Any, path: str, required: set[str], optional: set[str] | None = None
+) -> dict[str, Any]:
+    if not isinstance(raw, dict):
+        raise IRFormatError(f"authority IR {path} must be an object")
+    optional = optional or set()
+    missing = sorted(required - raw.keys())
+    if missing:
+        raise IRFormatError(f"authority IR {path} is missing field {missing[0]!r}")
+    extra = sorted(raw.keys() - required - optional)
+    if extra:
+        raise IRFormatError(f"authority IR {path} has unknown field {extra[0]!r}")
+    return raw
+
+
+def _table(
+    raw: Any, name: str, load: Callable[[Any, str], _RecordT]
+) -> tuple[_RecordT, ...]:
+    if not isinstance(raw, list):
+        raise IRFormatError(f"authority IR {name} must be an array")
+    return tuple(load(item, f"{name}[{index}]") for index, item in enumerate(raw))
+
+
+def _string(raw: dict[str, Any], field: str, path: str) -> str:
+    value = raw[field]
+    if not isinstance(value, str):
+        raise IRFormatError(f"authority IR {path}.{field} must be a string")
+    return value
+
+
+def _integer(raw: dict[str, Any], field: str, path: str) -> int:
+    value = raw[field]
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise IRFormatError(f"authority IR {path}.{field} must be an integer")
+    return value
+
+
+def _source_from_dict(raw: Any, path: str) -> Source:
+    raw = _record(
+        raw,
+        path,
+        {
+            "id",
+            "kind",
+            "locator",
+            "format_version",
+            "producer_version",
+            "semantic_sha256",
+            "adapter",
+            "adapter_version",
+        },
+        {"content_sha256"},
+    )
+    producer_version = raw["producer_version"]
+    if producer_version is not None and not isinstance(producer_version, str):
+        raise IRFormatError(
+            f"authority IR {path}.producer_version must be a string or null"
+        )
+    content_sha256 = raw.get("content_sha256")
+    if content_sha256 is not None and not isinstance(content_sha256, str):
+        raise IRFormatError(
+            f"authority IR {path}.content_sha256 must be a string or null"
+        )
     return Source(
-        id=raw["id"],
-        kind=raw["kind"],
-        locator=raw["locator"],
-        format_version=raw["format_version"],
-        producer_version=raw["producer_version"],
-        semantic_sha256=raw["semantic_sha256"],
-        adapter=raw["adapter"],
-        adapter_version=raw["adapter_version"],
-        content_sha256=raw.get("content_sha256"),
+        id=_string(raw, "id", path),
+        kind=_string(raw, "kind", path),
+        locator=_string(raw, "locator", path),
+        format_version=_integer(raw, "format_version", path),
+        producer_version=producer_version,
+        semantic_sha256=_string(raw, "semantic_sha256", path),
+        adapter=_string(raw, "adapter", path),
+        adapter_version=_integer(raw, "adapter_version", path),
+        content_sha256=content_sha256,
     )
 
 
-def _fact_from_dict(raw: dict[str, Any]) -> Fact:
+def _entity_from_dict(raw: Any, path: str) -> Entity:
+    raw = _record(raw, path, {"id", "kind", "name"})
+    return Entity(
+        id=_string(raw, "id", path),
+        kind=_string(raw, "kind", path),
+        name=_string(raw, "name", path),
+    )
+
+
+def _evidence_from_dict(raw: Any, path: str) -> Evidence:
+    raw = _record(raw, path, {"source", "location", "confidence", "review"})
+    confidence = _string(raw, "confidence", path)
+    if confidence not in {"exact", "heuristic", "unknown"}:
+        raise IRFormatError(f"authority IR {path}.confidence has an invalid value")
+    review = _string(raw, "review", path)
+    if review not in {"unreviewed", "accepted", "contested"}:
+        raise IRFormatError(f"authority IR {path}.review has an invalid value")
+    return Evidence(
+        source=_string(raw, "source", path),
+        location=_string(raw, "location", path),
+        confidence=confidence,
+        review=review,
+    )
+
+
+def _fact_from_dict(raw: Any, path: str) -> Fact:
+    raw = _record(raw, path, {"id", "subject", "predicate", "value", "evidence"})
+    evidence = raw["evidence"]
+    if not isinstance(evidence, list):
+        raise IRFormatError(f"authority IR {path}.evidence must be an array")
     return Fact(
-        id=raw["id"],
-        subject=raw["subject"],
-        predicate=raw["predicate"],
+        id=_string(raw, "id", path),
+        subject=_string(raw, "subject", path),
+        predicate=_string(raw, "predicate", path),
         value=raw["value"],
-        evidence=tuple(Evidence(**item) for item in raw["evidence"]),
+        evidence=tuple(
+            _evidence_from_dict(item, f"{path}.evidence[{index}]")
+            for index, item in enumerate(evidence)
+        ),
     )
 
 
-def _edge_from_dict(raw: dict[str, Any]) -> Edge:
+def _edge_from_dict(raw: Any, path: str) -> Edge:
+    raw = _record(raw, path, {"id", "source", "relation", "target", "support"})
+    support = raw["support"]
+    if not isinstance(support, list) or any(not isinstance(item, str) for item in support):
+        raise IRFormatError(f"authority IR {path}.support must be an array of strings")
+    relation = _string(raw, "relation", path)
+    if relation not in RELATIONS:
+        raise IRFormatError(f"authority IR {path}.relation has an invalid value")
     return Edge(
-        id=raw["id"],
-        source=raw["source"],
-        relation=raw["relation"],
-        target=raw["target"],
-        support=tuple(raw["support"]),
+        id=_string(raw, "id", path),
+        source=_string(raw, "source", path),
+        relation=relation,
+        target=_string(raw, "target", path),
+        support=tuple(support),
     )
 
 

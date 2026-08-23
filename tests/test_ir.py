@@ -166,7 +166,7 @@ def test_mandate_adapter_fails_closed_on_conflicting_single_valued_facts() -> No
     effect = next(item for item in snapshot.facts if item.predicate == "effect")
     conflict = replace(effect, value="irreversible")
 
-    with pytest.raises(IRFormatError, match="conflicting facts for tool:t.effect"):
+    with pytest.raises(IRFormatError, match=r"facts\[\d+\].id has conflicting facts"):
         _to_mandate(replace(snapshot, facts=snapshot.facts + (conflict,)))
 
 
