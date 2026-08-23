@@ -11,11 +11,11 @@ import hashlib
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any, TypeVar
 from urllib.parse import quote
 
-from .manifest import SCHEMA_VERSION, Limits, Mandate, Money, Tool
+from .manifest import EFFECTS, PRINCIPALS, SCHEMA_VERSION, Limits, Mandate, Money, Tool
 from .reach import (
     Authority,
     Step,
@@ -62,6 +62,54 @@ class Relation:
     predicate: str | None
     derived: bool = False
     support_rule: str = "input"
+
+
+@dataclass(frozen=True)
+class ManifestPredicate:
+    subject_kind: str
+    value_schema: str
+
+
+MANIFEST_PREDICATES = {
+    ("agent", "identity"): ManifestPredicate("agent", "nullable_string"),
+    ("agent", "name"): ManifestPredicate("agent", "entity_name"),
+    ("agent", "roles"): ManifestPredicate("agent", "role_refs"),
+    ("agent", "tools"): ManifestPredicate("agent", "tool_refs"),
+    ("constraint", "depth"): ManifestPredicate("constraint", "positive_integer"),
+    ("constraint", "effects"): ManifestPredicate("constraint", "effect_limits"),
+    ("constraint", "name"): ManifestPredicate("constraint", "entity_name"),
+    ("constraint", "total"): ManifestPredicate("constraint", "nullable_money"),
+    ("principal", "name"): ManifestPredicate("principal", "entity_name"),
+    ("role", "members"): ManifestPredicate("role", "tool_refs"),
+    ("role", "name"): ManifestPredicate("role", "entity_name"),
+    ("scope", "name"): ManifestPredicate("scope", "entity_name"),
+    ("tool", "ceiling"): ManifestPredicate("tool", "nullable_money"),
+    ("tool", "effect"): ManifestPredicate("tool", "effect"),
+    ("tool", "name"): ManifestPredicate("tool", "entity_name"),
+    ("tool", "principal"): ManifestPredicate("tool", "principal_ref"),
+    ("tool", "produces"): ManifestPredicate("tool", "nullable_scope_ref"),
+    ("tool", "requires"): ManifestPredicate("tool", "scope_refs"),
+    ("tool", "requires_approval"): ManifestPredicate("tool", "boolean"),
+    ("tool", "scope_key"): ManifestPredicate("tool", "nullable_scope_ref"),
+    ("tool", "unbounded"): ManifestPredicate("tool", "boolean"),
+    ("tool", "value_arg"): ManifestPredicate("tool", "nullable_name"),
+}
+
+_PROFILE_DEFAULTS = {
+    ("agent", "identity"): None,
+    ("agent", "roles"): [],
+    ("constraint", "depth"): 8,
+    ("constraint", "effects"): {},
+    ("constraint", "total"): None,
+    ("tool", "ceiling"): None,
+    ("tool", "principal"): "principal:caller",
+    ("tool", "produces"): None,
+    ("tool", "requires"): [],
+    ("tool", "requires_approval"): False,
+    ("tool", "scope_key"): None,
+    ("tool", "unbounded"): False,
+    ("tool", "value_arg"): None,
+}
 
 
 RELATIONS = {
@@ -893,34 +941,328 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
     return snapshot
 
 
+def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
+    """Require the closed, trusted manifest-v1 subset eligible for analysis."""
+    expected_sources = {
+        "source:mandate": (
+            "mandate-semantic",
+            MANIFEST_ADAPTER,
+            MANIFEST_ADAPTER_VERSION,
+        ),
+        "source:manifest-v1": (
+            "manifest-schema",
+            MANIFEST_DEFAULTS_ADAPTER,
+            MANIFEST_DEFAULTS_ADAPTER_VERSION,
+        ),
+    }
+    sources = {source.id: source for source in snapshot.sources}
+    if set(sources) != set(expected_sources):
+        raise IRFormatError(
+            "authority IR sources do not match the analyzable manifest-v1 profile"
+        )
+    for index, source in enumerate(snapshot.sources):
+        kind, adapter, adapter_version = expected_sources[source.id]
+        if (
+            source.kind != kind
+            or source.format_version != SCHEMA_VERSION
+            or source.adapter != adapter
+            or source.adapter_version != adapter_version
+        ):
+            raise IRFormatError(
+                f"authority IR sources[{index}] is outside the analyzable "
+                "manifest-v1 profile"
+            )
+
+    entities = {entity.id: entity for entity in snapshot.entities}
+    entity_indexes = {entity.id: index for index, entity in enumerate(snapshot.entities)}
+    derived = any(RELATIONS[edge.relation].derived for edge in snapshot.edges)
+    allowed_kinds = {kind for kind, _ in MANIFEST_PREDICATES}
+    if derived:
+        allowed_kinds.add("breach")
+    for index, entity in enumerate(snapshot.entities):
+        if entity.kind not in allowed_kinds:
+            raise IRFormatError(
+                f"authority IR entities[{index}].kind is outside the analyzable "
+                "manifest-v1 profile"
+            )
+
+    facts: dict[tuple[str, str], Fact] = {}
+    predicates_by_entity: dict[str, set[str]] = {}
+    for index, fact in enumerate(snapshot.facts):
+        entity = entities[fact.subject]
+        specification = MANIFEST_PREDICATES.get((entity.kind, fact.predicate))
+        if specification is None:
+            raise IRFormatError(
+                f"authority IR facts[{index}].predicate is unsupported by the "
+                "analyzable manifest-v1 profile"
+            )
+        if not fact.evidence:
+            raise IRFormatError(
+                f"authority IR facts[{index}].evidence is empty in the analyzable profile"
+            )
+        evidence_sources = {evidence.source for evidence in fact.evidence}
+        if "source:mandate" not in evidence_sources:
+            raise IRFormatError(
+                f"authority IR facts[{index}].evidence lacks reviewed manifest support"
+            )
+        for evidence_index, evidence in enumerate(fact.evidence):
+            path = f"facts[{index}].evidence[{evidence_index}]"
+            if evidence.review != "accepted":
+                raise IRFormatError(
+                    f"authority IR {path}.review is not accepted for analysis"
+                )
+            if evidence.confidence != "exact":
+                raise IRFormatError(
+                    f"authority IR {path}.confidence is not exact for analysis"
+                )
+            if evidence.source == "source:manifest-v1" and (
+                (entity.kind, fact.predicate) not in _PROFILE_DEFAULTS
+                or fact.value != _PROFILE_DEFAULTS[(entity.kind, fact.predicate)]
+            ):
+                raise IRFormatError(
+                    f"authority IR {path}.source claims an inapplicable schema default"
+                )
+        _validate_profile_value(
+            fact.value,
+            specification.value_schema,
+            f"facts[{index}].value",
+            entity,
+            entities,
+        )
+        facts[(fact.subject, fact.predicate)] = fact
+        predicates_by_entity.setdefault(fact.subject, set()).add(fact.predicate)
+
+    for entity in snapshot.entities:
+        expected = {
+            predicate
+            for (kind, predicate), _ in MANIFEST_PREDICATES.items()
+            if kind == entity.kind
+        }
+        actual = predicates_by_entity.get(entity.id, set())
+        if actual != expected:
+            raise IRFormatError(
+                f"authority IR entities[{entity_indexes[entity.id]}] does not have the "
+                "complete analyzable manifest-v1 predicate set"
+            )
+
+    def fact_value(subject: str, predicate: str) -> Any:
+        return facts[(subject, predicate)].value
+
+    agents = [entity for entity in snapshot.entities if entity.kind == "agent"]
+    constraints = [entity for entity in snapshot.entities if entity.kind == "constraint"]
+    if len(agents) != 1:
+        raise IRFormatError("authority IR analyzable profile requires exactly one agent")
+    if len(constraints) != 1 or constraints[0].name != "run":
+        raise IRFormatError(
+            "authority IR analyzable profile requires the run constraint"
+        )
+    agent = agents[0]
+    tool_ids = {entity.id for entity in snapshot.entities if entity.kind == "tool"}
+    role_ids = {entity.id for entity in snapshot.entities if entity.kind == "role"}
+    scope_ids = {entity.id for entity in snapshot.entities if entity.kind == "scope"}
+    principal_ids = {
+        entity.id for entity in snapshot.entities if entity.kind == "principal"
+    }
+    declared_tools = fact_value(agent.id, "tools")
+    if (
+        set(declared_tools) != tool_ids
+        or len(declared_tools) != len(tool_ids)
+        or not tool_ids
+    ):
+        raise IRFormatError(
+            "authority IR agent tools do not cover the analyzable tool entities"
+        )
+    declared_roles = fact_value(agent.id, "roles")
+    if set(declared_roles) != role_ids or len(declared_roles) != len(role_ids):
+        raise IRFormatError(
+            "authority IR agent roles do not cover the analyzable role entities"
+        )
+
+    referenced_scopes: set[str] = set()
+    referenced_principals: set[str] = set()
+    for tool_id in tool_ids:
+        required = fact_value(tool_id, "requires")
+        referenced_scopes.update(required)
+        for predicate in ("produces", "scope_key"):
+            scope = fact_value(tool_id, predicate)
+            if scope is not None:
+                referenced_scopes.add(scope)
+        referenced_principals.add(fact_value(tool_id, "principal"))
+        ceiling = fact_value(tool_id, "ceiling")
+        value_arg = fact_value(tool_id, "value_arg")
+        scope_key = fact_value(tool_id, "scope_key")
+        if (ceiling is None) != (value_arg is None):
+            raise IRFormatError(
+                "authority IR tool ceiling and value_arg must be declared together"
+            )
+        if ceiling is not None and scope_key is None:
+            raise IRFormatError(
+                "authority IR tool scope_key is required with a ceiling"
+            )
+    if referenced_scopes != scope_ids:
+        raise IRFormatError(
+            "authority IR scope entities do not match the analyzable tool references"
+        )
+    if referenced_principals != principal_ids:
+        raise IRFormatError(
+            "authority IR principal entities do not match the analyzable tool references"
+        )
+
+    source_entities = tuple(
+        sorted(
+            (entity for entity in snapshot.entities if entity.kind != "breach"),
+            key=lambda item: item.id,
+        )
+    )
+    source_facts = tuple(sorted(snapshot.facts, key=lambda item: item.id))
+    source_edges = tuple(
+        sorted(
+            (
+                edge
+                for edge in snapshot.edges
+                if not RELATIONS[edge.relation].derived
+            ),
+            key=lambda item: item.id,
+        )
+    )
+    semantic = hashlib.sha256(
+        _canonical_bytes(_semantic_payload(source_entities, source_facts, source_edges))
+    ).hexdigest()
+    if sources["source:mandate"].semantic_sha256 != semantic:
+        raise IRFormatError(
+            "authority IR source:mandate semantic_sha256 does not match the profile"
+        )
+    defaults_digest = hashlib.sha256(_canonical_bytes(_MANIFEST_V1_DEFAULTS)).hexdigest()
+    if sources["source:manifest-v1"].semantic_sha256 != defaults_digest:
+        raise IRFormatError(
+            "authority IR source:manifest-v1 semantic_sha256 does not match the profile"
+        )
+
+
+def _validate_profile_value(
+    value: Any,
+    schema: str,
+    path: str,
+    entity: Entity,
+    entities: dict[str, Entity],
+) -> None:
+    def reject() -> None:
+        raise IRFormatError(
+            f"authority IR {path} does not match manifest profile schema {schema}"
+        )
+
+    def reference(identifier: Any, kind: str) -> bool:
+        return (
+            isinstance(identifier, str)
+            and identifier in entities
+            and entities[identifier].kind == kind
+        )
+
+    if schema == "entity_name":
+        if (
+            value != entity.name
+            or not isinstance(value, str)
+            or not value.strip()
+            or any(character in value for character in "\r\n\x00")
+        ):
+            reject()
+        return
+    if schema == "nullable_string":
+        if value is not None and not isinstance(value, str):
+            reject()
+        return
+    if schema == "nullable_name":
+        if value is not None and (
+            not isinstance(value, str)
+            or not value.strip()
+            or any(character in value for character in "\r\n\x00")
+        ):
+            reject()
+        return
+    if schema == "effect":
+        if value not in EFFECTS:
+            reject()
+        return
+    if schema == "boolean":
+        if not isinstance(value, bool):
+            reject()
+        return
+    if schema == "positive_integer":
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            reject()
+        return
+    if schema == "effect_limits":
+        if not isinstance(value, dict) or any(
+            effect not in EFFECTS
+            or isinstance(limit, bool)
+            or not isinstance(limit, int)
+            or limit < 0
+            for effect, limit in value.items()
+        ):
+            reject()
+        return
+    if schema == "nullable_money":
+        if value is None:
+            return
+        if not isinstance(value, dict) or set(value) != {"amount", "currency"}:
+            reject()
+        amount = value["amount"]
+        currency = value["currency"]
+        if not isinstance(amount, str) or not isinstance(currency, str):
+            reject()
+        try:
+            decimal = Decimal(amount)
+        except InvalidOperation:
+            reject()
+        if (
+            not decimal.is_finite()
+            or decimal < 0
+            or len(currency) != 3
+            or not currency.isascii()
+            or not currency.isalpha()
+            or currency != currency.upper()
+        ):
+            reject()
+        return
+    if schema == "principal_ref":
+        if not reference(value, "principal") or entities[value].name not in PRINCIPALS:
+            reject()
+        return
+    if schema == "nullable_scope_ref":
+        if value is not None and not reference(value, "scope"):
+            reject()
+        return
+    reference_kinds = {
+        "role_refs": "role",
+        "scope_refs": "scope",
+        "tool_refs": "tool",
+    }
+    if schema not in reference_kinds:
+        raise IRFormatError(f"authority IR has unknown manifest profile schema {schema!r}")
+    kind = reference_kinds[schema]
+    if not isinstance(value, list) or any(
+        not reference(identifier, kind) for identifier in value
+    ):
+        reject()
+
+
 def _to_mandate(snapshot: AuthorityIR) -> Mandate:
     """Rebuild a mandate from records emitted by the v1 manifest adapter."""
     snapshot.validate()
+    _validate_manifest_profile(snapshot)
     entities = {item.id: item for item in snapshot.entities}
     facts = {(item.subject, item.predicate): item.value for item in snapshot.facts}
 
-    def only(kind: str) -> Entity:
-        candidates = [item for item in snapshot.entities if item.kind == kind]
-        if len(candidates) != 1:
-            raise IRFormatError(f"authority IR needs exactly one {kind} entity")
-        return candidates[0]
-
     def value(subject: str, predicate: str) -> Any:
-        try:
-            return facts[(subject, predicate)]
-        except KeyError as exc:
-            raise IRFormatError(f"authority IR is missing {subject}.{predicate}") from exc
+        return facts[(subject, predicate)]
 
-    def name(identifier: str, kind: str) -> str:
-        candidate = entities.get(identifier)
-        if candidate is None or candidate.kind != kind:
-            raise IRFormatError(f"authority IR has no {kind} entity {identifier!r}")
-        return candidate.name
+    def name(identifier: str) -> str:
+        return entities[identifier].name
 
-    agent = only("agent")
+    agent = next(item for item in snapshot.entities if item.kind == "agent")
     tools: list[Tool] = []
     for tool_id in value(agent.id, "tools"):
-        tool_name = name(tool_id, "tool")
+        tool_name = name(tool_id)
         ceiling_raw = value(tool_id, "ceiling")
         ceiling = (
             None
@@ -931,12 +1273,12 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
             Tool(
                 name=tool_name,
                 effect=value(tool_id, "effect"),
-                principal=name(value(tool_id, "principal"), "principal"),
-                requires=tuple(name(item, "scope") for item in value(tool_id, "requires")),
+                principal=name(value(tool_id, "principal")),
+                requires=tuple(name(item) for item in value(tool_id, "requires")),
                 produces=(
                     None
                     if value(tool_id, "produces") is None
-                    else name(value(tool_id, "produces"), "scope")
+                    else name(value(tool_id, "produces"))
                 ),
                 unbounded=value(tool_id, "unbounded"),
                 value_arg=value(tool_id, "value_arg"),
@@ -944,19 +1286,19 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
                 scope_key=(
                     None
                     if value(tool_id, "scope_key") is None
-                    else name(value(tool_id, "scope_key"), "scope")
+                    else name(value(tool_id, "scope_key"))
                 ),
                 requires_approval=value(tool_id, "requires_approval"),
             )
         )
 
     roles = {
-        name(role_id, "role"): tuple(
-            name(tool_id, "tool") for tool_id in value(role_id, "members")
+        name(role_id): tuple(
+            name(tool_id) for tool_id in value(role_id, "members")
         )
         for role_id in value(agent.id, "roles")
     }
-    limits_entity = only("constraint")
+    limits_entity = next(item for item in snapshot.entities if item.kind == "constraint")
     total_raw = value(limits_entity.id, "total")
     total = (
         None

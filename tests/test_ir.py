@@ -157,7 +157,7 @@ def test_mandate_adapter_requires_one_agent_and_every_required_fact() -> None:
 
     with pytest.raises(IRFormatError, match="exactly one agent"):
         _to_mandate(without_agent)
-    with pytest.raises(IRFormatError, match="missing agent:a.identity"):
+    with pytest.raises(IRFormatError, match="complete analyzable manifest-v1 predicate set"):
         _to_mandate(without_identity)
 
 
@@ -198,5 +198,5 @@ def test_mandate_adapter_rejects_a_reference_to_the_wrong_entity_kind() -> None:
         for item in snapshot.facts
     )
 
-    with pytest.raises(IRFormatError, match="no tool entity 'scope:case'"):
+    with pytest.raises(IRFormatError, match="manifest profile schema tool_refs"):
         _to_mandate(replace(snapshot, facts=facts))

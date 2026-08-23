@@ -154,6 +154,29 @@ root and table shapes, exact record fields, scalar types, evidence enums,
 relation names, and duplicate IDs before returning a snapshot. Errors identify
 the table, record index, and field but never repeat the rejected value.
 
+## Analyzable manifest profile
+
+Structural validity is deliberately weaker than eligibility for analysis. A
+valid snapshot may preserve contested evidence, unknown predicates, or future
+entity kinds for archival and transport. The private manifest-v1 analysis
+profile accepts only snapshots produced by the exact supported manifest and
+schema-default adapters, with their semantic digests intact.
+
+The profile has a closed registry of predicates and value schemas for agents,
+constraints, principals, roles, scopes, and tools. It requires the complete
+manifest-v1 predicate set, one agent, the `run` constraint, and exact agreement
+between declared and referenced entity sets. Money, effects, principals,
+references, limits, and tool ceiling fields are type- and relationship-checked
+before projection.
+
+Every consumed fact must cite the reviewed manifest source, and every evidence
+reference on that fact must be both `exact` and `accepted`. This conservative
+first resolution rule means contested, unreviewed, heuristic, unknown, or
+unsupported evidence remains serializable but cannot grant authority. Profile
+failure raises `IRFormatError`; it never falls through to manifest construction
+or the reachability kernel. Future source types need their own explicit profile
+and resolution rules rather than becoming trusted through successful parsing.
+
 ## Derived authority provenance
 
 A reachability result must be explainable without citing the implementation.
@@ -195,14 +218,16 @@ the four real evidence graphs. Retained paths are replayed against the same
 enabling semantics before provenance is derived, and each derived relation has
 a registry-enforced support shape. There is no CLI surface.
 
-Gate 4 reader hardening is complete, including committed malformed fixtures for
-every record type. Public import/export still requires a separate review of
-unsupported semantics, output stability, and CLI failure behavior.
+Gate 4 reader hardening and the private manifest-v1 analysis profile are
+complete, including committed malformed fixtures for every record type and
+adversarial fixtures for trust, predicate, value-shape, adapter, and digest
+failures. Public import/export still requires the result-envelope and CLI
+failure-behavior work.
 
 That review is recorded in
 [`authority-ir-gate-4-review.md`](authority-ir-gate-4-review.md). Its decision
-is to hold public exposure until the analyzable profile, result envelope, and
-reviewed CLI contract are complete.
+is to hold public exposure until the result envelope and reviewed CLI contract
+are complete.
 
 The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary
