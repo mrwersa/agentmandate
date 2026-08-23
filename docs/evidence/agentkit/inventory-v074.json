@@ -1,0 +1,41 @@
+{
+  "binding": "get_strands_tools(agentkit)",
+  "framework": "coinbase-agentkit-strands-agents",
+  "framework_version": "0.7.4",
+  "providers": [
+    {
+      "name": "cdp_api",
+      "tools": ["request_faucet_funds"]
+    },
+    {
+      "name": "erc20",
+      "tools": [
+        "approve",
+        "get_allowance",
+        "get_balance",
+        "get_erc20_token_address",
+        "transfer"
+      ]
+    },
+    {
+      "name": "pyth",
+      "tools": ["fetch_price", "fetch_price_feed"]
+    },
+    {
+      "name": "wallet",
+      "tools": ["get_balance", "get_wallet_details", "native_transfer"]
+    },
+    {
+      "name": "weth",
+      "tools": ["unwrap_eth", "wrap_eth"]
+    },
+    {
+      "name": "wow",
+      "tools": ["buy_token", "create_token", "sell_token"]
+    },
+    {
+      "name": "compound",
+      "tools": ["borrow", "get_portfolio", "repay", "supply", "withdraw"]
+    }
+  ]
+}

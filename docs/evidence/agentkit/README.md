@@ -29,6 +29,9 @@ Two manifests, one per AgentKit version:
 
 `get_balance` is declared by both the erc20 and the wallet provider; the
 manifest keys tools by name and resolves the collision to one entry.
+`inventory-v074.json` preserves the reviewed provider/action enumeration for
+the dynamic-inventory fixture: 21 provider actions and 20 distinct names. It
+is a source-derived review artifact, not output from importing AgentKit.
 
 ## What changed between the two versions
 
