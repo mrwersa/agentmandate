@@ -26,6 +26,7 @@ from .reach import (
 )
 
 IR_VERSION = 1
+RESULT_VERSION = 1
 MANIFEST_ADAPTER = "agentmandate.manifest"
 MANIFEST_ADAPTER_VERSION = 2
 MANIFEST_DEFAULTS_ADAPTER = "agentmandate.manifest-defaults"
@@ -402,10 +403,43 @@ class AuthorityIR:
 
 @dataclass(frozen=True)
 class _IRAnalysis:
-    """Private result envelope keeping analysis parameters out of source facts."""
+    """Private, versioned result envelope around authority and its provenance graph."""
 
     authority: Authority
     graph: AuthorityIR
+    source_graph_sha256: str
+    source_ir_version: int
+    result_version: int = RESULT_VERSION
+
+    def _body_dict(self) -> dict[str, Any]:
+        return {
+            "result_version": self.result_version,
+            "source_graph": {
+                "ir_version": self.source_ir_version,
+                "sha256": self.source_graph_sha256,
+            },
+            "analysis": {
+                "depth": self.authority.depth,
+                "truncated": self.authority.truncated,
+            },
+            "authority": self.authority.as_dict(),
+            "graph": self.graph.as_dict(),
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        _validate_ir_analysis(self)
+        body = self._body_dict()
+        return {
+            **body,
+            "result_sha256": hashlib.sha256(_canonical_result_bytes(body)).hexdigest(),
+        }
+
+    def to_json(self) -> str:
+        return _canonical_result_bytes(self.as_dict()).decode("utf-8") + "\n"
+
+    @classmethod
+    def from_json(cls, text: str) -> _IRAnalysis:
+        return _ir_analysis_from_json(text)
 
 
 def _validate_derived_edge(
@@ -702,6 +736,19 @@ def _pointer_token(value: str) -> str:
 
 def _canonical_bytes(value: Any) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
+
+
+def _canonical_result_bytes(value: Any) -> bytes:
+    try:
+        return json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode()
+    except (TypeError, ValueError) as exc:
+        raise IRFormatError("authority IR result contains a non-canonical value") from exc
 
 
 def _semantic_payload(
@@ -1329,6 +1376,127 @@ def _path_is_enabling(mandate: Mandate, path: tuple[Step, ...]) -> bool:
     return bool(path)
 
 
+def _source_graph(graph: AuthorityIR) -> AuthorityIR:
+    """Recover the canonical source snapshot from an augmented result graph."""
+    entities = tuple(entity for entity in graph.entities if entity.kind != "breach")
+    entity_ids = {entity.id for entity in entities}
+    source = AuthorityIR(
+        ir_version=graph.ir_version,
+        sources=graph.sources,
+        entities=entities,
+        facts=tuple(fact for fact in graph.facts if fact.subject in entity_ids),
+        edges=tuple(
+            edge for edge in graph.edges if not RELATIONS[edge.relation].derived
+        ),
+    )
+    source.validate()
+    return source
+
+
+def _source_graph_sha256(graph: AuthorityIR) -> str:
+    return hashlib.sha256(graph.to_json().encode("utf-8")).hexdigest()
+
+
+def _validate_ir_analysis(result: _IRAnalysis) -> None:
+    if result.result_version != RESULT_VERSION:
+        raise IRFormatError(
+            f"unsupported authority IR result version {result.result_version!r}"
+        )
+    result.graph.validate()
+    source = _source_graph(result.graph)
+    if result.source_ir_version != source.ir_version:
+        raise IRFormatError("authority IR result source graph version does not match")
+    digest = _source_graph_sha256(source)
+    if result.source_graph_sha256 != digest:
+        raise IRFormatError("authority IR result source graph digest does not match")
+    expected = _analyse_ir(source, depth=result.authority.depth)
+    if result.authority != expected.authority:
+        raise IRFormatError("authority IR result authority output does not match analysis")
+    if result.graph != expected.graph:
+        raise IRFormatError("authority IR result graph does not match analysis")
+
+
+def _ir_analysis_from_json(text: str) -> _IRAnalysis:
+    def reject_constant(_: str) -> None:
+        raise ValueError
+
+    try:
+        raw = json.loads(text, parse_constant=reject_constant)
+    except json.JSONDecodeError as exc:
+        raise IRFormatError(
+            f"authority IR result is not valid JSON at line {exc.lineno} column {exc.colno}"
+        ) from exc
+    except (TypeError, ValueError) as exc:
+        raise IRFormatError("authority IR result contains a non-canonical value") from exc
+    if not isinstance(raw, dict):
+        raise IRFormatError("authority IR result must be an object")
+    if "result_version" not in raw:
+        raise IRFormatError("authority IR result is missing field 'result_version'")
+    version = raw["result_version"]
+    if isinstance(version, bool) or not isinstance(version, int):
+        raise IRFormatError(
+            f"unsupported authority IR result version type; this build reads {RESULT_VERSION}"
+        )
+    if version != RESULT_VERSION:
+        raise IRFormatError(
+            f"unsupported authority IR result version {version!r}; "
+            f"this build reads {RESULT_VERSION}"
+        )
+    raw = _record(
+        raw,
+        "result",
+        {
+            "result_version",
+            "result_sha256",
+            "source_graph",
+            "analysis",
+            "authority",
+            "graph",
+        },
+    )
+    digest = _string(raw, "result_sha256", "result")
+    if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
+        raise IRFormatError("authority IR result.result_sha256 must be lowercase SHA-256")
+
+    source_raw = _record(raw["source_graph"], "result.source_graph", {"ir_version", "sha256"})
+    source_version = _integer(source_raw, "ir_version", "result.source_graph")
+    source_digest = _string(source_raw, "sha256", "result.source_graph")
+    if len(source_digest) != 64 or any(
+        character not in "0123456789abcdef" for character in source_digest
+    ):
+        raise IRFormatError("authority IR result.source_graph.sha256 must be lowercase SHA-256")
+
+    analysis = _record(raw["analysis"], "result.analysis", {"depth", "truncated"})
+    depth = _integer(analysis, "depth", "result.analysis")
+    if depth < 1:
+        raise IRFormatError("authority IR result.analysis.depth must be positive")
+    if not isinstance(analysis["truncated"], bool):
+        raise IRFormatError("authority IR result.analysis.truncated must be a boolean")
+    if not isinstance(raw["authority"], dict):
+        raise IRFormatError("authority IR result.authority must be an object")
+    if not isinstance(raw["graph"], dict):
+        raise IRFormatError("authority IR result.graph must be an object")
+
+    body = {key: value for key, value in raw.items() if key != "result_sha256"}
+    if digest != hashlib.sha256(_canonical_result_bytes(body)).hexdigest():
+        raise IRFormatError("authority IR result.result_sha256 does not match")
+    graph = AuthorityIR.from_json(_canonical_result_bytes(raw["graph"]).decode("utf-8"))
+    source = _source_graph(graph)
+    if source_version != source.ir_version:
+        raise IRFormatError("authority IR result source graph version does not match")
+    if source_digest != _source_graph_sha256(source):
+        raise IRFormatError("authority IR result source graph digest does not match")
+
+    expected = _analyse_ir(source, depth=depth)
+    if analysis["truncated"] != expected.authority.truncated:
+        raise IRFormatError("authority IR result truncation does not match analysis")
+    if raw["authority"] != expected.authority.as_dict():
+        raise IRFormatError("authority IR result authority output does not match analysis")
+    if graph != expected.graph:
+        raise IRFormatError("authority IR result graph does not match analysis")
+    return expected
+
+
 def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
     """Run reachability from validated IR and attach canonical derived provenance."""
     snapshot.validate()
@@ -1477,4 +1645,9 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
         edges=tuple(sorted(snapshot.edges + tuple(derived.values()), key=lambda item: item.id)),
     )
     graph.validate()
-    return _IRAnalysis(authority=authority, graph=graph)
+    return _IRAnalysis(
+        authority=authority,
+        graph=graph,
+        source_graph_sha256=_source_graph_sha256(snapshot),
+        source_ir_version=snapshot.ir_version,
+    )

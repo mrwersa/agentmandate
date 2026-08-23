@@ -96,9 +96,9 @@ until a stable result envelope and reviewed CLI surface are complete.
 Gate 4 review is recorded in
 [`docs/authority-ir-gate-4-review.md`](docs/authority-ir-gate-4-review.md). It
 holds public exposure until all three explicit gates pass. The trust-aware
-analyzable profile is implemented privately; the versioned result envelope and
-then the reviewed CLI contract remain. Structural IR validity alone is not
-treated as authority approval.
+analyzable profile and versioned result envelope are implemented privately; the
+reviewed CLI contract remains. Structural IR validity alone is not treated as
+authority approval, and a canonical checksum is not treated as a signature.
 
 ## 3–6 months: model real authority
 
