@@ -103,18 +103,23 @@ RELATIONS = {
     ),
     "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
     "contains_tool": Relation("boundary", "tool", "many", "union", "members"),
+    "constrained_by": Relation("principal", "principal", "many", "union", "principals"),
     "has_breach": Relation(
         "agent", "breach", "many", "union", None, True, "breach"
     ),
     "has_effect": Relation(
         "tool", "scope", "many", "union", None, True, "effect"
     ),
+    "has_condition": Relation("tool", "condition", "many", "union", "conditions"),
+    "narrows_to": Relation("condition", "effect", "one", "single", "effect"),
     "produces": Relation("tool", "scope", "one", "single", "produces"),
     "requires": Relation("tool", "scope", "many", "union", "requires"),
     "role_contains": Relation("role", "tool", "many", "union", "members"),
     "transitions_to": Relation(
         "tool", "tool", "many", "union", None, True, "transition"
     ),
+    "under_grant": Relation("principal", "grant", "one", "single", "grant"),
+    "uses_context": Relation("condition", "context", "one", "single", "context"),
 }
 
 

@@ -91,11 +91,13 @@ view, but it cannot cancel an accepted edge. The relation registry must declare
 cardinality and these merge semantics before reachability consumes a new
 relation.
 
-The private v1 registry separates source and derived relations. Source
-relations are `acts_as`, `ceiling_on`, `contains_tool`, `produces`, `requires`,
-and `role_contains`. `contains_tool` belongs to the dedicated dynamic-inventory
-profile and cannot make a manifest graph analyzable. Derived relations are
-closed and purpose-specific:
+The private v1 registry separates source and derived relations. Manifest source
+relations are `acts_as`, `ceiling_on`, `produces`, `requires`, and
+`role_contains`. `contains_tool` belongs to the dynamic-inventory profile.
+The experimental condition/principal profiles add `has_condition`,
+`uses_context`, `narrows_to`, `constrained_by`, and `under_grant`; none can make
+a graph eligible for manifest-v1 analysis. Derived relations are closed and
+purpose-specific:
 
 | Relation | Endpoints | Required support |
 |---|---|---|

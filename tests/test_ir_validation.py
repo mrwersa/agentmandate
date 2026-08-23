@@ -203,12 +203,17 @@ def test_relation_registry_declares_cardinality_merge_and_support_predicate() ->
         "can_reach": ("many", "union", None, True, "reachable"),
         "ceiling_on": ("one", "single", "scope_key", False, "input"),
         "contains_tool": ("many", "union", "members", False, "input"),
+        "constrained_by": ("many", "union", "principals", False, "input"),
         "has_breach": ("many", "union", None, True, "breach"),
         "has_effect": ("many", "union", None, True, "effect"),
+        "has_condition": ("many", "union", "conditions", False, "input"),
+        "narrows_to": ("one", "single", "effect", False, "input"),
         "produces": ("one", "single", "produces", False, "input"),
         "requires": ("many", "union", "requires", False, "input"),
         "role_contains": ("many", "union", "members", False, "input"),
         "transitions_to": ("many", "union", None, True, "transition"),
+        "under_grant": ("one", "single", "grant", False, "input"),
+        "uses_context": ("one", "single", "context", False, "input"),
     }
 
 
