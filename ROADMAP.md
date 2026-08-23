@@ -84,9 +84,11 @@ user-token delegation, tenant constraints, and unlabelled operational data.
 IR design progress: the proposed compatibility and provenance contract is in
 [`docs/authority-ir.md`](docs/authority-ir.md). Private records and the
 manifest round-trip gate now cover every example, all four evidence graphs, all
-v1 shorthand/default paths, and a canonical migration fixture. The format
-remains experimental until IR-backed reachability and derived-edge provenance
-pass their gates.
+v1 shorthand/default paths, and a canonical migration fixture. Private
+IR-backed reachability now preserves the existing authority result while
+emitting validated, provenance-bearing reachability, effect, transition, and
+breach edges. The format remains experimental until its unsupported semantics
+and output stability are reviewed before a CLI surface is proposed.
 
 ## 3–6 months: model real authority
 

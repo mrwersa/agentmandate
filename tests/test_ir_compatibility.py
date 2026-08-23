@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from agentmandate import analyse, load, loads
-from agentmandate._ir import AuthorityIR, _from_mandate, _to_mandate
+from agentmandate._ir import AuthorityIR, _analyse_ir, _from_mandate, _to_mandate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE_MANIFESTS = tuple(sorted((ROOT / "examples").glob("*.yaml")))
@@ -25,6 +25,7 @@ def test_every_example_and_real_evidence_graph_round_trips(path: Path) -> None:
 
     assert restored == mandate
     assert analyse(restored).as_dict() == analyse(mandate).as_dict()
+    assert _analyse_ir(snapshot).authority.as_dict() == analyse(mandate).as_dict()
     source = next(item for item in snapshot.sources if item.id == "source:mandate")
     assert source.content_sha256 == hashlib.sha256(content).hexdigest()
 
