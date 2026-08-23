@@ -134,6 +134,13 @@ def test_untrusted_catalogue_text_cannot_inject_yaml():
     assert "\n  - name: injected" not in text
 
 
+def test_truncated_catalogue_comments_have_no_trailing_whitespace():
+    description = "a" * 95 + " word beyond the comment limit"
+    text = render(propose([{"name": "get_case", "description": description}]), "agent")
+
+    assert all(line == line.rstrip() for line in text.splitlines())
+
+
 def test_control_characters_in_tool_names_are_rejected():
     with pytest.raises(ValueError, match="control character"):
         propose([{"name": "get_ok\nprincipal: service"}])
