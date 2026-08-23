@@ -1,0 +1,1 @@
+{"ir_version":1,"sources":[],"entities":[],"facts":[{"id":"fact:tool:t:name","subject":"tool:t","predicate":"name","value":"t","evidence":[{"source":"source:test","location":"/x","confidence":"secret-value","review":"accepted"}]}],"edges":[]}

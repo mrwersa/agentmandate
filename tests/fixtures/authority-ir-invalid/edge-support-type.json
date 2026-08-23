@@ -1,0 +1,1 @@
+{"ir_version":1,"sources":[],"entities":[],"facts":[],"edges":[{"id":"edge:tool:a:requires:scope:x","source":"tool:a","relation":"requires","target":"scope:x","support":"secret-value"}]}
