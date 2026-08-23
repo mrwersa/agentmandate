@@ -15,12 +15,12 @@ express:
   DDL depending on its `sql` argument and server flags; `execute_sentry_tool`
   dispatches over hidden tools ranging from reads to DSN creation. Manifest v1
   forces both to their strongest effect, so every SELECT is gated like a DROP.
-- **Delegated and intersecting identity.** Sentry stdio spends a fixed
-  delegated User Auth Token; AWS PostgreSQL spends AWS credentials that meet a
-  database role. `principal: caller | service` loses the token owner, the
-  grant chain, and the intersection — which is why the
-  `identity.service-principal` finding now reports its own limit instead of
-  prescribing token exchange.
+- **Unmodellable identity shapes.** Sentry stdio spends a fixed credential
+  carrying a user's authority, with no recorded grant proving delegation;
+  AWS PostgreSQL spends AWS credentials that meet a database role.
+  `principal: caller | service` loses the subject, any grant chain, and the
+  intersection — which is why the `identity.service-principal` finding now
+  reports its own limit instead of prescribing token exchange.
 
 Both gaps push reviewers toward either ignoring real distinctions or
 inventing per-deployment conventions. This contract gives them one reviewed,
@@ -51,53 +51,92 @@ tools:
     principal: service
     requires: [database_connection]
     conditions:
-      - predicate: argument_matches
+      - predicate: statement_class
         arg: sql
-        matches: "^(SELECT|EXPLAIN)\\b"
-        effect: read            # when true, this call is a read
-    effect: irreversible        # conservative default when no condition holds
+        class: select-only       # dialect-pinned classifier, reviewed
+        dialect: postgresql-16
+        effect: read             # when classified so, this call is a read
+      evidence:
+        confidence: exact
+        review: accepted
+        reviewer: platform-data
+    effect: irreversible         # conservative default when no condition holds
 ```
 
 Intended semantics:
 
-- The predicate vocabulary is closed and typed:
-  `argument_matches`, `flag_enabled`, `selection_equals`,
-  `time_within`, `status_is`. Each names its operands; free-form expressions
-  are rejected by profile validation.
+- The predicate vocabulary is closed and typed. `argument_matches` regex
+  matching is deliberately excluded: a pattern cannot prove a statement is
+  read-only (prefix matches admit multi-statement strings), and arbitrary
+  regex would reintroduce the expression language this contract refuses.
+  Predicates that need judgement — `statement_class` above — must name a
+  pinned, dialect-aware classifier whose failure resolves to the tool's
+  default effect, never to the weaker one.
+- **Conditions require a condition-context record** to narrow anything.
+  `reach` does not enumerate SQL statements, dispatch names, flag values,
+  status sets, or time; it cannot evaluate a predicate against an open
+  domain. A versioned context artifact — separate from the mandate, in the
+  dynamic-inventory pattern — supplies the reviewed admissible domain for
+  each conditioned argument or state: its values, producer revision, capture
+  digest, selection, completeness, evidence, review, and expiry. Narrowing
+  applies only within an eligible context; outside one, every conditioned
+  tool stays at its default effect and drift reports the unresolved boundary.
 - A condition maps only to a *weaker* declared effect class than the tool's
   default. Widening through conditions is structurally impossible.
-- Every condition carries the standard evidence pair (`confidence`, 
-  `review`). An unevaluable or unaccepted condition leaves the tool at its
-  default effect, and the counterexample cites which condition was skipped.
+- Conditions carry explicit evidence fields (`confidence`, `review`,
+  optional reviewer and expiry), as shown above. An unevaluable, unaccepted,
+  expired, or context-mismatched condition leaves the tool at its default
+  effect, and the counterexample cites which condition was skipped.
 - Approval requirements stay attached to the tool, not the condition: a gated
   tool remains gated on every branch.
 
 ### Delegations
+
+Delegation vocabulary separates three roles OAuth token exchange already
+distinguishes ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693.html#section-1.1)):
+the **subject** whose authority is spent, the **actor** that spends it, and
+the **grantor** that issued the grant.
 
 ```yaml
 tools:
   - name: find_projects
     principal:
       kind: delegated_user
-      granted_by: spiffe://bank/agents/dispute-resolver
+      subject: user:ada            # whose authority is spent
+      actor: spiffe://bank/agents/dispute-resolver   # what spends it
+      grant:
+        ref: grants/sentry-2026-11.json   # the reviewed granted surface
+        scopes: [project:read, issue:write]
       audience: sentry
       expires: 2026-11-23
+    evidence:
+      confidence: exact
+      review: accepted
+      reviewer: security-platform
+      expires: 2026-10-01          # review expiry, distinct from grant expiry
 ```
 
 Intended semantics:
 
 - `principal` gains structured kinds while remaining readable as today's
-  two-value form for ordinary manifests. New kinds: `delegated_user` (a fixed
-  credential spending a named user's authority) and later `agent_delegate`
-  (one agent acting for another).
-- Every delegation records grantor, audience, and expiry. Expiry is evaluated
-  against a caller-supplied date, as dynamic inventory does — never a clock.
-- Attenuation is checkable: a delegated credential may spend only authorities
-  its grantor holds for the same audience. `lint` reports a delegation whose
-  effective surface exceeds its grantor's as `delegation.widens`.
+  two-value form for ordinary manifests. Kinds: `delegated_user` (an actor
+  spending a named subject's authority under a grant), `agent_delegate`
+  later (one agent acting for another, preserving prior actors separately),
+  and `fixed_user_credential` for the Sentry shape — an operator-supplied
+  credential carrying a user's authority with *no recorded grant*. A fixed
+  credential is not proof of delegation: without evidence establishing grant
+  semantics, impersonation and credential sharing look identical, so it is
+  modelled honestly as unproven rather than upgraded into a chain.
+- The `grant.ref` names the reviewed granted surface — scopes, resources,
+  and effects the subject conferred. This is what makes attenuation
+  computable: `lint` compares each delegated tool's effective surface against
+  its grant and reports any excess as `delegation.widens`. Without a grant
+  reference there is nothing to compare, and no widening claim is made.
+- Grant expiry and review expiry are independent dates, both evaluated
+  against caller-supplied dates — never a clock.
 - `reach` cites the hop: a counterexample through a delegated tool names the
-  grantor and expiry in its provenance support, so "who allowed this" has a
-  mechanical answer.
+  subject, grant, and expiry in its provenance support, so "who allowed
+  this" has a mechanical answer.
 
 ### Intersecting principals
 
@@ -112,43 +151,56 @@ that jointly bound the call:
 ```
 
 Analysis treats each listed principal as an independent fail-closed
-constraint; neither alone describes the boundary.
+constraint; neither alone describes the boundary. An intersection is not a
+delegation chain and does not participate in attenuation.
 
 ## Trust rules
 
-The standard evidence pair governs both records. Additionally:
+Conditions and delegations carry their evidence fields explicitly. Beyond
+that:
 
-1. Only `exact` + `accepted` conditions participate in narrowing; anything
-   else leaves the conservative default in force.
-2. Contested or expired delegations produce findings (`delegation.expired`,
-   `delegation.contested`) rather than silent service treatment.
-3. Unknown predicate kinds, unknown principal kinds, and malformed operand
-   types are reader-level rejections, following the strict-reader pattern.
+1. Only `exact` + `accepted` conditions inside an eligible context
+   participate in narrowing; anything else leaves the conservative default in
+   force.
+2. Unknown or malformed delegation records are reader-level rejections,
+   following the strict-reader pattern. Records that parse but fail trust —
+   contested, expired, missing grant, selector mismatch — keep the tool in
+   analysis at full service-principal treatment (existing finding included)
+   and add their specific finding. A tool is never omitted from analysis:
+   dropping it would manufacture a false-clean result.
+3. `fixed_user_credential` tools remain findings
+   (`identity.service-principal`, plus `credential.unproven-delegation`)
+   until evidence establishes actual grant semantics.
 4. Profiles remain separate: the manifest analysis profile extends with a
    schema-version bump and migration fixtures; inventory profiles never gain
    authority-bearing conditions.
 
 ## Evidence anchors
 
-The two graphs that asked for this are the acceptance fixtures:
-
-| Fixture | Conditional case | Delegation case |
+| Fixture | Conditional case | Identity case |
 |---|---|---|
-| AWS PostgreSQL MCP | `run_query` narrows to `read` on SELECT-shaped SQL | `connect_to_database` spends an `intersecting` principal |
-| Sentry MCP | `execute_sentry_tool` narrows on dispatch target for known names | every tool spends a `delegated_user` token |
+| AWS PostgreSQL MCP | `run_query` narrows to `read` on classified SELECT-only SQL | `connect_to_database` spends an `intersecting` principal (not a delegation) |
+| Sentry MCP | `execute_sentry_tool` narrows on dispatch target for known names inside a reviewed context | tools spend a `fixed_user_credential`; delegation semantics are unproven |
+| AgentKit, dispute-resolver | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
 
-Gate acceptance requires: the shortest AgentKit/Sentry counterexample is
-unchanged under conservative defaults; a SELECT-only `run_query` profile
-produces no irreversible gating on that tool; and a Sentry breach path cites
-its delegation hop.
+Gate acceptance requires: **all four existing evidence-graph results are
+preserved byte-identically under conservative defaults**; a SELECT-only
+`run_query` profile inside an eligible context produces no irreversible
+gating on that tool; and any counterexample through a credentialed tool cites
+its principal record. A genuine delegation-chain fixture — an OAuth token
+exchange, MCP delegated authorization, or A2A delegation capture with a
+reviewed grant — remains a roadmap prerequisite for the attenuation rules;
+neither committed graph proves one.
 
 ## Gates
 
 1. **Contract:** this document survives challenge against both fixtures.
-2. **Records:** typed condition/delegation records, strict reader, canonical
-   fixtures, IR projection behind new registered relations.
+2. **Records:** typed condition/delegation records, the condition-context
+   artifact, strict reader, canonical fixtures, IR projection behind new
+   registered relations.
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
-   `drift`, with provenance-cited counterexamples.
+   `drift`, with provenance-cited counterexamples; all four graphs unchanged
+   under conservative defaults.
 4. **Public exposure:** CLI and schema-version bump only after failure
    behaviour and output stability reviews.
 
