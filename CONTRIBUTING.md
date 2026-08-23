@@ -49,3 +49,31 @@ what it can and cannot infer, and what a human still has to annotate.
 
 Do not include customer prompts, model outputs, credentials, real account
 identifiers, or trace identifiers in an issue or a fixture.
+
+## Contributing a real authority graph
+
+Start from the [evidence contribution template](docs/evidence/TEMPLATE.md) and
+place the finished package in `docs/evidence/<subject>/`. A real graph must
+include:
+
+- a published, version-pinned subject and source revision;
+- a reproducible capture or a digest-pinned raw inventory;
+- the deployment, selection, and completeness boundary that review assumes;
+- preserved raw inventory and scanner output beside the reviewed manifest;
+- every material correction, classified as **extractor defect**, **source
+  ambiguity**, **model gap**, or **deployment policy**; and
+- an understandable counterexample, limitation, or authority-shape consequence
+  linked to a shipped change, open roadmap prerequisite, or explicit no-action
+  conclusion.
+
+One correction may have several classifications. Do not infer deployment
+policy from implementation, upgrade heuristic evidence through review, or
+describe a correction-free skeleton as precise without recording what a human
+checked. Silence may mean the scanner missed uncertainty.
+
+Capture code must state whether it imports or executes the subject, touches the
+network, or contacts live infrastructure. Prefer pinned dependencies,
+side-effect-free discovery, placeholder credentials, and byte-verifiable
+output. Remove telemetry and account-specific environment where possible. A
+synthetic graph belongs in `docs/evidence/probes/` and does not count as real
+evidence for a model or roadmap gate.
