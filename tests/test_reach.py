@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 
 from agentmandate import analyse, loads
-from agentmandate.reach import Step
+from agentmandate.reach import Step, _analyse_with_trace
 
 CAPPED = """
 agent: capped
@@ -27,6 +27,27 @@ tools:
 UNBOUNDED = CAPPED.replace(
     "    produces: case\n", "    produces: case\n    unbounded: true\n"
 )
+
+
+def test_private_trace_retains_each_shortest_enabling_path_without_changing_authority():
+    mandate = loads(CAPPED)
+    authority, trace = _analyse_with_trace(mandate)
+
+    assert authority == analyse(mandate)
+    open_path = trace.path_for("open_case")
+    refund_path = trace.path_for("issue_refund")
+    assert open_path == (Step(tool="open_case", binding="case#1"),)
+    assert refund_path == (
+        Step(tool="open_case", binding="case#1"),
+        Step(
+            tool="issue_refund",
+            binding="case#1",
+            spent=Decimal(500),
+            currency="GBP",
+        ),
+    )
+    assert trace.path_for("missing") is None
+    assert [name for name, _ in trace.reachable_paths] == sorted(authority.reachable_tools)
 
 
 def test_a_bounded_scope_keeps_the_ceiling_meaningful():
