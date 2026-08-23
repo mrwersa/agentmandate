@@ -95,23 +95,6 @@ MANIFEST_PREDICATES = {
     ("tool", "value_arg"): ManifestPredicate("tool", "nullable_name"),
 }
 
-_PROFILE_DEFAULTS = {
-    ("agent", "identity"): None,
-    ("agent", "roles"): [],
-    ("constraint", "depth"): 8,
-    ("constraint", "effects"): {},
-    ("constraint", "total"): None,
-    ("tool", "ceiling"): None,
-    ("tool", "principal"): "principal:caller",
-    ("tool", "produces"): None,
-    ("tool", "requires"): [],
-    ("tool", "requires_approval"): False,
-    ("tool", "scope_key"): None,
-    ("tool", "unbounded"): False,
-    ("tool", "value_arg"): None,
-}
-
-
 RELATIONS = {
     "acts_as": Relation("tool", "principal", "one", "single", "principal"),
     "can_reach": Relation(
@@ -693,6 +676,18 @@ def _entity_id(kind: str, name: str) -> str:
     return f"{kind}:{quote(name, safe='')}"
 
 
+_PROFILE_DEFAULT_KINDS = {"agent": "agent", "limits": "constraint", "tool": "tool"}
+_PROFILE_DEFAULTS = {
+    (_PROFILE_DEFAULT_KINDS[section], predicate): (
+        _entity_id("principal", value)
+        if (section, predicate) == ("tool", "principal")
+        else value
+    )
+    for key, value in _MANIFEST_V1_DEFAULTS.items()
+    for section, predicate in (key.split(".", 1),)
+}
+
+
 def _fact_id(subject: str, predicate: str) -> str:
     return f"fact:{subject}:{quote(predicate, safe='')}"
 
@@ -1005,6 +1000,13 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
             raise IRFormatError(
                 f"authority IR facts[{index}].evidence lacks reviewed manifest support"
             )
+        _validate_profile_value(
+            fact.value,
+            specification.value_schema,
+            f"facts[{index}].value",
+            entity,
+            entities,
+        )
         for evidence_index, evidence in enumerate(fact.evidence):
             path = f"facts[{index}].evidence[{evidence_index}]"
             if evidence.review != "accepted":
@@ -1022,13 +1024,6 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
                 raise IRFormatError(
                     f"authority IR {path}.source claims an inapplicable schema default"
                 )
-        _validate_profile_value(
-            fact.value,
-            specification.value_schema,
-            f"facts[{index}].value",
-            entity,
-            entities,
-        )
         facts[(fact.subject, fact.predicate)] = fact
         predicates_by_entity.setdefault(fact.subject, set()).add(fact.predicate)
 

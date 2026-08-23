@@ -144,6 +144,13 @@ def test_wrong_value_shapes_fail_as_ir_errors_before_projection() -> None:
     with pytest.raises(IRFormatError, match="schema nullable_money"):
         _analyse_ir(value)
 
+    default_backed = _from_mandate(
+        loads("agent: defaults\ntools:\n  - name: look\n    effect: read\n")
+    )
+    default_backed = replace_fact(default_backed, "tool:look", "ceiling", value="opaque")
+    with pytest.raises(IRFormatError, match=r"facts\[.*\]\.value.*nullable_money"):
+        _to_mandate(default_backed)
+
 
 @pytest.mark.parametrize(
     ("subject", "predicate", "bad_value", "schema"),
