@@ -27,9 +27,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .inventory import Inventory, collect
 from .manifest import Mandate
+
+if TYPE_CHECKING:
+    from ._inventory import InventoryReconciliation
 
 # Ordered by how much a reader should care. Authority the mandate does not
 # describe comes first, because it silently invalidates every other answer.
@@ -113,14 +117,22 @@ class Drift:
         }
 
 
-def compare(mandate: Mandate, inventory: Inventory) -> Drift:
+def compare(
+    mandate: Mandate,
+    inventory: Inventory,
+    *,
+    dynamic: InventoryReconciliation | None = None,
+) -> Drift:
     """Report every way the manifest has stopped describing the source."""
     findings: list[DriftFinding] = []
 
     declared = {tool.name: tool for tool in mandate.tools}
     discovered = {d.name: d for d in inventory.declarations}
+    discovered_names = set(discovered)
+    if dynamic is not None:
+        discovered_names.update(dynamic.members)
 
-    for name in sorted(set(discovered) - set(declared)):
+    for name in sorted(discovered_names - set(declared)):
         findings.append(
             DriftFinding(
                 "undeclared",
@@ -169,9 +181,20 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
     # unenumerable list: it is absent from the declarations only because the
     # scan never saw it, so declaring it in the manifest must not read as a
     # removal.
-    unreadable = bool(inventory.unresolved) or bool(inventory.undeclared)
-    withheld = sorted(set(declared) - set(discovered)) if unreadable else []
-    for name in sorted(set(declared) - set(discovered)) if not unreadable else ():
+    unresolved = (
+        []
+        if dynamic is not None and dynamic.covers_binding
+        else inventory.unresolved
+    )
+    dynamic_findings = dynamic.findings if dynamic is not None else ()
+    unreadable = (
+        bool(unresolved)
+        or bool(inventory.undeclared)
+        or bool(dynamic_findings)
+        or (dynamic is not None and not dynamic.complete)
+    )
+    withheld = sorted(set(declared) - discovered_names) if unreadable else []
+    for name in sorted(set(declared) - discovered_names) if not unreadable else ():
         findings.append(
             DriftFinding(
                 "removed",
@@ -184,7 +207,7 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
         )
 
     # Fail closed when the read could not see the whole list.
-    for item in inventory.unresolved:
+    for item in unresolved:
         findings.append(
             DriftFinding(
                 "unresolved",
@@ -202,6 +225,15 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
                 "this is bound to the agent but declared outside the scanned "
                 "path, so whether the mandate covers it was never established. "
                 "Widen --source.",
+            )
+        )
+
+    for item in dynamic_findings:
+        findings.append(
+            DriftFinding(
+                "unresolved",
+                item.boundary,
+                f"dynamic inventory could not establish completeness: {item.message}",
             )
         )
 
@@ -236,7 +268,7 @@ def compare(mandate: Mandate, inventory: Inventory) -> Drift:
     return Drift(
         agent=mandate.agent,
         declared=tuple(sorted(declared)),
-        discovered=tuple(sorted(discovered)),
+        discovered=tuple(sorted(discovered_names)),
         findings=tuple(findings),
         source=source,
     )

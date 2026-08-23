@@ -9,10 +9,25 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from pathlib import PurePosixPath
 from typing import Any
+
+from ._ir import (
+    AuthorityIR,
+    Edge,
+    Entity,
+    Evidence,
+    Fact,
+    IRFormatError,
+    Source,
+    _edge_id,
+    _entity_id,
+    _fact_id,
+)
+from .inventory import Inventory
 
 INVENTORY_VERSION = 1
 BOUNDARY_KINDS = frozenset({"deployment", "factory", "provider", "registry"})
@@ -22,10 +37,47 @@ SELECTION_KEYS = frozenset(
 COMPLETENESS = frozenset({"complete", "partial", "unknown"})
 CONFIDENCE = frozenset({"exact", "heuristic", "unknown"})
 REVIEWS = frozenset({"accepted", "contested", "unreviewed"})
+INVENTORY_ADAPTER = "agentmandate.dynamic-inventory"
+INVENTORY_ADAPTER_VERSION = 1
+INVENTORY_CAPTURE_ADAPTER = "agentmandate.dynamic-inventory-capture"
+INVENTORY_CAPTURE_ADAPTER_VERSION = 1
+INVENTORY_PREDICATES = {
+    "boundary": frozenset(
+        {
+            "capture",
+            "completeness",
+            "expires",
+            "members",
+            "name",
+            "reviewer",
+            "selection",
+            "target",
+        }
+    ),
+    "tool": frozenset({"name"}),
+}
 
 
 class InventoryFormatError(ValueError):
     """Raised when a dynamic inventory declaration cannot be read safely."""
+
+
+@dataclass(frozen=True)
+class InventoryReconciliationFinding:
+    boundary: str
+    message: str
+
+
+@dataclass(frozen=True)
+class InventoryReconciliation:
+    """Private evidence passed into the existing drift comparison."""
+
+    as_of: str
+    members: tuple[str, ...]
+    findings: tuple[InventoryReconciliationFinding, ...]
+    complete: bool
+    covers_binding: bool
+    graphs: tuple[AuthorityIR, ...]
 
 
 @dataclass(frozen=True)
@@ -135,6 +187,10 @@ class DynamicInventory:
                 "dynamic inventory source.content_sha256 does not match supplied bytes"
             )
 
+    def to_ir(self) -> AuthorityIR:
+        """Project the declaration into its closed, provenance-bearing IR profile."""
+        return _to_inventory_ir(self)
+
     @classmethod
     def from_json(cls, text: str) -> DynamicInventory:
         """Read one declaration through a strict, value-safe error boundary."""
@@ -180,6 +236,473 @@ class DynamicInventory:
             source=_source(root["source"]),
             membership=_membership(root["membership"]),
             evidence=_evidence(root["evidence"]),
+        )
+
+
+def reconcile(
+    inventory: Inventory,
+    declarations: Sequence[DynamicInventory],
+    source_contents: Mapping[str, bytes],
+    *,
+    selection: Mapping[str, str | Sequence[str]],
+    as_of: date,
+) -> InventoryReconciliation:
+    """Evaluate declarations for one selected static binding without side effects."""
+    if type(as_of) is not date:
+        raise InventoryFormatError("dynamic inventory as_of must be a date")
+    expected_selection = _selection(
+        {
+            key: list(value)
+            if isinstance(value, Sequence) and not isinstance(value, str)
+            else value
+            for key, value in selection.items()
+        }
+    )
+    graphs = tuple(declaration.to_ir() for declaration in declarations)
+    findings: list[InventoryReconciliationFinding] = []
+    members: set[str] = set()
+    matching: list[DynamicInventory] = []
+
+    selected = inventory.selected
+    for declaration in declarations:
+        boundary = declaration.boundary.id
+        target = declaration.boundary.target
+        if (
+            selected is None
+            or target.source != selected.module
+            or target.binding != selected.label
+        ):
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the boundary target does not match the selected source binding",
+                )
+            )
+            continue
+        matching.append(declaration)
+        if declaration.selection != expected_selection:
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the boundary selection does not match the reviewed deployment context",
+                )
+            )
+            continue
+
+        content = source_contents.get(declaration.source.locator)
+        if content is None:
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the captured source bytes were not supplied, so its digest cannot be verified",
+                )
+            )
+            continue
+        try:
+            declaration.verify_source(content)
+        except InventoryFormatError:
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the captured source bytes do not match the reviewed digest",
+                )
+            )
+            continue
+        members.update(declaration.membership.members)
+
+    blocked = _conflicted_boundaries(matching, findings)
+    for declaration in matching:
+        boundary = declaration.boundary.id
+        if declaration.selection != expected_selection or boundary in blocked:
+            continue
+        # Source failures above already prevent both widening and eligibility.
+        content = source_contents.get(declaration.source.locator)
+        if (
+            content is None
+            or hashlib.sha256(content).hexdigest()
+            != declaration.source.content_sha256
+        ):
+            continue
+        if declaration.membership.completeness != "complete":
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the membership claim is not complete, so absence cannot be established",
+                )
+            )
+        if declaration.evidence.confidence != "exact":
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the membership evidence is not exact",
+                )
+            )
+        if declaration.evidence.review != "accepted":
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    "the membership evidence is not accepted",
+                )
+            )
+        expires = declaration.evidence.expires
+        if expires is None or date.fromisoformat(expires) < as_of:
+            findings.append(
+                InventoryReconciliationFinding(
+                    boundary,
+                    f"the membership review is expired at the {as_of.isoformat()} evaluation date",
+                )
+            )
+
+    covers = bool(matching)
+    complete = bool(declarations) and covers and not findings
+    return InventoryReconciliation(
+        as_of=as_of.isoformat(),
+        members=tuple(sorted(members)),
+        findings=tuple(findings),
+        complete=complete,
+        covers_binding=covers,
+        graphs=graphs,
+    )
+
+
+def _conflicted_boundaries(
+    declarations: Sequence[DynamicInventory],
+    findings: list[InventoryReconciliationFinding],
+) -> set[str]:
+    grouped: dict[str, list[DynamicInventory]] = {}
+    for declaration in declarations:
+        grouped.setdefault(declaration.boundary.id, []).append(declaration)
+    blocked: set[str] = set()
+    for boundary, claims in grouped.items():
+        if len(claims) == 1:
+            continue
+        blocked.add(boundary)
+        member_sets = {frozenset(claim.membership.members) for claim in claims}
+        message = (
+            "complete claims for this boundary disagree across producer revisions"
+            if len(member_sets) > 1
+            else "the boundary ID is declared more than once"
+        )
+        findings.append(InventoryReconciliationFinding(boundary, message))
+    return blocked
+
+
+def _to_inventory_ir(declaration: DynamicInventory) -> AuthorityIR:
+    declaration_source_id = _entity_id(
+        "source", f"inventory-declaration:{declaration.boundary.id}"
+    )
+    capture_source_id = _entity_id(
+        "source", f"inventory-capture:{declaration.boundary.id}"
+    )
+    boundary_id = _entity_id("boundary", declaration.boundary.id)
+    tool_ids = tuple(
+        _entity_id("tool", member) for member in declaration.membership.members
+    )
+    def evidence(location: str, *, captured: bool = False) -> tuple[Evidence, ...]:
+        items = [
+            Evidence(
+                source=declaration_source_id,
+                location=location,
+                confidence=declaration.evidence.confidence,
+                review=declaration.evidence.review,
+            )
+        ]
+        if captured:
+            items.append(
+                Evidence(
+                    source=capture_source_id,
+                    location="/",
+                    confidence=declaration.evidence.confidence,
+                    review=declaration.evidence.review,
+                )
+            )
+        return tuple(items)
+    entities = (
+        Entity(boundary_id, "boundary", declaration.boundary.id),
+        *(Entity(identifier, "tool", name) for identifier, name in zip(
+            tool_ids, declaration.membership.members, strict=True
+        )),
+    )
+    selection = {
+        key: sorted(value) if isinstance(value, tuple) else value
+        for key, value in declaration.selection
+    }
+    boundary_values: dict[str, Any] = {
+        "name": declaration.boundary.id,
+        "target": declaration.boundary.target.as_dict(),
+        "selection": selection,
+        "capture": declaration.source.as_dict(),
+        "completeness": declaration.membership.completeness,
+        "members": list(tool_ids),
+        "reviewer": declaration.evidence.reviewer,
+        "expires": declaration.evidence.expires,
+    }
+    boundary_locations = {
+        "name": "/boundary/id",
+        "target": "/boundary/target",
+        "selection": "/selection",
+        "capture": "/source",
+        "completeness": "/membership/completeness",
+        "members": "/membership/members",
+        "reviewer": "/evidence/reviewer",
+        "expires": "/evidence/expires",
+    }
+    facts = tuple(
+        Fact(
+            _fact_id(boundary_id, predicate),
+            boundary_id,
+            predicate,
+            value,
+            evidence(
+                boundary_locations[predicate],
+                captured=predicate == "members",
+            ),
+        )
+        for predicate, value in boundary_values.items()
+    ) + tuple(
+        Fact(
+            _fact_id(identifier, "name"),
+            identifier,
+            "name",
+            name,
+            evidence(f"/membership/members/{index}", captured=True),
+        )
+        for index, (identifier, name) in enumerate(
+            zip(tool_ids, declaration.membership.members, strict=True)
+        )
+    )
+    members_fact = _fact_id(boundary_id, "members")
+    edges = tuple(
+        Edge(
+            _edge_id(boundary_id, "contains_tool", identifier),
+            boundary_id,
+            "contains_tool",
+            identifier,
+            (members_fact,),
+        )
+        for identifier in tool_ids
+    )
+    semantic_sha256 = _inventory_semantic_sha256(entities, facts, edges)
+    capture_semantic = hashlib.sha256(
+        json.dumps(
+            {"members": sorted(declaration.membership.members)},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")
+    ).hexdigest()
+    graph = AuthorityIR(
+        ir_version=1,
+        sources=(
+            Source(
+                id=declaration_source_id,
+                kind="dynamic-inventory-declaration",
+                locator=f"memory:dynamic-inventory:{declaration.boundary.id}",
+                format_version=declaration.inventory_version,
+                producer_version=None,
+                semantic_sha256=semantic_sha256,
+                adapter=INVENTORY_ADAPTER,
+                adapter_version=INVENTORY_ADAPTER_VERSION,
+                content_sha256=hashlib.sha256(
+                    declaration.to_json().encode("utf-8")
+                ).hexdigest(),
+            ),
+            Source(
+                id=capture_source_id,
+                kind=declaration.source.kind,
+                locator=declaration.source.locator,
+                format_version=declaration.inventory_version,
+                producer_version=declaration.source.producer_version,
+                semantic_sha256=capture_semantic,
+                adapter=INVENTORY_CAPTURE_ADAPTER,
+                adapter_version=INVENTORY_CAPTURE_ADAPTER_VERSION,
+                content_sha256=declaration.source.content_sha256,
+            ),
+        ),
+        entities=entities,
+        facts=facts,
+        edges=edges,
+    )
+    _validate_inventory_profile(graph)
+    return graph
+
+
+def _inventory_semantic_sha256(
+    entities: Sequence[Entity], facts: Sequence[Fact], edges: Sequence[Edge]
+) -> str:
+    body = {
+        "entities": [entity.as_dict() for entity in sorted(entities, key=lambda item: item.id)],
+        "facts": [fact.as_dict() for fact in sorted(facts, key=lambda item: item.id)],
+        "edges": [edge.as_dict() for edge in sorted(edges, key=lambda item: item.id)],
+    }
+    encoded = json.dumps(
+        body, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _validate_inventory_profile(graph: AuthorityIR) -> None:
+    """Require the closed inventory projection without making it trusted policy."""
+    try:
+        graph.validate()
+    except IRFormatError as exc:
+        raise InventoryFormatError("dynamic inventory IR profile is structurally invalid") from exc
+    if len(graph.sources) != 2:
+        raise InventoryFormatError("dynamic inventory IR profile requires exactly two sources")
+    sources = {source.adapter: source for source in graph.sources}
+    if set(sources) != {INVENTORY_ADAPTER, INVENTORY_CAPTURE_ADAPTER}:
+        raise InventoryFormatError("dynamic inventory IR profile has unsupported sources")
+    declaration_source = sources[INVENTORY_ADAPTER]
+    capture_source = sources[INVENTORY_CAPTURE_ADAPTER]
+    if (
+        declaration_source.kind != "dynamic-inventory-declaration"
+        or declaration_source.format_version != INVENTORY_VERSION
+        or declaration_source.adapter_version != INVENTORY_ADAPTER_VERSION
+        or capture_source.format_version != INVENTORY_VERSION
+        or capture_source.adapter_version != INVENTORY_CAPTURE_ADAPTER_VERSION
+    ):
+        raise InventoryFormatError("dynamic inventory IR profile has an unsupported source")
+
+    entities = {entity.id: entity for entity in graph.entities}
+    boundaries = [entity for entity in graph.entities if entity.kind == "boundary"]
+    if len(boundaries) != 1 or any(
+        entity.kind not in INVENTORY_PREDICATES for entity in graph.entities
+    ):
+        raise InventoryFormatError(
+            "dynamic inventory IR profile requires one boundary and only tool entities"
+        )
+    boundary = boundaries[0]
+    facts: dict[tuple[str, str], Fact] = {}
+    for fact in graph.facts:
+        entity = entities[fact.subject]
+        if fact.predicate not in INVENTORY_PREDICATES[entity.kind]:
+            raise InventoryFormatError(
+                "dynamic inventory IR profile contains an unsupported predicate"
+            )
+        key = (fact.subject, fact.predicate)
+        evidence_sources = {item.source for item in fact.evidence}
+        if declaration_source.id not in evidence_sources or not evidence_sources <= {
+            declaration_source.id,
+            capture_source.id,
+        }:
+            raise InventoryFormatError(
+                "dynamic inventory IR profile fact has unsupported evidence"
+            )
+        facts[key] = fact
+
+    required = {(boundary.id, predicate) for predicate in INVENTORY_PREDICATES["boundary"]}
+    required.update(
+        (entity.id, "name") for entity in graph.entities if entity.kind == "tool"
+    )
+    if set(facts) != required:
+        raise InventoryFormatError(
+            "dynamic inventory IR profile does not contain its complete predicate set"
+        )
+    all_evidence = [item for fact in graph.facts for item in fact.evidence]
+    if any(
+        (item.confidence, item.review)
+        != (all_evidence[0].confidence, all_evidence[0].review)
+        for item in all_evidence
+    ):
+        raise InventoryFormatError(
+            "dynamic inventory IR profile facts disagree on evidence state"
+        )
+    if facts[(boundary.id, "name")].value != boundary.name:
+        raise InventoryFormatError("dynamic inventory IR boundary name does not match entity")
+    for entity in graph.entities:
+        if entity.kind == "tool" and facts[(entity.id, "name")].value != entity.name:
+            raise InventoryFormatError("dynamic inventory IR tool name does not match entity")
+
+    target = facts[(boundary.id, "target")].value
+    target_record = _record(target, "IR target", {"source", "binding"})
+    _relative_path(target_record, "source", "IR target")
+    _string(target_record, "binding", "IR target")
+    _selection(facts[(boundary.id, "selection")].value)
+    capture = _record(
+        facts[(boundary.id, "capture")].value,
+        "IR capture",
+        {
+            "kind",
+            "locator",
+            "format_version",
+            "producer",
+            "producer_version",
+            "content_sha256",
+        },
+    )
+    if (
+        _string(capture, "kind", "IR capture") != capture_source.kind
+        or _relative_path(capture, "locator", "IR capture")
+        != capture_source.locator
+        or _string(capture, "producer_version", "IR capture")
+        != capture_source.producer_version
+        or _string(capture, "content_sha256", "IR capture")
+        != capture_source.content_sha256
+    ):
+        raise InventoryFormatError(
+            "dynamic inventory IR capture fact does not match its source"
+        )
+    _string(capture, "format_version", "IR capture")
+    _string(capture, "producer", "IR capture")
+    completeness = facts[(boundary.id, "completeness")].value
+    if completeness not in COMPLETENESS:
+        raise InventoryFormatError(
+            "dynamic inventory IR profile completeness has an invalid value"
+        )
+    _evidence(
+        {
+            "confidence": all_evidence[0].confidence,
+            "review": all_evidence[0].review,
+            "reviewer": facts[(boundary.id, "reviewer")].value,
+            "expires": facts[(boundary.id, "expires")].value,
+        }
+    )
+    members = facts[(boundary.id, "members")].value
+    tool_ids = {entity.id for entity in graph.entities if entity.kind == "tool"}
+    if not isinstance(members, list) or set(members) != tool_ids or len(members) != len(tool_ids):
+        raise InventoryFormatError("dynamic inventory IR profile members do not match tools")
+    required_capture_facts = {
+        (boundary.id, "members"),
+        *(
+            (entity.id, "name")
+            for entity in graph.entities
+            if entity.kind == "tool"
+        ),
+    }
+    if any(
+        capture_source.id
+        not in {item.source for item in facts[key].evidence}
+        for key in required_capture_facts
+    ):
+        raise InventoryFormatError(
+            "dynamic inventory IR membership lacks captured-source evidence"
+        )
+    digest = capture_source.content_sha256
+    if digest is None or len(digest) != 64 or any(
+        character not in "0123456789abcdef" for character in digest
+    ):
+        raise InventoryFormatError(
+            "dynamic inventory IR source content_sha256 must be lowercase SHA-256"
+        )
+    semantic = _inventory_semantic_sha256(graph.entities, graph.facts, graph.edges)
+    if declaration_source.semantic_sha256 != semantic:
+        raise InventoryFormatError(
+            "dynamic inventory IR source semantic_sha256 does not match the profile"
+        )
+    member_names = sorted(
+        entity.name for entity in graph.entities if entity.kind == "tool"
+    )
+    capture_semantic = hashlib.sha256(
+        json.dumps(
+            {"members": member_names},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")
+    ).hexdigest()
+    if capture_source.semantic_sha256 != capture_semantic:
+        raise InventoryFormatError(
+            "dynamic inventory IR capture semantic_sha256 does not match members"
         )
 
 

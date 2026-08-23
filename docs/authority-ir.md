@@ -92,8 +92,10 @@ cardinality and these merge semantics before reachability consumes a new
 relation.
 
 The private v1 registry separates source and derived relations. Source
-relations are `acts_as`, `ceiling_on`, `produces`, `requires`, and
-`role_contains`. Derived relations are closed and purpose-specific:
+relations are `acts_as`, `ceiling_on`, `contains_tool`, `produces`, `requires`,
+and `role_contains`. `contains_tool` belongs to the dedicated dynamic-inventory
+profile and cannot make a manifest graph analyzable. Derived relations are
+closed and purpose-specific:
 
 | Relation | Endpoints | Required support |
 |---|---|---|

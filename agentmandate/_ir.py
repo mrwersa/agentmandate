@@ -102,6 +102,7 @@ RELATIONS = {
         "agent", "tool", "many", "union", None, True, "reachable"
     ),
     "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
+    "contains_tool": Relation("boundary", "tool", "many", "union", "members"),
     "has_breach": Relation(
         "agent", "breach", "many", "union", None, True, "breach"
     ),
@@ -356,7 +357,11 @@ class AuthorityIR:
                 )
         for index, fact in enumerate(self.facts):
             for relation_name, relation in RELATIONS.items():
-                if relation.derived or fact.predicate != relation.predicate:
+                if (
+                    relation.derived
+                    or fact.predicate != relation.predicate
+                    or entities[fact.subject].kind != relation.source_kind
+                ):
                     continue
                 targets = fact.value if isinstance(fact.value, list) else [fact.value]
                 for target in (item for item in targets if item is not None):
