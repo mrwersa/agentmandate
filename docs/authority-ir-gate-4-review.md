@@ -13,6 +13,18 @@ automatically trusted; the reviewed CLI contract preserves that boundary.
 | Output stability | Passed in private implementation | Versioned, hashed result envelope with canonical fixtures ([#56](https://github.com/mrwersa/agentmandate/issues/56)) |
 | CLI failure behavior | Passed | Canonical output, exit codes, stderr, and no-partial-output contract ([#57](https://github.com/mrwersa/agentmandate/issues/57)) |
 
+## Closing verdict
+
+**All four gates passed.** After the CLI merge at `f50a8a0`, the public-boundary
+suite reconfirmed canonical export, structural validation, profile-gated IR
+analysis, and verified result reading across AgentKit, GitHub MCP, AWS
+PostgreSQL, and Sentry. The canonical v1 migration fixture also crossed both
+`ir validate` and `reach --ir`. The full suite passed with 676 tests and 100%
+statement coverage.
+This closes the parent initiative without widening it into public Python
+records, arbitrary evidence trust, or a general execution format. The public
+artifact and CLI contracts ship in 0.10.0 under `STABILITY.md`.
+
 This is a gate working as intended, not a rejection of the IR design. The
 private records preserve manifest semantics and derived provenance. They have
 not yet earned the stronger claim that arbitrary valid snapshots can safely

@@ -13,7 +13,7 @@ against the declaration, so it is usable without another tool alongside it.
 
 from __future__ import annotations
 
-__version__ = "0.9.1"
+__version__ = "0.10.0"
 
 from .diff import Change, Delta, compare
 from .drift import Drift, DriftFinding, compare_source
