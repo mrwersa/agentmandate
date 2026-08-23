@@ -9,8 +9,16 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Authority IR validation recognizes provenance-bearing `contains_tool` edges
-  used by the private experimental dynamic-inventory profile. No command
-  imports dynamic declarations yet.
+  used by the dynamic-inventory profile.
+- `mandate inventory validate DECLARATION` checks declaration structure
+  without treating it as trusted authority. `mandate drift` accepts explicitly
+  paired declarations and capture bytes, a reviewed selection, and an
+  evaluation date; it never follows declaration locators or reads the clock.
+
+### Changed
+
+- Dynamic drift JSON adds `inventory_as_of` only when dynamic evidence was
+  supplied. Existing drift invocations and output remain unchanged.
 
 ## 0.10.0 - 2026-08-23
 

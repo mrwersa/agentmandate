@@ -205,6 +205,10 @@ still runs, and the ceiling counts against nothing.
 A tool list the read cannot enumerate, such as `tools=load_tools()`, is itself
 a finding. Reporting no drift from evidence that could not see the whole list
 would be the false assurance this package exists to prevent.
+Reviewed dynamic inventories can discharge that uncertainty only when `drift`
+also receives the declaration, captured bytes, deployment selection, and an
+explicit evaluation date. See the
+[dynamic-inventory contract](docs/dynamic-inventory.md).
 
 ## The manifest
 
@@ -249,6 +253,7 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
 | `mandate reach` | Bounded search over a manifest or reviewed `--ir` snapshot for a legal call sequence that breaches a limit, reported as a counterexample |
 | `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
+| `mandate inventory` | Structurally validates a dynamic-inventory declaration without accepting its membership as authority |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing. Reads [OpenTelemetry traces](https://github.com/mrwersa/agentmandate/blob/main/docs/traces.md) with `--otel` |
 | `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |

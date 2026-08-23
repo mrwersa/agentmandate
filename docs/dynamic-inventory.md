@@ -1,9 +1,9 @@
 # Dynamic inventory declaration contract
 
-Status: **experimental**. A private v1 reader, dedicated Authority IR inventory
+Status: **Gate 4 candidate**. A v1 reader, dedicated Authority IR inventory
 profile, and drift reconciliation implement gates 1–3 against canonical
-AgentKit and Sentry fixtures. Public CLI and failure-contract review remain
-gated by issue #63. This does not add a manifest field or make a parsed
+AgentKit and Sentry fixtures. `inventory validate` and explicit `drift` inputs
+now expose the proposed public boundary for review. Parsing never makes an
 inventory trustworthy.
 
 ## Problem boundary
@@ -159,6 +159,23 @@ No command may import application modules, invoke providers, query registries,
 or make network requests. Capture is an explicit upstream step whose bytes are
 reviewed and passed to AgentMandate.
 
+The public candidate uses paired, repeatable `--inventory-declaration` and
+`--inventory-capture` options. `--inventory-selection` is a JSON object and
+`--inventory-as-of` is an ISO date. Pairing is positional, but the capture is
+stored under the declaration's locator only after the caller supplies it; the
+locator is never opened. For example:
+
+```bash
+mandate drift mandate.yaml --source . --binding agent \
+  --inventory-declaration reviewed-inventory.json \
+  --inventory-capture captured-provider.json \
+  --inventory-selection '{"provider":["cdp_api","wallet"]}' \
+  --inventory-as-of 2027-01-01
+```
+
+`inventory validate DECLARATION` checks transport and structure only. It does
+not verify captured bytes or make the membership eligible for drift.
+
 ## Evidence gates and sequence
 
 1. **Contract:** challenge this record shape against AgentKit and Sentry,
@@ -172,7 +189,12 @@ reviewed and passed to AgentMandate.
    removal. **Implemented privately:** complete AgentKit evidence discharges
    the dynamic binding; partial Sentry and expired evidence remain unresolved.
 4. **Public CLI:** expose declaration input only after failure behavior and
-   output stability are reviewed across both fixtures.
+   output stability are reviewed across both fixtures. **Candidate
+   implemented:** both declarations cross structural validation; complete
+   AgentKit evidence crosses reconciliation. Sentry remains a deliberate
+   boundary test because its JavaScript binding is outside the current Python
+   source collector; the CLI must not manufacture a selected binding from the
+   declaration itself.
 
 The initiative is complete only when `drift` can prove one declared dynamic
 boundary complete and explain why every ineligible variant cannot be proved.

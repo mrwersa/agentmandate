@@ -11,6 +11,9 @@ V1 = str(EXAMPLES / "dispute-resolver.yaml")
 V2 = str(EXAMPLES / "dispute-resolver-v2.yaml")
 SOD = str(EXAMPLES / "dispute-resolver-sod.yaml")
 TRACES = str(EXAMPLES / "observed-calls.jsonl")
+ROOT = EXAMPLES.parent
+AGENTKIT_INVENTORY = ROOT / "tests/fixtures/dynamic-inventory-agentkit-v1.json"
+SENTRY_INVENTORY = ROOT / "tests/fixtures/dynamic-inventory-sentry-v1.json"
 
 
 def test_lint_is_clean_on_the_shipped_v1_example(capsys):
@@ -594,12 +597,241 @@ def test_drift_emits_parseable_json(tmp_path, capsys):
 
     assert payload["clean"] is False
     assert "wipe" in payload["discovered"]
+    assert "inventory_as_of" not in payload
     assert any(f["kind"] == "undeclared" for f in payload["findings"])
 
 
 def test_drift_reports_an_unreadable_source_as_a_usage_error(capsys):
     assert main(["drift", V1, "--source", "no-such-directory"]) == EXIT_USAGE
     assert "does not exist" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("fixture", [AGENTKIT_INVENTORY, SENTRY_INVENTORY])
+def test_inventory_validate_checks_both_evidence_declarations(fixture, capsys):
+    assert main(["inventory", "validate", str(fixture)]) == EXIT_OK
+    assert capsys.readouterr().out == "valid dynamic inventory v1\n"
+
+
+def test_inventory_validate_failure_emits_no_stdout(tmp_path, capsys):
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text('{"inventory_version":1,"unexpected":true}', encoding="utf-8")
+
+    assert main(["inventory", "validate", str(invalid)]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "error:" in captured.err
+
+
+def test_drift_accepts_complete_reviewed_dynamic_inventory(tmp_path, capsys):
+    source = tmp_path / "python/examples/strands-agents-cdp-server-chatbot"
+    source.mkdir(parents=True)
+    (source / "chatbot.py").write_text(
+        "tools = get_strands_tools(agentkit)\nagent = Agent(tools=tools)\n",
+        encoding="utf-8",
+    )
+    selection = json.dumps(
+        {
+            "provider": [
+                "cdp_api",
+                "compound",
+                "erc20",
+                "pyth",
+                "wallet",
+                "weth",
+                "wow",
+            ]
+        }
+    )
+
+    assert main(
+        [
+            "drift",
+            str(ROOT / "docs/evidence/agentkit/mandate.yaml"),
+            "--source",
+            str(tmp_path),
+            "--binding",
+            "agent",
+            "--inventory-declaration",
+            str(AGENTKIT_INVENTORY),
+            "--inventory-capture",
+            str(ROOT / "docs/evidence/agentkit/inventory-v074.json"),
+            "--inventory-selection",
+            selection,
+            "--inventory-as-of",
+            "2027-01-01",
+            "--json",
+        ]
+    ) == EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["clean"] is True
+    assert payload["inventory_as_of"] == "2027-01-01"
+    assert len(payload["discovered"]) == 20
+
+
+@pytest.mark.parametrize(
+    ("extra", "message"),
+    [
+        ([], "--inventory-capture"),
+        (
+            ["--inventory-capture", "missing"],
+            "--inventory-selection",
+        ),
+        (
+            [
+                "--inventory-capture",
+                "missing",
+                "--inventory-selection",
+                "{}",
+            ],
+            "--inventory-as-of",
+        ),
+        (
+            [
+                "--inventory-capture",
+                "missing",
+                "--inventory-selection",
+                "{",
+                "--inventory-as-of",
+                "2027-01-01",
+            ],
+            "valid JSON",
+        ),
+        (
+            [
+                "--inventory-capture",
+                "missing",
+                "--inventory-selection",
+                "[]",
+                "--inventory-as-of",
+                "2027-01-01",
+            ],
+            "JSON object",
+        ),
+        (
+            [
+                "--inventory-capture",
+                "missing",
+                "--inventory-selection",
+                "{}",
+                "--inventory-as-of",
+                "not-a-date",
+            ],
+            "YYYY-MM-DD",
+        ),
+        (
+            [
+                "--inventory-capture",
+                "missing",
+                "--inventory-selection",
+                "{}",
+                "--inventory-as-of",
+                "20270101",
+            ],
+            "YYYY-MM-DD",
+        ),
+    ],
+)
+def test_dynamic_inventory_option_errors_emit_no_stdout(tmp_path, capsys, extra, message):
+    (tmp_path / "agent.py").write_text(
+        "def open_case(): pass\nagent = Agent(tools=[open_case])\n",
+        encoding="utf-8",
+    )
+    arguments = [
+        "drift",
+        V1,
+        "--source",
+        str(tmp_path),
+        "--inventory-declaration",
+        str(AGENTKIT_INVENTORY),
+        *extra,
+    ]
+
+    assert main(arguments) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+def test_dynamic_inventory_requires_a_declaration(tmp_path, capsys):
+    (tmp_path / "agent.py").write_text(
+        "def open_case(): pass\nagent = Agent(tools=[open_case])\n",
+        encoding="utf-8",
+    )
+
+    assert main(
+        ["drift", V1, "--source", str(tmp_path), "--inventory-capture", "missing"]
+    ) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "--inventory-declaration" in captured.err
+
+
+def test_dynamic_inventory_rejects_different_bytes_for_one_locator(tmp_path, capsys):
+    source = tmp_path / "python/examples/strands-agents-cdp-server-chatbot"
+    source.mkdir(parents=True)
+    (source / "chatbot.py").write_text(
+        "tools = get_strands_tools(agentkit)\nagent = Agent(tools=tools)\n",
+        encoding="utf-8",
+    )
+    changed = tmp_path / "changed.json"
+    changed.write_text("{}", encoding="utf-8")
+    capture = ROOT / "docs/evidence/agentkit/inventory-v074.json"
+
+    assert main(
+        [
+            "drift",
+            str(ROOT / "docs/evidence/agentkit/mandate.yaml"),
+            "--source",
+            str(tmp_path),
+            "--binding",
+            "agent",
+            "--inventory-declaration",
+            str(AGENTKIT_INVENTORY),
+            "--inventory-capture",
+            str(capture),
+            "--inventory-declaration",
+            str(AGENTKIT_INVENTORY),
+            "--inventory-capture",
+            str(changed),
+            "--inventory-selection",
+            '{"provider":"cdp_api"}',
+            "--inventory-as-of",
+            "2027-01-01",
+        ]
+    ) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "different capture bytes" in captured.err
+
+
+def test_dynamic_inventory_text_records_the_evaluation_date(tmp_path, capsys):
+    source = tmp_path / "python/examples/strands-agents-cdp-server-chatbot"
+    source.mkdir(parents=True)
+    (source / "chatbot.py").write_text(
+        "tools = get_strands_tools(agentkit)\nagent = Agent(tools=tools)\n",
+        encoding="utf-8",
+    )
+    declaration = json.loads(AGENTKIT_INVENTORY.read_text(encoding="utf-8"))
+
+    main(
+        [
+            "drift",
+            str(ROOT / "docs/evidence/agentkit/mandate.yaml"),
+            "--source",
+            str(tmp_path),
+            "--binding",
+            "agent",
+            "--inventory-declaration",
+            str(AGENTKIT_INVENTORY),
+            "--inventory-capture",
+            str(ROOT / "docs/evidence/agentkit/inventory-v074.json"),
+            "--inventory-selection",
+            json.dumps(declaration["selection"]),
+            "--inventory-as-of",
+            "2027-01-01",
+        ]
+    )
+    assert "dynamic inventory evaluated as of 2027-01-01" in capsys.readouterr().out
 
 
 def test_reach_emits_sarif(capsys):
