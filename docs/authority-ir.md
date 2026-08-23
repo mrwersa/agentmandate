@@ -197,6 +197,37 @@ transitions occurred, not their order or repetition count.
 Provenance records support an explanation; they are not a proof that a source
 was truthful. Artifact signatures and evidence bundles are later roadmap work.
 
+## Versioned analysis result
+
+The private result envelope is distinct from both a source snapshot and its
+augmented graph. It contains:
+
+- `result_version`, which selects the envelope contract;
+- `source_graph`, naming the source `ir_version` and SHA-256 identity;
+- `analysis`, recording the effective search depth and whether that boundary
+  truncated exploration;
+- `authority`, preserving the existing ordered breach paths, including
+  repeated calls;
+- `graph`, carrying the validated source and derived provenance records; and
+- `result_sha256`, binding the complete canonical result body.
+
+`result_sha256` hashes the compact, key-sorted ASCII JSON object containing
+every field above except `result_sha256` itself, with no trailing newline. The
+source-graph digest separately hashes canonical `AuthorityIR.to_json()` bytes,
+including that format's trailing newline. Neither body contains a timestamp.
+The reader recovers the source-only graph, checks both digests, re-runs the
+bounded analysis, and requires exact agreement with the authority output,
+truncation flag, and augmented graph. A checksum that an importer can recompute
+is therefore an identity and corruption boundary, not a substitute for
+semantic validation or a signature.
+
+The three version axes are independent. `ir_version` governs graph records and
+relations. Adapter versions in source records govern projection semantics and
+therefore may change source and result digests without changing either format.
+`result_version` governs envelope fields, their meaning, and canonicalization.
+The private v1 reader is strict: adding, removing, or reinterpreting a hashed
+field requires a result-version change.
+
 ## Delivery and acceptance gates
 
 Implementation is deliberately split so review can stop a bad format early:
@@ -218,16 +249,16 @@ the four real evidence graphs. Retained paths are replayed against the same
 enabling semantics before provenance is derived, and each derived relation has
 a registry-enforced support shape. There is no CLI surface.
 
-Gate 4 reader hardening and the private manifest-v1 analysis profile are
-complete, including committed malformed fixtures for every record type and
-adversarial fixtures for trust, predicate, value-shape, adapter, and digest
-failures. Public import/export still requires the result-envelope and CLI
+Gate 4 reader hardening, the private manifest-v1 analysis profile, and the
+versioned result envelope are complete. Committed canonical result fixtures
+cover clean, truncated, and breached analysis, while adversarial fixtures cover
+trust, predicate, value-shape, adapter, digest, parameter, graph, and
+non-canonical-value failures. Public import/export still requires the CLI
 failure-behavior work.
 
 That review is recorded in
 [`authority-ir-gate-4-review.md`](authority-ir-gate-4-review.md). Its decision
-is to hold public exposure until the result envelope and reviewed CLI contract
-are complete.
+is to hold public exposure until the reviewed CLI contract is complete.
 
 The format remains experimental until all four gates pass. Policy-language
 imports, runtime evidence, signatures, global identifiers, and arbitrary

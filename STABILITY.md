@@ -22,6 +22,26 @@ Production users should pin the current minor series:
 agentmandate~=0.9.0
 ```
 
+## Experimental authority artifacts
+
+The private Authority IR and analysis-result envelope are not public package or
+CLI contracts yet. Their explicit versions establish the rules to apply before
+exposure:
+
+- `ir_version` changes when graph records, relations, or canonicalization
+  change incompatibly.
+- Source adapter versions change when projection logic changes; that may alter
+  semantic and result digests without changing either JSON format.
+- `result_version` changes when a hashed envelope field is added, removed,
+  renamed, reinterpreted, or canonicalized differently. The strict reader does
+  not treat additional fields as silently additive.
+
+Future presentation metadata may be additive only if it is explicitly outside
+the canonical envelope. Once the CLI exposes these artifacts, adding support
+for a new format version or changing command behavior also requires a package
+minor release and migration notes. These standalone artifact rules are stricter
+than the additive guarantee for existing `--json` command output.
+
 ## What is most likely to change
 
 The manifest schema. Three areas are known to be under-modelled:

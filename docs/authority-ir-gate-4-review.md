@@ -1,15 +1,16 @@
 # Authority IR Gate 4 Review
 
-Status: **hold public exposure**. Reviewed against `ed2e19b` on 23 August
-2026. Gates 1–3 and reader hardening are complete, but a structurally valid IR
-is not yet necessarily safe to analyze or sufficient to export as a result.
+Status: **hold public exposure**. The initial review was reproduced against
+`ed2e19b` on 23 August 2026. The private analysis-profile and result-envelope
+work now close the first two findings, but a structurally valid IR is still not
+automatically trusted and no public CLI contract has been implemented.
 
 ## Decision summary
 
 | Review | Verdict | Exit condition |
 |---|---|---|
 | Unsupported semantics | Passed in private implementation | Closed, trust-aware manifest-v1 analysis profile ([#55](https://github.com/mrwersa/agentmandate/issues/55)) |
-| Output stability | Blocked | Define and fixture a versioned result envelope ([#56](https://github.com/mrwersa/agentmandate/issues/56)) |
+| Output stability | Passed in private implementation | Versioned, hashed result envelope with canonical fixtures ([#56](https://github.com/mrwersa/agentmandate/issues/56)) |
 | CLI failure behavior | Contract ready; implementation blocked | Implement only after #55 and #56 ([#57](https://github.com/mrwersa/agentmandate/issues/57)) |
 
 This is a gate working as intended, not a rejection of the IR design. The
@@ -74,6 +75,15 @@ round-trip and byte stability under reordered tables, evidence, and support.
 Reject non-finite or otherwise non-canonical fact values before serialization.
 `STABILITY.md` must state which envelope changes are additive and which require
 a new format or package minor version.
+
+The private v1 envelope now supplies that boundary. Its hash covers the result
+version, source-graph identity, effective depth and truncation, existing
+Authority output, and augmented graph. Its reader recovers the source graph and
+re-runs analysis rather than trusting a self-consistent checksum. Canonical
+clean, truncated, and breached fixtures round-trip byte-for-byte, preserve
+ordered repeated calls, and remain stable under reordered source tables,
+evidence, and support. Non-finite JSON and mismatched parameters, authority, or
+graphs fail with `IRFormatError`. Public exposure remains held on the CLI gate.
 
 ## CLI failure-behavior review
 
