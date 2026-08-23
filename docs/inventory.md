@@ -22,6 +22,9 @@ the obvious problem that the import already did it.
 
 The cost is that a tool assembled at runtime is invisible. That is reported
 rather than hidden. See [What it says it cannot see](#what-it-says-it-cannot-see).
+The proposed [dynamic inventory declaration contract](dynamic-inventory.md)
+defines how reviewed captures may eventually discharge that uncertainty; no
+current command accepts those declarations.
 
 ## What it recognises
 
