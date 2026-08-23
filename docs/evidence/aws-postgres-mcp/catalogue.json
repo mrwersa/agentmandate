@@ -1,0 +1,384 @@
+{
+  "tools": [
+    {
+      "description": "Run a SQL query against PostgreSQL",
+      "inputSchema": {
+        "$defs": {
+          "ConnectionMethod": {
+            "description": "Connection method enumeration.",
+            "enum": [
+              "rdsapi",
+              "pgwire",
+              "pgwire_iam"
+            ],
+            "title": "ConnectionMethod",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "cluster_identifier": {
+            "description": "Cluster identifier",
+            "title": "Cluster Identifier",
+            "type": "string"
+          },
+          "connection_method": {
+            "$ref": "#/$defs/ConnectionMethod",
+            "description": "connection method"
+          },
+          "database": {
+            "description": "database name",
+            "title": "Database",
+            "type": "string"
+          },
+          "db_endpoint": {
+            "description": "database endpoint",
+            "title": "Db Endpoint",
+            "type": "string"
+          },
+          "query_parameters": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Parameters for the SQL query",
+            "title": "Query Parameters"
+          },
+          "sql": {
+            "description": "The SQL query to run",
+            "title": "Sql",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql",
+          "connection_method",
+          "cluster_identifier",
+          "db_endpoint",
+          "database"
+        ],
+        "title": "run_queryArguments",
+        "type": "object"
+      },
+      "name": "run_query",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "run_queryOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Fetch table columns and comments from Postgres",
+      "inputSchema": {
+        "$defs": {
+          "ConnectionMethod": {
+            "description": "Connection method enumeration.",
+            "enum": [
+              "rdsapi",
+              "pgwire",
+              "pgwire_iam"
+            ],
+            "title": "ConnectionMethod",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "cluster_identifier": {
+            "description": "Cluster identifier",
+            "title": "Cluster Identifier",
+            "type": "string"
+          },
+          "connection_method": {
+            "$ref": "#/$defs/ConnectionMethod",
+            "description": "connection method"
+          },
+          "database": {
+            "description": "database name",
+            "title": "Database",
+            "type": "string"
+          },
+          "db_endpoint": {
+            "description": "database endpoint",
+            "title": "Db Endpoint",
+            "type": "string"
+          },
+          "table_name": {
+            "description": "name of the table",
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_method",
+          "cluster_identifier",
+          "db_endpoint",
+          "database",
+          "table_name"
+        ],
+        "title": "get_table_schemaArguments",
+        "type": "object"
+      },
+      "name": "get_table_schema",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "get_table_schemaOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Connect to a specific database and save the connection internally",
+      "inputSchema": {
+        "$defs": {
+          "ConnectionMethod": {
+            "description": "Connection method enumeration.",
+            "enum": [
+              "rdsapi",
+              "pgwire",
+              "pgwire_iam"
+            ],
+            "title": "ConnectionMethod",
+            "type": "string"
+          },
+          "DatabaseType": {
+            "description": "Database type enumeration.",
+            "enum": [
+              "APG",
+              "RPG"
+            ],
+            "title": "DatabaseType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "cluster_identifier": {
+            "description": "cluster identifier",
+            "title": "Cluster Identifier",
+            "type": "string"
+          },
+          "connection_method": {
+            "$ref": "#/$defs/ConnectionMethod",
+            "description": "connection method"
+          },
+          "database": {
+            "description": "database name",
+            "title": "Database",
+            "type": "string"
+          },
+          "database_type": {
+            "$ref": "#/$defs/DatabaseType",
+            "description": "database type"
+          },
+          "db_endpoint": {
+            "description": "database endpoint",
+            "title": "Db Endpoint",
+            "type": "string"
+          },
+          "port": {
+            "description": "Postgres port",
+            "title": "Port",
+            "type": "integer"
+          },
+          "region": {
+            "description": "region",
+            "title": "Region",
+            "type": "string"
+          }
+        },
+        "required": [
+          "region",
+          "database_type",
+          "connection_method",
+          "cluster_identifier",
+          "db_endpoint",
+          "port",
+          "database"
+        ],
+        "title": "connect_to_databaseArguments",
+        "type": "object"
+      },
+      "name": "connect_to_database",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "connect_to_databaseOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Check if a connection has been established",
+      "inputSchema": {
+        "properties": {
+          "cluster_identifier": {
+            "description": "cluster identifier",
+            "title": "Cluster Identifier",
+            "type": "string"
+          },
+          "database": {
+            "default": "postgres",
+            "description": "database name",
+            "title": "Database",
+            "type": "string"
+          },
+          "db_endpoint": {
+            "default": "",
+            "description": "database endpoint",
+            "title": "Db Endpoint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cluster_identifier"
+        ],
+        "title": "is_database_connectedArguments",
+        "type": "object"
+      },
+      "name": "is_database_connected",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "is_database_connectedOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Get all cached database connection information",
+      "inputSchema": {
+        "properties": {},
+        "title": "get_database_connection_infoArguments",
+        "type": "object"
+      },
+      "name": "get_database_connection_info",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "get_database_connection_infoOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Create an Aurora Postgres cluster",
+      "inputSchema": {
+        "properties": {
+          "cluster_identifier": {
+            "description": "cluster identifier",
+            "title": "Cluster Identifier",
+            "type": "string"
+          },
+          "database": {
+            "default": "postgres",
+            "description": "default database name",
+            "title": "Database",
+            "type": "string"
+          },
+          "engine_version": {
+            "default": "17.5",
+            "description": "engine version",
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "region": {
+            "description": "region",
+            "title": "Region",
+            "type": "string"
+          },
+          "with_express_configuration": {
+            "default": false,
+            "description": "with express configuration",
+            "title": "With Express Configuration",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "region",
+          "cluster_identifier"
+        ],
+        "title": "create_clusterArguments",
+        "type": "object"
+      },
+      "name": "create_cluster",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "create_clusterOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "get background job status",
+      "inputSchema": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "get_job_statusArguments",
+        "type": "object"
+      },
+      "name": "get_job_status"
+    }
+  ]
+}

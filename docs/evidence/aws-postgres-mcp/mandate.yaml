@@ -1,0 +1,78 @@
+# Reviewed graph: AWS Labs PostgreSQL MCP server 1.1.11, captured from the
+# published wheel. This profile starts without a database connection, enables
+# write queries, enforces the upstream privilege check, and uses a dedicated
+# least-privilege database role. The AWS and database grants are deployment
+# facts, not present in the MCP catalogue.
+version: 1
+agent: aws-postgres-agent
+identity: spiffe://example/agents/aws-postgres-agent
+
+limits:
+  depth: 8
+  # REVIEWED POLICY: at most one arbitrary SQL statement in a run. This is a
+  # sample control used to exercise the graph, not an upstream AWS limit.
+  effects:
+    irreversible: 1
+
+tools:
+  # CONDITIONAL: read-only SELECT, durable writes, and destructive DDL share
+  # this one tool. The write-enabled profile is conservatively represented by
+  # its strongest effect; v1 cannot predicate effect on `sql` or server flags.
+  - name: run_query
+    effect: irreversible
+    principal: service
+    requires: [database_connection]
+    requires_approval: true
+
+  - name: get_table_schema
+    effect: read
+    principal: service
+    requires: [database_connection]
+
+  # Creates transient server state and makes the fixed database role reachable.
+  # The target is caller-selected but constrained by AWS visibility, registered
+  # secret mappings, network reachability, and the role's database grants.
+  - name: connect_to_database
+    effect: write
+    principal: service
+    produces: database_connection
+
+  - name: is_database_connected
+    effect: read
+    principal: service
+
+  # Returns endpoint, database, and connection-method metadata from the cache.
+  - name: get_database_connection_info
+    effect: read
+    principal: service
+
+  # Starts asynchronous Aurora creation and also caches a connection. It
+  # logically produces both a job and a database connection; v1 permits only
+  # one `produces`, so the authority-bearing connection is retained.
+  - name: create_cluster
+    effect: write
+    principal: service
+    produces: database_connection
+
+  # The scanner's `requires: [job]` guess was removed. A job ID is a bearer
+  # input and the graph cannot express create_cluster's second output anyway.
+  - name: get_job_status
+    effect: read
+    principal: service
+
+# Review findings:
+#
+# 1. `run_query` is value-conditional authority. The scan labels it read from
+#    its name, while a write-enabled deployment accepts arbitrary SQL. Calling
+#    it irreversible is safe for gating but overstates SELECT-only calls and a
+#    server started without `--allow_write_query`.
+# 2. `service` compresses two principals: AWS credentials select and create
+#    infrastructure and retrieve secrets; the PostgreSQL role authorises SQL.
+#    The manifest cannot express this delegation chain or their intersection.
+# 3. A database target is not an unconstrained string in practice. AWS
+#    visibility, operator-pinned secret mappings, network reachability, and
+#    PostgreSQL grants jointly bound it. v1 has no resource relationships or
+#    provenance for those constraints.
+# 4. `create_cluster` produces a job handle and a cached database connection,
+#    but a tool can declare only one produced scope. It is also bounded by AWS
+#    quotas, which cannot be represented without falsely marking it unbounded.
