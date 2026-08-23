@@ -131,8 +131,9 @@ Intended semantics:
   reports the unresolved boundary.
 - A condition maps only to a *weaker* declared effect class than the tool's
   default. Widening through conditions is structurally impossible.
-- Conditions carry explicit evidence fields (`confidence`, `review`,
-  optional reviewer and expiry), as shown above. An unevaluable, unaccepted,
+- Conditions carry explicit evidence fields (`confidence` and `review`);
+  accepted or contested evidence also requires a paired reviewer and expiry,
+  as shown above. An unevaluable, unaccepted,
   expired, or context-mismatched condition leaves the tool at its default
   effect, and the counterexample cites which condition was skipped.
 - Approval requirements stay attached to the tool, not the condition: a gated
@@ -153,21 +154,22 @@ separation that keeps inventory captures outside the mandate:
   "surface": {
     "scopes": ["project:read", "issue:write"],
     "tools": ["find_projects", "update_issue"],
-    "effects": ["read", "write"],
-    "irreversible": false
+    "effects": ["read", "write"]
   },
   "issued": "2026-08-01",
   "expires": "2026-11-23",
   "evidence": {
     "confidence": "exact",
     "review": "accepted",
-    "reviewer": "security-platform"
+    "reviewer": "security-platform",
+    "expires": "2026-10-01"
   }
 }
 ```
 
 `surface` is the complete authority the subject conferred: scopes, named
-tools, permitted effect classes, and whether irreversible calls are in scope.
+tools, and permitted effect classes. The effect set is the sole source of
+truth for irreversible authority; there is no second boolean that can disagree.
 Attenuation is the mechanical comparison of each delegated tool's effective
 surface (its declared effect, approval state, and required scopes from the
 manifest) against this object; any excess is `delegation.widens`. The grant's
@@ -253,7 +255,11 @@ that:
 3. `fixed_user_credential` tools remain findings
    (`identity.service-principal`, plus `credential.unproven-delegation`)
    until evidence establishes actual grant semantics.
-4. Profiles remain separate: the manifest analysis profile extends with a
+4. Evidence accountability follows the dynamic-inventory rule:
+   `unreviewed` evidence names neither reviewer nor expiry; `accepted` or
+   `contested` evidence requires both. Partial accountability is a reader
+   rejection, not a warning.
+5. Profiles remain separate: the manifest analysis profile extends with a
    schema-version bump and migration fixtures; inventory profiles never gain
    authority-bearing conditions.
 
@@ -274,14 +280,19 @@ gating on that tool; and any counterexample through a credentialed tool cites
 its principal record. A genuine delegation-chain fixture — an OAuth token
 exchange, MCP delegated authorization, or A2A delegation capture with a
 reviewed grant — remains a roadmap prerequisite for the attenuation rules;
-no committed graph proves one.
+no committed graph proves one. The committed condition-context and grant
+fixtures are explicitly synthetic samples pending captures with real
+provenance: they pin schema behaviour, not upstream facts.
 
 ## Gates
 
 1. **Contract:** this document survives challenge against both fixtures.
 2. **Records:** typed condition/delegation records, the condition-context
    artifact, strict reader, canonical fixtures, IR projection behind new
-   registered relations.
+   registered relations. Split for review: gate 2a delivers the context and
+   grant artifact readers with canonical synthetic fixtures (done); gate 2b
+   delivers tool-side condition and structured-principal records plus their
+   IR projection behind registered relations.
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
    under conservative defaults.
