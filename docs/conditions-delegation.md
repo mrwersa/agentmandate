@@ -39,9 +39,58 @@ protective reading already in the document.
 
 ## Candidate records
 
-Conditions and delegations are declared on tools in a future manifest
-version, projected into Authority IR facts and registered relations exactly as
-`contains_tool` was. Shapes are illustrative until fixtures prove them.
+Gate 1 narrows this initiative explicitly to **conditional effects**: whether
+a call's effect class depends on its arguments or dispatch target. Approval
+state, time windows, status, and request-context conditions stay future work —
+they need operand sources this contract cannot yet define, and the committed
+evidence does not ask for them. Conditions and delegations are declared on
+tools in a future manifest version, projected into Authority IR facts and
+registered relations exactly as `contains_tool` was. Shapes are illustrative
+until fixtures prove them.
+
+### Condition context
+
+Conditions cannot narrow anything until a reviewed record supplies the domain
+they classify over. The context is a versioned artifact, separate from the
+mandate:
+
+```json
+{
+  "context_version": 1,
+  "target": {
+    "source": "src/postgres-server/server.py",
+    "binding": "run_query"
+  },
+  "domain": {
+    "predicate": "statement_class",
+    "arg": "sql",
+    "classifier": "pg-statement-classifier",
+    "classifier_version": "1.3.0",
+    "dialect": "postgresql-16",
+    "classes": ["select-only", "dml", "ddl"]
+  },
+  "source": {
+    "kind": "argument-capture",
+    "locator": "inventory/run-query-prod.jsonl",
+    "producer_version": "2026.08",
+    "content_sha256": "..."
+  },
+  "completeness": "representative",
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "platform-data",
+    "expires": "2026-11-23"
+  }
+}
+```
+
+`completeness: representative` means the capture shows what production sends,
+not everything that could be sent; narrowing within it is a reviewed judgement
+recorded here, and `complete` would claim the domain itself is enumerated.
+Classifier identity and version are mandatory operands — two classifier
+versions may disagree, so a condition without one is malformed. Digest
+verification, strict reading, and expiry follow the dynamic-inventory rules.
 
 ### Conditions
 
@@ -54,33 +103,32 @@ tools:
       - predicate: statement_class
         arg: sql
         class: select-only       # dialect-pinned classifier, reviewed
-        dialect: postgresql-16
         effect: read             # when classified so, this call is a read
-      evidence:
-        confidence: exact
-        review: accepted
-        reviewer: platform-data
+        evidence:
+          confidence: exact
+          review: accepted
+          reviewer: platform-data
     effect: irreversible         # conservative default when no condition holds
 ```
 
 Intended semantics:
 
-- The predicate vocabulary is closed and typed. `argument_matches` regex
-  matching is deliberately excluded: a pattern cannot prove a statement is
-  read-only (prefix matches admit multi-statement strings), and arbitrary
-  regex would reintroduce the expression language this contract refuses.
-  Predicates that need judgement — `statement_class` above — must name a
-  pinned, dialect-aware classifier whose failure resolves to the tool's
-  default effect, never to the weaker one.
-- **Conditions require a condition-context record** to narrow anything.
-  `reach` does not enumerate SQL statements, dispatch names, flag values,
-  status sets, or time; it cannot evaluate a predicate against an open
-  domain. A versioned context artifact — separate from the mandate, in the
-  dynamic-inventory pattern — supplies the reviewed admissible domain for
-  each conditioned argument or state: its values, producer revision, capture
-  digest, selection, completeness, evidence, review, and expiry. Narrowing
-  applies only within an eligible context; outside one, every conditioned
-  tool stays at its default effect and drift reports the unresolved boundary.
+- Gate 1 defines exactly two predicates, each with its operand source in the
+  context record: `statement_class` (a pinned classifier classifies a string
+  argument into a closed class set) and `dispatch_target` (the reviewed
+  hidden-tool catalogue names the operations a dispatch tool may reach, so
+  known dispatch targets narrow while unknown ones stay at the default).
+  Regex argument matching is deliberately excluded: a pattern cannot prove a
+  statement is read-only (prefix matches admit multi-statement strings), and
+  arbitrary patterns would reintroduce the expression language this contract
+  refuses. Adding predicates later means extending the vocabulary and the
+  context schema together.
+- **Conditions require an eligible condition-context record** to narrow
+  anything. `reach` does not enumerate SQL statements or dispatch names; it
+  cannot evaluate a predicate against an open domain. The context supplies
+  the reviewed domain; narrowing applies only within it. Outside an eligible
+  context, every conditioned tool stays at its default effect and drift
+  reports the unresolved boundary.
 - A condition maps only to a *weaker* declared effect class than the tool's
   default. Widening through conditions is structurally impossible.
 - Conditions carry explicit evidence fields (`confidence`, `review`,
@@ -89,6 +137,42 @@ Intended semantics:
   effect, and the counterexample cites which condition was skipped.
 - Approval requirements stay attached to the tool, not the condition: a gated
   tool remains gated on every branch.
+
+### Grants
+
+A delegation is verifiable only against a reviewed grant artifact — the same
+separation that keeps inventory captures outside the mandate:
+
+```json
+{
+  "grant_version": 1,
+  "id": "grants/sentry-2026-11.json",
+  "subject": "user:ada",
+  "actor": "spiffe://bank/agents/dispute-resolver",
+  "audience": "sentry",
+  "surface": {
+    "scopes": ["project:read", "issue:write"],
+    "tools": ["find_projects", "update_issue"],
+    "effects": ["read", "write"],
+    "irreversible": false
+  },
+  "issued": "2026-08-01",
+  "expires": "2026-11-23",
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "security-platform"
+  }
+}
+```
+
+`surface` is the complete authority the subject conferred: scopes, named
+tools, permitted effect classes, and whether irreversible calls are in scope.
+Attenuation is the mechanical comparison of each delegated tool's effective
+surface (its declared effect, approval state, and required scopes from the
+manifest) against this object; any excess is `delegation.widens`. The grant's
+own digest and review state travel with it, so `lint` receives referenced
+grant bytes explicitly, verifies them, and never resolves a locator itself.
 
 ### Delegations
 
@@ -102,18 +186,16 @@ tools:
   - name: find_projects
     principal:
       kind: delegated_user
-      subject: user:ada            # whose authority is spent
+      subject: user:ada             # whose authority is spent
       actor: spiffe://bank/agents/dispute-resolver   # what spends it
-      grant:
-        ref: grants/sentry-2026-11.json   # the reviewed granted surface
-        scopes: [project:read, issue:write]
+      grant: grants/sentry-2026-11.json   # reviewed granted surface, verified bytes
       audience: sentry
-      expires: 2026-11-23
+      expires: 2026-11-23           # grant expiry, mirrors the artifact
     evidence:
       confidence: exact
       review: accepted
       reviewer: security-platform
-      expires: 2026-10-01          # review expiry, distinct from grant expiry
+      expires: 2026-10-01           # review expiry, distinct from grant expiry
 ```
 
 Intended semantics:
@@ -127,11 +209,11 @@ Intended semantics:
   credential is not proof of delegation: without evidence establishing grant
   semantics, impersonation and credential sharing look identical, so it is
   modelled honestly as unproven rather than upgraded into a chain.
-- The `grant.ref` names the reviewed granted surface — scopes, resources,
-  and effects the subject conferred. This is what makes attenuation
-  computable: `lint` compares each delegated tool's effective surface against
-  its grant and reports any excess as `delegation.widens`. Without a grant
-  reference there is nothing to compare, and no widening claim is made.
+- The manifest carries only the grant reference; the surface lives in the
+  verified grant artifact. Attenuation is the mechanical comparison described
+  above, reported as `delegation.widens`. A dangling or unverifiable grant
+  reference is a finding, not a widening claim and not silent service
+  treatment.
 - Grant expiry and review expiry are independent dates, both evaluated
   against caller-supplied dates — never a clock.
 - `reach` cites the hop: a counterexample through a delegated tool names the
@@ -179,18 +261,20 @@ that:
 
 | Fixture | Conditional case | Identity case |
 |---|---|---|
-| AWS PostgreSQL MCP | `run_query` narrows to `read` on classified SELECT-only SQL | `connect_to_database` spends an `intersecting` principal (not a delegation) |
-| Sentry MCP | `execute_sentry_tool` narrows on dispatch target for known names inside a reviewed context | tools spend a `fixed_user_credential`; delegation semantics are unproven |
-| AgentKit, dispute-resolver | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
+| AgentKit MCP (evidence graph) | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
+| GitHub MCP (evidence graph) | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
+| AWS PostgreSQL MCP (evidence graph) | `run_query` narrows to `read` on classified SELECT-only SQL | `connect_to_database` spends an `intersecting` principal (not a delegation) |
+| Sentry MCP (evidence graph) | `execute_sentry_tool` narrows on dispatch target for known names inside a reviewed context | tools spend a `fixed_user_credential`; delegation semantics are unproven |
+| dispute-resolver (example, not evidence) | no conditioned tools; must stay byte-identical under conservative defaults | unaffected |
 
-Gate acceptance requires: **all four existing evidence-graph results are
-preserved byte-identically under conservative defaults**; a SELECT-only
+All four committed **evidence graphs** must stay byte-identical under
+conservative defaults. Gate acceptance additionally requires: a SELECT-only
 `run_query` profile inside an eligible context produces no irreversible
 gating on that tool; and any counterexample through a credentialed tool cites
 its principal record. A genuine delegation-chain fixture — an OAuth token
 exchange, MCP delegated authorization, or A2A delegation capture with a
 reviewed grant — remains a roadmap prerequisite for the attenuation rules;
-neither committed graph proves one.
+no committed graph proves one.
 
 ## Gates
 
