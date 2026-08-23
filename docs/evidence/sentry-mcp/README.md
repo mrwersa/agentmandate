@@ -24,6 +24,10 @@ configuration, attachments, traces, replays, profiles, and user reports.
   and [`search-tools.ts`](https://github.com/getsentry/sentry-mcp/blob/d79490aee755875aef74a9e2647858fde3fd8587/packages/mcp-core/src/tools/special/search-tools.ts)
   establish that hidden, session-available tools can be discovered and called.
 
+The dynamic-inventory v1 fixture therefore records these eight visible names
+as `partial`, not `complete`. Successful digest verification proves which
+catalogue bytes were reviewed; it does not erase the hidden dispatch surface.
+
 The capture supplies a placeholder token, routes the unused API host to
 localhost, disables Sentry telemetry, removes model-provider environment
 variables, and calls only `initialize` and `tools/list`. It makes no Sentry or

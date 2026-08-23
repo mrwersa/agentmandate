@@ -1,8 +1,9 @@
 # Dynamic inventory declaration contract
 
-Status: **proposed and experimental**. This document defines the trust and
-compatibility gates for issue #63. It does not add a manifest field, change the
-Authority IR profile, or make a parsed inventory trustworthy.
+Status: **experimental**. A private v1 reader and canonical AgentKit and Sentry
+fixtures implement the structural gate. This document defines the remaining
+trust and compatibility gates for issue #63. It does not add a manifest field,
+change the Authority IR profile, or make a parsed inventory trustworthy.
 
 ## Problem boundary
 
@@ -60,8 +61,9 @@ parsing. A candidate v1 body contains:
 }
 ```
 
-This shape is illustrative until fixtures and a reader prove it. Fields have
-the following intended semantics:
+This v1 shape is exercised by canonical fixtures and a strict private reader.
+It remains experimental until reconciliation and public-CLI review establish
+its trust behavior. Fields have the following intended semantics:
 
 - `boundary.id` is a stable, reviewer-chosen identifier. It must not depend on
   a line number. `kind` is a closed vocabulary: `factory`, `provider`,
@@ -74,7 +76,7 @@ the following intended semantics:
 - `selection` records every input that changes membership. Version 1 accepts
   only `environment`, `tenant`, `region`, `provider`, `skills`, `toolsets`, and
   `configuration`; adding a key requires an explicit profile change. Scalar or
-  string-list values are canonicalized. Values are non-secret identifiers;
+  string or string-list values are canonicalized. Values are non-secret identifiers;
   credentials, tokens, passwords, and private material are forbidden.
 - `source` binds the claim to captured bytes and the producer that emitted
   them. `format_version` and `producer_version` are independent. Unknown
@@ -156,7 +158,9 @@ reviewed and passed to AgentMandate.
 1. **Contract:** challenge this record shape against AgentKit and Sentry,
    especially boundary identity, selector secrets, and hidden dispatch.
 2. **Reader:** add canonical fixtures, a strict typed-error boundary, digest
-   verification, and no trust-bearing CLI behavior.
+   verification, and no trust-bearing CLI behavior. **Implemented privately:**
+   AgentKit is complete at its reviewed provider boundary; Sentry is partial
+   because its captured eight-tool surface omits hidden dispatch targets.
 3. **Reconciliation:** resolve literal and declared dynamic members through the
    same `Inventory`/`drift` path; prove incomplete evidence cannot authorize a
    removal.
