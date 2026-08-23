@@ -1,10 +1,10 @@
 # Dynamic inventory declaration contract
 
-Status: **Gate 4 candidate**. A v1 reader, dedicated Authority IR inventory
-profile, and drift reconciliation implement gates 1–3 against canonical
-AgentKit and Sentry fixtures. `inventory validate` and explicit `drift` inputs
-now expose the proposed public boundary for review. Parsing never makes an
-inventory trustworthy.
+Status: **approved for CLI exposure**. A v1 reader, dedicated Authority IR
+inventory profile, and drift reconciliation implement the four evidence gates
+against canonical AgentKit and Sentry fixtures. The closing review is recorded
+in [`dynamic-inventory-gate-4-review.md`](dynamic-inventory-gate-4-review.md).
+Parsing never makes an inventory trustworthy.
 
 ## Problem boundary
 
@@ -62,9 +62,9 @@ parsing. A candidate v1 body contains:
 }
 ```
 
-This v1 shape is exercised by canonical fixtures and a strict private reader.
-It remains experimental until reconciliation and public-CLI review establish
-its trust behavior. Fields have the following intended semantics:
+This v1 shape is exercised by canonical fixtures and a strict reader. Its
+public CLI trust behavior passed the separate Gate 4 review. Fields have the
+following semantics:
 
 - `boundary.id` is a stable, reviewer-chosen identifier. It must not depend on
   a line number. `kind` is a closed vocabulary: `factory`, `provider`,
@@ -137,7 +137,7 @@ members and every eligible dynamic boundary, and no contributing boundary
 remains unresolved. A captured member absent from the mandate is undeclared
 authority. Neither conclusion is available from incomplete evidence.
 
-The private implementation projects membership into provenance-bearing IR
+The implementation projects membership into provenance-bearing IR
 facts and `contains_tool` edges through a dedicated inventory profile. The
 existing manifest-v1 profile remains the only path to authority analysis;
 successful inventory validation cannot grant tool effects or make a result
@@ -189,12 +189,11 @@ not verify captured bytes or make the membership eligible for drift.
    removal. **Implemented privately:** complete AgentKit evidence discharges
    the dynamic binding; partial Sentry and expired evidence remain unresolved.
 4. **Public CLI:** expose declaration input only after failure behavior and
-   output stability are reviewed across both fixtures. **Candidate
-   implemented:** both declarations cross structural validation; complete
-   AgentKit evidence crosses reconciliation. Sentry remains a deliberate
-   boundary test because its JavaScript binding is outside the current Python
-   source collector; the CLI must not manufacture a selected binding from the
-   declaration itself.
+   output stability are reviewed across both fixtures. **Passed:** both
+   declarations cross structural validation; complete AgentKit evidence
+   crosses reconciliation. Sentry remains a deliberate boundary test because
+   its JavaScript binding is outside the current Python source collector; the
+   CLI does not manufacture a selected binding from the declaration itself.
 
 The initiative is complete only when `drift` can prove one declared dynamic
 boundary complete and explain why every ineligible variant cannot be proved.
