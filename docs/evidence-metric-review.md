@@ -56,6 +56,10 @@ The evidence-diversity initiative passes only when every graph has:
 - at least one understandable counterexample, limitation, or authority-shape
   consequence linked to a shipped change or a named roadmap prerequisite.
 
+New graphs use the [contributor checklist](../CONTRIBUTING.md#contributing-a-real-authority-graph)
+and [evidence template](evidence/TEMPLATE.md), which make these gates part of
+submission review rather than a retrospective classification exercise.
+
 All four committed graphs meet this gate across a financial framework, a code
 and CI platform, a data system, and a SaaS operations system. The initiative is
 therefore delivered. The synthetic conditional fixture does not count toward
