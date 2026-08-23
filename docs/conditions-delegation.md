@@ -382,8 +382,8 @@ findings.
    under conservative defaults. The private conditional reachability consumer
    and source-drift reconciliation are done; delegation remains pending,
    blocked on genuine chain evidence.
-4. **Public exposure:** CLI and conditional presentation schema implemented;
-   failure-behaviour and output-stability review pending.
+4. **Public exposure:** CLI and conditional presentation schema approved by
+   the [closing gate review](conditional-authority-gate-4-review.md).
 
 ## Non-goals
 
