@@ -7,6 +7,22 @@ actions, and show how effective authority changes. The wider product will
 connect that analysis to inventory, existing policy decision points, and
 runtime evidence. It will not become the traffic proxy.
 
+## Positioning: the authority gap
+
+The category language for everything below is **the authority gap**: the
+distance between what a review approved, what an agent can actually reach by
+combining its tools, and what deployed enforcement really checks. Every
+initiative in this document either widens what the tool can see across that gap
+(model depth), or shortens it (inventory, policy export, reconciliation).
+Scanner and gateway vendors watch behaviour at one point; the gap itself is the
+unoccupied position, and vendor-neutral provenance is what lets this tool stand
+across frameworks and enforcement points.
+
+The name follows the positioning, not the reverse. "AgentMandate" stays until
+company formation or adoption scale makes a rename worth its release cost;
+product surfaces should lead with the gap framing (what approval cannot see)
+rather than the artifact name.
+
 This is an 18–24 month direction, not a release promise. Research supporting
 the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
