@@ -399,8 +399,9 @@ findings.
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
    under conservative defaults. The private conditional reachability consumer
    and source-drift reconciliation are done; genuine delegation-chain evidence
-   is captured, but delegation analysis remains pending the record revisions
-   it exposed and an operational scope-to-tool mapping.
+   is captured and its revised private records now project through a closed IR
+   profile. Delegation analysis remains pending an operational scope-to-tool
+   mapping.
 4. **Public exposure:** CLI and conditional presentation schema approved by
    the [closing gate review](conditional-authority-gate-4-review.md).
 
