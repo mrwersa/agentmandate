@@ -4,7 +4,8 @@ Status: **proposed and experimental**. This is the post-evidence contract for
 issue [#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
 private, synthetic grant-v1 delegation shape only after fixtures and profile
 validation land. No current command accepts this format as analyzable
-authority.
+authority. The private strict reader and both canonical migration fixtures are
+implemented; Authority IR projection and every analysis consumer remain gated.
 
 ## Evidence-driven changes
 

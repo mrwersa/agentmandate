@@ -17,7 +17,9 @@ closes the missing-chain prerequisite but fails the provisional record shape
 honestly; delegation semantics and every public surface remain gated on the
 [evidence-driven revision](delegation-v2.md). The grant-v1 examples below
 remain the implemented private transport until that revision passes its
-migration gate; they are not the target analysis contract.
+migration gate; they are not the target analysis contract. The revised private
+reader now preserves both the synthetic v1 grant and all four Authorizer hops,
+but no IR or reachability path consumes those records.
 
 ## Problem boundary
 
