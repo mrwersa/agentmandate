@@ -77,3 +77,16 @@ side-effect-free discovery, placeholder credentials, and byte-verifiable
 output. Remove telemetry and account-specific environment where possible. A
 synthetic graph belongs in `docs/evidence/probes/` and does not count as real
 evidence for a model or roadmap gate.
+
+Before opening an evidence PR, run the digest lint against your directory:
+
+```bash
+python scripts/evidence_lint.py
+```
+
+It fails when a README cites a SHA-256 that no longer matches the committed
+file, or when the cited file is missing. The machine-checked form is
+`\`<file>\`, SHA-256 \`<digest>\`` and must reference an artifact committed
+in the same directory. Pins on external artifacts (upstream archives, pinned
+source files) must be written in prose — "upstream archive SHA-256 is …" — so
+the linter treats them as provenance notes rather than verifiable claims.
