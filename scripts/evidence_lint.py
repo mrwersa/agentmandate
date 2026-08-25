@@ -3,11 +3,10 @@
 Evidence directories pin artifacts by SHA-256. When an artifact changes and
 its README citation goes stale, every downstream claim built on the old bytes
 becomes unverifiable. This script catches that rot: for every citation of the
-form ```<file>`, SHA-256 `<digest>`` where `<file>` exists in the same
-directory, the committed file must hash to `<digest>`.
-
-Citations whose file name does not resolve locally (external archives,
-upstream source files) are reported as unchecked, not failed.
+form ```<file>`, SHA-256 `<digest>`` the named file must be committed in the
+same directory and hash to `<digest>`. Missing files and paths outside that
+directory fail. External provenance pins use prose rather than this strict
+machine-checked form.
 
 Usage::
 
@@ -31,25 +30,20 @@ def _sha256(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def lint_directory(directory: Path) -> tuple[list[str], list[str]]:
-    """Return (errors, unchecked) for one evidence directory."""
+def lint_directory(directory: Path) -> list[str]:
+    """Return citation errors for one evidence directory."""
     readme = directory / "README.md"
     if not readme.exists():
-        return [f"{directory}: no README.md to lint"], []
+        return [f"{directory}: no README.md to lint"]
 
     text = readme.read_text(encoding="utf-8")
-    local_hashes: dict[str, str] = {}
-    for item in sorted(directory.iterdir()):
-        if item.is_file() and item.name != "README.md":
-            local_hashes[_sha256(item.read_bytes())] = item.name
-
     errors: list[str] = []
-    unchecked: list[str] = []
-    seen_digests: set[str] = set()
     for match in CITATION.finditer(text):
         name = match.group("name").strip()
         digest = match.group("digest")
-        seen_digests.add(digest)
+        if "/" in name or "\\" in name or name in {".", ".."}:
+            errors.append(f"{readme.name}: cited file {name} must be a file name in this directory")
+            continue
         candidate = directory / name
         if not candidate.is_file():
             errors.append(
@@ -66,10 +60,8 @@ def lint_directory(directory: Path) -> tuple[list[str], list[str]]:
                 f"{readme.name}: cited SHA-256 for {name} is stale "
                 f"(cited {digest[:12]}…, actual {actual[:12]}…)"
             )
-        else:
-            local_hashes.pop(actual, None)
 
-    return errors, unchecked
+    return errors
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -87,15 +79,13 @@ def main(argv: list[str] | None = None) -> int:
     if (root / "README.md").exists():
         directories.append(root)
     for directory in directories:
-        errors, unchecked = lint_directory(directory)
+        errors = lint_directory(directory)
         for error in errors:
             print(f"error: {error}", file=sys.stderr)
             failures += 1
-        for note in unchecked:
-            print(f"note: {note}", file=sys.stderr)
 
     if failures:
-        print(f"evidence lint: {failures} stale citation(s)", file=sys.stderr)
+        print(f"evidence lint: {failures} citation error(s)", file=sys.stderr)
         return 1
     print("evidence lint: all cited digests match committed files")
     return 0

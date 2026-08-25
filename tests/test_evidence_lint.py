@@ -5,6 +5,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 _spec = importlib.util.spec_from_file_location(
@@ -35,10 +37,7 @@ def test_matching_citation_passes(tmp_path: Path):
         {"capture.json": capture},
         f"**Capture:** `capture.json`, SHA-256 `{_digest(capture)}`\n",
     )
-    errors, unchecked = evidence_lint.lint_directory(d)
-
-    assert errors == []
-    assert unchecked == []
+    assert evidence_lint.lint_directory(d) == []
 
 
 def test_stale_citation_is_an_error(tmp_path: Path):
@@ -49,7 +48,7 @@ def test_stale_citation_is_an_error(tmp_path: Path):
         {"capture.json": capture},
         f"**Capture:** `capture.json`, SHA-256 `{stale}`\n",
     )
-    errors, _ = evidence_lint.lint_directory(d)
+    errors = evidence_lint.lint_directory(d)
 
     assert len(errors) == 1
     assert "stale" in errors[0]
@@ -66,14 +65,11 @@ def test_prose_pins_are_skipped_and_strict_pins_fail_closed(tmp_path: Path):
         "Upstream archive SHA-256 is `708effb774be8237570d0add163225abb"
         "dfaf4fca28b2611df167beba4feef89`.\n",
     )
-    errors, unchecked = evidence_lint.lint_directory(d)
-
-    assert errors == []
-    assert unchecked == []
+    assert evidence_lint.lint_directory(d) == []
 
     # Deleting the cited artifact must fail closed, never pass silently.
     (d / "capture.json").unlink()
-    errors, _ = evidence_lint.lint_directory(d)
+    errors = evidence_lint.lint_directory(d)
     assert len(errors) == 1
     assert "not committed in this directory" in errors[0]
 
@@ -85,7 +81,7 @@ def test_misspelled_citation_target_fails_closed(tmp_path: Path):
         {"capture.json": capture},
         f"**Capture:** `capture.jsoon`, SHA-256 `{_digest(capture)}`\n",
     )
-    errors, _ = evidence_lint.lint_directory(d)
+    errors = evidence_lint.lint_directory(d)
 
     assert len(errors) == 1
     assert "not committed in this directory" in errors[0]
@@ -95,9 +91,24 @@ def test_directory_without_readme_is_an_error(tmp_path: Path):
     d = tmp_path / "lonely"
     d.mkdir()
 
-    errors, _ = evidence_lint.lint_directory(d)
+    errors = evidence_lint.lint_directory(d)
 
     assert errors == [f"{d}: no README.md to lint"]
+
+
+@pytest.mark.parametrize("name", ["../capture.json", "sub/capture.json", "sub\\capture.json"])
+def test_citation_target_must_be_in_the_same_directory(tmp_path: Path, name: str):
+    capture = b"raw"
+    d = _make(
+        tmp_path,
+        {"capture.json": capture},
+        f"`{name}`, SHA-256 `{_digest(capture)}`\n",
+    )
+
+    errors = evidence_lint.lint_directory(d)
+
+    assert len(errors) == 1
+    assert "must be a file name in this directory" in errors[0]
 
 
 def test_main_reports_failure_and_success(tmp_path: Path, capsys):
@@ -114,7 +125,7 @@ def test_main_reports_failure_and_success(tmp_path: Path, capsys):
         "`b.bin`, SHA-256 `" + "0" * 64 + "`\n",
     )
     assert evidence_lint.main(["--root", str(tmp_path)]) == 1
-    assert "stale citation(s)" in capsys.readouterr().err
+    assert "citation error(s)" in capsys.readouterr().err
 
 
 def test_missing_root_is_a_usage_error():
