@@ -3,7 +3,8 @@
 Status: **proposed and experimental**. This is the post-evidence contract for
 issue [#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
 private, synthetic grant-v1 delegation shape only after fixtures and profile
-validation land. No current command accepts this format as authority.
+validation land. No current command accepts this format as analyzable
+authority.
 
 ## Evidence-driven changes
 
@@ -88,8 +89,15 @@ keep the example readable. Each subsequent complete `actors` list must equal
 the new current actor followed by the prior hop's complete list. Actors are
 stored current-first because that is the nested `act` claim order. Hop IDs are
 unique, and every hop has the chain's one subject. `actor_history` is `complete`
-or `partial`; partial history remains visible but cannot support a shortest-chain
-or attenuation decision.
+or `partial`, and actor entries are non-empty and unique.
+
+Actor-history trust is chain-wide. Any partial hop makes every decision derived
+from that chain unresolved, including decisions at earlier or later hops; a
+consumer cannot prove chain integrity by traversing around the gap. Continuity
+is still checked across a partial boundary: the next list must begin with its
+new current actor followed by the prior hop's current actor. When both histories
+are complete, the stronger full-list equality above applies. A later complete
+claim does not erase an earlier partial hop.
 
 `source.location` is an RFC 6901 JSON Pointer into the digest-pinned artifact.
 This gives each hop and surface dimension replayable provenance without
@@ -107,6 +115,10 @@ Validity is a closed union:
 
 Only `window` is eligible for live attenuation analysis. The caller must supply
 an RFC 3339 UTC `as_of` timestamp; the analyzer never reads the wall clock.
+The interval is half-open: `issued_at <= as_of < expires_at`. Equality at
+issuance is eligible; equality at expiry is expired, matching the JWT `exp`
+requirement that current time be before expiration in
+[RFC 7519 section 4.1.4](https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4).
 `duration` and `date_window` remain valid archival evidence but produce a named
 `delegation.validity-unresolved` finding. Converting either to a timestamp
 would invent precision.
@@ -186,8 +198,9 @@ The implementation gate is:
    actors, audience, complete scopes, 300-second duration, and unknown
    tools/effects;
 3. reject reordered or truncated actors, invalid hop continuity, conflicting
-   dimensions, non-canonical timestamps or pointers, and unknown dimensions
-   carrying claims;
+   dimensions, non-canonical timestamps or pointers, unknown dimensions
+   carrying claims, and any clean decision from a chain containing partial
+   history;
 4. prove that the migrated Authorizer chain yields unresolved tool/effect and
    validity findings, never `delegation.widens` or a clean decision;
 5. keep all four manifest evidence graphs and existing conditional outputs
