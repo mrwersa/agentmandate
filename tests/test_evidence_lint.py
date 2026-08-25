@@ -96,7 +96,7 @@ def test_directory_without_readme_is_an_error(tmp_path: Path):
     assert errors == [f"{d}: no README.md to lint"]
 
 
-@pytest.mark.parametrize("name", ["../capture.json", "sub/capture.json", "sub\\capture.json"])
+@pytest.mark.parametrize("name", ["", "../capture.json", "sub/capture.json", "sub\\capture.json"])
 def test_citation_target_must_be_in_the_same_directory(tmp_path: Path, name: str):
     capture = b"raw"
     d = _make(
@@ -109,6 +109,20 @@ def test_citation_target_must_be_in_the_same_directory(tmp_path: Path, name: str
 
     assert len(errors) == 1
     assert "must be a file name in this directory" in errors[0]
+
+
+def test_empty_strict_claim_cannot_disappear_beside_an_external_prose_pin(tmp_path: Path):
+    digest = _digest(b"missing")
+    d = _make(
+        tmp_path,
+        {},
+        f"``, SHA-256 `{digest}`\nUpstream archive SHA-256 is `{digest}`.\n",
+    )
+
+    errors = evidence_lint.lint_directory(d)
+
+    assert len(errors) == 1
+    assert "cited file" in errors[0]
 
 
 def test_main_reports_failure_and_success(tmp_path: Path, capsys):

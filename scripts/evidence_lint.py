@@ -23,7 +23,7 @@ import re
 import sys
 from pathlib import Path
 
-CITATION = re.compile(r"`(?P<name>[^`\n]+)`, SHA-256 `(?P<digest>[0-9a-f]{64})`")
+CITATION = re.compile(r"`(?P<name>[^`\n]*)`, SHA-256 `(?P<digest>[0-9a-f]{64})`")
 
 
 def _sha256(content: bytes) -> str:
@@ -41,7 +41,7 @@ def lint_directory(directory: Path) -> list[str]:
     for match in CITATION.finditer(text):
         name = match.group("name").strip()
         digest = match.group("digest")
-        if "/" in name or "\\" in name or name in {".", ".."}:
+        if not name or "/" in name or "\\" in name or name in {".", ".."}:
             errors.append(f"{readme.name}: cited file {name} must be a file name in this directory")
             continue
         candidate = directory / name
