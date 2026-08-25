@@ -11,7 +11,10 @@ graph integrity only and does not accept the records as authority.
 Gate 2a's context and grant readers, gate 2b's tool-side readers and IR
 projections, and the conditional half of gate 3 are implemented privately.
 Structural projection does not make a condition or principal eligible for
-analysis. Delegation semantics and every public surface remain gated.
+analysis. A real [Authorizer delegation capture](evidence/authorizer-delegation/README.md)
+now closes the missing-chain prerequisite but fails the provisional record
+shape honestly; delegation semantics and every public surface remain gated on
+the revisions recorded below.
 
 ## Problem boundary
 
@@ -280,18 +283,23 @@ that:
 | GitHub MCP (evidence graph) | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
 | AWS PostgreSQL MCP (evidence graph) | `run_query` narrows to `read` on classified SELECT-only SQL | `connect_to_database` spends an `intersecting` principal (not a delegation) |
 | Sentry MCP (evidence graph) | `execute_sentry_tool` narrows on dispatch target for known names inside a reviewed context | tools spend a `fixed_user_credential`; delegation semantics are unproven |
+| Authorizer token exchange (implementation evidence) | no conditioned tools | four actor-bearing hops prove delegation; timestamps, ordered history, and partial scope-only surfaces do not fit the provisional records |
 | dispute-resolver (example, not evidence) | no conditioned tools; must stay byte-identical under conservative defaults | unaffected |
 
 All four committed **evidence graphs** must stay byte-identical under
 conservative defaults. Gate acceptance additionally requires: a SELECT-only
 `run_query` profile inside an eligible context produces no irreversible
 gating on that tool; and any counterexample through a credentialed tool cites
-its principal record. A genuine delegation-chain fixture — an OAuth token
-exchange, MCP delegated authorization, or A2A delegation capture with a
-reviewed grant — remains a roadmap prerequisite for the attenuation rules;
-no committed graph proves one. The committed condition-context and grant
-fixtures are explicitly synthetic samples pending captures with real
-provenance: they pin schema behaviour, not upstream facts.
+its principal record. The Authorizer fixture proves a genuine OAuth
+token-exchange chain, including four nested actors and monotonic scope
+attenuation. It also demonstrates that the provisional shape is insufficient:
+five-minute validity cannot be encoded as dates, one actor cannot retain
+ordered history, and OAuth scopes do not establish required tool/effect
+mappings. The synthetic condition-context and grant fixtures continue to pin
+schema transport only. Delegation analysis must not consume either shape until
+the record contract represents these unknowns without inventing deployment
+policy; [issue #92](https://github.com/mrwersa/agentmandate/issues/92) records
+that gate.
 
 ## Gate 2b projection profiles
 
@@ -380,8 +388,9 @@ findings.
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
    under conservative defaults. The private conditional reachability consumer
-   and source-drift reconciliation are done; delegation remains pending,
-   blocked on genuine chain evidence.
+   and source-drift reconciliation are done; genuine delegation-chain evidence
+   is captured, but delegation analysis remains pending the record revisions
+   it exposed and an operational scope-to-tool mapping.
 4. **Public exposure:** CLI and conditional presentation schema approved by
    the [closing gate review](conditional-authority-gate-4-review.md).
 
