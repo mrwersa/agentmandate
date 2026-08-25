@@ -5,6 +5,10 @@ published, what AgentMandate inferred, what review corrected, and what the
 result changed or left unresolved. These packages challenge the model; they are
 not endorsements or deployment-ready policies.
 
+Protocol implementation captures are labeled separately. For example,
+`authorizer-delegation/` proves the shape of issued delegation chains but has no
+operational tool graph and does not count toward the real-graph diversity gate.
+
 To contribute a graph, follow the repository's
 [real-graph checklist](../../CONTRIBUTING.md#contributing-a-real-authority-graph)
 and copy [TEMPLATE.md](TEMPLATE.md) into `docs/evidence/<subject>/README.md`.
