@@ -17,13 +17,21 @@ from ._conditions import (
     Grant,
     _canonical_name,
     _evidence,
+    _fact,
     _load_json,
+    _profile_digest,
     _record,
     _relative_path,
+    _validate_projected_evidence,
+    _validate_projection_facts,
+    _validate_projection_source,
     _version,
 )
+from ._ir import IR_VERSION, AuthorityIR, Edge, Entity, Source, _edge_id, _entity_id, _fact_id
 
 DELEGATION_VERSION = 1
+DELEGATION_ADAPTER = "agentmandate.delegation-chain"
+DELEGATION_ADAPTER_VERSION = 1
 ACTOR_HISTORY = frozenset({"complete", "partial"})
 VALIDITY_KINDS = frozenset({"window", "duration", "date_window"})
 SURFACE_BASES = frozenset({"issuer", "deployment_policy", "unavailable"})
@@ -347,6 +355,9 @@ class DelegationChain:
             + "\n"
         )
 
+    def to_ir(self) -> AuthorityIR:
+        return _delegation_to_ir(self)
+
     def verify_sources(self, contents: Mapping[str, bytes]) -> None:
         expected: dict[str, str] = {}
         for hop in self.hops:
@@ -355,16 +366,25 @@ class DelegationChain:
                     continue
                 previous = expected.setdefault(source.locator, source.content_sha256)
                 if previous != source.content_sha256:
-                    raise DelegationFormatError("delegation sources disagree on a locator digest")
-        if set(contents) != set(expected):
-            raise DelegationFormatError("delegation source bytes do not match declared locators")
+                    raise DelegationFormatError(
+                        f"delegation sources disagree on the digest for {source.locator}"
+                    )
+        missing = sorted(set(expected) - set(contents))
+        if missing:
+            raise DelegationFormatError(
+                f"delegation source bytes are missing reviewed locator {missing[0]}"
+            )
+        if set(contents) - set(expected):
+            raise DelegationFormatError("delegation source bytes include an unexpected locator")
         for locator, digest in expected.items():
             content = contents[locator]
             if not isinstance(content, bytes):
-                raise DelegationFormatError("delegation source verification requires bytes")
+                raise DelegationFormatError(
+                    f"delegation source verification for {locator} requires bytes"
+                )
             if hashlib.sha256(content).hexdigest() != digest:
                 raise DelegationFormatError(
-                    "delegation source bytes do not match the reviewed digest"
+                    f"delegation source bytes for {locator} do not match the reviewed digest"
                 )
 
     @classmethod
@@ -526,3 +546,366 @@ class DelegationChain:
         projected = cls(DELEGATION_VERSION, "authorizer-demo-chain", subject_name, tuple(hops))
         # Re-read to apply the same continuity and strict-profile checks as external input.
         return cls.from_json(projected.to_json())
+
+
+def _delegation_to_ir(value: DelegationChain) -> AuthorityIR:
+    source_id = _entity_id("source", f"delegation-chain:{value.id}")
+    root_id = _entity_id("delegation", value.id)
+    subject_id = _entity_id("principal", value.subject)
+    entities: dict[str, Entity] = {
+        root_id: Entity(root_id, "delegation", value.id),
+        subject_id: Entity(subject_id, "principal", value.subject),
+    }
+    root_evidence = value.hops[0].evidence
+    hop_ids = [_entity_id("hop", hop.id) for hop in value.hops]
+    facts = [
+        _fact(root_id, "name", value.id, source_id, "/id", root_evidence),
+        _fact(root_id, "subject", subject_id, source_id, "/subject", root_evidence),
+        _fact(root_id, "hops", hop_ids, source_id, "/hops", root_evidence),
+        _fact(
+            root_id,
+            "reviewer",
+            root_evidence.reviewer,
+            source_id,
+            "/hops/0/evidence/reviewer",
+            root_evidence,
+        ),
+        _fact(
+            root_id,
+            "review_expires",
+            root_evidence.expires,
+            source_id,
+            "/hops/0/evidence/expires",
+            root_evidence,
+        ),
+        _fact(subject_id, "name", value.subject, source_id, "/subject", root_evidence),
+    ]
+    edges = [
+        Edge(
+            _edge_id(root_id, "delegates_for", subject_id),
+            root_id,
+            "delegates_for",
+            subject_id,
+            (_fact_id(root_id, "subject"),),
+        )
+    ]
+    for index, (hop, hop_id) in enumerate(zip(value.hops, hop_ids, strict=True)):
+        entities[hop_id] = Entity(hop_id, "hop", hop.id)
+        actor_ids = [_entity_id("principal", actor) for actor in hop.actors]
+        for actor, actor_id in zip(hop.actors, actor_ids, strict=True):
+            if actor_id not in entities:
+                entities[actor_id] = Entity(actor_id, "principal", actor)
+                facts.append(
+                    _fact(
+                        actor_id,
+                        "name",
+                        actor,
+                        source_id,
+                        f"/hops/{index}/actors",
+                        hop.evidence,
+                    )
+                )
+        surface_ids = [
+            _entity_id("surface", f"{hop.id}:{dimension}")
+            for dimension in ("scopes", "tools", "effects")
+        ]
+        previous = hop_ids[index - 1] if index else None
+        hop_path = f"/hops/{index}"
+        facts.extend(
+            (
+                _fact(hop_id, "name", hop.id, source_id, f"{hop_path}/id", hop.evidence),
+                _fact(
+                    hop_id, "grantor", hop.grantor, source_id, f"{hop_path}/grantor", hop.evidence
+                ),
+                _fact(hop_id, "actors", actor_ids, source_id, f"{hop_path}/actors", hop.evidence),
+                _fact(
+                    hop_id,
+                    "actor_history",
+                    hop.actor_history,
+                    source_id,
+                    f"{hop_path}/actor_history",
+                    hop.evidence,
+                ),
+                _fact(
+                    hop_id,
+                    "audience",
+                    hop.audience,
+                    source_id,
+                    f"{hop_path}/audience",
+                    hop.evidence,
+                ),
+                _fact(
+                    hop_id,
+                    "validity",
+                    hop.validity.as_dict(),
+                    source_id,
+                    f"{hop_path}/validity",
+                    hop.evidence,
+                ),
+                _fact(
+                    hop_id, "surfaces", surface_ids, source_id, f"{hop_path}/surface", hop.evidence
+                ),
+                _fact(hop_id, "previous", previous, source_id, hop_path, hop.evidence),
+                _fact(
+                    hop_id,
+                    "reviewer",
+                    hop.evidence.reviewer,
+                    source_id,
+                    f"{hop_path}/evidence/reviewer",
+                    hop.evidence,
+                ),
+                _fact(
+                    hop_id,
+                    "review_expires",
+                    hop.evidence.expires,
+                    source_id,
+                    f"{hop_path}/evidence/expires",
+                    hop.evidence,
+                ),
+            )
+        )
+        edges.append(
+            Edge(
+                _edge_id(root_id, "has_hop", hop_id),
+                root_id,
+                "has_hop",
+                hop_id,
+                (_fact_id(root_id, "hops"),),
+            )
+        )
+        if previous is not None:
+            edges.append(
+                Edge(
+                    _edge_id(hop_id, "previous_hop", previous),
+                    hop_id,
+                    "previous_hop",
+                    previous,
+                    (_fact_id(hop_id, "previous"),),
+                )
+            )
+        for actor_id in actor_ids:
+            edges.append(
+                Edge(
+                    _edge_id(hop_id, "acts_under", actor_id),
+                    hop_id,
+                    "acts_under",
+                    actor_id,
+                    (_fact_id(hop_id, "actors"),),
+                )
+            )
+        for dimension, surface_id in zip(("scopes", "tools", "effects"), surface_ids, strict=True):
+            surface = getattr(hop, dimension)
+            evidence = surface.evidence or hop.evidence
+            name = f"{hop.id}:{dimension}"
+            entities[surface_id] = Entity(surface_id, "surface", name)
+            surface_path = f"{hop_path}/surface/{dimension}"
+            facts.extend(
+                (
+                    _fact(surface_id, "name", name, source_id, surface_path, evidence),
+                    _fact(surface_id, "dimension", dimension, source_id, surface_path, evidence),
+                    _fact(
+                        surface_id,
+                        "domain",
+                        surface.domain,
+                        source_id,
+                        f"{surface_path}/domain",
+                        evidence,
+                    ),
+                    _fact(
+                        surface_id,
+                        "basis",
+                        surface.basis,
+                        source_id,
+                        f"{surface_path}/basis",
+                        evidence,
+                    ),
+                    _fact(
+                        surface_id,
+                        "completeness",
+                        surface.completeness,
+                        source_id,
+                        f"{surface_path}/completeness",
+                        evidence,
+                    ),
+                    _fact(
+                        surface_id,
+                        "members",
+                        list(surface.members),
+                        source_id,
+                        f"{surface_path}/members",
+                        evidence,
+                    ),
+                    _fact(
+                        surface_id,
+                        "reviewer",
+                        evidence.reviewer,
+                        source_id,
+                        f"{surface_path}/evidence/reviewer",
+                        evidence,
+                    ),
+                    _fact(
+                        surface_id,
+                        "review_expires",
+                        evidence.expires,
+                        source_id,
+                        f"{surface_path}/evidence/expires",
+                        evidence,
+                    ),
+                )
+            )
+            edges.append(
+                Edge(
+                    _edge_id(hop_id, "has_surface", surface_id),
+                    hop_id,
+                    "has_surface",
+                    surface_id,
+                    (_fact_id(hop_id, "surfaces"),),
+                )
+            )
+    entity_tuple = tuple(entities.values())
+    fact_tuple = tuple(facts)
+    edge_tuple = tuple(edges)
+    graph = AuthorityIR(
+        IR_VERSION,
+        (
+            Source(
+                source_id,
+                "delegation-chain",
+                f"memory:delegation-chain:{value.id}",
+                value.version,
+                None,
+                _profile_digest(entity_tuple, fact_tuple, edge_tuple),
+                DELEGATION_ADAPTER,
+                DELEGATION_ADAPTER_VERSION,
+                hashlib.sha256(value.to_json().encode("utf-8")).hexdigest(),
+            ),
+        ),
+        entity_tuple,
+        fact_tuple,
+        edge_tuple,
+    )
+    _validate_delegation_profile(graph)
+    return graph
+
+
+def _validate_delegation_profile(graph: AuthorityIR) -> None:
+    _translate(
+        _validate_projection_source,
+        graph,
+        "delegation-chain",
+        DELEGATION_ADAPTER,
+        DELEGATION_ADAPTER_VERSION,
+    )
+    entities = {entity.id: entity for entity in graph.entities}
+    roots = [entity for entity in graph.entities if entity.kind == "delegation"]
+    if len(roots) != 1 or any(
+        entity.kind not in {"delegation", "hop", "principal", "surface"}
+        for entity in graph.entities
+    ):
+        raise DelegationFormatError("delegation IR profile has unsupported entities")
+    predicates = {
+        entity.id: {
+            "delegation": {"name", "subject", "hops", "reviewer", "review_expires"},
+            "hop": {
+                "name",
+                "grantor",
+                "actors",
+                "actor_history",
+                "audience",
+                "validity",
+                "surfaces",
+                "previous",
+                "reviewer",
+                "review_expires",
+            },
+            "principal": {"name"},
+            "surface": {
+                "name",
+                "dimension",
+                "domain",
+                "basis",
+                "completeness",
+                "members",
+                "reviewer",
+                "review_expires",
+            },
+        }[entity.kind]
+        for entity in graph.entities
+    }
+    # A delegation projection is deliberately a single-source profile: mixed
+    # confidence or review states must be split into separately reviewed chains.
+    _translate(_validate_projection_facts, graph, entities, predicates)
+    facts = {(fact.subject, fact.predicate): fact for fact in graph.facts}
+    root = roots[0]
+    _translate(_validate_projected_evidence, graph, root.id, facts)
+    hop_ids = facts[(root.id, "hops")].value
+    actual_hops = [entity.id for entity in graph.entities if entity.kind == "hop"]
+    if (
+        not isinstance(hop_ids, list)
+        or set(hop_ids) != set(actual_hops)
+        or len(hop_ids) != len(actual_hops)
+    ):
+        raise DelegationFormatError("delegation IR profile hops do not match entities")
+    prior_actors: list[str] | None = None
+    prior_history: str | None = None
+    for index, hop_id in enumerate(hop_ids):
+        actors = facts[(hop_id, "actors")].value
+        surfaces = facts[(hop_id, "surfaces")].value
+        previous = facts[(hop_id, "previous")].value
+        if (
+            not isinstance(actors, list)
+            or not actors
+            or any(entities.get(item, Entity("", "", "")).kind != "principal" for item in actors)
+        ):
+            raise DelegationFormatError("delegation IR profile has invalid actors")
+        if (
+            not isinstance(surfaces, list)
+            or len(surfaces) != 3
+            or any(entities.get(item, Entity("", "", "")).kind != "surface" for item in surfaces)
+        ):
+            raise DelegationFormatError("delegation IR profile has invalid surfaces")
+        expected_previous = hop_ids[index - 1] if index else None
+        if previous != expected_previous:
+            raise DelegationFormatError("delegation IR profile has invalid hop order")
+        history = facts[(hop_id, "actor_history")].value
+        if history not in ACTOR_HISTORY:
+            raise DelegationFormatError("delegation IR profile has invalid actor history")
+        if prior_actors is not None:
+            if len(actors) < 2 or actors[1] != prior_actors[0]:
+                raise DelegationFormatError("delegation IR profile has broken actor continuity")
+            if prior_history == history == "complete" and actors != [actors[0], *prior_actors]:
+                raise DelegationFormatError("delegation IR profile has incomplete actor continuity")
+        prior_actors = actors
+        prior_history = history
+        validity = facts[(hop_id, "validity")].value
+        if not isinstance(validity, dict):
+            raise DelegationFormatError("delegation IR profile has invalid validity")
+        _validity(validity, "delegation_IR.validity")
+        dimensions: set[str] = set()
+        for surface_id in surfaces:
+            dimension = facts[(surface_id, "dimension")].value
+            domain = facts[(surface_id, "domain")].value
+            basis = facts[(surface_id, "basis")].value
+            completeness = facts[(surface_id, "completeness")].value
+            members = facts[(surface_id, "members")].value
+            if dimension not in {"scopes", "tools", "effects"} or dimension in dimensions:
+                raise DelegationFormatError("delegation IR profile has invalid surface dimensions")
+            dimensions.add(dimension)
+            _members(
+                members,
+                "delegation_IR.surface",
+                allowed=GRANT_EFFECTS if dimension == "effects" else None,
+            )
+            if completeness not in SURFACE_COMPLETENESS or basis not in SURFACE_BASES:
+                raise DelegationFormatError("delegation IR profile has invalid surface state")
+            if completeness == "unknown":
+                if basis != "unavailable" or domain is not None or members:
+                    raise DelegationFormatError("delegation IR profile has invalid unknown surface")
+            elif (
+                not isinstance(domain, str)
+                or not domain
+                or basis == "unavailable"
+                or (completeness == "partial" and not members)
+                or (dimension in {"tools", "effects"} and basis != "deployment_policy")
+            ):
+                raise DelegationFormatError("delegation IR profile has invalid claimed surface")

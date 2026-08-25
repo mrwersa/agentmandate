@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Authority IR validation recognizes additive delegation-chain relations used
+  by a private experimental profile. Structural validity does not make a chain
+  analyzable authority, and `mandate reach --ir` continues to reject it at the
+  manifest profile boundary.
+
 ## 0.12.0 - 2026-08-23
 
 ### Added

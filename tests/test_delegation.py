@@ -7,8 +7,23 @@ from pathlib import Path
 
 import pytest
 
-from agentmandate._conditions import Evidence, Grant
-from agentmandate._delegation import DelegationChain, DelegationFormatError
+from agentmandate._conditions import Evidence, Grant, _profile_digest
+from agentmandate._delegation import (
+    DELEGATION_ADAPTER,
+    DELEGATION_ADAPTER_VERSION,
+    DelegationChain,
+    DelegationFormatError,
+    _validate_delegation_profile,
+)
+from agentmandate._ir import (
+    AuthorityIR,
+    Entity,
+    Fact,
+    IRFormatError,
+    _analyse_ir,
+    _entity_id,
+    _fact_id,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 GRANT = FIXTURES / "delegation-grant-v1.json"
@@ -61,12 +76,19 @@ def test_authorizer_projection_is_canonical_and_verifies_its_source():
     assert DelegationChain.from_json(encoded).to_json() == encoded
     chain.verify_sources({chain.hops[0].source.locator: AUTHORIZER.read_bytes()})
 
-    with pytest.raises(DelegationFormatError, match="reviewed digest"):
+    with pytest.raises(DelegationFormatError, match=chain.hops[0].source.locator):
         chain.verify_sources({chain.hops[0].source.locator: b"{}"})
-    with pytest.raises(DelegationFormatError, match="declared locators"):
+    with pytest.raises(DelegationFormatError, match=chain.hops[0].source.locator):
         chain.verify_sources({})
-    with pytest.raises(DelegationFormatError, match="requires bytes"):
+    with pytest.raises(DelegationFormatError, match=chain.hops[0].source.locator):
         chain.verify_sources({chain.hops[0].source.locator: "bad"})  # type: ignore[dict-item]
+    with pytest.raises(DelegationFormatError, match="unexpected locator"):
+        chain.verify_sources(
+            {
+                chain.hops[0].source.locator: AUTHORIZER.read_bytes(),
+                "capture/undeclared.json": b"{}",
+            }
+        )
 
 
 def test_grant_v1_migrates_without_precision_or_evidence_upgrade():
@@ -234,7 +256,7 @@ def test_records_are_frozen_and_digest_conflicts_fail_at_read_time():
     conflicting_scope = replace(chain.hops[0].scopes, source=conflicting_source)
     conflicting_hop = replace(chain.hops[0], scopes=conflicting_scope)
     conflicting_chain = replace(chain, hops=(conflicting_hop, *chain.hops[1:]))
-    with pytest.raises(DelegationFormatError, match="disagree"):
+    with pytest.raises(DelegationFormatError, match=chain.hops[0].source.locator):
         conflicting_chain.verify_sources({})
 
 
@@ -257,3 +279,239 @@ def test_projection_digest_is_pinned_for_stability():
     assert hashlib.sha256(authorizer_chain().to_json().encode()).hexdigest() == (
         "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764"
     )
+
+
+@pytest.mark.parametrize(
+    ("chain", "projection_sha256"),
+    [
+        pytest.param(
+            authorizer_chain(),
+            "b1e8c43497d9408526cb649eecf844bbbf8f6b00afa37aa8703a3f8eeb2346f8",
+            id="authorizer",
+        ),
+        pytest.param(
+            DelegationChain.from_grant_v1(Grant.from_json(GRANT.read_text(encoding="utf-8"))),
+            "a5b2ad851500cd8f554e9bab124b7b291dee431815812b73ce5345d63066528d",
+            id="migrated-grant",
+        ),
+    ],
+)
+def test_delegation_ir_projection_is_structural_and_byte_stable(chain, projection_sha256):
+    graph = chain.to_ir()
+
+    assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
+    assert hashlib.sha256(graph.to_json().encode()).hexdigest() == projection_sha256
+    assert graph.sources[0].adapter == DELEGATION_ADAPTER
+    assert graph.sources[0].adapter_version == DELEGATION_ADAPTER_VERSION
+    assert graph.sources[0].content_sha256 == hashlib.sha256(chain.to_json().encode()).hexdigest()
+    assert [edge.relation for edge in graph.edges].count("has_hop") == len(chain.hops)
+    assert [edge.relation for edge in graph.edges].count("previous_hop") == len(chain.hops) - 1
+    assert [edge.relation for edge in graph.edges].count("has_surface") == 3 * len(chain.hops)
+
+    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+        _analyse_ir(graph)
+
+
+def test_authorizer_ir_preserves_chain_order_validity_and_unknown_policy_surfaces():
+    graph = authorizer_chain().to_ir()
+    facts = {(fact.subject, fact.predicate): fact.value for fact in graph.facts}
+    root = next(entity for entity in graph.entities if entity.kind == "delegation")
+    hops = facts[(root.id, "hops")]
+
+    assert len(hops) == 4
+    for index, hop in enumerate(hops):
+        assert facts[(hop, "previous")] == (hops[index - 1] if index else None)
+        assert facts[(hop, "validity")] == {"kind": "duration", "ttl_seconds": 300}
+        assert facts[(hop, "actor_history")] == "complete"
+        surfaces = facts[(hop, "surfaces")]
+        by_dimension = {facts[(surface, "dimension")]: surface for surface in surfaces}
+        assert facts[(by_dimension["tools"], "completeness")] == "unknown"
+        assert facts[(by_dimension["tools"], "members")] == []
+        assert facts[(by_dimension["effects"], "completeness")] == "unknown"
+        assert facts[(by_dimension["effects"], "members")] == []
+
+
+def rehash(graph: AuthorityIR) -> AuthorityIR:
+    return replace(
+        graph,
+        sources=(
+            replace(
+                graph.sources[0],
+                semantic_sha256=_profile_digest(graph.entities, graph.facts, graph.edges),
+            ),
+        ),
+    )
+
+
+def replace_fact_value(
+    graph: AuthorityIR, subject: str, predicate: str, value: object
+) -> AuthorityIR:
+    fact = next(
+        item for item in graph.facts if item.subject == subject and item.predicate == predicate
+    )
+    changed = replace(fact, value=value)
+    return replace(
+        graph,
+        facts=tuple(changed if item.id == fact.id else item for item in graph.facts),
+    )
+
+
+def test_delegation_ir_profile_rejects_semantic_tampering_after_rehash():
+    graph = authorizer_chain().to_ir()
+    root = next(entity for entity in graph.entities if entity.kind == "delegation")
+    hops = next(
+        fact for fact in graph.facts if fact.subject == root.id and fact.predicate == "hops"
+    )
+    changed = replace(hops, value=list(reversed(hops.value)))
+    tampered = replace(
+        graph,
+        facts=tuple(changed if fact.id == hops.id else fact for fact in graph.facts),
+    )
+
+    with pytest.raises(DelegationFormatError, match="hop order"):
+        _validate_delegation_profile(rehash(tampered))
+
+
+def test_delegation_ir_profile_requires_uniform_evidence_state():
+    graph = authorizer_chain().to_ir()
+    fact = graph.facts[-1]
+    changed = replace(
+        fact,
+        evidence=(replace(fact.evidence[0], review="contested"),),
+    )
+    tampered = replace(
+        graph,
+        facts=(*graph.facts[:-1], changed),
+    )
+
+    with pytest.raises(DelegationFormatError, match="disagree on evidence state"):
+        _validate_delegation_profile(rehash(tampered))
+
+
+def test_delegation_ir_profile_rejects_unsupported_entities_and_hop_sets():
+    graph = authorizer_chain().to_ir()
+    extra_id = _entity_id("mystery", "extra")
+    extra = Entity(extra_id, "mystery", "extra")
+    evidence = graph.facts[0].evidence
+    extra_fact = Fact(_fact_id(extra_id, "name"), extra_id, "name", "extra", evidence)
+    with pytest.raises(DelegationFormatError, match="unsupported entities"):
+        _validate_delegation_profile(
+            rehash(
+                replace(
+                    graph,
+                    entities=(*graph.entities, extra),
+                    facts=(*graph.facts, extra_fact),
+                )
+            )
+        )
+
+    root = next(entity for entity in graph.entities if entity.kind == "delegation")
+    hops = next(
+        fact for fact in graph.facts if fact.subject == root.id and fact.predicate == "hops"
+    )
+    duplicated = replace(hops, value=[*hops.value, hops.value[-1]])
+    with pytest.raises(DelegationFormatError, match="hops do not match"):
+        _validate_delegation_profile(
+            rehash(
+                replace(
+                    graph,
+                    facts=tuple(duplicated if fact.id == hops.id else fact for fact in graph.facts),
+                )
+            )
+        )
+
+
+@pytest.mark.parametrize(
+    ("predicate", "relation", "message"),
+    [
+        ("actors", "acts_under", "invalid actors"),
+        ("surfaces", "has_surface", "invalid surfaces"),
+    ],
+)
+def test_delegation_ir_profile_rejects_empty_hop_members(predicate, relation, message):
+    graph = authorizer_chain().to_ir()
+    hop = next(entity for entity in graph.entities if entity.kind == "hop")
+    member_fact = next(
+        fact for fact in graph.facts if fact.subject == hop.id and fact.predicate == predicate
+    )
+    changed = replace(member_fact, value=[])
+    tampered = replace(
+        graph,
+        facts=tuple(changed if fact.id == member_fact.id else fact for fact in graph.facts),
+        edges=tuple(
+            edge
+            for edge in graph.edges
+            if not (edge.source == hop.id and edge.relation == relation)
+        ),
+    )
+
+    with pytest.raises(DelegationFormatError, match=message):
+        _validate_delegation_profile(rehash(tampered))
+
+
+def test_delegation_ir_profile_rejects_invalid_hop_semantics():
+    graph = authorizer_chain().to_ir()
+    hops = [entity for entity in graph.entities if entity.kind == "hop"]
+
+    invalid_history = replace_fact_value(graph, hops[0].id, "actor_history", "invented")
+    with pytest.raises(DelegationFormatError, match="actor history"):
+        _validate_delegation_profile(rehash(invalid_history))
+
+    actors = next(
+        fact for fact in graph.facts if fact.subject == hops[1].id and fact.predicate == "actors"
+    ).value
+    broken = replace_fact_value(graph, hops[1].id, "actors", list(reversed(actors)))
+    with pytest.raises(DelegationFormatError, match="broken actor continuity"):
+        _validate_delegation_profile(rehash(broken))
+
+    actors = next(
+        fact for fact in graph.facts if fact.subject == hops[2].id and fact.predicate == "actors"
+    ).value
+    incomplete = replace_fact_value(graph, hops[2].id, "actors", actors[:2])
+    incomplete = replace(
+        incomplete,
+        edges=tuple(
+            edge
+            for edge in incomplete.edges
+            if not (
+                edge.source == hops[2].id
+                and edge.relation == "acts_under"
+                and edge.target == actors[2]
+            )
+        ),
+    )
+    with pytest.raises(DelegationFormatError, match="incomplete actor continuity"):
+        _validate_delegation_profile(rehash(incomplete))
+
+    invalid_validity = replace_fact_value(graph, hops[0].id, "validity", "duration")
+    with pytest.raises(DelegationFormatError, match="invalid validity"):
+        _validate_delegation_profile(rehash(invalid_validity))
+
+
+def test_delegation_ir_profile_rejects_invalid_surface_semantics():
+    graph = authorizer_chain().to_ir()
+    surfaces = [entity for entity in graph.entities if entity.kind == "surface"]
+    by_dimension = {
+        next(
+            fact
+            for fact in graph.facts
+            if fact.subject == surface.id and fact.predicate == "dimension"
+        ).value: surface
+        for surface in surfaces[:3]
+    }
+
+    duplicate = replace_fact_value(graph, by_dimension["effects"].id, "dimension", "tools")
+    with pytest.raises(DelegationFormatError, match="invalid surface dimensions"):
+        _validate_delegation_profile(rehash(duplicate))
+
+    invalid_state = replace_fact_value(graph, by_dimension["scopes"].id, "completeness", "maybe")
+    with pytest.raises(DelegationFormatError, match="invalid surface state"):
+        _validate_delegation_profile(rehash(invalid_state))
+
+    unknown_claim = replace_fact_value(graph, by_dimension["tools"].id, "basis", "issuer")
+    with pytest.raises(DelegationFormatError, match="invalid unknown surface"):
+        _validate_delegation_profile(rehash(unknown_claim))
+
+    incomplete_claim = replace_fact_value(graph, by_dimension["scopes"].id, "domain", None)
+    with pytest.raises(DelegationFormatError, match="invalid claimed surface"):
+        _validate_delegation_profile(rehash(incomplete_claim))

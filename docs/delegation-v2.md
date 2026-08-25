@@ -5,7 +5,8 @@ issue [#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
 private, synthetic grant-v1 delegation shape only after fixtures and profile
 validation land. No current command accepts this format as analyzable
 authority. The private strict reader and both canonical migration fixtures are
-implemented; Authority IR projection and every analysis consumer remain gated.
+implemented. A private, closed Authority IR projection now preserves the
+records behind registered relations; every analysis consumer remains gated.
 
 ## Evidence-driven changes
 
@@ -186,12 +187,16 @@ neither is promoted into a delegation.
 ## Trust and migration gates
 
 Structural parsing and IR projection remain distinct from analysis eligibility.
+The implemented standalone profile requires one pinned delegation-chain source,
+recomputes its semantic digest, and rejects mixed evidence states. Generic IR
+validation accepts its additive relations, while `reach --ir` refuses the
+profile at the manifest-v1 trust boundary.
 Before consumption, the analyzer re-reads each artifact, validates its closed
 profile, verifies every supplied digest, requires exact and accepted evidence,
 and evaluates review expiry against a caller-supplied date and token validity
 against the caller-supplied timestamp.
 
-The implementation gate is:
+The implementation and analysis gates are:
 
 1. migrate the synthetic grant-v1 fixture to one `date_window` hop without
    improving its evidence or eligibility;
@@ -207,7 +212,10 @@ The implementation gate is:
 5. keep all four manifest evidence graphs and existing conditional outputs
    byte-identical under conservative defaults.
 
-Delegation analysis remains private after this gate. Its first widening
+Items 1–3 are implemented as private records, migrations, projection, and
+adversarial profile tests. Item 4 remains an analysis gate; item 5 continues
+to protect conservative defaults. Delegation analysis remains private after
+this projection gate. Its first widening
 counterexample still requires an operational, digest-pinned deployment mapping
 from scopes to tools and effects. Public CLI exposure gets a separate closing
 review.

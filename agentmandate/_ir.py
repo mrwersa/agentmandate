@@ -98,12 +98,14 @@ MANIFEST_PREDICATES = {
 
 RELATIONS = {
     "acts_as": Relation("tool", "principal", "one", "single", "principal"),
+    "acts_under": Relation("hop", "principal", "many", "union", "actors"),
     "can_reach": Relation(
         "agent", "tool", "many", "union", None, True, "reachable"
     ),
     "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
     "contains_tool": Relation("boundary", "tool", "many", "union", "members"),
     "constrained_by": Relation("principal", "principal", "many", "union", "principals"),
+    "delegates_for": Relation("delegation", "principal", "one", "single", "subject"),
     "has_breach": Relation(
         "agent", "breach", "many", "union", None, True, "breach"
     ),
@@ -111,8 +113,11 @@ RELATIONS = {
         "tool", "scope", "many", "union", None, True, "effect"
     ),
     "has_condition": Relation("tool", "condition", "many", "union", "conditions"),
+    "has_hop": Relation("delegation", "hop", "many", "union", "hops"),
+    "has_surface": Relation("hop", "surface", "many", "union", "surfaces"),
     "narrows_to": Relation("condition", "effect", "one", "single", "effect"),
     "produces": Relation("tool", "scope", "one", "single", "produces"),
+    "previous_hop": Relation("hop", "hop", "one", "single", "previous"),
     "requires": Relation("tool", "scope", "many", "union", "requires"),
     "role_contains": Relation("role", "tool", "many", "union", "members"),
     "transitions_to": Relation(
