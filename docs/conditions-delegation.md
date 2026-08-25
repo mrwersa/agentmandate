@@ -11,10 +11,13 @@ graph integrity only and does not accept the records as authority.
 Gate 2a's context and grant readers, gate 2b's tool-side readers and IR
 projections, and the conditional half of gate 3 are implemented privately.
 Structural projection does not make a condition or principal eligible for
-analysis. A real [Authorizer delegation capture](evidence/authorizer-delegation/README.md)
-now closes the missing-chain prerequisite but fails the provisional record
-shape honestly; delegation semantics and every public surface remain gated on
-the revisions recorded below.
+analysis. A real
+[Authorizer delegation capture](evidence/authorizer-delegation/README.md) now
+closes the missing-chain prerequisite but fails the provisional record shape
+honestly; delegation semantics and every public surface remain gated on the
+[evidence-driven revision](delegation-v2.md). The grant-v1 examples below
+remain the implemented private transport until that revision passes its
+migration gate; they are not the target analysis contract.
 
 ## Problem boundary
 
@@ -151,6 +154,11 @@ Intended semantics:
   tool remains gated on every branch.
 
 ### Grants
+
+> **Superseded candidate:** the real chain demonstrated that this private v1
+> shape cannot preserve ordered actors, token-resolution validity, or partial
+> authority surfaces. [Delegation record revision](delegation-v2.md) defines
+> the replacement and its fail-closed migration gates.
 
 A delegation is verifiable only against a reviewed grant artifact — the same
 separation that keeps inventory captures outside the mandate:
