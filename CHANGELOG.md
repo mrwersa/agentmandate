@@ -14,7 +14,10 @@ All notable changes to this project are documented here. The format follows
   manifest profile boundary.
 - Private delegation analysis now re-verifies reviewed chain attachments,
   absolute validity windows, authority surfaces, and hop-to-hop attenuation.
-  The records and analyzer are not yet exposed through the CLI.
+  `mandate delegations validate` checks attachment or chain structure without
+  trusting it. Manifest-mode `mandate reach` accepts explicitly mapped capture
+  bytes, a selected source binding, and a UTC evaluation timestamp; delegation
+  JSON is namespaced as `agentmandate.delegations/v1`.
 
 ## 0.12.0 - 2026-08-23
 

@@ -25,7 +25,7 @@ agentmandate~=0.12.0
 
 ## Versioned authority artifacts
 
-The `mandate ir`, `mandate inventory`, `mandate conditions`, and
+The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`, and
 `mandate reach --ir` CLI surfaces are public. The Python records remain private
 and are not exported from `agentmandate`. Their explicit artifact versions
 separate compatibility from package releases:
@@ -40,6 +40,9 @@ separate compatibility from package releases:
 - `condition_version` and `context_version` change when their strict artifact
   records change incompatibly. Conditional command output uses the independent
   `agentmandate.conditions/v1` presentation schema.
+- `delegation_version` and principal-v2 attachment records change when their
+  strict artifact formats change incompatibly. Delegation command output uses
+  the independent `agentmandate.delegations/v1` presentation schema.
 
 Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
@@ -61,6 +64,13 @@ review, and expiry against an explicit evaluation date.
 capture digest, explicit evaluation date, and—during drift—the selected live
 source binding. Conditional JSON is additive and appears only when conditional
 inputs were supplied; legacy output remains unchanged.
+
+`mandate delegations validate` likewise proves only attachment or chain
+structure. Manifest-mode `reach` rechecks closed IR profiles, mapped capture
+digests, source binding, reviewed domains, evidence state, expiry, and
+hop-to-hop attenuation at an explicit UTC timestamp. Delegation JSON appears
+only when delegation inputs were supplied. SARIF, Mermaid, IR, and conditional
+composition are refused until they can preserve delegation uncertainty.
 
 ## What is most likely to change
 

@@ -229,8 +229,13 @@ Unknown, partial, cross-domain, expired, or unverifiable inputs produce named
 unresolved findings and cannot produce widening claims. Delegation analysis
 remains private after this gate. Its first non-synthetic widening
 counterexample still requires an operational, digest-pinned deployment mapping
-from scopes to tools and effects. Public CLI exposure gets a separate closing
-review.
+from scopes to tools and effects. The CLI exposure is implemented behind the
+same consumer and awaits its separate closing review.
+
+A standalone chain profile requires one confidence/review state so conflicting
+claims cannot be silently merged. Reviewer names remain per-fact accountability
+values and may differ across hops; changing reviewer identity does not itself
+upgrade or downgrade evidence confidence or review state.
 
 ## Non-goals
 
