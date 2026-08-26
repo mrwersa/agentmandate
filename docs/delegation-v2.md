@@ -5,8 +5,9 @@ issue [#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
 private, synthetic grant-v1 delegation shape only after fixtures and profile
 validation land. No current command accepts this format as analyzable
 authority. The private strict reader and both canonical migration fixtures are
-implemented. A private, closed Authority IR projection now preserves the
-records behind registered relations; every analysis consumer remains gated.
+implemented. A private, closed Authority IR projection preserves the records
+behind registered relations, and the private analysis consumer re-validates
+those profiles before making decisions. Public exposure remains gated.
 
 ## Evidence-driven changes
 
@@ -168,7 +169,12 @@ The delegated principal stops copying claims that can disagree with the chain:
   "principal": {
     "kind": "delegated_user",
     "delegation": "authorizer-demo-chain",
-    "hop": "hop-4"
+    "hop": "hop-4",
+    "domains": {
+      "scopes": "http://localhost:8080",
+      "tools": "deployment:export-agent",
+      "effects": "deployment:export-agent"
+    }
   },
   "evidence": {
     "confidence": "exact",
@@ -180,7 +186,9 @@ The delegated principal stops copying claims that can disagree with the chain:
 ```
 
 The referenced hop is the sole source of subject, actor history, audience, and
-validity. A dangling chain or hop is a trust failure. `fixed_user_credential`
+validity. The attachment's reviewed per-dimension domains establish whether
+manifest scope, tool, and effect names are comparable with the hop; spelling
+alone never crosses a domain. A dangling chain or hop is a trust failure. `fixed_user_credential`
 and `intersecting` retain their existing meanings when principal v2 migrates;
 neither is promoted into a delegation.
 
@@ -212,10 +220,14 @@ The implementation and analysis gates are:
 5. keep all four manifest evidence graphs and existing conditional outputs
    byte-identical under conservative defaults.
 
-Items 1–3 are implemented as private records, migrations, projection, and
-adversarial profile tests. Item 4 remains an analysis gate; item 5 continues
-to protect conservative defaults. Delegation analysis remains private after
-this projection gate. Its first widening
+Items 1–5 are implemented as private records, migrations, projection,
+adversarial profile tests, and a fail-closed analysis consumer. The consumer
+requires a canonical caller-supplied UTC timestamp, treats expiry as exclusive,
+and checks that every complete comparable downstream surface is a subset of
+its predecessor before comparing the attached tool with its referenced hop.
+Unknown, partial, cross-domain, expired, or unverifiable inputs produce named
+unresolved findings and cannot produce widening claims. Delegation analysis
+remains private after this gate. Its first non-synthetic widening
 counterexample still requires an operational, digest-pinned deployment mapping
 from scopes to tools and effects. Public CLI exposure gets a separate closing
 review.

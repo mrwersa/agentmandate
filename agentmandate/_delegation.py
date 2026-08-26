@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -15,6 +15,7 @@ from ._conditions import (
     ConditionFormatError,
     Evidence,
     Grant,
+    ToolTarget,
     _canonical_name,
     _evidence,
     _fact,
@@ -22,16 +23,22 @@ from ._conditions import (
     _profile_digest,
     _record,
     _relative_path,
+    _tool_target,
     _validate_projected_evidence,
     _validate_projection_facts,
     _validate_projection_source,
     _version,
 )
 from ._ir import IR_VERSION, AuthorityIR, Edge, Entity, Source, _edge_id, _entity_id, _fact_id
+from .manifest import Mandate, Tool
+from .reach import Authority, analyse
 
 DELEGATION_VERSION = 1
 DELEGATION_ADAPTER = "agentmandate.delegation-chain"
 DELEGATION_ADAPTER_VERSION = 1
+DELEGATION_ATTACHMENT_VERSION = 2
+DELEGATION_ATTACHMENT_ADAPTER = "agentmandate.delegation-attachment"
+DELEGATION_ATTACHMENT_ADAPTER_VERSION = 1
 ACTOR_HISTORY = frozenset({"complete", "partial"})
 VALIDITY_KINDS = frozenset({"window", "duration", "date_window"})
 SURFACE_BASES = frozenset({"issuer", "deployment_policy", "unavailable"})
@@ -909,3 +916,580 @@ def _validate_delegation_profile(graph: AuthorityIR) -> None:
                 or (dimension in {"tools", "effects"} and basis != "deployment_policy")
             ):
                 raise DelegationFormatError("delegation IR profile has invalid claimed surface")
+
+
+@dataclass(frozen=True)
+class DelegationAttachment:
+    """Reviewed attachment of one manifest tool to one delegation hop."""
+
+    version: int
+    id: str
+    target: ToolTarget
+    delegation: str
+    hop: str
+    scope_domain: str
+    tool_domain: str
+    effect_domain: str
+    evidence: Evidence
+
+    def domain_for(self, dimension: str) -> str:
+        return {
+            "scopes": self.scope_domain,
+            "tools": self.tool_domain,
+            "effects": self.effect_domain,
+        }[dimension]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "principal_version": self.version,
+            "id": self.id,
+            "target": self.target.as_dict(),
+            "principal": {
+                "kind": "delegated_user",
+                "delegation": self.delegation,
+                "hop": self.hop,
+                "domains": {
+                    "scopes": self.scope_domain,
+                    "tools": self.tool_domain,
+                    "effects": self.effect_domain,
+                },
+            },
+            "evidence": self.evidence.as_dict(),
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(
+            self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        ) + "\n"
+
+    def to_ir(self) -> AuthorityIR:
+        return _attachment_to_ir(self)
+
+    @classmethod
+    def from_json(cls, text: str) -> DelegationAttachment:
+        raw = _translate(
+            _record,
+            _translate(_load_json, text, "delegation attachment"),
+            "attachment",
+            {"principal_version", "id", "target", "principal", "evidence"},
+        )
+        principal = _translate(
+            _record,
+            raw["principal"],
+            "attachment.principal",
+            {"kind", "delegation", "hop", "domains"},
+        )
+        if principal["kind"] != "delegated_user":
+            raise DelegationFormatError("delegation attachment has an unsupported principal kind")
+        domains = _translate(
+            _record,
+            principal["domains"],
+            "attachment.principal.domains",
+            {"scopes", "tools", "effects"},
+        )
+        return cls(
+            _translate(
+                _version,
+                raw,
+                "principal_version",
+                "attachment",
+                DELEGATION_ATTACHMENT_VERSION,
+            ),
+            _translate(_canonical_name, raw, "id", "attachment"),
+            _translate(_tool_target, raw["target"], "attachment.target"),
+            _translate(_canonical_name, principal, "delegation", "attachment.principal"),
+            _translate(_canonical_name, principal, "hop", "attachment.principal"),
+            _translate(_canonical_name, domains, "scopes", "attachment.principal.domains"),
+            _translate(_canonical_name, domains, "tools", "attachment.principal.domains"),
+            _translate(_canonical_name, domains, "effects", "attachment.principal.domains"),
+            _translate(_evidence, raw["evidence"], "attachment"),
+        )
+
+
+@dataclass(frozen=True)
+class DelegationFinding:
+    code: str
+    attachment: str
+    tool: str
+    hop: str | None
+    dimension: str | None
+    message: str
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DelegationDecision:
+    attachment: str
+    tool: str
+    delegation: str
+    hop: str
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DelegationAnalysis:
+    authority: Authority
+    findings: tuple[DelegationFinding, ...]
+    attenuated: tuple[DelegationDecision, ...]
+    as_of: str
+
+    @property
+    def clean(self) -> bool:
+        return not self.findings
+
+
+def _attachment_to_ir(value: DelegationAttachment) -> AuthorityIR:
+    source_id = _entity_id("source", f"delegation-attachment:{value.id}")
+    tool_id = _entity_id("tool", value.target.tool)
+    principal_id = _entity_id("principal", value.id)
+    delegation_id = _entity_id("delegation", value.delegation)
+    hop_id = _entity_id("hop", value.hop)
+    entities = (
+        Entity(tool_id, "tool", value.target.tool),
+        Entity(principal_id, "principal", value.id),
+        Entity(delegation_id, "delegation", value.delegation),
+        Entity(hop_id, "hop", value.hop),
+    )
+    facts = (
+        _fact(tool_id, "name", value.target.tool, source_id, "/target/tool", value.evidence),
+        _fact(tool_id, "target", value.target.as_dict(), source_id, "/target", value.evidence),
+        _fact(tool_id, "principal", principal_id, source_id, "/id", value.evidence),
+        _fact(principal_id, "name", value.id, source_id, "/id", value.evidence),
+        _fact(
+            principal_id,
+            "kind",
+            "delegated_user",
+            source_id,
+            "/principal/kind",
+            value.evidence,
+        ),
+        _fact(
+            principal_id,
+            "delegation",
+            delegation_id,
+            source_id,
+            "/principal/delegation",
+            value.evidence,
+        ),
+        _fact(principal_id, "hop", hop_id, source_id, "/principal/hop", value.evidence),
+        _fact(
+            principal_id,
+            "domains",
+            {
+                "scopes": value.scope_domain,
+                "tools": value.tool_domain,
+                "effects": value.effect_domain,
+            },
+            source_id,
+            "/principal/domains",
+            value.evidence,
+        ),
+        _fact(
+            principal_id,
+            "reviewer",
+            value.evidence.reviewer,
+            source_id,
+            "/evidence/reviewer",
+            value.evidence,
+        ),
+        _fact(
+            principal_id,
+            "review_expires",
+            value.evidence.expires,
+            source_id,
+            "/evidence/expires",
+            value.evidence,
+        ),
+        _fact(
+            delegation_id,
+            "name",
+            value.delegation,
+            source_id,
+            "/principal/delegation",
+            value.evidence,
+        ),
+        _fact(hop_id, "name", value.hop, source_id, "/principal/hop", value.evidence),
+    )
+    edges = (
+        Edge(
+            _edge_id(tool_id, "acts_as", principal_id),
+            tool_id,
+            "acts_as",
+            principal_id,
+            (_fact_id(tool_id, "principal"),),
+        ),
+        Edge(
+            _edge_id(principal_id, "uses_delegation", delegation_id),
+            principal_id,
+            "uses_delegation",
+            delegation_id,
+            (_fact_id(principal_id, "delegation"),),
+        ),
+        Edge(
+            _edge_id(principal_id, "at_hop", hop_id),
+            principal_id,
+            "at_hop",
+            hop_id,
+            (_fact_id(principal_id, "hop"),),
+        ),
+    )
+    graph = AuthorityIR(
+        IR_VERSION,
+        (
+            Source(
+                source_id,
+                "delegation-attachment",
+                f"memory:delegation-attachment:{value.id}",
+                value.version,
+                None,
+                _profile_digest(entities, facts, edges),
+                DELEGATION_ATTACHMENT_ADAPTER,
+                DELEGATION_ATTACHMENT_ADAPTER_VERSION,
+                hashlib.sha256(value.to_json().encode()).hexdigest(),
+            ),
+        ),
+        entities,
+        facts,
+        edges,
+    )
+    _validate_attachment_profile(graph)
+    return graph
+
+
+def _validate_attachment_profile(graph: AuthorityIR) -> None:
+    _translate(
+        _validate_projection_source,
+        graph,
+        "delegation-attachment",
+        DELEGATION_ATTACHMENT_ADAPTER,
+        DELEGATION_ATTACHMENT_ADAPTER_VERSION,
+        DELEGATION_ATTACHMENT_VERSION,
+    )
+    entities = {entity.id: entity for entity in graph.entities}
+    counts = {
+        kind: sum(entity.kind == kind for entity in graph.entities)
+        for kind in {"tool", "principal", "delegation", "hop"}
+    }
+    if counts != {"tool": 1, "principal": 1, "delegation": 1, "hop": 1}:
+        raise DelegationFormatError("delegation attachment IR profile has unsupported entities")
+    predicates = {
+        entity.id: {
+            "tool": {"name", "target", "principal"},
+            "principal": {
+                "name",
+                "kind",
+                "delegation",
+                "hop",
+                "domains",
+                "reviewer",
+                "review_expires",
+            },
+            "delegation": {"name"},
+            "hop": {"name"},
+        }[entity.kind]
+        for entity in graph.entities
+    }
+    _translate(_validate_projection_facts, graph, entities, predicates)
+    facts = {(fact.subject, fact.predicate): fact for fact in graph.facts}
+    tool = next(entity for entity in graph.entities if entity.kind == "tool")
+    principal = next(entity for entity in graph.entities if entity.kind == "principal")
+    _translate(_validate_projected_evidence, graph, principal.id, facts)
+    target = _translate(_tool_target, facts[(tool.id, "target")].value, "attachment_IR.target")
+    if target.tool != tool.name:
+        raise DelegationFormatError("delegation attachment IR target does not match tool")
+    if facts[(principal.id, "kind")].value != "delegated_user":
+        raise DelegationFormatError("delegation attachment IR profile has invalid kind")
+
+
+def _chain_locators(chain: DelegationChain) -> set[str]:
+    result: set[str] = set()
+    for hop in chain.hops:
+        for source in (hop.source, hop.scopes.source, hop.tools.source, hop.effects.source):
+            if source is not None:
+                result.add(source.locator)
+    return result
+
+
+def _surface_for(hop: DelegationHop, dimension: str) -> SurfaceDimension:
+    return getattr(hop, dimension)
+
+
+def _surface_actual(tool: Tool, dimension: str) -> set[str]:
+    if dimension == "scopes":
+        return set(tool.requires)
+    if dimension == "tools":
+        return {tool.name}
+    return {tool.effect}
+
+
+def analyse_delegations(
+    mandate: Mandate,
+    attachments: Sequence[DelegationAttachment],
+    chains: Sequence[DelegationChain],
+    source_bytes: Mapping[str, bytes],
+    *,
+    as_of: str,
+    depth: int | None = None,
+    target_source: str | None = None,
+    target_binding: str | None = None,
+) -> DelegationAnalysis:
+    """Consume only re-read and profile-validated delegation evidence."""
+    evaluated_at = _timestamp({"as_of": as_of}, "as_of", "analysis")
+    canonical_attachments = tuple(
+        DelegationAttachment.from_json(item.to_json()) for item in attachments
+    )
+    canonical_chains = tuple(DelegationChain.from_json(item.to_json()) for item in chains)
+    attachment_graphs = {item.id: item.to_ir() for item in canonical_attachments}
+    for graph in attachment_graphs.values():
+        _validate_attachment_profile(graph)
+    chain_graphs = {item.id: item.to_ir() for item in canonical_chains}
+    for graph in chain_graphs.values():
+        _validate_delegation_profile(graph)
+
+    authority = analyse(mandate, depth=depth)
+    tools = {tool.name: tool for tool in mandate.tools}
+    attachment_counts: dict[str, int] = {}
+    chain_groups: dict[str, list[DelegationChain]] = {}
+    for item in canonical_attachments:
+        attachment_counts[item.id] = attachment_counts.get(item.id, 0) + 1
+    for chain in canonical_chains:
+        chain_groups.setdefault(chain.id, []).append(chain)
+    findings: list[DelegationFinding] = []
+    decisions: list[DelegationDecision] = []
+
+    def finding(
+        code: str,
+        attachment: DelegationAttachment,
+        message: str,
+        *,
+        hop: str | None = None,
+        dimension: str | None = None,
+    ) -> None:
+        support: set[str] = set()
+        attachment_graph = attachment_graphs.get(attachment.id)
+        if attachment_graph is not None:
+            support.update(source.id for source in attachment_graph.sources)
+            support.update(fact.id for fact in attachment_graph.facts)
+            support.update(edge.id for edge in attachment_graph.edges)
+        chain_graph = chain_graphs.get(attachment.delegation)
+        if chain_graph is not None:
+            support.update(source.id for source in chain_graph.sources)
+            support.update(fact.id for fact in chain_graph.facts)
+            support.update(edge.id for edge in chain_graph.edges)
+        findings.append(
+            DelegationFinding(
+                code,
+                attachment.id,
+                attachment.target.tool,
+                hop,
+                dimension,
+                message,
+                tuple(sorted(support)),
+            )
+        )
+
+    for attachment in sorted(canonical_attachments, key=lambda item: item.id):
+        start = len(findings)
+        tool = tools.get(attachment.target.tool)
+        if tool is None:
+            finding(
+                "delegation.unresolved",
+                attachment,
+                "target tool is not present in the mandate",
+            )
+            continue
+        if attachment_counts[attachment.id] != 1:
+            finding("delegation.unresolved", attachment, "attachment id is declared more than once")
+            continue
+        if (
+            target_source is None
+            or target_binding is None
+            or attachment.target.source != target_source
+            or attachment.target.binding != target_binding
+        ):
+            finding(
+                "delegation.unresolved",
+                attachment,
+                "attachment target does not match the selected source binding",
+            )
+            continue
+        matches = chain_groups.get(attachment.delegation, [])
+        if len(matches) != 1:
+            finding("delegation.unresolved", attachment, "delegation chain is missing or ambiguous")
+            continue
+        chain = matches[0]
+        hops = {hop.id: hop for hop in chain.hops}
+        referenced = hops.get(attachment.hop)
+        if referenced is None:
+            finding("delegation.unresolved", attachment, "referenced delegation hop is missing")
+            continue
+        attachment_eligible = True
+        if attachment.evidence.confidence != "exact" or attachment.evidence.review != "accepted":
+            attachment_eligible = False
+            finding(
+                "delegation.unresolved",
+                attachment,
+                "attachment evidence is not exact and accepted",
+            )
+        if attachment.evidence.expires is None or attachment.evidence.expires < evaluated_at[:10]:
+            attachment_eligible = False
+            finding("delegation.unresolved", attachment, "attachment review is expired")
+        source_verified = True
+        try:
+            locators = _chain_locators(chain)
+            chain.verify_sources(
+                {
+                    locator: source_bytes[locator]
+                    for locator in locators
+                    if locator in source_bytes
+                }
+            )
+        except DelegationFormatError as exc:
+            source_verified = False
+            finding("delegation.source-unresolved", attachment, str(exc))
+        history_complete = chain.actor_history_complete
+        if not chain.actor_history_complete:
+            finding(
+                "delegation.actor-history-unresolved",
+                attachment,
+                "partial actor history makes every chain-derived decision unresolved",
+            )
+        surface_eligible: dict[tuple[str, str], bool] = {}
+        for hop in chain.hops:
+            hop_eligible = source_verified and history_complete
+            if hop.evidence.confidence != "exact" or hop.evidence.review != "accepted":
+                hop_eligible = False
+                finding(
+                    "delegation.unresolved",
+                    attachment,
+                    "hop evidence is not exact and accepted",
+                    hop=hop.id,
+                )
+            if hop.evidence.expires is None or hop.evidence.expires < evaluated_at[:10]:
+                hop_eligible = False
+                finding("delegation.unresolved", attachment, "hop review is expired", hop=hop.id)
+            if hop.validity.kind != "window":
+                hop_eligible = False
+                finding(
+                    "delegation.validity-unresolved",
+                    attachment,
+                    "hop validity lacks an absolute timestamp window",
+                    hop=hop.id,
+                )
+            elif not (hop.validity.issued_at <= evaluated_at < hop.validity.expires_at):
+                hop_eligible = False
+                finding(
+                    "delegation.validity-unresolved",
+                    attachment,
+                    "evaluation time is outside the hop validity window",
+                    hop=hop.id,
+                )
+            for dimension in ("scopes", "tools", "effects"):
+                surface = _surface_for(hop, dimension)
+                eligible = hop_eligible
+                if surface.completeness != "complete":
+                    eligible = False
+                    finding(
+                        "delegation.surface-unresolved",
+                        attachment,
+                        "surface is not complete and comparable",
+                        hop=hop.id,
+                        dimension=dimension,
+                    )
+                elif (
+                    surface.evidence is None
+                    or surface.evidence.confidence != "exact"
+                    or surface.evidence.review != "accepted"
+                    or surface.evidence.expires is None
+                    or surface.evidence.expires < evaluated_at[:10]
+                ):
+                    eligible = False
+                    finding(
+                        "delegation.surface-unresolved",
+                        attachment,
+                        "surface evidence is not current, exact, and accepted",
+                        hop=hop.id,
+                        dimension=dimension,
+                    )
+                surface_eligible[(hop.id, dimension)] = eligible
+
+        for previous, current in zip(chain.hops, chain.hops[1:], strict=False):
+            for dimension in ("scopes", "tools", "effects"):
+                before = _surface_for(previous, dimension)
+                after = _surface_for(current, dimension)
+                if not (
+                    surface_eligible[(previous.id, dimension)]
+                    and surface_eligible[(current.id, dimension)]
+                ):
+                    continue
+                if before.domain != after.domain:
+                    finding(
+                        "delegation.surface-unresolved",
+                        attachment,
+                        "adjacent surfaces use incomparable domains",
+                        hop=current.id,
+                        dimension=dimension,
+                    )
+                elif not set(after.members).issubset(before.members):
+                    finding(
+                        "delegation.widens",
+                        attachment,
+                        "downstream hop regains authority absent from its grantor hop",
+                        hop=current.id,
+                        dimension=dimension,
+                    )
+
+        for dimension in ("scopes", "tools", "effects"):
+            surface = _surface_for(referenced, dimension)
+            if (
+                surface_eligible[(referenced.id, dimension)]
+                and surface.domain != attachment.domain_for(dimension)
+            ):
+                finding(
+                    "delegation.surface-unresolved",
+                    attachment,
+                    "tool attachment and hop surface use incomparable domains",
+                    hop=referenced.id,
+                    dimension=dimension,
+                )
+                continue
+            if (
+                attachment_eligible
+                and surface_eligible[(referenced.id, dimension)]
+                and not _surface_actual(tool, dimension).issubset(surface.members)
+            ):
+                finding(
+                    "delegation.widens",
+                    attachment,
+                    "tool authority exceeds the referenced hop surface",
+                    hop=referenced.id,
+                    dimension=dimension,
+                )
+        if len(findings) == start:
+            graph = attachment_graphs[attachment.id]
+            decisions.append(
+                DelegationDecision(
+                    attachment.id,
+                    tool.name,
+                    chain.id,
+                    referenced.id,
+                    tuple(
+                        sorted(
+                            {
+                                *(source.id for source in graph.sources),
+                                *(fact.id for fact in graph.facts),
+                                *(edge.id for edge in graph.edges),
+                                *(source.id for source in chain_graphs[chain.id].sources),
+                                *(fact.id for fact in chain_graphs[chain.id].facts),
+                                *(edge.id for edge in chain_graphs[chain.id].edges),
+                            }
+                        )
+                    ),
+                )
+            )
+    return DelegationAnalysis(
+        authority,
+        tuple(dict.fromkeys(findings)),
+        tuple(decisions),
+        evaluated_at,
+    )

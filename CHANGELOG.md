@@ -12,6 +12,9 @@ All notable changes to this project are documented here. The format follows
   by a private experimental profile. Structural validity does not make a chain
   analyzable authority, and `mandate reach --ir` continues to reject it at the
   manifest profile boundary.
+- Private delegation analysis now re-verifies reviewed chain attachments,
+  absolute validity windows, authority surfaces, and hop-to-hop attenuation.
+  The records and analyzer are not yet exposed through the CLI.
 
 ## 0.12.0 - 2026-08-23
 
