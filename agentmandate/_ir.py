@@ -99,6 +99,7 @@ MANIFEST_PREDICATES = {
 RELATIONS = {
     "acts_as": Relation("tool", "principal", "one", "single", "principal"),
     "acts_under": Relation("hop", "principal", "many", "union", "actors"),
+    "at_hop": Relation("principal", "hop", "one", "single", "hop"),
     "can_reach": Relation(
         "agent", "tool", "many", "union", None, True, "reachable"
     ),
@@ -124,6 +125,9 @@ RELATIONS = {
         "tool", "tool", "many", "union", None, True, "transition"
     ),
     "under_grant": Relation("principal", "grant", "one", "single", "grant"),
+    "uses_delegation": Relation(
+        "principal", "delegation", "one", "single", "delegation"
+    ),
     "uses_context": Relation("condition", "context", "one", "single", "context"),
 }
 

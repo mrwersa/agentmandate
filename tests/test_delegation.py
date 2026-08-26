@@ -7,13 +7,21 @@ from pathlib import Path
 
 import pytest
 
+from agentmandate import analyse, load, loads
 from agentmandate._conditions import Evidence, Grant, _profile_digest
 from agentmandate._delegation import (
     DELEGATION_ADAPTER,
     DELEGATION_ADAPTER_VERSION,
+    DELEGATION_ATTACHMENT_ADAPTER,
+    DELEGATION_ATTACHMENT_ADAPTER_VERSION,
+    DelegationAttachment,
     DelegationChain,
     DelegationFormatError,
+    _validate_attachment_profile,
     _validate_delegation_profile,
+)
+from agentmandate._delegation import (
+    analyse_delegations as _analyse_delegations,
 )
 from agentmandate._ir import (
     AuthorityIR,
@@ -33,6 +41,7 @@ MIGRATED_AUTHORIZER = FIXTURES / "delegation-chain-authorizer-v1.json"
 AUTHORIZER = (
     Path(__file__).parents[1] / "docs" / "evidence" / "authorizer-delegation" / "capture.json"
 )
+ATTACHMENT = FIXTURES / "delegation-attachment-v2.json"
 REVIEW = Evidence("exact", "accepted", "evidence-review", "2027-08-25")
 
 
@@ -46,6 +55,58 @@ def raw_chain() -> dict:
 
 def parse(raw: dict) -> DelegationChain:
     return DelegationChain.from_json(json.dumps(raw))
+
+
+def attachment() -> DelegationAttachment:
+    return DelegationAttachment.from_json(ATTACHMENT.read_text(encoding="utf-8"))
+
+
+def mandate():
+    return loads(
+        json.dumps(
+            {
+                "version": 1,
+                "agent": "export-agent",
+                "tools": [
+                    {
+                        "name": "export_records",
+                        "effect": "read",
+                        "requires": ["openid"],
+                    }
+                ],
+            }
+        )
+    )
+
+
+def analyzable_chain() -> DelegationChain:
+    raw = raw_chain()
+    for hop in raw["hops"]:
+        hop["validity"] = {
+            "kind": "window",
+            "issued_at": "2026-08-25T00:00:00Z",
+            "expires_at": "2026-08-26T00:00:00Z",
+        }
+        for dimension, members in {
+            "tools": ["export_records"],
+            "effects": ["read"],
+        }.items():
+            surface = hop["surface"][dimension]
+            surface.update(
+                domain="demo",
+                basis="deployment_policy",
+                completeness="complete",
+                members=members,
+                evidence=hop["evidence"],
+                source=hop["source"],
+            )
+    return parse(raw)
+
+
+def analyse_delegations(*args, **kwargs):
+    kwargs.setdefault("target_source", "deploy/agent.py")
+    kwargs.setdefault("target_binding", "agent")
+    return _analyse_delegations(*args, **kwargs)
 
 
 def test_authorizer_projection_preserves_all_four_hops_without_policy_invention():
@@ -515,3 +576,314 @@ def test_delegation_ir_profile_rejects_invalid_surface_semantics():
     incomplete_claim = replace_fact_value(graph, by_dimension["scopes"].id, "domain", None)
     with pytest.raises(DelegationFormatError, match="invalid claimed surface"):
         _validate_delegation_profile(rehash(incomplete_claim))
+
+
+def test_attachment_reader_and_profile_are_canonical_and_standalone():
+    value = attachment()
+    graph = value.to_ir()
+
+    assert value.to_json() == ATTACHMENT.read_text(encoding="utf-8")
+    assert DelegationAttachment.from_json(value.to_json()) == value
+    assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
+    assert graph.sources[0].adapter == DELEGATION_ATTACHMENT_ADAPTER
+    assert graph.sources[0].adapter_version == DELEGATION_ATTACHMENT_ADAPTER_VERSION
+    assert {edge.relation for edge in graph.edges} == {
+        "acts_as",
+        "at_hop",
+        "uses_delegation",
+    }
+    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+        _analyse_ir(graph)
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda d: d.update(principal_version=1),
+        lambda d: d.update(extra=True),
+        lambda d: d["principal"].update(kind="service"),
+        lambda d: d["principal"].pop("hop"),
+    ],
+)
+def test_attachment_reader_rejects_unsupported_shapes(mutate):
+    raw = attachment().as_dict()
+    mutate(raw)
+    with pytest.raises(DelegationFormatError):
+        DelegationAttachment.from_json(json.dumps(raw))
+
+
+def test_attachment_profile_rejects_semantic_tampering_after_rehash():
+    graph = attachment().to_ir()
+    principal = next(entity for entity in graph.entities if entity.kind == "principal")
+    kind = next(
+        fact for fact in graph.facts if fact.subject == principal.id and fact.predicate == "kind"
+    )
+    changed = replace(kind, value="fixed_user_credential")
+    tampered = replace(
+        graph,
+        facts=tuple(changed if fact.id == kind.id else fact for fact in graph.facts),
+    )
+    with pytest.raises(DelegationFormatError, match="invalid kind"):
+        _validate_attachment_profile(rehash(tampered))
+
+    tool = next(entity for entity in graph.entities if entity.kind == "tool")
+    target = next(
+        fact for fact in graph.facts if fact.subject == tool.id and fact.predicate == "target"
+    )
+    changed_target = replace(target, value={**target.value, "tool": "other"})
+    tampered_target = replace(
+        graph,
+        facts=tuple(
+            changed_target if fact.id == target.id else fact for fact in graph.facts
+        ),
+    )
+    with pytest.raises(DelegationFormatError, match="target does not match"):
+        _validate_attachment_profile(rehash(tampered_target))
+
+    extra = Entity(_entity_id("principal", "extra"), "principal", "extra")
+    name = Fact(
+        _fact_id(extra.id, "name"), extra.id, "name", "extra", graph.facts[0].evidence
+    )
+    with pytest.raises(DelegationFormatError, match="unsupported entities"):
+        _validate_attachment_profile(
+            rehash(replace(graph, entities=(*graph.entities, extra), facts=(*graph.facts, name)))
+        )
+
+
+def test_authorizer_analysis_is_unresolved_only_and_preserves_authority():
+    result = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [authorizer_chain()],
+        {authorizer_chain().hops[0].source.locator: AUTHORIZER.read_bytes()},
+        as_of="2026-08-25T12:00:00Z",
+    )
+
+    assert result.authority.as_dict() == analyse_delegations(
+        mandate(), [], [], {}, as_of="2026-08-25T12:00:00Z"
+    ).authority.as_dict()
+    assert not result.clean and not result.attenuated
+    assert "delegation.validity-unresolved" in {finding.code for finding in result.findings}
+    assert "delegation.surface-unresolved" in {finding.code for finding in result.findings}
+    assert "delegation.widens" not in {finding.code for finding in result.findings}
+    assert all(finding.support for finding in result.findings)
+
+
+def test_complete_monotonic_chain_attenuates_and_rewidening_is_detected():
+    chain = analyzable_chain()
+    contents = {chain.hops[0].source.locator: AUTHORIZER.read_bytes()}
+    clean = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [chain],
+        contents,
+        as_of="2026-08-25T00:00:00Z",
+    )
+    assert clean.clean
+    assert len(clean.attenuated) == 1
+    assert any(item.startswith("fact:") for item in clean.attenuated[0].support)
+    assert any(item.startswith("edge:") for item in clean.attenuated[0].support)
+
+    raw = chain.as_dict()
+    raw["hops"][2]["surface"]["scopes"]["members"].append("mail:send")
+    widened = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [parse(raw)],
+        contents,
+        as_of="2026-08-25T00:00:00Z",
+    )
+    finding = next(item for item in widened.findings if item.code == "delegation.widens")
+    assert finding.hop == "hop-3" and finding.dimension == "scopes"
+    assert finding.support
+    assert not widened.attenuated
+
+
+def test_expiry_is_exclusive_and_partial_history_taints_the_whole_chain():
+    chain = analyzable_chain()
+    contents = {chain.hops[0].source.locator: AUTHORIZER.read_bytes()}
+    expired = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [chain],
+        contents,
+        as_of="2026-08-26T00:00:00Z",
+    )
+    assert all(item.code == "delegation.validity-unresolved" for item in expired.findings)
+
+    raw = chain.as_dict()
+    raw["hops"][1]["actor_history"] = "partial"
+    partial = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [parse(raw)],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any(item.code == "delegation.actor-history-unresolved" for item in partial.findings)
+    assert not partial.attenuated
+
+
+def test_analysis_names_missing_locator_and_rejects_noncanonical_time():
+    chain = analyzable_chain()
+    result = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [chain],
+        {},
+        as_of="2026-08-25T12:00:00Z",
+    )
+    source = next(item for item in result.findings if item.code == "delegation.source-unresolved")
+    assert chain.hops[0].source.locator in source.message
+
+    with pytest.raises(DelegationFormatError, match="canonical UTC timestamp"):
+        analyse_delegations(
+            mandate(), [], [], {}, as_of="2026-08-25T12:00:00+00:00"
+        )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "agentkit/mandate.yaml",
+        "github-mcp-server/mandate.yaml",
+        "aws-postgres-mcp/mandate.yaml",
+        "sentry-mcp/mandate.yaml",
+    ],
+)
+def test_empty_delegation_inputs_preserve_all_four_evidence_graphs(path):
+    value = load(Path(__file__).parents[1] / "docs" / "evidence" / path)
+    result = analyse_delegations(value, [], [], {}, as_of="2026-08-25T12:00:00Z")
+
+    assert result.authority.as_dict() == analyse(value).as_dict()
+    assert result.clean and not result.attenuated
+
+
+def test_analysis_reports_attachment_join_failures_without_omission():
+    chain = analyzable_chain()
+    contents = {chain.hops[0].source.locator: AUTHORIZER.read_bytes()}
+    base = attachment()
+    cases = [
+        (replace(base, target=replace(base.target, tool="missing")), [chain], "target tool"),
+        (base, [], "chain is missing"),
+        (replace(base, hop="missing"), [chain], "hop is missing"),
+        (replace(base, evidence=replace(base.evidence, review="contested")), [chain], "not exact"),
+        (replace(base, evidence=replace(base.evidence, expires="2025-01-01")), [chain], "expired"),
+    ]
+    for item, chains, message in cases:
+        result = analyse_delegations(
+            mandate(), [item], chains, contents, as_of="2026-08-25T12:00:00Z"
+        )
+        assert any(message in finding.message for finding in result.findings)
+        assert not result.attenuated
+
+    duplicate = analyse_delegations(
+        mandate(), [base, base], [chain], contents, as_of="2026-08-25T12:00:00Z"
+    )
+    assert any("more than once" in finding.message for finding in duplicate.findings)
+
+    ambiguous = analyse_delegations(
+        mandate(), [base], [chain, chain], contents, as_of="2026-08-25T12:00:00Z"
+    )
+    assert any("ambiguous" in finding.message for finding in ambiguous.findings)
+
+    foreign = analyse_delegations(
+        mandate(),
+        [base],
+        [chain],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+        target_binding="other",
+    )
+    assert any("selected source binding" in finding.message for finding in foreign.findings)
+
+
+def test_analysis_requires_current_reviewed_hops_and_surfaces():
+    chain = analyzable_chain()
+    contents = {chain.hops[0].source.locator: AUTHORIZER.read_bytes()}
+    contested = Evidence("exact", "contested", "reviewer", "2027-08-25")
+    contested_hops = tuple(
+        replace(
+            hop,
+            evidence=contested,
+            scopes=replace(hop.scopes, evidence=contested),
+            tools=replace(hop.tools, evidence=contested),
+            effects=replace(hop.effects, evidence=contested),
+        )
+        for hop in chain.hops
+    )
+    result = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [replace(chain, hops=contested_hops)],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any("hop evidence" in finding.message for finding in result.findings)
+    assert not any(finding.code == "delegation.widens" for finding in result.findings)
+
+    expired = Evidence("exact", "accepted", "reviewer", "2025-01-01")
+    first = chain.hops[0]
+    expired_first = replace(
+        first,
+        evidence=expired,
+        scopes=replace(first.scopes, evidence=expired),
+        tools=replace(first.tools, evidence=expired),
+        effects=replace(first.effects, evidence=expired),
+    )
+    result = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [replace(chain, hops=(expired_first, *chain.hops[1:]))],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any("hop review is expired" in finding.message for finding in result.findings)
+    assert any("surface evidence" in finding.message for finding in result.findings)
+
+
+def test_analysis_distinguishes_domain_and_tool_widening_and_distrust():
+    chain = analyzable_chain()
+    contents = {chain.hops[0].source.locator: AUTHORIZER.read_bytes()}
+    third = chain.hops[2]
+    changed_domain = replace(third, scopes=replace(third.scopes, domain="other"))
+    result = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [replace(chain, hops=(*chain.hops[:2], changed_domain, chain.hops[3]))],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any("incomparable domains" in finding.message for finding in result.findings)
+
+    foreign_attachment = replace(attachment(), tool_domain="other")
+    result = analyse_delegations(
+        mandate(),
+        [foreign_attachment],
+        [chain],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any("tool attachment" in finding.message for finding in result.findings)
+
+    last = chain.hops[-1]
+    narrowed = replace(last, tools=replace(last.tools, members=()))
+    widened_chain = replace(chain, hops=(*chain.hops[:-1], narrowed))
+    result = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [widened_chain],
+        contents,
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any("tool authority exceeds" in finding.message for finding in result.findings)
+
+    unverified = analyse_delegations(
+        mandate(),
+        [attachment()],
+        [widened_chain],
+        {last.source.locator: b"wrong"},
+        as_of="2026-08-25T12:00:00Z",
+    )
+    assert any(finding.code == "delegation.source-unresolved" for finding in unverified.findings)
+    assert not any(finding.code == "delegation.widens" for finding in unverified.findings)

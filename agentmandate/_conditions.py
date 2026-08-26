@@ -1551,7 +1551,11 @@ def _validate_principal_profile(graph: AuthorityIR) -> None:
 
 
 def _validate_projection_source(
-    graph: AuthorityIR, kind: str, adapter: str, adapter_version: int
+    graph: AuthorityIR,
+    kind: str,
+    adapter: str,
+    adapter_version: int,
+    format_version: int = 1,
 ) -> None:
     try:
         graph.validate()
@@ -1562,7 +1566,7 @@ def _validate_projection_source(
     source = graph.sources[0]
     if (
         source.kind != kind
-        or source.format_version != 1
+        or source.format_version != format_version
         or source.adapter != adapter
         or source.adapter_version != adapter_version
     ):

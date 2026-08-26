@@ -201,6 +201,7 @@ def test_relation_registry_declares_cardinality_merge_and_support_predicate() ->
     } == {
         "acts_as": ("one", "single", "principal", False, "input"),
         "acts_under": ("many", "union", "actors", False, "input"),
+        "at_hop": ("one", "single", "hop", False, "input"),
         "can_reach": ("many", "union", None, True, "reachable"),
         "ceiling_on": ("one", "single", "scope_key", False, "input"),
         "contains_tool": ("many", "union", "members", False, "input"),
@@ -218,6 +219,7 @@ def test_relation_registry_declares_cardinality_merge_and_support_predicate() ->
         "role_contains": ("many", "union", "members", False, "input"),
         "transitions_to": ("many", "union", None, True, "transition"),
         "under_grant": ("one", "single", "grant", False, "input"),
+        "uses_delegation": ("one", "single", "delegation", False, "input"),
         "uses_context": ("one", "single", "context", False, "input"),
     }
 
