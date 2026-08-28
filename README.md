@@ -255,6 +255,7 @@ A ceiling is the maximum **cumulative** value one tool may spend against one bin
 | `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
 | `mandate inventory` | Structurally validates a dynamic-inventory declaration without accepting its membership as authority |
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |
+| `mandate delegations` | Structurally validates a delegation attachment or chain without accepting it as authority |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing. Reads [OpenTelemetry traces](https://github.com/mrwersa/agentmandate/blob/main/docs/traces.md) with `--otel` |
 | `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |

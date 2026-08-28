@@ -19,6 +19,15 @@ from ._conditions import (
     analyse_conditions,
     reconcile_condition_drift,
 )
+from ._delegation import (
+    DelegationAnalysis,
+    DelegationAttachment,
+    DelegationChain,
+    DelegationFormatError,
+    _chain_locators,
+    _timestamp,
+    analyse_delegations,
+)
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
 from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
@@ -91,6 +100,48 @@ def _add_condition_options(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_delegation_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--delegation-attachment",
+        action="append",
+        default=None,
+        metavar="ATTACHMENT",
+        help="reviewed tool-to-delegation attachment; repeatable",
+    )
+    parser.add_argument(
+        "--delegation-chain",
+        action="append",
+        default=None,
+        metavar="CHAIN",
+        help="reviewed delegation-chain artifact; repeatable",
+    )
+    parser.add_argument(
+        "--delegation-capture",
+        action="append",
+        default=None,
+        metavar="LOCATOR=PATH",
+        help="captured bytes for one reviewed source locator; repeatable",
+    )
+    parser.add_argument(
+        "--delegation-as-of",
+        default=None,
+        metavar="UTC_TIMESTAMP",
+        help="canonical UTC timestamp used for delegation validity",
+    )
+    parser.add_argument(
+        "--delegation-target-source",
+        default=None,
+        metavar="SOURCE",
+        help="selected repository-relative source addressed by attachments",
+    )
+    parser.add_argument(
+        "--delegation-target-binding",
+        default=None,
+        metavar="BINDING",
+        help="selected source binding addressed by attachments",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mandate",
@@ -142,6 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="emit a Mermaid diagram of the authority graph and the breaching path",
     )
     _add_condition_options(reach_parser)
+    _add_delegation_options(reach_parser)
 
     ir_parser = subparsers.add_parser(
         "ir",
@@ -190,6 +242,21 @@ def build_parser() -> argparse.ArgumentParser:
     conditions_input.add_argument(
         "--context", help="path to one condition-context artifact"
     )
+
+    delegations_parser = subparsers.add_parser(
+        "delegations",
+        help="structurally validate delegation artifacts",
+    )
+    delegations_subparsers = delegations_parser.add_subparsers(
+        dest="delegations_command", required=True
+    )
+    delegations_validate = delegations_subparsers.add_parser(
+        "validate",
+        help="validate artifact structure without accepting it as authority",
+    )
+    delegations_input = delegations_validate.add_mutually_exclusive_group(required=True)
+    delegations_input.add_argument("--attachment", help="path to one attachment artifact")
+    delegations_input.add_argument("--chain", help="path to one delegation-chain artifact")
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -458,6 +525,149 @@ def _run_conditions(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _run_delegations(args: argparse.Namespace) -> int:
+    try:
+        if args.attachment is not None:
+            value = DelegationAttachment.from_json(_read_text(args.attachment))
+            output = f"valid delegation attachment v{value.version}\n"
+        else:
+            value = DelegationChain.from_json(_read_text(args.chain))
+            output = f"valid delegation chain v{value.version}\n"
+    except (DelegationFormatError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_OK
+
+
+def _delegations_supplied(args: argparse.Namespace) -> bool:
+    return bool(
+        getattr(args, "delegation_attachment", None)
+        or getattr(args, "delegation_chain", None)
+        or getattr(args, "delegation_capture", None)
+        or getattr(args, "delegation_as_of", None)
+        or getattr(args, "delegation_target_source", None)
+        or getattr(args, "delegation_target_binding", None)
+    )
+
+
+def _delegation_inputs(
+    args: argparse.Namespace,
+) -> tuple[
+    tuple[DelegationAttachment, ...],
+    tuple[DelegationChain, ...],
+    dict[str, bytes],
+    str,
+    str,
+    str,
+] | None:
+    if not _delegations_supplied(args):
+        return None
+    attachment_paths = args.delegation_attachment or []
+    chain_paths = args.delegation_chain or []
+    capture_values = args.delegation_capture or []
+    if not attachment_paths:
+        raise DelegationFormatError("--delegation-attachment is required")
+    if not chain_paths:
+        raise DelegationFormatError("--delegation-chain is required")
+    if args.delegation_as_of is None:
+        raise DelegationFormatError("--delegation-as-of is required")
+    _timestamp(
+        {"as_of": args.delegation_as_of},
+        "as_of",
+        "command_line",
+    )
+    if args.delegation_target_source is None:
+        raise DelegationFormatError("--delegation-target-source is required")
+    if args.delegation_target_binding is None:
+        raise DelegationFormatError("--delegation-target-binding is required")
+    attachments = tuple(
+        DelegationAttachment.from_json(_read_text(path)) for path in attachment_paths
+    )
+    chains = tuple(DelegationChain.from_json(_read_text(path)) for path in chain_paths)
+    source_bytes: dict[str, bytes] = {}
+    for value in capture_values:
+        if "=" not in value:
+            raise DelegationFormatError(
+                "--delegation-capture must be LOCATOR=PATH"
+            )
+        locator, path = value.split("=", maxsplit=1)
+        if not locator or not path:
+            raise DelegationFormatError(
+                "--delegation-capture must be LOCATOR=PATH"
+            )
+        content = Path(path).read_bytes()
+        previous = source_bytes.get(locator)
+        if previous is not None and previous != content:
+            raise DelegationFormatError(
+                "one delegation locator supplied different capture bytes"
+            )
+        source_bytes[locator] = content
+    required_locators = set().union(*(_chain_locators(chain) for chain in chains))
+    missing = sorted(required_locators - source_bytes.keys())
+    if missing:
+        raise DelegationFormatError(
+            f"--delegation-capture is required for reviewed locator {missing[0]}"
+        )
+    if source_bytes.keys() - required_locators:
+        raise DelegationFormatError(
+            "--delegation-capture includes an undeclared locator"
+        )
+    return (
+        attachments,
+        chains,
+        source_bytes,
+        args.delegation_as_of,
+        args.delegation_target_source,
+        args.delegation_target_binding,
+    )
+
+
+def _delegation_payload(analysis: DelegationAnalysis) -> dict[str, Any]:
+    return {
+        "schema": "agentmandate.delegations/v1",
+        "as_of": analysis.as_of,
+        "attenuated": [
+            {
+                "attachment": item.attachment,
+                "tool": item.tool,
+                "delegation": item.delegation,
+                "hop": item.hop,
+                "support": list(item.support),
+            }
+            for item in analysis.attenuated
+        ],
+        "findings": [
+            {
+                "code": item.code,
+                "attachment": item.attachment,
+                "tool": item.tool,
+                "hop": item.hop,
+                "dimension": item.dimension,
+                "message": item.message,
+                "support": list(item.support),
+            }
+            for item in analysis.findings
+        ],
+    }
+
+
+def _render_delegations(analysis: DelegationAnalysis) -> str:
+    lines = [f"delegations  evaluated as of {analysis.as_of}"]
+    for item in analysis.attenuated:
+        lines.append(
+            f"  ATTENUATED  {item.tool} ({item.attachment} -> {item.delegation}#{item.hop})"
+        )
+    for item in analysis.findings:
+        status = "WIDENS" if item.code == "delegation.widens" else "UNRESOLVED"
+        location = "" if item.hop is None else f" at {item.hop}"
+        if item.dimension is not None:
+            location += f"/{item.dimension}"
+        lines.append(f"  {status:<10} {item.tool} ({item.attachment}){location}")
+        lines.append(f"      {item.message}")
+    return "\n".join(lines)
+
+
 def _conditions_supplied(args: argparse.Namespace) -> bool:
     return bool(
         getattr(args, "condition", None)
@@ -619,6 +829,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "conditions":
         return _run_conditions(args)
 
+    if args.command == "delegations":
+        return _run_delegations(args)
+
     if args.command == "scan":
         try:
             if args.source is not None:
@@ -667,10 +880,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return EXIT_USAGE
+        if _delegations_supplied(args) and args.ir_snapshot is not None:
+            print(
+                "error: delegation artifacts require a manifest; standalone "
+                "delegation profiles cannot be composed with --ir",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if _delegations_supplied(args) and (args.sarif or args.graph):
+            print(
+                "error: delegation findings currently support human or --json "
+                "output, not --sarif or --graph",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if _delegations_supplied(args) and _conditions_supplied(args):
+            print(
+                "error: conditional and delegation findings cannot yet be composed safely",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
 
     ir_result = None
     ir_json = None
     condition_inputs = None
+    delegation_inputs = None
     try:
         if args.command == "diff":
             before = load(args.before)
@@ -684,8 +918,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             mandate = load(args.manifest)
         if args.command in {"reach", "drift"}:
             condition_inputs = _condition_inputs(args)
+        if args.command == "reach":
+            delegation_inputs = _delegation_inputs(args)
     except (
         ConditionFormatError,
+        DelegationFormatError,
         IRFormatError,
         ManifestError,
         OSError,
@@ -807,7 +1044,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_FINDING if any(f.severity == ERROR for f in findings) else EXIT_OK
 
     if args.command == "reach":
-        if condition_inputs is not None:
+        if delegation_inputs is not None:
+            (
+                attachments,
+                chains,
+                contents,
+                as_of,
+                target_source,
+                target_binding,
+            ) = delegation_inputs
+            delegation_analysis = analyse_delegations(
+                mandate,
+                attachments,
+                chains,
+                contents,
+                as_of=as_of,
+                depth=args.depth,
+                target_source=target_source,
+                target_binding=target_binding,
+            )
+            conditional_analysis = None
+            authority = delegation_analysis.authority
+        elif condition_inputs is not None:
             conditions, contexts, contents, as_of = condition_inputs
             conditional_analysis = analyse_conditions(
                 mandate,
@@ -817,9 +1075,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 as_of=as_of,
                 depth=args.depth,
             )
+            delegation_analysis = None
             authority = conditional_analysis.authority
         else:
             conditional_analysis = None
+            delegation_analysis = None
             authority = (
                 ir_result.authority
                 if ir_result is not None
@@ -852,9 +1112,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             if conditional_analysis is not None:
                 payload["conditions"] = _condition_payload(conditional_analysis)
                 text = f"{_render_conditions(conditional_analysis)}\n\n{text}"
+            if delegation_analysis is not None:
+                payload["delegations"] = _delegation_payload(delegation_analysis)
+                text = f"{_render_delegations(delegation_analysis)}\n\n{text}"
             _emit(payload, args.json, text)
         finding = bool(authority.breaches) or bool(
             conditional_analysis is not None and conditional_analysis.findings
+        ) or bool(
+            delegation_analysis is not None and delegation_analysis.findings
         )
         return EXIT_FINDING if finding else EXIT_OK
 

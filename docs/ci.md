@@ -107,6 +107,27 @@ needed; pair every context with one capture in the same argument order. SARIF,
 Mermaid, and `reach --ir` composition are intentionally refused until those
 formats can carry unresolved condition evidence without implying a clean run.
 
+Delegation evidence uses the same validate-then-consume boundary. Capture
+arguments map each reviewed locator to local bytes explicitly; the command
+never follows a locator or reads the clock:
+
+```yaml
+- run: mandate delegations validate --attachment reviewed-attachment.json
+- run: mandate delegations validate --chain reviewed-chain.json
+- run: >-
+    mandate reach mandate.yaml
+    --delegation-attachment reviewed-attachment.json
+    --delegation-chain reviewed-chain.json
+    --delegation-capture docs/evidence/capture.json=reviewed-capture.json
+    --delegation-as-of 2027-01-01T12:00:00Z
+    --delegation-target-source deploy/agent.py
+    --delegation-target-binding agent
+```
+
+Repeat attachment, chain, and locator mappings as needed. Delegation findings
+support human and JSON output; SARIF, Mermaid, `reach --ir`, and conditional
+composition fail before output rather than dropping uncertainty.
+
 `ir validate` is a structural transport check and exits 0 even when evidence is
 contested or heuristic. `reach --ir` is the trust boundary: unsupported
 adapters, predicates, value shapes, or non-exact/non-accepted evidence exit 2

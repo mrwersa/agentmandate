@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -22,6 +23,9 @@ CONDITIONAL_MANIFEST_PATH = ROOT / "tests/fixtures/conditional-mandate-v1.yaml"
 CONDITIONAL_SOURCE = ROOT / "tests/fixtures/conditional-source"
 CONDITIONAL_REACH_RESULT = ROOT / "tests/fixtures/conditional-reach-result-v1.json"
 CONDITIONAL_DRIFT_RESULT = ROOT / "tests/fixtures/conditional-drift-result-v1.json"
+DELEGATION_ATTACHMENT = ROOT / "tests/fixtures/delegation-attachment-v2.json"
+DELEGATION_CHAIN = ROOT / "tests/fixtures/delegation-chain-authorizer-v1.json"
+DELEGATION_CAPTURE = ROOT / "docs/evidence/authorizer-delegation/capture.json"
 
 CONDITIONAL_MANIFEST = """
 agent: sql-agent
@@ -64,6 +68,69 @@ def write_conditional_source(tmp_path: Path) -> Path:
         encoding="utf-8",
     )
     return root
+
+
+def delegation_args(*, as_of: str = "2026-08-25T12:00:00Z") -> list[str]:
+    return [
+        "--delegation-attachment",
+        str(DELEGATION_ATTACHMENT),
+        "--delegation-chain",
+        str(DELEGATION_CHAIN),
+        "--delegation-capture",
+        f"docs/evidence/authorizer-delegation/capture.json={DELEGATION_CAPTURE}",
+        "--delegation-as-of",
+        as_of,
+        "--delegation-target-source",
+        "deploy/agent.py",
+        "--delegation-target-binding",
+        "agent",
+    ]
+
+
+def write_delegation_manifest(tmp_path: Path) -> Path:
+    path = tmp_path / "mandate.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "agent": "export-agent",
+                "tools": [
+                    {
+                        "name": "export_records",
+                        "effect": "read",
+                        "requires": ["openid"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def write_analyzable_delegation_chain(tmp_path: Path) -> Path:
+    raw = json.loads(DELEGATION_CHAIN.read_text(encoding="utf-8"))
+    for hop in raw["hops"]:
+        hop["validity"] = {
+            "kind": "window",
+            "issued_at": "2026-08-25T00:00:00Z",
+            "expires_at": "2026-08-26T00:00:00Z",
+        }
+        for dimension, members in {
+            "tools": ["export_records"],
+            "effects": ["read"],
+        }.items():
+            hop["surface"][dimension].update(
+                domain="demo",
+                basis="deployment_policy",
+                completeness="complete",
+                members=members,
+                evidence=hop["evidence"],
+                source=hop["source"],
+            )
+    path = tmp_path / "chain.json"
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    return path
 
 
 def test_lint_is_clean_on_the_shipped_v1_example(capsys):
@@ -117,6 +184,168 @@ def test_conditions_validate_failure_emits_no_stdout(tmp_path, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "error:" in captured.err
+
+
+@pytest.mark.parametrize(
+    ("flag", "path", "output"),
+    [
+        ("--attachment", DELEGATION_ATTACHMENT, "valid delegation attachment v2"),
+        ("--chain", DELEGATION_CHAIN, "valid delegation chain v1"),
+    ],
+)
+def test_delegations_validate_is_structural_only(flag, path, output, capsys):
+    assert main(["delegations", "validate", flag, str(path)]) == EXIT_OK
+    assert capsys.readouterr().out == f"{output}\n"
+
+
+def test_delegations_validate_failure_emits_no_stdout(tmp_path, capsys):
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text('{"delegation_version":1,"unexpected":true}', encoding="utf-8")
+
+    assert main(["delegations", "validate", "--chain", str(invalid)]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "error:" in captured.err
+
+
+def test_reach_renders_authorizer_delegation_uncertainty(capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *delegation_args()]) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "delegations  evaluated as of 2026-08-25T12:00:00Z" in captured.out
+    assert "UNRESOLVED" in captured.out
+    assert "hop validity lacks an absolute timestamp window" in captured.out
+    assert "WIDENS" not in captured.out
+
+
+def test_reach_delegation_json_is_namespaced_and_complete(capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *delegation_args(), "--json"]) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    payload = json.loads(captured.out)
+    delegation = payload["delegations"]
+    assert delegation["schema"] == "agentmandate.delegations/v1"
+    assert delegation["as_of"] == "2026-08-25T12:00:00Z"
+    assert delegation["attenuated"] == []
+    assert {item["code"] for item in delegation["findings"]} == {
+        "delegation.surface-unresolved",
+        "delegation.validity-unresolved",
+    }
+    assert all(item["support"] for item in delegation["findings"])
+    assert hashlib.sha256(captured.out.encode()).hexdigest() == (
+        "37e8cc7f786e4e6b0bff38325d0770d72a888c6059eee82d71c62fba8ed2492d"
+    )
+
+
+def test_reach_renders_clean_delegation_attenuation(capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+    chain = write_analyzable_delegation_chain(tmp_path)
+    args = delegation_args(as_of="2026-08-25T00:00:00Z")
+    args[args.index("--delegation-chain") + 1] = str(chain)
+
+    assert main(["reach", str(manifest), *args]) == EXIT_OK
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "ATTENUATED" in captured.out
+    assert "UNRESOLVED" not in captured.out and "WIDENS" not in captured.out
+
+
+@pytest.mark.parametrize(
+    ("args", "message"),
+    [
+        (["--delegation-attachment", str(DELEGATION_ATTACHMENT)], "chain is required"),
+        (["--delegation-chain", str(DELEGATION_CHAIN)], "attachment is required"),
+        (
+            delegation_args(as_of="2026-08-25T12:00:00+00:00"),
+            "canonical UTC timestamp",
+        ),
+        (
+            [*delegation_args()[:4], *delegation_args()[6:]],
+            "capture is required",
+        ),
+        (
+            [*delegation_args(), "--delegation-capture", "bad"],
+            "LOCATOR=PATH",
+        ),
+    ],
+)
+def test_reach_delegation_input_failures_emit_no_stdout(args, message, capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *args]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+def test_reach_delegation_requires_every_context_field(capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+    complete = delegation_args()
+    for flag, message in [
+        ("--delegation-as-of", "as-of is required"),
+        ("--delegation-target-source", "target-source is required"),
+        ("--delegation-target-binding", "target-binding is required"),
+    ]:
+        index = complete.index(flag)
+        args = [*complete[:index], *complete[index + 2 :]]
+        assert main(["reach", str(manifest), *args]) == EXIT_USAGE
+        captured = capsys.readouterr()
+        assert captured.out == "" and message in captured.err
+
+
+def test_reach_delegation_rejects_bad_capture_mappings(capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+    capture = tmp_path / "other.json"
+    capture.write_text("{}", encoding="utf-8")
+    cases = [
+        ("=missing", "LOCATOR=PATH"),
+        (f"undeclared={capture}", "undeclared locator"),
+    ]
+    for value, message in cases:
+        args = [*delegation_args(), "--delegation-capture", value]
+        assert main(["reach", str(manifest), *args]) == EXIT_USAGE
+        captured = capsys.readouterr()
+        assert captured.out == "" and message in captured.err
+
+    locator = "docs/evidence/authorizer-delegation/capture.json"
+    args = [*delegation_args(), "--delegation-capture", f"{locator}={capture}"]
+    assert main(["reach", str(manifest), *args]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == "" and "different capture bytes" in captured.err
+
+
+@pytest.mark.parametrize("format_flag", ["--sarif", "--graph"])
+def test_reach_refuses_delegation_formats_before_output(format_flag, capsys, tmp_path):
+    manifest = write_delegation_manifest(tmp_path)
+
+    assert main(["reach", str(manifest), *delegation_args(), format_flag]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "human or --json" in captured.err
+
+
+def test_reach_refuses_delegation_ir_and_condition_composition(capsys):
+    assert (
+        main(
+            [
+                "reach",
+                "--ir",
+                str(ROOT / "tests/fixtures/authority-ir-v1.json"),
+                *delegation_args(),
+            ]
+        )
+        == EXIT_USAGE
+    )
+    captured = capsys.readouterr()
+    assert captured.out == "" and "cannot be composed with --ir" in captured.err
+
+    assert main(["reach", V1, *delegation_args(), *condition_args()]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == "" and "cannot yet be composed safely" in captured.err
 
 
 def test_reach_applies_reviewed_conditional_authority(tmp_path, capsys):
