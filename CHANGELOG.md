@@ -6,18 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.13.0 - 2026-08-28
+
 ### Added
 
-- Authority IR validation recognizes additive delegation-chain relations used
-  by a private experimental profile. Structural validity does not make a chain
-  analyzable authority, and `mandate reach --ir` continues to reject it at the
-  manifest profile boundary.
-- Private delegation analysis now re-verifies reviewed chain attachments,
-  absolute validity windows, authority surfaces, and hop-to-hop attenuation.
-  `mandate delegations validate` checks attachment or chain structure without
-  trusting it. Manifest-mode `mandate reach` accepts explicitly mapped capture
-  bytes, a selected source binding, and a UTC evaluation timestamp; delegation
-  JSON is namespaced as `agentmandate.delegations/v1`.
+- Reviewed delegation artifacts represent the subject, ordered actor history,
+  audience, per-hop validity, and independently sourced scope, tool, and effect
+  surfaces. `mandate delegations validate` checks an attachment or chain
+  structurally without accepting its evidence as authority.
+- Manifest-mode `mandate reach` analyzes attached delegation chains using
+  explicit capture mappings, one selected source binding, and a caller-supplied
+  UTC timestamp. It verifies the closed evidence profiles, applies half-open
+  validity windows, and reports attenuated decisions plus unresolved or
+  widening findings in human output and `agentmandate.delegations/v1` JSON.
+- Authority IR validation recognizes provenance-bearing delegation entities
+  and relations. Standalone delegation profiles remain distinct from manifest
+  authority and are rejected by `mandate reach --ir`.
+- `python scripts/evidence_lint.py` verifies strict same-directory SHA-256
+  citations in real-graph evidence notes and fails closed for missing,
+  misspelled, or path-escaping artifacts.
+
+Delegation analysis does not infer deployment policy from OAuth scopes. The
+real Authorizer chain therefore remains unresolved where its validity or
+tool/effect surfaces are unknown. `delegation.widens` is currently demonstrated
+only by reviewed synthetic fixtures until an operational scope-to-tool mapping
+is captured.
 
 ## 0.12.0 - 2026-08-23
 
