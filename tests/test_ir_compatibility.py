@@ -30,7 +30,7 @@ def test_every_example_and_real_evidence_graph_round_trips(path: Path) -> None:
     assert source.content_sha256 == hashlib.sha256(content).hexdigest()
 
 
-def test_the_matrix_is_all_examples_and_four_independent_graphs() -> None:
+def test_the_matrix_is_all_examples_and_five_independent_graphs() -> None:
     assert {path.name for path in EXAMPLE_MANIFESTS} == {
         "dispute-resolver-sod.yaml",
         "dispute-resolver-v2.yaml",
@@ -40,6 +40,7 @@ def test_the_matrix_is_all_examples_and_four_independent_graphs() -> None:
         "agentkit",
         "aws-postgres-mcp",
         "github-mcp-server",
+        "initiative-mcp",
         "sentry-mcp",
     }
 
