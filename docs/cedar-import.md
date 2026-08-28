@@ -17,7 +17,7 @@ while returning those errors in diagnostics
 Those properties are precise enough to test without treating Cedar as
 AgentMandate's policy language.
 
-The experiment pins the Cedar CLI release
+The experiment pins the Cedar implementation release
 [`v4.12.0`](https://github.com/cedar-policy/cedar/releases/tag/v4.12.0) and the
 official `cedar-examples` commit
 [`c251f7d`](https://github.com/cedar-policy/cedar-examples/tree/c251f7d1ad171bd12dee5d1d7a1cceaec994518f/cedar-example-use-cases/document_cloud).
@@ -51,7 +51,8 @@ the schema as a contract with the application
 A repository fixture is a directory with a canonical `bundle.json` index and
 digest-pinned files. The index records:
 
-- `bundle_version`, Cedar language version, CLI release and executable digest;
+- `bundle_version`, Cedar language, SDK, implementation package, and package
+  integrity versions;
 - policy-set, schema, entity, and request-corpus locators with content digests;
 - the policy representation (`cedar` text or Cedar's
   [JSON policy-set format](https://docs.cedarpolicy.com/policies/json-format.html));
@@ -62,8 +63,9 @@ digest-pinned files. The index records:
 - capture adapter identity/version and an explicit completeness statement.
 
 The core package does not gain a Cedar parser or runtime dependency. A capture
-script invokes the pinned external CLI, preserves its raw output, and emits the
-JSON index. The private reader only validates that index and its digests.
+script invokes a pinned official Cedar distribution, preserves its raw output,
+and emits the JSON index. The private reader only validates that index and its
+digests.
 Caller-supplied bytes are hashed; the reader does not fetch policy stores,
 execute Cedar, read credentials, or consult the wall clock.
 
@@ -71,6 +73,22 @@ The first fixture uses the official document-cloud schema, policies, entities,
 one `ALLOW` request, and one `DENY` request. This proves transport and decision
 reproduction. It is not an agent deployment and therefore cannot satisfy the
 mapping or authority-eligibility gates.
+
+The gate-2 fixture uses the official `@cedar-policy/cedar-wasm` 4.12.0 Node
+distribution because Cedar does not publish a CLI binary release asset. The
+npm lock and SRI pin the distributed implementation. The bundle separately
+records language 4.5 and SDK 4.12.0, so the adapter does not conflate those
+versions.
+
+### Offline and native reproduction
+
+Committed native output is the required offline oracle. Python CI verifies the
+strict bundle, every source digest, decision summaries, and the recorded native
+schema-check failure without installing Node. When the pinned npm package is
+available, a focused test runs `capture.mjs` and requires byte-identical output.
+Contributors can reproduce that optional check with `npm ci --ignore-scripts`
+and `npm run capture`. CI may later add the same recapture as a non-core job;
+the offline gate never trusts a fresh network response.
 
 ## Reviewed deployment mapping
 

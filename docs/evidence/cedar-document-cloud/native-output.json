@@ -1,0 +1,56 @@
+{
+  "cedar": {
+    "language_version": "4.5",
+    "sdk_version": "4.12.0"
+  },
+  "decisions": {
+    "allow": {
+      "type": "success",
+      "response": {
+        "decision": "allow",
+        "diagnostics": {
+          "reason": [
+            "policy1",
+            "policy9"
+          ],
+          "errors": []
+        }
+      },
+      "warnings": []
+    },
+    "deny": {
+      "type": "success",
+      "response": {
+        "decision": "deny",
+        "diagnostics": {
+          "reason": [
+            "policy4"
+          ],
+          "errors": []
+        }
+      },
+      "warnings": []
+    }
+  },
+  "schema_checked_probe": {
+    "type": "failure",
+    "errors": [
+      {
+        "message": "entity does not conform to the schema: in attribute `manageACL` on `Document::\"alice_public\"`, type mismatch: value was expected to have type `DocumentShare`, but it actually has type (entity of type `Document`): `Document::\"alice_public_manage\"`",
+        "help": null,
+        "code": null,
+        "url": null,
+        "severity": null,
+        "sourceLocations": [],
+        "related": []
+      }
+    ],
+    "warnings": []
+  },
+  "validation": {
+    "type": "success",
+    "validationErrors": [],
+    "validationWarnings": [],
+    "otherWarnings": []
+  }
+}
