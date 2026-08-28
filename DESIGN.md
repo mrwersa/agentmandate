@@ -71,6 +71,21 @@ depth 8 is not proof that none exists at depth 20, and the report says so when
 it truncated. Claiming otherwise would require a completeness argument this
 model does not support.
 
+### Reachability is existential
+
+A reachable path means there is **some** permitted sequence and some consistent
+assignment of bindings that enables it. It does not mean every caller-supplied
+resource tuple succeeds. This follows from scopes being resource types rather
+than instances: `case` means "a case", not a claim about case 4471.
+
+That distinction is a gate on relationship work. An API rejecting project A
+with project B's status is not by itself an analysis false positive when the
+same generic tools can select a status belonging to project A. A qualifying
+relationship counterexample needs a real fixed or otherwise constrained
+binding for which no consistent assignment exists, while the abstraction still
+reports the path. Otherwise a relationship may improve explanation, but it
+does not make reachability more precise.
+
 ## Why effective authority, not declared policy
 
 `diff` compares what two manifests *permit*, computed by running the search over

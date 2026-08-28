@@ -80,10 +80,23 @@ If a safe local API probe cannot reproduce both directions, the candidate is
 rejected. A hand-written `contains` edge or a hypothetical access matrix may
 supplement the package, but cannot satisfy item 3.
 
+## Initiative capture result
+
+The [completed capture](evidence/initiative-mcp/README.md) preserves all 25
+published tools, the byte-exact scanner skeleton, and the reviewed manifest.
+It fails item 3 above for a principled reason: the generic status-listing tool
+can select statuses for the same project later supplied to task creation, so a
+consistent accepted assignment exists. Current analysis reports tool
+reachability; it does not claim that a deliberately mismatched pair of bearer
+IDs succeeds. Initiative is therefore a falsified candidate, not relationship
+evidence, and a fixed-binding operational graph remains required. The follow-up
+acceptance test is tracked in
+[#106](https://github.com/mrwersa/agentmandate/issues/106).
+
 ## Decision
 
-Do not design the relation vocabulary yet. Capture Initiative or another real
-deployment first, then test only the minimum relations needed by its
+Do not design the relation vocabulary yet. Capture a fixed-binding real
+deployment, then test only the minimum relations needed by its
 counterexample against OpenFGA concepts. This preserves the roadmap's intended
 order: evidence selects the abstraction; the abstraction does not select
 convenient evidence.

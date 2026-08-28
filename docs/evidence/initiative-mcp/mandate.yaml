@@ -1,0 +1,83 @@
+version: 1
+agent: initiative-agent
+identity: spiffe://example/agents/initiative-agent
+
+limits:
+  depth: 8
+
+tools:
+  - name: list_projects_api_v1_g
+    effect: read
+    principal: caller
+  - name: list_writable_projects_api_v1_g
+    effect: read
+    principal: caller
+  - name: get_project_counts_by_initiative_api_v1_g
+    effect: read
+    principal: caller
+  - name: favorite_projects_api_v1_g
+    effect: read
+    principal: caller
+  - name: project_activity_feed_api_v1_g
+    effect: read
+    principal: caller
+  - name: read_project_api_v1_g
+    effect: read
+    principal: caller
+  - name: search_project_members_api_v1_g
+    effect: read
+    principal: caller
+  - name: list_task_statuses_api_v1_g
+    effect: read
+    principal: caller
+  - name: list_tasks_api_v1_g
+    effect: read
+    principal: caller
+  - name: create_task_api_v1_g
+    effect: write
+    principal: caller
+  - name: autocomplete_tasks_api_v1_g
+    effect: read
+    principal: caller
+  - name: read_task_api_v1_g
+    effect: read
+    principal: caller
+  - name: update_task_api_v1_g
+    effect: write
+    principal: caller
+  - name: move_task_api_v1_g
+    effect: irreversible
+    principal: caller
+  - name: list_subtasks_api_v1_g
+    effect: read
+    principal: caller
+  - name: create_comment_api_v1_g
+    effect: write
+    principal: caller
+  - name: list_initiatives_api_v1_g
+    effect: read
+    principal: caller
+  - name: get_initiative_api_v1_g
+    effect: read
+    principal: caller
+  - name: list_initiative_roles_api_v1_g
+    effect: read
+    principal: caller
+  - name: get_my_initiative_permissions_api_v1_g
+    effect: read
+    principal: caller
+  - name: get_initiative_members_api_v1_g
+    effect: read
+    principal: caller
+  - name: search_initiative_members_api_v1_g
+    effect: read
+    principal: caller
+  - name: list_my_tasks_api_v1_me_tasks_get
+    effect: read
+    principal: caller
+  - name: list_my_created_tasks_api_v1_me_tasks_created_get
+    effect: read
+    principal: caller
+  - name: list_my_projects_api_v1_me_projects_get
+    effect: read
+    principal: caller
