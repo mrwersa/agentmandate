@@ -1,7 +1,9 @@
 # Bounded Producer and Quantity Evidence Audit
 
-Status: **cardinality evidence gate not met**. This audit was completed on
-29 August 2026. It separates three losses that look similar in a small
+Status: **both evidence halves met; record contract pending**. This audit was
+completed on 29 August 2026 and updated after the
+[AWS IAM access-key capture](evidence/aws-iam-access-keys/README.md). It
+separates three losses that look similar in a small
 manifest—producer arity, binding cardinality, and value relationships—so the
 next schema does not solve the wrong problem.
 
@@ -29,6 +31,7 @@ not evidence unless the pinned implementation enforces it.
 | Sentry MCP | A hidden skill catalogue sits behind one dispatch tool | **Inventory/condition issue.** The partial catalogue does not establish a producer or an absence bound. |
 | Initiative MCP | List tools return project, status, task, and initiative identifiers | **Bearer selection, not production.** Callers can supply identifiers directly; returning a finite page does not grant new authority. |
 | AgentCore refund policy | One mapped tool has two representative request values | **Policy comparison only.** The managed decisions prove exact-request widening, not scope creation or a complete quantity domain. |
+| AWS IAM access keys | The pinned IAM MCP 1.0.11 tool returns two credentials for one user; the third call is rejected with `LimitExceeded` | **Cardinality half met for this versioned deployment.** Both accepted credentials authenticate and the rejected third path is exactly the path manifest v1 overstates. Current IAM MCP 1.0.23 redacts the secret and is explicitly outside the claim. |
 
 The distinction is load-bearing. AWS motivates a future multi-output record,
 but treating two output *types* as a bound of two would lose their meanings.
@@ -73,10 +76,26 @@ unless exhaustion alone rejects the reported authority path. A hand-written
 quota or finite set may be a synthetic control, but cannot be the load-bearing
 evidence.
 
+## Captured cardinality result
+
+The [AWS IAM fixture](evidence/aws-iam-access-keys/README.md) passes the eight
+criteria above for the published 1.0.11 connector. It preserves the complete
+29-tool catalogue, selects one producer in a reviewed adapter, authenticates
+two distinct returned credentials as one temporary IAM user, and records the
+third call's typed exhaustion error. The depth-two reach control is clean;
+depth three reports a binding that AWS did not produce. All live identifiers
+and secrets stay out of the repository, and cleanup is verified before the
+sanitized result is written.
+
+The version boundary is part of the finding. Current IAM MCP 1.0.23 redacts the
+secret, so its output is ordinary metadata rather than a usable binding. The
+fixture proves a real finite producer in a pinned public release; it does not
+claim a current-server vulnerability or justify restoring secret output.
+
 ## Decision
 
-Do not design bounded-producer records yet. Keep the AgentKit quantity evidence
-as one half of the prerequisite, track multi-output arity separately, and find
-an independent finite-cardinality counterexample through issue #125. This keeps
-the roadmap sequence evidence-first: the observed rejection selects the
-minimum state transition, support, and completeness rules.
+The two evidence prerequisites are now met: AgentKit supplies value/quantity
+relationships, and AWS IAM supplies a finite authority-bearing cardinality of
+two. Close issue #125 after independent review, then propose the minimum record
+contract from these separate distortions. Keep multi-output arity separate and
+preserve conservative defaults until that contract survives both fixtures.

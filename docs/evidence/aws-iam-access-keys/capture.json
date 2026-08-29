@@ -1,0 +1,58 @@
+{
+  "adapter": {
+    "name": "agentmandate.aws-iam-access-key-capture",
+    "version": 1
+  },
+  "capture_date": "2026-08-29",
+  "capture_version": 1,
+  "cleanup": {
+    "access_keys": 0,
+    "user_absent": true
+  },
+  "deployment": {
+    "attached_policies": [],
+    "region": "us-east-1",
+    "user_path": "/agentmandate-evidence/"
+  },
+  "identity": {
+    "principal_kind": "iam-user",
+    "same_principal": true
+  },
+  "outcomes": [
+    {
+      "attempt": 1,
+      "authenticated": true,
+      "binding": "access-key-1",
+      "outcome": "created",
+      "status": "Active"
+    },
+    {
+      "attempt": 2,
+      "authenticated": true,
+      "binding": "access-key-2",
+      "outcome": "created",
+      "status": "Active"
+    },
+    {
+      "attempt": 3,
+      "error_code": "LimitExceeded",
+      "outcome": "rejected"
+    }
+  ],
+  "producer": {
+    "mcp_version": "1.23.3",
+    "package": "awslabs.iam-mcp-server",
+    "package_version": "1.0.11",
+    "wheel_sha256": "e48d688f8e338098f410fcabfbedec304f65e63c179bb19001e5b80a2523de16"
+  },
+  "quota": {
+    "adjustable": false,
+    "kind": "access_keys_per_user",
+    "maximum": 2
+  },
+  "sanitization": {
+    "committed_live_identifiers": false,
+    "committed_secret_material": false,
+    "raw_credentials_written_to_disk": false
+  }
+}
