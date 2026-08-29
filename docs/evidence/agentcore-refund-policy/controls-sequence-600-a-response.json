@@ -1,0 +1,13 @@
+{
+  "id": "sequence-600-a",
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "text": "{\"processed\":true,\"amount\":600}",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  }
+}

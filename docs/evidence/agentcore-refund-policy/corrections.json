@@ -49,6 +49,14 @@
       "classification_status": "noncanonical",
       "affected_artifact": "candidate-managed-state.json",
       "description": "Redeployment changed live resource identifiers and review retained only the logical binding."
+    },
+    {
+      "id": "agentcore-007",
+      "reported_class": "extractor defect",
+      "classes": ["extractor defect"],
+      "classification_status": "canonical",
+      "affected_artifact": "controls-index.json",
+      "description": "A literal backslash-n made the first no-op policy invalid, so the rejected attempt was discarded before capture."
     }
   ]
 }

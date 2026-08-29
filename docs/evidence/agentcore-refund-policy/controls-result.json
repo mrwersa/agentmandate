@@ -1,0 +1,33 @@
+{
+  "comparisons": {
+    "narrow": [
+      "stable_deny",
+      "tightens"
+    ],
+    "noop": [
+      "stable_deny",
+      "stable_allow"
+    ]
+  },
+  "controls_version": 1,
+  "sequence": {
+    "aggregate_amount": 1200,
+    "calls": [
+      {
+        "amount": 600,
+        "id": "sequence-600-a",
+        "outcome": "allow"
+      },
+      {
+        "amount": 600,
+        "id": "sequence-600-b",
+        "outcome": "allow"
+      }
+    ],
+    "claim_boundary": "the managed policy enforces each request; it does not claim cumulative accounting",
+    "per_request_threshold": 1000,
+    "policy_revision": "PaperBaselinePolicy",
+    "sequence_version": 1
+  },
+  "status_proof": "each raw AgentCore status contained exactly one deployed gateway, target, engine, and policy; managed responses prove the configured policy was enforcing"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "baseline-500",
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "text": "{\"processed\":true,\"amount\":500}",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  }
+}

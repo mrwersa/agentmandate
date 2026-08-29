@@ -282,6 +282,32 @@ def _managed_comparison(root: Path) -> dict[str, Any]:
     }
 
 
+def _managed_controls(root: Path) -> dict[str, Any]:
+    result = _read(root / "agentcore-refund-policy" / "controls-result.json")
+    expected = {
+        "noop": ["stable_deny", "stable_allow"],
+        "narrow": ["stable_deny", "tightens"],
+    }
+    if result.get("controls_version") != 1 or result.get("comparisons") != expected:
+        raise ValueError("managed policy controls do not match the reviewed outcomes")
+    sequence = result.get("sequence")
+    if (
+        not isinstance(sequence, dict)
+        or sequence.get("per_request_threshold") != 1000
+        or sequence.get("aggregate_amount") != 1200
+        or [item.get("outcome") for item in sequence.get("calls", [])] != ["allow", "allow"]
+    ):
+        raise ValueError("managed permitted sequence does not match the reviewed outcomes")
+    return {
+        "capture": "agentcore-refund-policy",
+        "baseline_revision": "PaperBaselinePolicy",
+        "noop_revision": "PaperNoOpPolicy",
+        "narrowing_revision": "PaperNarrowPolicy",
+        "comparisons": result["comparisons"],
+        "permitted_sequence": sequence,
+    }
+
+
 def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
     corrections = _corrections(root)
     canonical = sum(record["classification_status"] == "canonical" for record in corrections)
@@ -318,6 +344,7 @@ def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
         },
         "corrections": corrections,
         "live_comparisons": [_managed_comparison(root)],
+        "managed_controls": [_managed_controls(root)],
     }
 
 

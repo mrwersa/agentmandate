@@ -1,0 +1,35 @@
+{
+  "actions": [
+    {
+      "cedar": "AgentCore::Action::\"PaperControlTarget___process_refund\"",
+      "tool": "process_refund"
+    }
+  ],
+  "mapping_version": 1,
+  "principal": {
+    "cedar_types": [
+      "AgentCore::IamEntity"
+    ],
+    "mandate_principal": "caller"
+  },
+  "request_domain": {
+    "completeness": "representative",
+    "evidence": {
+      "confidence": "exact",
+      "expires": "2027-08-29",
+      "review": "accepted",
+      "reviewer": "paper-study-review"
+    }
+  },
+  "resources": [
+    {
+      "binding": "agentcore-policy-control-gateway",
+      "cedar_type": "AgentCore::Gateway"
+    }
+  ],
+  "source": "controls-mapping.json",
+  "target": {
+    "agent": "policy-control-agent",
+    "source": "controls-mandate.yaml"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "capture_date": "2026-08-29",
+  "gateway": {
+    "authorizer_type": "AWS_IAM",
+    "policy_engine_mode": "ENFORCE",
+    "protocol_type": "MCP",
+    "status": "READY"
+  },
+  "policy": {
+    "enforcement_mode": "ACTIVE",
+    "inventory_count": 1,
+    "name": "PaperBaselinePolicy",
+    "requested_validation_mode": "FAIL_ON_ANY_FINDINGS",
+    "status": "ACTIVE"
+  },
+  "policy_engine": {
+    "status": "ACTIVE"
+  },
+  "sanitization": {
+    "decision_messages_changed": false,
+    "omitted": [
+      "account identifiers",
+      "Amazon Resource Names",
+      "generated resource identifiers",
+      "resource URLs",
+      "service timestamps"
+    ],
+    "policy_resource_replaced_with_binding": true
+  },
+  "tool_inventory_complete": true
+}
