@@ -233,6 +233,11 @@ consumer must validate the Cedar profile and reviewed mapping at every boundary,
 retain strongest manifest authority on uncertainty, and explain effective
 policy-versus-agent differences without reimplementing Cedar.
 
+The proposed [effective-diff contract](cedar-effective-diff.md) subdivides gate
+5 and keeps local Cedar-WASM decisions separate from managed AgentCore
+enforcement. Its records and comparison semantics remain unimplemented pending
+review.
+
 ## Explicit non-goals
 
 No Python Cedar parser, native-policy replacement, live policy-store discovery,
