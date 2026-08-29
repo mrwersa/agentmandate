@@ -1,11 +1,12 @@
 # Cedar effective-diff contract
 
-Status: **experimental; gates 5a–5d complete**. This is gate 5a of
+Status: **experimental; gates 5a–5e complete**. This is gate 5a of
 [#116](https://github.com/mrwersa/agentmandate/issues/116). It defines the
 trust boundary before records or analysis make the choices expensive. No
-current command consumes managed Cedar evidence or changes reachability from a
-policy decision. Gate 5c is private analysis only; gate 5d supplies live
-widening evidence, while the exposure review remains open.
+command changes manifest reachability from a policy decision. Gate 5c is the
+private analysis kernel, gate 5d supplies live widening evidence, and the
+[gate 5e review](cedar-effective-diff-gate-5-review.md) approves its narrow CLI
+presentation.
 
 ## Question and invariants
 
@@ -194,11 +195,13 @@ combine it with reviewed authority.
 5. **5e — exposure review:** challenge tampering, expiry, incomplete inventory,
    changed joins, representative-domain overclaim, default-deny attribution,
    profile conflation, output stability, and no-partial-output behavior before
-   any CLI or public Python surface.
+   any CLI or public Python surface. **Complete:** the
+   [recorded review](cedar-effective-diff-gate-5-review.md) reproduced this
+   matrix against a tree byte-identical to the merged CLI implementation.
 
-## Candidate CLI exposure
+## Public CLI exposure
 
-Gate 5e proposes only these public commands:
+Gate 5e approves only these public commands:
 
 ```text
 mandate cedar validate ORACLE
@@ -224,8 +227,8 @@ is not mislabeled as a usage error. No SARIF, Mermaid, Authority IR, condition,
 delegation, or runtime composition is claimed by these commands.
 
 The checked-in live diff JSON is byte-stable. The Python records remain private
-and absent from `agentmandate.__all__`. Gate 5e is not complete until an
-independent review reproduces this matrix against the merged CLI tree.
+and absent from `agentmandate.__all__`. The independent gate 5e review
+reproduced this matrix against the merged CLI tree.
 
 Every gate proves all six manifest evidence graphs, existing Cedar fixtures,
 and legacy CLI output remain byte-identical when no policy evidence is supplied.
@@ -250,5 +253,5 @@ becomes a policy Deny.
 No Cedar parser or evaluator, symbolic condition analysis, global proof from a
 representative corpus, inferred mapping, wildcard-as-mapping, managed/local
 oracle conflation, credential handling, live discovery in core, runtime proxy,
-automatic policy compilation, mutation of manifest authority, or public CLI
-before the exposure review.
+automatic policy compilation, mutation of manifest authority, or public Python
+records.
