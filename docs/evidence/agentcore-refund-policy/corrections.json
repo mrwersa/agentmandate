@@ -57,6 +57,14 @@
       "classification_status": "canonical",
       "affected_artifact": "controls-index.json",
       "description": "A literal backslash-n made the first no-op policy invalid, so the rejected attempt was discarded before capture."
+    },
+    {
+      "id": "agentcore-008",
+      "reported_class": "deployment policy",
+      "classes": ["deployment policy"],
+      "classification_status": "canonical",
+      "affected_artifact": "binding-index.json",
+      "description": "The first binding invocation exposed a missing Gateway-role workload-token permission; the permission was added narrowly before the evidence run."
     }
   ]
 }

@@ -101,6 +101,55 @@ recapture used `IGNORE_ALL_FINDINGS`, which still performs schema validation,
 and preserves those failed findings in `temporal-authoring-refusal.json`. It
 does not claim successful semantic validation.
 
+## Mandate-bound session control
+
+A final deployment evaluated the minimum client-side control suggested by the
+temporal result. A trusted adapter received an Ed25519-signed record containing
+the reviewed mandate digest, logical principal, reviewed policy digest, issuer,
+and validity window. It verified the signature, principal, and half-open
+validity window, then deterministically derived a UUID-shaped policy-session
+identifier from the canonical signed fields. Derived identifiers were retained
+in memory only.
+
+| Control | Managed or local result |
+|---|---|
+| same signed mandate, first client process, `amount: 600` | Allow |
+| same signed mandate, second client process, `amount: 600` | Deny `-32002` |
+| different signed mandate, `amount: 600` | Allow in a distinct derived session |
+| tampered mandate digest | rejected locally before a network request |
+| expired binding | rejected locally before a network request |
+
+The same binding therefore preserves the cumulative boundary across separate
+client invocations without changing the managed Gateway or policy language.
+The distinct binding control shows that the derivation does not collapse
+unrelated mandates into one history. The reference implementation took a median
+13.602295 ms across 200 repetitions on the recorded CPython 3.12.3 host. That
+measurement includes an OpenSSL subprocess for Ed25519 verification and excludes
+network time. A production in-process verifier should be faster, but this
+capture does not estimate it.
+
+The trust boundary is essential. The adapter held the credential used to invoke
+the Gateway. The Gateway did not receive or verify the mandate binding itself.
+An agent that also holds a direct Gateway credential could bypass the adapter
+and choose a fresh session, so this result closes continuity only when the
+adapter is the exclusive credential-holding path. Platform verification of the
+binding would remove that deployment assumption. The experiment did not test
+that stronger design.
+
+The first deployment attempt exposed a missing role permission required for
+policy-session workload tokens. The managed target failed before Lambda
+execution. `binding-deployment-correction.json` preserves the sanitised
+diagnosis, and the evaluated run followed only after a narrowly scoped
+permission was applied. No outcome from the failed attempt enters the result.
+
+`binding-index.json`, SHA-256
+`e047ead77b943b81b6afc537945531e56ca76adab3835fea5a76e9fa665c3179`,
+pins the adapter, capture and benchmark scripts, issuer public key, signed
+bindings, policy, reviewed state, inventory, three requests and responses,
+local rejection controls, correction, benchmark,
+and result. The private signing key was generated for the experiment, remained
+in temporary storage, and was deleted after projection.
+
 `temporal-index.json`, SHA-256
 `7828b5f55cfcd24f54bcf73b436e2fa756d117e2b2b08aa088b067a5af34a6d0`,
 pins the transformation script, reviewed policy and state, tool inventory, four
@@ -192,6 +241,8 @@ deployment for the candidate revision. The control study created one more
 task-scoped deployment and applied three successful policy revisions; one
 invalid no-op update failed before activation. The temporal study created one
 more task-scoped deployment with a stateless permit and a Dogwood sum policy.
+The mandate-binding control created one final task-scoped deployment with the
+same inert shape.
 Each task used an AgentCore
 Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
 task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)

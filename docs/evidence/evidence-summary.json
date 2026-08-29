@@ -92,11 +92,11 @@
     }
   ],
   "correction_classification": {
-    "canonical_records": 17,
+    "canonical_records": 18,
     "class_counts": null,
     "complete": false,
     "reason": "legacy correction records lack canonical pre-study class labels",
-    "total_records": 38
+    "total_records": 39
   },
   "corrections": [
     {
@@ -435,6 +435,17 @@
       "reported_class": "extractor defect"
     },
     {
+      "affected_artifact": "binding-index.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [
+        "deployment policy"
+      ],
+      "classification_status": "canonical",
+      "description": "The first binding invocation exposed a missing Gateway-role workload-token permission; the permission was added narrowly before the evidence run.",
+      "id": "agentcore-008",
+      "reported_class": "deployment policy"
+    },
+    {
       "affected_artifact": "scan-skeleton.yaml",
       "capture": "aws-iam-access-keys",
       "classes": [
@@ -553,6 +564,52 @@
         "policy_revision": "PaperBaselinePolicy",
         "sequence_version": 1
       }
+    }
+  ],
+  "mandate_bindings": [
+    {
+      "capture": "agentcore-refund-policy",
+      "claim_boundary": "the trusted adapter held the Gateway credential and verified the binding before deriving the session; the managed Gateway did not verify the binding itself",
+      "different_signed_mandate": {
+        "calls": [
+          {
+            "id": "isolated-first",
+            "outcome": "allow"
+          }
+        ],
+        "derived_session_id_distinct": true
+      },
+      "local_controls": [
+        {
+          "case": "tampered-binding",
+          "reason": "binding signature is not valid for the reviewed issuer",
+          "result": "rejected-before-network"
+        },
+        {
+          "case": "expired-binding",
+          "reason": "binding is not active at as_of",
+          "result": "rejected-before-network"
+        }
+      ],
+      "mandate_binding_evaluation_version": 1,
+      "median_adapter_ms": 13.602295,
+      "request_amount": 600,
+      "same_signed_mandate": {
+        "calls": [
+          {
+            "id": "bound-first",
+            "outcome": "allow"
+          },
+          {
+            "id": "bound-second",
+            "outcome": "deny"
+          }
+        ],
+        "derived_session_ids_equal": true,
+        "separate_client_processes": 2
+      },
+      "scheme": "Ed25519 signature over canonical binding fields; UUID-shaped session from SHA-256",
+      "threshold": 1000
     }
   ],
   "summary_version": 1,

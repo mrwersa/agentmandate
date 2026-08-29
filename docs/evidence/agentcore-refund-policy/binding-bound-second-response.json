@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": -32002,
+    "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-binding-policy>]"
+  },
+  "id": "bound-second",
+  "jsonrpc": "2.0"
+}
