@@ -25,8 +25,8 @@ agentmandate~=0.13.0
 
 ## Versioned authority artifacts
 
-The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`, and
-`mandate reach --ir` CLI surfaces are public. The Python records remain private
+The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
+`mandate cedar`, and `mandate reach --ir` CLI surfaces are public. The Python records remain private
 and are not exported from `agentmandate`. Their explicit artifact versions
 separate compatibility from package releases:
 
@@ -43,6 +43,10 @@ separate compatibility from package releases:
 - `delegation_version` and principal-v2 attachment records change when their
   strict artifact formats change incompatibly. Delegation command output uses
   the independent `agentmandate.delegations/v1` presentation schema.
+- `managed_oracle_version` changes when the strict managed-enforcement record
+  changes incompatibly. Cedar alignment and revision output use the independent
+  `agentmandate.cedar-alignment/v1` and
+  `agentmandate.cedar-effective-diff/v1` presentation schemas.
 
 Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
@@ -71,6 +75,13 @@ digests, source binding, reviewed domains, evidence state, expiry, and
 hop-to-hop attenuation at an explicit UTC timestamp. Delegation JSON appears
 only when delegation inputs were supplied. SARIF, Mermaid, IR, and conditional
 composition are refused until they can preserve delegation uncertainty.
+
+`mandate cedar validate` likewise proves managed-oracle structure only. Cedar
+alignment and diff separately require explicit source roots and an evaluation
+date, verify every declared digest and the closed managed IR profile, and retain
+unchanged manifest authority on uncertainty. Their JSON names all input and
+per-request evidence digests. The presentation is not accepted as an authority
+artifact, and the private Python records remain unsupported.
 
 ## What is most likely to change
 

@@ -26,6 +26,11 @@ CONDITIONAL_DRIFT_RESULT = ROOT / "tests/fixtures/conditional-drift-result-v1.js
 DELEGATION_ATTACHMENT = ROOT / "tests/fixtures/delegation-attachment-v2.json"
 DELEGATION_CHAIN = ROOT / "tests/fixtures/delegation-chain-authorizer-v1.json"
 DELEGATION_CAPTURE = ROOT / "docs/evidence/authorizer-delegation/capture.json"
+CEDAR_EVIDENCE = ROOT / "docs/evidence/agentcore-refund-policy"
+CEDAR_MANIFEST = CEDAR_EVIDENCE / "mandate.yaml"
+CEDAR_BASELINE = CEDAR_EVIDENCE / "managed-oracle-v1.json"
+CEDAR_CANDIDATE = CEDAR_EVIDENCE / "candidate-managed-oracle-v1.json"
+CEDAR_DIFF_RESULT = ROOT / "tests/fixtures/cedar-effective-diff-v1.json"
 
 CONDITIONAL_MANIFEST = """
 agent: sql-agent
@@ -206,6 +211,183 @@ def test_delegations_validate_failure_emits_no_stdout(tmp_path, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "error:" in captured.err
+
+
+def cedar_align_args(oracle: Path = CEDAR_BASELINE) -> list[str]:
+    return [
+        "cedar",
+        "align",
+        str(CEDAR_MANIFEST),
+        "--oracle",
+        str(oracle),
+        "--source-root",
+        str(CEDAR_EVIDENCE),
+        "--as-of",
+        "2026-08-29",
+    ]
+
+
+def cedar_diff_args() -> list[str]:
+    return [
+        "cedar",
+        "diff",
+        str(CEDAR_MANIFEST),
+        "--baseline-oracle",
+        str(CEDAR_BASELINE),
+        "--baseline-root",
+        str(CEDAR_EVIDENCE),
+        "--candidate-oracle",
+        str(CEDAR_CANDIDATE),
+        "--candidate-root",
+        str(CEDAR_EVIDENCE),
+        "--as-of",
+        "2026-08-29",
+    ]
+
+
+def test_cedar_validate_is_structural_only(capsys) -> None:
+    assert main(["cedar", "validate", str(CEDAR_BASELINE)]) == EXIT_OK
+    assert capsys.readouterr().out == "valid managed Cedar oracle v1\n"
+
+
+def test_cedar_align_renders_exact_managed_narrowing(capsys) -> None:
+    assert main(cedar_align_args()) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "managed Cedar  evaluated as of 2026-08-29" in captured.out
+    assert "ALIGNED    process_refund (allow-under-limit)" in captured.out
+    assert "NARROWS    process_refund (deny-over-limit)" in captured.out
+
+
+def test_cedar_align_candidate_json_is_clean_and_versioned(capsys) -> None:
+    assert main([*cedar_align_args(CEDAR_CANDIDATE), "--json"]) == EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["schema"] == "agentmandate.cedar-alignment/v1"
+    assert payload["clean"] is True
+    assert len(payload["inputs"]["manifest_sha256"]) == 64
+    assert set(payload["inputs"]["oracle"]) == {
+        "oracle_sha256",
+        "profile_sha256",
+        "mapping_sha256",
+        "source_sha256",
+    }
+    assert all(
+        len(payload["inputs"]["oracle"][key]) == 64
+        for key in ("oracle_sha256", "profile_sha256", "mapping_sha256")
+    )
+    assert all(
+        len(value) == 64
+        for value in payload["inputs"]["oracle"]["source_sha256"].values()
+    )
+    assert {item["alignment"] for item in payload["alignments"]} == {"aligned_allow"}
+
+
+def test_cedar_diff_emits_the_live_widening_before_finding_exit(capsys) -> None:
+    assert main([*cedar_diff_args(), "--json"]) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    payload = json.loads(captured.out)
+
+    assert payload["schema"] == "agentmandate.cedar-effective-diff/v1"
+    assert [item["classification"] for item in payload["changes"]] == [
+        "stable_allow",
+        "widens",
+    ]
+    assert payload["findings"] == []
+    assert payload["clean"] is False
+    assert set(payload["inputs"]) == {
+        "manifest_sha256",
+        "baseline",
+        "candidate",
+    }
+    assert set(payload["inputs"]["baseline"]) == {
+        "oracle_sha256",
+        "profile_sha256",
+        "mapping_sha256",
+        "source_sha256",
+    }
+
+    assert main(cedar_diff_args()) == EXIT_FINDING
+    text = capsys.readouterr().out
+    assert "STABLE_ALLOW process_refund: allow -> allow" in text
+    assert "WIDENS       process_refund: deny -> allow" in text
+
+
+def test_cedar_diff_public_json_fixture_is_byte_stable(capsys) -> None:
+    assert main([*cedar_diff_args(), "--json"]) == EXIT_FINDING
+    assert capsys.readouterr().out == CEDAR_DIFF_RESULT.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("as_of", ["20260829", "2026-99-29"])
+def test_cedar_rejects_noncanonical_dates_before_output(as_of, capsys) -> None:
+    args = cedar_align_args()
+    args[args.index("--as-of") + 1] = as_of
+
+    assert main(args) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "--as-of must be YYYY-MM-DD" in captured.err
+
+
+def test_cedar_tampering_emits_a_complete_unresolved_result(tmp_path, capsys) -> None:
+    raw = json.loads(CEDAR_BASELINE.read_text(encoding="utf-8"))
+    for source in raw["sources"]:
+        content = (CEDAR_EVIDENCE / source["locator"]).read_bytes()
+        (tmp_path / source["locator"]).write_bytes(content)
+    (tmp_path / "deny-response.json").write_text("tampered", encoding="utf-8")
+    args = cedar_align_args()
+    args[args.index("--source-root") + 1] = str(tmp_path)
+
+    assert main(args) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "UNRESOLVED" in captured.out
+    assert "managed.source-untrusted" in captured.out
+    assert "digest does not match locator 'deny-response.json'" in captured.out
+
+
+def test_cedar_missing_sources_and_malformed_oracles_emit_no_output(tmp_path, capsys) -> None:
+    args = cedar_align_args()
+    args[args.index("--source-root") + 1] = str(tmp_path)
+    assert main(args) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "error:" in captured.err
+
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text("{}", encoding="utf-8")
+    assert main(["cedar", "validate", str(invalid)]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "missing field" in captured.err
+
+
+def test_cedar_source_root_rejects_files_and_escaping_symlinks(tmp_path, capsys) -> None:
+    args = cedar_align_args()
+    args[args.index("--source-root") + 1] = str(CEDAR_BASELINE)
+    assert main(args) == EXIT_USAGE
+    assert "source root must be a directory" in capsys.readouterr().err
+
+    raw = json.loads(CEDAR_BASELINE.read_text(encoding="utf-8"))
+    for source in raw["sources"]:
+        target = CEDAR_EVIDENCE / source["locator"]
+        (tmp_path / source["locator"]).symlink_to(target)
+    args[args.index("--source-root") + 1] = str(tmp_path)
+    assert main(args) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "outside the source root" in captured.err
+
+
+def test_cedar_diff_renders_comparison_findings(capsys) -> None:
+    args = cedar_diff_args()
+    args[args.index("--as-of") + 1] = "2027-08-30"
+
+    assert main(args) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "FINDING       managed.comparison-untrusted" in captured.out
 
 
 def test_reach_renders_authorizer_delegation_uncertainty(capsys, tmp_path):
