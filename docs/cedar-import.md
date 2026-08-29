@@ -132,11 +132,21 @@ tool is always denied or that no `forbid` can override an observed permit.
 ## Projection and unknowns
 
 The initial Cedar IR profile remains separate from the analyzable manifest-v1
-profile. It preserves policy-set, policy, action, entity-type, request, and
-decision records plus their sources. Candidate relations such as
-`contains_policy`, `maps_to_tool`, and `decides_request` are registered only
-when their endpoint and support rules have fixtures. Successful structural
-`ir validate` must not make the profile acceptable to `reach --ir`.
+profile. Gate 3 registers `contains_policy` and `decides_request`, preserves
+the policy-set source, observed policy identifiers, requests, decisions, native
+diagnostics, validation state, and implementation identity, and rejects the
+profile at the `reach --ir` manifest boundary. `maps_to_tool` remains
+unregistered until an operational fixture earns its endpoint and support
+rules.
+
+The current native output exposes only policy identifiers that determine a
+decision or report an error. The projection therefore marks policy inventory
+incomplete and `contains_policy` means “observed in captured diagnostics,” not
+“all policies in the source.” It does not parse policy text to manufacture a
+complete list. The clearly synthetic
+[`probes/cedar-schema-checked`](../probes/cedar-schema-checked/README.md)
+control covers schema-checked allow and deny transport without claiming a
+deployment mapping or authority eligibility.
 
 The importer records, rather than interprets away:
 

@@ -18,8 +18,24 @@ from datetime import datetime
 from pathlib import PurePosixPath
 from typing import Any
 
+from ._ir import (
+    IR_VERSION,
+    AuthorityIR,
+    Edge,
+    Entity,
+    Fact,
+    IRFormatError,
+    Source,
+    _edge_id,
+    _entity_id,
+    _fact_id,
+)
+from ._ir import Evidence as IREvidence
+
 BUNDLE_VERSION = 1
 MAPPING_VERSION = 1
+CEDAR_IR_ADAPTER = "agentmandate.cedar-bundle"
+CEDAR_IR_ADAPTER_VERSION = 1
 SOURCE_KINDS = frozenset(
     {
         "deployment_mapping",
@@ -264,6 +280,10 @@ class CedarBundle:
                 raise CedarBundleFormatError(
                     f"Cedar source content for {source.locator} does not match its digest"
                 )
+
+    def to_ir(self) -> AuthorityIR:
+        """Project the captured oracle into a closed, non-analyzable IR profile."""
+        return _bundle_to_ir(self)
 
     @classmethod
     def from_json(cls, text: str) -> CedarBundle:
@@ -664,3 +684,303 @@ def _references(
         raise CedarBundleFormatError(
             "Cedar bundle mapping must reference a declared deployment_mapping source"
         )
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _profile_digest(
+    entities: tuple[Entity, ...], facts: tuple[Fact, ...], edges: tuple[Edge, ...]
+) -> str:
+    body = {
+        "entities": [item.as_dict() for item in sorted(entities, key=lambda item: item.id)],
+        "facts": [item.as_dict() for item in sorted(facts, key=lambda item: item.id)],
+        "edges": [item.as_dict() for item in sorted(edges, key=lambda item: item.id)],
+    }
+    return hashlib.sha256(_canonical_json(body).encode("utf-8")).hexdigest()
+
+
+def _bundle_to_ir(bundle: CedarBundle) -> AuthorityIR:
+    source_name = hashlib.sha256(bundle.to_json().encode("utf-8")).hexdigest()
+    source_id = _entity_id("source", f"cedar-bundle:{source_name}")
+    policy_set_id = _entity_id("policy_set", "captured-policy-set")
+    observed_names = sorted(
+        {
+            policy
+            for decision in bundle.decisions
+            for policy in (*decision.determining_policies, *decision.error_policies)
+        }
+    )
+    policy_ids = {name: _entity_id("policy", name) for name in observed_names}
+    request_names = sorted({decision.request for decision in bundle.decisions})
+    request_ids = {name: _entity_id("request", name) for name in request_names}
+    decision_ids = {item.id: _entity_id("decision", item.id) for item in bundle.decisions}
+    entities = (
+        Entity(policy_set_id, "policy_set", "captured-policy-set"),
+        *(Entity(policy_ids[name], "policy", name) for name in observed_names),
+        *(Entity(request_ids[name], "request", name) for name in request_names),
+        *(Entity(decision_ids[item.id], "decision", item.id) for item in bundle.decisions),
+    )
+    def fact(subject: str, predicate: str, value: Any, location: str) -> Fact:
+        return Fact(
+            _fact_id(subject, predicate),
+            subject,
+            predicate,
+            value,
+            (IREvidence(source_id, location, "exact", "unreviewed"),),
+        )
+
+    facts: list[Fact] = [
+        fact(policy_set_id, "name", "captured-policy-set", "/sources"),
+        fact(
+            policy_set_id,
+            "observed_policies",
+            [policy_ids[name] for name in observed_names],
+            "/decisions",
+        ),
+        fact(policy_set_id, "policy_inventory_complete", False, "/decisions"),
+        fact(
+            policy_set_id,
+            "sources",
+            [source.as_dict() for source in bundle.sources],
+            "/sources",
+        ),
+        fact(policy_set_id, "validation_status", bundle.validation.status, "/validation/status"),
+        fact(
+            policy_set_id,
+            "validation_errors",
+            list(bundle.validation.errors),
+            "/validation/errors",
+        ),
+        fact(
+            policy_set_id,
+            "validation_warnings",
+            list(bundle.validation.warnings),
+            "/validation/warnings",
+        ),
+        fact(policy_set_id, "implementation", bundle.cedar.as_dict(), "/cedar"),
+        fact(
+            policy_set_id,
+            "mapping",
+            None if bundle.mapping is None else bundle.mapping.as_dict(),
+            "/mapping",
+        ),
+    ]
+    for name in observed_names:
+        facts.append(fact(policy_ids[name], "name", name, "/decisions"))
+    for name in request_names:
+        facts.extend(
+            (
+                fact(request_ids[name], "name", name, "/decisions"),
+                fact(request_ids[name], "source", name, "/decisions"),
+            )
+        )
+    for index, item in enumerate(bundle.decisions):
+        decision_id = decision_ids[item.id]
+        location = f"/decisions/{index}"
+        facts.extend(
+            (
+                fact(decision_id, "name", item.id, f"{location}/id"),
+                fact(decision_id, "outcome", item.decision, f"{location}/decision"),
+                fact(
+                    decision_id,
+                    "schema_checked",
+                    item.schema_checked,
+                    f"{location}/schema_checked",
+                ),
+                fact(decision_id, "request", request_ids[item.request], f"{location}/request"),
+                fact(
+                    decision_id,
+                    "determining_policies",
+                    [policy_ids[name] for name in item.determining_policies],
+                    f"{location}/determining_policies",
+                ),
+                fact(
+                    decision_id,
+                    "error_policies",
+                    [policy_ids[name] for name in item.error_policies],
+                    f"{location}/error_policies",
+                ),
+                fact(decision_id, "source", item.source, f"{location}/source"),
+                fact(decision_id, "location", item.location, f"{location}/location"),
+            )
+        )
+    edges = [
+        Edge(
+            _edge_id(policy_set_id, "contains_policy", policy_ids[name]),
+            policy_set_id,
+            "contains_policy",
+            policy_ids[name],
+            (_fact_id(policy_set_id, "observed_policies"),),
+        )
+        for name in observed_names
+    ]
+    edges.extend(
+        Edge(
+            _edge_id(decision_ids[item.id], "decides_request", request_ids[item.request]),
+            decision_ids[item.id],
+            "decides_request",
+            request_ids[item.request],
+            (_fact_id(decision_ids[item.id], "request"),),
+        )
+        for item in bundle.decisions
+    )
+    entity_tuple = tuple(entities)
+    fact_tuple = tuple(facts)
+    edge_tuple = tuple(edges)
+    graph = AuthorityIR(
+        IR_VERSION,
+        (
+            Source(
+                source_id,
+                "cedar-bundle",
+                "memory:cedar-bundle",
+                bundle.bundle_version,
+                bundle.cedar.sdk_version,
+                _profile_digest(entity_tuple, fact_tuple, edge_tuple),
+                CEDAR_IR_ADAPTER,
+                CEDAR_IR_ADAPTER_VERSION,
+                source_name,
+            ),
+        ),
+        entity_tuple,
+        fact_tuple,
+        edge_tuple,
+    )
+    _validate_cedar_profile(graph)
+    return graph
+
+
+def _validate_cedar_profile(graph: AuthorityIR) -> None:
+    """Validate the closed Cedar transport profile without granting authority."""
+    try:
+        graph.validate()
+    except IRFormatError as exc:
+        raise CedarBundleFormatError("Cedar IR profile is structurally invalid") from exc
+    if len(graph.sources) != 1:
+        raise CedarBundleFormatError("Cedar IR profile requires exactly one source")
+    source = graph.sources[0]
+    if (
+        source.kind != "cedar-bundle"
+        or source.format_version != BUNDLE_VERSION
+        or source.adapter != CEDAR_IR_ADAPTER
+        or source.adapter_version != CEDAR_IR_ADAPTER_VERSION
+        or source.content_sha256 is None
+    ):
+        raise CedarBundleFormatError("Cedar IR profile has an unsupported source")
+    if source.semantic_sha256 != _profile_digest(graph.entities, graph.facts, graph.edges):
+        raise CedarBundleFormatError("Cedar IR profile semantic digest does not match")
+    entities = {entity.id: entity for entity in graph.entities}
+    roots = [entity for entity in graph.entities if entity.kind == "policy_set"]
+    if len(roots) != 1 or any(
+        entity.kind not in {"policy_set", "policy", "request", "decision"}
+        for entity in graph.entities
+    ):
+        raise CedarBundleFormatError("Cedar IR profile has unsupported entities")
+    expected = {
+        entity.id: {
+            "policy_set": {
+                "name",
+                "observed_policies",
+                "policy_inventory_complete",
+                "sources",
+                "validation_status",
+                "validation_errors",
+                "validation_warnings",
+                "implementation",
+                "mapping",
+            },
+            "policy": {"name"},
+            "request": {"name", "source"},
+            "decision": {
+                "name",
+                "outcome",
+                "schema_checked",
+                "request",
+                "determining_policies",
+                "error_policies",
+                "source",
+                "location",
+            },
+        }[entity.kind]
+        for entity in graph.entities
+    }
+    actual = {entity.id: set() for entity in graph.entities}
+    facts: dict[tuple[str, str], Fact] = {}
+    for fact_item in graph.facts:
+        if fact_item.predicate not in expected.get(fact_item.subject, set()):
+            raise CedarBundleFormatError("Cedar IR profile has an unsupported predicate")
+        if len(fact_item.evidence) != 1 or fact_item.evidence[0].source != source.id:
+            raise CedarBundleFormatError("Cedar IR profile has unsupported evidence")
+        if (fact_item.evidence[0].confidence, fact_item.evidence[0].review) != (
+            "exact",
+            "unreviewed",
+        ):
+            raise CedarBundleFormatError("Cedar IR profile facts have an invalid evidence state")
+        actual[fact_item.subject].add(fact_item.predicate)
+        facts[(fact_item.subject, fact_item.predicate)] = fact_item
+        if fact_item.predicate == "name" and fact_item.value != entities[fact_item.subject].name:
+            raise CedarBundleFormatError("Cedar IR profile entity name does not match")
+    if actual != expected:
+        raise CedarBundleFormatError("Cedar IR profile is incomplete")
+    root = roots[0]
+    policies = {entity.id for entity in graph.entities if entity.kind == "policy"}
+    observed = facts[(root.id, "observed_policies")].value
+    if (
+        not isinstance(observed, list)
+        or set(observed) != policies
+        or len(observed) != len(policies)
+    ):
+        raise CedarBundleFormatError("Cedar IR profile observed policies do not match entities")
+    if facts[(root.id, "policy_inventory_complete")].value is not False:
+        raise CedarBundleFormatError("Cedar IR profile cannot claim complete policy inventory")
+    projected_sources = _sources(facts[(root.id, "sources")].value)
+    source_kinds = {item.locator: item.kind for item in projected_sources}
+    _implementation(facts[(root.id, "implementation")].value)
+    mapping_value = facts[(root.id, "mapping")].value
+    mapping = None if mapping_value is None else _mapping(mapping_value)
+    if mapping is not None and source_kinds.get(mapping.source) != "deployment_mapping":
+        raise CedarBundleFormatError(
+            "Cedar IR profile mapping must reference a deployment_mapping source"
+        )
+    status = facts[(root.id, "validation_status")].value
+    validation_errors = _strings(
+        facts[(root.id, "validation_errors")].value, "IR.validation_errors"
+    )
+    _strings(facts[(root.id, "validation_warnings")].value, "IR.validation_warnings")
+    if status not in {"success", "failure"}:
+        raise CedarBundleFormatError("Cedar IR profile has an invalid validation status")
+    if (status == "success" and validation_errors) or (
+        status == "failure" and not validation_errors
+    ):
+        raise CedarBundleFormatError("Cedar IR profile validation status contradicts errors")
+    for entity in graph.entities:
+        if entity.kind != "decision":
+            continue
+        outcome = facts[(entity.id, "outcome")].value
+        checked = facts[(entity.id, "schema_checked")].value
+        determining = facts[(entity.id, "determining_policies")].value
+        errors = facts[(entity.id, "error_policies")].value
+        if outcome not in DECISIONS or not isinstance(checked, bool):
+            raise CedarBundleFormatError("Cedar IR profile has an invalid decision")
+        if any(
+            not isinstance(values, list)
+            or len(values) != len(set(values))
+            or any(value not in policies for value in values)
+            for values in (determining, errors)
+        ):
+            raise CedarBundleFormatError("Cedar IR profile decision has invalid policy references")
+        decision_source = facts[(entity.id, "source")].value
+        if (
+            not isinstance(decision_source, str)
+            or source_kinds.get(decision_source) != "native_output"
+        ):
+            raise CedarBundleFormatError("Cedar IR profile decision has an invalid source")
+        _pointer(facts[(entity.id, "location")].value, "IR.decision.location")
+    for entity in graph.entities:
+        if entity.kind != "request":
+            continue
+        request_source = facts[(entity.id, "source")].value
+        if not isinstance(request_source, str) or source_kinds.get(request_source) != "request":
+            raise CedarBundleFormatError("Cedar IR profile request has an invalid source")

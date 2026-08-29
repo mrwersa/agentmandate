@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Authority IR validation recognizes standalone Cedar policy-set and decision
+  profiles through `contains_policy` and `decides_request`. The profile records
+  only policies observed in captured native diagnostics, marks that inventory
+  incomplete, and remains ineligible for `mandate reach --ir`.
+
 ## 0.13.0 - 2026-08-28
 
 ### Added
