@@ -83,29 +83,30 @@ manifest shape.
 | **Two additional real graphs** ([delivered under the reassessed evidence gate](docs/evidence-metric-review.md); high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with explicit boundaries, preserved raw evidence, classified reviewer corrections, and linked model or product outcomes. Scanner precision is tracked separately and is not declared solved. Not a synthetic benchmark corpus. |
 | **Canonical authority IR with provenance** (delivered; high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
 | **Dynamic inventory declarations** ([delivered](docs/dynamic-inventory-gate-4-review.md); high) | Static scan cannot enumerate provider-built tool lists and must fail closed. Add reviewed inventory boundaries for factories, providers, registries, and deployment configuration. | The [versioned contract](docs/dynamic-inventory.md), reader, inventory IR profile, drift reconciliation, and reviewed CLI preserve complete AgentKit and partial Sentry evidence. | Public drift proves the AgentKit boundary complete and names the evaluation date; every ineligible variant remains a finding. Sentry's JavaScript binding remains an explicit collector limitation, not a fabricated clean result. Never import or execute application code. |
-| **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** ([Cedar gates 1–3 implemented; operational source gap captured](docs/evidence/agentcore-fgac/README.md); medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. Cedar starts with a pinned native allow/deny oracle and keeps parsing, validation, decision reproduction, deployment mapping, and authority eligibility separate. | Version-pinned fixtures and a mapping note for each format. Cedar additionally requires an operational action-to-tool/request mapping before imported decisions constrain reachability. The AgentCore candidate documents six eCommerce operations but its unfiltered exporter also includes `/health`; native `tools/list` and ENFORCE decisions remain uncaptured. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation, a Python Cedar evaluator, or production policy compilation. |
+| **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** ([Cedar operational mapping captured; effective diff pending](docs/evidence/agentcore-refund-policy/README.md); medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. Cedar starts with a pinned native allow/deny oracle and keeps parsing, validation, decision reproduction, deployment mapping, and authority eligibility separate. | Version-pinned fixtures and a mapping note for each format. Cedar now has a live one-tool IAM AgentCore mapping with opposite ENFORCE decisions; imported decisions must remain inert until a reviewed, fail-closed effective-diff consumer passes gate 5. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation, a Python Cedar evaluator, or production policy compilation. |
 
 Dependencies: the IR design follows the new graph evidence, not the reverse.
 Policy experiments may remain disposable until the provenance representation is
 accepted.
 
-Cedar import gates 1–3 now have a contract, private strict bundle reader,
+Cedar import gates 1–4 now have a contract, private strict bundle reader,
 digest-pinned official allow/deny fixture, and standalone IR projection. The
 projection preserves observed native decisions while explicitly marking policy
 inventory incomplete; a synthetic probe covers the schema-checked path that
-the official fixture cannot. This does not claim the policy-language dimension
-delivered: a real enforcement integration with a reviewed deployment mapping
-remains the load-bearing gate.
+the official fixture cannot. A separate
+[live AgentCore capture](docs/evidence/agentcore-refund-policy/README.md) proves
+one IAM principal, one Gateway tool, one ACTIVE policy attached in `ENFORCE`,
+an exact reviewed mapping, and opposite managed decisions. Its two request
+values remain representative, and no policy decision constrains reachability
+until the effective-diff gate passes.
 
-The [operational mapping audit](docs/cedar-operational-mapping-audit.md)
-selects a pinned AgentCore Gateway sample whose six explicit eCommerce
-operations map to Cedar actions and documented customer/admin controls. The
-[source capture](docs/evidence/agentcore-fgac/README.md) subsequently found an
-unmapped seventh route, `/health`, in the unfiltered OpenAPI exporter. Gate 4
-remains open on
-[#112](https://github.com/mrwersa/agentmandate/issues/112) until sanitized
-native `ENFORCE` decisions and mapping completeness are reproduced; deployable
-source and local Cedar replay are explicitly insufficient.
+The earlier [operational mapping audit](docs/cedar-operational-mapping-audit.md)
+and [source capture](docs/evidence/agentcore-fgac/README.md) remain negative
+evidence: the larger sample's unfiltered exporter contains an unresolved
+seventh `/health` route, so its documented six-operation policy is not a
+complete mapping. Gate 4 was instead cleared by a deliberately finite live
+refund-policy fixture; the failed candidate is retained rather than
+reclassified.
 
 Evidence progress: the four-graph diversity gate is delivered. The
 [metric review](docs/evidence-metric-review.md) retires “one clean result” as a

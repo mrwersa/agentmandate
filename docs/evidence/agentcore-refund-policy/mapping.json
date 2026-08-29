@@ -1,0 +1,33 @@
+{
+  "mapping_version": 1,
+  "source": "mapping.json",
+  "target": {
+    "source": "mandate.yaml",
+    "agent": "refund-evidence-agent"
+  },
+  "principal": {
+    "cedar_types": ["AgentCore::IamEntity"],
+    "mandate_principal": "caller"
+  },
+  "actions": [
+    {
+      "cedar": "AgentCore::Action::\"RefundIamTarget___process_refund\"",
+      "tool": "process_refund"
+    }
+  ],
+  "resources": [
+    {
+      "cedar_type": "AgentCore::Gateway",
+      "binding": "agentcore-refund-gateway"
+    }
+  ],
+  "request_domain": {
+    "completeness": "representative",
+    "evidence": {
+      "confidence": "exact",
+      "review": "accepted",
+      "reviewer": "platform-security",
+      "expires": "2027-08-29"
+    }
+  }
+}
