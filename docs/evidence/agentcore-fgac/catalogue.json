@@ -1,0 +1,103 @@
+{
+  "catalogue_version": 1,
+  "customer_policy_actions": [
+    "add_to_cart",
+    "checkout",
+    "list_products"
+  ],
+  "mapping_complete": false,
+  "revision": "3e0d462c679c4cddfdea1bfc9176256628c7d699",
+  "routes": [
+    {
+      "action": "ecommerce-tools___add_to_cart",
+      "backend_access": "authenticated",
+      "cedar_admin": "allow",
+      "cedar_customer": "allow",
+      "line": 28,
+      "method": "POST",
+      "operation_id": "add_to_cart",
+      "path": "/cart/items",
+      "source": "upstream/cart.py.txt"
+    },
+    {
+      "action": "ecommerce-tools___checkout",
+      "backend_access": "authenticated",
+      "cedar_admin": "allow",
+      "cedar_customer": "allow",
+      "line": 25,
+      "method": "POST",
+      "operation_id": "checkout",
+      "path": "/checkout",
+      "source": "upstream/checkout.py.txt"
+    },
+    {
+      "action": null,
+      "backend_access": "public",
+      "cedar_admin": "allow",
+      "cedar_customer": "deny",
+      "line": 19,
+      "method": "GET",
+      "operation_id": null,
+      "path": "/health",
+      "source": "upstream/main.py.txt"
+    },
+    {
+      "action": "ecommerce-tools___list_products",
+      "backend_access": "authenticated",
+      "cedar_admin": "allow",
+      "cedar_customer": "allow",
+      "line": 21,
+      "method": "GET",
+      "operation_id": "list_products",
+      "path": "/products",
+      "source": "upstream/products.py.txt"
+    },
+    {
+      "action": "ecommerce-tools___add_product",
+      "backend_access": "admin_only",
+      "cedar_admin": "allow",
+      "cedar_customer": "deny",
+      "line": 32,
+      "method": "POST",
+      "operation_id": "add_product",
+      "path": "/products",
+      "source": "upstream/products.py.txt"
+    },
+    {
+      "action": "ecommerce-tools___update_price",
+      "backend_access": "admin_only",
+      "cedar_admin": "allow",
+      "cedar_customer": "deny",
+      "line": 50,
+      "method": "PATCH",
+      "operation_id": "update_price",
+      "path": "/products/{product_id}/price",
+      "source": "upstream/products.py.txt"
+    },
+    {
+      "action": "ecommerce-tools___update_stock",
+      "backend_access": "admin_only",
+      "cedar_admin": "allow",
+      "cedar_customer": "deny",
+      "line": 68,
+      "method": "PATCH",
+      "operation_id": "update_stock",
+      "path": "/products/{product_id}/stock",
+      "source": "upstream/products.py.txt"
+    }
+  ],
+  "source_declared_operation_ids": [
+    "add_product",
+    "add_to_cart",
+    "checkout",
+    "list_products",
+    "update_price",
+    "update_stock"
+  ],
+  "source_route_count": 7,
+  "target": "ecommerce-tools",
+  "unresolved": [
+    "GET /health has no explicit operation_id; the generated Gateway tool name is not captured",
+    "native AgentCore tools/list and ENFORCE decision records are absent"
+  ]
+}

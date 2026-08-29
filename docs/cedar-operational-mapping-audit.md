@@ -9,11 +9,13 @@ decision or that the gate is complete.
 Use AWS's
 [`sample-agentcore-gateway-fgac`](https://github.com/aws-samples/sample-agentcore-gateway-fgac/tree/3e0d462c679c4cddfdea1bfc9176256628c7d699)
 at commit `3e0d462c679c4cddfdea1bfc9176256628c7d699` as the operational-mapping
-candidate. It clears the source-side screen because a real MCP Gateway target,
-finite OpenAPI tool domain, Cedar policies, identity construction, and
-ENFORCE-mode attachment are joined in one deployable repository. It does not
-yet clear the decision-evidence screen: no AgentCore native validation or
-decision record has been captured in this repository.
+candidate. The initial audit treated its six explicit eCommerce operation IDs
+as the finite tool domain. The subsequent
+[source capture](evidence/agentcore-fgac/README.md) found a seventh source
+route, `GET /health`, which the unfiltered OpenAPI exporter also emits. The
+candidate therefore does not yet clear source-side mapping completeness, and
+it does not clear the decision-evidence screen: no AgentCore `tools/list`,
+native validation, or decision record has been captured in this repository.
 
 No deployment was performed during this audit. Deploying the sample would
 create billable AWS and Okta resources and requires authority beyond a
@@ -28,8 +30,8 @@ provider does not expose it
 ([Gateway module](https://github.com/aws-samples/sample-agentcore-gateway-fgac/blob/3e0d462c679c4cddfdea1bfc9176256628c7d699/infra/modules/agentcore/main.tf),
 [attachment script](https://github.com/aws-samples/sample-agentcore-gateway-fgac/blob/3e0d462c679c4cddfdea1bfc9176256628c7d699/scripts/attach_policy_engine.sh)).
 
-The application's explicit OpenAPI operation IDs define a finite six-tool
-domain:
+The application's explicit OpenAPI operation IDs define six intended
+eCommerce tools:
 
 | Operation/tool | Customer | Admin | Source |
 |---|---:|---:|---|
@@ -53,10 +55,18 @@ This matches AWS's documented AgentCore mapping of JWT claims, MCP tool names,
 Gateway resources, and tool arguments into Cedar requests
 ([AgentCore Policy guide](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)).
 
+This table is not the complete source route set. `main.py` also includes
+public `GET /health` without an explicit `operation_id`, while
+`export_openapi.py` serializes the complete application schema. Its generated
+Gateway action is unresolved until OpenAPI and `tools/list` output are
+captured. The six-row table is retained as the policy author's documented
+intent, not as a completeness claim.
+
 ## Why the gate remains open
 
-Source inspection proves how the deployment is intended to construct and
-enforce requests; it does not prove a deployed policy engine evaluated them.
+Source inspection now also disproves the initial six-entry completeness
+assumption. It proves how the deployment is intended to construct and enforce
+requests; it does not prove a deployed policy engine evaluated them.
 README expectations are not native decisions, and a local Cedar replay would
 not prove that AgentCore attached the same engine in `ENFORCE` mode. The admin
 policy's wildcard is valid Cedar behavior but cannot substitute for an
