@@ -98,7 +98,9 @@ plus ordinary Lambda, logging, and bootstrap-storage charges.
 This fixture satisfies the Cedar contract's operational-mapping evidence gate:
 the finite one-tool inventory, IAM principal type, exact action, reviewed
 resource binding, managed mode, policy count, and opposite decisions are all
-captured. It does **not** register `maps_to_tool`, constrain `reach`, infer all
-requests under the policy condition, or prove that a real refund backend
-enforces anything. Gate 5 must consume the mapping fail-closed and produce an
-effective policy-versus-agent diff before any public CLI exposure.
+captured. Its private transport profile registers provenance-bearing
+`maps_to_tool`, `enforces_for`, and `decides_request` edges but remains rejected
+by manifest analysis. It does **not** constrain `reach`, infer all requests
+under the policy condition, or prove that a real refund backend enforces
+anything. Gate 5c must consume the mapping fail-closed and produce an effective
+policy-versus-agent diff before any public CLI exposure.

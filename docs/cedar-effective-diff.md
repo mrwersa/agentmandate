@@ -1,6 +1,6 @@
 # Cedar effective-diff contract
 
-Status: **proposed and experimental**. This is gate 5a of
+Status: **experimental; gates 5a and 5b complete**. This is gate 5a of
 [#116](https://github.com/mrwersa/agentmandate/issues/116). It defines the
 trust boundary before records or analysis make the choices expensive. No
 current command consumes managed Cedar evidence or changes reachability from a
@@ -142,12 +142,14 @@ synthetic pair may develop the analyzer but cannot close the gate.
 
 ## IR boundary
 
-Managed captures project through a standalone closed profile. Candidate
-relations are `maps_to_tool`, `enforces_for`, and the existing
-`decides_request`; endpoint kinds, cardinality, merge mode, and minimum source
-support must be registered before projection. Derived `widens` or `tightens`
-edges cite both decision edges, the exact request facts, comparable mapping
-facts, and policy/source identities.
+Managed captures project through a standalone closed profile. Gate 5b
+registers `maps_to_tool` from a reviewed Cedar action to a manifest tool,
+`enforces_for` from the managed Gateway enforcement point to its decisions, and
+the existing `decides_request`. `enforces_for` deliberately does not originate
+at a policy entity: AgentCore proved that its attached enforcement point made
+the decision but did not return a determining-policy diagnostic. Derived
+`widens` or `tightens` edges later cite both decision edges, the exact request
+facts, comparable mapping facts, and policy/source identities.
 
 The generic IR reader establishes structure only. The managed profile validator
 establishes its closed semantics. `_analyse_ir` continues to reject the profile
@@ -174,11 +176,12 @@ combine it with reviewed authority.
 Every gate proves all six manifest evidence graphs, existing Cedar fixtures,
 and legacy CLI output remain byte-identical when no policy evidence is supplied.
 
-Gate 5b is split at its review boundary. The first PR adds the managed reader
-and canonical migration record; IR projection and relation registration remain
-the second half of 5b. The managed record's closed field sets deliberately
-exclude `schema_checked` and `determining_policies`, so local-oracle claims
-cannot leak through optional defaults.
+Gate 5b was split at its review boundary. Its first PR added the managed reader
+and canonical migration record; its second adds the standalone IR projection,
+registered relations, semantic-digest validation, and manifest-analysis
+refusal. The managed record's closed field sets deliberately exclude
+`schema_checked` and `determining_policies`, so local-oracle claims cannot leak
+through optional defaults.
 
 ## Explicit non-goals
 
