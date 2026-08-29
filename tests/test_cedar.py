@@ -4,15 +4,31 @@ import copy
 import hashlib
 import json
 import subprocess
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from agentmandate._cedar import CedarBundle, CedarBundleFormatError
+from agentmandate._cedar import (
+    CedarBundle,
+    CedarBundleFormatError,
+    _profile_digest,
+    _validate_cedar_profile,
+)
+from agentmandate._ir import (
+    AuthorityIR,
+    Entity,
+    Evidence,
+    IRFormatError,
+    _analyse_ir,
+    _entity_id,
+    _fact_id,
+)
 
 ROOT = Path(__file__).parents[1] / "docs" / "evidence" / "cedar-document-cloud"
 BUNDLE = ROOT / "bundle.json"
+SCHEMA_CHECKED = Path(__file__).parents[1] / "probes" / "cedar-schema-checked"
 
 
 def raw_bundle() -> dict[str, Any]:
@@ -99,6 +115,238 @@ def test_the_official_bundle_is_canonical_and_digest_bound() -> None:
     )
 
 
+def rehash(graph: AuthorityIR) -> AuthorityIR:
+    source = replace(
+        graph.sources[0],
+        semantic_sha256=_profile_digest(graph.entities, graph.facts, graph.edges),
+    )
+    return replace(graph, sources=(source,))
+
+
+def test_official_bundle_projects_observed_policy_decisions_without_claiming_completeness() -> None:
+    bundle = CedarBundle.from_json(BUNDLE.read_text(encoding="utf-8"))
+    graph = bundle.to_ir()
+
+    assert len(graph.entities) == 8
+    assert len(graph.facts) == 32
+    assert len(graph.edges) == 5
+    assert {edge.relation for edge in graph.edges} == {
+        "contains_policy",
+        "decides_request",
+    }
+    facts = {(fact.subject, fact.predicate): fact.value for fact in graph.facts}
+    policy_set = next(entity for entity in graph.entities if entity.kind == "policy_set")
+    assert facts[(policy_set.id, "policy_inventory_complete")] is False
+    assert {
+        entity.name for entity in graph.entities if entity.kind == "policy"
+    } == {"policy1", "policy4", "policy9"}
+    assert {
+        facts[(entity.id, "schema_checked")]
+        for entity in graph.entities
+        if entity.kind == "decision"
+    } == {False}
+    assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
+    _validate_cedar_profile(AuthorityIR.from_json(graph.to_json()))
+    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+        _analyse_ir(graph, depth=8)
+
+
+def test_synthetic_probe_covers_schema_checked_decisions_without_mapping() -> None:
+    bundle = CedarBundle.from_json(
+        (SCHEMA_CHECKED / "bundle.json").read_text(encoding="utf-8")
+    )
+    bundle.verify_sources(
+        {
+            source.locator: (SCHEMA_CHECKED / source.locator).read_bytes()
+            for source in bundle.sources
+        }
+    )
+    graph = bundle.to_ir()
+    decision_facts = {
+        (fact.subject, fact.predicate): fact.value for fact in graph.facts
+    }
+
+    assert bundle.mapping is None
+    assert {decision.decision for decision in bundle.decisions} == {"allow", "deny"}
+    assert all(decision.schema_checked for decision in bundle.decisions)
+    assert {
+        decision_facts[(entity.id, "schema_checked")]
+        for entity in graph.entities
+        if entity.kind == "decision"
+    } == {True}
+
+
+def test_synthetic_schema_checked_capture_is_byte_exact_when_installed() -> None:
+    package = SCHEMA_CHECKED / "node_modules" / "@cedar-policy" / "cedar-wasm"
+    if not package.is_dir():
+        pytest.skip("run npm ci in the synthetic Cedar probe to enable native recapture")
+
+    result = subprocess.run(
+        ["node", "capture.mjs"],
+        cwd=SCHEMA_CHECKED,
+        check=True,
+        capture_output=True,
+    )
+
+    assert result.stdout == (SCHEMA_CHECKED / "native-output.json").read_bytes()
+    assert result.stderr == b""
+
+
+def test_cedar_profile_rejects_tampering_even_after_rehashing() -> None:
+    graph = CedarBundle.from_json(BUNDLE.read_text(encoding="utf-8")).to_ir()
+    with pytest.raises(CedarBundleFormatError, match="semantic digest"):
+        _validate_cedar_profile(replace(graph, facts=graph.facts[:-1]))
+
+    policy_set = next(entity for entity in graph.entities if entity.kind == "policy_set")
+    complete = tuple(
+        replace(fact, value=True)
+        if (fact.subject, fact.predicate) == (policy_set.id, "policy_inventory_complete")
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(CedarBundleFormatError, match="cannot claim complete"):
+        _validate_cedar_profile(rehash(replace(graph, facts=complete)))
+
+    decision = next(entity for entity in graph.entities if entity.kind == "decision")
+    bad_evidence = tuple(
+        replace(fact, evidence=(Evidence(graph.sources[0].id, "", "exact", "accepted"),))
+        if fact.subject == decision.id and fact.predicate == "outcome"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(CedarBundleFormatError, match="invalid evidence state"):
+        _validate_cedar_profile(rehash(replace(graph, facts=bad_evidence)))
+
+
+def replace_fact(graph: AuthorityIR, subject: str, predicate: str, **changes: Any) -> AuthorityIR:
+    facts = tuple(
+        replace(fact, **changes)
+        if (fact.subject, fact.predicate) == (subject, predicate)
+        else fact
+        for fact in graph.facts
+    )
+    return rehash(replace(graph, facts=facts))
+
+
+def test_cedar_profile_rejects_structural_source_entity_and_fact_failures() -> None:
+    graph = CedarBundle.from_json(BUNDLE.read_text(encoding="utf-8")).to_ir()
+    with pytest.raises(CedarBundleFormatError, match="structurally invalid"):
+        _validate_cedar_profile(replace(graph, edges=graph.edges[:-1]))
+    extra_source = replace(graph.sources[0], id="source:other")
+    with pytest.raises(CedarBundleFormatError, match="exactly one source"):
+        _validate_cedar_profile(replace(graph, sources=(*graph.sources, extra_source)))
+    with pytest.raises(CedarBundleFormatError, match="unsupported source"):
+        _validate_cedar_profile(
+            replace(graph, sources=(replace(graph.sources[0], adapter="future"),))
+        )
+    future = Entity(_entity_id("future", "record"), "future", "record")
+    with pytest.raises(CedarBundleFormatError, match="unsupported entities"):
+        _validate_cedar_profile(rehash(replace(graph, entities=(*graph.entities, future))))
+
+    root = next(entity for entity in graph.entities if entity.kind == "policy_set")
+    warning = next(
+        fact
+        for fact in graph.facts
+        if (fact.subject, fact.predicate) == (root.id, "validation_warnings")
+    )
+    renamed = replace(
+        warning,
+        id=_fact_id(warning.subject, "future"),
+        predicate="future",
+    )
+    facts = tuple(renamed if fact is warning else fact for fact in graph.facts)
+    with pytest.raises(CedarBundleFormatError, match="unsupported predicate"):
+        _validate_cedar_profile(rehash(replace(graph, facts=facts)))
+    no_evidence = replace_fact(graph, root.id, "validation_warnings", evidence=())
+    with pytest.raises(CedarBundleFormatError, match="unsupported evidence"):
+        _validate_cedar_profile(no_evidence)
+    name_mismatch = replace_fact(graph, root.id, "name", value="other")
+    with pytest.raises(CedarBundleFormatError, match="name does not match"):
+        _validate_cedar_profile(name_mismatch)
+    incomplete = rehash(
+        replace(
+            graph,
+            facts=tuple(
+                fact
+                for fact in graph.facts
+                if (fact.subject, fact.predicate) != (root.id, "validation_warnings")
+            ),
+        )
+    )
+    with pytest.raises(CedarBundleFormatError, match="profile is incomplete"):
+        _validate_cedar_profile(incomplete)
+
+
+def test_cedar_profile_rejects_semantically_inconsistent_records() -> None:
+    graph = CedarBundle.from_json(BUNDLE.read_text(encoding="utf-8")).to_ir()
+    root = next(entity for entity in graph.entities if entity.kind == "policy_set")
+    observed = next(
+        fact
+        for fact in graph.facts
+        if (fact.subject, fact.predicate) == (root.id, "observed_policies")
+    )
+    duplicated = replace_fact(
+        graph, root.id, "observed_policies", value=[*observed.value, observed.value[0]]
+    )
+    with pytest.raises(CedarBundleFormatError, match="observed policies"):
+        _validate_cedar_profile(duplicated)
+    bad_status = replace_fact(graph, root.id, "validation_status", value="unknown")
+    with pytest.raises(CedarBundleFormatError, match="validation status"):
+        _validate_cedar_profile(bad_status)
+
+    decision = next(entity for entity in graph.entities if entity.kind == "decision")
+    invalid_decision = replace_fact(graph, decision.id, "outcome", value="maybe")
+    with pytest.raises(CedarBundleFormatError, match="invalid decision"):
+        _validate_cedar_profile(invalid_decision)
+    determining = next(
+        fact
+        for fact in graph.facts
+        if (fact.subject, fact.predicate) == (decision.id, "determining_policies")
+    )
+    duplicate_policy = replace_fact(
+        graph,
+        decision.id,
+        "determining_policies",
+        value=[*determining.value, determining.value[0]],
+    )
+    with pytest.raises(CedarBundleFormatError, match="invalid policy references"):
+        _validate_cedar_profile(duplicate_policy)
+
+
+def test_cedar_profile_rejects_source_and_validation_contradictions() -> None:
+    mapped = CedarBundle.from_json(text(with_mapping())).to_ir()
+    root = next(entity for entity in mapped.entities if entity.kind == "policy_set")
+    mapping_fact = next(
+        fact
+        for fact in mapped.facts
+        if (fact.subject, fact.predicate) == (root.id, "mapping")
+    )
+    wrong_mapping = copy.deepcopy(mapping_fact.value)
+    wrong_mapping["source"] = "entities.json"
+    with pytest.raises(CedarBundleFormatError, match="deployment_mapping source"):
+        _validate_cedar_profile(replace_fact(mapped, root.id, "mapping", value=wrong_mapping))
+
+    graph = CedarBundle.from_json(BUNDLE.read_text(encoding="utf-8")).to_ir()
+    root = next(entity for entity in graph.entities if entity.kind == "policy_set")
+    contradiction = replace_fact(graph, root.id, "validation_errors", value=["policy4"])
+    with pytest.raises(CedarBundleFormatError, match="status contradicts errors"):
+        _validate_cedar_profile(contradiction)
+
+    decision = next(entity for entity in graph.entities if entity.kind == "decision")
+    wrong_decision_source = replace_fact(
+        graph, decision.id, "source", value="entities.json"
+    )
+    with pytest.raises(CedarBundleFormatError, match="decision has an invalid source"):
+        _validate_cedar_profile(wrong_decision_source)
+
+    request = next(entity for entity in graph.entities if entity.kind == "request")
+    wrong_request_source = replace_fact(
+        graph, request.id, "source", value="native-output.json"
+    )
+    with pytest.raises(CedarBundleFormatError, match="request has an invalid source"):
+        _validate_cedar_profile(wrong_request_source)
+
+
 def test_native_capture_is_byte_exact_when_the_pinned_package_is_installed() -> None:
     package = ROOT / "node_modules" / "@cedar-policy" / "cedar-wasm"
     if not package.is_dir():
@@ -130,6 +378,14 @@ def test_a_reviewed_mapping_round_trips_without_becoming_authority() -> None:
     assert [item.cedar_type for item in bundle.mapping.resources] == ["Document", "Drive"]
     assert bundle.mapping.request_domain.evidence.review == "accepted"
     assert CedarBundle.from_json(bundle.to_json()) == bundle
+    graph = bundle.to_ir()
+    policy_set = next(entity for entity in graph.entities if entity.kind == "policy_set")
+    mapping = next(
+        fact.value
+        for fact in graph.facts
+        if (fact.subject, fact.predicate) == (policy_set.id, "mapping")
+    )
+    assert mapping == bundle.mapping.as_dict()
 
 
 def test_unreviewed_mapping_evidence_carries_no_accountability_claim() -> None:

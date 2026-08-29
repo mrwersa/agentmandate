@@ -105,8 +105,12 @@ RELATIONS = {
     ),
     "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
     "contains_tool": Relation("boundary", "tool", "many", "union", "members"),
+    "contains_policy": Relation(
+        "policy_set", "policy", "many", "union", "observed_policies"
+    ),
     "constrained_by": Relation("principal", "principal", "many", "union", "principals"),
     "delegates_for": Relation("delegation", "principal", "one", "single", "subject"),
+    "decides_request": Relation("decision", "request", "one", "single", "request"),
     "has_breach": Relation(
         "agent", "breach", "many", "union", None, True, "breach"
     ),
