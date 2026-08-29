@@ -1,0 +1,25 @@
+version: 1
+agent: iam-key-producer
+identity: spiffe://example/agents/iam-key-producer
+
+# The evidence adapter selects only create_access_key from the full published
+# catalogue. The IAM MCP server spends the operator's configured AWS identity.
+limits:
+  depth: 3
+  effects:
+    write: 2
+
+tools:
+  - name: create_access_key
+    effect: write
+    principal: service
+    produces: access_key
+    unbounded: true
+
+# Review correction:
+#
+# Manifest v1 forces a false choice. Without unbounded, the second successful
+# key is lost. With unbounded, reach reports a third successful creation even
+# though IAM rejects it with LimitExceeded. The output is a real credential in
+# the pinned MCP release: both accepted keys independently authenticated with
+# STS before being deleted.
