@@ -84,6 +84,18 @@ Before opening an evidence PR, run the digest lint against your directory:
 python scripts/evidence_lint.py
 ```
 
+When a capture contributes to the paper-facing evidence set, also regenerate
+and check the consolidated handoff:
+
+```bash
+python scripts/evidence_summary.py
+python scripts/evidence_summary.py --check
+```
+
+`--require-complete-classification` is deliberately stricter. It fails while
+any legacy correction lacks a canonical class assigned before the study. Do
+not make it pass by reclassifying old prose after seeing the aggregate counts.
+
 It fails when a README cites a SHA-256 that no longer matches the committed
 file, or when the cited file is missing. The machine-checked form is
 `\`<file>\`, SHA-256 \`<digest>\`` and must reference an artifact committed

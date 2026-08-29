@@ -1,0 +1,38 @@
+{
+  "corrections_version": 1,
+  "capture": "aws-postgres-mcp",
+  "corrections": [
+    {
+      "id": "postgres-001",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "The write-enabled SQL tool was upgraded from read to irreversible because its argument determines the effect."
+    },
+    {
+      "id": "postgres-002",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Connection-state tools were corrected from irreversible to write and read effects."
+    },
+    {
+      "id": "postgres-003",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "All tools were changed to service principal because they spend configured AWS or database credentials."
+    },
+    {
+      "id": "postgres-004",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "A bearer job identifier was removed as a requirement while the producer's second output remains unrepresentable."
+    }
+  ]
+}

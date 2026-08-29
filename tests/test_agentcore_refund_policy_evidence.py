@@ -26,7 +26,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
-        if path.is_file() and path.name not in {"README.md", "capture-index.json"}
+        if path.is_file()
+        and path.name not in {"README.md", "capture-index.json", "corrections.json"}
     }
 
     assert index["capture_version"] == 1

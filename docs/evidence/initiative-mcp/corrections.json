@@ -1,0 +1,54 @@
+{
+  "corrections_version": 1,
+  "capture": "initiative-mcp",
+  "corrections": [
+    {
+      "id": "initiative-001",
+      "reported_class": "source ambiguity",
+      "classes": ["source ambiguity"],
+      "classification_status": "canonical",
+      "affected_artifact": "scan-skeleton.yaml",
+      "description": "Caller-supplied guild and calendar identifiers were guessed as authority scopes."
+    },
+    {
+      "id": "initiative-002",
+      "reported_class": "source ambiguity",
+      "classes": ["source ambiguity"],
+      "classification_status": "canonical",
+      "affected_artifact": "scan-skeleton.yaml",
+      "description": "Result limits and custom-property values were guessed as monetary arguments."
+    },
+    {
+      "id": "initiative-003",
+      "reported_class": "source ambiguity",
+      "classes": ["source ambiguity"],
+      "classification_status": "canonical",
+      "affected_artifact": "mandate.yaml",
+      "description": "Three GET-backed tools were corrected from irreversible to read effects."
+    },
+    {
+      "id": "initiative-004",
+      "reported_class": "model gap",
+      "classes": ["model gap"],
+      "classification_status": "canonical",
+      "affected_artifact": "mandate.yaml",
+      "description": "One move tool has reversible and destructive branches that a tool-level effect cannot separate."
+    },
+    {
+      "id": "initiative-005",
+      "reported_class": "deployment policy",
+      "classes": ["deployment policy"],
+      "classification_status": "canonical",
+      "affected_artifact": "mandate.yaml",
+      "description": "Client-side approval prompts were removed because the server does not enforce them for every caller."
+    },
+    {
+      "id": "initiative-006",
+      "reported_class": "source ambiguity",
+      "classes": ["source ambiguity"],
+      "classification_status": "canonical",
+      "affected_artifact": "mandate.yaml",
+      "description": "Caller principals were retained after source review proved credential forwarding."
+    }
+  ]
+}

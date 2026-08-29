@@ -1,0 +1,46 @@
+{
+  "corrections_version": 1,
+  "capture": "authorizer-delegation",
+  "corrections": [
+    {
+      "id": "authorizer-001",
+      "reported_class": "extractor defect",
+      "classes": ["extractor defect"],
+      "classification_status": "canonical",
+      "affected_artifact": "capture-delegation.mjs",
+      "description": "A backward clock step was masked as an undefined-token error and the adapter now preserves the HTTP failure."
+    },
+    {
+      "id": "authorizer-002",
+      "reported_class": "model gap",
+      "classes": ["model gap"],
+      "classification_status": "canonical",
+      "affected_artifact": "capture.json",
+      "description": "Nested actor histories of depths one through four did not fit the single-actor provisional record."
+    },
+    {
+      "id": "authorizer-003",
+      "reported_class": "model gap",
+      "classes": ["model gap"],
+      "classification_status": "canonical",
+      "affected_artifact": "capture.json",
+      "description": "Five-minute token validity did not fit date-granularity grant records."
+    },
+    {
+      "id": "authorizer-004",
+      "reported_class": "source ambiguity / deployment policy",
+      "classes": ["source ambiguity", "deployment policy"],
+      "classification_status": "canonical",
+      "affected_artifact": "capture.json",
+      "description": "Issuer scopes and audience do not establish which tools or effects the deployment authorises."
+    },
+    {
+      "id": "authorizer-005",
+      "reported_class": "source ambiguity",
+      "classes": ["source ambiguity"],
+      "classification_status": "canonical",
+      "affected_artifact": "capture.json",
+      "description": "Issuer-side rejection evidence does not prove resource-server validation."
+    }
+  ]
+}

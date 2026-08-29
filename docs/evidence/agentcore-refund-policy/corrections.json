@@ -1,0 +1,54 @@
+{
+  "corrections_version": 1,
+  "capture": "agentcore-refund-policy",
+  "corrections": [
+    {
+      "id": "agentcore-001",
+      "reported_class": "source ambiguity",
+      "classes": ["source ambiguity"],
+      "classification_status": "canonical",
+      "affected_artifact": "protocol-refusal.json",
+      "description": "The first requested MCP protocol version was unsupported and the advertised version was preserved."
+    },
+    {
+      "id": "agentcore-002",
+      "reported_class": "model/trust gap",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "affected_artifact": "managed-state.json",
+      "description": "A no-authorizer deployment could exercise policy but could not justify the principal mapping."
+    },
+    {
+      "id": "agentcore-003",
+      "reported_class": "extractor/process defect",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "affected_artifact": "capture-index.json",
+      "description": "An earlier run held two policies and lacked a final inventory capture, so it was discarded."
+    },
+    {
+      "id": "agentcore-004",
+      "reported_class": "deployment policy",
+      "classes": ["deployment policy"],
+      "classification_status": "canonical",
+      "affected_artifact": "mapping.json",
+      "description": "Two observed request values remain representative rather than a complete condition domain."
+    },
+    {
+      "id": "agentcore-005",
+      "reported_class": "extractor/model defect",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "affected_artifact": "candidate-managed-oracle-v1.json",
+      "description": "Evidence filenames were removed from enforcement identity while their bytes remain independently verified."
+    },
+    {
+      "id": "agentcore-006",
+      "reported_class": "deployment identity",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "affected_artifact": "candidate-managed-state.json",
+      "description": "Redeployment changed live resource identifiers and review retained only the logical binding."
+    }
+  ]
+}

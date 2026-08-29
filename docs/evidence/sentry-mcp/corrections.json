@@ -1,0 +1,38 @@
+{
+  "corrections_version": 1,
+  "capture": "sentry-mcp",
+  "corrections": [
+    {
+      "id": "sentry-001",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "scan-skeleton.yaml",
+      "description": "Caller-supplied bearer references were guessed as authority scopes and removed."
+    },
+    {
+      "id": "sentry-002",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Search result limits were not promoted into monetary ceilings."
+    },
+    {
+      "id": "sentry-003",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "The fixed user token was represented as service principal while its owner and delegation remain lost."
+    },
+    {
+      "id": "sentry-004",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "The hidden dispatch meta-tool stayed irreversible because its argument selects mixed effects and approvals."
+    }
+  ]
+}

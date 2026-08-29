@@ -75,6 +75,28 @@ Scanner precision is tracked separately through:
   removed without suppressing uncertainty or worsening another committed
   graph.
 
+## Machine-readable handoff audit
+
+The paper handoff exposed a limitation in this review's wording. Legacy
+capture READMEs enumerate corrections, but many do not assign each record to
+the fixed four-way taxonomy. Some later records use compound or non-canonical
+labels such as `model/trust gap` and `extractor/process defect`. The claim that
+every legacy correction was already canonically classified was therefore too
+strong.
+
+Each capture now has a `corrections.json` that transcribes its existing prose
+without adding a class. The generated `evidence-summary.json` records eight
+captures, seven analyzable manifest graphs, and 37 correction records. Only 16
+records carry canonical pre-study labels. Class counts are `null`, and the
+strict generator mode fails, rather than converting the remaining 21 labels
+into post-hoc judgements after the study table is known.
+
+This does not change the diversity decision or erase the correction ledger. It
+does mean a paper may report the correction total and classification coverage,
+but cannot report a four-class distribution as if all labels predated the
+study. Future captures remain subject to the canonical template and therefore
+do not inherit this legacy gap.
+
 There is deliberately no target of “one clean graph.” No current graph is
 clean, and scanner precision is not marked complete. Future work may introduce
 a labeled correction-rate benchmark once the repository has enough comparable

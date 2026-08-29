@@ -1,0 +1,499 @@
+{
+  "authority_graph_count": 7,
+  "capture_count": 8,
+  "captures": [
+    {
+      "analysed_tool_count": 20,
+      "authority_graph": true,
+      "capture_kind": "static-source",
+      "captured_tool_count": 20,
+      "domain": "digital assets",
+      "enforcement_pattern": "framework capability gate",
+      "id": "agentkit",
+      "pinned_version": "0.1.6 -> 0.7.4",
+      "upstream_project": "Coinbase AgentKit"
+    },
+    {
+      "analysed_tool_count": 23,
+      "authority_graph": true,
+      "capture_kind": "local-runtime",
+      "captured_tool_count": 23,
+      "domain": "software delivery",
+      "enforcement_pattern": "downstream service",
+      "id": "github-mcp-server",
+      "pinned_version": "1.8.0",
+      "upstream_project": "GitHub MCP Server"
+    },
+    {
+      "analysed_tool_count": 7,
+      "authority_graph": true,
+      "capture_kind": "static-source",
+      "captured_tool_count": 7,
+      "domain": "data systems",
+      "enforcement_pattern": "downstream service",
+      "id": "aws-postgres-mcp",
+      "pinned_version": "1.1.11",
+      "upstream_project": "AWS PostgreSQL MCP Server"
+    },
+    {
+      "analysed_tool_count": 8,
+      "authority_graph": true,
+      "capture_kind": "local-runtime",
+      "captured_tool_count": 8,
+      "domain": "operations SaaS",
+      "enforcement_pattern": "tool implementation",
+      "id": "sentry-mcp",
+      "pinned_version": "0.37.0",
+      "upstream_project": "Sentry MCP Server"
+    },
+    {
+      "analysed_tool_count": 25,
+      "authority_graph": true,
+      "capture_kind": "local-runtime",
+      "captured_tool_count": 25,
+      "domain": "work management",
+      "enforcement_pattern": "tool implementation",
+      "id": "initiative-mcp",
+      "pinned_version": "0.63.4",
+      "upstream_project": "Initiative"
+    },
+    {
+      "analysed_tool_count": 0,
+      "authority_graph": false,
+      "capture_kind": "local-runtime",
+      "captured_tool_count": null,
+      "domain": "identity",
+      "enforcement_pattern": "credential scope",
+      "id": "authorizer-delegation",
+      "pinned_version": "2.4.0",
+      "upstream_project": "Authorizer"
+    },
+    {
+      "analysed_tool_count": 1,
+      "authority_graph": true,
+      "capture_kind": "managed-live",
+      "captured_tool_count": 1,
+      "domain": "cloud platform",
+      "enforcement_pattern": "gateway policy engine",
+      "id": "agentcore-refund-policy",
+      "pinned_version": "CLI 0.28.1 / capture 2026-08-29",
+      "upstream_project": "Amazon Bedrock AgentCore"
+    },
+    {
+      "analysed_tool_count": 1,
+      "authority_graph": true,
+      "capture_kind": "managed-live",
+      "captured_tool_count": 29,
+      "domain": "cloud identity",
+      "enforcement_pattern": "downstream service",
+      "id": "aws-iam-access-keys",
+      "pinned_version": "1.0.11",
+      "upstream_project": "AWS IAM MCP Server"
+    }
+  ],
+  "correction_classification": {
+    "canonical_records": 16,
+    "class_counts": null,
+    "complete": false,
+    "reason": "legacy correction records lack canonical pre-study class labels",
+    "total_records": 37
+  },
+  "corrections": [
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "agentkit",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Asset arguments and invented producer anchors cannot express the real authority source.",
+      "id": "agentkit-001",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "agentkit",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Collateral-limited borrowing and one-to-one wrapping are represented as unbounded production.",
+      "id": "agentkit-002",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "agentkit",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Buying then selling is counted as gross spend although net exposure is approximately zero.",
+      "id": "agentkit-003",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "inventory-v074.json",
+      "capture": "agentkit",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Two providers declare get_balance and name-based manifest identity silently collapses one tool.",
+      "id": "agentkit-004",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "github-mcp-server",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Method-dispatch identifiers were guessed as produced authority scopes and removed.",
+      "id": "github-001",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "github-mcp-server",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Fork creation was downgraded from irreversible to a reversible write.",
+      "id": "github-002",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "github-mcp-server",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "A multi-file commit was downgraded from irreversible to a reversible write.",
+      "id": "github-003",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "github-mcp-server",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Workflow-file writes were reviewed as producers of workflow execution authority.",
+      "id": "github-004",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "aws-postgres-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "The write-enabled SQL tool was upgraded from read to irreversible because its argument determines the effect.",
+      "id": "postgres-001",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "aws-postgres-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Connection-state tools were corrected from irreversible to write and read effects.",
+      "id": "postgres-002",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "aws-postgres-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "All tools were changed to service principal because they spend configured AWS or database credentials.",
+      "id": "postgres-003",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "aws-postgres-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "A bearer job identifier was removed as a requirement while the producer's second output remains unrepresentable.",
+      "id": "postgres-004",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "scan-skeleton.yaml",
+      "capture": "sentry-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Caller-supplied bearer references were guessed as authority scopes and removed.",
+      "id": "sentry-001",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "sentry-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "Search result limits were not promoted into monetary ceilings.",
+      "id": "sentry-002",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "sentry-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "The fixed user token was represented as service principal while its owner and delegation remain lost.",
+      "id": "sentry-003",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "sentry-mcp",
+      "classes": [],
+      "classification_status": "missing",
+      "description": "The hidden dispatch meta-tool stayed irreversible because its argument selects mixed effects and approvals.",
+      "id": "sentry-004",
+      "reported_class": null
+    },
+    {
+      "affected_artifact": "scan-skeleton.yaml",
+      "capture": "initiative-mcp",
+      "classes": [
+        "source ambiguity"
+      ],
+      "classification_status": "canonical",
+      "description": "Caller-supplied guild and calendar identifiers were guessed as authority scopes.",
+      "id": "initiative-001",
+      "reported_class": "source ambiguity"
+    },
+    {
+      "affected_artifact": "scan-skeleton.yaml",
+      "capture": "initiative-mcp",
+      "classes": [
+        "source ambiguity"
+      ],
+      "classification_status": "canonical",
+      "description": "Result limits and custom-property values were guessed as monetary arguments.",
+      "id": "initiative-002",
+      "reported_class": "source ambiguity"
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "initiative-mcp",
+      "classes": [
+        "source ambiguity"
+      ],
+      "classification_status": "canonical",
+      "description": "Three GET-backed tools were corrected from irreversible to read effects.",
+      "id": "initiative-003",
+      "reported_class": "source ambiguity"
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "initiative-mcp",
+      "classes": [
+        "model gap"
+      ],
+      "classification_status": "canonical",
+      "description": "One move tool has reversible and destructive branches that a tool-level effect cannot separate.",
+      "id": "initiative-004",
+      "reported_class": "model gap"
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "initiative-mcp",
+      "classes": [
+        "deployment policy"
+      ],
+      "classification_status": "canonical",
+      "description": "Client-side approval prompts were removed because the server does not enforce them for every caller.",
+      "id": "initiative-005",
+      "reported_class": "deployment policy"
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "initiative-mcp",
+      "classes": [
+        "source ambiguity"
+      ],
+      "classification_status": "canonical",
+      "description": "Caller principals were retained after source review proved credential forwarding.",
+      "id": "initiative-006",
+      "reported_class": "source ambiguity"
+    },
+    {
+      "affected_artifact": "capture-delegation.mjs",
+      "capture": "authorizer-delegation",
+      "classes": [
+        "extractor defect"
+      ],
+      "classification_status": "canonical",
+      "description": "A backward clock step was masked as an undefined-token error and the adapter now preserves the HTTP failure.",
+      "id": "authorizer-001",
+      "reported_class": "extractor defect"
+    },
+    {
+      "affected_artifact": "capture.json",
+      "capture": "authorizer-delegation",
+      "classes": [
+        "model gap"
+      ],
+      "classification_status": "canonical",
+      "description": "Nested actor histories of depths one through four did not fit the single-actor provisional record.",
+      "id": "authorizer-002",
+      "reported_class": "model gap"
+    },
+    {
+      "affected_artifact": "capture.json",
+      "capture": "authorizer-delegation",
+      "classes": [
+        "model gap"
+      ],
+      "classification_status": "canonical",
+      "description": "Five-minute token validity did not fit date-granularity grant records.",
+      "id": "authorizer-003",
+      "reported_class": "model gap"
+    },
+    {
+      "affected_artifact": "capture.json",
+      "capture": "authorizer-delegation",
+      "classes": [
+        "source ambiguity",
+        "deployment policy"
+      ],
+      "classification_status": "canonical",
+      "description": "Issuer scopes and audience do not establish which tools or effects the deployment authorises.",
+      "id": "authorizer-004",
+      "reported_class": "source ambiguity / deployment policy"
+    },
+    {
+      "affected_artifact": "capture.json",
+      "capture": "authorizer-delegation",
+      "classes": [
+        "source ambiguity"
+      ],
+      "classification_status": "canonical",
+      "description": "Issuer-side rejection evidence does not prove resource-server validation.",
+      "id": "authorizer-005",
+      "reported_class": "source ambiguity"
+    },
+    {
+      "affected_artifact": "protocol-refusal.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [
+        "source ambiguity"
+      ],
+      "classification_status": "canonical",
+      "description": "The first requested MCP protocol version was unsupported and the advertised version was preserved.",
+      "id": "agentcore-001",
+      "reported_class": "source ambiguity"
+    },
+    {
+      "affected_artifact": "managed-state.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "description": "A no-authorizer deployment could exercise policy but could not justify the principal mapping.",
+      "id": "agentcore-002",
+      "reported_class": "model/trust gap"
+    },
+    {
+      "affected_artifact": "capture-index.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "description": "An earlier run held two policies and lacked a final inventory capture, so it was discarded.",
+      "id": "agentcore-003",
+      "reported_class": "extractor/process defect"
+    },
+    {
+      "affected_artifact": "mapping.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [
+        "deployment policy"
+      ],
+      "classification_status": "canonical",
+      "description": "Two observed request values remain representative rather than a complete condition domain.",
+      "id": "agentcore-004",
+      "reported_class": "deployment policy"
+    },
+    {
+      "affected_artifact": "candidate-managed-oracle-v1.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "description": "Evidence filenames were removed from enforcement identity while their bytes remain independently verified.",
+      "id": "agentcore-005",
+      "reported_class": "extractor/model defect"
+    },
+    {
+      "affected_artifact": "candidate-managed-state.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "description": "Redeployment changed live resource identifiers and review retained only the logical binding.",
+      "id": "agentcore-006",
+      "reported_class": "deployment identity"
+    },
+    {
+      "affected_artifact": "scan-skeleton.yaml",
+      "capture": "aws-iam-access-keys",
+      "classes": [
+        "extractor defect"
+      ],
+      "classification_status": "canonical",
+      "description": "The scanner sees neither the returned credential nor its finite cardinality.",
+      "id": "iam-001",
+      "reported_class": "extractor defect"
+    },
+    {
+      "affected_artifact": "capture.json",
+      "capture": "aws-iam-access-keys",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "description": "The captured release returns credential material while the current release redacts it.",
+      "id": "iam-002",
+      "reported_class": "source/version ambiguity"
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "aws-iam-access-keys",
+      "classes": [
+        "model gap"
+      ],
+      "classification_status": "canonical",
+      "description": "Manifest v1 forces one binding or an unbounded series and cannot express the enforced maximum of two.",
+      "id": "iam-003",
+      "reported_class": "model gap"
+    },
+    {
+      "affected_artifact": "mandate.yaml",
+      "capture": "aws-iam-access-keys",
+      "classes": [
+        "deployment policy"
+      ],
+      "classification_status": "canonical",
+      "description": "The permissionless one-tool adapter and verified cleanup justify a reversible write only for this run.",
+      "id": "iam-004",
+      "reported_class": "deployment policy"
+    }
+  ],
+  "generated_at": "2026-08-29T18:06:26Z",
+  "live_comparisons": [
+    {
+      "analysis_wall_clock_ms": null,
+      "baseline_revision": "RefundIamUnderLimit",
+      "candidate_revision": "RefundIamCandidate",
+      "capture": "agentcore-refund-policy",
+      "counterexample_length": null,
+      "instrumentation_status": "missing",
+      "requests": [
+        {
+          "arguments": {
+            "amount": 2000
+          },
+          "baseline": "deny",
+          "candidate": "allow",
+          "change": "widens"
+        },
+        {
+          "arguments": {
+            "amount": 500
+          },
+          "baseline": "allow",
+          "candidate": "allow",
+          "change": "stable_allow"
+        }
+      ]
+    }
+  ],
+  "summary_version": 1
+}
