@@ -1,0 +1,38 @@
+{
+  "corrections_version": 1,
+  "capture": "github-mcp-server",
+  "corrections": [
+    {
+      "id": "github-001",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Method-dispatch identifiers were guessed as produced authority scopes and removed."
+    },
+    {
+      "id": "github-002",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Fork creation was downgraded from irreversible to a reversible write."
+    },
+    {
+      "id": "github-003",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "A multi-file commit was downgraded from irreversible to a reversible write."
+    },
+    {
+      "id": "github-004",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Workflow-file writes were reviewed as producers of workflow execution authority."
+    }
+  ]
+}

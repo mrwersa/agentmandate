@@ -1,0 +1,38 @@
+{
+  "corrections_version": 1,
+  "capture": "agentkit",
+  "corrections": [
+    {
+      "id": "agentkit-001",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Asset arguments and invented producer anchors cannot express the real authority source."
+    },
+    {
+      "id": "agentkit-002",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Collateral-limited borrowing and one-to-one wrapping are represented as unbounded production."
+    },
+    {
+      "id": "agentkit-003",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "mandate.yaml",
+      "description": "Buying then selling is counted as gross spend although net exposure is approximately zero."
+    },
+    {
+      "id": "agentkit-004",
+      "reported_class": null,
+      "classes": [],
+      "classification_status": "missing",
+      "affected_artifact": "inventory-v074.json",
+      "description": "Two providers declare get_balance and name-based manifest identity silently collapses one tool."
+    }
+  ]
+}

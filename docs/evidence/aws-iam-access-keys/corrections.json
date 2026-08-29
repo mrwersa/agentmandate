@@ -1,0 +1,38 @@
+{
+  "corrections_version": 1,
+  "capture": "aws-iam-access-keys",
+  "corrections": [
+    {
+      "id": "iam-001",
+      "reported_class": "extractor defect",
+      "classes": ["extractor defect"],
+      "classification_status": "canonical",
+      "affected_artifact": "scan-skeleton.yaml",
+      "description": "The scanner sees neither the returned credential nor its finite cardinality."
+    },
+    {
+      "id": "iam-002",
+      "reported_class": "source/version ambiguity",
+      "classes": [],
+      "classification_status": "noncanonical",
+      "affected_artifact": "capture.json",
+      "description": "The captured release returns credential material while the current release redacts it."
+    },
+    {
+      "id": "iam-003",
+      "reported_class": "model gap",
+      "classes": ["model gap"],
+      "classification_status": "canonical",
+      "affected_artifact": "mandate.yaml",
+      "description": "Manifest v1 forces one binding or an unbounded series and cannot express the enforced maximum of two."
+    },
+    {
+      "id": "iam-004",
+      "reported_class": "deployment policy",
+      "classes": ["deployment policy"],
+      "classification_status": "canonical",
+      "affected_artifact": "mandate.yaml",
+      "description": "The permissionless one-tool adapter and verified cleanup justify a reversible write only for this run."
+    }
+  ]
+}
