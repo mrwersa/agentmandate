@@ -1,0 +1,43 @@
+{
+  "claim_boundary": "the trusted adapter held the Gateway credential and verified the binding before deriving the session; the managed Gateway did not verify the binding itself",
+  "different_signed_mandate": {
+    "calls": [
+      {
+        "id": "isolated-first",
+        "outcome": "allow"
+      }
+    ],
+    "derived_session_id_distinct": true
+  },
+  "local_controls": [
+    {
+      "case": "tampered-binding",
+      "reason": "binding signature is not valid for the reviewed issuer",
+      "result": "rejected-before-network"
+    },
+    {
+      "case": "expired-binding",
+      "reason": "binding is not active at as_of",
+      "result": "rejected-before-network"
+    }
+  ],
+  "mandate_binding_evaluation_version": 1,
+  "median_adapter_ms": 13.602295,
+  "request_amount": 600,
+  "same_signed_mandate": {
+    "calls": [
+      {
+        "id": "bound-first",
+        "outcome": "allow"
+      },
+      {
+        "id": "bound-second",
+        "outcome": "deny"
+      }
+    ],
+    "derived_session_ids_equal": true,
+    "separate_client_processes": 2
+  },
+  "scheme": "Ed25519 signature over canonical binding fields; UUID-shaped session from SHA-256",
+  "threshold": 1000
+}

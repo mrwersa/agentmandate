@@ -1,0 +1,10 @@
+{
+  "binding_version": 1,
+  "expires_at": "2026-08-30T00:00:00Z",
+  "issued_at": "2026-08-29T00:00:00Z",
+  "issuer": "review-control-plane-evaluation-2",
+  "mandate_sha256": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85",
+  "policy_sha256": "1c4a561ce6a5a2776d0c8a7da77641f40d2f61c4790446bfc21ad725b9066e9a",
+  "principal": "caller",
+  "signature": "6Hw6izEw5DSUlp3mujguNzp5QR5omPgOLLlFP6VLMtyGavY5rmcIEA3PFFWK7VeWALdIaS4roTbLVmibcw+LCg=="
+}

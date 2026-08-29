@@ -1,0 +1,24 @@
+{
+  "id": "binding-tools-list",
+  "jsonrpc": "2.0",
+  "result": {
+    "tools": [
+      {
+        "description": "Process a test refund amount for AgentMandate policy evidence",
+        "inputSchema": {
+          "properties": {
+            "amount": {
+              "description": "Synthetic refund amount in dollars",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "amount"
+          ],
+          "type": "object"
+        },
+        "name": "TemporalBindingTarget___process_refund"
+      }
+    ]
+  }
+}

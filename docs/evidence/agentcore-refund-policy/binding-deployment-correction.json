@@ -1,0 +1,7 @@
+{
+  "classification": "deployment policy",
+  "correction": "add GetWorkloadAccessToken for the default directory and this Gateway's workload identity only",
+  "diagnosis": "the generated Gateway role lacked the workload-token permission required for policy-session evaluation",
+  "evidence_boundary": "the failed call is excluded from the evaluated sequence",
+  "initial_result": "Gateway target returned an internal error before execution"
+}

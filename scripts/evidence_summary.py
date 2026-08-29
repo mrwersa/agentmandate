@@ -356,6 +356,45 @@ def _temporal_session(root: Path) -> dict[str, Any]:
     }
 
 
+def _mandate_binding(root: Path) -> dict[str, Any]:
+    result = _read(root / "agentcore-refund-policy" / "mandate-binding-result.json")
+    expected_fields = {
+        "mandate_binding_evaluation_version",
+        "scheme",
+        "threshold",
+        "request_amount",
+        "same_signed_mandate",
+        "different_signed_mandate",
+        "local_controls",
+        "median_adapter_ms",
+        "claim_boundary",
+    }
+    same = result.get("same_signed_mandate")
+    different = result.get("different_signed_mandate")
+    controls = result.get("local_controls")
+    if (
+        not isinstance(result, dict)
+        or set(result) != expected_fields
+        or result.get("mandate_binding_evaluation_version") != 1
+        or result.get("threshold") != 1000
+        or result.get("request_amount") != 600
+        or not isinstance(same, dict)
+        or same.get("separate_client_processes") != 2
+        or same.get("derived_session_ids_equal") is not True
+        or [item.get("outcome") for item in same.get("calls", [])] != ["allow", "deny"]
+        or not isinstance(different, dict)
+        or different.get("derived_session_id_distinct") is not True
+        or [item.get("outcome") for item in different.get("calls", [])] != ["allow"]
+        or not isinstance(controls, list)
+        or [item.get("result") for item in controls]
+        != ["rejected-before-network", "rejected-before-network"]
+        or not isinstance(result.get("median_adapter_ms"), (int, float))
+        or result["median_adapter_ms"] <= 0
+    ):
+        raise ValueError("mandate binding result does not match the reviewed outcomes")
+    return {"capture": "agentcore-refund-policy", **result}
+
+
 def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
     corrections = _corrections(root)
     canonical = sum(record["classification_status"] == "canonical" for record in corrections)
@@ -394,6 +433,7 @@ def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
         "live_comparisons": [_managed_comparison(root)],
         "managed_controls": [_managed_controls(root)],
         "temporal_sessions": [_temporal_session(root)],
+        "mandate_bindings": [_mandate_binding(root)],
     }
 
 

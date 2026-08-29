@@ -1,0 +1,15 @@
+{
+  "binding_benchmark_version": 1,
+  "environment": {
+    "implementation": "CPython",
+    "openssl": "OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "median_ms": 13.602295,
+  "minimum_ms": 6.026572,
+  "operation": "Ed25519 verify plus deterministic session derivation",
+  "repetitions": 200,
+  "timing_boundary": "in-process adapter call including one OpenSSL subprocess",
+  "warmups": 20
+}

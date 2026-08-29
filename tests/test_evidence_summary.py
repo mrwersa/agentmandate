@@ -35,8 +35,8 @@ def test_summary_refuses_to_invent_legacy_class_counts() -> None:
 
     assert classification == {
         "complete": False,
-        "canonical_records": 17,
-        "total_records": 38,
+        "canonical_records": 18,
+        "total_records": 39,
         "class_counts": None,
         "reason": "legacy correction records lack canonical pre-study class labels",
     }
@@ -88,6 +88,24 @@ def test_temporal_session_boundary_is_in_the_summary() -> None:
         "authenticated_principal_binding": "configured-not-adversarially-tested",
         "multi_hop_continuity": "documented-not-live-tested",
     }
+
+
+def test_mandate_binding_control_is_in_the_summary() -> None:
+    binding = evidence_summary.build_summary()["mandate_bindings"][0]
+
+    assert binding["threshold"] == 1000
+    assert binding["request_amount"] == 600
+    assert binding["same_signed_mandate"]["separate_client_processes"] == 2
+    assert [item["outcome"] for item in binding["same_signed_mandate"]["calls"]] == [
+        "allow",
+        "deny",
+    ]
+    assert binding["different_signed_mandate"]["derived_session_id_distinct"] is True
+    assert [item["result"] for item in binding["local_controls"]] == [
+        "rejected-before-network",
+        "rejected-before-network",
+    ]
+    assert binding["median_adapter_ms"] > 0
 
 
 @pytest.mark.parametrize(

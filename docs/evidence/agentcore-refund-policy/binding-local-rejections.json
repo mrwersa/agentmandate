@@ -1,0 +1,15 @@
+{
+  "cases": [
+    {
+      "case": "tampered-binding",
+      "reason": "binding signature is not valid for the reviewed issuer",
+      "result": "rejected-before-network"
+    },
+    {
+      "case": "expired-binding",
+      "reason": "binding is not active at as_of",
+      "result": "rejected-before-network"
+    }
+  ],
+  "network_requests": 0
+}

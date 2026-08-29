@@ -5,7 +5,7 @@ import importlib.util
 import json
 import re
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +43,22 @@ capture_temporal = importlib.util.module_from_spec(_temporal_spec)
 sys.modules["capture_temporal"] = capture_temporal
 _temporal_spec.loader.exec_module(capture_temporal)
 
+_binding_spec = importlib.util.spec_from_file_location(
+    "mandate_binding", EVIDENCE / "mandate_binding.py"
+)
+assert _binding_spec is not None and _binding_spec.loader is not None
+mandate_binding = importlib.util.module_from_spec(_binding_spec)
+sys.modules["mandate_binding"] = mandate_binding
+_binding_spec.loader.exec_module(mandate_binding)
+
+_binding_capture_spec = importlib.util.spec_from_file_location(
+    "capture_binding", EVIDENCE / "capture_binding.py"
+)
+assert _binding_capture_spec is not None and _binding_capture_spec.loader is not None
+capture_binding = importlib.util.module_from_spec(_binding_capture_spec)
+sys.modules["capture_binding"] = capture_binding
+_binding_capture_spec.loader.exec_module(capture_binding)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -55,6 +71,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     controls_indexed = {source["locator"] for source in controls_index["sources"]}
     temporal_index = read_json("temporal-index.json")
     temporal_indexed = {source["locator"] for source in temporal_index["sources"]}
+    binding_index = read_json("binding-index.json")
+    binding_indexed = {source["locator"] for source in binding_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -63,6 +81,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         not in {
             "README.md",
             "capture-index.json",
+            "binding-index.json",
             "controls-index.json",
             "corrections.json",
             "temporal-index.json",
@@ -81,8 +100,14 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert indexed.isdisjoint(controls_indexed)
     assert indexed.isdisjoint(temporal_indexed)
     assert controls_indexed.isdisjoint(temporal_indexed)
-    assert indexed | controls_indexed | temporal_indexed == committed
-    for source in (*index["sources"], *controls_index["sources"], *temporal_index["sources"]):
+    assert binding_indexed.isdisjoint(indexed | controls_indexed | temporal_indexed)
+    assert indexed | controls_indexed | temporal_indexed | binding_indexed == committed
+    for source in (
+        *index["sources"],
+        *controls_index["sources"],
+        *temporal_index["sources"],
+        *binding_index["sources"],
+    ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
     assert controls_index["cleanup"] == {
@@ -94,6 +119,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         "policy_engine": "absent",
     }
     assert temporal_index["cleanup"] == controls_index["cleanup"]
+    assert binding_index["cleanup"] == controls_index["cleanup"]
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -494,6 +520,179 @@ def test_temporal_capture_rejects_policy_and_decision_mismatch(tmp_path: Path) -
     (raw / "fresh-second.raw").write_text(json.dumps(response), encoding="utf-8")
     with pytest.raises(ValueError, match="outcome is not allow"):
         capture_temporal.capture(raw, tmp_path / "bad-response")
+
+
+def _write_binding_raw(root: Path) -> None:
+    status = {
+        "success": True,
+        "projectName": "TemporalMandate",
+        "targetRegion": "us-east-1",
+        "resources": [
+            {
+                "resourceType": resource_type,
+                "name": name,
+                "deploymentState": "deployed",
+            }
+            for resource_type, name in (
+                ("gateway", "TemporalBindingGateway"),
+                ("policy-engine", "TemporalBindingPolicyEngine"),
+                ("policy", "TemporalBindingBudget"),
+                ("policy", "TemporalBindingPermit"),
+            )
+        ],
+    }
+    (root / "deployment-status.raw").write_text(json.dumps(status), encoding="utf-8")
+    gateway = {
+        "status": "READY",
+        "authorizerType": "AWS_IAM",
+        "protocolType": "MCP",
+        "policyEngineConfiguration": {"mode": "ENFORCE"},
+        "workloadIdentityDetails": {"workloadIdentityArn": "present-only-in-raw"},
+    }
+    (root / "gateway-state.raw").write_text(json.dumps(gateway), encoding="utf-8")
+    budget = (EVIDENCE / "binding-policy.dogwood").read_text(encoding="utf-8").replace(
+        "<reviewed-gateway-binding>", "raw-gateway-resource"
+    )
+    permit = (
+        "permit (principal is AgentCore::IamEntity, "
+        'action == AgentCore::Action::"TemporalBindingTarget___process_refund", '
+        'resource == AgentCore::Gateway::"raw-gateway-resource");'
+    )
+    policies = {
+        "policies": [
+            {
+                "name": "TemporalBindingBudget",
+                "status": "ACTIVE",
+                "enforcementMode": "ACTIVE",
+                "definition": {"policy": {"statement": budget}},
+            },
+            {
+                "name": "TemporalBindingPermit",
+                "status": "ACTIVE",
+                "enforcementMode": "ACTIVE",
+                "definition": {"policy": {"statement": permit}},
+            },
+        ]
+    }
+    (root / "policy-inventory.raw").write_text(json.dumps(policies), encoding="utf-8")
+    for committed, raw in (
+        ("binding-tools-list-response.json", "tools-list.raw"),
+        ("mandate-binding.json", "binding-a.raw"),
+        ("isolation-binding.json", "binding-b.raw"),
+        ("binding-public-key.pem", "binding-public.raw"),
+        ("binding-benchmark.json", "benchmark.raw"),
+        ("binding-bound-first-response.json", "bound-first.raw"),
+        ("binding-isolated-first-response.json", "isolated-first.raw"),
+    ):
+        (root / raw).write_bytes((EVIDENCE / committed).read_bytes())
+    denied = read_json("binding-bound-second-response.json")
+    denied["error"]["message"] = (
+        "Tool Execution Denied: Tool call not allowed due to policy enforcement "
+        "[Policy evaluation denied due to TemporalBindingBudget-raw-only]"
+    )
+    (root / "bound-second.raw").write_text(json.dumps(denied), encoding="utf-8")
+    preflight = {
+        "result": {
+            "isError": True,
+            "_meta": {
+                "debug": {
+                    "text": (
+                        "not authorized to perform: "
+                        "bedrock-agentcore:GetWorkloadAccessToken"
+                    )
+                }
+            },
+        }
+    }
+    (root / "preflight-failure.raw").write_text(json.dumps(preflight), encoding="utf-8")
+
+
+def test_signed_mandate_binding_is_stable_fail_closed_and_live(tmp_path: Path) -> None:
+    binding = read_json("mandate-binding.json")
+    public_key = (EVIDENCE / "binding-public-key.pem").read_bytes()
+    as_of = datetime(2026, 8, 29, 23, 30, tzinfo=timezone.utc)
+
+    first = mandate_binding.verify_and_derive(
+        binding, public_key, as_of=as_of, expected_principal="caller"
+    )
+    second = mandate_binding.verify_and_derive(
+        binding, public_key, as_of=as_of, expected_principal="caller"
+    )
+    other = mandate_binding.verify_and_derive(
+        read_json("isolation-binding.json"),
+        public_key,
+        as_of=as_of,
+        expected_principal="caller",
+    )
+    assert first == second
+    assert first != other
+    assert re.fullmatch(r"[0-9a-f-]{36}", first)
+
+    result = read_json("mandate-binding-result.json")
+    assert [call["outcome"] for call in result["same_signed_mandate"]["calls"]] == [
+        "allow",
+        "deny",
+    ]
+    assert result["same_signed_mandate"]["separate_client_processes"] == 2
+    assert result["different_signed_mandate"]["calls"] == [
+        {"id": "isolated-first", "outcome": "allow"}
+    ]
+    assert [case["result"] for case in result["local_controls"]] == [
+        "rejected-before-network",
+        "rejected-before-network",
+    ]
+    assert read_json("binding-local-rejections.json")["network_requests"] == 0
+    assert result["median_adapter_ms"] == read_json("binding-benchmark.json")["median_ms"]
+
+    tampered = dict(binding)
+    tampered["mandate_sha256"] = "0" * 64
+    with pytest.raises(mandate_binding.BindingError, match="signature is not valid"):
+        mandate_binding.verify_and_derive(
+            tampered, public_key, as_of=as_of, expected_principal="caller"
+        )
+    with pytest.raises(mandate_binding.BindingError, match="not active"):
+        mandate_binding.verify_and_derive(
+            binding,
+            public_key,
+            as_of=datetime(2026, 8, 30, tzinfo=timezone.utc),
+            expected_principal="caller",
+        )
+
+    raw = tmp_path / "raw"
+    output = tmp_path / "output"
+    raw.mkdir()
+    _write_binding_raw(raw)
+    regenerated = capture_binding.capture(raw, output)
+    assert regenerated == result
+    index = json.loads((output / "binding-index.json").read_text(encoding="utf-8"))
+    for source in index["sources"]:
+        if source["kind"] != "capture_script":
+            assert (output / source["locator"]).read_bytes() == (
+                EVIDENCE / source["locator"]
+            ).read_bytes()
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (lambda value: value.update(extra=True), "missing or unknown"),
+        (lambda value: value.update(binding_version=True), "binding_version"),
+        (lambda value: value.update(principal=" caller"), "non-empty stripped"),
+        (lambda value: value.update(issued_at="20260829"), "canonical UTC"),
+        (lambda value: value.update(expires_at=value["issued_at"]), "increasing"),
+        (lambda value: value.update(signature="!"), "base64"),
+    ],
+)
+def test_binding_reader_rejects_malformed_records(mutation: Any, message: str) -> None:
+    binding = read_json("mandate-binding.json")
+    mutation(binding)
+    with pytest.raises(mandate_binding.BindingError, match=message):
+        mandate_binding.verify_and_derive(
+            binding,
+            (EVIDENCE / "binding-public-key.pem").read_bytes(),
+            as_of=datetime(2026, 8, 29, 23, 30, tzinfo=timezone.utc),
+            expected_principal="caller",
+        )
 
 
 def test_protocol_correction_is_preserved() -> None:

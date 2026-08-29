@@ -1,0 +1,15 @@
+{
+  "id": "bound-first",
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "arguments": {
+      "amount": 600
+    },
+    "name": "TemporalBindingTarget___process_refund"
+  },
+  "reviewed_binding": {
+    "mandate_alias": "mandate-a",
+    "session_identifier": "derived-after-signature-verification-not-retained"
+  }
+}

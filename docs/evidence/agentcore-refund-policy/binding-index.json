@@ -1,0 +1,111 @@
+{
+  "binding_capture_version": 1,
+  "capture_date": "2026-08-29",
+  "cleanup": {
+    "cdk_bootstrap": "retained",
+    "gateway": "absent",
+    "iam_role": "absent",
+    "lambda": "absent",
+    "log_group": "absent",
+    "policy_engine": "absent"
+  },
+  "raw_retention": "live identifiers, derived session IDs, resource URLs, and signed request headers remained in temporary files and were deleted after projection",
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "8a8429493d1baf883255ea84c5d47ab75462568e3283a3ff789fa7b57c02da4d",
+      "kind": "capture_script",
+      "locator": "benchmark_binding.py"
+    },
+    {
+      "content_sha256": "d989bab39ab4a88f0e3431d3174bdd5bde10687f21d1e90827767add11ec2829",
+      "kind": "reviewed_artifact",
+      "locator": "binding-benchmark.json"
+    },
+    {
+      "content_sha256": "673c68b05c02d44ca1223c43a1654680f843285a129d2b0a3e8cc26efa3f2d82",
+      "kind": "reviewed_artifact",
+      "locator": "binding-bound-first-request.json"
+    },
+    {
+      "content_sha256": "effc48b1b5c63d63679e5d5f95b82da27130869bc1457f34d00f3fbff78952f9",
+      "kind": "reviewed_artifact",
+      "locator": "binding-bound-first-response.json"
+    },
+    {
+      "content_sha256": "00bc0354e36188d7159fe65af4a0f619806539356cc6f063c7ccfef5c0c7b816",
+      "kind": "reviewed_artifact",
+      "locator": "binding-bound-second-request.json"
+    },
+    {
+      "content_sha256": "24ddb7cb8a47533d76c44e45fa5261e7ac4b360e30c3de7e0515898531efb913",
+      "kind": "reviewed_artifact",
+      "locator": "binding-bound-second-response.json"
+    },
+    {
+      "content_sha256": "62a8f5bf2aac52f361e27819ec82fbbfa66f425bfa8bef8d21606cab9f29a0b2",
+      "kind": "reviewed_artifact",
+      "locator": "binding-deployment-correction.json"
+    },
+    {
+      "content_sha256": "8c403513aecde3d1f4fb18c91592e0a0a2799ef0300f1f891742d9c3970fac8c",
+      "kind": "reviewed_artifact",
+      "locator": "binding-isolated-first-request.json"
+    },
+    {
+      "content_sha256": "0da20032cecd76cf57f23e7b5a0480af3c5e8a083333b7eaa1bd6f9d0c8fecd7",
+      "kind": "reviewed_artifact",
+      "locator": "binding-isolated-first-response.json"
+    },
+    {
+      "content_sha256": "0a4709e1c1e08a0e8ff0572af1be34c04d10389c6e0fdb3017722e323c069d78",
+      "kind": "reviewed_artifact",
+      "locator": "binding-local-rejections.json"
+    },
+    {
+      "content_sha256": "6ad5ff5bb088ea9a0cdf49688866a8fb423a753c7f0dab5c1e328624ccd8cd5f",
+      "kind": "reviewed_artifact",
+      "locator": "binding-managed-state.json"
+    },
+    {
+      "content_sha256": "fc80984ae5c75cb2c57f89cd4f2df55220767c44b1f2c3bc4f820e222bb2a8d2",
+      "kind": "reviewed_artifact",
+      "locator": "binding-policy.dogwood"
+    },
+    {
+      "content_sha256": "c5dff1d6d4eb4212c9ff42ed15e8b7a0f8fa1f109d5df9488299b641ecf38536",
+      "kind": "reviewed_artifact",
+      "locator": "binding-public-key.pem"
+    },
+    {
+      "content_sha256": "baf974ca4af4f0454d29b6617e812b5b75769d37b007130e5fe04aeb2af59480",
+      "kind": "reviewed_artifact",
+      "locator": "binding-tools-list-response.json"
+    },
+    {
+      "content_sha256": "0899445aead401051722c10ddf04e4c0fcaa7c5a8ac30301462bf715c7b1b742",
+      "kind": "capture_script",
+      "locator": "capture_binding.py"
+    },
+    {
+      "content_sha256": "6977de33e8c8a45aa11e9deb3cd4d096477193b2c96ea6b7ec4cbf854503beae",
+      "kind": "reviewed_artifact",
+      "locator": "isolation-binding.json"
+    },
+    {
+      "content_sha256": "aa80fa7ce4a5543c95adad05e0e6e68a5200b1d89073a96074f440584e3bf74e",
+      "kind": "reviewed_artifact",
+      "locator": "mandate-binding-result.json"
+    },
+    {
+      "content_sha256": "d68090083664b72203acd6fe9faa33fdae86499d2b201c3c8927e5754f403ace",
+      "kind": "reviewed_artifact",
+      "locator": "mandate-binding.json"
+    },
+    {
+      "content_sha256": "b5ed0aeef894a589aecad7940ffce32c9cf55f88390be135af44ca001bbb908b",
+      "kind": "capture_script",
+      "locator": "mandate_binding.py"
+    }
+  ]
+}

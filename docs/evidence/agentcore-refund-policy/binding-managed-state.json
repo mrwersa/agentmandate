@@ -1,0 +1,31 @@
+{
+  "active_policy_inventory": [
+    "TemporalBindingBudget",
+    "TemporalBindingPermit"
+  ],
+  "capture_date": "2026-08-29",
+  "gateway": {
+    "authorizer_type": "AWS_IAM",
+    "binding": "agentcore-temporal-bound-mandate-gateway",
+    "policy_engine_mode": "ENFORCE",
+    "protocol_type": "MCP",
+    "status": "READY",
+    "workload_identity_present": true
+  },
+  "region": "us-east-1",
+  "sanitisation": {
+    "deny_message_policy_identifier_replaced": true,
+    "omitted": [
+      "account identifiers",
+      "Amazon Resource Names",
+      "generated resource identifiers",
+      "resource URLs",
+      "service timestamps",
+      "derived policy session identifiers",
+      "signed request headers"
+    ]
+  },
+  "tool_inventory": [
+    "TemporalBindingTarget___process_refund"
+  ]
+}
