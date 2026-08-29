@@ -112,10 +112,12 @@ Each request result contains:
 - minimum support naming the reviewed mapping and the digest-pinned request and
   response bytes.
 
-The later exposure envelope must add its own presentation version and explicit
-manifest, managed-profile, mapping, and source digests before output stability
-can pass gate 5e. Gate 5c does not silently promote private dataclasses into a
-public artifact contract.
+Gate 5e adds two presentation schemas: `agentmandate.cedar-alignment/v1` and
+`agentmandate.cedar-effective-diff/v1`. Each records the manifest content
+digest plus the managed-oracle content digest, managed-profile semantic digest,
+and reviewed mapping digest for each side. Per-request support retains the
+request and response locators and digests. These are versioned command outputs,
+not importable authority artifacts; no reader accepts them as policy evidence.
 
 An eligible Allow for a reachable mapped tool is `aligned_allow`. An eligible
 Deny for that exact request is `enforcement_narrows_request`; it does not prove
@@ -193,6 +195,37 @@ combine it with reviewed authority.
    changed joins, representative-domain overclaim, default-deny attribution,
    profile conflation, output stability, and no-partial-output behavior before
    any CLI or public Python surface.
+
+## Candidate CLI exposure
+
+Gate 5e proposes only these public commands:
+
+```text
+mandate cedar validate ORACLE
+mandate cedar align MANIFEST --oracle ORACLE --source-root DIR --as-of YYYY-MM-DD
+mandate cedar diff MANIFEST \
+  --baseline-oracle ORACLE --baseline-root DIR \
+  --candidate-oracle ORACLE --candidate-root DIR \
+  --as-of YYYY-MM-DD
+```
+
+`validate` is structural only and does not read declared sources. `align` and
+`diff` require explicit roots, read exactly the locators declared by each
+oracle, reject paths or symlinks escaping their root, and pass the bytes to the
+same private fail-closed consumer reviewed at gate 5c. They never read AWS
+credentials, call a service, or inspect policy expressions.
+
+Human and `--json` output are complete before exit. A trusted narrowing,
+widening, tightening, or unresolved finding exits 1 after output. Malformed
+records, missing files, unsafe roots, and invalid dates exit 2 with empty
+stdout. Semantic tampering whose record remains structurally valid is itself a
+finding and therefore emits the complete unresolved result before exit 1; it
+is not mislabeled as a usage error. No SARIF, Mermaid, Authority IR, condition,
+delegation, or runtime composition is claimed by these commands.
+
+The checked-in live diff JSON is byte-stable. The Python records remain private
+and absent from `agentmandate.__all__`. Gate 5e is not complete until an
+independent review reproduces this matrix against the merged CLI tree.
 
 Every gate proves all six manifest evidence graphs, existing Cedar fixtures,
 and legacy CLI output remain byte-identical when no policy evidence is supplied.

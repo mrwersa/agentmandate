@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `mandate cedar validate` structurally validates a managed-enforcement oracle
+  without trusting its sources. `mandate cedar align` and `mandate cedar diff`
+  verify explicit source roots, reviewed mapping evidence, managed state, and
+  exact request decisions before emitting human or versioned JSON results.
+  Findings exit 1 after complete output; malformed or unsafe inputs exit 2
+  without partial stdout.
+
 - Authority IR validation recognizes standalone Cedar policy-set and decision
   profiles through `contains_policy` and `decides_request`. The profile records
   only policies observed in captured native diagnostics, marks that inventory

@@ -128,6 +128,29 @@ Repeat attachment, chain, and locator mappings as needed. Delegation findings
 support human and JSON output; SARIF, Mermaid, `reach --ir`, and conditional
 composition fail before output rather than dropping uncertainty.
 
+Managed Cedar evidence also separates structural validation from trusted
+consumption. Source roots are explicit; the command reads exactly the locators
+declared by each oracle and refuses paths that escape the root:
+
+```yaml
+- run: mandate cedar validate baseline-oracle.json
+- run: mandate cedar validate candidate-oracle.json
+- run: >-
+    mandate cedar diff mandate.yaml
+    --baseline-oracle baseline-oracle.json
+    --baseline-root evidence/baseline
+    --candidate-oracle candidate-oracle.json
+    --candidate-root evidence/candidate
+    --as-of 2027-01-01
+    --json
+```
+
+The diff compares only identical canonical requests under one reviewed
+enforcement boundary. A widening, tightening, per-request Deny, or unresolved
+trust finding writes the complete result and exits 1. Invalid dates, malformed
+records, missing files, and unsafe roots exit 2 with empty stdout. The command
+does not fetch policy stores or evaluate Cedar source text.
+
 `ir validate` is a structural transport check and exits 0 even when evidence is
 contested or heuristic. `reach --ir` is the trust boundary: unsupported
 adapters, predicates, value shapes, or non-exact/non-accepted evidence exit 2

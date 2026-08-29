@@ -1,0 +1,169 @@
+{
+  "baseline": {
+    "alignments": [
+      {
+        "alignment": "aligned_allow",
+        "decision": "allow-under-limit",
+        "outcome": "allow",
+        "reason": "managed_allow",
+        "request_key": "{\"arguments\":{\"amount\":500},\"method\":\"tools/call\",\"tool\":\"RefundIamTarget___process_refund\"}",
+        "support": [
+          "mapping:mapping.json",
+          "request:allow-request.json:a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
+          "response:allow-response.json:c5f32b9669f4f72b97813f18543f12aad5af8d4645fe19a657a6d07e50898a02"
+        ],
+        "tool": "process_refund"
+      },
+      {
+        "alignment": "enforcement_narrows_request",
+        "decision": "deny-over-limit",
+        "outcome": "deny",
+        "reason": "default_deny",
+        "request_key": "{\"arguments\":{\"amount\":2000},\"method\":\"tools/call\",\"tool\":\"RefundIamTarget___process_refund\"}",
+        "support": [
+          "mapping:mapping.json",
+          "request:deny-request.json:d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
+          "response:deny-response.json:f429fb2674ad34701ba88d53dead7369fa9942ec01386d2b1a2083f6336bf264"
+        ],
+        "tool": "process_refund"
+      }
+    ],
+    "as_of": "2026-08-29",
+    "authority": {
+      "breaches": [],
+      "depth": 8,
+      "effects": [],
+      "max_extractable": null,
+      "reachable_tools": [
+        "process_refund"
+      ],
+      "service_principal_tools": [],
+      "truncated": false,
+      "ungated_irreversible": []
+    },
+    "clean": false,
+    "findings": []
+  },
+  "candidate": {
+    "alignments": [
+      {
+        "alignment": "aligned_allow",
+        "decision": "allow-under-limit",
+        "outcome": "allow",
+        "reason": "managed_allow",
+        "request_key": "{\"arguments\":{\"amount\":500},\"method\":\"tools/call\",\"tool\":\"RefundIamTarget___process_refund\"}",
+        "support": [
+          "mapping:mapping.json",
+          "request:candidate-allow-request.json:a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
+          "response:candidate-allow-response.json:4c4903d38757abf73f05f1ee6cd863258b412ec86f6f1e93cdc5cf7afa7a12b0"
+        ],
+        "tool": "process_refund"
+      },
+      {
+        "alignment": "aligned_allow",
+        "decision": "deny-over-limit",
+        "outcome": "allow",
+        "reason": "managed_allow",
+        "request_key": "{\"arguments\":{\"amount\":2000},\"method\":\"tools/call\",\"tool\":\"RefundIamTarget___process_refund\"}",
+        "support": [
+          "mapping:mapping.json",
+          "request:candidate-widen-request.json:d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
+          "response:candidate-widen-response.json:27a11b736c35db7ea9abf5c948718ca66ca7b22f86f63d907575264abde43861"
+        ],
+        "tool": "process_refund"
+      }
+    ],
+    "as_of": "2026-08-29",
+    "authority": {
+      "breaches": [],
+      "depth": 8,
+      "effects": [],
+      "max_extractable": null,
+      "reachable_tools": [
+        "process_refund"
+      ],
+      "service_principal_tools": [],
+      "truncated": false,
+      "ungated_irreversible": []
+    },
+    "clean": true,
+    "findings": []
+  },
+  "changes": [
+    {
+      "baseline": "allow",
+      "candidate": "allow",
+      "classification": "stable_allow",
+      "request_key": "{\"arguments\":{\"amount\":500},\"method\":\"tools/call\",\"tool\":\"RefundIamTarget___process_refund\"}",
+      "support": [
+        "mapping:mapping.json",
+        "request:allow-request.json:a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
+        "response:allow-response.json:c5f32b9669f4f72b97813f18543f12aad5af8d4645fe19a657a6d07e50898a02",
+        "mapping:mapping.json",
+        "request:candidate-allow-request.json:a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
+        "response:candidate-allow-response.json:4c4903d38757abf73f05f1ee6cd863258b412ec86f6f1e93cdc5cf7afa7a12b0"
+      ],
+      "tool": "process_refund"
+    },
+    {
+      "baseline": "deny",
+      "candidate": "allow",
+      "classification": "widens",
+      "request_key": "{\"arguments\":{\"amount\":2000},\"method\":\"tools/call\",\"tool\":\"RefundIamTarget___process_refund\"}",
+      "support": [
+        "mapping:mapping.json",
+        "request:deny-request.json:d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
+        "response:deny-response.json:f429fb2674ad34701ba88d53dead7369fa9942ec01386d2b1a2083f6336bf264",
+        "mapping:mapping.json",
+        "request:candidate-widen-request.json:d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
+        "response:candidate-widen-response.json:27a11b736c35db7ea9abf5c948718ca66ca7b22f86f63d907575264abde43861"
+      ],
+      "tool": "process_refund"
+    }
+  ],
+  "clean": false,
+  "findings": [],
+  "inputs": {
+    "baseline": {
+      "mapping_sha256": "d6175d9abf08eeac8143ef5141b45ba9d37dc3dd45c25e0e3f2b39ec9f6e7d74",
+      "oracle_sha256": "0dbe5ea25cab0dbf362eddaa8215c1ae7dcc8f73acfcd5b492a64e10866f6d46",
+      "profile_sha256": "12ca0626a2ac5ee21445fbe0f40308dc744bf7dc255eff868dcba343f345a307",
+      "source_sha256": {
+        "allow-request.json": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
+        "allow-response.json": "c5f32b9669f4f72b97813f18543f12aad5af8d4645fe19a657a6d07e50898a02",
+        "deny-request.json": "d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
+        "deny-response.json": "f429fb2674ad34701ba88d53dead7369fa9942ec01386d2b1a2083f6336bf264",
+        "lambda.py.txt": "f05e7a43cedca12eb885a65662ed2c480149e06f9dbc7804d094cfb2c0831f8c",
+        "managed-state.json": "13746d27b0921ba00f829d4a73dbfb07a8238d5980f3f2e635d0f5311ef9572c",
+        "mandate.yaml": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85",
+        "mapping.json": "d6175d9abf08eeac8143ef5141b45ba9d37dc3dd45c25e0e3f2b39ec9f6e7d74",
+        "policy.cedar": "15c72a22e99a087de583cc631a3545c738b54190b70fb34ebe70233302a16acf",
+        "protocol-refusal.json": "eb162cb7d3b0c165aa551d8832f2f7b6579a49e17ea2f1a7129c999b92a02b53",
+        "tool-schema.json": "d8e9381038ac4ba1ccd0f2db8c76422bcb9d3a563c302bbfe5a599821e3b3797",
+        "tools-list-request.json": "34c85e53bff07631d75dbe141ca2020ac830e422fe27698b5a3f87c3d2c5ebc9",
+        "tools-list-response.json": "3aa4e3b019a1b26515dbd6acfc50799cd89ff32a183f4027cf3106dd91a18a79"
+      }
+    },
+    "candidate": {
+      "mapping_sha256": "d6175d9abf08eeac8143ef5141b45ba9d37dc3dd45c25e0e3f2b39ec9f6e7d74",
+      "oracle_sha256": "c0b43701c78b64406d8836d0422b92c948074bc8ef1b19e9048eb1e0f93ecfa8",
+      "profile_sha256": "4034cdd583d27a4b10bf08edcee1d84ee9f59f966b36e5fff3fcd3ab107e29a2",
+      "source_sha256": {
+        "candidate-allow-request.json": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
+        "candidate-allow-response.json": "4c4903d38757abf73f05f1ee6cd863258b412ec86f6f1e93cdc5cf7afa7a12b0",
+        "candidate-managed-state.json": "e1a5b14534a952e0b99c39805e2aec07f714d813696bea240b4c64fff62224ad",
+        "candidate-policy.cedar": "fd141a4b53a2a6bcfec9e36b9ccd93124015cd7e11c69d3949330e2d9266f558",
+        "candidate-tools-list-request.json": "34c85e53bff07631d75dbe141ca2020ac830e422fe27698b5a3f87c3d2c5ebc9",
+        "candidate-tools-list-response.json": "04c12ae649026ffaa20347e932229fef9b6a369d84261aaf4ecee997bf7327d0",
+        "candidate-widen-request.json": "d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
+        "candidate-widen-response.json": "27a11b736c35db7ea9abf5c948718ca66ca7b22f86f63d907575264abde43861",
+        "lambda.py.txt": "f05e7a43cedca12eb885a65662ed2c480149e06f9dbc7804d094cfb2c0831f8c",
+        "mandate.yaml": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85",
+        "mapping.json": "d6175d9abf08eeac8143ef5141b45ba9d37dc3dd45c25e0e3f2b39ec9f6e7d74",
+        "tool-schema.json": "d8e9381038ac4ba1ccd0f2db8c76422bcb9d3a563c302bbfe5a599821e3b3797"
+      }
+    },
+    "manifest_sha256": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85"
+  },
+  "schema": "agentmandate.cedar-effective-diff/v1"
+}

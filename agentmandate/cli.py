@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections.abc import Sequence
@@ -31,6 +32,14 @@ from ._delegation import (
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
 from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
+from ._managed_cedar import (
+    ManagedAnalysis,
+    ManagedDiff,
+    ManagedOracle,
+    ManagedOracleFormatError,
+    analyse_managed_cedar,
+    compare_managed_cedar,
+)
 from .diff import compare
 from .drift import compare as compare_drift
 from .findings import render_sarif, to_mermaid
@@ -257,6 +266,51 @@ def build_parser() -> argparse.ArgumentParser:
     delegations_input = delegations_validate.add_mutually_exclusive_group(required=True)
     delegations_input.add_argument("--attachment", help="path to one attachment artifact")
     delegations_input.add_argument("--chain", help="path to one delegation-chain artifact")
+
+    cedar_parser = subparsers.add_parser(
+        "cedar",
+        help="validate or compare reviewed managed Cedar evidence",
+    )
+    cedar_subparsers = cedar_parser.add_subparsers(dest="cedar_command", required=True)
+    cedar_validate = cedar_subparsers.add_parser(
+        "validate",
+        help="validate a managed oracle structurally without trusting its sources",
+    )
+    cedar_validate.add_argument("oracle", help="path to a managed Cedar oracle")
+    cedar_align = cedar_subparsers.add_parser(
+        "align",
+        help="align one managed oracle with reviewed manifest authority",
+    )
+    _add_manifest(cedar_align)
+    cedar_align.add_argument("--oracle", required=True, help="managed Cedar oracle")
+    cedar_align.add_argument(
+        "--source-root",
+        required=True,
+        help="directory containing every source declared by the oracle",
+    )
+    cedar_align.add_argument(
+        "--as-of",
+        required=True,
+        metavar="YYYY-MM-DD",
+        help="explicit evaluation date for reviewed mapping evidence",
+    )
+    cedar_align.add_argument("--json", action="store_true", help="machine-readable output")
+    cedar_diff = cedar_subparsers.add_parser(
+        "diff",
+        help="compare exact managed requests across two policy revisions",
+    )
+    _add_manifest(cedar_diff)
+    cedar_diff.add_argument("--baseline-oracle", required=True)
+    cedar_diff.add_argument("--baseline-root", required=True)
+    cedar_diff.add_argument("--candidate-oracle", required=True)
+    cedar_diff.add_argument("--candidate-root", required=True)
+    cedar_diff.add_argument(
+        "--as-of",
+        required=True,
+        metavar="YYYY-MM-DD",
+        help="explicit evaluation date for both reviewed mappings",
+    )
+    cedar_diff.add_argument("--json", action="store_true", help="machine-readable output")
 
     diff_parser = subparsers.add_parser(
         "diff", help="compare the effective authority of two manifests"
@@ -538,6 +592,214 @@ def _run_delegations(args: argparse.Namespace) -> int:
         return EXIT_USAGE
     sys.stdout.write(output)
     return EXIT_OK
+
+
+def _cedar_date(value: str) -> date:
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        raise ManagedOracleFormatError("--as-of must be YYYY-MM-DD") from exc
+    if parsed.isoformat() != value:
+        raise ManagedOracleFormatError("--as-of must be YYYY-MM-DD")
+    return parsed
+
+
+def _managed_sources(oracle: ManagedOracle, root: str) -> dict[str, bytes]:
+    root_path = Path(root).resolve(strict=True)
+    if not root_path.is_dir():
+        raise ManagedOracleFormatError("managed Cedar source root must be a directory")
+    contents = {}
+    for source in oracle.sources:
+        path = (root_path / source.locator).resolve(strict=True)
+        if not path.is_relative_to(root_path) or not path.is_file():
+            raise ManagedOracleFormatError(
+                f"managed Cedar source locator '{source.locator}' is outside the source root"
+            )
+        contents[source.locator] = path.read_bytes()
+    return contents
+
+
+def _oracle_input(path: str, root: str) -> tuple[ManagedOracle, dict[str, bytes], str]:
+    content = Path(path).read_bytes()
+    oracle = ManagedOracle.from_json(content.decode("utf-8"))
+    sources = _managed_sources(oracle, root)
+    return oracle, sources, hashlib.sha256(content).hexdigest()
+
+
+def _oracle_digests(
+    oracle: ManagedOracle,
+    contents: dict[str, bytes],
+    content_sha256: str,
+) -> dict[str, Any]:
+    source_digests = {
+        locator: hashlib.sha256(content).hexdigest()
+        for locator, content in sorted(contents.items())
+    }
+    return {
+        "oracle_sha256": content_sha256,
+        "profile_sha256": oracle.to_ir().sources[0].semantic_sha256,
+        "mapping_sha256": source_digests[oracle.mapping.source],
+        "source_sha256": source_digests,
+    }
+
+
+def _managed_alignment_payload(
+    analysis: ManagedAnalysis,
+    *,
+    manifest_sha256: str,
+    analysis_oracle: ManagedOracle,
+    analysis_contents: dict[str, bytes],
+    oracle_sha256: str,
+) -> dict[str, Any]:
+    return {
+        "schema": "agentmandate.cedar-alignment/v1",
+        "inputs": {
+            "manifest_sha256": manifest_sha256,
+            "oracle": _oracle_digests(
+                analysis_oracle,
+                analysis_contents,
+                oracle_sha256,
+            ),
+        },
+        **analysis.as_dict(),
+    }
+
+
+def _managed_diff_payload(
+    result: ManagedDiff,
+    *,
+    manifest_sha256: str,
+    baseline_oracle: ManagedOracle,
+    baseline_contents: dict[str, bytes],
+    baseline_sha256: str,
+    candidate_oracle: ManagedOracle,
+    candidate_contents: dict[str, bytes],
+    candidate_sha256: str,
+) -> dict[str, Any]:
+    return {
+        "schema": "agentmandate.cedar-effective-diff/v1",
+        "inputs": {
+            "manifest_sha256": manifest_sha256,
+            "baseline": _oracle_digests(
+                baseline_oracle,
+                baseline_contents,
+                baseline_sha256,
+            ),
+            "candidate": _oracle_digests(
+                candidate_oracle,
+                candidate_contents,
+                candidate_sha256,
+            ),
+        },
+        **result.as_dict(),
+    }
+
+
+def _render_managed_analysis(analysis: ManagedAnalysis) -> str:
+    lines = [f"managed Cedar  evaluated as of {analysis.as_of}"]
+    for item in analysis.alignments:
+        status = {
+            "aligned_allow": "ALIGNED",
+            "enforcement_narrows_request": "NARROWS",
+            "unresolved": "UNRESOLVED",
+        }[item.alignment]
+        lines.append(f"  {status:<10} {item.tool or '<unmapped>'} ({item.decision})")
+        lines.append(f"      {item.reason}: {item.request_key}")
+    for item in analysis.findings:
+        lines.append(f"  FINDING     {item.code}")
+        lines.append(f"      {item.message}")
+    return "\n".join(lines)
+
+
+def _render_managed_diff(result: ManagedDiff) -> str:
+    lines = [f"managed Cedar diff  evaluated as of {result.baseline.as_of}"]
+    for item in result.changes:
+        lines.append(
+            f"  {item.classification.upper():<12} {item.tool or '<unmapped>'}: "
+            f"{item.baseline} -> {item.candidate}"
+        )
+        lines.append(f"      {item.request_key}")
+    for item in result.findings:
+        lines.append(f"  FINDING       {item.code}")
+        lines.append(f"      {item.message}")
+    return "\n".join(lines)
+
+
+def _run_cedar(args: argparse.Namespace) -> int:
+    try:
+        if args.cedar_command == "validate":
+            oracle = ManagedOracle.from_json(_read_text(args.oracle))
+            output = f"valid managed Cedar oracle v{oracle.managed_oracle_version}\n"
+            result_clean = True
+        else:
+            manifest_content = Path(args.manifest).read_bytes()
+            mandate = loads(manifest_content.decode("utf-8"), source=args.manifest)
+            as_of = _cedar_date(args.as_of)
+            manifest_sha256 = hashlib.sha256(manifest_content).hexdigest()
+            if args.cedar_command == "align":
+                oracle, contents, oracle_sha256 = _oracle_input(
+                    args.oracle, args.source_root
+                )
+                analysis = analyse_managed_cedar(
+                    mandate,
+                    oracle,
+                    contents,
+                    as_of=as_of,
+                )
+                payload = _managed_alignment_payload(
+                    analysis,
+                    manifest_sha256=manifest_sha256,
+                    analysis_oracle=oracle,
+                    analysis_contents=contents,
+                    oracle_sha256=oracle_sha256,
+                )
+                output = (
+                    json.dumps(payload, indent=2, sort_keys=True) + "\n"
+                    if args.json
+                    else _render_managed_analysis(analysis) + "\n"
+                )
+                result_clean = analysis.clean
+            else:
+                baseline, baseline_contents, baseline_sha256 = _oracle_input(
+                    args.baseline_oracle, args.baseline_root
+                )
+                candidate, candidate_contents, candidate_sha256 = _oracle_input(
+                    args.candidate_oracle, args.candidate_root
+                )
+                result = compare_managed_cedar(
+                    mandate,
+                    baseline,
+                    baseline_contents,
+                    candidate,
+                    candidate_contents,
+                    as_of=as_of,
+                )
+                payload = _managed_diff_payload(
+                    result,
+                    manifest_sha256=manifest_sha256,
+                    baseline_oracle=baseline,
+                    baseline_contents=baseline_contents,
+                    baseline_sha256=baseline_sha256,
+                    candidate_oracle=candidate,
+                    candidate_contents=candidate_contents,
+                    candidate_sha256=candidate_sha256,
+                )
+                output = (
+                    json.dumps(payload, indent=2, sort_keys=True) + "\n"
+                    if args.json
+                    else _render_managed_diff(result) + "\n"
+                )
+                result_clean = result.clean
+    except (
+        ManagedOracleFormatError,
+        ManifestError,
+        OSError,
+        UnicodeError,
+    ) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_OK if result_clean else EXIT_FINDING
 
 
 def _delegations_supplied(args: argparse.Namespace) -> bool:
@@ -831,6 +1093,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "delegations":
         return _run_delegations(args)
+
+    if args.command == "cedar":
+        return _run_cedar(args)
 
     if args.command == "scan":
         try:
