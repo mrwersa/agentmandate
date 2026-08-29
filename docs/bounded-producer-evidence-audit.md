@@ -96,6 +96,7 @@ claim a current-server vulnerability or justify restoring secret output.
 
 The two evidence prerequisites are now met: AgentKit supplies value/quantity
 relationships, and AWS IAM supplies a finite authority-bearing cardinality of
-two. Close issue #125 after independent review, then propose the minimum record
-contract from these separate distortions. Keep multi-output arity separate and
-preserve conservative defaults until that contract survives both fixtures.
+two. The [bounded-producer contract](bounded-producers.md) now proposes the
+minimum finite-cardinality profile under issue #128 while keeping quantity on
+its own evidence and delivery track. Keep multi-output arity separate and
+preserve conservative defaults until the contract survives both fixtures.
