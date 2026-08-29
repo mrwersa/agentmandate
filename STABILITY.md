@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.13.0
+agentmandate~=0.14.0
 ```
 
 ## Versioned authority artifacts
