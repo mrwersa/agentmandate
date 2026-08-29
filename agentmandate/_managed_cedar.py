@@ -1,0 +1,752 @@
+"""Private records for digest-pinned managed Cedar enforcement captures.
+
+This profile is deliberately separate from :mod:`agentmandate._cedar`.  A
+managed AgentCore response does not expose the local Cedar schema, entities,
+validation diagnostics, or determining policies required by ``CedarBundle``.
+The reader proves transport structure and caller-supplied byte identity only;
+analysis eligibility is a later gate.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from collections.abc import Mapping
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import PurePosixPath
+from typing import Any
+
+from ._cedar import CedarBundleFormatError, CedarMapping, _mapping
+from .manifest import ManifestError, loads
+
+MANAGED_ORACLE_VERSION = 1
+MANAGED_ADAPTER = "agentmandate.agentcore-managed-capture"
+MANAGED_ADAPTER_VERSION = 1
+SOURCE_KINDS = frozenset(
+    {
+        "decision_request",
+        "decision_response",
+        "deployment_mapping",
+        "handler_source",
+        "managed_state",
+        "manifest",
+        "policy",
+        "protocol_output",
+        "tool_inventory_request",
+        "tool_inventory_response",
+        "tool_schema",
+    }
+)
+REQUIRED_SOURCE_KINDS = frozenset(
+    {
+        "decision_request",
+        "decision_response",
+        "deployment_mapping",
+        "managed_state",
+        "manifest",
+        "policy",
+        "tool_inventory_response",
+        "tool_schema",
+    }
+)
+OUTCOMES = frozenset({"allow", "deny"})
+REASONS = frozenset({"managed_allow", "default_deny", "explicit_deny"})
+_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+class ManagedOracleFormatError(ValueError):
+    """Raised when a managed enforcement record violates its closed contract."""
+
+
+@dataclass(frozen=True)
+class ManagedProvider:
+    name: str
+    region: str
+    protocol: str
+    protocol_version: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "name": self.name,
+            "region": self.region,
+            "protocol": self.protocol,
+            "protocol_version": self.protocol_version,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedAdapter:
+    name: str
+    version: int
+
+    def as_dict(self) -> dict[str, str | int]:
+        return {"name": self.name, "version": self.version}
+
+
+@dataclass(frozen=True)
+class ManagedSource:
+    kind: str
+    locator: str
+    content_sha256: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "kind": self.kind,
+            "locator": self.locator,
+            "content_sha256": self.content_sha256,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedState:
+    source: str
+    authorizer_type: str
+    gateway_status: str
+    policy_engine_status: str
+    policy_engine_mode: str
+    requested_validation_mode: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "source": self.source,
+            "authorizer_type": self.authorizer_type,
+            "gateway_status": self.gateway_status,
+            "policy_engine_status": self.policy_engine_status,
+            "policy_engine_mode": self.policy_engine_mode,
+            "requested_validation_mode": self.requested_validation_mode,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedPolicy:
+    name: str
+    status: str
+    enforcement_mode: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "name": self.name,
+            "status": self.status,
+            "enforcement_mode": self.enforcement_mode,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedInventory:
+    source: str
+    complete: bool
+    members: tuple[str, ...] | tuple[ManagedPolicy, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "source": self.source,
+            "complete": self.complete,
+            "members": [
+                member.as_dict() if isinstance(member, ManagedPolicy) else member
+                for member in self.members
+            ],
+        }
+
+
+@dataclass(frozen=True)
+class ManagedDecision:
+    id: str
+    request: str
+    response: str
+    outcome: str
+    reason: str
+    method: str
+    tool: str
+    arguments: dict[str, Any]
+
+    @property
+    def request_key(self) -> str:
+        return json.dumps(
+            {"method": self.method, "tool": self.tool, "arguments": self.arguments},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        )
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "request": self.request,
+            "response": self.response,
+            "outcome": self.outcome,
+            "reason": self.reason,
+            "method": self.method,
+            "tool": self.tool,
+            "arguments": self.arguments,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedAlias:
+    cedar_type: str
+    binding: str
+    placeholder: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "cedar_type": self.cedar_type,
+            "binding": self.binding,
+            "placeholder": self.placeholder,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedSanitization:
+    source: str
+    omitted: tuple[str, ...]
+    decision_messages_changed: bool
+    aliases: tuple[ManagedAlias, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "source": self.source,
+            "omitted": list(self.omitted),
+            "decision_messages_changed": self.decision_messages_changed,
+            "aliases": [alias.as_dict() for alias in self.aliases],
+        }
+
+
+@dataclass(frozen=True)
+class ManagedOracle:
+    managed_oracle_version: int
+    provider: ManagedProvider
+    adapter: ManagedAdapter
+    capture_date: str
+    sources: tuple[ManagedSource, ...]
+    state: ManagedState
+    tool_inventory: ManagedInventory
+    policy_inventory: ManagedInventory
+    mapping: CedarMapping
+    decisions: tuple[ManagedDecision, ...]
+    sanitization: ManagedSanitization
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "managed_oracle_version": self.managed_oracle_version,
+            "provider": self.provider.as_dict(),
+            "adapter": self.adapter.as_dict(),
+            "capture_date": self.capture_date,
+            "sources": [source.as_dict() for source in self.sources],
+            "state": self.state.as_dict(),
+            "tool_inventory": self.tool_inventory.as_dict(),
+            "policy_inventory": self.policy_inventory.as_dict(),
+            "mapping": self.mapping.as_dict(),
+            "decisions": [decision.as_dict() for decision in self.decisions],
+            "sanitization": self.sanitization.as_dict(),
+        }
+
+    def to_json(self) -> str:
+        return (
+            json.dumps(
+                self.as_dict(),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+                allow_nan=False,
+            )
+            + "\n"
+        )
+
+    @classmethod
+    def from_json(cls, text: str) -> ManagedOracle:
+        try:
+            raw = json.loads(
+                text,
+                parse_constant=lambda _value: (_ for _ in ()).throw(
+                    ValueError("non-finite number")
+                ),
+            )
+        except (json.JSONDecodeError, TypeError, ValueError) as exc:
+            detail = (
+                f" at line {exc.lineno} column {exc.colno}"
+                if isinstance(exc, json.JSONDecodeError)
+                else ""
+            )
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle is not valid JSON{detail}"
+            ) from exc
+        root = _record(
+            raw,
+            "root",
+            {
+                "managed_oracle_version",
+                "provider",
+                "adapter",
+                "capture_date",
+                "sources",
+                "state",
+                "tool_inventory",
+                "policy_inventory",
+                "mapping",
+                "decisions",
+                "sanitization",
+            },
+        )
+        version = root["managed_oracle_version"]
+        if isinstance(version, bool) or not isinstance(version, int):
+            raise ManagedOracleFormatError(
+                "unsupported managed Cedar oracle version type; "
+                f"this build reads {MANAGED_ORACLE_VERSION}"
+            )
+        if version != MANAGED_ORACLE_VERSION:
+            raise ManagedOracleFormatError(
+                f"unsupported managed Cedar oracle version {version}; "
+                f"this build reads {MANAGED_ORACLE_VERSION}"
+            )
+        try:
+            mapping = _mapping(root["mapping"])
+        except CedarBundleFormatError as exc:
+            raise ManagedOracleFormatError("managed Cedar oracle mapping is invalid") from exc
+        oracle = cls(
+            version,
+            _provider(root["provider"]),
+            _adapter(root["adapter"]),
+            _date(root["capture_date"], "capture_date"),
+            _sources(root["sources"]),
+            _state(root["state"]),
+            _inventory(root["tool_inventory"], "tool_inventory", policies=False),
+            _inventory(root["policy_inventory"], "policy_inventory", policies=True),
+            mapping,
+            _decisions(root["decisions"]),
+            _sanitization(root["sanitization"]),
+        )
+        _references(oracle)
+        return oracle
+
+    def verify_sources(self, contents: Mapping[str, bytes]) -> None:
+        if not isinstance(contents, Mapping) or any(
+            not isinstance(key, str) or not isinstance(value, bytes)
+            for key, value in contents.items()
+        ):
+            raise ManagedOracleFormatError(
+                "managed Cedar oracle source contents must be a locator-to-bytes mapping"
+            )
+        expected = {source.locator for source in self.sources}
+        if set(contents) != expected:
+            missing = sorted(expected - set(contents))
+            extra = sorted(set(contents) - expected)
+            locator = missing[0] if missing else extra[0]
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle source bytes do not match declared locator '{locator}'"
+            )
+        for source in self.sources:
+            if hashlib.sha256(contents[source.locator]).hexdigest() != source.content_sha256:
+                raise ManagedOracleFormatError(
+                    f"managed Cedar oracle source digest does not match locator '{source.locator}'"
+                )
+        _verify_projection(self, contents)
+
+
+def _record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path} must be an object")
+    missing = fields - set(value)
+    extra = set(value) - fields
+    if missing:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} is missing field '{min(missing)}'"
+        )
+    if extra:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} has unknown field '{min(extra)}'"
+        )
+    return value
+
+
+def _name(value: Any, path: str) -> str:
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} must be a non-empty stripped string"
+        )
+    return value
+
+
+def _positive_integer(value: Any, path: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path} must be a positive integer")
+    return value
+
+
+def _date(value: Any, path: str) -> str:
+    if not isinstance(value, str) or not _DATE.fullmatch(value):
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path} must be a canonical date")
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError as exc:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} must be a canonical date"
+        ) from exc
+    return value
+
+
+def _relative(value: Any, path: str) -> str:
+    if not isinstance(value, str) or not value or "\\" in value:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} must be a repository-relative POSIX path"
+        )
+    candidate = PurePosixPath(value)
+    if candidate.is_absolute() or str(candidate) != value or ".." in candidate.parts:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} must be a repository-relative POSIX path"
+        )
+    return value
+
+
+def _digest(value: Any, path: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path} must be lowercase SHA-256")
+    return value
+
+
+def _strings(value: Any, path: str, *, allow_empty: bool = True) -> tuple[str, ...]:
+    if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path} must be an array of strings")
+    if (not allow_empty and not value) or any(not item or item != item.strip() for item in value):
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle {path} members must be non-empty and stripped"
+        )
+    if len(value) != len(set(value)):
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path} contains duplicates")
+    return tuple(sorted(value))
+
+
+def _provider(raw: Any) -> ManagedProvider:
+    value = _record(raw, "provider", {"name", "region", "protocol", "protocol_version"})
+    return ManagedProvider(
+        _name(value["name"], "provider.name"),
+        _name(value["region"], "provider.region"),
+        _name(value["protocol"], "provider.protocol"),
+        _name(value["protocol_version"], "provider.protocol_version"),
+    )
+
+
+def _adapter(raw: Any) -> ManagedAdapter:
+    value = _record(raw, "adapter", {"name", "version"})
+    name = _name(value["name"], "adapter.name")
+    version = _positive_integer(value["version"], "adapter.version")
+    if (name, version) != (MANAGED_ADAPTER, MANAGED_ADAPTER_VERSION):
+        raise ManagedOracleFormatError("managed Cedar oracle has an unsupported adapter")
+    return ManagedAdapter(name, version)
+
+
+def _sources(raw: Any) -> tuple[ManagedSource, ...]:
+    if not isinstance(raw, list) or not raw:
+        raise ManagedOracleFormatError("managed Cedar oracle sources must be a non-empty array")
+    result = []
+    for index, item in enumerate(raw):
+        path = f"sources[{index}]"
+        value = _record(item, path, {"kind", "locator", "content_sha256"})
+        kind = _name(value["kind"], f"{path}.kind")
+        if kind not in SOURCE_KINDS:
+            raise ManagedOracleFormatError(f"managed Cedar oracle {path}.kind is invalid")
+        result.append(
+            ManagedSource(
+                kind,
+                _relative(value["locator"], f"{path}.locator"),
+                _digest(value["content_sha256"], f"{path}.content_sha256"),
+            )
+        )
+    locators = [item.locator for item in result]
+    if len(locators) != len(set(locators)):
+        raise ManagedOracleFormatError("managed Cedar oracle sources contain duplicate locators")
+    missing = REQUIRED_SOURCE_KINDS - {item.kind for item in result}
+    if missing:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle sources are missing required kind '{min(missing)}'"
+        )
+    return tuple(sorted(result, key=lambda item: item.locator))
+
+
+def _state(raw: Any) -> ManagedState:
+    fields = {
+        "source",
+        "authorizer_type",
+        "gateway_status",
+        "policy_engine_status",
+        "policy_engine_mode",
+        "requested_validation_mode",
+    }
+    value = _record(raw, "state", fields)
+    return ManagedState(
+        _relative(value["source"], "state.source"),
+        _name(value["authorizer_type"], "state.authorizer_type"),
+        _name(value["gateway_status"], "state.gateway_status"),
+        _name(value["policy_engine_status"], "state.policy_engine_status"),
+        _name(value["policy_engine_mode"], "state.policy_engine_mode"),
+        _name(value["requested_validation_mode"], "state.requested_validation_mode"),
+    )
+
+
+def _inventory(raw: Any, path: str, *, policies: bool) -> ManagedInventory:
+    value = _record(raw, path, {"source", "complete", "members"})
+    if not isinstance(value["complete"], bool):
+        raise ManagedOracleFormatError(f"managed Cedar oracle {path}.complete must be boolean")
+    if policies:
+        if not isinstance(value["members"], list):
+            raise ManagedOracleFormatError(f"managed Cedar oracle {path}.members must be an array")
+        members: tuple[str, ...] | tuple[ManagedPolicy, ...] = tuple(
+            sorted(
+                (
+                    ManagedPolicy(
+                        _name(item_value["name"], f"{path}.members[{index}].name"),
+                        _name(item_value["status"], f"{path}.members[{index}].status"),
+                        _name(
+                            item_value["enforcement_mode"],
+                            f"{path}.members[{index}].enforcement_mode",
+                        ),
+                    )
+                    for index, item in enumerate(value["members"])
+                    for item_value in [
+                        _record(
+                            item, f"{path}.members[{index}]", {"name", "status", "enforcement_mode"}
+                        )
+                    ]
+                ),
+                key=lambda item: item.name,
+            )
+        )
+        names = [item.name for item in members]
+        if not members or len(names) != len(set(names)):
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle {path}.members must be non-empty and unique"
+            )
+    else:
+        members = _strings(value["members"], f"{path}.members", allow_empty=False)
+    return ManagedInventory(
+        _relative(value["source"], f"{path}.source"), value["complete"], members
+    )
+
+
+def _decisions(raw: Any) -> tuple[ManagedDecision, ...]:
+    if not isinstance(raw, list) or not raw:
+        raise ManagedOracleFormatError("managed Cedar oracle decisions must be a non-empty array")
+    result = []
+    fields = {"id", "request", "response", "outcome", "reason", "method", "tool", "arguments"}
+    for index, item in enumerate(raw):
+        path = f"decisions[{index}]"
+        value = _record(item, path, fields)
+        outcome = _name(value["outcome"], f"{path}.outcome")
+        reason = _name(value["reason"], f"{path}.reason")
+        if outcome not in OUTCOMES or reason not in REASONS:
+            raise ManagedOracleFormatError(f"managed Cedar oracle {path} has an invalid outcome")
+        if (outcome == "allow") != (reason == "managed_allow"):
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle {path} outcome contradicts reason"
+            )
+        arguments = value["arguments"]
+        if not isinstance(arguments, dict) or any(not isinstance(key, str) for key in arguments):
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle {path}.arguments must be a JSON object"
+            )
+        canonical_arguments = json.loads(json.dumps(arguments, sort_keys=True))
+        result.append(
+            ManagedDecision(
+                _name(value["id"], f"{path}.id"),
+                _relative(value["request"], f"{path}.request"),
+                _relative(value["response"], f"{path}.response"),
+                outcome,
+                reason,
+                _name(value["method"], f"{path}.method"),
+                _name(value["tool"], f"{path}.tool"),
+                canonical_arguments,
+            )
+        )
+    ids = [item.id for item in result]
+    keys = [item.request_key for item in result]
+    if len(ids) != len(set(ids)) or len(keys) != len(set(keys)):
+        raise ManagedOracleFormatError("managed Cedar oracle decisions contain duplicates")
+    return tuple(sorted(result, key=lambda item: item.id))
+
+
+def _sanitization(raw: Any) -> ManagedSanitization:
+    value = _record(
+        raw, "sanitization", {"source", "omitted", "decision_messages_changed", "aliases"}
+    )
+    if not isinstance(value["decision_messages_changed"], bool):
+        raise ManagedOracleFormatError(
+            "managed Cedar oracle sanitization.decision_messages_changed must be boolean"
+        )
+    if not isinstance(value["aliases"], list) or not value["aliases"]:
+        raise ManagedOracleFormatError(
+            "managed Cedar oracle sanitization.aliases must be non-empty"
+        )
+    aliases = []
+    for index, item in enumerate(value["aliases"]):
+        path = f"sanitization.aliases[{index}]"
+        item_value = _record(item, path, {"cedar_type", "binding", "placeholder"})
+        aliases.append(
+            ManagedAlias(
+                _name(item_value["cedar_type"], f"{path}.cedar_type"),
+                _name(item_value["binding"], f"{path}.binding"),
+                _name(item_value["placeholder"], f"{path}.placeholder"),
+            )
+        )
+    if len({(item.cedar_type, item.binding) for item in aliases}) != len(aliases):
+        raise ManagedOracleFormatError("managed Cedar oracle sanitization aliases conflict")
+    return ManagedSanitization(
+        _relative(value["source"], "sanitization.source"),
+        _strings(value["omitted"], "sanitization.omitted"),
+        value["decision_messages_changed"],
+        tuple(sorted(aliases, key=lambda item: (item.cedar_type, item.binding))),
+    )
+
+
+def _references(oracle: ManagedOracle) -> None:
+    kinds = {source.locator: source.kind for source in oracle.sources}
+    expected = {
+        oracle.state.source: "managed_state",
+        oracle.tool_inventory.source: "tool_inventory_response",
+        oracle.policy_inventory.source: "managed_state",
+        oracle.mapping.source: "deployment_mapping",
+        oracle.mapping.target.source: "manifest",
+        oracle.sanitization.source: "managed_state",
+    }
+    for locator, kind in expected.items():
+        if kinds.get(locator) != kind:
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle reference '{locator}' must name source kind '{kind}'"
+            )
+    for decision in oracle.decisions:
+        if (
+            kinds.get(decision.request) != "decision_request"
+            or kinds.get(decision.response) != "decision_response"
+        ):
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle decision '{decision.id}' has invalid source references"
+            )
+
+
+def _json_source(contents: Mapping[str, bytes], locator: str) -> Any:
+    try:
+        return json.loads(contents[locator])
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle source '{locator}' is not valid JSON"
+        ) from exc
+
+
+def _verify_projection(oracle: ManagedOracle, contents: Mapping[str, bytes]) -> None:
+    try:
+        projected_mapping = _mapping(_json_source(contents, oracle.mapping.source))
+    except CedarBundleFormatError as exc:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle mapping source '{oracle.mapping.source}' is invalid"
+        ) from exc
+    if projected_mapping != oracle.mapping:
+        raise ManagedOracleFormatError("managed Cedar oracle mapping source disagrees with record")
+    try:
+        mandate = loads(
+            contents[oracle.mapping.target.source].decode("utf-8"),
+            source=oracle.mapping.target.source,
+        )
+    except (ManifestError, UnicodeDecodeError) as exc:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle manifest source '{oracle.mapping.target.source}' is invalid"
+        ) from exc
+    if mandate.agent != oracle.mapping.target.agent or set(mandate.tool_names) != {
+        item.tool for item in oracle.mapping.actions
+    }:
+        raise ManagedOracleFormatError(
+            "managed Cedar oracle mapping target disagrees with manifest"
+        )
+    listed = _json_source(contents, oracle.tool_inventory.source)
+    try:
+        listed_names = {item["name"] for item in listed["result"]["tools"]}
+    except (KeyError, TypeError) as exc:
+        raise ManagedOracleFormatError(
+            "managed Cedar oracle tool inventory source "
+            f"'{oracle.tool_inventory.source}' has invalid shape"
+        ) from exc
+    if listed_names != set(oracle.tool_inventory.members):
+        raise ManagedOracleFormatError("managed Cedar oracle tool inventory disagrees with record")
+    schema_source = next(source for source in oracle.sources if source.kind == "tool_schema")
+    schema = _json_source(contents, schema_source.locator)
+    try:
+        schema_names = {item["name"] for item in schema}
+    except (KeyError, TypeError) as exc:
+        raise ManagedOracleFormatError(
+            f"managed Cedar oracle tool schema source '{schema_source.locator}' has invalid shape"
+        ) from exc
+    if schema_names != set(mandate.tool_names):
+        raise ManagedOracleFormatError("managed Cedar oracle tool schema disagrees with manifest")
+    mapped_actions = {item.cedar for item in oracle.mapping.actions}
+    if mapped_actions != {f'AgentCore::Action::"{name}"' for name in listed_names}:
+        raise ManagedOracleFormatError("managed Cedar oracle actions disagree with tool inventory")
+    state = _json_source(contents, oracle.state.source)
+    policies = tuple(oracle.policy_inventory.members)
+    if (
+        state.get("gateway")
+        != {
+            "authorizer_type": oracle.state.authorizer_type,
+            "policy_engine_mode": oracle.state.policy_engine_mode,
+            "protocol_type": oracle.provider.protocol,
+            "status": oracle.state.gateway_status,
+        }
+        or state.get("policy_engine") != {"status": oracle.state.policy_engine_status}
+        or len(policies) != 1
+        or state.get("policy")
+        != {
+            "enforcement_mode": policies[0].enforcement_mode,
+            "inventory_count": 1,
+            "name": policies[0].name,
+            "requested_validation_mode": oracle.state.requested_validation_mode,
+            "status": policies[0].status,
+        }
+        or state.get("tool_inventory_complete") is not oracle.tool_inventory.complete
+        or state.get("sanitization", {}).get("decision_messages_changed")
+        is not oracle.sanitization.decision_messages_changed
+        or set(state.get("sanitization", {}).get("omitted", []))
+        != set(oracle.sanitization.omitted)
+        or state.get("sanitization", {}).get("policy_resource_replaced_with_binding")
+        is not True
+    ):
+        raise ManagedOracleFormatError(
+            "managed Cedar oracle managed-state source disagrees with record"
+        )
+    policy_source = next(source for source in oracle.sources if source.kind == "policy")
+    policy_text = contents[policy_source.locator].decode("utf-8")
+    if any(
+        alias.placeholder not in policy_text
+        or not any(
+            resource.cedar_type == alias.cedar_type and resource.binding == alias.binding
+            for resource in oracle.mapping.resources
+        )
+        for alias in oracle.sanitization.aliases
+    ):
+        raise ManagedOracleFormatError("managed Cedar oracle sanitization aliases do not join")
+    for decision in oracle.decisions:
+        request = _json_source(contents, decision.request)
+        response = _json_source(contents, decision.response)
+        expected_request = {
+            "jsonrpc": "2.0",
+            "id": decision.id,
+            "method": decision.method,
+            "params": {"arguments": decision.arguments, "name": decision.tool},
+        }
+        if request != expected_request:
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle request source '{decision.request}' disagrees with record"
+            )
+        allowed = (
+            isinstance(response, dict) and "result" in response and response.get("error") is None
+        )
+        error = response.get("error") if isinstance(response, dict) else None
+        denied = isinstance(error, dict) and error.get("code") == -32002
+        if (decision.outcome == "allow" and not allowed) or (
+            decision.outcome == "deny" and not denied
+        ):
+            raise ManagedOracleFormatError(
+                f"managed Cedar oracle response source '{decision.response}' disagrees with outcome"
+            )

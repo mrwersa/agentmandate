@@ -38,9 +38,14 @@ refusal is retained rather than silently correcting the attempted request.
 [`capture-index.json`](capture-index.json) records the AgentCore CLI version,
 npm package integrity, protocol, region, source roles, and digest of every
 committed artifact. `capture-index.json`, SHA-256
-`1826102df83daad2fc7978da7239fd4ddfe9156cd79878d3da0ff45fbe67dbc3`.
+`1151ef7b119d99e9ed5887be17c022232b6f6ea5e65513566837c4bc52a6142b`.
 Tests recompute all nested digests and require exact set equality across the
 deployed schema, `tools/list`, mapping, and manifest.
+
+`managed-oracle-v1.json` is the canonical private migration record for gate
+5b. It preserves the managed/local-oracle distinction: fields such as
+`schema_checked` and `determining_policies` are not part of its closed shape
+and are rejected as unknown rather than defaulted.
 
 The managed-state snapshot records an IAM authorizer, READY MCP Gateway,
 ACTIVE policy engine, `ENFORCE` attachment, exactly one ACTIVE policy, and the

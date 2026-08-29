@@ -72,8 +72,10 @@ bytes, then validates the closed managed profile. It requires:
 - a mapping target whose source bytes and agent equal the mandate being
   analyzed;
 - exact, accepted mapping evidence with reviewer and expiry, evaluated against
-  a caller-supplied `date`; expiry is inclusive (`as_of <= expires`), matching
-  the existing reviewed-evidence convention;
+  a caller-supplied `date`; expiry is inclusive (`as_of <= expires`). This
+  extends the [authority IR evidence-state rule](authority-ir.md#evidence-and-review-state)
+  with the same date comparison already used by reviewed condition and
+  inventory evidence;
 - unchanged decision messages and an explicit reviewed alias for every
   redacted operand that participates in the join; and
 - one canonical request identity: protocol method, mapped tool, and canonical
@@ -171,6 +173,12 @@ combine it with reviewed authority.
 
 Every gate proves all six manifest evidence graphs, existing Cedar fixtures,
 and legacy CLI output remain byte-identical when no policy evidence is supplied.
+
+Gate 5b is split at its review boundary. The first PR adds the managed reader
+and canonical migration record; IR projection and relation registration remain
+the second half of 5b. The managed record's closed field sets deliberately
+exclude `schema_checked` and `determining_policies`, so local-oracle claims
+cannot leak through optional defaults.
 
 ## Explicit non-goals
 
