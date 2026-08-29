@@ -237,7 +237,11 @@ The proposed [effective-diff contract](cedar-effective-diff.md) subdivides gate
 5 and keeps local Cedar-WASM decisions separate from managed AgentCore
 enforcement. Its private managed-oracle reader and canonical gate-4 migration
 record now project through a standalone, semantically validated IR profile.
-Effective comparison and eligibility semantics remain pending.
+The private gate-5c consumer verifies that profile and every captured source at
+the consumption boundary, aligns each exact request with unchanged reviewed
+authority, and compares matched managed outcomes across policy revisions. Its
+widening proof remains synthetic; a matched live Deny-to-Allow capture and the
+public exposure review are still required.
 
 ## Explicit non-goals
 

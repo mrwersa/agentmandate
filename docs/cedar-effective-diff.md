@@ -1,10 +1,11 @@
 # Cedar effective-diff contract
 
-Status: **experimental; gates 5a and 5b complete**. This is gate 5a of
+Status: **experimental; gates 5a–5c complete**. This is gate 5a of
 [#116](https://github.com/mrwersa/agentmandate/issues/116). It defines the
 trust boundary before records or analysis make the choices expensive. No
 current command consumes managed Cedar evidence or changes reachability from a
-policy decision.
+policy decision. Gate 5c is private analysis only; live widening evidence and
+the exposure review remain open.
 
 ## Question and invariants
 
@@ -66,6 +67,8 @@ Every consumer serializes and strictly re-reads the record, verifies all source
 bytes, then validates the closed managed profile. It requires:
 
 - `AWS_IAM`, MCP, READY Gateway, ACTIVE engine and policies, and `ENFORCE`;
+- the recorded `FAIL_ON_ANY_FINDINGS` request mode, without treating that
+  request as a returned validation diagnostic;
 - exactly the declared complete tool and policy inventories;
 - exact action-to-tool, principal-type-to-manifest-principal, and
   resource-type-to-reviewed-binding joins;
@@ -76,6 +79,8 @@ bytes, then validates the closed managed profile. It requires:
   extends the [authority IR evidence-state rule](authority-ir.md#evidence-and-review-state)
   with the same date comparison already used by reviewed condition and
   inventory evidence;
+- an evaluation date on or after the capture date, so later evidence cannot be
+  applied retroactively;
 - unchanged decision messages and an explicit reviewed alias for every
   redacted operand that participates in the join; and
 - one canonical request identity: protocol method, mapped tool, and canonical
@@ -95,17 +100,22 @@ describe them.
 
 ## Effective result
 
-The private result envelope records its own version, `as_of`, manifest semantic
-digest, managed-profile semantic digest, mapping digest, source digests, and
-ordered findings. Each request result contains:
+Gate 5c implements immutable private result records. They contain `as_of`, the
+unchanged manifest `Authority`, ordered findings, and per-request alignment.
+Each request result contains:
 
-- canonical request key and mapped agent/tool/principal/binding;
-- manifest reachability and shortest enabling path;
+- canonical request key and mapped tool;
 - managed outcome and reason;
 - alignment: `aligned_allow`, `enforcement_narrows_request`, or `unresolved`;
 - policy revision change, when a comparable baseline is supplied:
   `stable_allow`, `stable_deny`, `widens`, `tightens`, or `unresolved`; and
-- minimum provenance sufficient to replay every join and native outcome.
+- minimum support naming the reviewed mapping and the digest-pinned request and
+  response bytes.
+
+The later exposure envelope must add its own presentation version and explicit
+manifest, managed-profile, mapping, and source digests before output stability
+can pass gate 5e. Gate 5c does not silently promote private dataclasses into a
+public artifact contract.
 
 An eligible Allow for a reachable mapped tool is `aligned_allow`. An eligible
 Deny for that exact request is `enforcement_narrows_request`; it does not prove
@@ -164,7 +174,10 @@ combine it with reviewed authority.
    adversarial reader tests without changing analysis.
 3. **5c — private effective diff:** implement eligibility, exact-request
    alignment, revision comparison, provenance, and conservative defaults;
-   develop widening with clearly synthetic fixtures.
+   develop widening with clearly synthetic fixtures. **Complete:** the private
+   consumer strictly re-reads records, verifies source bytes and the managed IR
+   profile, retains unchanged manifest authority on every trust failure, and
+   classifies matched request outcomes without evaluating Cedar policy text.
 4. **5d — live widening evidence:** capture the same managed request changing
    from Deny to Allow, preserve sanitized evidence, and prove the private
    widening counterexample.
@@ -182,6 +195,13 @@ registered relations, semantic-digest validation, and manifest-analysis
 refusal. The managed record's closed field sets deliberately exclude
 `schema_checked` and `determining_policies`, so local-oracle claims cannot leak
 through optional defaults.
+
+Gate 5c uses the live fixture only for request alignment: `amount: 500` is an
+aligned Allow and `amount: 2000` is enforcement narrowing for that exact
+request. Its Deny-to-Allow, Allow-to-Deny, and stable revision tests are
+synthetic and do not satisfy gate 5d. A trust failure blocks every alignment in
+the record, keeps the manifest analysis unchanged, and emits a named finding;
+it never becomes a policy Deny.
 
 ## Explicit non-goals
 

@@ -102,5 +102,9 @@ captured. Its private transport profile registers provenance-bearing
 `maps_to_tool`, `enforces_for`, and `decides_request` edges but remains rejected
 by manifest analysis. It does **not** constrain `reach`, infer all requests
 under the policy condition, or prove that a real refund backend enforces
-anything. Gate 5c must consume the mapping fail-closed and produce an effective
-policy-versus-agent diff before any public CLI exposure.
+anything. The private gate-5c consumer now verifies the mapping fail-closed and
+reports the captured Allow as aligned and the exact default-Deny request as
+enforcement narrowing while leaving manifest authority unchanged. This live
+fixture does not prove a policy revision: widening remains synthetic until a
+matched managed Deny-to-Allow capture clears gate 5d, before any public CLI
+exposure.
