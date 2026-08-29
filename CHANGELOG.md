@@ -6,22 +6,37 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.14.0 - 2026-08-29
+
 ### Added
 
 - `mandate cedar validate` structurally validates a managed-enforcement oracle
-  without trusting its sources. `mandate cedar align` and `mandate cedar diff`
-  verify explicit source roots, reviewed mapping evidence, managed state, and
-  exact request decisions before emitting human or versioned JSON results.
-  Findings exit 1 after complete output; malformed or unsafe inputs exit 2
-  without partial stdout.
-
-- Authority IR validation recognizes standalone Cedar policy-set and decision
-  profiles through `contains_policy` and `decides_request`. The profile records
-  only policies observed in captured native diagnostics, marks that inventory
-  incomplete, and remains ineligible for `mandate reach --ir`.
-- Authority IR validation recognizes standalone managed Cedar enforcement
+  without accepting its evidence as authority. `mandate cedar align` verifies
+  reviewed mappings, managed state, and exact captured decisions against a
+  manifest. `mandate cedar diff` compares matched requests across two managed
+  policy revisions and reports stable, narrowing, tightening, or widening
+  outcomes.
+- Cedar alignment and effective-diff output is available as human-readable
+  findings or the versioned `agentmandate.cedar-alignment/v1` and
+  `agentmandate.cedar-effective-diff/v1` JSON schemas. Findings exit 1 after
+  complete output; malformed records, unsafe source roots, and invalid dates
+  exit 2 without partial stdout.
+- Authority IR validation recognizes standalone local Cedar decision profiles
+  through `contains_policy` and `decides_request`, and managed-enforcement
   profiles through `maps_to_tool`, `enforces_for`, and `decides_request`.
-  Managed profiles remain ineligible for `mandate reach --ir`.
+  Both remain ineligible for general `mandate reach --ir` analysis.
+
+The managed Cedar consumer verifies every declared source beneath explicit
+roots, exact accepted mapping evidence, complete tool and policy inventories,
+and an active enforcement boundary. Trust failures retain the manifest's full
+authority and become unresolved findings. It does not evaluate Cedar policy
+text, infer a complete request domain from representative calls, or attribute a
+managed decision to a policy without native diagnostics.
+
+The committed AgentCore evidence reproduces one exact request changing from
+Deny to Allow across managed policy revisions. This establishes a real widening
+for that request only; it is not a global proof of the policy condition or the
+behavior of a financial backend.
 
 ## 0.13.0 - 2026-08-28
 
