@@ -555,5 +555,51 @@
       }
     }
   ],
-  "summary_version": 1
+  "summary_version": 1,
+  "temporal_sessions": [
+    {
+      "capture": "agentcore-refund-policy",
+      "conformance": {
+        "authenticated_principal_binding": "configured-not-adversarially-tested",
+        "fresh_session_reset": "observed",
+        "multi_hop_continuity": "documented-not-live-tested",
+        "within_session_accumulation": "observed"
+      },
+      "finding": "the managed sum is correct within one policy session, while fresh caller-selected sessions reset the technical accounting boundary",
+      "fresh_sessions": {
+        "aggregate_across_sessions": 1200,
+        "calls": [
+          {
+            "id": "fresh-first",
+            "outcome": "allow"
+          },
+          {
+            "id": "fresh-second",
+            "outcome": "allow"
+          }
+        ],
+        "session_aliases": [
+          "fresh-a",
+          "fresh-b"
+        ]
+      },
+      "request_amount": 600,
+      "same_session": {
+        "attempted_aggregate": 1200,
+        "calls": [
+          {
+            "id": "same-first",
+            "outcome": "allow"
+          },
+          {
+            "id": "same-second",
+            "outcome": "deny"
+          }
+        ],
+        "permitted_aggregate": 600,
+        "session_alias": "same"
+      },
+      "threshold": 1000
+    }
+  ]
 }

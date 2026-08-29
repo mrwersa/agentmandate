@@ -1,0 +1,103 @@
+{
+  "capture_date": "2026-08-29",
+  "cleanup": {
+    "cdk_bootstrap": "retained",
+    "gateway": "absent",
+    "iam_role": "absent",
+    "lambda": "absent",
+    "log_group": "absent",
+    "policy_engine": "absent"
+  },
+  "discarded_attempts": [
+    {
+      "classification": "source ambiguity",
+      "id": "combined-statements",
+      "result": "the managed create operation accepts exactly one statement"
+    },
+    {
+      "classification": "source ambiguity",
+      "id": "semantic-validation",
+      "result": "the separate permit and temporal forbid triggered overly permissive and overly restrictive findings; schema-only active recapture followed"
+    }
+  ],
+  "raw_retention": "live identifiers, session UUIDs, resource URLs, and signed headers remained in temporary files and were deleted after reviewed projection",
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "2a191e4b4f7e697320760e7e0a183e33c5014964430fc41acbbdae5f51d1a600",
+      "kind": "capture_script",
+      "locator": "capture_temporal.py"
+    },
+    {
+      "content_sha256": "46b0a8746e3a730973d9a72332b8bedda919e157277bbf2d48be15a2383414ba",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-authoring-refusal.json"
+    },
+    {
+      "content_sha256": "41f16477790c3084ef96e954f87303d74e97ed8a73525cc6b82a9ec91d75066b",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-fresh-first-request.json"
+    },
+    {
+      "content_sha256": "83061ee221d1a7693256a9fbc9d986c32537a3f79a804cb80efde6e1bf253bfa",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-fresh-first-response.json"
+    },
+    {
+      "content_sha256": "23eadcecbeccdf9a1d93ed965cdb33ce45f4642ac13c08d16e6ad0f03d1d9ec0",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-fresh-second-request.json"
+    },
+    {
+      "content_sha256": "a225279c2a260cb0292cfde405765a630bd81a2938e67fabd03be68cd844ba5f",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-fresh-second-response.json"
+    },
+    {
+      "content_sha256": "0a1e185375b182d65a610429a3ef2b00daf561b769479af36b759c7f17416dc0",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-lambda.py.txt"
+    },
+    {
+      "content_sha256": "70f3d51407fda40c957bd01ea85d97c89e6047e26194bb85e44f0706319344e9",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-managed-state.json"
+    },
+    {
+      "content_sha256": "49521f17e0e45b04099ee81e3b4eeedcabbfed49bfc5603036e8b6aec27caa34",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-policy.dogwood"
+    },
+    {
+      "content_sha256": "764f8a0b4384a8d8d89245e33a11baaa364cfdf19bef9b6b4f4927e5b5e41f8c",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-same-first-request.json"
+    },
+    {
+      "content_sha256": "90dce78786c685b7b27671051befbe276d61c195d83f73562884bdba4012dc07",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-same-first-response.json"
+    },
+    {
+      "content_sha256": "4ae21ae1bdf34aa9a0ce2d9dfda3a7241c293bfc78a4fe41cafe6973a51c5ac4",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-same-second-request.json"
+    },
+    {
+      "content_sha256": "b600f26fa2cfe1fb5a099da5d1f8d06e1295b787c589f644735a62fbe890b2e6",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-same-second-response.json"
+    },
+    {
+      "content_sha256": "4d345cc66235e786faf2b4da37d63373cca0ed49fac3e5351b8c8f67e76a08d8",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-session-result.json"
+    },
+    {
+      "content_sha256": "a2172ea851ec30896c33d4b895995f5468c937f3be00109a8c83b8e42643aba3",
+      "kind": "reviewed_artifact",
+      "locator": "temporal-tools-list-response.json"
+    }
+  ],
+  "temporal_capture_version": 1
+}

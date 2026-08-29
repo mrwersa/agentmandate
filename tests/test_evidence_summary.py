@@ -69,6 +69,27 @@ def test_managed_controls_and_permitted_sequence_are_in_the_summary() -> None:
     assert controls["permitted_sequence"]["per_request_threshold"] == 1000
 
 
+def test_temporal_session_boundary_is_in_the_summary() -> None:
+    temporal = evidence_summary.build_summary()["temporal_sessions"][0]
+
+    assert temporal["threshold"] == 1000
+    assert temporal["request_amount"] == 600
+    assert [item["outcome"] for item in temporal["same_session"]["calls"]] == [
+        "allow",
+        "deny",
+    ]
+    assert [item["outcome"] for item in temporal["fresh_sessions"]["calls"]] == [
+        "allow",
+        "allow",
+    ]
+    assert temporal["conformance"] == {
+        "within_session_accumulation": "observed",
+        "fresh_session_reset": "observed",
+        "authenticated_principal_binding": "configured-not-adversarially-tested",
+        "multi_hop_continuity": "documented-not-live-tested",
+    }
+
+
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [

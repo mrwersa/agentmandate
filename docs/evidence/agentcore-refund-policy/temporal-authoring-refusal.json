@@ -1,0 +1,13 @@
+{
+  "active_recapture_validation_mode": "IGNORE_ALL_FINDINGS",
+  "budget_policy": {
+    "finding": "Overly Restrictive",
+    "status": "CREATE_FAILED"
+  },
+  "claim_boundary": "native schema validation accepted the active policies; the failed semantic findings are preserved and no successful semantic-validation claim is made",
+  "permit_policy": {
+    "finding": "Overly Permissive",
+    "status": "CREATE_FAILED"
+  },
+  "requested_validation_mode": "FAIL_ON_ANY_FINDINGS"
+}

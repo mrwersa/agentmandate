@@ -67,6 +67,47 @@ comment. Native validation rejected it before activation, so no decision from
 that attempt enters the result. The accepted no-op uses a true conjunct and is
 classified separately from the rejected extractor defect.
 
+## Temporal session boundary
+
+A separate one-tool AWS IAM deployment tested a Dogwood cumulative sum rather
+than the earlier per-request Cedar condition. The active policy included the
+current request in a one-hour sum and forbade the tool when the total reached
+1,000. Every request supplied a caller-generated policy-session identifier.
+
+| Sequence | First `amount: 600` | Second `amount: 600` | Observed boundary |
+|---|---|---|---|
+| same session alias | Allow | Deny `-32002` | cumulative sum enforced |
+| two fresh session aliases | Allow | Allow | accounting reset between sessions |
+
+The 1,200 aggregate is therefore rejected inside one technical policy session
+and permitted across two fresh sessions. This is not a policy-engine defect:
+the managed sum behaves correctly at its declared boundary. It shows that the
+application-selected policy-session boundary is a load-bearing part of the
+effective mandate. A reviewed task or run limit is not established merely by
+deploying an equal numeric per-session limit.
+
+The authenticated Gateway was READY, used `AWS_IAM`, ran its engine in
+`ENFORCE`, exposed one inert Lambda tool, and had a workload identity. The
+experiment did not adversarially test a second principal, and it did not deploy
+a Gateway-to-Runtime-to-Gateway path. Principal isolation and multi-hop WAT
+continuity therefore remain documented service properties, not live results in
+this fixture. The [AgentCore session documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-session-based-temporal.html)
+defines both properties and explicitly states that a fresh caller-supplied ID
+creates a new evaluation boundary.
+
+Native `FAIL_ON_ANY_FINDINGS` authoring rejected the standalone permit as
+overly permissive and the temporal forbid as overly restrictive. The active
+recapture used `IGNORE_ALL_FINDINGS`, which still performs schema validation,
+and preserves those failed findings in `temporal-authoring-refusal.json`. It
+does not claim successful semantic validation.
+
+`temporal-index.json`, SHA-256
+`7828b5f55cfcd24f54bcf73b436e2fa756d117e2b2b08aa088b067a5af34a6d0`,
+pins the transformation script, reviewed policy and state, tool inventory, four
+requests and responses, and the conformance result. Session UUIDs, signed
+headers, live identifiers, ARNs, URLs, and service timestamps remained in
+temporary files and were deleted after projection.
+
 `controls-index.json`, SHA-256
 `1a0c8838a6920c24b260fd3bfc225c3fb5ae2440ffef68c4b804fe5976392585`,
 pins the transformation script, three managed oracles, policies, reviewed
@@ -149,7 +190,9 @@ The baseline capture created two short-lived deployments while correcting the
 authorizer and inventory boundaries. Gate 5d created one further clean
 deployment for the candidate revision. The control study created one more
 task-scoped deployment and applied three successful policy revisions; one
-invalid no-op update failed before activation. Each task used an AgentCore
+invalid no-op update failed before activation. The temporal study created one
+more task-scoped deployment with a stateless permit and a Dogwood sum policy.
+Each task used an AgentCore
 Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
 task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)
 workflow and explicit AWS checks confirmed zero task Gateways, policy engines,

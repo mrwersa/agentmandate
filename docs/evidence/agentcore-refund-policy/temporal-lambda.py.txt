@@ -1,0 +1,7 @@
+def handler(event, context):
+    del context
+    arguments = event.get("arguments", event)
+    return {
+        "processed": True,
+        "amount": arguments.get("amount"),
+    }
