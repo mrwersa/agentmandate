@@ -39,6 +39,11 @@
       "content_sha256": "13746d27b0921ba00f829d4a73dbfb07a8238d5980f3f2e635d0f5311ef9572c"
     },
     {
+      "kind": "managed_oracle",
+      "locator": "managed-oracle-v1.json",
+      "content_sha256": "0dbe5ea25cab0dbf362eddaa8215c1ae7dcc8f73acfcd5b492a64e10866f6d46"
+    },
+    {
       "kind": "manifest",
       "locator": "mandate.yaml",
       "content_sha256": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85"
