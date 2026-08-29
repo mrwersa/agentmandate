@@ -1,0 +1,3 @@
+def lambda_handler(event, context):
+    amount = event["amount"]
+    return {"processed": True, "amount": amount}

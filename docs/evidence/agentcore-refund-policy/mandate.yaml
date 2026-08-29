@@ -1,0 +1,9 @@
+version: 1
+agent: refund-evidence-agent
+tools:
+  - name: process_refund
+    effect: read
+    principal: caller
+    requires: []
+    requires_approval: false
+    unbounded: false

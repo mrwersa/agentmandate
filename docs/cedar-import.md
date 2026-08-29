@@ -1,6 +1,6 @@
 # Cedar policy import contract
 
-Status: **proposed and experimental**. This document is contract gate 1 of
+Status: **experimental; gates 1–4 complete**. This document is contract gate 1 of
 [issue #108](https://github.com/mrwersa/agentmandate/issues/108). It defines a
 read-only Cedar experiment; no current command accepts a Cedar bundle as
 reviewed or analyzable authority.
@@ -73,6 +73,14 @@ The first fixture uses the official document-cloud schema, policies, entities,
 one `ALLOW` request, and one `DENY` request. This proves transport and decision
 reproduction. It is not an agent deployment and therefore cannot satisfy the
 mapping or authority-eligibility gates.
+
+The live
+[`agentcore-refund-policy`](evidence/agentcore-refund-policy/README.md) fixture
+clears gate 4 with a smaller operational domain: one IAM-authorized AgentCore
+Gateway, one Lambda-backed tool, one ACTIVE Cedar policy attached in `ENFORCE`,
+an exact action/tool/resource binding, and opposite managed decisions for two
+request values. Its request corpus remains `representative`; inspecting the
+policy condition does not turn two requests into a complete context domain.
 
 The gate-2 fixture uses the official `@cedar-policy/cedar-wasm` 4.12.0 Node
 distribution because Cedar does not publish a CLI binary release asset. The
@@ -212,10 +220,18 @@ decision and compiling reviewed intent back to Cedar are different proofs.
    produce a counterexample for a widening change, and record a gate review
    before public CLI exposure.
 
-Every gate proves all five existing evidence graphs remain byte-identical when
+Every gate proves all committed manifest evidence graphs remain byte-identical when
 no policy bundle is supplied. Gate 4, not successful parsing, completes the
 Foundation import experiment for the policy-language dimension. Rego begins
 only after the Cedar loss model and consumption boundary survive this sequence.
+
+Gate 4 was reproduced on 29 August 2026. The evidence separates canonical
+decision bodies from sanitized control-plane state, records exactly one policy
+and tool, and keeps the concrete request domain representative. It does not
+register `maps_to_tool` or change reachability. Gate 5 remains open: the
+consumer must validate the Cedar profile and reviewed mapping at every boundary,
+retain strongest manifest authority on uncertainty, and explain effective
+policy-versus-agent differences without reimplementing Cedar.
 
 ## Explicit non-goals
 

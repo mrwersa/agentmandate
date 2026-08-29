@@ -1,0 +1,77 @@
+{
+  "capture_version": 1,
+  "capture_date": "2026-08-29",
+  "region": "us-east-1",
+  "agentcore_cli": {
+    "version": "0.28.1",
+    "package_integrity": "sha512-lkgudEhogNezM0w70eGE0sW9+a9yU79X46kkBTJpFkpUjBS7pAZVqd/kz5TvXXdp9wNai4zlubuB2edQ4Od3Ag=="
+  },
+  "mcp_protocol": "2025-03-26",
+  "sources": [
+    {
+      "kind": "request",
+      "locator": "allow-request.json",
+      "content_sha256": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146"
+    },
+    {
+      "kind": "native_output",
+      "locator": "allow-response.json",
+      "content_sha256": "c5f32b9669f4f72b97813f18543f12aad5af8d4645fe19a657a6d07e50898a02"
+    },
+    {
+      "kind": "request",
+      "locator": "deny-request.json",
+      "content_sha256": "d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44"
+    },
+    {
+      "kind": "native_output",
+      "locator": "deny-response.json",
+      "content_sha256": "f429fb2674ad34701ba88d53dead7369fa9942ec01386d2b1a2083f6336bf264"
+    },
+    {
+      "kind": "handler_source",
+      "locator": "lambda.py.txt",
+      "content_sha256": "f05e7a43cedca12eb885a65662ed2c480149e06f9dbc7804d094cfb2c0831f8c"
+    },
+    {
+      "kind": "managed_state",
+      "locator": "managed-state.json",
+      "content_sha256": "13746d27b0921ba00f829d4a73dbfb07a8238d5980f3f2e635d0f5311ef9572c"
+    },
+    {
+      "kind": "manifest",
+      "locator": "mandate.yaml",
+      "content_sha256": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85"
+    },
+    {
+      "kind": "deployment_mapping",
+      "locator": "mapping.json",
+      "content_sha256": "d6175d9abf08eeac8143ef5141b45ba9d37dc3dd45c25e0e3f2b39ec9f6e7d74"
+    },
+    {
+      "kind": "policy",
+      "locator": "policy.cedar",
+      "content_sha256": "15c72a22e99a087de583cc631a3545c738b54190b70fb34ebe70233302a16acf"
+    },
+    {
+      "kind": "native_output",
+      "locator": "protocol-refusal.json",
+      "content_sha256": "eb162cb7d3b0c165aa551d8832f2f7b6579a49e17ea2f1a7129c999b92a02b53"
+    },
+    {
+      "kind": "tool_schema",
+      "locator": "tool-schema.json",
+      "content_sha256": "d8e9381038ac4ba1ccd0f2db8c76422bcb9d3a563c302bbfe5a599821e3b3797"
+    },
+    {
+      "kind": "request",
+      "locator": "tools-list-request.json",
+      "content_sha256": "34c85e53bff07631d75dbe141ca2020ac830e422fe27698b5a3f87c3d2c5ebc9"
+    },
+    {
+      "kind": "native_output",
+      "locator": "tools-list-response.json",
+      "content_sha256": "3aa4e3b019a1b26515dbd6acfc50799cd89ff32a183f4027cf3106dd91a18a79"
+    }
+  ]
+}

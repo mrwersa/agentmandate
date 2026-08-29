@@ -4,6 +4,12 @@ Research cutoff: 29 August 2026. This audit selects a candidate for Cedar
 import gate 4; it does not claim that AgentMandate reproduced a managed-policy
 decision or that the gate is complete.
 
+**Update:** the candidate below remains a useful negative result, but gate 4
+was subsequently cleared by the separate
+[`agentcore-refund-policy`](evidence/agentcore-refund-policy/README.md) live
+capture. Its one-tool domain permits exact inventory and mapping evidence
+without weakening this audit's seven-route finding.
+
 ## Decision
 
 Use AWS's
