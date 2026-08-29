@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import subprocess
+import sys
 from pathlib import Path
 from types import ModuleType
 
@@ -34,7 +35,7 @@ def test_pinned_agentcore_sources_match_the_offline_index() -> None:
 def test_source_catalogue_is_byte_exact_and_refuses_six_tool_completeness() -> None:
     expected = (EVIDENCE / "catalogue.json").read_text(encoding="utf-8")
     result = subprocess.run(
-        [str(ROOT / ".venv" / "bin" / "python"), "capture_catalogue.py"],
+        [sys.executable, "capture_catalogue.py"],
         cwd=EVIDENCE,
         check=True,
         capture_output=True,
