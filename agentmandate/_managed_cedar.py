@@ -13,8 +13,8 @@ import hashlib
 import json
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
-from datetime import datetime
+from dataclasses import dataclass, replace
+from datetime import date, datetime
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -32,7 +32,8 @@ from ._ir import (
     _entity_id,
     _fact_id,
 )
-from .manifest import ManifestError, loads
+from .manifest import Mandate, ManifestError, loads
+from .reach import Authority, analyse
 
 MANAGED_ORACLE_VERSION = 1
 MANAGED_ADAPTER = "agentmandate.agentcore-managed-capture"
@@ -362,6 +363,106 @@ class ManagedOracle:
     def to_ir(self) -> AuthorityIR:
         """Project transport facts without making them analyzable authority."""
         return _managed_to_ir(self)
+
+
+@dataclass(frozen=True)
+class ManagedFinding:
+    code: str
+    message: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {"code": self.code, "message": self.message}
+
+
+@dataclass(frozen=True)
+class ManagedAlignment:
+    decision: str
+    request_key: str
+    tool: str | None
+    outcome: str
+    reason: str
+    alignment: str
+    support: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "decision": self.decision,
+            "request_key": self.request_key,
+            "tool": self.tool,
+            "outcome": self.outcome,
+            "reason": self.reason,
+            "alignment": self.alignment,
+            "support": list(self.support),
+        }
+
+
+@dataclass(frozen=True)
+class ManagedAnalysis:
+    authority: Authority
+    as_of: str
+    alignments: tuple[ManagedAlignment, ...]
+    findings: tuple[ManagedFinding, ...]
+
+    @property
+    def clean(self) -> bool:
+        return not self.findings and all(
+            item.alignment == "aligned_allow" for item in self.alignments
+        )
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "as_of": self.as_of,
+            "authority": self.authority.as_dict(),
+            "alignments": [item.as_dict() for item in self.alignments],
+            "findings": [item.as_dict() for item in self.findings],
+            "clean": self.clean,
+        }
+
+
+@dataclass(frozen=True)
+class ManagedChange:
+    request_key: str
+    tool: str | None
+    baseline: str
+    candidate: str
+    classification: str
+    support: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "request_key": self.request_key,
+            "tool": self.tool,
+            "baseline": self.baseline,
+            "candidate": self.candidate,
+            "classification": self.classification,
+            "support": list(self.support),
+        }
+
+
+@dataclass(frozen=True)
+class ManagedDiff:
+    baseline: ManagedAnalysis
+    candidate: ManagedAnalysis
+    changes: tuple[ManagedChange, ...]
+    findings: tuple[ManagedFinding, ...]
+
+    @property
+    def clean(self) -> bool:
+        return (
+            self.baseline.clean
+            and self.candidate.clean
+            and not self.findings
+            and all(item.classification.startswith("stable_") for item in self.changes)
+        )
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "baseline": self.baseline.as_dict(),
+            "candidate": self.candidate.as_dict(),
+            "changes": [item.as_dict() for item in self.changes],
+            "findings": [item.as_dict() for item in self.findings],
+            "clean": self.clean,
+        }
 
 
 def _record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
@@ -760,14 +861,28 @@ def _verify_projection(oracle: ManagedOracle, contents: Mapping[str, bytes]) -> 
             raise ManagedOracleFormatError(
                 f"managed Cedar oracle request source '{decision.request}' disagrees with record"
             )
+        result = response.get("result") if isinstance(response, dict) else None
         allowed = (
-            isinstance(response, dict) and "result" in response and response.get("error") is None
+            isinstance(result, dict)
+            and result.get("isError") is False
+            and response.get("error") is None
         )
         error = response.get("error") if isinstance(response, dict) else None
         denied = isinstance(error, dict) and error.get("code") == -32002
-        if (decision.outcome == "allow" and not allowed) or (
-            decision.outcome == "deny" and not denied
-        ):
+        default_denied = denied and "denied by default" in str(error.get("message", "")).lower()
+        # This adapter has captured AgentCore's default-deny diagnostic only.
+        # Do not invent an explicit-deny response shape before service evidence
+        # establishes one and an adapter-version change pins it.
+        response_matches = (
+            decision.outcome == "allow"
+            and decision.reason == "managed_allow"
+            and allowed
+        ) or (
+            decision.outcome == "deny"
+            and decision.reason == "default_deny"
+            and default_denied
+        )
+        if not response_matches:
             raise ManagedOracleFormatError(
                 f"managed Cedar oracle response source '{decision.response}' disagrees with outcome"
             )
@@ -800,9 +915,7 @@ def _projection_parts(
     policy_ids = {
         policy.name: _entity_id("policy", policy.name) for policy in oracle.policy_inventory.members
     }
-    request_ids = {
-        decision.id: _entity_id("request", decision.id) for decision in oracle.decisions
-    }
+    request_ids = {decision.id: _entity_id("request", decision.id) for decision in oracle.decisions}
     decision_ids = {
         decision.id: _entity_id("decision", decision.id) for decision in oracle.decisions
     }
@@ -991,3 +1104,265 @@ def _validate_managed_profile(graph: AuthorityIR) -> None:
     expected_content = hashlib.sha256(oracle.to_json().encode("utf-8")).hexdigest()
     if source.content_sha256 != expected_content:
         raise ManagedOracleFormatError("managed Cedar IR profile content digest does not match")
+
+
+def _evaluation_date(as_of: date) -> str:
+    if isinstance(as_of, datetime) or not isinstance(as_of, date):
+        raise ManagedOracleFormatError("managed Cedar analysis as_of must be a date")
+    return as_of.isoformat()
+
+
+def _manifest_matches(
+    mandate: Mandate, oracle: ManagedOracle, contents: Mapping[str, bytes]
+) -> bool:
+    projected = loads(
+        contents[oracle.mapping.target.source].decode("utf-8"),
+        source=mandate.source,
+    )
+    return projected == mandate
+
+
+def _trust_findings(
+    mandate: Mandate,
+    oracle: ManagedOracle,
+    contents: Mapping[str, bytes],
+    evaluated_on: str,
+) -> tuple[ManagedFinding, ...]:
+    findings: list[ManagedFinding] = []
+    try:
+        oracle.verify_sources(contents)
+        graph = AuthorityIR.from_json(oracle.to_ir().to_json())
+        _validate_managed_profile(graph)
+    except (ManagedOracleFormatError, IRFormatError) as exc:
+        return (ManagedFinding("managed.source-untrusted", str(exc)),)
+    if not _manifest_matches(mandate, oracle, contents):
+        findings.append(
+            ManagedFinding(
+                "managed.target-mismatch",
+                "managed Cedar mapping target does not match the analyzed mandate",
+            )
+        )
+    if (
+        oracle.provider.name != "aws-agentcore"
+        or oracle.provider.protocol != "MCP"
+        or oracle.state.authorizer_type != "AWS_IAM"
+        or oracle.state.gateway_status != "READY"
+        or oracle.state.policy_engine_status != "ACTIVE"
+        or oracle.state.policy_engine_mode != "ENFORCE"
+        or oracle.state.requested_validation_mode != "FAIL_ON_ANY_FINDINGS"
+    ):
+        findings.append(
+            ManagedFinding(
+                "managed.enforcement-ineligible",
+                "managed Cedar capture does not prove a ready IAM ENFORCE boundary",
+            )
+        )
+    if oracle.capture_date > evaluated_on:
+        findings.append(
+            ManagedFinding(
+                "managed.capture-in-future",
+                "managed Cedar capture date is after the evaluation date",
+            )
+        )
+    policies = tuple(oracle.policy_inventory.members)
+    if (
+        not oracle.tool_inventory.complete
+        or not oracle.policy_inventory.complete
+        or any(
+            policy.status != "ACTIVE" or policy.enforcement_mode != "ACTIVE" for policy in policies
+        )
+    ):
+        findings.append(
+            ManagedFinding(
+                "managed.inventory-incomplete",
+                "managed Cedar tool or policy inventory is not complete and active",
+            )
+        )
+    evidence = oracle.mapping.request_domain.evidence
+    if (
+        evidence.confidence != "exact"
+        or evidence.review != "accepted"
+        or evidence.reviewer is None
+        or evidence.expires is None
+        or evidence.expires < evaluated_on
+    ):
+        findings.append(
+            ManagedFinding(
+                "managed.mapping-untrusted",
+                "managed Cedar mapping is not exact, accepted, and current",
+            )
+        )
+    if oracle.sanitization.decision_messages_changed:
+        findings.append(
+            ManagedFinding(
+                "managed.sanitization-changed-decision",
+                "managed Cedar sanitization changed decision messages",
+            )
+        )
+    if (
+        oracle.mapping.principal.cedar_types != ("AgentCore::IamEntity",)
+        or oracle.mapping.principal.mandate_principal != "caller"
+    ):
+        findings.append(
+            ManagedFinding(
+                "managed.principal-mismatch",
+                "managed Cedar principal mapping does not match the IAM caller boundary",
+            )
+        )
+    if oracle.mapping.resources[0].cedar_type != "AgentCore::Gateway":
+        findings.append(
+            ManagedFinding(
+                "managed.resource-mismatch",
+                "managed Cedar resource mapping is not an AgentCore Gateway",
+            )
+        )
+    return tuple(findings)
+
+
+def _action_tools(oracle: ManagedOracle) -> dict[str, str]:
+    return {item.cedar: item.tool for item in oracle.mapping.actions}
+
+
+def _alignment_support(oracle: ManagedOracle, decision: ManagedDecision) -> tuple[str, ...]:
+    source_digests = {item.locator: item.content_sha256 for item in oracle.sources}
+    return (
+        f"mapping:{oracle.mapping.source}",
+        f"request:{decision.request}:{source_digests[decision.request]}",
+        f"response:{decision.response}:{source_digests[decision.response]}",
+    )
+
+
+def analyse_managed_cedar(
+    mandate: Mandate,
+    oracle: ManagedOracle,
+    contents: Mapping[str, bytes],
+    *,
+    as_of: date,
+) -> ManagedAnalysis:
+    """Align exact managed decisions with unchanged reviewed authority."""
+    evaluated_on = _evaluation_date(as_of)
+    reread = ManagedOracle.from_json(oracle.to_json())
+    authority = analyse(mandate)
+    findings = list(_trust_findings(mandate, reread, contents, evaluated_on))
+    action_tools = _action_tools(reread)
+    alignments = []
+    blocked = bool(findings)
+    for decision in reread.decisions:
+        cedar_action = f'AgentCore::Action::"{decision.tool}"'
+        tool = action_tools.get(cedar_action)
+        alignment = "unresolved"
+        if tool is None or tool not in authority.reachable_tools:
+            findings.append(
+                ManagedFinding(
+                    "managed.request-unmapped",
+                    f"managed Cedar decision '{decision.id}' has no reachable reviewed tool",
+                )
+            )
+            blocked = True
+        elif not blocked:
+            alignment = (
+                "aligned_allow" if decision.outcome == "allow" else "enforcement_narrows_request"
+            )
+        alignments.append(
+            ManagedAlignment(
+                decision.id,
+                decision.request_key,
+                tool,
+                decision.outcome,
+                decision.reason,
+                alignment,
+                _alignment_support(reread, decision),
+            )
+        )
+    if blocked:
+        alignments = [replace(item, alignment="unresolved") for item in alignments]
+    unique_findings = tuple(
+        {
+            (
+                item.code,
+                item.message,
+            ): item
+            for item in findings
+        }.values()
+    )
+    return ManagedAnalysis(
+        authority,
+        evaluated_on,
+        tuple(alignments),
+        unique_findings,
+    )
+
+
+def _comparison_identity(oracle: ManagedOracle) -> dict[str, Any]:
+    return {
+        "provider": oracle.provider.as_dict(),
+        "state": oracle.state.as_dict(),
+        "mapping": oracle.mapping.as_dict(),
+        "tool_inventory": oracle.tool_inventory.as_dict(),
+        "sanitization": oracle.sanitization.as_dict(),
+    }
+
+
+def compare_managed_cedar(
+    mandate: Mandate,
+    baseline: ManagedOracle,
+    baseline_contents: Mapping[str, bytes],
+    candidate: ManagedOracle,
+    candidate_contents: Mapping[str, bytes],
+    *,
+    as_of: date,
+) -> ManagedDiff:
+    """Compare reproduced outcomes only for identical managed request boundaries."""
+    baseline_result = analyse_managed_cedar(mandate, baseline, baseline_contents, as_of=as_of)
+    candidate_result = analyse_managed_cedar(mandate, candidate, candidate_contents, as_of=as_of)
+    findings: list[ManagedFinding] = []
+    if baseline_result.findings or candidate_result.findings:
+        findings.append(
+            ManagedFinding(
+                "managed.comparison-untrusted",
+                "managed Cedar revisions are not both eligible for comparison",
+            )
+        )
+    if _comparison_identity(baseline) != _comparison_identity(candidate):
+        findings.append(
+            ManagedFinding(
+                "managed.comparison-boundary-changed",
+                "managed Cedar revisions do not share one reviewed enforcement boundary",
+            )
+        )
+    baseline_by_key = {item.request_key: item for item in baseline_result.alignments}
+    candidate_by_key = {item.request_key: item for item in candidate_result.alignments}
+    if set(baseline_by_key) != set(candidate_by_key):
+        findings.append(
+            ManagedFinding(
+                "managed.comparison-requests-changed",
+                "managed Cedar revisions do not contain the same canonical requests",
+            )
+        )
+    changes = []
+    if not findings:
+        classifications = {
+            ("allow", "allow"): "stable_allow",
+            ("deny", "deny"): "stable_deny",
+            ("deny", "allow"): "widens",
+            ("allow", "deny"): "tightens",
+        }
+        for before in baseline_result.alignments:
+            request_key = before.request_key
+            after = candidate_by_key[request_key]
+            changes.append(
+                ManagedChange(
+                    request_key,
+                    before.tool,
+                    before.outcome,
+                    after.outcome,
+                    classifications[(before.outcome, after.outcome)],
+                    (*before.support, *after.support),
+                )
+            )
+    return ManagedDiff(
+        baseline_result,
+        candidate_result,
+        tuple(changes),
+        tuple(findings),
+    )

@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 from dataclasses import replace
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +16,10 @@ from agentmandate._managed_cedar import (
     ManagedOracleFormatError,
     _profile_digest,
     _validate_managed_profile,
+    analyse_managed_cedar,
+    compare_managed_cedar,
 )
+from agentmandate.manifest import load
 
 ROOT = Path(__file__).parents[1] / "docs" / "evidence" / "agentcore-refund-policy"
 ORACLE = ROOT / "managed-oracle-v1.json"
@@ -47,6 +51,17 @@ def replace_source(
     contents[locator] = content
     source = next(item for item in raw["sources"] if item["locator"] == locator)
     source["content_sha256"] = hashlib.sha256(content).hexdigest()
+
+
+def oracle_and_contents(
+    mutate: Any | None = None,
+) -> tuple[ManagedOracle, dict[str, bytes]]:
+    raw = raw_oracle()
+    oracle = ManagedOracle.from_json(text(raw))
+    contents = source_bytes(oracle)
+    if mutate is not None:
+        mutate(raw, contents)
+    return ManagedOracle.from_json(text(raw)), contents
 
 
 def test_live_managed_oracle_is_canonical_and_digest_bound() -> None:
@@ -275,6 +290,24 @@ def test_projection_verification_rejects_deeper_join_failures() -> None:
             ManagedOracle.from_json(text(candidate)).verify_sources(source_content)
 
 
+def test_projection_verification_requires_the_recorded_managed_response_semantics() -> None:
+    raw = raw_oracle()
+    oracle = ManagedOracle.from_json(text(raw))
+    contents = source_bytes(oracle)
+    allow = json.loads(contents["allow-response.json"])
+    allow["result"]["isError"] = True
+    replace_source(raw, contents, "allow-response.json", allow)
+    with pytest.raises(ManagedOracleFormatError, match="response source.*disagrees"):
+        ManagedOracle.from_json(text(raw)).verify_sources(contents)
+
+    raw = raw_oracle()
+    oracle = ManagedOracle.from_json(text(raw))
+    contents = source_bytes(oracle)
+    raw["decisions"][1]["reason"] = "explicit_deny"
+    with pytest.raises(ManagedOracleFormatError, match="response source.*disagrees"):
+        ManagedOracle.from_json(text(raw)).verify_sources(contents)
+
+
 def rehash(graph: AuthorityIR) -> AuthorityIR:
     source = replace(
         graph.sources[0],
@@ -385,3 +418,291 @@ def test_managed_ir_profile_rejects_tampering_even_after_rehashing() -> None:
         _validate_managed_profile(
             replace(graph, sources=(replace(graph.sources[0], content_sha256="0" * 64),))
         )
+
+
+def test_private_alignment_preserves_authority_and_exact_request_scope() -> None:
+    oracle, contents = oracle_and_contents()
+    mandate = load(ROOT / "mandate.yaml")
+    result = analyse_managed_cedar(mandate, oracle, contents, as_of=date(2027, 8, 29))
+
+    assert result.authority.reachable_tools == {"process_refund"}
+    assert result.findings == ()
+    assert [(item.decision, item.alignment) for item in result.alignments] == [
+        ("allow-under-limit", "aligned_allow"),
+        ("deny-over-limit", "enforcement_narrows_request"),
+    ]
+    assert all(len(item.support) == 3 for item in result.alignments)
+    assert result.clean is False
+    rendered = result.as_dict()
+    assert rendered["clean"] is False
+    assert rendered["alignments"][1]["outcome"] == "deny"
+
+
+def test_private_alignment_fails_closed_for_source_and_review_failures() -> None:
+    mandate = load(ROOT / "mandate.yaml")
+    oracle, contents = oracle_and_contents()
+    tampered = contents | {"allow-response.json": b"tampered"}
+    result = analyse_managed_cedar(mandate, oracle, tampered, as_of=date(2026, 8, 29))
+    assert [item.code for item in result.findings] == ["managed.source-untrusted"]
+    assert {item.alignment for item in result.alignments} == {"unresolved"}
+
+    expired = analyse_managed_cedar(mandate, oracle, contents, as_of=date(2027, 8, 30))
+    assert [item.code for item in expired.findings] == ["managed.mapping-untrusted"]
+    assert {item.alignment for item in expired.alignments} == {"unresolved"}
+    assert expired.as_dict()["findings"] == [
+        {
+            "code": "managed.mapping-untrusted",
+            "message": "managed Cedar mapping is not exact, accepted, and current",
+        }
+    ]
+
+    with pytest.raises(ManagedOracleFormatError, match="as_of must be a date"):
+        analyse_managed_cedar(
+            mandate,
+            oracle,
+            contents,
+            as_of=datetime(2026, 8, 29),  # type: ignore[arg-type]
+        )
+
+
+def test_private_alignment_refuses_a_foreign_or_unreachable_mandate() -> None:
+    oracle, contents = oracle_and_contents()
+    mandate = load(ROOT / "mandate.yaml")
+    foreign = replace(mandate, agent="other")
+    result = analyse_managed_cedar(foreign, oracle, contents, as_of=date(2026, 8, 29))
+    assert "managed.target-mismatch" in {item.code for item in result.findings}
+
+    unreachable = replace(
+        mandate,
+        tools=(replace(mandate.tools[0], name="other"),),
+    )
+    result = analyse_managed_cedar(unreachable, oracle, contents, as_of=date(2026, 8, 29))
+    assert "managed.request-unmapped" in {item.code for item in result.findings}
+    assert {item.alignment for item in result.alignments} == {"unresolved"}
+
+
+@pytest.mark.parametrize(
+    ("mutate", "code"),
+    [
+        (
+            lambda raw, contents: (
+                raw["state"].update(policy_engine_mode="LOG_ONLY"),
+                _mutate_state(raw, contents, ("gateway", "policy_engine_mode"), "LOG_ONLY"),
+            ),
+            "managed.enforcement-ineligible",
+        ),
+        (
+            lambda raw, contents: (
+                raw["state"].update(requested_validation_mode="IGNORE_ALL_FINDINGS"),
+                _mutate_state(
+                    raw,
+                    contents,
+                    ("policy", "requested_validation_mode"),
+                    "IGNORE_ALL_FINDINGS",
+                ),
+            ),
+            "managed.enforcement-ineligible",
+        ),
+        (
+            lambda raw, contents: (
+                raw["tool_inventory"].update(complete=False),
+                _mutate_state(raw, contents, ("tool_inventory_complete",), False),
+            ),
+            "managed.inventory-incomplete",
+        ),
+        (
+            lambda raw, contents: _mutate_mapping_review(raw, contents, "contested"),
+            "managed.mapping-untrusted",
+        ),
+        (
+            lambda raw, contents: (
+                raw["sanitization"].update(decision_messages_changed=True),
+                _mutate_state(
+                    raw,
+                    contents,
+                    ("sanitization", "decision_messages_changed"),
+                    True,
+                ),
+            ),
+            "managed.sanitization-changed-decision",
+        ),
+        (
+            lambda raw, contents: _mutate_principal(raw, contents, "service"),
+            "managed.principal-mismatch",
+        ),
+        (
+            lambda raw, contents: _mutate_resource_type(raw, contents, "Other::Gateway"),
+            "managed.resource-mismatch",
+        ),
+    ],
+)
+def test_private_alignment_names_each_trust_failure(mutate: Any, code: str) -> None:
+    oracle, contents = oracle_and_contents(mutate)
+    result = analyse_managed_cedar(
+        load(ROOT / "mandate.yaml"),
+        oracle,
+        contents,
+        as_of=date(2026, 8, 29),
+    )
+
+    assert code in {item.code for item in result.findings}
+    assert {item.alignment for item in result.alignments} == {"unresolved"}
+
+
+def _mutate_state(
+    raw: dict[str, Any],
+    contents: dict[str, bytes],
+    path: tuple[str, ...],
+    value: Any,
+) -> None:
+    state = json.loads(contents["managed-state.json"])
+    set_path(state, path, value)
+    replace_source(raw, contents, "managed-state.json", state)
+
+
+def _mutate_mapping_review(raw: dict[str, Any], contents: dict[str, bytes], review: str) -> None:
+    raw["mapping"]["request_domain"]["evidence"]["review"] = review
+    replace_source(raw, contents, "mapping.json", raw["mapping"])
+
+
+def _mutate_principal(raw: dict[str, Any], contents: dict[str, bytes], principal: str) -> None:
+    raw["mapping"]["principal"]["mandate_principal"] = principal
+    replace_source(raw, contents, "mapping.json", raw["mapping"])
+
+
+def _mutate_resource_type(raw: dict[str, Any], contents: dict[str, bytes], cedar_type: str) -> None:
+    raw["mapping"]["resources"][0]["cedar_type"] = cedar_type
+    raw["sanitization"]["aliases"][0]["cedar_type"] = cedar_type
+    replace_source(raw, contents, "mapping.json", raw["mapping"])
+
+
+def test_private_alignment_rejects_an_evaluation_before_capture() -> None:
+    oracle, contents = oracle_and_contents()
+    result = analyse_managed_cedar(
+        load(ROOT / "mandate.yaml"),
+        oracle,
+        contents,
+        as_of=date(2026, 8, 28),
+    )
+
+    assert [item.code for item in result.findings] == ["managed.capture-in-future"]
+    assert {item.alignment for item in result.alignments} == {"unresolved"}
+
+
+def candidate_allowing_2000() -> tuple[ManagedOracle, dict[str, bytes]]:
+    def mutate(raw: dict[str, Any], contents: dict[str, bytes]) -> None:
+        decision = next(item for item in raw["decisions"] if item["id"] == "deny-over-limit")
+        decision["outcome"] = "allow"
+        decision["reason"] = "managed_allow"
+        response = {
+            "jsonrpc": "2.0",
+            "id": "deny-over-limit",
+            "result": {
+                "content": [{"text": '{"processed":true,"amount":2000}', "type": "text"}],
+                "isError": False,
+            },
+        }
+        replace_source(raw, contents, "deny-response.json", response)
+        policy = (
+            (ROOT / "policy.cedar")
+            .read_text(encoding="utf-8")
+            .replace("amount < 1000", "amount < 3000")
+        )
+        replace_source(raw, contents, "policy.cedar", policy.encode())
+
+    return oracle_and_contents(mutate)
+
+
+def test_private_revision_comparison_classifies_all_four_outcome_pairs() -> None:
+    baseline, baseline_contents = oracle_and_contents()
+    candidate, candidate_contents = candidate_allowing_2000()
+    mandate = load(ROOT / "mandate.yaml")
+    widened = compare_managed_cedar(
+        mandate,
+        baseline,
+        baseline_contents,
+        candidate,
+        candidate_contents,
+        as_of=date(2026, 8, 29),
+    )
+
+    assert [item.classification for item in widened.changes] == [
+        "stable_allow",
+        "widens",
+    ]
+    assert widened.findings == ()
+    assert widened.clean is False
+    assert widened.as_dict()["changes"][1]["classification"] == "widens"
+
+    tightened = compare_managed_cedar(
+        mandate,
+        candidate,
+        candidate_contents,
+        baseline,
+        baseline_contents,
+        as_of=date(2026, 8, 29),
+    )
+    assert [item.classification for item in tightened.changes] == [
+        "stable_allow",
+        "tightens",
+    ]
+    stable = compare_managed_cedar(
+        mandate,
+        baseline,
+        baseline_contents,
+        baseline,
+        baseline_contents,
+        as_of=date(2026, 8, 29),
+    )
+    assert [item.classification for item in stable.changes] == [
+        "stable_allow",
+        "stable_deny",
+    ]
+
+
+def test_private_revision_comparison_refuses_changed_boundaries_and_requests() -> None:
+    mandate = load(ROOT / "mandate.yaml")
+    baseline, baseline_contents = oracle_and_contents()
+
+    def region(raw: dict[str, Any], _contents: dict[str, bytes]) -> None:
+        raw["provider"]["region"] = "us-west-2"
+
+    candidate, candidate_contents = oracle_and_contents(region)
+    changed = compare_managed_cedar(
+        mandate,
+        baseline,
+        baseline_contents,
+        candidate,
+        candidate_contents,
+        as_of=date(2026, 8, 29),
+    )
+    assert [item.code for item in changed.findings] == ["managed.comparison-boundary-changed"]
+    assert changed.changes == ()
+
+    def request(raw: dict[str, Any], contents: dict[str, bytes]) -> None:
+        decision = raw["decisions"][0]
+        decision["arguments"] = {"amount": 600}
+        body = json.loads(contents[decision["request"]])
+        body["params"]["arguments"] = {"amount": 600}
+        replace_source(raw, contents, decision["request"], body)
+
+    candidate, candidate_contents = oracle_and_contents(request)
+    changed = compare_managed_cedar(
+        mandate,
+        baseline,
+        baseline_contents,
+        candidate,
+        candidate_contents,
+        as_of=date(2026, 8, 29),
+    )
+    assert [item.code for item in changed.findings] == ["managed.comparison-requests-changed"]
+
+    expired = compare_managed_cedar(
+        mandate,
+        baseline,
+        baseline_contents,
+        baseline,
+        baseline_contents,
+        as_of=date(2027, 8, 30),
+    )
+    assert [item.code for item in expired.findings] == ["managed.comparison-untrusted"]
