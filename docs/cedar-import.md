@@ -1,9 +1,10 @@
 # Cedar policy import contract
 
-Status: **experimental; gates 1–4 complete**. This document is contract gate 1 of
+Status: **experimental; gates 1–5 complete**. This document is contract gate 1 of
 [issue #108](https://github.com/mrwersa/agentmandate/issues/108). It defines a
-read-only Cedar experiment; no current command accepts a Cedar bundle as
-reviewed or analyzable authority.
+read-only Cedar experiment. No command accepts a Cedar bundle as reviewed
+manifest authority; the explicit managed-oracle commands verify one closed
+profile for alignment and effective diff.
 
 ## Why Cedar is first
 
@@ -228,10 +229,14 @@ only after the Cedar loss model and consumption boundary survive this sequence.
 Gate 4 was reproduced on 29 August 2026. The evidence separates canonical
 decision bodies from sanitized control-plane state, records exactly one policy
 and tool, and keeps the concrete request domain representative. It does not
-register `maps_to_tool` or change reachability. Gate 5 remains open: the
-consumer must validate the Cedar profile and reviewed mapping at every boundary,
-retain strongest manifest authority on uncertainty, and explain effective
-policy-versus-agent differences without reimplementing Cedar.
+by itself register `maps_to_tool` or change reachability. Gate 5 subsequently
+registered the reviewed managed-profile relations without admitting that
+profile to manifest analysis. Its consumer validates the managed profile and
+reviewed mapping at every boundary, retains strongest manifest authority on
+uncertainty, and explains effective policy-versus-agent differences without
+reimplementing Cedar. The
+[recorded exposure review](cedar-effective-diff-gate-5-review.md) reproduces the
+trust and exit-code matrix against the merged CLI tree.
 
 The proposed [effective-diff contract](cedar-effective-diff.md) subdivides gate
 5 and keeps local Cedar-WASM decisions separate from managed AgentCore
@@ -241,7 +246,8 @@ The private gate-5c consumer verifies that profile and every captured source at
 the consumption boundary, aligns each exact request with unchanged reviewed
 authority, and compares matched managed outcomes across policy revisions. Its
 widening proof is now backed by a matched live Deny-to-Allow AgentCore capture.
-The public exposure review and versioned result envelope are still required.
+The public CLI and its versioned result schemas passed gate 5e. These schemas
+remain presentation artifacts, not authority imports.
 
 ## Explicit non-goals
 

@@ -127,5 +127,7 @@ reports the captured Allow as aligned and the exact default-Deny request as
 enforcement narrowing while leaving manifest authority unchanged. The second
 managed oracle now clears gate 5d: the same canonical `amount: 2000` request,
 mapping, tool inventory, and enforcement class change from Deny to Allow, while
-the `amount: 500` control remains Allow. Public exposure remains gated on the
-adversarial gate 5e review and a versioned result envelope.
+the `amount: 500` control remains Allow. The versioned public result and
+adversarial [gate 5e review](../../cedar-effective-diff-gate-5-review.md) now
+reproduce that widening without turning the representative request pair into a
+complete domain claim.
