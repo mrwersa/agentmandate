@@ -38,6 +38,43 @@ advertised `2025-03-26`; the successful calls use the advertised version. The
 refusal is retained rather than silently correcting the attempted request. The
 candidate reused the supported version and did not repeat the rejected probe.
 
+## Managed comparison controls
+
+A fresh task-scoped deployment tested two negative controls under one logical
+Gateway, one IAM authorizer, one Lambda-backed tool, and one ENFORCE policy
+engine. The baseline condition admitted amounts below 1,000. A semantic no-op
+added `&& true`, while a narrowing revision lowered the threshold to 400.
+
+| Revision comparison | `amount: 500` | `amount: 2000` | Reported changes |
+|---|---|---|---|
+| baseline → semantic no-op | Allow → Allow | Deny → Deny | `stable_allow`, `stable_deny` |
+| baseline → narrowing | Allow → Deny | Deny → Deny | `tightens`, `stable_deny` |
+
+Neither control reports `widens`. Each raw status snapshot contained exactly
+one deployed Gateway, target, engine, and policy. The signed MCP responses
+establish that the configured policy was enforcing: denied calls retain the
+managed `-32002` default-deny diagnostic, while allowed calls contain the
+synthetic Lambda result. The reviewed managed-state files combine those two
+observations and do not claim a separately retained AWS control-plane export.
+
+The baseline also received two separate calls of `amount: 600`. Both were
+allowed and the numeric aggregate is 1,200. This demonstrates compound reach
+beyond the policy's 1,000 per-request threshold. It does not claim that the
+Cedar condition promised cumulative accounting.
+
+The first no-op attempt encoded a newline as the two characters `\n` before a
+comment. Native validation rejected it before activation, so no decision from
+that attempt enters the result. The accepted no-op uses a true conjunct and is
+classified separately from the rejected extractor defect.
+
+`controls-index.json`, SHA-256
+`1a0c8838a6920c24b260fd3bfc225c3fb5ae2440ffef68c4b804fe5976392585`,
+pins the transformation script, three managed oracles, policies, reviewed
+state, requests, responses, control results, and sequence. Live identifiers
+remained in temporary deployment and status outputs only. Tests regenerate the
+reviewed fixture from equivalent raw shapes, re-run both comparisons, verify
+every nested digest, and require the two allowed sequence calls.
+
 ## Provenance and integrity
 
 [`capture-index.json`](capture-index.json) records the AgentCore CLI version,
@@ -110,9 +147,11 @@ managed metadata was not retained after verification.
 
 The baseline capture created two short-lived deployments while correcting the
 authorizer and inventory boundaries. Gate 5d created one further clean
-deployment for the candidate revision. Each used an AgentCore Gateway and
-policy engine, a Lambda function, a CloudWatch log group, and a task-specific
-IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)
+deployment for the candidate revision. The control study created one more
+task-scoped deployment and applied three successful policy revisions; one
+invalid no-op update failed before activation. Each task used an AgentCore
+Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
+task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)
 workflow and explicit AWS checks confirmed zero task Gateways, policy engines,
 Lambda functions, roles, and log groups afterward. The standard regional
 `CDKToolkit` bootstrap stack remains for future deployments.

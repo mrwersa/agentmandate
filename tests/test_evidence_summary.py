@@ -35,8 +35,8 @@ def test_summary_refuses_to_invent_legacy_class_counts() -> None:
 
     assert classification == {
         "complete": False,
-        "canonical_records": 16,
-        "total_records": 37,
+        "canonical_records": 17,
+        "total_records": 38,
         "class_counts": None,
         "reason": "legacy correction records lack canonical pre-study class labels",
     }
@@ -56,6 +56,17 @@ def test_live_comparison_is_extracted_from_committed_oracles() -> None:
     assert comparison["instrumentation_status"] == "complete"
     assert comparison["measurement"]["repetitions"] == 1000
     assert comparison["measurement"]["warmups"] == 100
+
+
+def test_managed_controls_and_permitted_sequence_are_in_the_summary() -> None:
+    controls = evidence_summary.build_summary()["managed_controls"][0]
+
+    assert controls["comparisons"] == {
+        "noop": ["stable_deny", "stable_allow"],
+        "narrow": ["stable_deny", "tightens"],
+    }
+    assert controls["permitted_sequence"]["aggregate_amount"] == 1200
+    assert controls["permitted_sequence"]["per_request_threshold"] == 1000
 
 
 @pytest.mark.parametrize(

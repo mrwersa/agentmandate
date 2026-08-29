@@ -27,6 +27,14 @@ measure_analysis = importlib.util.module_from_spec(_spec)
 sys.modules["measure_analysis"] = measure_analysis
 _spec.loader.exec_module(measure_analysis)
 
+_controls_spec = importlib.util.spec_from_file_location(
+    "capture_controls", EVIDENCE / "capture_controls.py"
+)
+assert _controls_spec is not None and _controls_spec.loader is not None
+capture_controls = importlib.util.module_from_spec(_controls_spec)
+sys.modules["capture_controls"] = capture_controls
+_controls_spec.loader.exec_module(capture_controls)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -35,11 +43,19 @@ def read_json(name: str) -> Any:
 def test_capture_index_pins_every_operational_artifact() -> None:
     index = read_json("capture-index.json")
     indexed = {source["locator"] for source in index["sources"]}
+    controls_index = read_json("controls-index.json")
+    controls_indexed = {source["locator"] for source in controls_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
         if path.is_file()
-        and path.name not in {"README.md", "capture-index.json", "corrections.json"}
+        and path.name
+        not in {
+            "README.md",
+            "capture-index.json",
+            "controls-index.json",
+            "corrections.json",
+        }
     }
 
     assert index["capture_version"] == 1
@@ -51,10 +67,19 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         "version": "0.28.1",
     }
     assert index["mcp_protocol"] == "2025-03-26"
-    assert indexed == committed
-    for source in index["sources"]:
+    assert indexed.isdisjoint(controls_indexed)
+    assert indexed | controls_indexed == committed
+    for source in (*index["sources"], *controls_index["sources"]):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
+    assert controls_index["cleanup"] == {
+        "cdk_bootstrap": "retained",
+        "gateway": "absent",
+        "iam_role": "absent",
+        "lambda": "absent",
+        "log_group": "absent",
+        "policy_engine": "absent",
+    }
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -204,6 +229,107 @@ def test_analysis_measurement_rejects_invalid_sample_counts() -> None:
                 repetitions=repetitions,
                 measured_at="2026-08-29T00:00:00Z",
             )
+
+
+def _write_control_raw(root: Path) -> None:
+    (root / "agentmandate-paper-controls-tools-list.raw").write_bytes(
+        (EVIDENCE / "controls-tools-list-response.json").read_bytes()
+    )
+    policies = {
+        "baseline": "PaperBaselinePolicy",
+        "noop": "PaperNoOpPolicy",
+        "narrow": "PaperNarrowPolicy",
+    }
+    for revision, policy in policies.items():
+        status = {
+            "success": True,
+            "projectName": "AuthorityControls",
+            "targetRegion": "us-east-1",
+            "resources": [
+                {
+                    "resourceType": "gateway",
+                    "name": "PaperControlGateway",
+                    "deploymentState": "deployed",
+                },
+                {
+                    "resourceType": "policy-engine",
+                    "name": "PaperControlEngine",
+                    "deploymentState": "deployed",
+                },
+                {"resourceType": "policy", "name": policy, "deploymentState": "deployed"},
+            ],
+            "deployedState": {
+                "targets": {
+                    "default": {
+                        "resources": {
+                            "mcp": {
+                                "gateways": {
+                                    "PaperControlGateway": {
+                                        "targets": {"PaperControlTarget": {"targetId": "raw-only"}}
+                                    }
+                                }
+                            },
+                            "policyEngines": {"PaperControlEngine": {}},
+                            "policies": {f"PaperControlEngine/{policy}": {}},
+                        }
+                    }
+                }
+            },
+        }
+        (root / f"agentmandate-paper-{revision}-status.raw").write_text(
+            json.dumps(status), encoding="utf-8"
+        )
+        for amount in (500, 2000):
+            (root / f"agentmandate-paper-{revision}-{amount}.raw").write_bytes(
+                (EVIDENCE / f"controls-{revision}-{amount}-response.json").read_bytes()
+            )
+    for suffix in ("a", "b"):
+        (root / f"agentmandate-paper-sequence-600-{suffix}.raw").write_bytes(
+            (EVIDENCE / f"controls-sequence-600-{suffix}-response.json").read_bytes()
+        )
+
+
+def test_managed_controls_regenerate_and_prove_negative_controls(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    output = tmp_path / "output"
+    raw.mkdir()
+    _write_control_raw(raw)
+
+    result = capture_controls.capture(raw, output)
+
+    assert result["comparisons"] == {
+        "noop": ["stable_deny", "stable_allow"],
+        "narrow": ["stable_deny", "tightens"],
+    }
+    assert result["sequence"]["aggregate_amount"] == 1200
+    assert all(item["outcome"] == "allow" for item in result["sequence"]["calls"])
+    index = json.loads((output / "controls-index.json").read_text(encoding="utf-8"))
+    for source in index["sources"]:
+        if source["locator"] != "capture_controls.py":
+            assert (output / source["locator"]).read_bytes() == (
+                EVIDENCE / source["locator"]
+            ).read_bytes()
+
+
+def test_managed_control_capture_rejects_wrong_outcomes_and_inventory(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    _write_control_raw(raw)
+    response = json.loads((raw / "agentmandate-paper-noop-500.raw").read_text(encoding="utf-8"))
+    response["id"] = "wrong"
+    (raw / "agentmandate-paper-noop-500.raw").write_text(
+        json.dumps(response), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="response does not match"):
+        capture_controls.capture(raw, tmp_path / "bad-response")
+
+    _write_control_raw(raw)
+    status_path = raw / "agentmandate-paper-narrow-status.raw"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    status["resources"].pop()
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+    with pytest.raises(ValueError, match="reviewed boundary"):
+        capture_controls.capture(raw, tmp_path / "bad-status")
 
 
 def test_protocol_correction_is_preserved() -> None:

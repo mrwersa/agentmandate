@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": -32002,
+    "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [No policy applies to the request (denied by default).]"
+  },
+  "id": "narrow-2000",
+  "jsonrpc": "2.0"
+}

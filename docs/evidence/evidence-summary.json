@@ -92,11 +92,11 @@
     }
   ],
   "correction_classification": {
-    "canonical_records": 16,
+    "canonical_records": 17,
     "class_counts": null,
     "complete": false,
     "reason": "legacy correction records lack canonical pre-study class labels",
-    "total_records": 37
+    "total_records": 38
   },
   "corrections": [
     {
@@ -424,6 +424,17 @@
       "reported_class": "deployment identity"
     },
     {
+      "affected_artifact": "controls-index.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [
+        "extractor defect"
+      ],
+      "classification_status": "canonical",
+      "description": "A literal backslash-n made the first no-op policy invalid, so the rejected attempt was discarded before capture.",
+      "id": "agentcore-007",
+      "reported_class": "extractor defect"
+    },
+    {
       "affected_artifact": "scan-skeleton.yaml",
       "capture": "aws-iam-access-keys",
       "classes": [
@@ -505,6 +516,43 @@
           "change": "stable_allow"
         }
       ]
+    }
+  ],
+  "managed_controls": [
+    {
+      "baseline_revision": "PaperBaselinePolicy",
+      "capture": "agentcore-refund-policy",
+      "comparisons": {
+        "narrow": [
+          "stable_deny",
+          "tightens"
+        ],
+        "noop": [
+          "stable_deny",
+          "stable_allow"
+        ]
+      },
+      "narrowing_revision": "PaperNarrowPolicy",
+      "noop_revision": "PaperNoOpPolicy",
+      "permitted_sequence": {
+        "aggregate_amount": 1200,
+        "calls": [
+          {
+            "amount": 600,
+            "id": "sequence-600-a",
+            "outcome": "allow"
+          },
+          {
+            "amount": 600,
+            "id": "sequence-600-b",
+            "outcome": "allow"
+          }
+        ],
+        "claim_boundary": "the managed policy enforces each request; it does not claim cumulative accounting",
+        "per_request_threshold": 1000,
+        "policy_revision": "PaperBaselinePolicy",
+        "sequence_version": 1
+      }
     }
   ],
   "summary_version": 1
