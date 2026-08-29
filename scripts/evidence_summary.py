@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -158,6 +159,21 @@ def _managed_comparison(root: Path) -> dict[str, Any]:
     directory = root / "agentcore-refund-policy"
     baseline = _read(directory / "managed-oracle-v1.json")
     candidate = _read(directory / "candidate-managed-oracle-v1.json")
+    measurement = _read(directory / "analysis-measurement.json")
+    measurement_fields = {
+        "measurement_version",
+        "capture",
+        "measured_at",
+        "counterexample_length",
+        "counterexample_definition",
+        "analysis_wall_clock_ms",
+        "timing_definition",
+        "samples",
+        "environment",
+        "result",
+    }
+    if not isinstance(measurement, dict) or set(measurement) != measurement_fields:
+        raise ValueError("managed comparison measurement fields are not exact")
     baseline_by_args = {
         json.dumps(item["arguments"], sort_keys=True): item for item in baseline["decisions"]
     }
@@ -184,14 +200,85 @@ def _managed_comparison(root: Path) -> dict[str, Any]:
                 "change": changes[(before["outcome"], after["outcome"])],
             }
         )
+    expected_measurement = {
+        "capture": "agentcore-refund-policy",
+        "measurement_version": 1,
+        "counterexample_length": 1,
+        "counterexample_definition": (
+            "minimum canonical managed requests needed to witness the deny-to-allow change"
+        ),
+        "timing_definition": (
+            "median in-process compare_managed_cedar wall-clock time after input loading"
+        ),
+    }
+    for field, expected in expected_measurement.items():
+        if measurement.get(field) != expected:
+            raise ValueError(f"managed comparison measurement has invalid {field}")
+    elapsed = measurement.get("analysis_wall_clock_ms")
+    samples = measurement.get("samples")
+    sample_fields = {"warmups", "repetitions", "minimum_ms", "median_ms", "maximum_ms"}
+    timing_values = (
+        samples.get("minimum_ms") if isinstance(samples, dict) else None,
+        samples.get("median_ms") if isinstance(samples, dict) else None,
+        samples.get("maximum_ms") if isinstance(samples, dict) else None,
+    )
+    if (
+        not isinstance(elapsed, (int, float))
+        or isinstance(elapsed, bool)
+        or not math.isfinite(elapsed)
+        or elapsed <= 0
+        or not isinstance(samples, dict)
+        or set(samples) != sample_fields
+        or samples.get("median_ms") != elapsed
+        or any(
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+            or not math.isfinite(value)
+            or value <= 0
+            for value in timing_values
+        )
+        or not timing_values[0] <= timing_values[1] <= timing_values[2]
+        or not isinstance(samples.get("warmups"), int)
+        or isinstance(samples.get("warmups"), bool)
+        or samples["warmups"] < 0
+        or not isinstance(samples.get("repetitions"), int)
+        or isinstance(samples.get("repetitions"), bool)
+        or samples["repetitions"] < 1
+    ):
+        raise ValueError("managed comparison measurement has invalid timing")
+    environment = measurement.get("environment")
+    if (
+        not isinstance(measurement.get("measured_at"), str)
+        or not measurement["measured_at"].strip()
+        or not isinstance(environment, dict)
+        or set(environment) != {"python", "implementation", "platform", "machine"}
+        or any(not isinstance(value, str) or not value.strip() for value in environment.values())
+    ):
+        raise ValueError("managed comparison measurement has invalid environment")
+    observed_changes = [item["change"] for item in requests]
+    measured_result = measurement.get("result")
+    if (
+        not isinstance(measured_result, dict)
+        or set(measured_result) != {"classifications", "finding_count"}
+        or measured_result.get("finding_count") != 0
+        or sorted(measured_result.get("classifications") or []) != sorted(observed_changes)
+    ):
+        raise ValueError("managed comparison measurement result does not match the oracles")
     return {
         "capture": "agentcore-refund-policy",
         "baseline_revision": baseline["policy_inventory"]["members"][0]["name"],
         "candidate_revision": candidate["policy_inventory"]["members"][0]["name"],
         "requests": requests,
-        "counterexample_length": None,
-        "analysis_wall_clock_ms": None,
-        "instrumentation_status": "missing",
+        "counterexample_length": measurement["counterexample_length"],
+        "analysis_wall_clock_ms": elapsed,
+        "instrumentation_status": "complete",
+        "measurement": {
+            "measured_at": measurement["measured_at"],
+            "timing_definition": measurement["timing_definition"],
+            "warmups": samples["warmups"],
+            "repetitions": samples["repetitions"],
+            "environment": environment,
+        },
     }
 
 

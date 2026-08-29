@@ -469,12 +469,24 @@
   "generated_at": "2026-08-29T18:06:26Z",
   "live_comparisons": [
     {
-      "analysis_wall_clock_ms": null,
+      "analysis_wall_clock_ms": 9.474077,
       "baseline_revision": "RefundIamUnderLimit",
       "candidate_revision": "RefundIamCandidate",
       "capture": "agentcore-refund-policy",
-      "counterexample_length": null,
-      "instrumentation_status": "missing",
+      "counterexample_length": 1,
+      "instrumentation_status": "complete",
+      "measurement": {
+        "environment": {
+          "implementation": "CPython",
+          "machine": "x86_64",
+          "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+          "python": "3.12.3"
+        },
+        "measured_at": "2026-08-29T20:07:22+01:00",
+        "repetitions": 1000,
+        "timing_definition": "median in-process compare_managed_cedar wall-clock time after input loading",
+        "warmups": 100
+      },
       "requests": [
         {
           "arguments": {

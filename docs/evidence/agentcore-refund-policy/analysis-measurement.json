@@ -1,0 +1,29 @@
+{
+  "analysis_wall_clock_ms": 9.474077,
+  "capture": "agentcore-refund-policy",
+  "counterexample_definition": "minimum canonical managed requests needed to witness the deny-to-allow change",
+  "counterexample_length": 1,
+  "environment": {
+    "implementation": "CPython",
+    "machine": "x86_64",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "measured_at": "2026-08-29T20:07:22+01:00",
+  "measurement_version": 1,
+  "result": {
+    "classifications": [
+      "stable_allow",
+      "widens"
+    ],
+    "finding_count": 0
+  },
+  "samples": {
+    "maximum_ms": 14.123937,
+    "median_ms": 9.474077,
+    "minimum_ms": 8.853117,
+    "repetitions": 1000,
+    "warmups": 100
+  },
+  "timing_definition": "median in-process compare_managed_cedar wall-clock time after input loading"
+}

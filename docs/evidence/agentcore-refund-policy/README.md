@@ -43,9 +43,18 @@ candidate reused the supported version and did not repeat the rejected probe.
 [`capture-index.json`](capture-index.json) records the AgentCore CLI version,
 npm package integrity, protocol, region, source roles, and digest of every
 committed artifact. `capture-index.json`, SHA-256
-`b942c984683e4b93327f1f80b3acfe3b8114a4ebf6c4c53f6088f482c9ba9f24`.
+`e14512037348e0ffc3a6611dc623848cb16ba6e6b03ea11dde78fa64d71917a3`.
 Tests recompute all nested digests and require exact set equality across the
 deployed schema, `tools/list`, mapping, and manifest.
+
+`analysis-measurement.json`, SHA-256
+`dcfef77f517bd782b8c598bb92f1c4f43d329b8e679076192477e60a5226250e`,
+records 100 warm-ups and 1,000 measured comparisons on CPython 3.12.3. Input
+loading happens before timing. The reported 9.474077 ms is the median
+in-process `compare_managed_cedar` wall-clock time on the recorded WSL2 host.
+The counterexample length is one because one canonical `amount: 2000` request
+is sufficient to witness the managed Deny-to-Allow change. The timing is an
+observed host result, not a deterministic build output.
 
 `managed-oracle-v1.json` is the canonical private migration record for gate
 5b. It preserves the managed/local-oracle distinction: fields such as

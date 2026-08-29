@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import re
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 from agentmandate._cedar import _mapping
 from agentmandate._managed_cedar import ManagedOracle, compare_managed_cedar
@@ -14,6 +18,14 @@ from agentmandate.reach import analyse
 
 ROOT = Path(__file__).parents[1]
 EVIDENCE = ROOT / "docs" / "evidence" / "agentcore-refund-policy"
+
+_spec = importlib.util.spec_from_file_location(
+    "measure_analysis", EVIDENCE / "measure_analysis.py"
+)
+assert _spec is not None and _spec.loader is not None
+measure_analysis = importlib.util.module_from_spec(_spec)
+sys.modules["measure_analysis"] = measure_analysis
+_spec.loader.exec_module(measure_analysis)
 
 
 def read_json(name: str) -> Any:
@@ -153,6 +165,45 @@ def test_live_candidate_preserves_the_boundary_and_widens_the_exact_request() ->
     baseline_policy = (EVIDENCE / "policy.cedar").read_text(encoding="utf-8")
     candidate_policy = (EVIDENCE / "candidate-policy.cedar").read_text(encoding="utf-8")
     assert baseline_policy.replace("amount < 1000", "amount < 3000") == candidate_policy
+
+
+def test_analysis_measurement_reproduces_the_widening_result(tmp_path: Path) -> None:
+    result = measure_analysis.measure(warmups=0, repetitions=1, measured_at="2026-08-29T00:00:00Z")
+
+    assert result["counterexample_length"] == 1
+    assert result["analysis_wall_clock_ms"] > 0
+    assert result["samples"]["repetitions"] == 1
+    assert result["result"] == {
+        "classifications": ["stable_allow", "widens"],
+        "finding_count": 0,
+    }
+    output = tmp_path / "measurement.json"
+    assert (
+        measure_analysis.main(
+            [
+                "--warmups",
+                "0",
+                "--repetitions",
+                "1",
+                "--measured-at",
+                "2026-08-29T00:00:00Z",
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    assert json.loads(output.read_text(encoding="utf-8"))["measurement_version"] == 1
+
+
+def test_analysis_measurement_rejects_invalid_sample_counts() -> None:
+    for warmups, repetitions in ((-1, 1), (0, 0)):
+        with pytest.raises(ValueError, match="warmups must be non-negative"):
+            measure_analysis.measure(
+                warmups=warmups,
+                repetitions=repetitions,
+                measured_at="2026-08-29T00:00:00Z",
+            )
 
 
 def test_protocol_correction_is_preserved() -> None:

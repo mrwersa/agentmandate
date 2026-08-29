@@ -51,9 +51,41 @@ def test_live_comparison_is_extracted_from_committed_oracles() -> None:
         ({"amount": 2000}, "widens"),
         ({"amount": 500}, "stable_allow"),
     ]
-    assert comparison["counterexample_length"] is None
-    assert comparison["analysis_wall_clock_ms"] is None
-    assert comparison["instrumentation_status"] == "missing"
+    assert comparison["counterexample_length"] == 1
+    assert comparison["analysis_wall_clock_ms"] > 0
+    assert comparison["instrumentation_status"] == "complete"
+    assert comparison["measurement"]["repetitions"] == 1000
+    assert comparison["measurement"]["warmups"] == 100
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("extra", True, "fields are not exact"),
+        ("counterexample_length", 2, "invalid counterexample_length"),
+        ("analysis_wall_clock_ms", 0, "invalid timing"),
+        ("environment", {}, "invalid environment"),
+        ("result", {"classifications": ["stable_allow"]}, "does not match"),
+    ],
+)
+def test_live_measurement_fails_closed(
+    tmp_path: Path, field: str, value: object, message: str
+) -> None:
+    source = evidence_summary.EVIDENCE / "agentcore-refund-policy"
+    target = tmp_path / "agentcore-refund-policy"
+    target.mkdir()
+    for name in (
+        "managed-oracle-v1.json",
+        "candidate-managed-oracle-v1.json",
+        "analysis-measurement.json",
+    ):
+        (target / name).write_bytes((source / name).read_bytes())
+    measurement = json.loads((target / "analysis-measurement.json").read_text(encoding="utf-8"))
+    measurement[field] = value
+    (target / "analysis-measurement.json").write_text(json.dumps(measurement), encoding="utf-8")
+
+    with pytest.raises(ValueError, match=message):
+        evidence_summary._managed_comparison(tmp_path)
 
 
 def _one_capture(monkeypatch: pytest.MonkeyPatch) -> tuple:
