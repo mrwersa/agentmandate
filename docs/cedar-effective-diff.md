@@ -1,11 +1,11 @@
 # Cedar effective-diff contract
 
-Status: **experimental; gates 5a–5c complete**. This is gate 5a of
+Status: **experimental; gates 5a–5d complete**. This is gate 5a of
 [#116](https://github.com/mrwersa/agentmandate/issues/116). It defines the
 trust boundary before records or analysis make the choices expensive. No
 current command consumes managed Cedar evidence or changes reachability from a
-policy decision. Gate 5c is private analysis only; live widening evidence and
-the exposure review remain open.
+policy decision. Gate 5c is private analysis only; gate 5d supplies live
+widening evidence, while the exposure review remains open.
 
 ## Question and invariants
 
@@ -144,11 +144,18 @@ the Deny side of this table. If either service response does not support the
 claimed distinction, the record cannot upgrade it by reading policy text.
 Changed request arguments are different requests, not a policy diff.
 
-The current live fixture proves alignment transport: `amount: 500` is allowed,
-and `amount: 2000` is default-denied for that exact call. It does not itself
-prove a revision. Gate 5 requires a second sanitized live AgentCore capture in
-which the same `amount: 2000` request is allowed under a candidate policy. A
-synthetic pair may develop the analyzer but cannot close the gate.
+The baseline live fixture proves alignment transport: `amount: 500` is allowed,
+and `amount: 2000` is default-denied for that exact call. Gate 5d adds a second
+sanitized AgentCore capture under the same reviewed boundary. The `amount: 500`
+control remains Allow and the identical canonical `amount: 2000` request becomes
+Allow under the candidate policy. The private comparator therefore reproduces
+`stable_allow` and `widens` from managed decisions rather than policy-text
+interpretation.
+
+Evidence locators are not enforcement identity. Each revision independently
+verifies its managed-state, tool-inventory, request, response, and policy bytes;
+comparability pins their semantic state and reviewed joins while allowing the
+repository filenames that preserve separate observations to differ.
 
 ## IR boundary
 
@@ -180,7 +187,8 @@ combine it with reviewed authority.
    classifies matched request outcomes without evaluating Cedar policy text.
 4. **5d — live widening evidence:** capture the same managed request changing
    from Deny to Allow, preserve sanitized evidence, and prove the private
-   widening counterexample.
+   widening counterexample. **Complete:** the matched AgentCore captures produce
+   `stable_allow` for `amount: 500` and `widens` for `amount: 2000`.
 5. **5e — exposure review:** challenge tampering, expiry, incomplete inventory,
    changed joins, representative-domain overclaim, default-deny attribution,
    profile conflation, output stability, and no-partial-output behavior before
@@ -196,12 +204,13 @@ refusal. The managed record's closed field sets deliberately exclude
 `schema_checked` and `determining_policies`, so local-oracle claims cannot leak
 through optional defaults.
 
-Gate 5c uses the live fixture only for request alignment: `amount: 500` is an
-aligned Allow and `amount: 2000` is enforcement narrowing for that exact
-request. Its Deny-to-Allow, Allow-to-Deny, and stable revision tests are
-synthetic and do not satisfy gate 5d. A trust failure blocks every alignment in
-the record, keeps the manifest analysis unchanged, and emits a named finding;
-it never becomes a policy Deny.
+Gate 5c first used the baseline live fixture only for request alignment:
+`amount: 500` is an aligned Allow and `amount: 2000` is enforcement narrowing
+for that exact request. Gate 5d replaces the synthetic Deny-to-Allow proof with
+a second live managed oracle. Allow-to-Deny and the stable-Deny branch remain
+synthetic unit controls. A trust failure blocks every alignment in the record,
+keeps the manifest analysis unchanged, and emits a named finding; it never
+becomes a policy Deny.
 
 ## Explicit non-goals
 

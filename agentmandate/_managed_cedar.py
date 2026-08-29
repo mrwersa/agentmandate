@@ -1294,12 +1294,21 @@ def analyse_managed_cedar(
 
 
 def _comparison_identity(oracle: ManagedOracle) -> dict[str, Any]:
+    state = oracle.state.as_dict()
+    sanitization = oracle.sanitization.as_dict()
+    tool_inventory = oracle.tool_inventory.as_dict()
+    # Evidence locators differ across captures; the referenced bytes are
+    # independently verified before comparison. Pin their semantic boundary,
+    # not the repository filename used to preserve each observation.
+    del state["source"]
+    del sanitization["source"]
+    del tool_inventory["source"]
     return {
         "provider": oracle.provider.as_dict(),
-        "state": oracle.state.as_dict(),
+        "state": state,
         "mapping": oracle.mapping.as_dict(),
-        "tool_inventory": oracle.tool_inventory.as_dict(),
-        "sanitization": oracle.sanitization.as_dict(),
+        "tool_inventory": tool_inventory,
+        "sanitization": sanitization,
     }
 
 

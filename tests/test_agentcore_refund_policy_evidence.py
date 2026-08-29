@@ -3,10 +3,12 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 from agentmandate._cedar import _mapping
+from agentmandate._managed_cedar import ManagedOracle, compare_managed_cedar
 from agentmandate.manifest import load
 from agentmandate.reach import analyse
 
@@ -95,6 +97,61 @@ def test_live_enforce_controls_preserve_opposite_decisions() -> None:
     assert state["policy"]["enforcement_mode"] == "ACTIVE"
     assert state["policy"]["requested_validation_mode"] == "FAIL_ON_ANY_FINDINGS"
     assert state["tool_inventory_complete"] is True
+
+
+def test_live_candidate_preserves_the_boundary_and_widens_the_exact_request() -> None:
+    baseline = ManagedOracle.from_json(
+        (EVIDENCE / "managed-oracle-v1.json").read_text(encoding="utf-8")
+    )
+    candidate = ManagedOracle.from_json(
+        (EVIDENCE / "candidate-managed-oracle-v1.json").read_text(encoding="utf-8")
+    )
+
+    def contents(oracle: ManagedOracle) -> dict[str, bytes]:
+        return {item.locator: (EVIDENCE / item.locator).read_bytes() for item in oracle.sources}
+
+    baseline_contents = contents(baseline)
+    candidate_contents = contents(candidate)
+    baseline.verify_sources(baseline_contents)
+    candidate.verify_sources(candidate_contents)
+    assert baseline.to_json() == (EVIDENCE / "managed-oracle-v1.json").read_text(
+        encoding="utf-8"
+    )
+    assert candidate.to_json() == (EVIDENCE / "candidate-managed-oracle-v1.json").read_text(
+        encoding="utf-8"
+    )
+
+    result = compare_managed_cedar(
+        load(EVIDENCE / "mandate.yaml"),
+        baseline,
+        baseline_contents,
+        candidate,
+        candidate_contents,
+        as_of=date(2026, 8, 29),
+    )
+
+    assert result.findings == ()
+    assert [(item.baseline, item.candidate, item.classification) for item in result.changes] == [
+        ("allow", "allow", "stable_allow"),
+        ("deny", "allow", "widens"),
+    ]
+    assert all(len(item.support) == 6 for item in result.changes)
+    assert read_json("candidate-allow-request.json") == read_json("allow-request.json")
+    assert read_json("candidate-widen-request.json") == read_json("deny-request.json")
+    assert read_json("candidate-tools-list-request.json") == read_json(
+        "tools-list-request.json"
+    )
+    assert read_json("candidate-tools-list-response.json") == read_json(
+        "tools-list-response.json"
+    )
+    widen_text = read_json("candidate-widen-response.json")["result"]["content"][0]["text"]
+    assert json.loads(widen_text) == {
+        "amount": 2000,
+        "processed": True,
+    }
+    baseline_policy = (EVIDENCE / "policy.cedar").read_text(encoding="utf-8")
+    candidate_policy = (EVIDENCE / "candidate-policy.cedar").read_text(encoding="utf-8")
+    assert baseline_policy.replace("amount < 1000", "amount < 3000") == candidate_policy
 
 
 def test_protocol_correction_is_preserved() -> None:

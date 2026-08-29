@@ -20,6 +20,51 @@
     },
     {
       "kind": "request",
+      "locator": "candidate-allow-request.json",
+      "content_sha256": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146"
+    },
+    {
+      "kind": "native_output",
+      "locator": "candidate-allow-response.json",
+      "content_sha256": "4c4903d38757abf73f05f1ee6cd863258b412ec86f6f1e93cdc5cf7afa7a12b0"
+    },
+    {
+      "kind": "managed_oracle",
+      "locator": "candidate-managed-oracle-v1.json",
+      "content_sha256": "c0b43701c78b64406d8836d0422b92c948074bc8ef1b19e9048eb1e0f93ecfa8"
+    },
+    {
+      "kind": "managed_state",
+      "locator": "candidate-managed-state.json",
+      "content_sha256": "e1a5b14534a952e0b99c39805e2aec07f714d813696bea240b4c64fff62224ad"
+    },
+    {
+      "kind": "policy",
+      "locator": "candidate-policy.cedar",
+      "content_sha256": "fd141a4b53a2a6bcfec9e36b9ccd93124015cd7e11c69d3949330e2d9266f558"
+    },
+    {
+      "kind": "request",
+      "locator": "candidate-tools-list-request.json",
+      "content_sha256": "34c85e53bff07631d75dbe141ca2020ac830e422fe27698b5a3f87c3d2c5ebc9"
+    },
+    {
+      "kind": "native_output",
+      "locator": "candidate-tools-list-response.json",
+      "content_sha256": "04c12ae649026ffaa20347e932229fef9b6a369d84261aaf4ecee997bf7327d0"
+    },
+    {
+      "kind": "request",
+      "locator": "candidate-widen-request.json",
+      "content_sha256": "d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44"
+    },
+    {
+      "kind": "native_output",
+      "locator": "candidate-widen-response.json",
+      "content_sha256": "27a11b736c35db7ea9abf5c948718ca66ca7b22f86f63d907575264abde43861"
+    },
+    {
+      "kind": "request",
       "locator": "deny-request.json",
       "content_sha256": "d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44"
     },

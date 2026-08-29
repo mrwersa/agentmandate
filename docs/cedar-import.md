@@ -240,8 +240,8 @@ record now project through a standalone, semantically validated IR profile.
 The private gate-5c consumer verifies that profile and every captured source at
 the consumption boundary, aligns each exact request with unchanged reviewed
 authority, and compares matched managed outcomes across policy revisions. Its
-widening proof remains synthetic; a matched live Deny-to-Allow capture and the
-public exposure review are still required.
+widening proof is now backed by a matched live Deny-to-Allow AgentCore capture.
+The public exposure review and versioned result envelope are still required.
 
 ## Explicit non-goals
 
