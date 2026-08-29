@@ -3,12 +3,19 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from agentmandate._managed_cedar import ManagedOracle, ManagedOracleFormatError
+from agentmandate._ir import AuthorityIR, Entity, IRFormatError, Source, _analyse_ir, _entity_id
+from agentmandate._managed_cedar import (
+    ManagedOracle,
+    ManagedOracleFormatError,
+    _profile_digest,
+    _validate_managed_profile,
+)
 
 ROOT = Path(__file__).parents[1] / "docs" / "evidence" / "agentcore-refund-policy"
 ORACLE = ROOT / "managed-oracle-v1.json"
@@ -154,6 +161,11 @@ def test_reader_rejects_shape_reference_and_duplicate_failures() -> None:
     with pytest.raises(ManagedOracleFormatError, match="invalid source references"):
         ManagedOracle.from_json(text(raw))
 
+    raw = raw_oracle()
+    raw["mapping"]["resources"].append({"cedar_type": "Other", "binding": "other"})
+    with pytest.raises(ManagedOracleFormatError, match="exactly one resource"):
+        ManagedOracle.from_json(text(raw))
+
 
 def test_verify_sources_rejects_mapping_and_digest_boundaries() -> None:
     oracle = ManagedOracle.from_json(ORACLE.read_text(encoding="utf-8"))
@@ -261,3 +273,115 @@ def test_projection_verification_rejects_deeper_join_failures() -> None:
     for candidate, source_content, message in cases:
         with pytest.raises(ManagedOracleFormatError, match=message):
             ManagedOracle.from_json(text(candidate)).verify_sources(source_content)
+
+
+def rehash(graph: AuthorityIR) -> AuthorityIR:
+    source = replace(
+        graph.sources[0],
+        semantic_sha256=_profile_digest(graph.entities, graph.facts, graph.edges),
+    )
+    return replace(graph, sources=(source,))
+
+
+def test_managed_oracle_projects_a_closed_standalone_ir_profile() -> None:
+    oracle = ManagedOracle.from_json(ORACLE.read_text(encoding="utf-8"))
+    graph = oracle.to_ir()
+
+    assert len(graph.entities) == 8
+    assert len(graph.edges) == 5
+    assert {edge.relation for edge in graph.edges} == {
+        "decides_request",
+        "enforces_for",
+        "maps_to_tool",
+    }
+    assert {entity.kind for entity in graph.entities} == {
+        "decision",
+        "enforcement_point",
+        "policy",
+        "policy_action",
+        "request",
+        "tool",
+    }
+    assert not {
+        "schema_checked",
+        "determining_policies",
+    } & {fact.predicate for fact in graph.facts}
+    restored = AuthorityIR.from_json(graph.to_json())
+    assert restored.to_json() == graph.to_json()
+    _validate_managed_profile(restored)
+    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+        _analyse_ir(restored)
+
+
+def test_managed_ir_profile_rejects_tampering_even_after_rehashing() -> None:
+    graph = ManagedOracle.from_json(ORACLE.read_text(encoding="utf-8")).to_ir()
+    with pytest.raises(ManagedOracleFormatError, match="semantic digest"):
+        _validate_managed_profile(replace(graph, facts=graph.facts[:-1]))
+
+    root = next(entity for entity in graph.entities if entity.kind == "enforcement_point")
+    facts = tuple(
+        replace(fact, value=fact.value | {"schema_checked": True})
+        if fact.subject == root.id and fact.predicate == "oracle"
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ManagedOracleFormatError, match="oracle fact is invalid"):
+        _validate_managed_profile(rehash(replace(graph, facts=facts)))
+
+    edge = graph.edges[0]
+    edges = (replace(edge, support=()), *graph.edges[1:])
+    with pytest.raises(ManagedOracleFormatError, match="structurally invalid"):
+        _validate_managed_profile(rehash(replace(graph, edges=edges)))
+
+    extra_source = Source(
+        "source:extra",
+        "managed-cedar-oracle",
+        "memory:extra",
+        1,
+        "2025-03-26",
+        "0" * 64,
+        "agentmandate.managed-cedar-oracle",
+        1,
+        "0" * 64,
+    )
+    with pytest.raises(ManagedOracleFormatError, match="exactly one source"):
+        _validate_managed_profile(replace(graph, sources=(*graph.sources, extra_source)))
+
+    with pytest.raises(ManagedOracleFormatError, match="unsupported source"):
+        _validate_managed_profile(
+            replace(graph, sources=(replace(graph.sources[0], kind="other"),))
+        )
+
+    extra_root = Entity(_entity_id("enforcement_point", "other"), "enforcement_point", "other")
+    with pytest.raises(ManagedOracleFormatError, match="one enforcement point"):
+        _validate_managed_profile(
+            rehash(
+                replace(
+                    graph, entities=tuple(sorted((*graph.entities, extra_root), key=lambda x: x.id))
+                )
+            )
+        )
+
+    no_oracle = tuple(
+        fact for fact in graph.facts if not (fact.subject == root.id and fact.predicate == "oracle")
+    )
+    with pytest.raises(ManagedOracleFormatError, match="no unique oracle fact"):
+        _validate_managed_profile(rehash(replace(graph, facts=no_oracle)))
+
+    extra_policy = Entity(_entity_id("policy", "extra"), "policy", "extra")
+    with pytest.raises(ManagedOracleFormatError, match="does not match its oracle"):
+        _validate_managed_profile(
+            rehash(
+                replace(
+                    graph,
+                    entities=tuple(
+                        sorted((*graph.entities, extra_policy), key=lambda item: item.id)
+                    ),
+                )
+            )
+        )
+
+    with pytest.raises(ManagedOracleFormatError, match="content digest"):
+        _validate_managed_profile(
+            replace(graph, sources=(replace(graph.sources[0], content_sha256="0" * 64),))
+        )

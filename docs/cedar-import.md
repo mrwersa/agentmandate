@@ -236,8 +236,8 @@ policy-versus-agent differences without reimplementing Cedar.
 The proposed [effective-diff contract](cedar-effective-diff.md) subdivides gate
 5 and keeps local Cedar-WASM decisions separate from managed AgentCore
 enforcement. Its private managed-oracle reader and canonical gate-4 migration
-record are implemented; standalone IR projection and comparison semantics
-remain pending.
+record now project through a standalone, semantically validated IR profile.
+Effective comparison and eligibility semantics remain pending.
 
 ## Explicit non-goals
 

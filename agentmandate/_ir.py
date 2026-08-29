@@ -111,6 +111,9 @@ RELATIONS = {
     "constrained_by": Relation("principal", "principal", "many", "union", "principals"),
     "delegates_for": Relation("delegation", "principal", "one", "single", "subject"),
     "decides_request": Relation("decision", "request", "one", "single", "request"),
+    "enforces_for": Relation(
+        "enforcement_point", "decision", "many", "union", "decisions"
+    ),
     "has_breach": Relation(
         "agent", "breach", "many", "union", None, True, "breach"
     ),
@@ -121,6 +124,7 @@ RELATIONS = {
     "has_hop": Relation("delegation", "hop", "many", "union", "hops"),
     "has_surface": Relation("hop", "surface", "many", "union", "surfaces"),
     "narrows_to": Relation("condition", "effect", "one", "single", "effect"),
+    "maps_to_tool": Relation("policy_action", "tool", "one", "single", "tool"),
     "produces": Relation("tool", "scope", "one", "single", "produces"),
     "previous_hop": Relation("hop", "hop", "one", "single", "previous"),
     "requires": Relation("tool", "scope", "many", "union", "requires"),

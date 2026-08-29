@@ -19,11 +19,26 @@ from pathlib import PurePosixPath
 from typing import Any
 
 from ._cedar import CedarBundleFormatError, CedarMapping, _mapping
+from ._ir import (
+    IR_VERSION,
+    AuthorityIR,
+    Edge,
+    Entity,
+    Evidence,
+    Fact,
+    IRFormatError,
+    Source,
+    _edge_id,
+    _entity_id,
+    _fact_id,
+)
 from .manifest import ManifestError, loads
 
 MANAGED_ORACLE_VERSION = 1
 MANAGED_ADAPTER = "agentmandate.agentcore-managed-capture"
 MANAGED_ADAPTER_VERSION = 1
+MANAGED_IR_ADAPTER = "agentmandate.managed-cedar-oracle"
+MANAGED_IR_ADAPTER_VERSION = 1
 SOURCE_KINDS = frozenset(
     {
         "decision_request",
@@ -344,6 +359,10 @@ class ManagedOracle:
                 )
         _verify_projection(self, contents)
 
+    def to_ir(self) -> AuthorityIR:
+        """Project transport facts without making them analyzable authority."""
+        return _managed_to_ir(self)
+
 
 def _record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
     if not isinstance(value, dict):
@@ -604,6 +623,10 @@ def _sanitization(raw: Any) -> ManagedSanitization:
 
 
 def _references(oracle: ManagedOracle) -> None:
+    if len(oracle.mapping.resources) != 1:
+        raise ManagedOracleFormatError(
+            "managed Cedar oracle mapping must identify exactly one resource binding"
+        )
     kinds = {source.locator: source.kind for source in oracle.sources}
     expected = {
         oracle.state.source: "managed_state",
@@ -707,10 +730,8 @@ def _verify_projection(oracle: ManagedOracle, contents: Mapping[str, bytes]) -> 
         or state.get("tool_inventory_complete") is not oracle.tool_inventory.complete
         or state.get("sanitization", {}).get("decision_messages_changed")
         is not oracle.sanitization.decision_messages_changed
-        or set(state.get("sanitization", {}).get("omitted", []))
-        != set(oracle.sanitization.omitted)
-        or state.get("sanitization", {}).get("policy_resource_replaced_with_binding")
-        is not True
+        or set(state.get("sanitization", {}).get("omitted", [])) != set(oracle.sanitization.omitted)
+        or state.get("sanitization", {}).get("policy_resource_replaced_with_binding") is not True
     ):
         raise ManagedOracleFormatError(
             "managed Cedar oracle managed-state source disagrees with record"
@@ -750,3 +771,223 @@ def _verify_projection(oracle: ManagedOracle, contents: Mapping[str, bytes]) -> 
             raise ManagedOracleFormatError(
                 f"managed Cedar oracle response source '{decision.response}' disagrees with outcome"
             )
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _profile_digest(
+    entities: tuple[Entity, ...], facts: tuple[Fact, ...], edges: tuple[Edge, ...]
+) -> str:
+    body = {
+        "entities": [item.as_dict() for item in sorted(entities, key=lambda item: item.id)],
+        "facts": [item.as_dict() for item in sorted(facts, key=lambda item: item.id)],
+        "edges": [item.as_dict() for item in sorted(edges, key=lambda item: item.id)],
+    }
+    return hashlib.sha256(_canonical_json(body).encode("utf-8")).hexdigest()
+
+
+def _projection_parts(
+    oracle: ManagedOracle, source_id: str
+) -> tuple[tuple[Entity, ...], tuple[Fact, ...], tuple[Edge, ...]]:
+    binding = oracle.mapping.resources[0].binding
+    root_id = _entity_id("enforcement_point", binding)
+    tool_ids = {action.tool: _entity_id("tool", action.tool) for action in oracle.mapping.actions}
+    action_ids = {
+        action.cedar: _entity_id("policy_action", action.cedar) for action in oracle.mapping.actions
+    }
+    policy_ids = {
+        policy.name: _entity_id("policy", policy.name) for policy in oracle.policy_inventory.members
+    }
+    request_ids = {
+        decision.id: _entity_id("request", decision.id) for decision in oracle.decisions
+    }
+    decision_ids = {
+        decision.id: _entity_id("decision", decision.id) for decision in oracle.decisions
+    }
+    entities = (
+        Entity(root_id, "enforcement_point", binding),
+        *(
+            Entity(action_ids[action.cedar], "policy_action", action.cedar)
+            for action in oracle.mapping.actions
+        ),
+        *(Entity(tool_ids[name], "tool", name) for name in sorted(tool_ids)),
+        *(Entity(policy_ids[name], "policy", name) for name in sorted(policy_ids)),
+        *(
+            Entity(request_ids[decision.id], "request", decision.id)
+            for decision in oracle.decisions
+        ),
+        *(
+            Entity(decision_ids[decision.id], "decision", decision.id)
+            for decision in oracle.decisions
+        ),
+    )
+
+    def fact(subject: str, predicate: str, value: Any, location: str) -> Fact:
+        return Fact(
+            _fact_id(subject, predicate),
+            subject,
+            predicate,
+            value,
+            (Evidence(source_id, location, "exact", "unreviewed"),),
+        )
+
+    facts: list[Fact] = [
+        fact(root_id, "name", binding, "/mapping/resources/0/binding"),
+        fact(root_id, "oracle", oracle.as_dict(), ""),
+        fact(
+            root_id,
+            "decisions",
+            [decision_ids[item.id] for item in oracle.decisions],
+            "/decisions",
+        ),
+    ]
+    for action in oracle.mapping.actions:
+        action_id = action_ids[action.cedar]
+        facts.extend(
+            (
+                fact(action_id, "name", action.cedar, "/mapping/actions"),
+                fact(action_id, "tool", tool_ids[action.tool], "/mapping/actions"),
+            )
+        )
+    for name, tool_id in sorted(tool_ids.items()):
+        facts.append(fact(tool_id, "name", name, "/mapping/actions"))
+    for name, policy_id in sorted(policy_ids.items()):
+        policy = next(item for item in oracle.policy_inventory.members if item.name == name)
+        facts.extend(
+            (
+                fact(policy_id, "name", name, "/policy_inventory/members"),
+                fact(policy_id, "status", policy.status, "/policy_inventory/members"),
+                fact(
+                    policy_id,
+                    "enforcement_mode",
+                    policy.enforcement_mode,
+                    "/policy_inventory/members",
+                ),
+            )
+        )
+    for index, decision in enumerate(oracle.decisions):
+        location = f"/decisions/{index}"
+        request_id = request_ids[decision.id]
+        decision_id = decision_ids[decision.id]
+        facts.extend(
+            (
+                fact(request_id, "name", decision.id, f"{location}/id"),
+                fact(request_id, "request_key", decision.request_key, location),
+                fact(request_id, "method", decision.method, f"{location}/method"),
+                fact(request_id, "tool_name", decision.tool, f"{location}/tool"),
+                fact(request_id, "arguments", decision.arguments, f"{location}/arguments"),
+                fact(request_id, "source", decision.request, f"{location}/request"),
+                fact(decision_id, "name", decision.id, f"{location}/id"),
+                fact(decision_id, "outcome", decision.outcome, f"{location}/outcome"),
+                fact(decision_id, "reason", decision.reason, f"{location}/reason"),
+                fact(decision_id, "request", request_id, f"{location}/request"),
+                fact(decision_id, "source", decision.response, f"{location}/response"),
+            )
+        )
+    edges = [
+        Edge(
+            _edge_id(root_id, "enforces_for", decision_ids[item.id]),
+            root_id,
+            "enforces_for",
+            decision_ids[item.id],
+            (_fact_id(root_id, "decisions"),),
+        )
+        for item in oracle.decisions
+    ]
+    edges.extend(
+        Edge(
+            _edge_id(action_ids[item.cedar], "maps_to_tool", tool_ids[item.tool]),
+            action_ids[item.cedar],
+            "maps_to_tool",
+            tool_ids[item.tool],
+            (_fact_id(action_ids[item.cedar], "tool"),),
+        )
+        for item in oracle.mapping.actions
+    )
+    edges.extend(
+        Edge(
+            _edge_id(decision_ids[item.id], "decides_request", request_ids[item.id]),
+            decision_ids[item.id],
+            "decides_request",
+            request_ids[item.id],
+            (_fact_id(decision_ids[item.id], "request"),),
+        )
+        for item in oracle.decisions
+    )
+    return (
+        tuple(sorted(entities, key=lambda item: item.id)),
+        tuple(sorted(facts, key=lambda item: item.id)),
+        tuple(sorted(edges, key=lambda item: item.id)),
+    )
+
+
+def _managed_to_ir(oracle: ManagedOracle) -> AuthorityIR:
+    content_sha256 = hashlib.sha256(oracle.to_json().encode("utf-8")).hexdigest()
+    source_id = _entity_id("source", f"managed-cedar-oracle:{content_sha256}")
+    entities, facts, edges = _projection_parts(oracle, source_id)
+    graph = AuthorityIR(
+        IR_VERSION,
+        (
+            Source(
+                source_id,
+                "managed-cedar-oracle",
+                "memory:managed-cedar-oracle",
+                oracle.managed_oracle_version,
+                oracle.provider.protocol_version,
+                _profile_digest(entities, facts, edges),
+                MANAGED_IR_ADAPTER,
+                MANAGED_IR_ADAPTER_VERSION,
+                content_sha256,
+            ),
+        ),
+        entities,
+        facts,
+        edges,
+    )
+    _validate_managed_profile(graph)
+    return graph
+
+
+def _validate_managed_profile(graph: AuthorityIR) -> None:
+    """Validate the closed managed transport profile without granting authority."""
+    try:
+        graph.validate()
+    except IRFormatError as exc:
+        raise ManagedOracleFormatError("managed Cedar IR profile is structurally invalid") from exc
+    if len(graph.sources) != 1:
+        raise ManagedOracleFormatError("managed Cedar IR profile requires exactly one source")
+    source = graph.sources[0]
+    if (
+        source.kind != "managed-cedar-oracle"
+        or source.format_version != MANAGED_ORACLE_VERSION
+        or source.adapter != MANAGED_IR_ADAPTER
+        or source.adapter_version != MANAGED_IR_ADAPTER_VERSION
+        or source.content_sha256 is None
+    ):
+        raise ManagedOracleFormatError("managed Cedar IR profile has an unsupported source")
+    if source.semantic_sha256 != _profile_digest(graph.entities, graph.facts, graph.edges):
+        raise ManagedOracleFormatError("managed Cedar IR profile semantic digest does not match")
+    roots = [item for item in graph.entities if item.kind == "enforcement_point"]
+    if len(roots) != 1:
+        raise ManagedOracleFormatError("managed Cedar IR profile requires one enforcement point")
+    oracle_facts = [
+        item for item in graph.facts if item.subject == roots[0].id and item.predicate == "oracle"
+    ]
+    if len(oracle_facts) != 1:
+        raise ManagedOracleFormatError("managed Cedar IR profile has no unique oracle fact")
+    try:
+        oracle = ManagedOracle.from_json(_canonical_json(oracle_facts[0].value))
+    except ManagedOracleFormatError as exc:
+        raise ManagedOracleFormatError("managed Cedar IR profile oracle fact is invalid") from exc
+    expected_entities, expected_facts, expected_edges = _projection_parts(oracle, source.id)
+    if (
+        graph.entities != expected_entities
+        or graph.facts != expected_facts
+        or graph.edges != expected_edges
+    ):
+        raise ManagedOracleFormatError("managed Cedar IR profile does not match its oracle")
+    expected_content = hashlib.sha256(oracle.to_json().encode("utf-8")).hexdigest()
+    if source.content_sha256 != expected_content:
+        raise ManagedOracleFormatError("managed Cedar IR profile content digest does not match")

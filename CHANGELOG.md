@@ -12,6 +12,9 @@ All notable changes to this project are documented here. The format follows
   profiles through `contains_policy` and `decides_request`. The profile records
   only policies observed in captured native diagnostics, marks that inventory
   incomplete, and remains ineligible for `mandate reach --ir`.
+- Authority IR validation recognizes standalone managed Cedar enforcement
+  profiles through `maps_to_tool`, `enforces_for`, and `decides_request`.
+  Managed profiles remain ineligible for `mandate reach --ir`.
 
 ## 0.13.0 - 2026-08-28
 
