@@ -9,6 +9,11 @@
   "mcp_protocol": "2025-03-26",
   "sources": [
     {
+      "kind": "analysis_measurement",
+      "locator": "analysis-measurement.json",
+      "content_sha256": "dcfef77f517bd782b8c598bb92f1c4f43d329b8e679076192477e60a5226250e"
+    },
+    {
       "kind": "request",
       "locator": "allow-request.json",
       "content_sha256": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146"
@@ -82,6 +87,11 @@
       "kind": "managed_state",
       "locator": "managed-state.json",
       "content_sha256": "13746d27b0921ba00f829d4a73dbfb07a8238d5980f3f2e635d0f5311ef9572c"
+    },
+    {
+      "kind": "analysis_script",
+      "locator": "measure_analysis.py",
+      "content_sha256": "8d320ac0729b5ba56bea23a1cee900e9239fb42e7a92bc04a6cce6d7a9235bf0"
     },
     {
       "kind": "managed_oracle",
