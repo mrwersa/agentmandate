@@ -308,6 +308,54 @@ def _managed_controls(root: Path) -> dict[str, Any]:
     }
 
 
+def _temporal_session(root: Path) -> dict[str, Any]:
+    result = _read(root / "agentcore-refund-policy" / "temporal-session-result.json")
+    expected_fields = {
+        "temporal_session_version",
+        "threshold",
+        "request_amount",
+        "same_session",
+        "fresh_sessions",
+        "conformance",
+        "finding",
+    }
+    if not isinstance(result, dict) or set(result) != expected_fields:
+        raise ValueError("temporal session result fields are not exact")
+    same = result.get("same_session")
+    fresh = result.get("fresh_sessions")
+    conformance = result.get("conformance")
+    if (
+        result.get("temporal_session_version") != 1
+        or result.get("threshold") != 1000
+        or result.get("request_amount") != 600
+        or not isinstance(same, dict)
+        or [item.get("outcome") for item in same.get("calls", [])] != ["allow", "deny"]
+        or same.get("attempted_aggregate") != 1200
+        or same.get("permitted_aggregate") != 600
+        or not isinstance(fresh, dict)
+        or [item.get("outcome") for item in fresh.get("calls", [])] != ["allow", "allow"]
+        or fresh.get("aggregate_across_sessions") != 1200
+    ):
+        raise ValueError("temporal session result does not match the reviewed outcomes")
+    expected_conformance = {
+        "within_session_accumulation": "observed",
+        "fresh_session_reset": "observed",
+        "authenticated_principal_binding": "configured-not-adversarially-tested",
+        "multi_hop_continuity": "documented-not-live-tested",
+    }
+    if conformance != expected_conformance:
+        raise ValueError("temporal session conformance states are not exact")
+    return {
+        "capture": "agentcore-refund-policy",
+        "threshold": result["threshold"],
+        "request_amount": result["request_amount"],
+        "same_session": same,
+        "fresh_sessions": fresh,
+        "conformance": conformance,
+        "finding": result["finding"],
+    }
+
+
 def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
     corrections = _corrections(root)
     canonical = sum(record["classification_status"] == "canonical" for record in corrections)
@@ -345,6 +393,7 @@ def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
         "corrections": corrections,
         "live_comparisons": [_managed_comparison(root)],
         "managed_controls": [_managed_controls(root)],
+        "temporal_sessions": [_temporal_session(root)],
     }
 
 

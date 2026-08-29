@@ -35,6 +35,14 @@ capture_controls = importlib.util.module_from_spec(_controls_spec)
 sys.modules["capture_controls"] = capture_controls
 _controls_spec.loader.exec_module(capture_controls)
 
+_temporal_spec = importlib.util.spec_from_file_location(
+    "capture_temporal", EVIDENCE / "capture_temporal.py"
+)
+assert _temporal_spec is not None and _temporal_spec.loader is not None
+capture_temporal = importlib.util.module_from_spec(_temporal_spec)
+sys.modules["capture_temporal"] = capture_temporal
+_temporal_spec.loader.exec_module(capture_temporal)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -45,6 +53,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     indexed = {source["locator"] for source in index["sources"]}
     controls_index = read_json("controls-index.json")
     controls_indexed = {source["locator"] for source in controls_index["sources"]}
+    temporal_index = read_json("temporal-index.json")
+    temporal_indexed = {source["locator"] for source in temporal_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -55,6 +65,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "capture-index.json",
             "controls-index.json",
             "corrections.json",
+            "temporal-index.json",
         }
     }
 
@@ -68,8 +79,10 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     }
     assert index["mcp_protocol"] == "2025-03-26"
     assert indexed.isdisjoint(controls_indexed)
-    assert indexed | controls_indexed == committed
-    for source in (*index["sources"], *controls_index["sources"]):
+    assert indexed.isdisjoint(temporal_indexed)
+    assert controls_indexed.isdisjoint(temporal_indexed)
+    assert indexed | controls_indexed | temporal_indexed == committed
+    for source in (*index["sources"], *controls_index["sources"], *temporal_index["sources"]):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
     assert controls_index["cleanup"] == {
@@ -80,6 +93,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         "log_group": "absent",
         "policy_engine": "absent",
     }
+    assert temporal_index["cleanup"] == controls_index["cleanup"]
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -330,6 +344,156 @@ def test_managed_control_capture_rejects_wrong_outcomes_and_inventory(tmp_path: 
     status_path.write_text(json.dumps(status), encoding="utf-8")
     with pytest.raises(ValueError, match="reviewed boundary"):
         capture_controls.capture(raw, tmp_path / "bad-status")
+
+
+def _write_temporal_raw(root: Path) -> None:
+    status = {
+        "success": True,
+        "projectName": "TemporalMandate",
+        "targetRegion": "us-east-1",
+        "resources": [
+            {
+                "resourceType": "gateway",
+                "name": "TemporalMandateGateway",
+                "deploymentState": "deployed",
+            },
+            {
+                "resourceType": "policy-engine",
+                "name": "TemporalPolicyEngine",
+                "deploymentState": "deployed",
+            },
+        ],
+        "deployedState": {
+            "targets": {
+                "default": {
+                    "resources": {
+                        "mcp": {
+                            "gateways": {
+                                "TemporalMandateGateway": {
+                                    "targets": {"TemporalTarget": {"targetId": "raw-only"}}
+                                }
+                            }
+                        },
+                        "policyEngines": {"TemporalPolicyEngine": {}},
+                    }
+                }
+            }
+        },
+    }
+    (root / "deployment-status.raw").write_text(json.dumps(status), encoding="utf-8")
+    gateway = {
+        "status": "READY",
+        "authorizerType": "AWS_IAM",
+        "protocolType": "MCP",
+        "policyEngineConfiguration": {"mode": "ENFORCE"},
+        "workloadIdentityDetails": {"workloadIdentityArn": "raw-only"},
+    }
+    (root / "gateway-state.raw").write_text(json.dumps(gateway), encoding="utf-8")
+    resource = 'AgentCore::Gateway::"raw-only"'
+    tool = "TemporalTarget___process_refund"
+    policies = {
+        "policies": [
+            {
+                "name": "TemporalMandateBudgetActive",
+                "status": "ACTIVE",
+                "enforcementMode": "ACTIVE",
+                "definition": {
+                    "policy": {
+                        "statement": (
+                            f'forbid (action == AgentCore::Action::"{tool}", resource == '
+                            f"{resource}) when temporal {{ sum amt; total >= 1000 }};"
+                        )
+                    }
+                },
+            },
+            {
+                "name": "TemporalMandatePermitActive",
+                "status": "ACTIVE",
+                "enforcementMode": "ACTIVE",
+                "definition": {
+                    "cedar": {
+                        "statement": (
+                            f'permit (action == AgentCore::Action::"{tool}", resource == '
+                            f"{resource});"
+                        )
+                    }
+                },
+            },
+            {
+                "name": "TemporalMandateBudget",
+                "status": "CREATE_FAILED",
+                "statusReasons": ["Overly Restrictive"],
+            },
+            {
+                "name": "TemporalMandatePermit",
+                "status": "CREATE_FAILED",
+                "statusReasons": ["Overly Permissive"],
+            },
+        ]
+    }
+    (root / "policy-inventory.raw").write_text(json.dumps(policies), encoding="utf-8")
+    (root / "tools-list.raw").write_bytes(
+        (EVIDENCE / "temporal-tools-list-response.json").read_bytes()
+    )
+    shape = {
+        "session_aliases": ["same", "fresh-a", "fresh-b"],
+        "same_session_calls": ["same-first", "same-second"],
+        "distinct_session_calls": ["fresh-first", "fresh-second"],
+        "session_ids_generated_as": "independent UUIDv4 values retained in memory only",
+    }
+    (root / "session-shape.raw").write_text(json.dumps(shape), encoding="utf-8")
+    for identifier in ("same-first", "same-second", "fresh-first", "fresh-second"):
+        response = read_json(f"temporal-{identifier}-response.json")
+        if identifier == "same-second":
+            response["error"]["message"] = (
+                "Tool Execution Denied: Tool call not allowed due to policy enforcement "
+                "[Policy evaluation denied due to TemporalMandateBudgetActive-raw-only]"
+            )
+        (root / f"{identifier}.raw").write_text(json.dumps(response), encoding="utf-8")
+
+
+def test_temporal_session_capture_regenerates_the_live_boundary(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    output = tmp_path / "output"
+    raw.mkdir()
+    _write_temporal_raw(raw)
+
+    result = capture_temporal.capture(raw, output)
+
+    assert [item["outcome"] for item in result["same_session"]["calls"]] == [
+        "allow",
+        "deny",
+    ]
+    assert [item["outcome"] for item in result["fresh_sessions"]["calls"]] == [
+        "allow",
+        "allow",
+    ]
+    assert result["same_session"]["attempted_aggregate"] == 1200
+    assert result["fresh_sessions"]["aggregate_across_sessions"] == 1200
+    index = json.loads((output / "temporal-index.json").read_text(encoding="utf-8"))
+    for source in index["sources"]:
+        if source["locator"] != "capture_temporal.py":
+            assert (output / source["locator"]).read_bytes() == (
+                EVIDENCE / source["locator"]
+            ).read_bytes()
+
+
+def test_temporal_capture_rejects_policy_and_decision_mismatch(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    _write_temporal_raw(raw)
+    policies = json.loads((raw / "policy-inventory.raw").read_text(encoding="utf-8"))
+    policies["policies"][0]["definition"]["policy"]["statement"] = "forbid();"
+    (raw / "policy-inventory.raw").write_text(json.dumps(policies), encoding="utf-8")
+    with pytest.raises(ValueError, match="sum boundary"):
+        capture_temporal.capture(raw, tmp_path / "bad-policy")
+
+    _write_temporal_raw(raw)
+    response = json.loads((raw / "fresh-second.raw").read_text(encoding="utf-8"))
+    response["result"]["isError"] = True
+    (raw / "fresh-second.raw").write_text(json.dumps(response), encoding="utf-8")
+    with pytest.raises(ValueError, match="outcome is not allow"):
+        capture_temporal.capture(raw, tmp_path / "bad-response")
 
 
 def test_protocol_correction_is_preserved() -> None:
