@@ -1,0 +1,36 @@
+{
+  "protocol_version": 1,
+  "status": "pilot_not_run",
+  "provider": "Anthropic",
+  "service": "Managed Agents",
+  "beta": "managed-agents-2026-04-01",
+  "sdk": "anthropic==1.2.0",
+  "model": "claude-haiku-4-5",
+  "capture_date": null,
+  "pilot": {
+    "excluded_from_confirmation": true,
+    "sessions": 3,
+    "work_unit": "Return exactly 120 repetitions of the token ALPHA, separated by one space, and nothing else."
+  },
+  "confirmation": {
+    "trials_per_cell": 10,
+    "cap_minor_units": null,
+    "cells": [
+      "sequential_control",
+      "fresh_session_replication",
+      "cap_revision_control",
+      "agent_revision_unmeasurable",
+      "subagent_handoff",
+      "concurrent_subagents_2",
+      "concurrent_subagents_4"
+    ]
+  },
+  "predictions": {
+    "sequential_control": "budget_reached",
+    "fresh_session_replication": "independent_capacity",
+    "cap_revision_control": "consumed_cost_retained",
+    "agent_revision_unmeasurable": "supported API snapshots an agent version and cannot replace it mid-session",
+    "subagent_handoff": "one_shared_session_total",
+    "concurrent_subagents": "unknown_overshoot_magnitude"
+  }
+}
