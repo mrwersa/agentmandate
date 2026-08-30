@@ -92,11 +92,11 @@
     }
   ],
   "correction_classification": {
-    "canonical_records": 20,
+    "canonical_records": 21,
     "class_counts": null,
     "complete": false,
     "reason": "legacy correction records lack canonical pre-study class labels",
-    "total_records": 41
+    "total_records": 42
   },
   "corrections": [
     {
@@ -468,6 +468,17 @@
       "reported_class": "extractor defect"
     },
     {
+      "affected_artifact": "temporal-repetition-corrections.json",
+      "capture": "agentcore-refund-policy",
+      "classes": [
+        "extractor defect"
+      ],
+      "classification_status": "canonical",
+      "description": "The first repeated-binding parent process inspected its child envelope at the wrong level; the failed projection was excluded and the corrected classifier was rerun for all ten trials.",
+      "id": "agentcore-011",
+      "reported_class": "extractor defect"
+    },
+    {
       "affected_artifact": "scan-skeleton.yaml",
       "capture": "aws-iam-access-keys",
       "classes": [
@@ -731,6 +742,41 @@
     }
   ],
   "summary_version": 1,
+  "temporal_repetitions": [
+    {
+      "binding_cells": {
+        "different_binding_allowed": 10,
+        "expired_rejected_before_network": 10,
+        "same_binding_allow_then_deny": 10,
+        "tampered_rejected_before_network": 10
+      },
+      "capture": "agentcore-refund-policy",
+      "paired_latency": {
+        "claim_boundary": "paired randomized reference-path timing on one host, region, gateway, and inert tool; not a population estimate",
+        "median_bound_minus_unbound_ms": 0.8011319999999955,
+        "pairs": 30,
+        "q1_bound_minus_unbound_ms": -54.94211799999998,
+        "q3_bound_minus_unbound_ms": 45.14932324999998
+      },
+      "policy_updates": {
+        "fresh_recovery_allowed": 10,
+        "no_update_allow_then_deny": 10,
+        "old_session_rejected_as_stale": 10,
+        "recovery_aggregate_across_revisions": 1200,
+        "update_to_active_ms": {
+          "maximum": 8351.70747,
+          "median": 7219.415364,
+          "minimum": 4906.438311
+        }
+      },
+      "session_cells": {
+        "concurrent_exactly_one_allow": 10,
+        "concurrent_intervals_overlapped": 10,
+        "fresh_sessions_allow_then_allow": 10,
+        "same_session_allow_then_deny": 10
+      }
+    }
+  ],
   "temporal_sessions": [
     {
       "capture": "agentcore-refund-policy",

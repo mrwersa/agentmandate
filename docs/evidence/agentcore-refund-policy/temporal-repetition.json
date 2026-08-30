@@ -1,0 +1,315 @@
+{
+  "cells": [
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          448.286163,
+          478.70214
+        ],
+        "fresh_sessions": [
+          499.0615,
+          533.85085
+        ],
+        "same_session": [
+          848.200968,
+          421.861125
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 0
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          463.005853,
+          492.072687
+        ],
+        "fresh_sessions": [
+          518.24708,
+          452.418829
+        ],
+        "same_session": [
+          512.079474,
+          460.512321
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 1
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          500.859757,
+          418.942349
+        ],
+        "fresh_sessions": [
+          530.232453,
+          480.081168
+        ],
+        "same_session": [
+          491.196062,
+          449.309616
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 2
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          472.76186,
+          442.800075
+        ],
+        "fresh_sessions": [
+          523.819799,
+          547.639343
+        ],
+        "same_session": [
+          503.682926,
+          456.060098
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 3
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          427.534911,
+          417.960443
+        ],
+        "fresh_sessions": [
+          522.644031,
+          518.555886
+        ],
+        "same_session": [
+          498.745032,
+          458.576753
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 4
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          469.21949,
+          551.011645
+        ],
+        "fresh_sessions": [
+          522.578283,
+          520.512495
+        ],
+        "same_session": [
+          456.229355,
+          468.252196
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 5
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          544.213855,
+          498.765246
+        ],
+        "fresh_sessions": [
+          556.371118,
+          513.446203
+        ],
+        "same_session": [
+          526.486649,
+          430.408508
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 6
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          456.664078,
+          455.867526
+        ],
+        "fresh_sessions": [
+          433.951513,
+          479.666214
+        ],
+        "same_session": [
+          469.387549,
+          461.71967
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 7
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          476.269698,
+          458.519707
+        ],
+        "fresh_sessions": [
+          522.969673,
+          528.716359
+        ],
+        "same_session": [
+          530.536517,
+          429.239861
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 8
+    },
+    {
+      "concurrent_intervals_overlap": true,
+      "concurrent_same_session": [
+        "allow",
+        "deny"
+      ],
+      "fresh_sessions": [
+        "allow",
+        "allow"
+      ],
+      "managed_call_ms": {
+        "concurrent_same_session": [
+          496.655562,
+          540.652748
+        ],
+        "fresh_sessions": [
+          501.347012,
+          510.012796
+        ],
+        "same_session": [
+          491.610542,
+          496.169771
+        ]
+      },
+      "same_session": [
+        "allow",
+        "deny"
+      ],
+      "trial": 9
+    }
+  ],
+  "concurrency_verdict": "no double-allow observed under synchronized two-request load; this is a negative result, not proof of serialization for all loads",
+  "request_amount": 600,
+  "results": {
+    "concurrent_exactly_one_allow": 10,
+    "concurrent_intervals_overlapped": 10,
+    "fresh_sessions_allow_then_allow": 10,
+    "same_session_allow_then_deny": 10
+  },
+  "temporal_repetition_version": 1,
+  "threshold": 1000,
+  "trials_per_cell": 10
+}

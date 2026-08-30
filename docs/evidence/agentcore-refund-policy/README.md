@@ -168,6 +168,52 @@ name that did not exist. `binding-live-deployment-corrections.json` classifies
 both as extractor defects. A successful probe followed both corrections, and no
 failed outcome enters the retained 30 samples.
 
+## Repeated temporal and revision controls
+
+A final task-scoped recapture repeated the load-bearing cells rather than
+extrapolating from one sequence. Across ten trials per cell, same-session calls
+were Allow then Deny in 10/10 trials, while two fresh sessions were Allow then
+Allow in 10/10 trials. Two same-session calls released together had overlapping
+client-side intervals in 10/10 trials and produced exactly one Allow and one
+Deny every time. The proposed concurrency race therefore did **not** reproduce
+under this synchronized two-request load. That negative result does not prove
+serialization for all loads.
+
+Ten policy-update trials exposed a different revision boundary. Each no-update
+control was Allow then Deny. After one allowed call, the active threshold was
+alternated between 1,000 and 1,001 and the control plane was polled until the
+new ACTIVE revision contained the exact requested statement. Reusing the old
+session failed closed in 10/10 trials with managed error `-32005`: the session
+was stale because policy changed. Following the diagnostic and starting a new
+session was allowed in 10/10 trials. Thus the service did not silently reuse
+stale history, but its required recovery reset that history: one reviewed
+mandate could reach an aggregate 1,200 across policy revisions unless another
+component preserves or re-approves the cumulative state.
+
+The binding control was also repeated. In ten independent rounds, two separate
+client processes using one signed mandate were Allow then Deny, a distinct
+signed mandate was Allow, and tampered and expired records were rejected before
+network access. A randomized 30-pair timing experiment then compared a verified
+binding call with an unbound fresh-session call under the same Gateway. Every
+call was allowed. The median paired bound-minus-unbound difference was 0.801132
+ms, with an interquartile range of -54.942118 to 45.149323 ms. This paired result
+supersedes interpreting the earlier ratio of separate medians as causal
+overhead. It is one-host, one-region reference-path evidence, not a population
+latency estimate.
+
+The first repeated-binding projection classified a child-process result at the
+wrong envelope level. It was retained outside the repository, classified as an
+extractor defect, and excluded before all ten reviewed trials were rerun.
+Cleanup removed the Gateway, engine, policies, Lambda, role and log group; only
+the reusable CDK bootstrap remains.
+
+`temporal-repetition-index.json`, SHA-256
+`cb3e8546157a4a2f9b7d48b8e20666a212fd6b418de669d682c5a4f5bec31cba`,
+pins the capture transformer, procedure, both sanitised policy revisions, full
+reviewed cell vectors, correction and verified cleanup state. Live URLs, AWS
+identities, signatures, session IDs and service timestamps remained in
+temporary raw files and were deleted after projection.
+
 `binding-index.json`, SHA-256
 `e047ead77b943b81b6afc537945531e56ca76adab3835fea5a76e9fa665c3179`,
 pins the adapter, capture and benchmark scripts, issuer public key, signed

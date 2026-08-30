@@ -1,0 +1,9 @@
+{
+  "cdk_bootstrap": "retained",
+  "gateway": "absent",
+  "lambda": "absent",
+  "lambda_log_group": "absent",
+  "lambda_role": "absent",
+  "policies": "absent",
+  "policy_engine": "absent"
+}

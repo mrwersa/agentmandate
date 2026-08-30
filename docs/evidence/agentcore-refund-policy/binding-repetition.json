@@ -1,0 +1,114 @@
+{
+  "binding_repetition_version": 1,
+  "cells": [
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 0
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 1
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 2
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 3
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 4
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 5
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 6
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 7
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 8
+    },
+    {
+      "different_binding": "allow",
+      "expired_binding": "rejected-before-network",
+      "same_binding_separate_processes": [
+        "allow",
+        "deny"
+      ],
+      "tampered_binding": "rejected-before-network",
+      "trial": 9
+    }
+  ],
+  "request_amount": 600,
+  "results": {
+    "different_binding_allowed": 10,
+    "expired_rejected_before_network": 10,
+    "same_binding_allow_then_deny": 10,
+    "tampered_rejected_before_network": 10
+  },
+  "trials": 10,
+  "trust_boundary": "exclusive credential-holding adapter; Gateway did not verify binding"
+}

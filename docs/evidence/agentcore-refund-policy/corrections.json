@@ -81,6 +81,14 @@
       "classification_status": "canonical",
       "affected_artifact": "binding-live-deployment-corrections.json",
       "description": "The first latency target used a nonexistent Lambda handler name; the handler was corrected and a successful probe preceded measurement."
+    },
+    {
+      "id": "agentcore-011",
+      "reported_class": "extractor defect",
+      "classes": ["extractor defect"],
+      "classification_status": "canonical",
+      "affected_artifact": "temporal-repetition-corrections.json",
+      "description": "The first repeated-binding parent process inspected its child envelope at the wrong level; the failed projection was excluded and the corrected classifier was rerun for all ten trials."
     }
   ]
 }

@@ -60,6 +60,14 @@ capture_binding = importlib.util.module_from_spec(_binding_capture_spec)
 sys.modules["capture_binding"] = capture_binding
 _binding_capture_spec.loader.exec_module(capture_binding)
 
+_repetition_spec = importlib.util.spec_from_file_location(
+    "capture_temporal_repetition", EVIDENCE / "capture_temporal_repetition.py"
+)
+assert _repetition_spec is not None and _repetition_spec.loader is not None
+capture_temporal_repetition = importlib.util.module_from_spec(_repetition_spec)
+sys.modules["capture_temporal_repetition"] = capture_temporal_repetition
+_repetition_spec.loader.exec_module(capture_temporal_repetition)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -76,6 +84,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     binding_indexed = {source["locator"] for source in binding_index["sources"]}
     latency_index = read_json("binding-latency-index.json")
     latency_indexed = {source["locator"] for source in latency_index["sources"]}
+    repetition_index = read_json("temporal-repetition-index.json")
+    repetition_indexed = {source["locator"] for source in repetition_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -89,6 +99,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "controls-index.json",
             "corrections.json",
             "temporal-index.json",
+            "temporal-repetition-index.json",
         }
     }
 
@@ -108,12 +119,16 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert latency_indexed.isdisjoint(
         indexed | controls_indexed | temporal_indexed | binding_indexed
     )
+    assert repetition_indexed.isdisjoint(
+        indexed | controls_indexed | temporal_indexed | binding_indexed | latency_indexed
+    )
     assert (
         indexed
         | controls_indexed
         | temporal_indexed
         | binding_indexed
         | latency_indexed
+        | repetition_indexed
         == committed
     )
     for source in (
@@ -122,6 +137,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *temporal_index["sources"],
         *binding_index["sources"],
         *latency_index["sources"],
+        *repetition_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
@@ -136,6 +152,15 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert temporal_index["cleanup"] == controls_index["cleanup"]
     assert binding_index["cleanup"] == controls_index["cleanup"]
     assert latency_index["cleanup"] == controls_index["cleanup"]
+    assert read_json("temporal-repetition-cleanup.json") == {
+        "cdk_bootstrap": "retained",
+        "gateway": "absent",
+        "lambda": "absent",
+        "lambda_log_group": "absent",
+        "lambda_role": "absent",
+        "policies": "absent",
+        "policy_engine": "absent",
+    }
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -711,6 +736,96 @@ def test_live_binding_latency_is_reproducible_and_scoped() -> None:
         "extractor defect",
     ]
     assert corrections["failed_outcomes_entered_measurement"] is False
+
+
+def test_temporal_repetitions_preserve_all_reviewed_cells() -> None:
+    result = read_json("temporal-repetition.json")
+
+    assert result["trials_per_cell"] == 10
+    assert result["results"] == {
+        "concurrent_exactly_one_allow": 10,
+        "concurrent_intervals_overlapped": 10,
+        "fresh_sessions_allow_then_allow": 10,
+        "same_session_allow_then_deny": 10,
+    }
+    assert all(cell["same_session"] == ["allow", "deny"] for cell in result["cells"])
+    assert all(cell["fresh_sessions"] == ["allow", "allow"] for cell in result["cells"])
+    assert all(
+        cell["concurrent_same_session"] == ["allow", "deny"]
+        and cell["concurrent_intervals_overlap"] is True
+        for cell in result["cells"]
+    )
+
+
+def test_policy_updates_fail_closed_then_reset_history_on_recovery() -> None:
+    result = read_json("temporal-update-repetition.json")
+
+    assert result["trials"] == 10
+    assert result["results"]["no_update_allow_then_deny"] == 10
+    assert result["results"]["old_session_rejected_as_stale"] == 10
+    assert result["results"]["fresh_recovery_allowed"] == 10
+    assert result["results"]["recovery_aggregate_across_revisions"] == 1200
+    assert all(
+        update["old_session"]["error_code"] == -32005
+        and update["fresh_recovery_session"] == "allow"
+        and update["final_statement_matches"] is True
+        for update in result["updates"]
+    )
+
+
+def test_binding_repetitions_and_paired_latency_are_reproducible() -> None:
+    binding = read_json("binding-repetition.json")
+    latency = read_json("binding-paired-latency.json")
+    differences = [record["bound_minus_unbound_ms"] for record in latency["records"]]
+
+    assert binding["trials"] == 10
+    assert binding["results"] == {
+        "different_binding_allowed": 10,
+        "expired_rejected_before_network": 10,
+        "same_binding_allow_then_deny": 10,
+        "tampered_rejected_before_network": 10,
+    }
+    assert latency["pairs"] == 30
+    assert latency["paired_difference_ms"]["median"] == statistics.median(differences)
+    assert all(
+        record[mode]["outcome"] == "allow"
+        for record in latency["records"]
+        for mode in ("bound", "unbound")
+    )
+
+
+def test_repetition_capture_rejects_a_double_allow_concurrency_claim() -> None:
+    raw = {
+        "trials": 1,
+        "sequential": [[{"outcome": "allow"}, {"outcome": "deny"}]],
+        "fresh": [[{"outcome": "allow"}, {"outcome": "allow"}]],
+        "concurrent": [
+            {
+                "calls": [{"outcome": "allow"}, {"outcome": "allow"}],
+                "intervals_overlap": True,
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="does not match the reviewed outcomes"):
+        capture_temporal_repetition._summary(raw)
+
+
+def test_repetition_correction_preserves_the_failed_classifier() -> None:
+    corrections = read_json("temporal-repetition-corrections.json")
+
+    assert corrections["corrections"] == [
+        {
+            "class": "extractor defect",
+            "description": (
+                "The first parent process classified a child envelope as a native MCP "
+                "response. The failed projection was retained outside the repository; the "
+                "classifier was corrected before the ten reviewed trials."
+            ),
+            "failed_outcomes_entered_result": False,
+            "id": "temporal-repetition-001",
+        }
+    ]
 
 
 @pytest.mark.parametrize(

@@ -35,8 +35,8 @@ def test_summary_refuses_to_invent_legacy_class_counts() -> None:
 
     assert classification == {
         "complete": False,
-        "canonical_records": 20,
-        "total_records": 41,
+        "canonical_records": 21,
+        "total_records": 42,
         "class_counts": None,
         "reason": "legacy correction records lack canonical pre-study class labels",
     }
@@ -113,6 +113,30 @@ def test_mandate_binding_control_is_in_the_summary() -> None:
     assert latency["ratio_of_adapter_only_median_to_end_to_end_median_percent"] == 2.399098
     assert latency["credential_path"] == "exclusive trusted adapter"
     assert latency["gateway_verified_binding"] is False
+
+
+def test_repeated_temporal_controls_are_in_the_summary() -> None:
+    result = evidence_summary.build_summary()["temporal_repetitions"][0]
+
+    assert result["session_cells"] == {
+        "concurrent_exactly_one_allow": 10,
+        "concurrent_intervals_overlapped": 10,
+        "fresh_sessions_allow_then_allow": 10,
+        "same_session_allow_then_deny": 10,
+    }
+    assert result["policy_updates"]["old_session_rejected_as_stale"] == 10
+    assert result["policy_updates"]["fresh_recovery_allowed"] == 10
+    assert result["binding_cells"]["same_binding_allow_then_deny"] == 10
+    assert result["paired_latency"] == {
+        "pairs": 30,
+        "median_bound_minus_unbound_ms": 0.8011319999999955,
+        "q1_bound_minus_unbound_ms": -54.94211799999998,
+        "q3_bound_minus_unbound_ms": 45.14932324999998,
+        "claim_boundary": (
+            "paired randomized reference-path timing on one host, region, gateway, and "
+            "inert tool; not a population estimate"
+        ),
+    }
 
 
 @pytest.mark.parametrize(
