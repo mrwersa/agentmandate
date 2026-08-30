@@ -1,0 +1,13 @@
+forbid (
+  principal is AgentCore::IamEntity,
+  action == AgentCore::Action::"OutstandingTarget___process_refund",
+  resource == AgentCore::Gateway::"<reviewed-gateway-binding>"
+)
+when temporal {
+  exists (accumulated: Long).
+    (sum amount for (amount: Long), (observed: Timepoint).
+      where (formerly within 1h (AgentCore::Action::"OutstandingTarget___process_refund"::request{
+        eventResource: resource, input.amount: amount
+      } && tp(observed)))) == accumulated
+    && accumulated >= 1000
+};

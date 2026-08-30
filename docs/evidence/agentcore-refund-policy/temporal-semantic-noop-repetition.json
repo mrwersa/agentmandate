@@ -1,0 +1,201 @@
+{
+  "byte_identical_control": {
+    "before_write": "allow",
+    "interpretation": "the service deduplicated the byte-identical write",
+    "revision": {
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "revision_changed": false,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 2583.678119
+    },
+    "same_session_after_write": "deny"
+  },
+  "interpretation": "textually different but alpha-equivalent temporal policies invalidated accrued session history; revision identity, not a changed bound, was sufficient",
+  "request_amount": 600,
+  "results": {
+    "distinct_active_revision": 10,
+    "fresh_recovery_allowed": 10,
+    "old_session_rejected_as_stale": 10,
+    "update_to_active_ms": {
+      "maximum": 10514.814172,
+      "median": 8217.953572,
+      "minimum": 7076.166358
+    }
+  },
+  "semantic_noop_revision_version": 1,
+  "semantic_noop_trials": [
+    {
+      "alpha_equivalent_form": "accumulated",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8293.082383
+      },
+      "trial": 0
+    },
+    {
+      "alpha_equivalent_form": "total",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8255.228845
+      },
+      "trial": 1
+    },
+    {
+      "alpha_equivalent_form": "accumulated",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 10514.814172
+      },
+      "trial": 2
+    },
+    {
+      "alpha_equivalent_form": "total",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 7164.596451
+      },
+      "trial": 3
+    },
+    {
+      "alpha_equivalent_form": "accumulated",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8180.678298
+      },
+      "trial": 4
+    },
+    {
+      "alpha_equivalent_form": "total",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 10489.271684
+      },
+      "trial": 5
+    },
+    {
+      "alpha_equivalent_form": "accumulated",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 7076.166358
+      },
+      "trial": 6
+    },
+    {
+      "alpha_equivalent_form": "total",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 9360.062947
+      },
+      "trial": 7
+    },
+    {
+      "alpha_equivalent_form": "accumulated",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 7163.423484
+      },
+      "trial": 8
+    },
+    {
+      "alpha_equivalent_form": "total",
+      "before_update": "allow",
+      "fresh_recovery_session": "allow",
+      "old_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 7245.343117
+      },
+      "trial": 9
+    }
+  ],
+  "threshold": 1000,
+  "trials": 10
+}

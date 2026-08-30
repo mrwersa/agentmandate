@@ -137,6 +137,23 @@ def test_repeated_temporal_controls_are_in_the_summary() -> None:
             "inert tool; not a population estimate"
         ),
     }
+    assert result["semantic_noop_revision"] == {
+        "byte_identical_same_session_second_call": "deny",
+        "byte_identical_write_created_revision": False,
+        "distinct_active_revision": 10,
+        "fresh_recovery_allowed": 10,
+        "old_session_rejected_as_stale": 10,
+        "update_to_active_ms": {
+            "maximum": 10514.814172,
+            "median": 8217.953572,
+            "minimum": 7076.166358,
+        },
+    }
+    assert result["binding_policy_revision"] == {
+        "old_binding_session_rejected_as_stale": 10,
+        "same_mandate_across_revision_aggregate": 1200,
+        "successor_binding_session_allowed": 10,
+    }
 
 
 @pytest.mark.parametrize(

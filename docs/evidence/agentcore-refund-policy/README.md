@@ -190,6 +190,22 @@ stale history, but its required recovery reset that history: one reviewed
 mandate could reach an aggregate 1,200 across policy revisions unless another
 component preserves or re-approves the cumulative state.
 
+A further control separated a write from a semantic change. A byte-identical
+submission produced no new revision; the original session retained its history
+and denied the second 600. Ten textually distinct but alpha-equivalent updates
+each produced a new exact ACTIVE revision. In all 10/10 trials the old session
+was rejected as stale and a fresh session allowed 600. This result is about the
+observed revision boundary: it does not claim a general semantic-equivalence
+decision procedure, but shows that unchanged policy meaning did not preserve
+history once the managed revision changed.
+
+The signed-binding limit was then measured rather than inferred. In ten trials,
+the same mandate digest was retained while the policy digest and derived session
+changed. The old binding's session was rejected as stale in 10/10 trials and the
+successor binding was allowed in 10/10. The binding therefore makes session
+continuity auditable conditional on an exclusive credential-holding adapter; it
+does not migrate consumed authority across policy revisions.
+
 The binding control was also repeated. In ten independent rounds, two separate
 client processes using one signed mandate were Allow then Deny, a distinct
 signed mandate was Allow, and tampered and expired records were rejected before
@@ -213,6 +229,12 @@ pins the capture transformer, procedure, both sanitised policy revisions, full
 reviewed cell vectors, correction and verified cleanup state. Live URLs, AWS
 identities, signatures, session IDs and service timestamps remained in
 temporary raw files and were deleted after projection.
+
+`temporal-transition-index.json`, SHA-256
+`4d1488404381490ec7d8703764e8a83cd18e7a103995b1ba4cddd34dfff2eb12`,
+pins the two alpha-equivalent policy forms, capture transformer, procedure,
+ten-trial semantic-no-op and binding-revision projections, and verified cleanup.
+Raw cloud responses and binding material were not committed.
 
 `binding-index.json`, SHA-256
 `e047ead77b943b81b6afc537945531e56ca76adab3835fea5a76e9fa665c3179`,

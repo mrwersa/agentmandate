@@ -463,6 +463,8 @@ def _temporal_repetitions(root: Path) -> dict[str, Any]:
     updates = _read(directory / "temporal-update-repetition.json")
     bindings = _read(directory / "binding-repetition.json")
     latency = _read(directory / "binding-paired-latency.json")
+    semantic_noop = _read(directory / "temporal-semantic-noop-repetition.json")
+    binding_revision = _read(directory / "binding-policy-revision-repetition.json")
     session_results = sessions.get("results") if isinstance(sessions, dict) else None
     update_results = updates.get("results") if isinstance(updates, dict) else None
     binding_results = bindings.get("results") if isinstance(bindings, dict) else None
@@ -498,6 +500,25 @@ def _temporal_repetitions(root: Path) -> dict[str, Any]:
         or differences.get("median") != 0.8011319999999955
         or differences.get("q1") != -54.94211799999998
         or differences.get("q3") != 45.14932324999998
+        or semantic_noop.get("semantic_noop_revision_version") != 1
+        or semantic_noop.get("trials") != 10
+        or semantic_noop.get("byte_identical_control", {})
+        .get("revision", {})
+        .get("revision_changed")
+        is not False
+        or semantic_noop.get("byte_identical_control", {}).get("same_session_after_write")
+        != "deny"
+        or semantic_noop.get("results", {}).get("distinct_active_revision") != 10
+        or semantic_noop.get("results", {}).get("old_session_rejected_as_stale") != 10
+        or semantic_noop.get("results", {}).get("fresh_recovery_allowed") != 10
+        or binding_revision.get("binding_policy_revision_version") != 1
+        or binding_revision.get("trials") != 10
+        or binding_revision.get("results")
+        != {
+            "old_binding_session_rejected_as_stale": 10,
+            "same_mandate_across_revision_aggregate": 1200,
+            "successor_binding_session_allowed": 10,
+        }
     ):
         raise ValueError("temporal repetition evidence does not match the reviewed run")
     return {
@@ -512,6 +533,12 @@ def _temporal_repetitions(root: Path) -> dict[str, Any]:
             "q3_bound_minus_unbound_ms": differences["q3"],
             "claim_boundary": latency["claim_boundary"],
         },
+        "semantic_noop_revision": {
+            "byte_identical_write_created_revision": False,
+            "byte_identical_same_session_second_call": "deny",
+            **semantic_noop["results"],
+        },
+        "binding_policy_revision": binding_revision["results"],
     }
 
 

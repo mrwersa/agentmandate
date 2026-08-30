@@ -750,6 +750,11 @@
         "same_binding_allow_then_deny": 10,
         "tampered_rejected_before_network": 10
       },
+      "binding_policy_revision": {
+        "old_binding_session_rejected_as_stale": 10,
+        "same_mandate_across_revision_aggregate": 1200,
+        "successor_binding_session_allowed": 10
+      },
       "capture": "agentcore-refund-policy",
       "paired_latency": {
         "claim_boundary": "paired randomized reference-path timing on one host, region, gateway, and inert tool; not a population estimate",
@@ -767,6 +772,18 @@
           "maximum": 8351.70747,
           "median": 7219.415364,
           "minimum": 4906.438311
+        }
+      },
+      "semantic_noop_revision": {
+        "byte_identical_same_session_second_call": "deny",
+        "byte_identical_write_created_revision": false,
+        "distinct_active_revision": 10,
+        "fresh_recovery_allowed": 10,
+        "old_session_rejected_as_stale": 10,
+        "update_to_active_ms": {
+          "maximum": 10514.814172,
+          "median": 8217.953572,
+          "minimum": 7076.166358
         }
       },
       "session_cells": {

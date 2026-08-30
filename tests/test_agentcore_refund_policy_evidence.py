@@ -68,6 +68,14 @@ capture_temporal_repetition = importlib.util.module_from_spec(_repetition_spec)
 sys.modules["capture_temporal_repetition"] = capture_temporal_repetition
 _repetition_spec.loader.exec_module(capture_temporal_repetition)
 
+_transition_spec = importlib.util.spec_from_file_location(
+    "capture_transition_controls", EVIDENCE / "capture_transition_controls.py"
+)
+assert _transition_spec is not None and _transition_spec.loader is not None
+capture_transition_controls = importlib.util.module_from_spec(_transition_spec)
+sys.modules["capture_transition_controls"] = capture_transition_controls
+_transition_spec.loader.exec_module(capture_transition_controls)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -86,6 +94,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     latency_indexed = {source["locator"] for source in latency_index["sources"]}
     repetition_index = read_json("temporal-repetition-index.json")
     repetition_indexed = {source["locator"] for source in repetition_index["sources"]}
+    transition_index = read_json("temporal-transition-index.json")
+    transition_indexed = {source["locator"] for source in transition_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -100,6 +110,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "corrections.json",
             "temporal-index.json",
             "temporal-repetition-index.json",
+            "temporal-transition-index.json",
         }
     }
 
@@ -122,6 +133,14 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert repetition_indexed.isdisjoint(
         indexed | controls_indexed | temporal_indexed | binding_indexed | latency_indexed
     )
+    assert transition_indexed.isdisjoint(
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        | repetition_indexed
+    )
     assert (
         indexed
         | controls_indexed
@@ -129,6 +148,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | binding_indexed
         | latency_indexed
         | repetition_indexed
+        | transition_indexed
         == committed
     )
     for source in (
@@ -138,6 +158,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *binding_index["sources"],
         *latency_index["sources"],
         *repetition_index["sources"],
+        *transition_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
@@ -161,6 +182,9 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         "policies": "absent",
         "policy_engine": "absent",
     }
+    assert read_json("temporal-transition-cleanup.json") == read_json(
+        "temporal-repetition-cleanup.json"
+    )
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -792,6 +816,104 @@ def test_binding_repetitions_and_paired_latency_are_reproducible() -> None:
         for record in latency["records"]
         for mode in ("bound", "unbound")
     )
+
+
+def test_semantic_noop_and_binding_revision_controls_are_preserved() -> None:
+    semantic = read_json("temporal-semantic-noop-repetition.json")
+    binding = read_json("binding-policy-revision-repetition.json")
+
+    assert semantic["byte_identical_control"]["revision"]["revision_changed"] is False
+    assert semantic["byte_identical_control"]["same_session_after_write"] == "deny"
+    assert semantic["results"]["distinct_active_revision"] == 10
+    assert semantic["results"]["old_session_rejected_as_stale"] == 10
+    assert all(
+        trial["revision"]["revision_changed"] is True
+        and trial["old_session"]["error_code"] == -32005
+        and trial["fresh_recovery_session"] == "allow"
+        for trial in semantic["semantic_noop_trials"]
+    )
+    assert binding["results"] == {
+        "old_binding_session_rejected_as_stale": 10,
+        "same_mandate_across_revision_aggregate": 1200,
+        "successor_binding_session_allowed": 10,
+    }
+    assert all(
+        cell["same_mandate_digest"] is True
+        and cell["policy_digest_changed"] is True
+        and cell["derived_session_changed"] is True
+        for cell in binding["cells"]
+    )
+
+
+def test_transition_capture_regenerates_reviewed_artifacts(tmp_path: Path) -> None:
+    allow = {"outcome": "allow", "response": {"result": {"isError": False}}}
+    deny = {"outcome": "deny", "response": {"error": {"code": -32002}}}
+    stale = {
+        "outcome": "stale-session-rejected",
+        "response": {"error": {"code": -32005, "message": "Policy session is stale"}},
+    }
+    changed = {
+        "revision_changed": True,
+        "update_status": "UPDATING",
+        "final_status": "ACTIVE",
+        "final_statement_matches": True,
+        "elapsed_ms": 1.0,
+    }
+    raw = {
+        "experiment_version": 1,
+        "byte_identical_control": {
+            "before": allow,
+            "revision": {**changed, "revision_changed": False},
+            "reuse": deny,
+        },
+        "semantic_noop_trials": [
+            {
+                "trial": trial,
+                "style": "total" if trial % 2 else "accumulated",
+                "before": allow,
+                "revision": changed,
+                "reuse": stale,
+                "recovery": allow,
+            }
+            for trial in range(10)
+        ],
+        "binding_revision_trials": [
+            {
+                "trial": trial,
+                "before_threshold": 1000,
+                "after_threshold": 1001,
+                "same_mandate_digest": True,
+                "policy_digest_changed": True,
+                "derived_session_changed": True,
+                "before": allow,
+                "revision": changed,
+                "old_binding_reuse": stale,
+                "successor_binding_recovery": allow,
+            }
+            for trial in range(10)
+        ],
+    }
+    output = tmp_path / "evidence"
+    output.mkdir()
+    for name in (
+        "capture_transition_controls.py",
+        "temporal-semantic-noop-accumulated.dogwood",
+        "temporal-semantic-noop-total.dogwood",
+        "temporal-transition-cleanup.json",
+        "temporal-transition-procedure.md",
+    ):
+        (output / name).write_bytes((EVIDENCE / name).read_bytes())
+
+    raw_path = tmp_path / "raw.json"
+    raw_path.write_text(json.dumps(raw))
+    capture_transition_controls.capture(raw_path, output)
+
+    semantic = json.loads((output / "temporal-semantic-noop-repetition.json").read_text())
+    binding = json.loads((output / "binding-policy-revision-repetition.json").read_text())
+    index = json.loads((output / "temporal-transition-index.json").read_text())
+    assert semantic["results"]["old_session_rejected_as_stale"] == 10
+    assert binding["results"]["old_binding_session_rejected_as_stale"] == 10
+    assert len(index["sources"]) == 7
 
 
 def test_repetition_capture_rejects_a_double_allow_concurrency_claim() -> None:

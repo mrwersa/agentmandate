@@ -1,0 +1,228 @@
+{
+  "alternating_thresholds": [
+    1000,
+    1001
+  ],
+  "binding_policy_revision_version": 1,
+  "cells": [
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8435.016219
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 0
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8300.776005
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 1
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 6041.525631
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 2
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8291.613771
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 3
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 7195.331315
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 4
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 7183.452872
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 5
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8340.118226
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 6
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 8282.942001
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 7
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 9569.976583
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 8
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "derived_session_changed": true,
+      "old_binding_session": {
+        "error_code": -32005,
+        "outcome": "stale-session-rejected"
+      },
+      "policy_digest_changed": true,
+      "revision": {
+        "final_statement_matches": true,
+        "final_status": "ACTIVE",
+        "revision_changed": true,
+        "update_status": "UPDATING",
+        "update_to_active_ms": 10558.763698
+      },
+      "same_mandate_digest": true,
+      "successor_binding_session": "allow",
+      "trial": 9
+    }
+  ],
+  "interpretation": "the binding collapses session continuity into complete mediation but does not carry consumed authority across a policy revision",
+  "request_amount": 600,
+  "results": {
+    "old_binding_session_rejected_as_stale": 10,
+    "same_mandate_across_revision_aggregate": 1200,
+    "successor_binding_session_allowed": 10
+  },
+  "trials": 10,
+  "trust_boundary": "the exclusive credential-holding adapter verified each signed binding; the managed Gateway did not verify it"
+}

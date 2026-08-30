@@ -1,0 +1,38 @@
+{
+  "capture_date": "2026-08-30",
+  "capture_version": 1,
+  "provider": "AWS AgentCore Gateway Policy ENFORCE",
+  "raw_artifact_policy": "account identifiers, URLs, policy IDs, service timestamps, session IDs, signatures, private keys, and credentials remained in temporary storage",
+  "raw_artifacts_committed": false,
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "79bd9022cffee259c7e5e2a52ceccb924fb804d214690962ae534061a85776f9",
+      "locator": "binding-policy-revision-repetition.json"
+    },
+    {
+      "content_sha256": "9b2c3b8d432e0d84bdf68f5158cca03f7748fac44c318ae7b91295e565c39787",
+      "locator": "capture_transition_controls.py"
+    },
+    {
+      "content_sha256": "75e5458d7556ba3ece4c62bdbe0f58cd0865a438492a00226d1e35bb194efbbf",
+      "locator": "temporal-semantic-noop-accumulated.dogwood"
+    },
+    {
+      "content_sha256": "84949d3ad093b8832c1eab2117bd1fba688f0676b48c56253da5b2e9135380c1",
+      "locator": "temporal-semantic-noop-repetition.json"
+    },
+    {
+      "content_sha256": "6a4f6cfe2f2f11abadc416657c03ef8c4be8479f6c72bb4d6418ab7963f6967f",
+      "locator": "temporal-semantic-noop-total.dogwood"
+    },
+    {
+      "content_sha256": "1386305f2f1a45c5265d47ed31d0c15cf46ab6657e8677c41f4b8484c8c53a68",
+      "locator": "temporal-transition-cleanup.json"
+    },
+    {
+      "content_sha256": "305a5a2ffa62bab799bc2e2db70cae8455a33590e3c23ca18cf8c43beac4d888",
+      "locator": "temporal-transition-procedure.md"
+    }
+  ]
+}
