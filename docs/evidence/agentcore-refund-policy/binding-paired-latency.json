@@ -1,0 +1,509 @@
+{
+  "binding_paired_latency_version": 1,
+  "bound_ms": {
+    "maximum": 680.435928,
+    "median": 569.0205874999999,
+    "minimum": 469.413818,
+    "q1": 528.817012,
+    "q3": 600.110655
+  },
+  "claim_boundary": "paired randomized reference-path timing on one host, region, gateway, and inert tool; not a population estimate",
+  "paired_difference_ms": {
+    "maximum": 142.02406499999995,
+    "median": 0.8011319999999955,
+    "minimum": -170.15722099999994,
+    "q1": -54.94211799999998,
+    "q3": 45.14932324999998
+  },
+  "pairs": 30,
+  "random_seed": 139,
+  "records": [
+    {
+      "bound": {
+        "elapsed_ms": 534.770797,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -170.15722099999994,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 0,
+      "unbound": {
+        "elapsed_ms": 704.928018,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 591.951989,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -161.03006699999992,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 1,
+      "unbound": {
+        "elapsed_ms": 752.982056,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 600.037974,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -20.960819000000015,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 2,
+      "unbound": {
+        "elapsed_ms": 620.998793,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 576.899596,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 19.24597099999994,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 3,
+      "unbound": {
+        "elapsed_ms": 557.653625,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 546.431404,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 15.479859000000033,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 4,
+      "unbound": {
+        "elapsed_ms": 530.951545,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 600.134882,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 85.90558499999997,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 5,
+      "unbound": {
+        "elapsed_ms": 514.229297,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 619.944054,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 48.36368300000004,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 6,
+      "unbound": {
+        "elapsed_ms": 571.580371,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 631.858353,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 35.766760999999974,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 7,
+      "unbound": {
+        "elapsed_ms": 596.091592,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 570.111582,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -8.865751000000046,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 8,
+      "unbound": {
+        "elapsed_ms": 578.977333,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 680.435928,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 142.02406499999995,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 9,
+      "unbound": {
+        "elapsed_ms": 538.411863,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 571.888295,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 80.41255699999999,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 10,
+      "unbound": {
+        "elapsed_ms": 491.475738,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 490.310535,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -54.39953799999995,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 11,
+      "unbound": {
+        "elapsed_ms": 544.710073,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 562.980141,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -2.776171999999974,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 12,
+      "unbound": {
+        "elapsed_ms": 565.756313,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 611.99846,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 57.09567800000002,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 13,
+      "unbound": {
+        "elapsed_ms": 554.902782,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 519.890783,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -78.55217499999992,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 14,
+      "unbound": {
+        "elapsed_ms": 598.442958,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 605.215242,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 12.011627999999973,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 15,
+      "unbound": {
+        "elapsed_ms": 593.203614,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 496.627224,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -59.68669399999993,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 16,
+      "unbound": {
+        "elapsed_ms": 556.313918,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 575.016523,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -7.7237499999999955,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 17,
+      "unbound": {
+        "elapsed_ms": 582.740273,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 563.76778,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 9.429311999999982,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 18,
+      "unbound": {
+        "elapsed_ms": 554.338468,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 497.343335,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -88.60252400000002,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 19,
+      "unbound": {
+        "elapsed_ms": 585.945859,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 469.413818,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -73.94488799999999,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 20,
+      "unbound": {
+        "elapsed_ms": 543.358706,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 518.717119,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -14.23845499999993,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 21,
+      "unbound": {
+        "elapsed_ms": 532.955574,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 509.612807,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -81.37916500000006,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 22,
+      "unbound": {
+        "elapsed_ms": 590.991972,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 628.947947,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 68.34027800000001,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 23,
+      "unbound": {
+        "elapsed_ms": 560.607669,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 639.795619,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -32.533698999999956,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 24,
+      "unbound": {
+        "elapsed_ms": 672.329318,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 526.832417,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 39.74870299999998,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 25,
+      "unbound": {
+        "elapsed_ms": 487.083714,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 585.239395,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 46.94952999999998,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 26,
+      "unbound": {
+        "elapsed_ms": 538.289865,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 567.929593,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 104.17927899999995,
+      "order": [
+        "unbound",
+        "bound"
+      ],
+      "pair": 27,
+      "unbound": {
+        "elapsed_ms": 463.750314,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 567.536436,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": -55.12297799999999,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 28,
+      "unbound": {
+        "elapsed_ms": 622.659414,
+        "outcome": "allow"
+      }
+    },
+    {
+      "bound": {
+        "elapsed_ms": 564.230065,
+        "outcome": "allow"
+      },
+      "bound_minus_unbound_ms": 4.378435999999965,
+      "order": [
+        "bound",
+        "unbound"
+      ],
+      "pair": 29,
+      "unbound": {
+        "elapsed_ms": 559.851629,
+        "outcome": "allow"
+      }
+    }
+  ],
+  "unbound_ms": {
+    "maximum": 752.982056,
+    "median": 560.229649,
+    "minimum": 463.750314,
+    "q1": 539.64857375,
+    "q3": 592.6507035
+  }
+}

@@ -457,6 +457,64 @@ def _binding_live_latency(root: Path) -> dict[str, Any]:
     return result
 
 
+def _temporal_repetitions(root: Path) -> dict[str, Any]:
+    directory = root / "agentcore-refund-policy"
+    sessions = _read(directory / "temporal-repetition.json")
+    updates = _read(directory / "temporal-update-repetition.json")
+    bindings = _read(directory / "binding-repetition.json")
+    latency = _read(directory / "binding-paired-latency.json")
+    session_results = sessions.get("results") if isinstance(sessions, dict) else None
+    update_results = updates.get("results") if isinstance(updates, dict) else None
+    binding_results = bindings.get("results") if isinstance(bindings, dict) else None
+    differences = latency.get("paired_difference_ms") if isinstance(latency, dict) else None
+    if (
+        sessions.get("temporal_repetition_version") != 1
+        or sessions.get("trials_per_cell") != 10
+        or session_results
+        != {
+            "same_session_allow_then_deny": 10,
+            "fresh_sessions_allow_then_allow": 10,
+            "concurrent_exactly_one_allow": 10,
+            "concurrent_intervals_overlapped": 10,
+        }
+        or updates.get("temporal_update_version") != 1
+        or updates.get("trials") != 10
+        or update_results.get("no_update_allow_then_deny") != 10
+        or update_results.get("old_session_rejected_as_stale") != 10
+        or update_results.get("fresh_recovery_allowed") != 10
+        or update_results.get("recovery_aggregate_across_revisions") != 1200
+        or bindings.get("binding_repetition_version") != 1
+        or bindings.get("trials") != 10
+        or binding_results
+        != {
+            "same_binding_allow_then_deny": 10,
+            "different_binding_allowed": 10,
+            "tampered_rejected_before_network": 10,
+            "expired_rejected_before_network": 10,
+        }
+        or latency.get("binding_paired_latency_version") != 1
+        or latency.get("pairs") != 30
+        or not isinstance(differences, dict)
+        or differences.get("median") != 0.8011319999999955
+        or differences.get("q1") != -54.94211799999998
+        or differences.get("q3") != 45.14932324999998
+    ):
+        raise ValueError("temporal repetition evidence does not match the reviewed run")
+    return {
+        "capture": "agentcore-refund-policy",
+        "session_cells": session_results,
+        "policy_updates": update_results,
+        "binding_cells": binding_results,
+        "paired_latency": {
+            "pairs": latency["pairs"],
+            "median_bound_minus_unbound_ms": differences["median"],
+            "q1_bound_minus_unbound_ms": differences["q1"],
+            "q3_bound_minus_unbound_ms": differences["q3"],
+            "claim_boundary": latency["claim_boundary"],
+        },
+    }
+
+
 def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
     corrections = _corrections(root)
     canonical = sum(record["classification_status"] == "canonical" for record in corrections)
@@ -496,6 +554,7 @@ def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
         "managed_controls": [_managed_controls(root)],
         "temporal_sessions": [_temporal_session(root)],
         "mandate_bindings": [_mandate_binding(root)],
+        "temporal_repetitions": [_temporal_repetitions(root)],
     }
 
 

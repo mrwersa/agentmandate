@@ -1,0 +1,11 @@
+{
+  "corrections": [
+    {
+      "class": "extractor defect",
+      "description": "The first parent process classified a child envelope as a native MCP response. The failed projection was retained outside the repository; the classifier was corrected before the ten reviewed trials.",
+      "failed_outcomes_entered_result": false,
+      "id": "temporal-repetition-001"
+    }
+  ],
+  "corrections_version": 1
+}

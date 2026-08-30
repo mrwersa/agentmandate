@@ -1,0 +1,223 @@
+{
+  "alternating_thresholds": [
+    1000,
+    1001
+  ],
+  "interpretation": "policy revision invalidated the old session; following the managed error's fresh-session recovery reset cumulative history",
+  "request_amount": 600,
+  "results": {
+    "fresh_recovery_allowed": 10,
+    "no_update_allow_then_deny": 10,
+    "old_session_rejected_as_stale": 10,
+    "recovery_aggregate_across_revisions": 1200,
+    "update_to_active_ms": {
+      "maximum": 8351.70747,
+      "median": 7219.415364,
+      "minimum": 4906.438311
+    }
+  },
+  "temporal_update_version": 1,
+  "trials": 10,
+  "updates": [
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 0,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 7281.036308
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 1,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 7157.794419
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 2,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 8294.975391
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 3,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 8301.019418
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 4,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 4906.438311
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 5,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 8241.872138
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 6,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 6146.022767
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 7,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 7149.852914
+    },
+    {
+      "after_threshold": 1001,
+      "before_threshold": 1000,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 8,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 7091.347473
+    },
+    {
+      "after_threshold": 1000,
+      "before_threshold": 1001,
+      "before_update": "allow",
+      "final_statement_matches": true,
+      "final_status": "ACTIVE",
+      "fresh_recovery_session": "allow",
+      "no_update_control": [
+        "allow",
+        "deny"
+      ],
+      "old_session": {
+        "error_code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry.",
+        "outcome": "stale-session-rejected"
+      },
+      "trial": 9,
+      "update_status": "UPDATING",
+      "update_to_active_ms": 8351.70747
+    }
+  ]
+}

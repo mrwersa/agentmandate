@@ -1,0 +1,50 @@
+{
+  "capture_date": "2026-08-30",
+  "capture_version": 1,
+  "provider": "AWS AgentCore Gateway Policy ENFORCE",
+  "raw_artifact_policy": "live identifiers, URLs, signatures, session IDs, and service timestamps remained in temporary files and were deleted after projection",
+  "raw_artifacts_committed": false,
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "3c47b22a5699ac4be098fb5864a2d8c03ef7a644f989b5536edf6a63846da650",
+      "locator": "binding-paired-latency.json"
+    },
+    {
+      "content_sha256": "d1ca57b3917a9a547e9bd47e47984c56ed9d5041757d932fa180f4776e46b5db",
+      "locator": "binding-repetition.json"
+    },
+    {
+      "content_sha256": "8129deb970e7505c1439d1391d96dd5d89539f89139cf4e03e0e3100c1222a00",
+      "locator": "capture_temporal_repetition.py"
+    },
+    {
+      "content_sha256": "1386305f2f1a45c5265d47ed31d0c15cf46ab6657e8677c41f4b8484c8c53a68",
+      "locator": "temporal-repetition-cleanup.json"
+    },
+    {
+      "content_sha256": "335e4d367339795e671d67f8731ddbf7a89bbd8f6a27c5947db966dacb6d0d8f",
+      "locator": "temporal-repetition-corrections.json"
+    },
+    {
+      "content_sha256": "3406b315578a0c3e9dca785d6d36c67ef08126df28fa7891f61fb3202eeb9645",
+      "locator": "temporal-repetition-policy-1000.dogwood"
+    },
+    {
+      "content_sha256": "b558d6934dfe1539a0fbccbe7918d5d3fe62faf6fbc243c0c397bf110916f60b",
+      "locator": "temporal-repetition-policy-1001.dogwood"
+    },
+    {
+      "content_sha256": "8d642b0fe28ec9f273feef8437d2d3c87eafbd44938ab88ec30afe9c1fb7e47a",
+      "locator": "temporal-repetition-procedure.md"
+    },
+    {
+      "content_sha256": "2bb58ba1a567da8f2ac020585f56c2ac6a60a378e52cf29be8a221255f35cc57",
+      "locator": "temporal-repetition.json"
+    },
+    {
+      "content_sha256": "c130c0c5aaf812dcc1a39d8e6b930cbf4bee667745876b0ab36911c5351bd7a5",
+      "locator": "temporal-update-repetition.json"
+    }
+  ]
+}
