@@ -73,11 +73,22 @@ def _all(page: Any) -> list[Any]:
         current = current.get_next_page()
 
 
-def _wait_idle(client: Any, session_id: str) -> Any:
+def _wait_idle(client: Any, session_id: str, event_id: str) -> Any:
     deadline = time.monotonic() + TIMEOUT_SECONDS
     while time.monotonic() < deadline:
         session = client.beta.sessions.retrieve(session_id, betas=BETAS)
-        if session.status == "idle":
+        events = _all(
+            client.beta.sessions.events.list(
+                session_id,
+                order="asc",
+                limit=100,
+                betas=BETAS,
+            )
+        )
+        processed = any(
+            event.id == event_id and event.processed_at is not None for event in events
+        )
+        if processed and session.status == "idle":
             return session
         if session.status == "terminated":
             raise RuntimeError("managed session terminated before reaching idle")
@@ -86,7 +97,7 @@ def _wait_idle(client: Any, session_id: str) -> Any:
 
 
 def _send_work(client: Any, session_id: str, prompt: str) -> Any:
-    client.beta.sessions.events.send(
+    sent = client.beta.sessions.events.send(
         session_id,
         betas=BETAS,
         events=[
@@ -96,7 +107,34 @@ def _send_work(client: Any, session_id: str, prompt: str) -> Any:
             }
         ],
     )
-    return _wait_idle(client, session_id)
+    if sent.data is None or len(sent.data) != 1:
+        raise RuntimeError("managed API did not acknowledge exactly one work event")
+    return _wait_idle(client, session_id, sent.data[0].id)
+
+
+def _delete_session(client: Any, session_id: str) -> None:
+    try:
+        client.beta.sessions.delete(session_id, betas=BETAS)
+    except Exception:  # noqa: BLE001 - inspect state before retrying managed cleanup
+        current = client.beta.sessions.retrieve(session_id, betas=BETAS)
+        if current.status != "running":
+            raise
+        sent = client.beta.sessions.events.send(
+            session_id,
+            betas=BETAS,
+            events=[{"type": "user.interrupt"}],
+        )
+        if sent.data is None or len(sent.data) != 1:
+            raise RuntimeError("managed API did not acknowledge cleanup interrupt") from None
+        _wait_idle(client, session_id, sent.data[0].id)
+        client.beta.sessions.delete(session_id, betas=BETAS)
+    try:
+        client.beta.sessions.retrieve(session_id, betas=BETAS)
+    except Exception as exc:  # noqa: BLE001 - a typed not-found is the absence proof
+        if type(exc).__module__.startswith("anthropic.") and type(exc).__name__ == "NotFoundError":
+            return
+        raise
+    raise RuntimeError("managed session still resolves after deletion")
 
 
 def _snapshot(client: Any, session_id: str) -> dict[str, Any]:
@@ -173,8 +211,8 @@ def pilot(output: Path) -> None:
     finally:
         for session in sessions:
             try:
-                client.beta.sessions.delete(session.id, betas=BETAS)
-                cleanup.append({"kind": "session", "deleted": True})
+                _delete_session(client, session.id)
+                cleanup.append({"kind": "session", "deleted": True, "verified_absent": True})
             except Exception as exc:  # capture must retain cleanup failures
                 cleanup.append(
                     {"kind": "session", "deleted": False, "error_type": type(exc).__name__}

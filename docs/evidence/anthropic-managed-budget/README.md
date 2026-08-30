@@ -54,6 +54,14 @@ agent-revision cell is therefore retained as `unmeasurable`, not replaced with
 a different experiment. This is a source-boundary correction discovered before
 any result.
 
+The first excluded pilot attempt exposed an **extractor defect** before usable
+data was recorded. `events.send` acknowledges queued work, so accepting the
+session's pre-start `idle` state captured three still-running sessions with zero
+cost. The invalid private output is excluded. The reader now waits until the
+specific sent event has a non-null `processed_at` value and the session is idle.
+Cleanup interrupts a running session when necessary, deletes it, and requires a
+typed not-found response as the absence proof.
+
 ## Result and consequence
 
 No result yet. Expected outcomes must not enter this file or the manuscript
