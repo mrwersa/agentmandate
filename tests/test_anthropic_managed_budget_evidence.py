@@ -61,3 +61,12 @@ def test_capture_refuses_to_run_without_api_key(tmp_path, monkeypatch, capsys):
 
     assert capture.main(["capability", "--output", str(tmp_path / "out")]) == 2
     assert "ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
+
+
+def test_capture_refuses_to_run_without_valid_workspace(tmp_path, monkeypatch, capsys):
+    capture = _capture_module()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "placeholder")
+    monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "not-a-workspace")
+
+    assert capture.main(["capability", "--output", str(tmp_path / "out")]) == 2
+    assert "ANTHROPIC_WORKSPACE_ID is not set" in capsys.readouterr().err
