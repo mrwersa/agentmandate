@@ -1,0 +1,45 @@
+{
+  "capability_version": 1,
+  "excluded_from_confirmation": true,
+  "protocol_sha256": "b56802cd8a4be4ace4369750114c9808d2589e04b34e20527c69c1965819f16e",
+  "raw_capture_sha256": {
+    "capability-concurrent_subagents_2.json": "a5f26197596975a7eaa50b61733cdd9c38b562e003f06a610914ca92dc2bb72e",
+    "capability-concurrent_subagents_4.json": "64c14ebdbe93ea0edb56d0e7318d3f0c98c323bbfdda6d2ea0e1393ab5b2dd21",
+    "capability-subagent_handoff.json": "dd1097df2ef908e9dc119a93441ad7f89c6f0c76b1c2c74f43ef5e274f49a41b",
+    "cleanup.json": "9046c0d2e5bbe4108edb54584e8fc367bbe384d2c83d33b90813f8f731528c27"
+  },
+  "cells": [
+    {
+      "cell": "subagent_handoff",
+      "requested_children": 1,
+      "observed_children": 1,
+      "primary_threads": 1,
+      "all_children_attached_to_primary": true,
+      "all_children_created_before_first_child_idle": true,
+      "final_list_cost_minor_units": 2
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "requested_children": 2,
+      "observed_children": 2,
+      "primary_threads": 1,
+      "all_children_attached_to_primary": true,
+      "all_children_created_before_first_child_idle": true,
+      "final_list_cost_minor_units": 4
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "requested_children": 4,
+      "observed_children": 4,
+      "primary_threads": 1,
+      "all_children_attached_to_primary": true,
+      "all_children_created_before_first_child_idle": true,
+      "final_list_cost_minor_units": 6
+    }
+  ],
+  "cleanup": {
+    "sessions_deleted_and_verified_absent": 3,
+    "agents_archived": 2,
+    "environment_deleted": true
+  }
+}
