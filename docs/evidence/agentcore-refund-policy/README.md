@@ -132,15 +132,41 @@ The trust boundary is essential. The adapter held the credential used to invoke
 the Gateway. The Gateway did not receive or verify the mandate binding itself.
 An agent that also holds a direct Gateway credential could bypass the adapter
 and choose a fresh session, so this result closes continuity only when the
-adapter is the exclusive credential-holding path. Platform verification of the
-binding would remove that deployment assumption. The experiment did not test
-that stronger design.
+adapter is the exclusive credential-holding path. The binding does not achieve
+complete mediation. It makes continuity follow from complete mediation, thereby
+collapsing two independent deployment obligations into one classical security
+property.
+
+A follow-up live measurement evaluated the cost on that exclusive path. It
+used a fresh functionally equivalent one-tool deployment, verified the singleton
+native `tools/list` result, discarded five warm-ups, and timed 30 complete calls
+under 30 independently signed mandates. All 30 calls were allowed. The median
+from binding verification through the complete managed response was 566.975384
+ms (minimum 484.438959 ms, maximum 628.521726 ms). The separately measured
+13.602295 ms adapter median is 2.399098% of that end-to-end median. This is a
+ratio of medians from one host and region, not a production latency claim, and
+the representative request set does not establish a complete latency domain.
+
+The remaining platform change is specific: a Gateway could require and verify a
+signed binding before policy evaluation, then derive the session identifier
+from the canonical signed fields or reject a caller-supplied identifier that
+does not match. Treating the binding as an advisory header would not close the
+gap. Enforcement also needs issuer and key-rotation rules, half-open expiry,
+principal and policy-revision checks, and rejection of missing bindings on a
+mandate-bound policy. This stronger design would move continuity inside the
+platform trust boundary instead of relying on credential isolation. It was not
+implemented by the managed service in this experiment.
 
 The first deployment attempt exposed a missing role permission required for
 policy-session workload tokens. The managed target failed before Lambda
 execution. `binding-deployment-correction.json` preserves the sanitised
 diagnosis, and the evaluated run followed only after a narrowly scoped
 permission was applied. No outcome from the failed attempt enters the result.
+The latency recapture also rejected two operator defects before measurement: a
+JSON wrapper supplied where the CLI expected raw Cedar, and a Lambda handler
+name that did not exist. `binding-live-deployment-corrections.json` classifies
+both as extractor defects. A successful probe followed both corrections, and no
+failed outcome enters the retained 30 samples.
 
 `binding-index.json`, SHA-256
 `e047ead77b943b81b6afc537945531e56ca76adab3835fea5a76e9fa665c3179`,
@@ -149,6 +175,15 @@ bindings, policy, reviewed state, inventory, three requests and responses,
 local rejection controls, correction, benchmark,
 and result. The private signing key was generated for the experiment, remained
 in temporary storage, and was deleted after projection.
+
+`binding-latency-index.json`, SHA-256
+`1502de4da873f5bdd83430b1e781dd1fd59389a780ce4a66b766d12ab3d4b066`,
+pins the live measurement script, sanitised policy, issuer public key,
+fully pinned capture dependencies, classified deployment corrections, and
+complete timing vector. The measurement
+script generated its private signing key and mandate values only in temporary
+storage. URLs, signatures, session identifiers, AWS identities, and credentials
+were not committed.
 
 `temporal-index.json`, SHA-256
 `7828b5f55cfcd24f54bcf73b436e2fa756d117e2b2b08aa088b067a5af34a6d0`,
@@ -242,7 +277,9 @@ task-scoped deployment and applied three successful policy revisions; one
 invalid no-op update failed before activation. The temporal study created one
 more task-scoped deployment with a stateless permit and a Dogwood sum policy.
 The mandate-binding control created one final task-scoped deployment with the
-same inert shape.
+same inert shape. The latency follow-up recreated that one-tool shape once more
+and made 36 managed requests: one inventory call, five warm-ups, and 30 retained
+measurements.
 Each task used an AgentCore
 Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
 task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)

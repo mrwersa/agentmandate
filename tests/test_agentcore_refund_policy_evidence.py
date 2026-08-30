@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import re
+import statistics
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -73,6 +74,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     temporal_indexed = {source["locator"] for source in temporal_index["sources"]}
     binding_index = read_json("binding-index.json")
     binding_indexed = {source["locator"] for source in binding_index["sources"]}
+    latency_index = read_json("binding-latency-index.json")
+    latency_indexed = {source["locator"] for source in latency_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -82,6 +85,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "README.md",
             "capture-index.json",
             "binding-index.json",
+            "binding-latency-index.json",
             "controls-index.json",
             "corrections.json",
             "temporal-index.json",
@@ -101,12 +105,23 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert indexed.isdisjoint(temporal_indexed)
     assert controls_indexed.isdisjoint(temporal_indexed)
     assert binding_indexed.isdisjoint(indexed | controls_indexed | temporal_indexed)
-    assert indexed | controls_indexed | temporal_indexed | binding_indexed == committed
+    assert latency_indexed.isdisjoint(
+        indexed | controls_indexed | temporal_indexed | binding_indexed
+    )
+    assert (
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        == committed
+    )
     for source in (
         *index["sources"],
         *controls_index["sources"],
         *temporal_index["sources"],
         *binding_index["sources"],
+        *latency_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
@@ -120,6 +135,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     }
     assert temporal_index["cleanup"] == controls_index["cleanup"]
     assert binding_index["cleanup"] == controls_index["cleanup"]
+    assert latency_index["cleanup"] == controls_index["cleanup"]
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -670,6 +686,31 @@ def test_signed_mandate_binding_is_stable_fail_closed_and_live(tmp_path: Path) -
             assert (output / source["locator"]).read_bytes() == (
                 EVIDENCE / source["locator"]
             ).read_bytes()
+
+
+def test_live_binding_latency_is_reproducible_and_scoped() -> None:
+    result = read_json("binding-live-latency.json")
+    samples = result["end_to_end_samples_ms"]
+
+    assert result["samples"] == result["independent_signed_mandates"] == len(samples) == 30
+    assert result["outcomes"] == ["allow"] * 30
+    assert result["tool_inventory"] == ["BindingLatencyTarget___process_refund"]
+    assert result["tool_inventory_complete"] is True
+    assert result["request_domain"] == "representative"
+    assert result["credential_path"] == "exclusive trusted adapter"
+    assert result["gateway_verified_binding"] is False
+    assert result["end_to_end_median_ms"] == round(statistics.median(samples), 6)
+    assert result["end_to_end_minimum_ms"] == min(samples)
+    assert result["end_to_end_maximum_ms"] == max(samples)
+    assert result["ratio_of_adapter_only_median_to_end_to_end_median_percent"] == round(
+        result["adapter_only_median_ms"] / statistics.median(samples) * 100, 6
+    )
+    corrections = read_json("binding-live-deployment-corrections.json")
+    assert [item["class"] for item in corrections["corrections"]] == [
+        "extractor defect",
+        "extractor defect",
+    ]
+    assert corrections["failed_outcomes_entered_measurement"] is False
 
 
 @pytest.mark.parametrize(

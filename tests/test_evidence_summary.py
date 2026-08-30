@@ -35,8 +35,8 @@ def test_summary_refuses_to_invent_legacy_class_counts() -> None:
 
     assert classification == {
         "complete": False,
-        "canonical_records": 18,
-        "total_records": 39,
+        "canonical_records": 20,
+        "total_records": 41,
         "class_counts": None,
         "reason": "legacy correction records lack canonical pre-study class labels",
     }
@@ -106,6 +106,13 @@ def test_mandate_binding_control_is_in_the_summary() -> None:
         "rejected-before-network",
     ]
     assert binding["median_adapter_ms"] > 0
+    latency = binding["live_latency"]
+    assert latency["samples"] == latency["independent_signed_mandates"] == 30
+    assert latency["outcomes"] == ["allow"] * 30
+    assert latency["end_to_end_median_ms"] == 566.975384
+    assert latency["ratio_of_adapter_only_median_to_end_to_end_median_percent"] == 2.399098
+    assert latency["credential_path"] == "exclusive trusted adapter"
+    assert latency["gateway_verified_binding"] is False
 
 
 @pytest.mark.parametrize(

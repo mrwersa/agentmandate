@@ -1,0 +1,43 @@
+{
+  "binding_latency_capture_version": 1,
+  "cleanup": {
+    "cdk_bootstrap": "retained",
+    "gateway": "absent",
+    "iam_role": "absent",
+    "lambda": "absent",
+    "log_group": "absent",
+    "policy_engine": "absent"
+  },
+  "sources": [
+    {
+      "content_sha256": "a14459b9b293971b7e9c2f485ae9a1312e9d28aa53c0f292bd1145a0a5ba639c",
+      "kind": "review_corrections",
+      "locator": "binding-live-deployment-corrections.json"
+    },
+    {
+      "content_sha256": "bf0811284799ca80fa2d354235ff58e85131895f0d751449be05bd4dca545d1d",
+      "kind": "measurement",
+      "locator": "binding-live-latency.json"
+    },
+    {
+      "content_sha256": "cae4a84f5a500388393a6907dc5ade97b786abe4ff1c29c0f02927c30f82252e",
+      "kind": "issuer_public_key",
+      "locator": "binding-live-public-key.pem"
+    },
+    {
+      "content_sha256": "bbed1f45b5602f3d2f1c23433f8c7dce9d016aaac3d033a8f9e86aff45611546",
+      "kind": "policy",
+      "locator": "binding-latency-policy.dogwood"
+    },
+    {
+      "content_sha256": "51454358125399230967ab165c5e8c5f5afdf5248eeb46fd06ffa2b7d3fc58e1",
+      "kind": "capture_script",
+      "locator": "measure_binding_live.py"
+    },
+    {
+      "content_sha256": "3539ea966fb4c191bd3d849d1df13816a067d7b09615f20a71922e1806265580",
+      "kind": "capture_dependencies",
+      "locator": "requirements-binding-latency.txt"
+    }
+  ]
+}

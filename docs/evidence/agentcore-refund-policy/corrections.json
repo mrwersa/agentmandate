@@ -65,6 +65,22 @@
       "classification_status": "canonical",
       "affected_artifact": "binding-index.json",
       "description": "The first binding invocation exposed a missing Gateway-role workload-token permission; the permission was added narrowly before the evidence run."
+    },
+    {
+      "id": "agentcore-009",
+      "reported_class": "extractor defect",
+      "classes": ["extractor defect"],
+      "classification_status": "canonical",
+      "affected_artifact": "binding-live-deployment-corrections.json",
+      "description": "The first latency deployment passed a JSON wrapper where the CLI expected raw Cedar policy text; the failed deployment was excluded."
+    },
+    {
+      "id": "agentcore-010",
+      "reported_class": "extractor defect",
+      "classes": ["extractor defect"],
+      "classification_status": "canonical",
+      "affected_artifact": "binding-live-deployment-corrections.json",
+      "description": "The first latency target used a nonexistent Lambda handler name; the handler was corrected and a successful probe preceded measurement."
     }
   ]
 }

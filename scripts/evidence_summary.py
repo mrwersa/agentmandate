@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import statistics
 import sys
 from pathlib import Path
 from typing import Any
@@ -18,7 +19,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "docs" / "evidence"
 OUTPUT = EVIDENCE / "evidence-summary.json"
-GENERATED_AT = "2026-08-29T18:06:26Z"
+GENERATED_AT = "2026-08-30T00:20:00Z"
 CLASSES = {"extractor defect", "source ambiguity", "model gap", "deployment policy"}
 
 CAPTURES = (
@@ -392,7 +393,68 @@ def _mandate_binding(root: Path) -> dict[str, Any]:
         or result["median_adapter_ms"] <= 0
     ):
         raise ValueError("mandate binding result does not match the reviewed outcomes")
-    return {"capture": "agentcore-refund-policy", **result}
+    latency = _binding_live_latency(root)
+    return {"capture": "agentcore-refund-policy", **result, "live_latency": latency}
+
+
+def _binding_live_latency(root: Path) -> dict[str, Any]:
+    result = _read(root / "agentcore-refund-policy" / "binding-live-latency.json")
+    expected_fields = {
+        "binding_live_latency_version",
+        "adapter_only_median_ms",
+        "end_to_end_median_ms",
+        "end_to_end_minimum_ms",
+        "end_to_end_maximum_ms",
+        "ratio_of_adapter_only_median_to_end_to_end_median_percent",
+        "warmups",
+        "samples",
+        "amount",
+        "outcomes",
+        "independent_signed_mandates",
+        "end_to_end_samples_ms",
+        "tool_inventory",
+        "tool_inventory_complete",
+        "request_domain",
+        "policy_session_identity",
+        "timing_boundary",
+        "environment",
+        "committed_live_identifiers",
+        "committed_credentials",
+        "gateway_verified_binding",
+        "credential_path",
+    }
+    if not isinstance(result, dict) or set(result) != expected_fields:
+        raise ValueError("binding live latency fields are not exact")
+    samples = result.get("end_to_end_samples_ms")
+    if (
+        result.get("binding_live_latency_version") != 1
+        or result.get("samples") != 30
+        or result.get("warmups") != 5
+        or result.get("independent_signed_mandates") != 30
+        or result.get("amount") != 600
+        or not isinstance(samples, list)
+        or len(samples) != 30
+        or any(not isinstance(value, (int, float)) or value <= 0 for value in samples)
+        or result.get("outcomes") != ["allow"] * 30
+        or result.get("tool_inventory") != ["BindingLatencyTarget___process_refund"]
+        or result.get("tool_inventory_complete") is not True
+        or result.get("request_domain") != "representative"
+        or result.get("credential_path") != "exclusive trusted adapter"
+        or result.get("gateway_verified_binding") is not False
+        or result.get("committed_live_identifiers") is not False
+        or result.get("committed_credentials") is not False
+    ):
+        raise ValueError("binding live latency does not match the reviewed run")
+    median_ms = statistics.median(samples)
+    if (
+        result["end_to_end_median_ms"] != round(median_ms, 6)
+        or result["end_to_end_minimum_ms"] != min(samples)
+        or result["end_to_end_maximum_ms"] != max(samples)
+        or result["ratio_of_adapter_only_median_to_end_to_end_median_percent"]
+        != round(result["adapter_only_median_ms"] / median_ms * 100, 6)
+    ):
+        raise ValueError("binding live latency statistics do not reproduce")
+    return result
 
 
 def build_summary(root: Path = EVIDENCE) -> dict[str, Any]:
