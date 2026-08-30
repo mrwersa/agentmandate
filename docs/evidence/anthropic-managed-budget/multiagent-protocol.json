@@ -1,0 +1,40 @@
+{
+  "protocol_version": 1,
+  "status": "capability_pending_confirmation_not_implemented",
+  "provider": "Anthropic",
+  "service": "Managed Agents",
+  "beta": "managed-agents-2026-04-01",
+  "sdk": "anthropic==1.2.0",
+  "model": "claude-haiku-4-5",
+  "capture_date": "2026-08-30",
+  "binding_sha256": "8fff92a1bf72f3014eec66c25dea58de569e2bf26643fc1d4de135b1854ddacc",
+  "cap_minor_units": 1,
+  "trials_per_cell": 10,
+  "random_seed": 20260831,
+  "cells": {
+    "subagent_handoff": {
+      "child_count": 1,
+      "prediction": "one_shared_session_total"
+    },
+    "concurrent_subagents_2": {
+      "child_count": 2,
+      "prediction": "unknown_overshoot_magnitude"
+    },
+    "concurrent_subagents_4": {
+      "child_count": 4,
+      "prediction": "unknown_overshoot_magnitude"
+    }
+  },
+  "worker_instruction": "Return exactly 500 repetitions of the token ALPHA, separated by one space, and nothing else.",
+  "eligibility": {
+    "exact_child_count_required": true,
+    "all_children_must_have_the_primary_thread_as_parent": true,
+    "concurrent_cells_require_all_child_creation_events_before_the_first_child_idle_event": true,
+    "confirmation_retries": 0,
+    "nonconforming_trials": "retain and report; never replace or omit"
+  },
+  "capability": {
+    "excluded_from_confirmation": true,
+    "one_attempt_per_child_count": true
+  }
+}

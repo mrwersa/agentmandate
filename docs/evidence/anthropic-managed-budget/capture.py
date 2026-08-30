@@ -1,8 +1,8 @@
 """Private-first Anthropic Managed Agents budget capture.
 
-The capability and pilot stages are intentionally the only executable stages
-until a reviewed pilot cap is committed to protocol.json. Never commit the raw
-output produced by this program because it contains live service identifiers.
+Each live stage is unlocked only after its inputs are reviewed. Never commit
+the raw output produced by this program because it contains live service
+identifiers.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 PROTOCOL_PATH = HERE / "protocol.json"
+MULTIAGENT_PROTOCOL_PATH = HERE / "multiagent-protocol.json"
 BETAS = ["managed-agents-2026-04-01"]
 POLL_SECONDS = 0.5
 TIMEOUT_SECONDS = 180
@@ -28,6 +29,10 @@ WORKSPACE_ID = re.compile(r"^wrkspc_[A-Za-z0-9]+$")
 
 def _load_protocol() -> dict[str, Any]:
     return json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
+
+
+def _load_multiagent_protocol() -> dict[str, Any]:
+    return json.loads(MULTIAGENT_PROTOCOL_PATH.read_text(encoding="utf-8"))
 
 
 def _jsonable(value: Any) -> Any:
@@ -498,6 +503,127 @@ def confirm(output: Path) -> None:
             _write_json(output / "cleanup.json", cleanup)
 
 
+def multiagent_capability(output: Path) -> None:
+    """Probe whether frozen prompts create the requested thread topologies."""
+    protocol = _load_multiagent_protocol()
+    if protocol["status"] != "capability_pending_confirmation_not_implemented":
+        raise RuntimeError("multiagent capability is closed after its result is committed")
+    client = _client()
+    output.mkdir(parents=True, exist_ok=False)
+    environment = None
+    worker = None
+    coordinator = None
+    sessions: list[Any] = []
+    cleanup: list[dict[str, Any]] = []
+    try:
+        environment = client.beta.environments.create(
+            name="agentmandate-multiagent-capability",
+            config={
+                "type": "cloud",
+                "networking": {
+                    "type": "limited",
+                    "allowed_hosts": [],
+                    "allow_mcp_servers": False,
+                    "allow_package_managers": False,
+                },
+            },
+            betas=BETAS,
+        )
+        worker = client.beta.agents.create(
+            name="agentmandate-budget-worker",
+            model=protocol["model"],
+            system="Follow the coordinator's output instruction exactly. Do not use tools.",
+            tools=[],
+            betas=BETAS,
+        )
+        coordinator = client.beta.agents.create(
+            name="agentmandate-budget-coordinator",
+            model=protocol["model"],
+            system=(
+                "Follow the user's requested delegation topology exactly. Spawn all requested "
+                "workers before waiting for any result. Do not perform the workers' task yourself."
+            ),
+            tools=[],
+            multiagent={"type": "coordinator", "agents": [worker.id]},
+            betas=BETAS,
+        )
+        for cell, specification in protocol["cells"].items():
+            child_count = specification["child_count"]
+            session = client.beta.sessions.create(
+                agent={
+                    "type": "agent",
+                    "id": coordinator.id,
+                    "version": coordinator.version,
+                },
+                environment_id=environment.id,
+                metadata={
+                    "study": "budget-multiagent-capability",
+                    "cell": cell,
+                    "mandate_sha256": protocol["binding_sha256"],
+                },
+                betas=BETAS,
+            )
+            sessions.append(session)
+            prompt = (
+                f"Immediately spawn exactly {child_count} separate roster workers concurrently. "
+                "Spawn every worker before waiting for any result. Give each worker this exact "
+                f"instruction: {protocol['worker_instruction']} After all workers finish, reply "
+                "with only DONE."
+            )
+            _send_work(client, session.id, prompt)
+            _write_json(
+                output / f"capability-{cell}.json",
+                {
+                    "excluded_from_confirmation": True,
+                    "requested_child_count": child_count,
+                    "snapshot": _snapshot(client, session.id),
+                },
+            )
+            _delete_session(client, session.id)
+            sessions.remove(session)
+            cleanup.append(
+                {
+                    "kind": "session",
+                    "cell": cell,
+                    "deleted": True,
+                    "verified_absent": True,
+                }
+            )
+    finally:
+        for session in sessions:
+            try:
+                _delete_session(client, session.id)
+                cleanup.append({"kind": "session", "deleted": True, "verified_absent": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "session", "deleted": False, "error_type": type(exc).__name__}
+                )
+        for role, agent in (("coordinator", coordinator), ("worker", worker)):
+            if agent is not None:
+                try:
+                    client.beta.agents.archive(agent.id, betas=BETAS)
+                    cleanup.append({"kind": "agent", "role": role, "archived": True})
+                except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                    cleanup.append(
+                        {
+                            "kind": "agent",
+                            "role": role,
+                            "archived": False,
+                            "error_type": type(exc).__name__,
+                        }
+                    )
+        if environment is not None:
+            try:
+                client.beta.environments.delete(environment.id, betas=BETAS)
+                cleanup.append({"kind": "environment", "deleted": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "environment", "deleted": False, "error_type": type(exc).__name__}
+                )
+        if output.exists():
+            _write_json(output / "cleanup.json", cleanup)
+
+
 def _is_anthropic_error(exc: Exception) -> bool:
     module = type(exc).__module__
     return module == "anthropic" or module.startswith("anthropic.")
@@ -505,11 +631,18 @@ def _is_anthropic_error(exc: Exception) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("stage", choices=("capability", "pilot", "confirm"))
+    parser.add_argument(
+        "stage", choices=("capability", "pilot", "confirm", "multiagent-capability")
+    )
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args(argv)
     try:
-        {"capability": capability, "pilot": pilot, "confirm": confirm}[args.stage](args.output)
+        {
+            "capability": capability,
+            "pilot": pilot,
+            "confirm": confirm,
+            "multiagent-capability": multiagent_capability,
+        }[args.stage](args.output)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

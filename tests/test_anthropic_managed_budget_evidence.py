@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 ROOT = Path(__file__).parents[1]
 EVIDENCE = ROOT / "docs" / "evidence" / "anthropic-managed-budget"
 
@@ -44,6 +46,34 @@ def test_protocol_records_the_excluded_pilot_and_frozen_confirmation_cap():
         "concurrent_subagents_2",
         "concurrent_subagents_4",
     ]
+
+
+def test_multiagent_protocol_freezes_topology_and_nonreplacement_rules():
+    protocol = json.loads((EVIDENCE / "multiagent-protocol.json").read_text())
+
+    assert protocol["status"] == "capability_pending_confirmation_not_implemented"
+    assert protocol["binding_sha256"] == json.loads(
+        (EVIDENCE / "protocol.json").read_text()
+    )["binding"]["sha256"]
+    assert {name: cell["child_count"] for name, cell in protocol["cells"].items()} == {
+        "subagent_handoff": 1,
+        "concurrent_subagents_2": 2,
+        "concurrent_subagents_4": 4,
+    }
+    assert protocol["eligibility"]["confirmation_retries"] == 0
+    assert protocol["eligibility"]["nonconforming_trials"].startswith("retain and report")
+
+
+def test_multiagent_capability_refuses_after_protocol_status_changes(tmp_path, monkeypatch):
+    capture = _capture_module()
+    monkeypatch.setattr(
+        capture,
+        "_load_multiagent_protocol",
+        lambda: {"status": "capability_complete"},
+    )
+
+    with pytest.raises(RuntimeError, match="capability is closed"):
+        capture.multiagent_capability(tmp_path / "private-output")
 
 
 def test_capture_uses_managed_beta_and_pinned_sdk():

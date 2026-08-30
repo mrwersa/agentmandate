@@ -53,6 +53,13 @@ Their order was randomised with the committed seed and each ran ten trials.
 Subagent handoff and concurrent overshoot remain unimplemented until a separate
 review of prompt-driven thread creation.
 
+`multiagent-protocol.json` freezes that separate stage before execution. Its
+excluded capability probe requests one, two, and four child threads with the
+same worker instruction. Confirmation permits no replacement trials: a prompt
+that produces the wrong child count or parentage is retained and reported.
+Concurrent cells additionally require every child-creation event to precede
+the first child-idle event; prose instructions alone do not establish overlap.
+
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked
 keys may span workspaces. The script creates managed agents, cloud environments,
