@@ -76,6 +76,30 @@ def test_multiagent_capability_refuses_after_protocol_status_changes(tmp_path, m
         capture.multiagent_capability(tmp_path / "private-output")
 
 
+def test_multiagent_capability_summary_proves_topology_without_live_identifiers():
+    text = (EVIDENCE / "multiagent-capability-summary.json").read_text()
+    summary = json.loads(text)
+
+    assert summary["excluded_from_confirmation"] is True
+    assert summary["protocol_sha256"] == hashlib.sha256(
+        (EVIDENCE / "multiagent-protocol.json").read_bytes()
+    ).hexdigest()
+    assert [cell["requested_children"] for cell in summary["cells"]] == [1, 2, 4]
+    assert [cell["observed_children"] for cell in summary["cells"]] == [1, 2, 4]
+    assert [cell["final_list_cost_minor_units"] for cell in summary["cells"]] == [2, 4, 6]
+    assert all(cell["primary_threads"] == 1 for cell in summary["cells"])
+    assert all(cell["all_children_attached_to_primary"] for cell in summary["cells"])
+    assert all(
+        cell["all_children_created_before_first_child_idle"] for cell in summary["cells"]
+    )
+    assert summary["cleanup"] == {
+        "sessions_deleted_and_verified_absent": 3,
+        "agents_archived": 2,
+        "environment_deleted": True,
+    }
+    assert re.search(r"\b(?:sesn|sthr|agent|env|ws)_[A-Za-z0-9]{12,}\b", text) is None
+
+
 def test_capture_uses_managed_beta_and_pinned_sdk():
     capture = _capture_module()
 

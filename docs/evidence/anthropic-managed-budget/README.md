@@ -60,6 +60,14 @@ that produces the wrong child count or parentage is retained and reported.
 Concurrent cells additionally require every child-creation event to precede
 the first child-idle event; prose instructions alone do not establish overlap.
 
+The excluded capability probe succeeded for all three requested topologies.
+`multiagent-capability-summary.json`, SHA-256 `5d24b64b6950915d69ef318b56cf74529fde0b3a92f96c76f3d027081d8121fa`,
+records one primary thread plus exactly one, two, and four child
+threads. Every child named the primary as its parent, and all child-creation
+events preceded the first child-idle event. The uncapped sessions ended at two,
+four, and six cents respectively. These observations validate the frozen
+prompts; they are not confirmation trials and do not answer budget behavior.
+
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked
 keys may span workspaces. The script creates managed agents, cloud environments,
