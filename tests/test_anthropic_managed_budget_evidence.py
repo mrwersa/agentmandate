@@ -41,6 +41,13 @@ def test_capture_uses_managed_beta_and_pinned_sdk():
     assert (EVIDENCE / "requirements-capture.txt").read_text() == "anthropic==1.2.0\n"
 
 
+def test_private_capture_outputs_and_environment_are_gitignored():
+    ignored = (ROOT / ".gitignore").read_text().splitlines()
+
+    assert ".capture-venv/" in ignored
+    assert "private-*/" in ignored
+
+
 def test_confirmation_refuses_to_run_before_pilot_cap(tmp_path, capsys):
     capture = _capture_module()
 
