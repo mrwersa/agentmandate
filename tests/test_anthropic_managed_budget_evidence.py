@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 ROOT = Path(__file__).parents[1]
 EVIDENCE = ROOT / "docs" / "evidence" / "anthropic-managed-budget"
@@ -89,3 +90,72 @@ def test_capture_does_not_echo_anthropic_error_values(tmp_path, monkeypatch, cap
     error = capsys.readouterr().err
     assert "FakeAnthropicError" in error
     assert "live-workspace-identifier" not in error
+
+
+def test_wait_idle_does_not_accept_the_prestart_idle_state(monkeypatch):
+    capture = _capture_module()
+    states = iter(("idle", "running", "idle"))
+    processed = iter((None, None, "2026-08-30T12:00:00Z"))
+
+    class Sessions:
+        def __init__(self):
+            self.events = SimpleNamespace(list=self.list_events)
+
+        @staticmethod
+        def list_events(*_args, **_kwargs):
+            value = next(processed)
+            return SimpleNamespace(
+                data=[SimpleNamespace(id="event-1", processed_at=value)],
+                has_next_page=lambda: False,
+            )
+
+        @staticmethod
+        def retrieve(*_args, **_kwargs):
+            return SimpleNamespace(status=next(states))
+
+    client = SimpleNamespace(beta=SimpleNamespace(sessions=Sessions()))
+    monkeypatch.setattr(capture.time, "sleep", lambda _seconds: None)
+
+    result = capture._wait_idle(client, "session-1", "event-1")
+
+    assert result.status == "idle"
+
+
+def test_delete_session_interrupts_running_work_and_verifies_absence(monkeypatch):
+    capture = _capture_module()
+
+    class FakeNotFoundError(Exception):
+        pass
+
+    FakeNotFoundError.__module__ = "anthropic.fake"
+    FakeNotFoundError.__name__ = "NotFoundError"
+
+    class Events:
+        @staticmethod
+        def send(*_args, **_kwargs):
+            return SimpleNamespace(data=[SimpleNamespace(id="interrupt-1")])
+
+    class Sessions:
+        def __init__(self):
+            self.events = Events()
+            self.delete_calls = 0
+            self.retrieve_calls = 0
+
+        def delete(self, *_args, **_kwargs):
+            self.delete_calls += 1
+            if self.delete_calls == 1:
+                raise RuntimeError("running")
+
+        def retrieve(self, *_args, **_kwargs):
+            self.retrieve_calls += 1
+            if self.retrieve_calls == 1:
+                return SimpleNamespace(status="running")
+            raise FakeNotFoundError()
+
+    sessions = Sessions()
+    client = SimpleNamespace(beta=SimpleNamespace(sessions=sessions))
+    monkeypatch.setattr(capture, "_wait_idle", lambda *_args: SimpleNamespace(status="idle"))
+
+    capture._delete_session(client, "session-1")
+
+    assert sessions.delete_calls == 2
