@@ -37,12 +37,14 @@ python -m venv .capture-venv
 outputs remain private and excluded from confirmation. After pilot review, the
 chosen whole-cent cap and capture date must be committed before confirmation.
 
-The script reads `ANTHROPIC_API_KEY` from the environment. It creates managed
-agents, cloud environments, and sessions, makes calls only to Anthropic's API,
-and attempts cleanup in `finally`. Native private output may contain live IDs
-and timestamps. It must not be committed. The later publication step assigns
-stable aliases and preserves event order, costs, caps, stop reasons, agent
-versions, and thread parentage while removing credentials and live identifiers.
+The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
+environment. The workspace ID is required explicitly because identity-linked
+keys may span workspaces. The script creates managed agents, cloud environments,
+and sessions, makes calls only to Anthropic's API, and attempts cleanup in
+`finally`. Native private output may contain live IDs and timestamps. It must
+not be committed. The later publication step assigns stable aliases and
+preserves event order, costs, caps, stop reasons, agent versions, and thread
+parentage while removing credentials and live identifiers.
 
 ## Pre-capture correction
 

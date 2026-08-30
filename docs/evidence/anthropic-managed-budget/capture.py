@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import date, datetime
@@ -21,6 +22,7 @@ PROTOCOL_PATH = HERE / "protocol.json"
 BETAS = ["managed-agents-2026-04-01"]
 POLL_SECONDS = 0.5
 TIMEOUT_SECONDS = 180
+WORKSPACE_ID = re.compile(r"^wrkspc_[A-Za-z0-9]+$")
 
 
 def _load_protocol() -> dict[str, Any]:
@@ -49,13 +51,16 @@ def _write_json(path: Path, value: Any) -> None:
 def _client() -> Any:
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("ANTHROPIC_API_KEY is not set")
+    workspace_id = os.environ.get("ANTHROPIC_WORKSPACE_ID", "")
+    if not WORKSPACE_ID.fullmatch(workspace_id):
+        raise RuntimeError("ANTHROPIC_WORKSPACE_ID is not set to a valid workspace ID")
     try:
         from anthropic import Anthropic
     except ModuleNotFoundError as exc:
         raise RuntimeError(
             "install the pinned capture requirements before running this program"
         ) from exc
-    return Anthropic()
+    return Anthropic(default_headers={"anthropic-workspace-id": workspace_id})
 
 
 def _all(page: Any) -> list[Any]:
