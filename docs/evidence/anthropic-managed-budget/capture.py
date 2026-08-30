@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -160,6 +161,78 @@ def _list_cost(snapshot: dict[str, Any]) -> int:
     return int(value)
 
 
+def _idle_reason(snapshot: dict[str, Any]) -> str | None:
+    for event in reversed(snapshot["events"]):
+        if event.type == "session.status_idle" and event.stop_reason is not None:
+            return event.stop_reason.type
+    return None
+
+
+def _budget(cap_minor_units: int) -> dict[str, Any]:
+    return {
+        "type": "limit",
+        "max_list_cost": {"amount": str(cap_minor_units), "currency": "USD"},
+    }
+
+
+def _create_budget_session(
+    client: Any,
+    agent: Any,
+    environment: Any,
+    cap_minor_units: int,
+    metadata: dict[str, str],
+) -> Any:
+    return client.beta.sessions.create(
+        agent={"type": "agent", "id": agent.id, "version": agent.version},
+        environment_id=environment.id,
+        budget=_budget(cap_minor_units),
+        metadata=metadata,
+        betas=BETAS,
+    )
+
+
+def _run_to_budget(
+    client: Any,
+    session_id: str,
+    prompt: str,
+    max_work_units: int,
+) -> list[dict[str, Any]]:
+    work_units = []
+    for index in range(max_work_units):
+        _send_work(client, session_id, prompt)
+        snapshot = _snapshot(client, session_id)
+        work_units.append(
+            {
+                "work_unit": index + 1,
+                "list_cost_minor_units": _list_cost(snapshot),
+                "idle_reason": _idle_reason(snapshot),
+                "snapshot": snapshot,
+            }
+        )
+        if work_units[-1]["idle_reason"] == "budget_reached":
+            return work_units
+    raise RuntimeError("managed session did not reach its budget within the frozen work-unit bound")
+
+
+def _expect_budget_refusal(client: Any, session_id: str, prompt: str) -> dict[str, Any]:
+    try:
+        client.beta.sessions.events.send(
+            session_id,
+            betas=BETAS,
+            events=[
+                {
+                    "type": "user.message",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        )
+    except Exception as exc:  # noqa: BLE001 - private native refusal capture
+        if not _is_anthropic_error(exc):
+            raise
+        return {"error_type": type(exc).__name__, "body": getattr(exc, "body", None)}
+    raise RuntimeError("managed session accepted new work after reporting budget_reached")
+
+
 def capability(output: Path) -> None:
     client = _client()
     output.mkdir(parents=True, exist_ok=False)
@@ -265,13 +338,164 @@ def pilot(output: Path) -> None:
             _write_json(output / "cleanup.json", cleanup)
 
 
-def confirm(_: Path) -> None:
+def confirm(output: Path) -> None:
     protocol = _load_protocol()
     if protocol["confirmation"]["cap_minor_units"] is None:
         raise RuntimeError(
             "confirmation is locked until the excluded pilot cap is reviewed and committed"
         )
-    raise RuntimeError("confirmation implementation is not part of the frozen pilot harness")
+    client = _client()
+    output.mkdir(parents=True, exist_ok=False)
+    environment = None
+    agent = None
+    sessions: list[Any] = []
+    cleanup: list[dict[str, Any]] = []
+    confirmation = protocol["confirmation"]
+    cap = confirmation["cap_minor_units"]
+    prompt = protocol["pilot"]["work_unit"]
+    mandate_digest = protocol["binding"]["sha256"]
+    rng = random.Random(confirmation["random_seed"])
+    order = []
+    for trial in range(1, confirmation["trials_per_cell"] + 1):
+        cells = ["sequential_control", "fresh_session_replication", "cap_revision_control"]
+        rng.shuffle(cells)
+        order.extend({"trial": trial, "cell": cell} for cell in cells)
+    try:
+        environment = client.beta.environments.create(
+            name="agentmandate-budget-confirmation",
+            config={
+                "type": "cloud",
+                "networking": {
+                    "type": "limited",
+                    "allowed_hosts": [],
+                    "allow_mcp_servers": False,
+                    "allow_package_managers": False,
+                },
+            },
+            betas=BETAS,
+        )
+        agent = client.beta.agents.create(
+            name="agentmandate-budget-confirmation",
+            model=protocol["model"],
+            system="Follow the user's output instruction exactly. Do not use tools.",
+            tools=[],
+            betas=BETAS,
+        )
+        _write_json(output / "cell-order.json", order)
+        for position, item in enumerate(order, 1):
+            metadata = {
+                "study": "budget-confirmation",
+                "trial": str(item["trial"]),
+                "cell": item["cell"],
+                "mandate_sha256": mandate_digest,
+                "principal": "reviewed-caller",
+            }
+            result: dict[str, Any] = {"order": position, **item}
+            created: list[Any] = []
+            if item["cell"] == "sequential_control":
+                session = _create_budget_session(client, agent, environment, cap, metadata)
+                sessions.append(session)
+                created.append(session)
+                result["work_units"] = _run_to_budget(
+                    client,
+                    session.id,
+                    prompt,
+                    confirmation["max_work_units_per_budget"],
+                )
+                result["post_budget_refusal"] = _expect_budget_refusal(
+                    client, session.id, prompt
+                )
+            elif item["cell"] == "fresh_session_replication":
+                result["sessions"] = []
+                for replica in ("a", "b"):
+                    replica_metadata = {**metadata, "replica": replica}
+                    session = _create_budget_session(
+                        client, agent, environment, cap, replica_metadata
+                    )
+                    sessions.append(session)
+                    created.append(session)
+                    result["sessions"].append(
+                        {
+                            "replica": replica,
+                            "work_units": _run_to_budget(
+                                client,
+                                session.id,
+                                prompt,
+                                confirmation["max_work_units_per_budget"],
+                            ),
+                        }
+                    )
+            else:
+                session = _create_budget_session(client, agent, environment, cap, metadata)
+                sessions.append(session)
+                created.append(session)
+                result["before_revision"] = _run_to_budget(
+                    client,
+                    session.id,
+                    prompt,
+                    confirmation["max_work_units_per_budget"],
+                )
+                consumed = result["before_revision"][-1]["list_cost_minor_units"]
+                revised_cap = consumed + 1
+                updated = client.beta.sessions.update(
+                    session.id,
+                    budget=_budget(revised_cap),
+                    betas=BETAS,
+                )
+                result["revision"] = {
+                    "consumed_before": consumed,
+                    "cap_after": revised_cap,
+                    "cost_immediately_after": int(updated.usage.list_cost.amount),
+                }
+                result["after_revision"] = _run_to_budget(
+                    client,
+                    session.id,
+                    prompt,
+                    confirmation["max_work_units_per_budget"],
+                )
+            _write_json(
+                output / f"trial-{item['trial']:02d}-{item['cell']}.json",
+                result,
+            )
+            for session in created:
+                _delete_session(client, session.id)
+                sessions.remove(session)
+                cleanup.append(
+                    {
+                        "kind": "session",
+                        "cell": item["cell"],
+                        "trial": item["trial"],
+                        "deleted": True,
+                        "verified_absent": True,
+                    }
+                )
+    finally:
+        for session in sessions:
+            try:
+                _delete_session(client, session.id)
+                cleanup.append({"kind": "session", "deleted": True, "verified_absent": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "session", "deleted": False, "error_type": type(exc).__name__}
+                )
+        if agent is not None:
+            try:
+                client.beta.agents.archive(agent.id, betas=BETAS)
+                cleanup.append({"kind": "agent", "archived": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "agent", "archived": False, "error_type": type(exc).__name__}
+                )
+        if environment is not None:
+            try:
+                client.beta.environments.delete(environment.id, betas=BETAS)
+                cleanup.append({"kind": "environment", "deleted": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "environment", "deleted": False, "error_type": type(exc).__name__}
+                )
+        if output.exists():
+            _write_json(output / "cleanup.json", cleanup)
 
 
 def _is_anthropic_error(exc: Exception) -> bool:
