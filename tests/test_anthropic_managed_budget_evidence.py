@@ -83,6 +83,54 @@ def test_pilot_summary_selects_one_cent_without_live_identifiers():
     assert re.search(r"\b(?:sesn|agent|env)_[A-Za-z0-9]{16,}\b", summary_text) is None
 
 
+def test_single_agent_confirmation_preserves_session_boundary_results_without_identifiers():
+    text = (EVIDENCE / "confirmation.json").read_text()
+    result = json.loads(text)
+    trials = result["trials"]
+
+    assert result["evidence_version"] == 1
+    assert result["protocol_sha256"] == hashlib.sha256(
+        (EVIDENCE / "protocol.json").read_bytes()
+    ).hexdigest()
+    assert len(result["raw_capture_sha256"]) == 32
+    assert len(trials) == 30
+    assert [trial["order"] for trial in trials] == list(range(1, 31))
+
+    sequential = [trial for trial in trials if trial["cell"] == "sequential_control"]
+    fresh = [trial for trial in trials if trial["cell"] == "fresh_session_replication"]
+    revised = [trial for trial in trials if trial["cell"] == "cap_revision_control"]
+    assert len(sequential) == len(fresh) == len(revised) == 10
+    assert all(trial["work_units"][-1]["idle_reason"] == "budget_reached" for trial in sequential)
+    assert all(trial["work_units"][-1]["list_cost_minor_units"] == 1 for trial in sequential)
+    assert all(
+        trial["post_budget_refusal"]["api_error_type"] == "invalid_request_error"
+        for trial in sequential
+    )
+    assert all(len(trial["sessions"]) == 2 for trial in fresh)
+    assert all(
+        session["work_units"][-1]["idle_reason"] == "budget_reached"
+        and session["work_units"][-1]["list_cost_minor_units"] == 1
+        for trial in fresh
+        for session in trial["sessions"]
+    )
+    assert all(
+        trial["revision"]
+        == {"cap_after": 2, "consumed_before": 1, "cost_immediately_after": 1}
+        for trial in revised
+    )
+    assert all(trial["after_revision"][-1]["idle_reason"] == "budget_reached" for trial in revised)
+    assert sorted(
+        trial["after_revision"][-1]["list_cost_minor_units"] for trial in revised
+    ) == [2] * 9 + [3]
+    assert result["cleanup"] == {
+        "agent_archived": True,
+        "environment_deleted": True,
+        "sessions_deleted_and_verified_absent": 40,
+    }
+    assert re.search(r"\b(?:sesn|agent|env|ws)_[A-Za-z0-9]{12,}\b", text) is None
+    assert "processed_at" not in text
+
+
 def test_capture_refuses_to_run_without_api_key(tmp_path, monkeypatch, capsys):
     capture = _capture_module()
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)

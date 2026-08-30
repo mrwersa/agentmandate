@@ -1,0 +1,1260 @@
+{
+  "cleanup": {
+    "agent_archived": true,
+    "environment_deleted": true,
+    "sessions_deleted_and_verified_absent": 40
+  },
+  "evidence_version": 1,
+  "protocol_sha256": "5e7ad330270b36adce17c7b4e9f374ca2f03b548e1c251ab1b37eabb0a6a4001",
+  "raw_capture_sha256": {
+    "cell-order.json": "5d383a437b19ab79e8bf31120ed06f8aca2083e3ff92f02a72839af1d034b624",
+    "cleanup.json": "6dfff3f34745f2268c0556b50b15d3196c7611c2f7b3f8a7896d80bd552a43db",
+    "trial-01-cap_revision_control.json": "ccd699df1bac947f169e2c0f7a34472a3b0c64d0cef27d947b0f47bf7d49a2e5",
+    "trial-01-fresh_session_replication.json": "06e961949b4fc962ba13b714fefee644383bbce1a64611b59179ca98d55d7330",
+    "trial-01-sequential_control.json": "8a18a9b538f90380aaf2508f0bd85ed1450d48b353c6bd9e04382f7ecb14851c",
+    "trial-02-cap_revision_control.json": "cb2b3ade9af29a77f600bf8dd55cfd5e07e29a649ab6876e4bd211a3ddc16e3f",
+    "trial-02-fresh_session_replication.json": "e7881f08ada37182581d65f0707d4d9e250cb12b643c8a8bba101bc14c25363d",
+    "trial-02-sequential_control.json": "8ada9daa36ca8be5d45cedaf691fcc9de5773b995032451317abd4cfbf83dc56",
+    "trial-03-cap_revision_control.json": "9867b52ace5bf1a0a47584231ff81247f083aa725ce9acdf04461a2e57ca0717",
+    "trial-03-fresh_session_replication.json": "4496977c10ec290842f76d9fa843f692c69579444f11477cd4db4d46c8bd87f4",
+    "trial-03-sequential_control.json": "4453bdb9049db48f66a31514bccb8693b1644cd220ff2f7ffa4b9f64f9c0b99c",
+    "trial-04-cap_revision_control.json": "785155151c1f6d03d89ef50f1abee2670c0257fd7a8e4f176e1aae1382db4eb0",
+    "trial-04-fresh_session_replication.json": "56078e6e6922b9cdb3286ee29b963ed749d45ccb03f92a67252a19d9321353a6",
+    "trial-04-sequential_control.json": "17966770d4ccb562bca4df77271a4b03dca95cddd0f38418225271c4d8025f24",
+    "trial-05-cap_revision_control.json": "844fa7eb82d5f5d9aa27157644dd405a678b27aa7070cac8013db6eb1ce4cf98",
+    "trial-05-fresh_session_replication.json": "e655f9257bc25fd9b0da6bea39fd794ae2b3b6787c3e5096e1f786c5b7be03b3",
+    "trial-05-sequential_control.json": "a7b79f6d4fe8d16f3a0e0ff4fdd0f9e919b41fb794ca6194f7a0626cbb3c9ae9",
+    "trial-06-cap_revision_control.json": "bf6df0593de5ad214cfc085205be747d0d5bb625323b6d75921e833dfff54ecb",
+    "trial-06-fresh_session_replication.json": "75569e227385081a5404e23a85d5ac6e12666734a255d3812016abcd088f88f1",
+    "trial-06-sequential_control.json": "bae541f4378b55ff9b60b474135a8c18639d98553cee1245923d7f5d88f29c48",
+    "trial-07-cap_revision_control.json": "3ee11ce3db3a5ac3f404a165b346045c04860d6428a5595ea9faa01a8e97663e",
+    "trial-07-fresh_session_replication.json": "6d49e78454df329e0cac75e8387143c39c48c66c32c8d87e1e0ac536b82053e1",
+    "trial-07-sequential_control.json": "5e72abe5906a969258af207de90a378b200bfa33d4800c3071bd7ef868268cd7",
+    "trial-08-cap_revision_control.json": "d17d4a10cdfddfc6d6a54d425940944fb783a9fbaf39f6dda85adb8a96be030a",
+    "trial-08-fresh_session_replication.json": "89360a74f2e6db8023a0e027ee268388702ab7f12e02539e2f4498dfadfae6fb",
+    "trial-08-sequential_control.json": "a93bc7964f202db11247fee742cca3c5de9c4384a52ca2d7db1e1e68937f0fba",
+    "trial-09-cap_revision_control.json": "544eab8d5e2d558765bb1512925ff7f6173af1c029fd51e7202f99ed831a700c",
+    "trial-09-fresh_session_replication.json": "037f4c5739bd2dbc33e83db805d2718b3a63fad52adeda9f61923a5df2f9b7fa",
+    "trial-09-sequential_control.json": "e90125459158e8fe5f8f72e74f125b674f02c998a7b0759a2a8c1a8ab5386d3c",
+    "trial-10-cap_revision_control.json": "caf9a6167aa5d4217186a385c2a4477c1ce736ccf8b983a0bc4b21ccb8af34fd",
+    "trial-10-fresh_session_replication.json": "2d80fd05f84cefca35df3df8baa88257311a9dcde95d48e2f572e33f0bdc1cc4",
+    "trial-10-sequential_control.json": "26ed17b958fa6f643a59f2fbf4decbc06826a6782b1439325aa918fc892bf56c"
+  },
+  "trials": [
+    {
+      "cell": "fresh_session_replication",
+      "order": 1,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 1
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 3
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 2,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 1
+    },
+    {
+      "cell": "sequential_control",
+      "order": 3,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 1,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 4
+        }
+      ]
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 4,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 2
+    },
+    {
+      "cell": "sequential_control",
+      "order": 5,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 2,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ]
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 6,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        }
+      ],
+      "trial": 2
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 7,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        }
+      ],
+      "trial": 3
+    },
+    {
+      "cell": "sequential_control",
+      "order": 8,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 3,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        }
+      ]
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 3
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 9,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 3
+    },
+    {
+      "cell": "sequential_control",
+      "order": 10,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 4,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ]
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 11,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 4
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 3
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 12,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 4
+    },
+    {
+      "cell": "sequential_control",
+      "order": 13,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 5,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 4
+        }
+      ]
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 14,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 5
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 3
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 15,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 5
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 16,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 6
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 17,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 6
+    },
+    {
+      "cell": "sequential_control",
+      "order": 18,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 6,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ]
+    },
+    {
+      "cell": "sequential_control",
+      "order": 19,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 7,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 4
+        }
+      ]
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 4
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 20,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 7
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 21,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 7
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 22,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 8
+    },
+    {
+      "cell": "sequential_control",
+      "order": 23,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 8,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ]
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 3,
+          "work_unit": 3
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 4
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 24,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 8
+    },
+    {
+      "cell": "sequential_control",
+      "order": 25,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 9,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ]
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 26,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        }
+      ],
+      "trial": 9
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 4
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 27,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 9
+    },
+    {
+      "cell": "fresh_session_replication",
+      "order": 28,
+      "sessions": [
+        {
+          "replica": "a",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 0,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 4
+            }
+          ]
+        },
+        {
+          "replica": "b",
+          "work_units": [
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 1
+            },
+            {
+              "idle_reason": "end_turn",
+              "list_cost_minor_units": 1,
+              "work_unit": 2
+            },
+            {
+              "idle_reason": "budget_reached",
+              "list_cost_minor_units": 1,
+              "work_unit": 3
+            }
+          ]
+        }
+      ],
+      "trial": 10
+    },
+    {
+      "after_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 2,
+          "work_unit": 3
+        }
+      ],
+      "before_revision": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ],
+      "cell": "cap_revision_control",
+      "order": 29,
+      "revision": {
+        "cap_after": 2,
+        "consumed_before": 1,
+        "cost_immediately_after": 1
+      },
+      "trial": 10
+    },
+    {
+      "cell": "sequential_control",
+      "order": 30,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "trial": 10,
+      "work_units": [
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "work_unit": 1
+        },
+        {
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "work_unit": 2
+        },
+        {
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 1,
+          "work_unit": 3
+        }
+      ]
+    }
+  ]
+}
