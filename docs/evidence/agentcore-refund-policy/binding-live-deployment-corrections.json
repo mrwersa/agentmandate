@@ -1,0 +1,18 @@
+{
+  "binding_live_deployment_corrections_version": 1,
+  "corrections": [
+    {
+      "class": "extractor defect",
+      "id": "binding-live-policy-source",
+      "observed": "The first deployment passed a JSON wrapper where the CLI expected raw Cedar policy text.",
+      "resolution": "The failed deployment was excluded and the exact raw Cedar source was deployed."
+    },
+    {
+      "class": "extractor defect",
+      "id": "binding-live-lambda-handler",
+      "observed": "The first managed target calls reached a Lambda configuration whose handler name did not exist.",
+      "resolution": "The handler configuration was corrected and a successful probe preceded all retained samples."
+    }
+  ],
+  "failed_outcomes_entered_measurement": false
+}
