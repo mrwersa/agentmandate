@@ -1,8 +1,8 @@
 # Anthropic Managed Agents evidence: preregistered session-budget replication
 
-This package will test whether a second managed architecture places cumulative
+This package tests whether a second managed architecture places cumulative
 authority at a session boundary that is not joined natively to a reviewed
-mandate. No live result has been captured yet. Issue #143 tracks execution.
+mandate. Issue #143 tracks the staged execution.
 
 ## Evidence boundary and provenance
 
@@ -12,8 +12,9 @@ mandate. No live result has been captured yet. Issue #143 tracks execution.
   client-side `--max-budget-usd` option.
 - **Model:** `claude-haiku-4-5`, frozen in `protocol.json`.
 - **SDK:** `anthropic==1.2.0`, pinned in `requirements-capture.txt`.
-- **Completeness:** no empirical claim is complete before the pilot and ten
-  confirmatory trials per measurable cell have merged.
+- **Completeness:** the three single-agent cells have ten confirmatory trials
+  each. The preregistered subagent cells remain pending and are not implied by
+  these results.
 
 Primary documentation:
 
@@ -42,14 +43,15 @@ The valid excluded pilot completed on 30 August 2026. Its three sessions first
 reported a non-zero whole-cent cost after 2, 3, and 2 frozen work units. All
 three sessions were deleted and verified absent. The preregistered selection
 rule therefore fixes the confirmation cap at one cent. `pilot-summary.json`
-contains only these aggregate pilot facts and no live identifier. Confirmation
-implementation remains absent in this commit.
+contains only these aggregate pilot facts and no live identifier. The protocol
+file remains byte-identical to its pre-confirmation state; its status records
+the point at which it was frozen rather than being rewritten after observation.
 
-The next capture stage implements only the three single-agent confirmation
-cells: sequential enforcement, fresh-session replication, and live cap
-revision. Their order is randomised with the committed seed and each runs ten
-trials. Subagent handoff and concurrent overshoot remain unimplemented until a
-separate review of prompt-driven thread creation.
+The first confirmation stage implements only the three single-agent cells:
+sequential enforcement, fresh-session replication, and live cap revision.
+Their order was randomised with the committed seed and each ran ten trials.
+Subagent handoff and concurrent overshoot remain unimplemented until a separate
+review of prompt-driven thread creation.
 
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked
@@ -85,7 +87,31 @@ repeats the frozen work unit until the first non-zero whole-cent cost, up to the
 precommitted maximum of eight, so it can select a cap without borrowing values
 from confirmation.
 
-## Result and consequence
+## Single-agent result
 
-No result yet. Expected outcomes must not enter this file or the manuscript
-while the capture is incomplete or under review.
+`confirmation.json`, SHA-256 `f2b70d732f94ee3381b377fdac58ccb6150922dd5f96a057a9ee66505cfabe51`,
+is the
+deterministic, identifier-free reduction of 30 private trial files. It pins the
+digest of every raw file while withholding live session identifiers and
+timestamps. `sanitize_confirmation.py` defines the reduction.
+
+- **Sequential control:** all 10 sessions reached the native `budget_reached`
+  state at the one-cent cap. A subsequent message was refused in all 10 trials.
+- **Fresh-session replication:** both fresh sessions reached one cent in all 10
+  paired trials. The same reviewed mandate digest and principal therefore had
+  two cents of aggregate capacity across the pair. This is a session-boundary
+  result, not evidence that Anthropic accepts or verifies the binding record.
+- **Live cap revision:** all 10 sessions retained their consumed one cent
+  immediately after their cap was raised to two cents. All then reached the
+  revised budget. Nine ended at two cents and one at three cents; the latter is
+  retained as observed between-request overshoot, not reclassified as a policy
+  revision failure.
+- **Cleanup:** all 40 sessions were deleted and verified absent, the agent was
+  archived, and the cloud environment was deleted.
+
+This establishes a second managed implementation in which a cumulative bound
+is scoped to a provider session rather than to the reviewed mandate identity.
+It also supplies a positive design control: within a live Anthropic session,
+raising the cap preserved consumed cost in every trial. It does **not** yet
+establish how the same budget behaves across subagent handoff or concurrent
+threads, and it does not replicate AgentCore's policy-revision transition.
