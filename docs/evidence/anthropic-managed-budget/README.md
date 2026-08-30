@@ -45,6 +45,12 @@ rule therefore fixes the confirmation cap at one cent. `pilot-summary.json`
 contains only these aggregate pilot facts and no live identifier. Confirmation
 implementation remains absent in this commit.
 
+The next capture stage implements only the three single-agent confirmation
+cells: sequential enforcement, fresh-session replication, and live cap
+revision. Their order is randomised with the committed seed and each runs ten
+trials. Subagent handoff and concurrent overshoot remain unimplemented until a
+separate review of prompt-driven thread creation.
+
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked
 keys may span workspaces. The script creates managed agents, cloud environments,

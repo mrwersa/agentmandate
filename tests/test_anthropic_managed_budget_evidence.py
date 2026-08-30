@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import json
 import re
@@ -26,6 +27,14 @@ def test_protocol_records_the_excluded_pilot_and_frozen_confirmation_cap():
     assert protocol["pilot"]["max_work_units_per_session"] == 8
     assert protocol["confirmation"]["trials_per_cell"] == 10
     assert protocol["confirmation"]["cap_minor_units"] == 1
+    assert protocol["confirmation"]["max_work_units_per_budget"] == 8
+    assert protocol["confirmation"]["random_seed"] == 20260830
+    assert protocol["binding"]["managed_platform_verifies_binding"] is False
+    binding_bytes = (
+        json.dumps(protocol["binding"]["canonical_record"], sort_keys=True, separators=(",", ":"))
+        + "\n"
+    ).encode()
+    assert hashlib.sha256(binding_bytes).hexdigest() == protocol["binding"]["sha256"]
     assert protocol["confirmation"]["cells"] == [
         "sequential_control",
         "fresh_session_replication",
@@ -51,11 +60,12 @@ def test_private_capture_outputs_and_environment_are_gitignored():
     assert "private-*/" in ignored
 
 
-def test_confirmation_refuses_to_run_before_implementation(tmp_path, capsys):
+def test_confirmation_refuses_without_api_credentials(tmp_path, monkeypatch, capsys):
     capture = _capture_module()
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
     assert capture.main(["confirm", "--output", str(tmp_path / "confirm")]) == 2
-    assert "confirmation implementation is not part" in capsys.readouterr().err
+    assert "ANTHROPIC_API_KEY is not set" in capsys.readouterr().err
 
 
 def test_pilot_summary_selects_one_cent_without_live_identifiers():

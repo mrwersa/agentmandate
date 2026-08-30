@@ -7,6 +7,14 @@
   "sdk": "anthropic==1.2.0",
   "model": "claude-haiku-4-5",
   "capture_date": "2026-08-30",
+  "binding": {
+    "canonical_record": {
+      "mandate": "anthropic-budget-study-v1",
+      "principal": "reviewed-caller"
+    },
+    "managed_platform_verifies_binding": false,
+    "sha256": "8fff92a1bf72f3014eec66c25dea58de569e2bf26643fc1d4de135b1854ddacc"
+  },
   "pilot": {
     "excluded_from_confirmation": true,
     "max_work_units_per_session": 8,
@@ -17,6 +25,8 @@
   "confirmation": {
     "trials_per_cell": 10,
     "cap_minor_units": 1,
+    "max_work_units_per_budget": 8,
+    "random_seed": 20260830,
     "cells": [
       "sequential_control",
       "fresh_session_replication",
