@@ -100,6 +100,77 @@ def test_multiagent_capability_summary_proves_topology_without_live_identifiers(
     assert re.search(r"\b(?:sesn|sthr|agent|env|ws)_[A-Za-z0-9]{12,}\b", text) is None
 
 
+def test_multiagent_topology_requires_exact_parentage_and_event_backed_overlap():
+    capture = _capture_module()
+    primary = SimpleNamespace(id="primary", parent_thread_id=None)
+    child_a = SimpleNamespace(id="child-a", parent_thread_id="primary")
+    child_b = SimpleNamespace(id="child-b", parent_thread_id="primary")
+    snapshot = {
+        "threads": [primary, child_a, child_b],
+        "events": [
+            SimpleNamespace(type="session.thread_created", session_thread_id="child-a"),
+            SimpleNamespace(type="session.thread_created", session_thread_id="child-b"),
+            SimpleNamespace(type="session.thread_status_running", session_thread_id="child-a"),
+            SimpleNamespace(type="session.thread_status_running", session_thread_id="child-b"),
+            SimpleNamespace(type="session.thread_status_idle", session_thread_id="child-a"),
+        ],
+    }
+
+    assert capture._multiagent_topology(snapshot, 2) == {
+        "requested_children": 2,
+        "observed_primary_threads": 1,
+        "observed_children": 2,
+        "all_children_attached_to_primary": True,
+        "all_children_created_before_first_child_idle": True,
+        "all_children_running_before_first_child_idle": True,
+        "protocol_conformant": True,
+    }
+
+    snapshot["events"] = [
+        snapshot["events"][0],
+        snapshot["events"][1],
+        snapshot["events"][2],
+        snapshot["events"][4],
+        snapshot["events"][3],
+    ]
+    assert capture._multiagent_topology(snapshot, 2)["protocol_conformant"] is False
+
+
+def test_single_child_topology_does_not_claim_concurrent_overlap():
+    capture = _capture_module()
+    snapshot = {
+        "threads": [
+            SimpleNamespace(id="primary", parent_thread_id=None),
+            SimpleNamespace(id="child", parent_thread_id="primary"),
+        ],
+        "events": [],
+    }
+
+    topology = capture._multiagent_topology(snapshot, 1)
+
+    assert topology["all_children_created_before_first_child_idle"] is False
+    assert topology["all_children_running_before_first_child_idle"] is False
+    assert topology["protocol_conformant"] is True
+
+
+def test_multiagent_topology_rejects_wrong_parent_and_missing_primary():
+    capture = _capture_module()
+    wrong_parent = {
+        "threads": [
+            SimpleNamespace(id="primary", parent_thread_id=None),
+            SimpleNamespace(id="child", parent_thread_id="different"),
+        ],
+        "events": [],
+    }
+    no_primary = {
+        "threads": [SimpleNamespace(id="child", parent_thread_id="missing")],
+        "events": [],
+    }
+
+    assert capture._multiagent_topology(wrong_parent, 1)["protocol_conformant"] is False
+    assert capture._multiagent_topology(no_primary, 1)["protocol_conformant"] is False
+
+
 def test_capture_uses_managed_beta_and_pinned_sdk():
     capture = _capture_module()
 

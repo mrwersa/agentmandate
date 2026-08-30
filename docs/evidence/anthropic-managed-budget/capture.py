@@ -173,6 +173,53 @@ def _idle_reason(snapshot: dict[str, Any]) -> str | None:
     return None
 
 
+def _multiagent_topology(snapshot: dict[str, Any], requested_children: int) -> dict[str, Any]:
+    threads = snapshot["threads"]
+    primary = [thread for thread in threads if thread.parent_thread_id is None]
+    children = [thread for thread in threads if thread.parent_thread_id is not None]
+    parentage = len(primary) == 1 and all(
+        child.parent_thread_id == primary[0].id for child in children
+    )
+    child_ids = {child.id for child in children}
+    events = snapshot["events"]
+    created_positions = [
+        index
+        for index, event in enumerate(events)
+        if event.type == "session.thread_created" and event.session_thread_id in child_ids
+    ]
+    idle_positions = [
+        index
+        for index, event in enumerate(events)
+        if event.type == "session.thread_status_idle" and event.session_thread_id in child_ids
+    ]
+    creation_before_idle = (
+        len(created_positions) == requested_children
+        and bool(idle_positions)
+        and max(created_positions) < min(idle_positions)
+    )
+    running_positions = [
+        index
+        for index, event in enumerate(events)
+        if event.type == "session.thread_status_running" and event.session_thread_id in child_ids
+    ]
+    running_before_idle = (
+        len(running_positions) == requested_children
+        and bool(idle_positions)
+        and max(running_positions) < min(idle_positions)
+    )
+    exact = len(primary) == 1 and len(children) == requested_children and parentage
+    concurrent = requested_children == 1 or (creation_before_idle and running_before_idle)
+    return {
+        "requested_children": requested_children,
+        "observed_primary_threads": len(primary),
+        "observed_children": len(children),
+        "all_children_attached_to_primary": parentage,
+        "all_children_created_before_first_child_idle": creation_before_idle,
+        "all_children_running_before_first_child_idle": running_before_idle,
+        "protocol_conformant": exact and concurrent,
+    }
+
+
 def _budget(cap_minor_units: int) -> dict[str, Any]:
     return {
         "type": "limit",
@@ -624,6 +671,145 @@ def multiagent_capability(output: Path) -> None:
             _write_json(output / "cleanup.json", cleanup)
 
 
+def multiagent_confirm(output: Path) -> None:
+    """Run the frozen handoff and concurrent-child confirmation cells."""
+    protocol = _load_multiagent_protocol()
+    client = _client()
+    output.mkdir(parents=True, exist_ok=False)
+    environment = None
+    worker = None
+    coordinator = None
+    sessions: list[Any] = []
+    cleanup: list[dict[str, Any]] = []
+    order = []
+    rng = random.Random(protocol["random_seed"])
+    for trial in range(1, protocol["trials_per_cell"] + 1):
+        cells = list(protocol["cells"])
+        rng.shuffle(cells)
+        order.extend({"trial": trial, "cell": cell} for cell in cells)
+    try:
+        environment = client.beta.environments.create(
+            name="agentmandate-multiagent-confirmation",
+            config={
+                "type": "cloud",
+                "networking": {
+                    "type": "limited",
+                    "allowed_hosts": [],
+                    "allow_mcp_servers": False,
+                    "allow_package_managers": False,
+                },
+            },
+            betas=BETAS,
+        )
+        worker = client.beta.agents.create(
+            name="agentmandate-budget-worker",
+            model=protocol["model"],
+            system="Follow the coordinator's output instruction exactly. Do not use tools.",
+            tools=[],
+            betas=BETAS,
+        )
+        coordinator = client.beta.agents.create(
+            name="agentmandate-budget-coordinator",
+            model=protocol["model"],
+            system=(
+                "Follow the user's requested delegation topology exactly. Spawn all requested "
+                "workers before waiting for any result. Do not perform the workers' task yourself."
+            ),
+            tools=[],
+            multiagent={"type": "coordinator", "agents": [worker.id]},
+            betas=BETAS,
+        )
+        _write_json(output / "cell-order.json", order)
+        for position, item in enumerate(order, 1):
+            child_count = protocol["cells"][item["cell"]]["child_count"]
+            session = _create_budget_session(
+                client,
+                coordinator,
+                environment,
+                protocol["cap_minor_units"],
+                {
+                    "study": "budget-multiagent-confirmation",
+                    "trial": str(item["trial"]),
+                    "cell": item["cell"],
+                    "mandate_sha256": protocol["binding_sha256"],
+                    "principal": "reviewed-caller",
+                },
+            )
+            sessions.append(session)
+            prompt = (
+                f"Immediately spawn exactly {child_count} separate roster workers concurrently. "
+                "Spawn every worker before waiting for any result. Give each worker this exact "
+                f"instruction: {protocol['worker_instruction']} After all workers finish, reply "
+                "with only DONE."
+            )
+            _send_work(client, session.id, prompt)
+            snapshot = _snapshot(client, session.id)
+            idle_reason = _idle_reason(snapshot)
+            result: dict[str, Any] = {
+                "trial": item["trial"],
+                "order": position,
+                "cell": item["cell"],
+                "topology": _multiagent_topology(snapshot, child_count),
+                "list_cost_minor_units": _list_cost(snapshot),
+                "idle_reason": idle_reason,
+                "snapshot": snapshot,
+            }
+            if idle_reason == "budget_reached":
+                result["post_budget_refusal"] = _expect_budget_refusal(
+                    client, session.id, protocol["worker_instruction"]
+                )
+            else:
+                result["post_budget_refusal"] = None
+            _write_json(
+                output / f"trial-{item['trial']:02d}-{item['cell']}.json",
+                result,
+            )
+            _delete_session(client, session.id)
+            sessions.remove(session)
+            cleanup.append(
+                {
+                    "kind": "session",
+                    "cell": item["cell"],
+                    "trial": item["trial"],
+                    "deleted": True,
+                    "verified_absent": True,
+                }
+            )
+    finally:
+        for session in sessions:
+            try:
+                _delete_session(client, session.id)
+                cleanup.append({"kind": "session", "deleted": True, "verified_absent": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "session", "deleted": False, "error_type": type(exc).__name__}
+                )
+        for role, agent in (("coordinator", coordinator), ("worker", worker)):
+            if agent is not None:
+                try:
+                    client.beta.agents.archive(agent.id, betas=BETAS)
+                    cleanup.append({"kind": "agent", "role": role, "archived": True})
+                except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                    cleanup.append(
+                        {
+                            "kind": "agent",
+                            "role": role,
+                            "archived": False,
+                            "error_type": type(exc).__name__,
+                        }
+                    )
+        if environment is not None:
+            try:
+                client.beta.environments.delete(environment.id, betas=BETAS)
+                cleanup.append({"kind": "environment", "deleted": True})
+            except Exception as exc:  # noqa: BLE001 - retain cleanup failure type
+                cleanup.append(
+                    {"kind": "environment", "deleted": False, "error_type": type(exc).__name__}
+                )
+        if output.exists():
+            _write_json(output / "cleanup.json", cleanup)
+
+
 def _is_anthropic_error(exc: Exception) -> bool:
     module = type(exc).__module__
     return module == "anthropic" or module.startswith("anthropic.")
@@ -632,7 +818,14 @@ def _is_anthropic_error(exc: Exception) -> bool:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "stage", choices=("capability", "pilot", "confirm", "multiagent-capability")
+        "stage",
+        choices=(
+            "capability",
+            "pilot",
+            "confirm",
+            "multiagent-capability",
+            "multiagent-confirm",
+        ),
     )
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args(argv)
@@ -642,6 +835,7 @@ def main(argv: list[str] | None = None) -> int:
             "pilot": pilot,
             "confirm": confirm,
             "multiagent-capability": multiagent_capability,
+            "multiagent-confirm": multiagent_confirm,
         }[args.stage](args.output)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
