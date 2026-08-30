@@ -33,9 +33,17 @@ python -m venv .capture-venv
 .capture-venv/bin/python capture.py pilot --output private-pilot
 ```
 
-`confirm` refuses to run while `confirmation.cap_minor_units` is null. Pilot
-outputs remain private and excluded from confirmation. After pilot review, the
-chosen whole-cent cap and capture date must be committed before confirmation.
+The initial harness made `confirm` refuse to run while
+`confirmation.cap_minor_units` was null. Pilot outputs remain private and
+excluded from confirmation. The chosen whole-cent cap and capture date are now
+committed before confirmation implementation.
+
+The valid excluded pilot completed on 30 August 2026. Its three sessions first
+reported a non-zero whole-cent cost after 2, 3, and 2 frozen work units. All
+three sessions were deleted and verified absent. The preregistered selection
+rule therefore fixes the confirmation cap at one cent. `pilot-summary.json`
+contains only these aggregate pilot facts and no live identifier. Confirmation
+implementation remains absent in this commit.
 
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked

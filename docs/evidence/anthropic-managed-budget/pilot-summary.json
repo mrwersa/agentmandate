@@ -1,0 +1,38 @@
+{
+  "beta": "managed-agents-2026-04-01",
+  "capture_date": "2026-08-30",
+  "cleanup": {
+    "agent_archived": true,
+    "environment_deleted": true,
+    "sessions_deleted_and_verified_absent": 3
+  },
+  "excluded_from_confirmation": true,
+  "model": "claude-haiku-4-5",
+  "pilot_sessions": [
+    {
+      "list_cost_minor_units": [
+        0,
+        1
+      ],
+      "work_units_to_first_non_zero_cost": 2
+    },
+    {
+      "list_cost_minor_units": [
+        0,
+        0,
+        1
+      ],
+      "work_units_to_first_non_zero_cost": 3
+    },
+    {
+      "list_cost_minor_units": [
+        0,
+        1
+      ],
+      "work_units_to_first_non_zero_cost": 2
+    }
+  ],
+  "sdk": "anthropic==1.2.0",
+  "selected_confirmation_cap_minor_units": 1,
+  "selection_rule": "smallest whole-cent cap above one completed work unit and reached by repeated work"
+}

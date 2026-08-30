@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,14 +18,14 @@ def _capture_module():
     return module
 
 
-def test_protocol_is_preregistered_and_confirmation_is_locked():
+def test_protocol_records_the_excluded_pilot_and_frozen_confirmation_cap():
     protocol = json.loads((EVIDENCE / "protocol.json").read_text())
 
-    assert protocol["status"] == "pilot_not_run"
+    assert protocol["status"] == "pilot_complete_confirmation_not_implemented"
     assert protocol["pilot"]["excluded_from_confirmation"] is True
     assert protocol["pilot"]["max_work_units_per_session"] == 8
     assert protocol["confirmation"]["trials_per_cell"] == 10
-    assert protocol["confirmation"]["cap_minor_units"] is None
+    assert protocol["confirmation"]["cap_minor_units"] == 1
     assert protocol["confirmation"]["cells"] == [
         "sequential_control",
         "fresh_session_replication",
@@ -50,11 +51,26 @@ def test_private_capture_outputs_and_environment_are_gitignored():
     assert "private-*/" in ignored
 
 
-def test_confirmation_refuses_to_run_before_pilot_cap(tmp_path, capsys):
+def test_confirmation_refuses_to_run_before_implementation(tmp_path, capsys):
     capture = _capture_module()
 
     assert capture.main(["confirm", "--output", str(tmp_path / "confirm")]) == 2
-    assert "confirmation is locked" in capsys.readouterr().err
+    assert "confirmation implementation is not part" in capsys.readouterr().err
+
+
+def test_pilot_summary_selects_one_cent_without_live_identifiers():
+    summary_text = (EVIDENCE / "pilot-summary.json").read_text()
+    summary = json.loads(summary_text)
+
+    assert summary["excluded_from_confirmation"] is True
+    assert summary["selected_confirmation_cap_minor_units"] == 1
+    assert [item["work_units_to_first_non_zero_cost"] for item in summary["pilot_sessions"]] == [
+        2,
+        3,
+        2,
+    ]
+    assert summary["cleanup"]["sessions_deleted_and_verified_absent"] == 3
+    assert re.search(r"\b(?:sesn|agent|env)_[A-Za-z0-9]{16,}\b", summary_text) is None
 
 
 def test_capture_refuses_to_run_without_api_key(tmp_path, monkeypatch, capsys):

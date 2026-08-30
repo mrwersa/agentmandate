@@ -1,12 +1,12 @@
 {
   "protocol_version": 1,
-  "status": "pilot_not_run",
+  "status": "pilot_complete_confirmation_not_implemented",
   "provider": "Anthropic",
   "service": "Managed Agents",
   "beta": "managed-agents-2026-04-01",
   "sdk": "anthropic==1.2.0",
   "model": "claude-haiku-4-5",
-  "capture_date": null,
+  "capture_date": "2026-08-30",
   "pilot": {
     "excluded_from_confirmation": true,
     "max_work_units_per_session": 8,
@@ -16,7 +16,7 @@
   },
   "confirmation": {
     "trials_per_cell": 10,
-    "cap_minor_units": null,
+    "cap_minor_units": 1,
     "cells": [
       "sequential_control",
       "fresh_session_replication",
