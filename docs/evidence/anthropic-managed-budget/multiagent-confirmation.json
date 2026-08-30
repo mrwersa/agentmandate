@@ -1,0 +1,645 @@
+{
+  "cleanup": {
+    "agents_archived": 2,
+    "environment_deleted": true,
+    "sessions_deleted_and_verified_absent": 30
+  },
+  "evidence_version": 1,
+  "protocol_sha256": "b56802cd8a4be4ace4369750114c9808d2589e04b34e20527c69c1965819f16e",
+  "raw_capture_sha256": {
+    "cell-order.json": "ec3158859e1acca3ca5f73f848a95b72a35d2331e0b73adca79440a317890bd4",
+    "cleanup.json": "10c631c4190aca7cbba151403155ca1cea5ef27958b6d0d7d7b662c719151368",
+    "trial-01-concurrent_subagents_2.json": "511bbb9e6a96ec26245b62f27f30b496709ca7e04cac141c573f7392aa4ec808",
+    "trial-01-concurrent_subagents_4.json": "11d3a95edaaf15e76df66274367c9c63883d553e1916ecc2558c8826c8199187",
+    "trial-01-subagent_handoff.json": "a53786181d80a8aee8804a3a7183015e864c2b948338fef7f8b4e39c29ddff3a",
+    "trial-02-concurrent_subagents_2.json": "c1848255dd993b17aae84998bd841f2b97f4a46a45df90eadc5c8eb4aa65269e",
+    "trial-02-concurrent_subagents_4.json": "0adc05c3c14ce253ecfc67fbd7405c036d92ac4762d2e8e7690ce2e2b94f4802",
+    "trial-02-subagent_handoff.json": "0b032f830409dd78a7ac41c3e2703e99e51e5ac8555fa686d0c3014719d71e8e",
+    "trial-03-concurrent_subagents_2.json": "d45ff5d70313b0790a0423b895ceca1d28e01056a6beedd9f926fa9b3049d29e",
+    "trial-03-concurrent_subagents_4.json": "4b7fe25b826d7afcbf726fd9446f2fcd4d52ea2491ac313beea9043987360f01",
+    "trial-03-subagent_handoff.json": "ded92080397bf212619b73e13acef221f88c2e9350692382a6110dc1408f8fb2",
+    "trial-04-concurrent_subagents_2.json": "0ad871ee7fdeda9cafa7dd5dc1177b7c3e17de4f56bfed1009128a012686e7bc",
+    "trial-04-concurrent_subagents_4.json": "b904b87d37bcf8284148607880f3ef3f9be3748d7cecf18b82f6ce924d7e16fd",
+    "trial-04-subagent_handoff.json": "d0f56c92e7bcb01b374fe2cc681e7e6fad39ec352c130b59ceea1b161f961fc3",
+    "trial-05-concurrent_subagents_2.json": "227414fd5acf5fb165874c9c5d583d78068f83fa404e2f1522c7f6245d0e9f7c",
+    "trial-05-concurrent_subagents_4.json": "ed6e3a27e19b11182fe6f71d211daf30b45cd619c6ecfebad736ac1c667f8ffb",
+    "trial-05-subagent_handoff.json": "2cea38745e2bc8d8d17c3b74a1992d9c1ff2e0e5de7a23262fe85bd1de6c36ba",
+    "trial-06-concurrent_subagents_2.json": "736ed15b7004c34584478ee0e17e4f1e79340530fef83de548aa6a44c861439e",
+    "trial-06-concurrent_subagents_4.json": "a40ca4234226c42b605388025da4b3febb2312dd0e7b29106513aaa55fd48449",
+    "trial-06-subagent_handoff.json": "b8ee37be18ced4f583018e04deb211f1316d82f2e4d3e071fbef531151362468",
+    "trial-07-concurrent_subagents_2.json": "95437c4eb58263e97b9d5f12c44b1f011c55b6bef8d5247c845bebc10650533f",
+    "trial-07-concurrent_subagents_4.json": "a28761c39c8545f2888d55f88583449f643a95abe3b74f077ad2bba26a8146a3",
+    "trial-07-subagent_handoff.json": "812a25da5ec4b058a99d7ab7a5abac74cf92b8a39bd2d08ffb36b0cd027ac412",
+    "trial-08-concurrent_subagents_2.json": "2f84b7a4b95483f2c9e82c2c49eef94742be7d4da4c36279e6cc8e4b22c7b5d4",
+    "trial-08-concurrent_subagents_4.json": "8cd47e6e765676baeb6a5e26ff514d292021971defbad6ec89cce40c527a53b0",
+    "trial-08-subagent_handoff.json": "87d0d69ff20aa3542a43f4eb79d48569b475646f44eac53914822de5a1351ee9",
+    "trial-09-concurrent_subagents_2.json": "f8b9c42a94f20dd1016343b005d16c6d28330b438153c9640cb0d1c5781e4a51",
+    "trial-09-concurrent_subagents_4.json": "e0c9b3729926efe87d10a3f05dae40b74af10bd473155afcf968b50f26478281",
+    "trial-09-subagent_handoff.json": "27cac06ef98af2a7ffe22c8b83cdf1b84f0591f2430b3a449b4319a3cb579782",
+    "trial-10-concurrent_subagents_2.json": "0ff163c3aa6b3e2fba183ffc8710c1b9fc5f300d2d395273df1c9c18de9e4c4b",
+    "trial-10-concurrent_subagents_4.json": "81592f2e8d87efbe5dda58225d55d3eeb8e9d344324f74efd5725eb71df48032",
+    "trial-10-subagent_handoff.json": "c972f8b16f1452f3959fa03004507f16fd9b026f186cfb0599a194598b814353"
+  },
+  "trials": [
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 1,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 1
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 2,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 1
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 3,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 1
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 1,
+      "order": 4,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 2
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 5,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 2
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 6,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 2
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 7,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 3
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 8,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 3
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 9,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 3
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 1,
+      "order": 10,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 4
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 11,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 4
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 3,
+      "order": 12,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 4
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 13,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 5
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 14,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 5
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 15,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 5
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 16,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 6
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 17,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 6
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 18,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 6
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 19,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 7
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 1,
+      "order": 20,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 7
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 21,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 7
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 22,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 8
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 23,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 8
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 24,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 8
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 25,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 9
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 1,
+      "order": 26,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 9
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 27,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 9
+    },
+    {
+      "cell": "subagent_handoff",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 28,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 1,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 1
+      },
+      "trial": 10
+    },
+    {
+      "cell": "concurrent_subagents_4",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 4,
+      "order": 29,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 4,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 4
+      },
+      "trial": 10
+    },
+    {
+      "cell": "concurrent_subagents_2",
+      "idle_reason": "budget_reached",
+      "list_cost_minor_units": 2,
+      "order": 30,
+      "post_budget_refusal": {
+        "api_error_type": "invalid_request_error",
+        "error_type": "BadRequestError"
+      },
+      "topology": {
+        "all_children_attached_to_primary": true,
+        "all_children_created_before_first_child_idle": true,
+        "all_children_running_before_first_child_idle": true,
+        "observed_children": 2,
+        "observed_primary_threads": 1,
+        "protocol_conformant": true,
+        "requested_children": 2
+      },
+      "trial": 10
+    }
+  ]
+}

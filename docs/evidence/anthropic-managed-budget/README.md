@@ -77,6 +77,21 @@ concurrent cells by also requiring every child `thread_status_running` event to
 precede the first child-idle event. Every session is deleted and verified
 absent before the next trial begins.
 
+`multiagent-confirmation.json`, SHA-256 `7300038f4aeb13fc1b9b35c6a06b6eee9a86d0907bdc3a6af46fd8cc8b2819f7`,
+is the identifier-free reduction of the 30 confirmatory trials. All 30 had the
+requested child count and primary parentage. In both concurrent cells, every
+child was created and running before any child idled. Every session eventually
+reported `budget_reached`, and every subsequent message was refused.
+
+At the one-cent session cap, the one-child handoff trials ended at one cent in
+four trials and two cents in six. The two-child concurrent trials ended at two
+cents in nine trials and three cents in one. All ten four-child concurrent
+trials ended at four cents. The result therefore shows one shared session
+account, but not a strict one-cent run bound: work already executing across
+child threads can carry the final total beyond the cap before the next request
+is refused. This is reported as a measured enforcement boundary, not as a claim
+that the service promises transactional cancellation of in-flight work.
+
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked
 keys may span workspaces. The script creates managed agents, cloud environments,
@@ -139,3 +154,9 @@ It also supplies a positive design control: within a live Anthropic session,
 raising the cap preserved consumed cost in every trial. It does **not** yet
 establish how the same budget behaves across subagent handoff or concurrent
 threads, and it does not replicate AgentCore's policy-revision transition.
+
+The later multiagent result closes the thread questions left open above. It
+shows shared accounting across handoff and a concurrency-dependent overshoot
+inside one correctly identified session. It still does not replicate
+AgentCore's policy-revision transition, and Anthropic still does not verify the
+reviewed mandate binding.
