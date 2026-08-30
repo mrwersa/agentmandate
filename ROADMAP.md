@@ -11,9 +11,10 @@ runtime evidence. It will not become the traffic proxy.
 
 The category language for everything below is **the authority gap**: the
 distance between what a review approved, what an agent can actually reach by
-combining its tools, and what deployed enforcement really checks. Every
-initiative in this document either widens what the tool can see across that gap
-(model depth), or shortens it (inventory, policy export, reconciliation).
+combining its tools, what deployed enforcement really checks, and which reviewed
+state survives a session, handoff, or policy revision. Every initiative in this
+document either widens what the tool can see across that gap (model depth), or
+shortens it (inventory, policy export, continuity, reconciliation).
 Scanner and gateway vendors watch behaviour at one point; the gap itself is the
 unoccupied position, and vendor-neutral provenance is what lets this tool stand
 across frameworks and enforcement points.
@@ -34,7 +35,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 The target workflow is:
 
 ```text
-agents + tools + identities + policy
+mandates + agents + tools + identities + policy
                   ↓
        versioned authority IR
                   ↓
@@ -44,7 +45,7 @@ policy exports          test obligations
           ↓                   ↓
  existing enforcement → decisions and traces
                   ↓
-        drift and reconciliation
+ continuity, drift, and reconciliation
 ```
 
 The open-source core will include the authority format, analysis engine, CLI,
@@ -58,6 +59,7 @@ Three boundaries remain firm:
 - no general LLM firewall or prompt-injection classifier
 - no bundled behavioral judge, scenario runner, or benchmark
 - no mandatory MCP/A2A proxy, credential broker, or runtime enforcement point
+- no session broker, distributed budget counter, or transactional scheduler
 
 Exporting policy is not enforcing it. AgentMandate must report the target,
 version, unsupported semantics, and later evidence of activation; it must never
@@ -156,6 +158,7 @@ application specification.
 |---|---|---|---|
 | **Conditional authority** ([delivered](docs/conditional-authority-gate-4-review.md); medium) | Approval, status, time, and request context can change whether an action is permitted. Add a closed, typed predicate vocabulary with explicit unknown handling. The path now projects and conservatively consumes statement classification and dispatch targets, then reconciles them against the selected live inventory; approval/status/time predicates follow once their operand sources exist. | The contract, profiles, and trust-failure matrix must survive the AWS PostgreSQL and Sentry conditional fixtures before a schema change is proposed. The complete SELECT-only fixture is synthetic and cannot substitute for deployment evidence. | A reviewer can see which condition narrowed a path and every absent, representative, mixed, expired, unverifiable, or source-mismatched value retains the strongest effect. Not arbitrary code or a second general policy language. |
 | **Delegation chains and attenuation** ([delivered](docs/delegation-gate-4-review.md); high direction, medium shape) | Caller/service is insufficient when agents act for users or delegate to agents. Track actor, subject, delegator, audience, expiry, and the authority passed at each hop. | The Authorizer capture proves four actor-bearing OAuth hops and fail-closed attenuation. The CLI reuses the private analyzer to re-verify closed IR profiles, preserve ordered actors, apply half-open timestamp windows, and check hop-to-hop plus tool-to-hop attenuation. A real scope-to-tool/effect mapping is still required for the first non-synthetic widening counterexample. Align terminology with stable standards while isolating drafts. | Detect a delegation that widens rather than narrows authority and produce the shortest chain. Not an identity provider, token issuer, or cryptographic verifier. |
+| **Mandate/session alignment and authority continuity** (live evidence captured; [contract pending](https://github.com/mrwersa/agentmandate/issues/156); high) | A provider may correctly enforce every request while a fresh session or policy revision resets the state that bounded one reviewed mandate. Define a versioned binding between mandate, principal, enforcement boundary, policy revision, and limits, then distinguish preserved, reset, widened, overshot, and unresolved transitions. | The [AgentCore fixture](docs/evidence/agentcore-refund-policy/README.md) reproduces same-session enforcement, fresh-session reset, signed-binding continuity, and revision-triggered loss across ten trials per cell. The independent [Anthropic fixture](docs/evidence/anthropic-managed-budget/README.md) reproduces fresh-session capacity, preserves one total across parent and child threads and across a live cap increase, and records concurrent fanout beyond a nominal cap. A contract must keep these provider profiles separate, treat complete mediation as evidence rather than an assumption, and preserve existing analyses under empty inputs. | A reviewer can determine whether one mandate retained one enforcement boundary and whether consumed authority survived a transition, with every missing binding, state handoff, or mediation proof reported as unresolved. Not a proxy, session allocator, token issuer, distributed counter, or claim of atomic enforcement. This experimental profile does not block 1.0. |
 | **Resource relationships and provenance** ([evidence audit: gate not met](docs/resource-relationship-audit.md); [Initiative capture: candidate falsified](docs/evidence/initiative-mcp/README.md); medium) | Scope counts forget ownership, containment, and whether two bindings denote the same resource. Add a small typed relation vocabulary and preserve binding lineage. | One real false positive or missed path; validate mapping potential against OpenFGA concepts. Initiative enforces project/status containment, but its generic tools retain a valid existential assignment, so the graph does not change a reproduced authority result. A [fixed-binding operational graph](https://github.com/mrwersa/agentmandate/issues/106) is still required. | The motivating graph becomes more precise without material search regression. Not a complete ReBAC service or arbitrary first-order logic. |
 | **Bounded producers and quantities** ([evidence gates met](docs/bounded-producer-evidence-audit.md); [finite-cardinality contract proposed](docs/bounded-producers.md); medium) | `unbounded` versus one binding overstates finite collections and cannot express value relationships such as collateral or 1:1 conversion. Separate cardinality bounds from reviewed quantity relations. | AgentKit supplies collateral, 1:1 conversion, and gross-versus-net quantity distortions. The [AWS IAM access-key capture](docs/evidence/aws-iam-access-keys/README.md) supplies the independent cardinality half: pinned IAM MCP 1.0.11 returns two authenticated credentials for one user and AWS rejects the modeled third binding solely on exhaustion. Current 1.0.23 redacts the secret and is outside that version-scoped claim. The gate-1 contract scopes the bound to one partition and monotone run; readers and analysis remain pending on [#128](https://github.com/mrwersa/agentmandate/issues/128). | Each feature removes a demonstrated false path while preserving existing breach detection. Quantity remains a separate evidence track; this is not a generic optimization or accounting language. |
 | **Reviewed data-flow labels** (medium) | Current analysis cannot connect sensitive reads to external sinks. Add explicit source, transform, classification, trust-zone, and sink labels with conservative propagation. | A real, non-synthetic exfiltration path and an annotation study showing reviewers can supply the labels. | Find the path with a short explanation and no inferred sensitivity presented as fact. Not DLP, content inspection, or prompt-injection detection. |
@@ -165,6 +168,12 @@ Data flow stays experimental until annotation burden and false-positive rates
 are measured. Search limits, canonicalization, and truncation reporting are
 part of each feature, not later performance work.
 
+Authority continuity is promoted from the former advanced-session hypothesis
+because two independent managed services now expose the session boundary and
+one reproduces revision-triggered state loss. The bounded near-term problem is
+evidence reconciliation across named transitions. General reachability across
+arbitrary durable agents, memories, and sessions remains advanced work.
+
 ## 6–12 months: policy control-plane preview
 
 Goal: turn reviewed compound analysis into portable enforcement inputs while
@@ -172,9 +181,9 @@ making semantic loss visible.
 
 | Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
 |---|---|---|---|
-| **Policy validation and effective diff** ([Cedar path delivered](docs/cedar-effective-diff-gate-5-review.md); high) | Syntax-valid per-call policy may still permit an unsafe sequence. Analyze imported policy with tool inventory and compare reachable outcomes across revisions. | Stable IR mappings and executable Cedar/Rego fixtures with known decisions. The reviewed Cedar consumer aligns exact managed requests and reproduces a live AgentCore Deny-to-Allow revision through versioned CLI output. Rego remains a separate evidence-gated extension. | Equivalent policies produce the same authority summary; a widening policy change yields a counterexample. Not a replacement for native validators. |
+| **Policy validation and effective diff** ([Cedar decision path delivered](docs/cedar-effective-diff-gate-5-review.md); transition continuity pending; high) | Syntax-valid per-call policy may still permit an unsafe sequence, and a semantically equivalent redeployment may reset accrued state. Analyze imported policy with tool inventory, compare reachable outcomes across revisions, and keep decision change separate from state migration. | Stable IR mappings and executable Cedar/Rego fixtures with known decisions. The reviewed Cedar consumer aligns exact managed requests and reproduces a live AgentCore Deny-to-Allow revision. The continuity fixture additionally distinguishes a byte-identical deduplicated write from a textually different equivalent revision that invalidates the old session. Rego remains a separate evidence-gated extension. | Equivalent policies produce the same authority summary; a widening decision or state-resetting transition yields a distinct, replayable finding. Never infer migrated state from equivalent decisions or replace native validators. |
 | **Cedar and Rego exporters** (medium) | Reviewed constraints otherwise need manual re-entry at each PDP. Compile the enforceable subset, emit tests and a machine-readable loss report, and refuse unsafe approximation by default. | Round-trip semantics suite for the supported subset; target versions pinned. | Generated policies pass native validation and decision fixtures; every unsupported compound invariant is explicit. Not a new runtime PDP or silent best-effort translation. |
-| **Policy-versus-agent drift** (high) | Agent bindings, imported policy, gateway exposure, and exported policy can diverge independently. Compare all four and distinguish missing control, stale inventory, and unreachable declaration. | Provenance IR plus at least one gateway configuration fixture. | CI identifies the exact edge and source that drifted without claiming absence from incomplete inventory. Not live asset discovery. |
+| **Policy-versus-agent drift** (high) | Agent bindings, imported policy, gateway exposure, session identity, policy revision, and accrued-state handoff can diverge independently. Compare them without collapsing a correct per-request decision into proof of mandate continuity. | Provenance IR, the mandate-continuity profile, and at least one gateway configuration fixture. | CI identifies the exact edge or transition that drifted and distinguishes missing control, stale inventory, reset state, and widened policy without claiming absence from incomplete evidence. Not live asset discovery or runtime counter management. |
 | **Explainable counterfactual remediation** (medium) | A breach path says what is wrong but not the smallest safe change. Compute candidate removals or tighter approvals, conditions, budgets, and delegation bounds, ranked by authority impact. | Stable compound models and equivalence tests. | Every suggestion is mechanically rechecked to remove the path and labeled as candidate, not intent. Not autonomous policy authoring or auto-application. |
 | **Named-review CI workflow** (high) | Authority widening needs accountable acceptance rather than a generic green check. Extend change records with owner, reason, expiry, evidence, and target-policy status. | Stable additive JSON contract and threat review of records. | Widening cannot be marked reviewed without named evidence; expired exceptions fail closed. Not a general ticketing or GRC system. |
 
@@ -192,7 +201,7 @@ without building an observability backend.
 | Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
 |---|---|---|---|
 | **Federated agent and tool inventory** (medium) | Platform teams cannot govern repositories one at a time. Define an open inventory index over signed IR snapshots, owners, environments, and expiry. | Stable IR identities; prototypes against MCP Registry/subregistry and A2A cards. | Local aggregation answers ownership, exposure, and stale-review queries across repositories. Not network discovery or a proprietary CMDB. |
-| **Decision and OTel reconciliation** (high) | A policy file does not prove that a PEP evaluated a call. Correlate manifest version, export receipt, principal/delegation, decision ID, tool span, and observed effect. | OTel convention adapter plus OPA and one cloud decision-log fixture. | Detect missing, bypassed, stale, or contradictory enforcement with payload capture disabled by default. Not full trace storage, APM, or SIEM. |
+| **Decision and OTel reconciliation** (high) | A policy file does not prove that a PEP evaluated a call or retained the same reviewed boundary. Correlate mandate digest, session identity, policy revision, manifest version, export receipt, principal/delegation, decision ID, tool span, and observed effect. Where providers expose them, keep consumed, reserved, and in-flight authority distinct. | OTel convention adapter plus OPA and one cloud decision-log fixture; mandate-continuity records define the join and its trust states. | Detect missing, bypassed, stale, reset, or contradictory enforcement with payload capture disabled by default. Never infer strict cumulative enforcement from completed-event telemetry alone. Not full trace storage, APM, SIEM, or a distributed counter. |
 | **Signed evidence bundles** (medium) | Audit evidence loses integrity and context when copied among CI, PDPs, and review systems. Package hashes, provenance, decisions, exceptions, and analysis results with a verifiable manifest. | Threat model, key-rotation design, and one external consumer. | Offline verification detects tampering and missing components. Not a PKI, identity attestation service, or immutable ledger. |
 | **Ownership and time-bounded exceptions** (medium) | Fleet findings need accountable routing and temporary risk acceptance. Keep ownership and exception objects portable in the open format. | Named-review workflow and privacy review. | Every exception has scope, owner, reason, evidence, and expiry; local CLI can enforce it. Not a full enterprise RBAC or workflow UI in core. |
 | **Control evidence mappings** (medium-low) | Security teams repeatedly translate the same technical evidence into governance language. Map artifacts—not verdicts—to selected OWASP, NIST, MITRE, IMDA, and ISO control concepts. | Review by domain experts and public mapping methodology. | Each mapping states what the artifact establishes and what remains organizational. Never issue compliance scores or certification claims. |
@@ -209,8 +218,8 @@ teams reduce it without hiding uncertainty.
 
 | Initiative | Problem and differentiating outcome | Prerequisite and evidence gate | Success measure and non-goal |
 |---|---|---|---|
-| **Cross-agent and cross-session reachability** (medium-low) | Delegated agents, durable grants, memory, and asynchronous tasks can complete a path no single run contains. Extend state with explicit lifetime and trust boundaries. | Real incident or graph with durable authority plus measured state-space bounds. | Produce a finite, replayable counterexample across named agents/sessions and state the completeness limit. Not simulation of arbitrary model behavior. |
-| **Temporal and revocable capabilities** (medium-low) | Expiry, activation, revocation, and approval windows affect whether a path is reachable. Model a small event vocabulary and verify attenuation over time. | Stable delegation standards and decision evidence containing relevant timestamps/status. | Detect use outside a window or after revocation in fixtures without wall-clock nondeterminism. Not a token service or distributed clock protocol. |
+| **Cross-agent and cross-session reachability** (medium-low) | Delegated agents, durable grants, memory, and asynchronous tasks can complete a path no single run contains. Extend state with explicit lifetime and trust boundaries beyond the bounded continuity checks delivered earlier. | Real incident or graph with durable authority plus measured state-space bounds. Parent/child accounting within one managed session is evidence for continuity, not proof of arbitrary cross-session reachability. | Produce a finite, replayable counterexample across named agents/sessions and state the completeness limit. Not simulation of arbitrary model behavior or reimplementation of provider scheduling. |
+| **Temporal, revocable, and transferable capabilities** (medium) | Expiry, activation, revocation, approval windows, and policy revisions affect whether authority remains reachable and how already-consumed authority transfers. Model a small event vocabulary and a verifiable handoff without treating an empty successor session as restored authority. | Stable delegation standards plus decision evidence containing timestamps/status; the near-term continuity profile must first distinguish reset, migration, settlement, and reapproval. | Detect use outside a window or after revocation and detect an unaccounted state transition in fixtures without wall-clock nondeterminism. Not a token service, distributed clock protocol, or transaction coordinator. |
 | **Least-authority synthesis** (low) | Teams need a practical route from a finding to a smaller safe capability set. Find minimal candidate policy changes that preserve declared required scenarios while removing breaches. | Counterfactual remediation plus reviewed positive obligations and performance study. | Candidates are Pareto-ranked, mechanically checked, and require human selection. Not automatic production mutation or proof of business correctness. |
 | **Extension interfaces** (medium) | One project cannot maintain every framework, PDP, and evidence adapter. Publish versioned importer, exporter, finding, and evidence conformance suites. | Three in-tree adapters of each relevant kind and a security model for plugins. | An external adapter can pass conformance without importing private internals. Not arbitrary in-process execution of untrusted plugins. |
 
@@ -229,6 +238,7 @@ when the feature list is checked off. Track:
 - importer completeness and exporter semantic-loss rates
 - counterexample length, analysis time, memory use, and truncation frequency
 - deployed decisions that reconcile to the reviewed manifest and policy build
+- mandate/session transitions whose binding and accrued-state outcome reconcile
 - annotation/review time and findings disabled as noise
 - external adapters and policy/evidence consumers
 
