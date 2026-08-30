@@ -70,3 +70,22 @@ def test_capture_refuses_to_run_without_valid_workspace(tmp_path, monkeypatch, c
 
     assert capture.main(["capability", "--output", str(tmp_path / "out")]) == 2
     assert "ANTHROPIC_WORKSPACE_ID is not set" in capsys.readouterr().err
+
+
+def test_capture_does_not_echo_anthropic_error_values(tmp_path, monkeypatch, capsys):
+    capture = _capture_module()
+
+    class FakeAnthropicError(Exception):
+        pass
+
+    FakeAnthropicError.__module__ = "anthropic.fake"
+
+    def fail(_output):
+        raise FakeAnthropicError("live-workspace-identifier")
+
+    monkeypatch.setattr(capture, "capability", fail)
+
+    assert capture.main(["capability", "--output", str(tmp_path / "out")]) == 2
+    error = capsys.readouterr().err
+    assert "FakeAnthropicError" in error
+    assert "live-workspace-identifier" not in error
