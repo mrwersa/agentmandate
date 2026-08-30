@@ -1,0 +1,484 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+import pytest
+
+import agentmandate._continuity as continuity
+from agentmandate._continuity import (
+    AgentCoreContinuity,
+    AnthropicContinuity,
+    ContinuityBinding,
+    ContinuityFormatError,
+    _agentcore_controls,
+    _anthropic_controls,
+    _boolean,
+    _captured,
+    _date,
+    _digest,
+    _evidence,
+    _integer,
+    _load,
+    _migration_sources,
+    _path,
+    _record,
+    _sources,
+    _string,
+    _strings,
+    _utc,
+    _verify_sources,
+    migrate_agentcore_binding,
+    migrate_agentcore_continuity,
+    migrate_anthropic_continuity,
+)
+
+ROOT = Path(__file__).parents[1]
+FIXTURES = ROOT / "tests" / "fixtures"
+AGENTCORE = ROOT / "docs" / "evidence" / "agentcore-refund-policy"
+ANTHROPIC = ROOT / "docs" / "evidence" / "anthropic-managed-budget"
+
+
+def _contents(paths: list[Path]) -> dict[str, bytes]:
+    return {str(path.relative_to(ROOT)): path.read_bytes() for path in paths}
+
+
+def _binding_contents() -> dict[str, bytes]:
+    return _contents(
+        [
+            AGENTCORE / "mandate-binding.json",
+            AGENTCORE / "mandate-binding-result.json",
+            AGENTCORE / "binding-public-key.pem",
+        ]
+    )
+
+
+def _agentcore_contents() -> dict[str, bytes]:
+    return _contents(
+        [
+            AGENTCORE / "temporal-repetition.json",
+            AGENTCORE / "temporal-semantic-noop-repetition.json",
+            AGENTCORE / "temporal-update-repetition.json",
+            AGENTCORE / "binding-repetition.json",
+            AGENTCORE / "binding-policy-revision-repetition.json",
+        ]
+    )
+
+
+def _anthropic_contents() -> dict[str, bytes]:
+    return _contents(
+        [
+            ANTHROPIC / "protocol.json",
+            ANTHROPIC / "confirmation.json",
+            ANTHROPIC / "multiagent-protocol.json",
+            ANTHROPIC / "multiagent-confirmation.json",
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    ("migrate", "contents", "reader", "fixture"),
+    [
+        (
+            migrate_agentcore_binding,
+            _binding_contents,
+            ContinuityBinding,
+            "continuity-binding-v1.json",
+        ),
+        (
+            migrate_agentcore_continuity,
+            _agentcore_contents,
+            AgentCoreContinuity,
+            "agentcore-continuity-v1.json",
+        ),
+        (
+            migrate_anthropic_continuity,
+            _anthropic_contents,
+            AnthropicContinuity,
+            "anthropic-continuity-v1.json",
+        ),
+    ],
+)
+def test_canonical_migrations_are_byte_stable(migrate, contents, reader, fixture):
+    migrated = migrate(contents())
+    expected = (FIXTURES / fixture).read_text()
+    assert migrated.to_json() == expected
+    assert reader.from_json(expected).to_json() == expected
+    migrated.verify_sources(contents())
+
+
+def test_migrations_preserve_provider_specific_unknowns_and_controls():
+    agentcore = migrate_agentcore_continuity(_agentcore_contents())
+    anthropic = migrate_anthropic_continuity(_anthropic_contents())
+
+    assert len(agentcore.controls) == 8
+    assert next(
+        item for item in agentcore.controls if item.id == "equivalent-revision"
+    ).outcomes == (
+        "allow",
+        "stale_session",
+        "allow",
+    )
+    assert next(item for item in agentcore.controls if item.id == "signed-binding").mediation == (
+        "exclusive_adapter"
+    )
+    assert (
+        next(item for item in agentcore.controls if item.id == "fresh-sessions").same_mandate
+        is None
+    )
+    assert next(item for item in agentcore.controls if item.id == "binding-revision").same_mandate
+    assert len(anthropic.controls) == 6
+    assert next(item for item in anthropic.controls if item.id == "two-children").final_costs == (
+        2,
+        2,
+        2,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+    )
+    assert next(item for item in anthropic.controls if item.id == "four-children").child_count == 4
+    assert not hasattr(agentcore, "final_costs")
+    assert not hasattr(anthropic, "revision_changed")
+
+
+@pytest.mark.parametrize(
+    ("reader", "fixture"),
+    [
+        (ContinuityBinding, "continuity-binding-v1.json"),
+        (AgentCoreContinuity, "agentcore-continuity-v1.json"),
+        (AnthropicContinuity, "anthropic-continuity-v1.json"),
+    ],
+)
+def test_canonical_readers_normalize_set_like_order(reader, fixture):
+    expected = (FIXTURES / fixture).read_text()
+    raw = json.loads(expected)
+    raw["sources"].reverse()
+    if "controls" in raw:
+        raw["controls"].reverse()
+        for control in raw["controls"]:
+            control["sources"].reverse()
+    assert reader.from_json(json.dumps(raw)).to_json() == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("{", "not valid JSON"),
+        ('{"x":NaN}', "non-canonical"),
+    ],
+)
+def test_json_errors_are_typed(text, message):
+    with pytest.raises(ContinuityFormatError, match=message):
+        _load(text, "sample")
+
+
+@pytest.mark.parametrize(
+    ("call", "message"),
+    [
+        (lambda: _record([], "x", set()), "must be an object"),
+        (lambda: _record({}, "x", {"a"}), "missing field"),
+        (lambda: _record({"a": 1}, "x", set()), "unknown field"),
+        (lambda: _string("", "x"), "non-empty stripped"),
+        (lambda: _string(" x", "x"), "non-empty stripped"),
+        (lambda: _integer(True, "x"), "integer"),
+        (lambda: _integer(-1, "x"), "integer"),
+        (lambda: _boolean(1, "x"), "boolean"),
+        (lambda: _digest("0" * 63, "x"), "lowercase SHA-256"),
+        (lambda: _date("20260830", "x"), "canonical ISO date"),
+        (lambda: _date("2026-02-30", "x"), "real calendar"),
+        (lambda: _utc("2026-08-30T00:00:00+00:00", "x"), "canonical UTC"),
+        (lambda: _utc("2026-02-30T00:00:00Z", "x"), "real timestamp"),
+        (lambda: _path("/absolute", "x"), "repository-relative"),
+        (lambda: _path("a\\b", "x"), "repository-relative"),
+        (lambda: _path("a/../b", "x"), "repository-relative"),
+        (lambda: _strings({}, "x"), "non-empty array"),
+        (lambda: _strings(["a", "a"], "x"), "duplicates"),
+        (lambda: _strings(["x"], "x", frozenset({"a"})), "invalid value"),
+    ],
+)
+def test_scalar_reader_errors_are_typed(call, message):
+    with pytest.raises(ContinuityFormatError, match=message):
+        call()
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"confidence": "wrong", "review": "accepted", "reviewer": "r", "expires": "2027-01-01"},
+        {"confidence": "exact", "review": "wrong", "reviewer": "r", "expires": "2027-01-01"},
+        {"confidence": "exact", "review": "unreviewed", "reviewer": "r", "expires": None},
+        {"confidence": "exact", "review": "accepted", "reviewer": None, "expires": "2027-01-01"},
+    ],
+)
+def test_evidence_invariants_fail_closed(raw):
+    with pytest.raises(ContinuityFormatError):
+        _evidence(raw, "evidence")
+
+
+def test_unreviewed_evidence_is_archival():
+    evidence = _evidence(
+        {"confidence": "unknown", "review": "unreviewed", "reviewer": None, "expires": None},
+        "evidence",
+    )
+    assert evidence.as_dict()["reviewer"] is None
+    reviewed = _evidence(
+        {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "reviewer",
+            "expires": "2027-08-30",
+        },
+        "evidence",
+    )
+    assert reviewed.expires == "2027-08-30"
+
+
+def test_source_reader_and_verifier_fail_closed():
+    source = {
+        "id": "source:a",
+        "kind": "capture",
+        "locator": "capture.json",
+        "content_sha256": "0" * 64,
+    }
+    with pytest.raises(ContinuityFormatError, match="non-empty array"):
+        _sources([], "sources")
+    with pytest.raises(ContinuityFormatError, match="duplicate identities"):
+        _sources([source, source], "sources")
+    parsed = _sources([source], "sources")
+    with pytest.raises(ContinuityFormatError, match="locator-to-bytes"):
+        _verify_sources(parsed, {"capture.json": "not bytes"})
+    with pytest.raises(ContinuityFormatError, match="source set"):
+        _verify_sources(parsed, {})
+    with pytest.raises(ContinuityFormatError, match="capture.json"):
+        _verify_sources(parsed, {"capture.json": b"wrong"})
+
+
+def _mutate_fixture(name: str, mutate) -> str:
+    raw = json.loads((FIXTURES / name).read_text())
+    mutate(raw)
+    return json.dumps(raw)
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (lambda raw: raw.update(continuity_binding_version=2), "unsupported"),
+        (lambda raw: raw["adapter"].update(version=2), "not supported"),
+        (lambda raw: raw["mediation"].update(kind="claimed"), "mediation"),
+        (lambda raw: raw["signature"].update(algorithm="rsa"), "cryptographic"),
+        (lambda raw: raw["validity"].update(expires_at=raw["validity"]["issued_at"]), "half-open"),
+    ],
+)
+def test_binding_reader_rejects_invalid_contracts(mutate, message):
+    with pytest.raises(ContinuityFormatError, match=message):
+        ContinuityBinding.from_json(_mutate_fixture("continuity-binding-v1.json", mutate))
+
+
+@pytest.mark.parametrize(
+    ("reader", "fixture", "version_field"),
+    [
+        (AgentCoreContinuity, "agentcore-continuity-v1.json", "agentcore_continuity_version"),
+        (AnthropicContinuity, "anthropic-continuity-v1.json", "anthropic_continuity_version"),
+    ],
+)
+def test_provider_readers_reject_future_versions(reader, fixture, version_field):
+    text = _mutate_fixture(fixture, lambda raw: raw.update({version_field: 2}))
+    with pytest.raises(ContinuityFormatError, match="unsupported"):
+        reader.from_json(text)
+
+
+@pytest.mark.parametrize(
+    ("reader", "fixture", "mutate"),
+    [
+        (
+            AgentCoreContinuity,
+            "agentcore-continuity-v1.json",
+            lambda raw: raw.update(provider="other"),
+        ),
+        (
+            AnthropicContinuity,
+            "anthropic-continuity-v1.json",
+            lambda raw: raw.update(service="other"),
+        ),
+    ],
+)
+def test_provider_readers_reject_other_profiles(reader, fixture, mutate):
+    with pytest.raises(ContinuityFormatError, match="not supported"):
+        reader.from_json(_mutate_fixture(fixture, mutate))
+
+
+def test_agentcore_control_reader_rejects_bad_shapes():
+    valid = json.loads((FIXTURES / "agentcore-continuity-v1.json").read_text())
+    source_ids = {source["id"] for source in valid["sources"]}
+    control = valid["controls"][0]
+    cases = [
+        ([], "must be an array"),
+        ([{**control, "transition": "wrong"}], "vocabulary"),
+        ([{**control, "provider_limits": []}], "provider_limits"),
+        ([{**control, "outcomes": ["wrong"]}], "invalid value"),
+        ([{**control, "sources": ["source:missing"]}], "unknown source"),
+        ([{**control, "revision_changed": "yes"}], "boolean"),
+        ([control, control], "duplicate ids"),
+    ]
+    for value, message in cases:
+        with pytest.raises(ContinuityFormatError, match=message):
+            _agentcore_controls(value, source_ids)
+
+
+def test_anthropic_control_reader_rejects_bad_shapes():
+    valid = json.loads((FIXTURES / "anthropic-continuity-v1.json").read_text())
+    source_ids = {source["id"] for source in valid["sources"]}
+    control = valid["controls"][0]
+    cases = [
+        ([], "must be an array"),
+        ([{**control, "transition": "wrong"}], "invalid value"),
+        ([{**control, "final_costs": []}], "final_costs"),
+        ([{**control, "child_count": 0}], "integer"),
+        ([{**control, "topology_complete": "yes"}], "boolean"),
+        ([{**control, "final_costs": [1]}], "one value per trial"),
+        ([{**control, "child_count": 1}], "child topology together"),
+        ([{**control, "sources": ["source:missing"]}], "unknown source"),
+        ([control, control], "duplicate ids"),
+    ]
+    for value, message in cases:
+        with pytest.raises(ContinuityFormatError, match=message):
+            _anthropic_controls(value, source_ids)
+
+
+def test_migration_source_and_capture_errors_are_named():
+    with pytest.raises(ContinuityFormatError, match="differs at locator"):
+        _migration_sources({}, {"missing.json": "capture"}, {"missing.json": "0" * 64})
+    with pytest.raises(ContinuityFormatError, match="reviewed locator"):
+        _migration_sources(
+            {"capture.json": b"changed"},
+            {"capture.json": "capture"},
+            {"capture.json": "0" * 64},
+        )
+    with pytest.raises(ContinuityFormatError, match="missing source locator"):
+        _captured({}, "missing.json")
+    with pytest.raises(ContinuityFormatError, match="must be bytes"):
+        _captured({"capture.json": "bad"}, "capture.json")
+    with pytest.raises(ContinuityFormatError, match="must contain an object"):
+        _captured({"capture.json": b"[]"}, "capture.json")
+
+
+def _replace_json(contents: dict[str, bytes], suffix: str, mutate) -> dict[str, bytes]:
+    result = dict(contents)
+    locator = next(name for name in result if name.endswith(suffix))
+    raw = json.loads(result[locator])
+    mutate(raw)
+    result[locator] = json.dumps(raw).encode()
+    return result
+
+
+def _allow_rehashed_migration(monkeypatch):
+    original = _migration_sources
+
+    def rehashed(contents, kinds, expected):
+        del expected
+        return original(
+            contents,
+            kinds,
+            {locator: hashlib.sha256(contents[locator]).hexdigest() for locator in kinds},
+        )
+
+    monkeypatch.setattr(continuity, "_migration_sources", rehashed)
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda raw: raw.update(binding_version=2),
+        lambda raw: raw.pop("issuer"),
+    ],
+)
+def test_binding_migration_rejects_changed_transport(mutate, monkeypatch):
+    _allow_rehashed_migration(monkeypatch)
+    with pytest.raises(ContinuityFormatError):
+        migrate_agentcore_binding(
+            _replace_json(_binding_contents(), "mandate-binding.json", mutate)
+        )
+
+
+def test_binding_migration_rejects_changed_controls(monkeypatch):
+    _allow_rehashed_migration(monkeypatch)
+    changed = _replace_json(
+        _binding_contents(),
+        "mandate-binding-result.json",
+        lambda raw: raw["same_signed_mandate"].update(calls=[]),
+    )
+    with pytest.raises(ContinuityFormatError, match="controls do not match"):
+        migrate_agentcore_binding(changed)
+
+
+@pytest.mark.parametrize(
+    ("suffix", "mutate"),
+    [
+        (
+            "temporal-repetition.json",
+            lambda raw: raw["results"].update(same_session_allow_then_deny=9),
+        ),
+        (
+            "temporal-semantic-noop-repetition.json",
+            lambda raw: raw["results"].update(distinct_active_revision=9),
+        ),
+        (
+            "temporal-update-repetition.json",
+            lambda raw: raw["results"].update(old_session_rejected_as_stale=9),
+        ),
+        (
+            "binding-repetition.json",
+            lambda raw: raw["results"].update(same_binding_allow_then_deny=9),
+        ),
+        (
+            "binding-policy-revision-repetition.json",
+            lambda raw: raw["results"].update(same_mandate_across_revision_aggregate=1199),
+        ),
+    ],
+)
+def test_agentcore_migration_rejects_changed_controls(suffix, mutate, monkeypatch):
+    _allow_rehashed_migration(monkeypatch)
+    with pytest.raises(ContinuityFormatError, match="does not match source"):
+        migrate_agentcore_continuity(_replace_json(_agentcore_contents(), suffix, mutate))
+
+
+def test_anthropic_migration_rejects_bad_joins_and_cells(monkeypatch):
+    _allow_rehashed_migration(monkeypatch)
+    bad_join = _replace_json(
+        _anthropic_contents(), "confirmation.json", lambda raw: raw.update(protocol_sha256="0" * 64)
+    )
+    with pytest.raises(ContinuityFormatError, match="protocol join"):
+        migrate_anthropic_continuity(bad_join)
+
+    bad_trials = _replace_json(
+        _anthropic_contents(), "confirmation.json", lambda raw: raw.update(trials={})
+    )
+    with pytest.raises(ContinuityFormatError, match="trials must be arrays"):
+        migrate_anthropic_continuity(bad_trials)
+
+    wrong_count = _replace_json(
+        _anthropic_contents(), "confirmation.json", lambda raw: raw["trials"].pop()
+    )
+    with pytest.raises(ContinuityFormatError, match="trial counts differ"):
+        migrate_anthropic_continuity(wrong_count)
+
+    bad_cell = _replace_json(
+        _anthropic_contents(),
+        "confirmation.json",
+        lambda raw: raw["trials"][0].update(cell="other"),
+    )
+    with pytest.raises(ContinuityFormatError, match="cell fresh_session_replication differs"):
+        migrate_anthropic_continuity(bad_cell)
+
+    bad_topology = _replace_json(
+        _anthropic_contents(),
+        "multiagent-confirmation.json",
+        lambda raw: raw["trials"][0]["topology"].update(protocol_conformant=False),
+    )
+    with pytest.raises(ContinuityFormatError, match="cell concurrent_subagents_2 differs"):
+        migrate_anthropic_continuity(bad_topology)

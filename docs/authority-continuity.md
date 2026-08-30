@@ -60,6 +60,17 @@ Neither profile may gain fields borrowed from the other. Unknown provider facts
 remain unknown. The projection admits only meanings proved by the profile's
 closed validator and digest-pinned sources.
 
+Gate 2a now implements these transports privately in
+`agentmandate._continuity`. The canonical migrations are pinned to the exact
+committed AgentCore and Anthropic bytes. Migration remains `unreviewed`: byte
+identity cannot manufacture an accountable reviewer or expiry, and changed
+bytes cannot inherit the canonical record merely by reproducing a summary.
+Each record names its adapter and version, uses a strict reader, verifies
+caller-supplied bytes without resolving paths, and preserves ordered provider
+outcomes. The AgentCore record has no cost accumulator, and the Anthropic
+record has no policy-revision or platform-verified mandate binding. No common continuity
+outcome is computed at this gate.
+
 ## Reviewed binding
 
 The candidate `continuity_binding_version: 1` record stays separate from the
@@ -325,10 +336,11 @@ stronger result.
 1. **Gate 1 — contract:** challenge the three-axis outcome model, provider
    separation, alignment checks, transition identity, evidence strength and
    conservative failure semantics.
-2. **Gate 2a — provider readers and migrations:** add strict private AgentCore
-   and Anthropic readers over canonical migrations of the committed captures.
-   Verify caller-supplied bytes and preserve provider-specific unknowns. No
-   common analysis.
+2. **Gate 2a — provider readers and migrations (complete):** strict private
+   AgentCore, Anthropic and signed-binding readers reproduce canonical
+   migrations of the committed captures. They verify caller-supplied bytes,
+   pin the reviewed source digests and preserve provider-specific unknowns. No
+   common analysis is present.
 3. **Gate 2b — IR projection:** register the minimum source relations, validate
    closed standalone profiles and semantic digests, and prove manifest
    `reach --ir` refuses them.
