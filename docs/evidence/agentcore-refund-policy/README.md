@@ -9,6 +9,11 @@ captures prove a managed Deny-to-Allow revision for one exact request. They do
 not make imported policy analyzable authority or expose the private comparison
 through the CLI.
 
+The proposed [authority continuity contract](../../authority-continuity.md)
+uses the later temporal, binding and revision controls in this evidence package
+as gate fixtures. No current command accepts those records as authority or as a
+continuity assessment.
+
 ## Reproduced controls
 
 The deployed tool was `RefundIamTarget___process_refund`. Its Lambda is a
