@@ -208,6 +208,10 @@ def confirm(_: Path) -> None:
     raise RuntimeError("confirmation implementation is not part of the frozen pilot harness")
 
 
+def _is_anthropic_error(exc: Exception) -> bool:
+    return type(exc).__module__.startswith("anthropic.")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", choices=("capability", "pilot", "confirm"))
@@ -217,6 +221,11 @@ def main(argv: list[str] | None = None) -> int:
         {"capability": capability, "pilot": pilot, "confirm": confirm}[args.stage](args.output)
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except Exception as exc:  # noqa: BLE001 - sanitise SDK errors at the capture boundary
+        if not _is_anthropic_error(exc):
+            raise
+        print(f"error: Anthropic request failed ({type(exc).__name__})", file=sys.stderr)
         return 2
     return 0
 
