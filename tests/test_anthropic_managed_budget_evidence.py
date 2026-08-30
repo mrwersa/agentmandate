@@ -171,6 +171,65 @@ def test_multiagent_topology_rejects_wrong_parent_and_missing_primary():
     assert capture._multiagent_topology(no_primary, 1)["protocol_conformant"] is False
 
 
+def test_multiagent_confirmation_preserves_concurrency_result_without_identifiers():
+    text = (EVIDENCE / "multiagent-confirmation.json").read_text()
+    result = json.loads(text)
+    trials = result["trials"]
+
+    assert result["protocol_sha256"] == hashlib.sha256(
+        (EVIDENCE / "multiagent-protocol.json").read_bytes()
+    ).hexdigest()
+    assert len(result["raw_capture_sha256"]) == 32
+    assert len(trials) == 30
+    assert [trial["order"] for trial in trials] == list(range(1, 31))
+    assert all(trial["topology"]["protocol_conformant"] for trial in trials)
+    assert all(trial["idle_reason"] == "budget_reached" for trial in trials)
+    assert all(
+        trial["post_budget_refusal"]["api_error_type"] == "invalid_request_error"
+        for trial in trials
+    )
+
+    cells = {
+        name: [trial for trial in trials if trial["cell"] == name]
+        for name in (
+            "subagent_handoff",
+            "concurrent_subagents_2",
+            "concurrent_subagents_4",
+        )
+    }
+    assert all(len(cell) == 10 for cell in cells.values())
+    assert sorted(trial["list_cost_minor_units"] for trial in cells["subagent_handoff"]) == [
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+    ]
+    assert sorted(
+        trial["list_cost_minor_units"] for trial in cells["concurrent_subagents_2"]
+    ) == [2] * 9 + [3]
+    assert [
+        trial["list_cost_minor_units"] for trial in cells["concurrent_subagents_4"]
+    ] == [4] * 10
+    assert all(
+        trial["topology"]["all_children_running_before_first_child_idle"]
+        for name in ("concurrent_subagents_2", "concurrent_subagents_4")
+        for trial in cells[name]
+    )
+    assert result["cleanup"] == {
+        "sessions_deleted_and_verified_absent": 30,
+        "agents_archived": 2,
+        "environment_deleted": True,
+    }
+    assert re.search(r"\b(?:sesn|sthr|agent|env|ws)_[A-Za-z0-9]{12,}\b", text) is None
+    assert "processed_at" not in text
+
+
 def test_capture_uses_managed_beta_and_pinned_sdk():
     capture = _capture_module()
 
