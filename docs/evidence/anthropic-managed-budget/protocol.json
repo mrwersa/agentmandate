@@ -9,7 +9,9 @@
   "capture_date": null,
   "pilot": {
     "excluded_from_confirmation": true,
+    "max_work_units_per_session": 8,
     "sessions": 3,
+    "stopping_rule": "stop after the first non-zero whole-cent list_cost or the maximum work units",
     "work_unit": "Return exactly 120 repetitions of the token ALPHA, separated by one space, and nothing else."
   },
   "confirmation": {

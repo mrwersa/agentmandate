@@ -85,10 +85,12 @@ def _wait_idle(client: Any, session_id: str, event_id: str) -> Any:
                 betas=BETAS,
             )
         )
-        processed = any(
-            event.id == event_id and event.processed_at is not None for event in events
+        sent_positions = [index for index, event in enumerate(events) if event.id == event_id]
+        completed = bool(sent_positions) and any(
+            index > sent_positions[0] and event.type == "session.status_idle"
+            for index, event in enumerate(events)
         )
-        if processed and session.status == "idle":
+        if completed and session.status == "idle":
             return session
         if session.status == "terminated":
             raise RuntimeError("managed session terminated before reaching idle")
@@ -131,7 +133,7 @@ def _delete_session(client: Any, session_id: str) -> None:
     try:
         client.beta.sessions.retrieve(session_id, betas=BETAS)
     except Exception as exc:  # noqa: BLE001 - a typed not-found is the absence proof
-        if type(exc).__module__.startswith("anthropic.") and type(exc).__name__ == "NotFoundError":
+        if _is_anthropic_error(exc) and type(exc).__name__ == "NotFoundError":
             return
         raise
     raise RuntimeError("managed session still resolves after deletion")
@@ -149,6 +151,13 @@ def _snapshot(client: Any, session_id: str) -> dict[str, Any]:
     )
     threads = _all(client.beta.sessions.threads.list(session_id, limit=100, betas=BETAS))
     return {"session": session, "events": events, "threads": threads}
+
+
+def _list_cost(snapshot: dict[str, Any]) -> int:
+    value = snapshot["session"].usage.list_cost.amount
+    if not isinstance(value, str) or not value.isdigit():
+        raise RuntimeError("managed session returned a non-canonical list cost")
+    return int(value)
 
 
 def capability(output: Path) -> None:
@@ -206,8 +215,27 @@ def pilot(output: Path) -> None:
                 betas=BETAS,
             )
             sessions.append(session)
-            _send_work(client, session.id, protocol["pilot"]["work_unit"])
-            _write_json(output / f"pilot-{index + 1}.json", _snapshot(client, session.id))
+            snapshots = []
+            for work_index in range(protocol["pilot"]["max_work_units_per_session"]):
+                _send_work(client, session.id, protocol["pilot"]["work_unit"])
+                snapshot = _snapshot(client, session.id)
+                snapshots.append(
+                    {
+                        "work_unit": work_index + 1,
+                        "list_cost_minor_units": _list_cost(snapshot),
+                        "snapshot": snapshot,
+                    }
+                )
+                if snapshots[-1]["list_cost_minor_units"] > 0:
+                    break
+            _write_json(
+                output / f"pilot-{index + 1}.json",
+                {
+                    "excluded_from_confirmation": True,
+                    "stopping_rule": protocol["pilot"]["stopping_rule"],
+                    "work_units": snapshots,
+                },
+            )
     finally:
         for session in sessions:
             try:
@@ -247,7 +275,8 @@ def confirm(_: Path) -> None:
 
 
 def _is_anthropic_error(exc: Exception) -> bool:
-    return type(exc).__module__.startswith("anthropic.")
+    module = type(exc).__module__
+    return module == "anthropic" or module.startswith("anthropic.")
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -22,6 +22,7 @@ def test_protocol_is_preregistered_and_confirmation_is_locked():
 
     assert protocol["status"] == "pilot_not_run"
     assert protocol["pilot"]["excluded_from_confirmation"] is True
+    assert protocol["pilot"]["max_work_units_per_session"] == 8
     assert protocol["confirmation"]["trials_per_cell"] == 10
     assert protocol["confirmation"]["cap_minor_units"] is None
     assert protocol["confirmation"]["cells"] == [
@@ -95,7 +96,19 @@ def test_capture_does_not_echo_anthropic_error_values(tmp_path, monkeypatch, cap
 def test_wait_idle_does_not_accept_the_prestart_idle_state(monkeypatch):
     capture = _capture_module()
     states = iter(("idle", "running", "idle"))
-    processed = iter((None, None, "2026-08-30T12:00:00Z"))
+    event_sets = iter(
+        (
+            [SimpleNamespace(id="event-1", type="user.message")],
+            [
+                SimpleNamespace(id="event-1", type="user.message"),
+                SimpleNamespace(id="model-1", type="span.model_request_start"),
+            ],
+            [
+                SimpleNamespace(id="event-1", type="user.message"),
+                SimpleNamespace(id="idle-1", type="session.status_idle"),
+            ],
+        )
+    )
 
     class Sessions:
         def __init__(self):
@@ -103,9 +116,8 @@ def test_wait_idle_does_not_accept_the_prestart_idle_state(monkeypatch):
 
         @staticmethod
         def list_events(*_args, **_kwargs):
-            value = next(processed)
             return SimpleNamespace(
-                data=[SimpleNamespace(id="event-1", processed_at=value)],
+                data=next(event_sets),
                 has_next_page=lambda: False,
             )
 
@@ -119,6 +131,17 @@ def test_wait_idle_does_not_accept_the_prestart_idle_state(monkeypatch):
     result = capture._wait_idle(client, "session-1", "event-1")
 
     assert result.status == "idle"
+
+
+def test_anthropic_error_recognises_sdk_root_module():
+    capture = _capture_module()
+
+    class FakeRootError(Exception):
+        pass
+
+    FakeRootError.__module__ = "anthropic"
+
+    assert capture._is_anthropic_error(FakeRootError()) is True
 
 
 def test_delete_session_interrupts_running_work_and_verifies_absence(monkeypatch):

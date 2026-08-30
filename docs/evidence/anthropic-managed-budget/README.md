@@ -62,6 +62,15 @@ specific sent event has a non-null `processed_at` value and the session is idle.
 Cleanup interrupts a running session when necessary, deletes it, and requires a
 typed not-found response as the absence proof.
 
+That corrected attempt still produced two pre-completion snapshots because a
+queued user event may be marked processed before its model request ends. The
+completed trial also showed that the API rounds the reported list cost to whole
+cents. A second **extractor defect** correction therefore requires a
+session-level idle event ordered after the sent message. The excluded pilot now
+repeats the frozen work unit until the first non-zero whole-cent cost, up to the
+precommitted maximum of eight, so it can select a cap without borrowing values
+from confirmation.
+
 ## Result and consequence
 
 No result yet. Expected outcomes must not enter this file or the manuscript
