@@ -68,6 +68,15 @@ events preceded the first child-idle event. The uncapped sessions ended at two,
 four, and six cents respectively. These observations validate the frozen
 prompts; they are not confirmation trials and do not answer budget behavior.
 
+The confirmation runner uses the same frozen prompts and a one-cent session cap
+for ten randomized trials per cell. It never retries a nonconforming topology.
+Each trial retains the full private native snapshot, exact child count and
+parentage, creation-before-idle check, session cost, native idle reason, and
+post-budget refusal. The implementation strengthens the frozen minimum for
+concurrent cells by also requiring every child `thread_status_running` event to
+precede the first child-idle event. Every session is deleted and verified
+absent before the next trial begins.
+
 The script reads `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` from the
 environment. The workspace ID is required explicitly because identity-linked
 keys may span workspaces. The script creates managed agents, cloud environments,
