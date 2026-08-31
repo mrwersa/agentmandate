@@ -298,6 +298,15 @@ Names and endpoints remain proposals until the relation-registry review. Facts
 carry limit values, units, consumed/reserved/in-flight observations,
 completeness, evidence state and provider-specific source locators.
 
+Gate 2b registers `binds_mandate`, `binds_boundary`, `state_of`,
+`before_state`, `after_state`, and `observes_decision`. The binding and both
+provider records project through separate closed standalone profiles. Each
+profile embeds its strict transport record, checks independent content and
+semantic digests, regenerates every entity, fact, and edge after reading, and
+remains rejected by manifest `reach --ir`. `governed_by` is deliberately not
+registered: the sanitized captures prove whether a revision changed but do not
+retain a stable revision identity that could honestly serve as its endpoint.
+
 Generic IR validation proves structure only. Closed provider validators prove
 their own profile semantics. The common continuity consumer revalidates every
 profile at the consumption boundary. `_analyse_ir` continues to reject all
@@ -341,9 +350,9 @@ stronger result.
    migrations of the committed captures. They verify caller-supplied bytes,
    pin the reviewed source digests and preserve provider-specific unknowns. No
    common analysis is present.
-3. **Gate 2b — IR projection:** register the minimum source relations, validate
-   closed standalone profiles and semantic digests, and prove manifest
-   `reach --ir` refuses them.
+3. **Gate 2b — IR projection (complete):** the minimum evidence-backed source
+   relations are registered; separate closed profiles validate content and
+   semantic digests by regeneration; manifest `reach --ir` refuses them.
 4. **Gate 3 — private reconciliation:** reproduce every evidence-selected
    control, adversarial trust failure, whole-transition comparison and legacy
    byte-identity result. No public Python records.

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -23,16 +25,19 @@ from agentmandate._continuity import (
     _load,
     _migration_sources,
     _path,
+    _profile_digest,
     _record,
     _sources,
     _string,
     _strings,
     _utc,
+    _validate_continuity_profile,
     _verify_sources,
     migrate_agentcore_binding,
     migrate_agentcore_continuity,
     migrate_anthropic_continuity,
 )
+from agentmandate._ir import AuthorityIR, IRFormatError, _analyse_ir
 
 ROOT = Path(__file__).parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
@@ -163,6 +168,155 @@ def test_canonical_readers_normalize_set_like_order(reader, fixture):
         for control in raw["controls"]:
             control["sources"].reverse()
     assert reader.from_json(json.dumps(raw)).to_json() == expected
+
+
+def _projected_profiles():
+    return (
+        migrate_agentcore_binding(_binding_contents()).to_ir(),
+        migrate_agentcore_continuity(_agentcore_contents()).to_ir(),
+        migrate_anthropic_continuity(_anthropic_contents()).to_ir(),
+    )
+
+
+def _profile_contract(graph: AuthorityIR) -> tuple[str, str]:
+    source = graph.sources[0]
+    return source.kind, source.adapter
+
+
+def test_continuity_profiles_project_registered_relations_and_round_trip():
+    binding, agentcore, anthropic = _projected_profiles()
+    assert (len(binding.entities), len(binding.facts), len(binding.edges)) == (3, 9, 2)
+    assert (len(agentcore.entities), len(agentcore.facts), len(agentcore.edges)) == (45, 187, 52)
+    assert (len(anthropic.entities), len(anthropic.facts), len(anthropic.edges)) == (25, 111, 30)
+    assert {edge.relation for edge in binding.edges} == {"binds_mandate", "binds_boundary"}
+    provider_relations = {
+        "after_state",
+        "before_state",
+        "observes_decision",
+        "state_of",
+    }
+    assert {edge.relation for edge in agentcore.edges} == provider_relations
+    assert {edge.relation for edge in anthropic.edges} == provider_relations
+    assert {
+        graph.sources[0].kind: graph.sources[0].semantic_sha256
+        for graph in (binding, agentcore, anthropic)
+    } == {
+        "continuity-binding": "1d1d3593d78fb58185b6846262c7c6f21b82af744e6cefa6450a69056c150af7",
+        "agentcore-continuity": "4962f850b8b3736f1614385316f02f217a3f716d1d75ef894742fb0d717d1db9",
+        "anthropic-continuity": "260cf8b10c0fb70b600db5cb101a79211c4aaf957ccc35ec7b68a40b345955bc",
+    }
+    for graph in (binding, agentcore, anthropic):
+        encoded = graph.to_json()
+        decoded = AuthorityIR.from_json(encoded)
+        assert decoded.to_json() == encoded
+        assert {item.review for fact in graph.facts for item in fact.evidence} == {"unreviewed"}
+        with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+            _analyse_ir(graph)
+
+
+def test_provider_projection_preserves_distinct_state_shapes():
+    _, agentcore, anthropic = _projected_profiles()
+    agentcore_predicates = {fact.predicate for fact in agentcore.facts}
+    anthropic_predicates = {fact.predicate for fact in anthropic.facts}
+    assert "completed_values" not in agentcore_predicates
+    assert "completed_values" in anthropic_predicates
+    assert any(
+        fact.predicate == "control" and fact.value["same_mandate"] is None
+        for fact in agentcore.facts
+    )
+    assert not any(
+        "revision_changed" in fact.value for fact in anthropic.facts if isinstance(fact.value, dict)
+    )
+
+
+def _rehash(graph: AuthorityIR) -> AuthorityIR:
+    source = graph.sources[0]
+    return replace(
+        graph,
+        sources=(
+            replace(
+                source,
+                semantic_sha256=_profile_digest(graph.entities, graph.facts, graph.edges),
+            ),
+        ),
+    )
+
+
+def test_profile_validator_rejects_structural_source_and_digest_failures():
+    graph = migrate_agentcore_continuity(_agentcore_contents()).to_ir()
+    kind, adapter = _profile_contract(graph)
+    cases = (
+        replace(graph, edges=graph.edges[:-1]),
+        replace(
+            graph,
+            sources=graph.sources + (replace(graph.sources[0], id="source:extra"),),
+        ),
+        replace(graph, sources=(replace(graph.sources[0], adapter="wrong"),)),
+        replace(graph, sources=(replace(graph.sources[0], locator="memory:wrong"),)),
+        replace(graph, sources=(replace(graph.sources[0], semantic_sha256="0" * 64),)),
+        replace(graph, sources=(replace(graph.sources[0], producer_version="wrong"),)),
+    )
+    for changed in cases:
+        with pytest.raises(ContinuityFormatError):
+            _validate_continuity_profile(changed, kind, adapter)
+    with pytest.raises(ContinuityFormatError, match="kind is not supported"):
+        _validate_continuity_profile(graph, "other", adapter)
+
+
+def test_profile_validator_rejects_invalid_and_rehashed_record_tampering():
+    graph = migrate_anthropic_continuity(_anthropic_contents()).to_ir()
+    kind, adapter = _profile_contract(graph)
+    root = next(entity for entity in graph.entities if entity.kind == "enforcement_boundary")
+    record = next(
+        fact for fact in graph.facts if fact.subject == root.id and fact.predicate == "record"
+    )
+
+    invalid_value = deepcopy(record.value)
+    invalid_value["provider"] = "other"
+    invalid_fact = replace(record, value=invalid_value)
+    invalid = replace(
+        graph,
+        facts=tuple(invalid_fact if fact.id == record.id else fact for fact in graph.facts),
+    )
+    with pytest.raises(ContinuityFormatError, match="record fact is invalid"):
+        _validate_continuity_profile(_rehash(invalid), kind, adapter)
+
+    valid_value = deepcopy(record.value)
+    valid_value["controls"][0]["cap_after"] = 3
+    changed_fact = replace(record, value=valid_value)
+    changed = replace(
+        graph,
+        facts=tuple(changed_fact if fact.id == record.id else fact for fact in graph.facts),
+    )
+    with pytest.raises(ContinuityFormatError, match="source identity"):
+        _validate_continuity_profile(_rehash(changed), kind, adapter)
+
+    state_fact = next(fact for fact in graph.facts if fact.predicate == "provider_limit")
+    altered_fact = replace(state_fact, value=state_fact.value + 1)
+    altered = replace(
+        graph,
+        facts=tuple(altered_fact if fact.id == state_fact.id else fact for fact in graph.facts),
+    )
+    with pytest.raises(ContinuityFormatError, match="does not match its record"):
+        _validate_continuity_profile(_rehash(altered), kind, adapter)
+
+    missing_record = replace(
+        graph,
+        facts=tuple(fact for fact in graph.facts if fact.id != record.id),
+    )
+    with pytest.raises(ContinuityFormatError, match="record root"):
+        _validate_continuity_profile(_rehash(missing_record), kind, adapter)
+
+
+def test_profile_validator_checks_content_digest_after_regeneration():
+    graph = migrate_agentcore_binding(_binding_contents()).to_ir()
+    kind, adapter = _profile_contract(graph)
+    changed = replace(
+        graph,
+        sources=(replace(graph.sources[0], content_sha256="0" * 64),),
+    )
+    with pytest.raises(ContinuityFormatError, match="content digest"):
+        _validate_continuity_profile(changed, kind, adapter)
 
 
 @pytest.mark.parametrize(
