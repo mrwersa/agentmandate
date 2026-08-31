@@ -14,9 +14,29 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
+from ._ir import (
+    IR_VERSION,
+    AuthorityIR,
+    Edge,
+    Entity,
+    Fact,
+    IRFormatError,
+    Source,
+    _edge_id,
+    _entity_id,
+    _fact_id,
+)
+from ._ir import (
+    Evidence as IREvidence,
+)
+
 CONTINUITY_BINDING_VERSION = 1
 AGENTCORE_CONTINUITY_VERSION = 1
 ANTHROPIC_CONTINUITY_VERSION = 1
+CONTINUITY_BINDING_IR_ADAPTER = "agentmandate.continuity-binding-ir"
+AGENTCORE_CONTINUITY_IR_ADAPTER = "agentmandate.agentcore-continuity-ir"
+ANTHROPIC_CONTINUITY_IR_ADAPTER = "agentmandate.anthropic-continuity-ir"
+CONTINUITY_IR_ADAPTER_VERSION = 1
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
@@ -289,6 +309,9 @@ class ContinuityBinding:
     def verify_sources(self, contents: dict[str, bytes]) -> None:
         _verify_sources(self.sources, contents)
 
+    def to_ir(self) -> AuthorityIR:
+        return _binding_to_ir(self)
+
     @classmethod
     def from_json(cls, text: str) -> ContinuityBinding:
         raw = _record(
@@ -497,6 +520,9 @@ class AgentCoreContinuity:
     def verify_sources(self, contents: dict[str, bytes]) -> None:
         _verify_sources(self.sources, contents)
 
+    def to_ir(self) -> AuthorityIR:
+        return _provider_to_ir(self)
+
     @classmethod
     def from_json(cls, text: str) -> AgentCoreContinuity:
         raw = _record(
@@ -671,6 +697,9 @@ class AnthropicContinuity:
 
     def verify_sources(self, contents: dict[str, bytes]) -> None:
         _verify_sources(self.sources, contents)
+
+    def to_ir(self) -> AuthorityIR:
+        return _provider_to_ir(self)
 
     @classmethod
     def from_json(cls, text: str) -> AnthropicContinuity:
@@ -1225,3 +1254,452 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
         _migration_evidence(),
     )
     return AnthropicContinuity.from_json(migrated.to_json())
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _profile_digest(
+    entities: tuple[Entity, ...], facts: tuple[Fact, ...], edges: tuple[Edge, ...]
+) -> str:
+    body = {
+        "entities": [item.as_dict() for item in sorted(entities, key=lambda item: item.id)],
+        "facts": [item.as_dict() for item in sorted(facts, key=lambda item: item.id)],
+        "edges": [item.as_dict() for item in sorted(edges, key=lambda item: item.id)],
+    }
+    return hashlib.sha256(_canonical_json(body).encode()).hexdigest()
+
+
+def _ir_fact(
+    subject: str,
+    predicate: str,
+    value: Any,
+    source: str,
+    location: str,
+    evidence: ContinuityEvidence,
+) -> Fact:
+    return Fact(
+        _fact_id(subject, predicate),
+        subject,
+        predicate,
+        value,
+        (IREvidence(source, location, evidence.confidence, evidence.review),),
+    )
+
+
+def _binding_projection_parts(
+    value: ContinuityBinding, source_id: str
+) -> tuple[tuple[Entity, ...], tuple[Fact, ...], tuple[Edge, ...]]:
+    binding_id = _entity_id("continuity_binding", value.id)
+    mandate_id = _entity_id("mandate", value.mandate_sha256)
+    boundary_name = f"{value.provider}:{value.binding}"
+    boundary_id = _entity_id("enforcement_boundary", boundary_name)
+    entities = (
+        Entity(binding_id, "continuity_binding", value.id),
+        Entity(mandate_id, "mandate", value.mandate_sha256),
+        Entity(boundary_id, "enforcement_boundary", boundary_name),
+    )
+    facts = (
+        _ir_fact(binding_id, "name", value.id, source_id, "/id", value.evidence),
+        _ir_fact(binding_id, "record", value.as_dict(), source_id, "", value.evidence),
+        _ir_fact(binding_id, "mandate", mandate_id, source_id, "/mandate", value.evidence),
+        _ir_fact(
+            binding_id,
+            "boundary",
+            boundary_id,
+            source_id,
+            "/enforcement",
+            value.evidence,
+        ),
+        _ir_fact(
+            mandate_id,
+            "sha256",
+            value.mandate_sha256,
+            source_id,
+            "/mandate/sha256",
+            value.evidence,
+        ),
+        _ir_fact(
+            mandate_id,
+            "principal",
+            value.principal,
+            source_id,
+            "/mandate/principal",
+            value.evidence,
+        ),
+        _ir_fact(boundary_id, "name", boundary_name, source_id, "/enforcement", value.evidence),
+        _ir_fact(
+            boundary_id,
+            "provider",
+            value.provider,
+            source_id,
+            "/enforcement/provider",
+            value.evidence,
+        ),
+        _ir_fact(
+            boundary_id,
+            "boundary_kind",
+            value.boundary_kind,
+            source_id,
+            "/enforcement/boundary_kind",
+            value.evidence,
+        ),
+    )
+    edges = (
+        Edge(
+            _edge_id(binding_id, "binds_mandate", mandate_id),
+            binding_id,
+            "binds_mandate",
+            mandate_id,
+            (_fact_id(binding_id, "mandate"),),
+        ),
+        Edge(
+            _edge_id(binding_id, "binds_boundary", boundary_id),
+            binding_id,
+            "binds_boundary",
+            boundary_id,
+            (_fact_id(binding_id, "boundary"),),
+        ),
+    )
+    return (
+        tuple(sorted(entities, key=lambda item: item.id)),
+        tuple(sorted(facts, key=lambda item: item.id)),
+        tuple(sorted(edges, key=lambda item: item.id)),
+    )
+
+
+def _control_values(
+    value: AgentCoreControl | AnthropicControl,
+) -> tuple[int, int, list[int] | None]:
+    if isinstance(value, AgentCoreControl):
+        return value.provider_limits[0], value.provider_limits[-1], None
+    return value.cap_before, value.cap_after, list(value.final_costs)
+
+
+def _provider_projection_parts(
+    value: AgentCoreContinuity | AnthropicContinuity, source_id: str
+) -> tuple[tuple[Entity, ...], tuple[Fact, ...], tuple[Edge, ...]]:
+    if isinstance(value, AgentCoreContinuity):
+        boundary_name = f"{value.provider}:{value.binding}"
+    else:
+        boundary_name = f"anthropic-managed-agents:{value.binding_sha256}"
+    boundary_id = _entity_id("enforcement_boundary", boundary_name)
+    entities: list[Entity] = [Entity(boundary_id, "enforcement_boundary", boundary_name)]
+    transition_ids = {
+        control.id: _entity_id("transition", control.id) for control in value.controls
+    }
+    facts: list[Fact] = [
+        _ir_fact(boundary_id, "name", boundary_name, source_id, "/", value.evidence),
+        _ir_fact(boundary_id, "record", value.as_dict(), source_id, "", value.evidence),
+        _ir_fact(
+            boundary_id,
+            "transitions",
+            [transition_ids[item.id] for item in value.controls],
+            source_id,
+            "/controls",
+            value.evidence,
+        ),
+    ]
+    edges: list[Edge] = []
+    for control_index, control in enumerate(value.controls):
+        transition_id = transition_ids[control.id]
+        before_id = _entity_id("boundary_state", f"{control.id}:before")
+        after_id = _entity_id("boundary_state", f"{control.id}:after")
+        decision_ids = [
+            _entity_id("decision", f"{control.id}:event:{index}")
+            for index in range(len(control.outcomes))
+        ]
+        entities.extend(
+            (
+                Entity(transition_id, "transition", control.id),
+                Entity(before_id, "boundary_state", f"{control.id}:before"),
+                Entity(after_id, "boundary_state", f"{control.id}:after"),
+            )
+        )
+        before_limit, after_limit, completed = _control_values(control)
+        path = f"/controls/{control_index}"
+        facts.extend(
+            (
+                _ir_fact(
+                    transition_id, "name", control.id, source_id, f"{path}/id", value.evidence
+                ),
+                _ir_fact(
+                    transition_id,
+                    "control",
+                    control.as_dict(),
+                    source_id,
+                    path,
+                    value.evidence,
+                ),
+                _ir_fact(
+                    transition_id,
+                    "before",
+                    before_id,
+                    source_id,
+                    path,
+                    value.evidence,
+                ),
+                _ir_fact(
+                    transition_id,
+                    "after",
+                    after_id,
+                    source_id,
+                    path,
+                    value.evidence,
+                ),
+                _ir_fact(
+                    transition_id,
+                    "decisions",
+                    decision_ids,
+                    source_id,
+                    f"{path}/outcomes",
+                    value.evidence,
+                ),
+            )
+        )
+        for state_id, phase, limit in (
+            (before_id, "before", before_limit),
+            (after_id, "after", after_limit),
+        ):
+            facts.extend(
+                (
+                    _ir_fact(
+                        state_id, "name", f"{control.id}:{phase}", source_id, path, value.evidence
+                    ),
+                    _ir_fact(
+                        state_id,
+                        "boundary",
+                        boundary_id,
+                        source_id,
+                        path,
+                        value.evidence,
+                    ),
+                    _ir_fact(state_id, "phase", phase, source_id, path, value.evidence),
+                    _ir_fact(
+                        state_id,
+                        "provider_limit",
+                        limit,
+                        source_id,
+                        path,
+                        value.evidence,
+                    ),
+                )
+            )
+            edges.append(
+                Edge(
+                    _edge_id(state_id, "state_of", boundary_id),
+                    state_id,
+                    "state_of",
+                    boundary_id,
+                    (_fact_id(state_id, "boundary"),),
+                )
+            )
+        if completed is not None:
+            facts.append(
+                _ir_fact(
+                    after_id,
+                    "completed_values",
+                    completed,
+                    source_id,
+                    f"{path}/final_costs",
+                    value.evidence,
+                )
+            )
+        edges.extend(
+            (
+                Edge(
+                    _edge_id(transition_id, "before_state", before_id),
+                    transition_id,
+                    "before_state",
+                    before_id,
+                    (_fact_id(transition_id, "before"),),
+                ),
+                Edge(
+                    _edge_id(transition_id, "after_state", after_id),
+                    transition_id,
+                    "after_state",
+                    after_id,
+                    (_fact_id(transition_id, "after"),),
+                ),
+            )
+        )
+        for decision_index, (decision_id, outcome) in enumerate(
+            zip(decision_ids, control.outcomes, strict=True)
+        ):
+            decision_name = f"{control.id}:event:{decision_index}"
+            entities.append(Entity(decision_id, "decision", decision_name))
+            facts.extend(
+                (
+                    _ir_fact(decision_id, "name", decision_name, source_id, path, value.evidence),
+                    _ir_fact(
+                        decision_id,
+                        "outcome",
+                        outcome,
+                        source_id,
+                        f"{path}/outcomes/{decision_index}",
+                        value.evidence,
+                    ),
+                    _ir_fact(
+                        decision_id,
+                        "ordinal",
+                        decision_index,
+                        source_id,
+                        f"{path}/outcomes/{decision_index}",
+                        value.evidence,
+                    ),
+                    _ir_fact(
+                        decision_id,
+                        "trials",
+                        control.trials,
+                        source_id,
+                        f"{path}/trials",
+                        value.evidence,
+                    ),
+                )
+            )
+            edges.append(
+                Edge(
+                    _edge_id(transition_id, "observes_decision", decision_id),
+                    transition_id,
+                    "observes_decision",
+                    decision_id,
+                    (_fact_id(transition_id, "decisions"),),
+                )
+            )
+    return (
+        tuple(sorted(entities, key=lambda item: item.id)),
+        tuple(sorted(facts, key=lambda item: item.id)),
+        tuple(sorted(edges, key=lambda item: item.id)),
+    )
+
+
+def _make_profile(
+    record: ContinuityBinding | AgentCoreContinuity | AnthropicContinuity,
+    kind: str,
+    adapter: str,
+    producer_version: str | None,
+    parts,
+) -> AuthorityIR:
+    content_sha256 = hashlib.sha256(record.to_json().encode()).hexdigest()
+    source_id = _entity_id("source", f"{kind}:{content_sha256}")
+    entities, facts, edges = parts(record, source_id)
+    graph = AuthorityIR(
+        IR_VERSION,
+        (
+            Source(
+                source_id,
+                kind,
+                f"memory:{kind}",
+                record.version,
+                producer_version,
+                _profile_digest(entities, facts, edges),
+                adapter,
+                CONTINUITY_IR_ADAPTER_VERSION,
+                content_sha256,
+            ),
+        ),
+        entities,
+        facts,
+        edges,
+    )
+    _validate_continuity_profile(graph, kind, adapter)
+    return graph
+
+
+def _binding_to_ir(value: ContinuityBinding) -> AuthorityIR:
+    return _make_profile(
+        value,
+        "continuity-binding",
+        CONTINUITY_BINDING_IR_ADAPTER,
+        value.derivation_algorithm,
+        _binding_projection_parts,
+    )
+
+
+def _provider_to_ir(value: AgentCoreContinuity | AnthropicContinuity) -> AuthorityIR:
+    if isinstance(value, AgentCoreContinuity):
+        return _make_profile(
+            value,
+            "agentcore-continuity",
+            AGENTCORE_CONTINUITY_IR_ADAPTER,
+            value.protocol,
+            _provider_projection_parts,
+        )
+    return _make_profile(
+        value,
+        "anthropic-continuity",
+        ANTHROPIC_CONTINUITY_IR_ADAPTER,
+        value.beta,
+        _provider_projection_parts,
+    )
+
+
+def _validate_continuity_profile(graph: AuthorityIR, kind: str, adapter: str) -> None:
+    """Validate and regenerate one closed standalone continuity profile."""
+
+    contracts = {
+        "continuity-binding": (CONTINUITY_BINDING_IR_ADAPTER, ContinuityBinding),
+        "agentcore-continuity": (AGENTCORE_CONTINUITY_IR_ADAPTER, AgentCoreContinuity),
+        "anthropic-continuity": (ANTHROPIC_CONTINUITY_IR_ADAPTER, AnthropicContinuity),
+    }
+    contract = contracts.get(kind)
+    if contract is None or contract[0] != adapter:
+        raise ContinuityFormatError("continuity IR profile kind is not supported")
+    try:
+        graph.validate()
+    except IRFormatError as exc:
+        raise ContinuityFormatError("continuity IR profile is structurally invalid") from exc
+    if len(graph.sources) != 1:
+        raise ContinuityFormatError("continuity IR profile requires exactly one source")
+    source = graph.sources[0]
+    if (
+        source.kind != kind
+        or source.adapter != adapter
+        or source.adapter_version != CONTINUITY_IR_ADAPTER_VERSION
+        or source.format_version != 1
+        or source.content_sha256 is None
+        or source.locator != f"memory:{kind}"
+    ):
+        raise ContinuityFormatError("continuity IR profile has an unsupported source")
+    if source.semantic_sha256 != _profile_digest(graph.entities, graph.facts, graph.edges):
+        raise ContinuityFormatError("continuity IR profile semantic digest does not match")
+    root_kind = "continuity_binding" if kind == "continuity-binding" else "enforcement_boundary"
+    roots = [entity for entity in graph.entities if entity.kind == root_kind]
+    record_facts = [
+        fact
+        for fact in graph.facts
+        if fact.predicate == "record" and fact.subject in {root.id for root in roots}
+    ]
+    if len(roots) != 1 or len(record_facts) != 1:
+        raise ContinuityFormatError("continuity IR profile requires one record root")
+    reader = contract[1]
+    try:
+        record = reader.from_json(_canonical_json(record_facts[0].value))
+    except ContinuityFormatError as exc:
+        raise ContinuityFormatError("continuity IR profile record fact is invalid") from exc
+    content_sha256 = hashlib.sha256(record.to_json().encode()).hexdigest()
+    producer_version = (
+        record.derivation_algorithm
+        if isinstance(record, ContinuityBinding)
+        else record.protocol
+        if isinstance(record, AgentCoreContinuity)
+        else record.beta
+    )
+    if (
+        source.id != _entity_id("source", f"{kind}:{content_sha256}")
+        or source.producer_version != producer_version
+    ):
+        raise ContinuityFormatError("continuity IR profile source identity does not match")
+    parts = (
+        _binding_projection_parts if kind == "continuity-binding" else _provider_projection_parts
+    )
+    expected_entities, expected_facts, expected_edges = parts(record, source.id)
+    if (
+        graph.entities != expected_entities
+        or graph.facts != expected_facts
+        or graph.edges != expected_edges
+    ):
+        raise ContinuityFormatError("continuity IR profile does not match its record")
+    if source.content_sha256 != content_sha256:
+        raise ContinuityFormatError("continuity IR profile content digest does not match")

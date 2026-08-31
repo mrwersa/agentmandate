@@ -99,7 +99,15 @@ MANIFEST_PREDICATES = {
 RELATIONS = {
     "acts_as": Relation("tool", "principal", "one", "single", "principal"),
     "acts_under": Relation("hop", "principal", "many", "union", "actors"),
+    "after_state": Relation("transition", "boundary_state", "one", "single", "after"),
     "at_hop": Relation("principal", "hop", "one", "single", "hop"),
+    "before_state": Relation("transition", "boundary_state", "one", "single", "before"),
+    "binds_boundary": Relation(
+        "continuity_binding", "enforcement_boundary", "one", "single", "boundary"
+    ),
+    "binds_mandate": Relation(
+        "continuity_binding", "mandate", "one", "single", "mandate"
+    ),
     "can_reach": Relation(
         "agent", "tool", "many", "union", None, True, "reachable"
     ),
@@ -124,11 +132,17 @@ RELATIONS = {
     "has_hop": Relation("delegation", "hop", "many", "union", "hops"),
     "has_surface": Relation("hop", "surface", "many", "union", "surfaces"),
     "narrows_to": Relation("condition", "effect", "one", "single", "effect"),
+    "observes_decision": Relation(
+        "transition", "decision", "many", "union", "decisions"
+    ),
     "maps_to_tool": Relation("policy_action", "tool", "one", "single", "tool"),
     "produces": Relation("tool", "scope", "one", "single", "produces"),
     "previous_hop": Relation("hop", "hop", "one", "single", "previous"),
     "requires": Relation("tool", "scope", "many", "union", "requires"),
     "role_contains": Relation("role", "tool", "many", "union", "members"),
+    "state_of": Relation(
+        "boundary_state", "enforcement_boundary", "one", "single", "boundary"
+    ),
     "transitions_to": Relation(
         "tool", "tool", "many", "union", None, True, "transition"
     ),

@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+### Added
+
+- Authority IR validation recognizes standalone authority-continuity binding,
+  AgentCore policy-session, and Anthropic managed-budget profiles through
+  `binds_mandate`, `binds_boundary`, `state_of`, `before_state`,
+  `after_state`, and `observes_decision`. These profiles remain ineligible for
+  general `mandate reach --ir` analysis.
+
 ## 0.14.0 - 2026-08-29
 
 ### Added
