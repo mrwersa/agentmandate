@@ -1,8 +1,9 @@
-"""Private Gate 2a records for authority-continuity evidence.
+"""Private records and reconciliation for authority-continuity evidence.
 
 The two provider profiles intentionally remain distinct.  This module parses
-and canonicalises reviewed transport records and verifies caller-supplied
-bytes; it does not infer continuity outcomes or expose a public format.
+and canonicalises transport records, verifies caller-supplied bytes, and keeps
+provider-specific facts separate before a common private analysis. It exposes
+no public format.
 """
 
 from __future__ import annotations
@@ -10,8 +11,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 from ._ir import (
@@ -29,6 +31,8 @@ from ._ir import (
 from ._ir import (
     Evidence as IREvidence,
 )
+from .manifest import Mandate, ManifestError, loads
+from .reach import Authority, analyse
 
 CONTINUITY_BINDING_VERSION = 1
 AGENTCORE_CONTINUITY_VERSION = 1
@@ -572,6 +576,7 @@ class AnthropicControl:
     cap_before: int
     cap_after: int
     child_count: int | None
+    consumed_before: tuple[int, ...] | None
     final_costs: tuple[int, ...]
     outcomes: tuple[str, ...]
     topology_complete: bool | None
@@ -586,6 +591,9 @@ class AnthropicControl:
             "cap_before": self.cap_before,
             "cap_after": self.cap_after,
             "child_count": self.child_count,
+            "consumed_before": (
+                None if self.consumed_before is None else list(self.consumed_before)
+            ),
             "final_costs": list(self.final_costs),
             "outcomes": list(self.outcomes),
             "topology_complete": self.topology_complete,
@@ -605,6 +613,7 @@ def _anthropic_controls(value: Any, source_ids: set[str]) -> tuple[AnthropicCont
         "cap_before",
         "cap_after",
         "child_count",
+        "consumed_before",
         "final_costs",
         "outcomes",
         "topology_complete",
@@ -623,6 +632,17 @@ def _anthropic_controls(value: Any, source_ids: set[str]) -> tuple[AnthropicCont
         if not isinstance(costs_raw, list) or not costs_raw:
             raise ContinuityFormatError(f"continuity contract {path}.final_costs must be an array")
         costs = tuple(_integer(cost, f"{path}.final_costs[]") for cost in costs_raw)
+        before_raw = raw["consumed_before"]
+        if before_raw is None:
+            before = None
+        elif not isinstance(before_raw, list):
+            raise ContinuityFormatError(
+                f"continuity contract {path}.consumed_before must be an array or null"
+            )
+        else:
+            before = tuple(
+                _integer(cost, f"{path}.consumed_before[]") for cost in before_raw
+            )
         child = raw["child_count"]
         child = None if child is None else _integer(child, f"{path}.child_count", minimum=1)
         topology = raw["topology_complete"]
@@ -631,6 +651,10 @@ def _anthropic_controls(value: Any, source_ids: set[str]) -> tuple[AnthropicCont
         if len(costs) != trials:
             raise ContinuityFormatError(
                 f"continuity contract {path}.final_costs must contain one value per trial"
+            )
+        if before is not None and len(before) != trials:
+            raise ContinuityFormatError(
+                f"continuity contract {path}.consumed_before must contain one value per trial"
             )
         if (child is None) != (topology is None):
             raise ContinuityFormatError(
@@ -647,6 +671,7 @@ def _anthropic_controls(value: Any, source_ids: set[str]) -> tuple[AnthropicCont
                 _integer(raw["cap_before"], f"{path}.cap_before", minimum=1),
                 _integer(raw["cap_after"], f"{path}.cap_after", minimum=1),
                 child,
+                before,
                 costs,
                 _strings(raw["outcomes"], f"{path}.outcomes", _OUTCOMES, unique=False),
                 topology,
@@ -1142,6 +1167,15 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
                 costs.append(max(unit["list_cost_minor_units"] for unit in trial["work_units"]))
         return tuple(costs)
 
+    def single_before_costs(cell: str) -> tuple[int, ...]:
+        selected = [trial for trial in single_trials if trial.get("cell") == cell]
+        if cell == "fresh_session_replication":
+            return tuple(
+                max(unit["list_cost_minor_units"] for unit in trial["sessions"][0]["work_units"])
+                for trial in selected
+            )
+        return tuple(trial["revision"]["consumed_before"] for trial in selected)
+
     def multi_costs(cell: str) -> tuple[int, ...]:
         selected = [trial for trial in multi_trials if trial.get("cell") == cell]
         if len(selected) != 10 or any(
@@ -1166,6 +1200,7 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
             1,
             1,
             None,
+            None,
             single_costs("sequential_control"),
             ("budget_reached",),
             None,
@@ -1179,6 +1214,7 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
             1,
             1,
             None,
+            single_before_costs("fresh_session_replication"),
             single_costs("fresh_session_replication"),
             ("budget_reached",),
             None,
@@ -1192,6 +1228,7 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
             1,
             2,
             None,
+            single_before_costs("cap_revision_control"),
             single_costs("cap_revision_control"),
             ("budget_reached",),
             None,
@@ -1205,6 +1242,7 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
             1,
             1,
             1,
+            None,
             multi_costs("subagent_handoff"),
             ("budget_reached",),
             True,
@@ -1218,6 +1256,7 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
             1,
             1,
             2,
+            None,
             multi_costs("concurrent_subagents_2"),
             ("budget_reached",),
             True,
@@ -1231,6 +1270,7 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
             1,
             1,
             4,
+            None,
             multi_costs("concurrent_subagents_4"),
             ("budget_reached",),
             True,
@@ -1371,10 +1411,15 @@ def _binding_projection_parts(
 
 def _control_values(
     value: AgentCoreControl | AnthropicControl,
-) -> tuple[int, int, list[int] | None]:
+) -> tuple[int, int, list[int] | None, list[int] | None]:
     if isinstance(value, AgentCoreControl):
-        return value.provider_limits[0], value.provider_limits[-1], None
-    return value.cap_before, value.cap_after, list(value.final_costs)
+        return value.provider_limits[0], value.provider_limits[-1], None, None
+    return (
+        value.cap_before,
+        value.cap_after,
+        None if value.consumed_before is None else list(value.consumed_before),
+        list(value.final_costs),
+    )
 
 
 def _provider_projection_parts(
@@ -1417,7 +1462,7 @@ def _provider_projection_parts(
                 Entity(after_id, "boundary_state", f"{control.id}:after"),
             )
         )
-        before_limit, after_limit, completed = _control_values(control)
+        before_limit, after_limit, before_completed, after_completed = _control_values(control)
         path = f"/controls/{control_index}"
         facts.extend(
             (
@@ -1458,9 +1503,9 @@ def _provider_projection_parts(
                 ),
             )
         )
-        for state_id, phase, limit in (
-            (before_id, "before", before_limit),
-            (after_id, "after", after_limit),
+        for state_id, phase, limit, completed in (
+            (before_id, "before", before_limit, before_completed),
+            (after_id, "after", after_limit, after_completed),
         ):
             facts.extend(
                 (
@@ -1495,17 +1540,18 @@ def _provider_projection_parts(
                     (_fact_id(state_id, "boundary"),),
                 )
             )
-        if completed is not None:
-            facts.append(
-                _ir_fact(
-                    after_id,
-                    "completed_values",
-                    completed,
-                    source_id,
-                    f"{path}/final_costs",
-                    value.evidence,
+            if completed is not None:
+                completed_path = "consumed_before" if phase == "before" else "final_costs"
+                facts.append(
+                    _ir_fact(
+                        state_id,
+                        "completed_values",
+                        completed,
+                        source_id,
+                        f"{path}/{completed_path}",
+                        value.evidence,
+                    )
                 )
-            )
         edges.extend(
             (
                 Edge(
@@ -1703,3 +1749,532 @@ def _validate_continuity_profile(graph: AuthorityIR, kind: str, adapter: str) ->
         raise ContinuityFormatError("continuity IR profile does not match its record")
     if source.content_sha256 != content_sha256:
         raise ContinuityFormatError("continuity IR profile content digest does not match")
+
+
+@dataclass(frozen=True)
+class ContinuityFinding:
+    """One fail-closed continuity or trust finding."""
+
+    code: str
+    transition: str | None
+    message: str
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ContinuityAlignment:
+    """One independently reported boundary-alignment check."""
+
+    check: str
+    status: str
+    strength: str
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ContinuityOutcome:
+    """The three orthogonal outcomes for one observed transition."""
+
+    provider: str
+    transition: str
+    kind: str
+    dimension: str
+    unit: str
+    limit_before: int
+    limit_after: int
+    completed_values: tuple[int, ...]
+    state: str
+    authority_change: str
+    admission: str
+    alignments: tuple[ContinuityAlignment, ...]
+    assumptions: tuple[str, ...]
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ContinuityAnalysis:
+    """Private Gate 3 result beside unchanged manifest authority."""
+
+    authority: Authority
+    as_of: str
+    outcomes: tuple[ContinuityOutcome, ...]
+    findings: tuple[ContinuityFinding, ...]
+
+    @property
+    def clean(self) -> bool:
+        return not self.findings and all(
+            item.state == "preserved"
+            and item.authority_change == "stable"
+            and item.admission == "within_bound"
+            for item in self.outcomes
+        )
+
+
+def _evaluation_time(as_of: datetime) -> str:
+    if (
+        not isinstance(as_of, datetime)
+        or as_of.tzinfo is None
+        or as_of.utcoffset() != timezone.utc.utcoffset(as_of)
+        or as_of.microsecond
+    ):
+        raise ContinuityFormatError(
+            "continuity analysis as_of must be a whole-second UTC datetime"
+        )
+    return as_of.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _eligible_evidence(evidence: ContinuityEvidence, evaluated_at: str) -> bool:
+    return (
+        evidence.confidence == "exact"
+        and evidence.review == "accepted"
+        and evidence.reviewer is not None
+        and evidence.expires is not None
+        and evidence.expires >= evaluated_at[:10]
+    )
+
+
+def _profile_support(
+    graph: AuthorityIR,
+    control_id: str,
+    sources: tuple[ContinuitySource, ...],
+    selected_sources: tuple[str, ...],
+) -> tuple[str, ...]:
+    transition = next(
+        entity
+        for entity in graph.entities
+        if entity.kind == "transition" and entity.name == control_id
+    )
+    selected_entities = {transition.id}
+    selected_edges = []
+    for edge in graph.edges:
+        if edge.source == transition.id:
+            selected_edges.append(edge)
+            selected_entities.add(edge.target)
+    selected_facts = [fact for fact in graph.facts if fact.subject in selected_entities]
+    source_digests = {source.id: source for source in sources}
+    return tuple(
+        sorted(
+            {graph.sources[0].id}
+            | {edge.id for edge in selected_edges}
+            | {fact.id for fact in selected_facts}
+            | {
+                f"capture:{source_digests[source_id].locator}:"
+                f"{source_digests[source_id].content_sha256}"
+                for source_id in selected_sources
+            }
+        )
+    )
+
+
+def _binding_support(graph: AuthorityIR | None) -> tuple[str, ...]:
+    if graph is None:
+        return ()
+    return tuple(
+        sorted(
+            {graph.sources[0].id}
+            | {fact.id for fact in graph.facts}
+            | {edge.id for edge in graph.edges}
+        )
+    )
+
+
+def _alignment(
+    check: str, status: str, strength: str, support: tuple[str, ...]
+) -> ContinuityAlignment:
+    return ContinuityAlignment(check, status, strength, support)
+
+
+def _agentcore_axes(
+    control: AgentCoreControl,
+    *,
+    binding_ready: bool,
+) -> tuple[str, str, str, tuple[ContinuityAlignment, ...], tuple[str, ...]]:
+    same_boundary = control.boundary_changed is False
+    same_mandate = control.same_mandate is True and binding_ready
+    outcomes = control.outcomes
+    allowed = outcomes.count("allow")
+
+    missing_required_binding = control.mediation == "exclusive_adapter" and not binding_ready
+    if missing_required_binding:
+        state = "unresolved"
+    elif same_boundary and outcomes[:2] == ("allow", "deny"):
+        state = "preserved"
+    elif (
+        control.boundary_changed is True
+        and same_mandate
+        and outcomes[0] == "allow"
+        and outcomes[-1] == "allow"
+    ):
+        state = "reset"
+    else:
+        state = "unresolved"
+
+    authority = (
+        "unresolved"
+        if missing_required_binding
+        else "stable"
+        if len(set(control.provider_limits)) == 1
+        else "widens"
+        if control.provider_limits[-1] > control.provider_limits[0]
+        else "tightens"
+    )
+    completed = allowed * control.request_amount
+    if missing_required_binding or (control.boundary_changed and not same_mandate):
+        admission = "unresolved"
+    else:
+        admission = (
+            "overshot" if completed > control.provider_limits[-1] else "within_bound"
+        )
+
+    continuity_status = "established" if state != "unresolved" else "unresolved"
+    derivation_status = "established" if not missing_required_binding and (
+        same_boundary or same_mandate
+    ) else "unresolved"
+    isolation_status = (
+        "conditional" if control.mediation == "exclusive_adapter" else "unresolved"
+    )
+    mediation_status = (
+        "conditional" if control.mediation == "exclusive_adapter" else "unresolved"
+    )
+    boundary_strength = (
+        "configured" if control.mediation == "exclusive_adapter" else "unestablished"
+    )
+    assumptions = []
+    if control.intervals_overlap:
+        assumptions.append("completed decisions do not prove reservation of in-flight work")
+    if control.mediation == "exclusive_adapter":
+        assumptions.append("continuity is conditional on the adapter being the exclusive path")
+    return (
+        state,
+        authority,
+        admission,
+        (
+            _alignment("continuity", continuity_status, "observed", ()),
+            _alignment("derivation_integrity", derivation_status, "observed", ()),
+            _alignment("isolation", isolation_status, boundary_strength, ()),
+            _alignment("complete_mediation", mediation_status, boundary_strength, ()),
+        ),
+        tuple(assumptions),
+    )
+
+
+def _anthropic_axes(
+    control: AnthropicControl,
+) -> tuple[str, str, str, tuple[ContinuityAlignment, ...], tuple[str, ...]]:
+    before_complete = (
+        control.consumed_before is not None
+        and len(control.consumed_before) == control.trials
+        and all(value > 0 for value in control.consumed_before)
+    )
+    if control.transition == "fresh_session":
+        state = "reset" if before_complete else "unresolved"
+    elif control.transition == "limit_revision":
+        state = "preserved" if before_complete and all(
+            after >= before
+            for before, after in zip(
+                control.consumed_before or (), control.final_costs, strict=True
+            )
+        ) else "unresolved"
+    elif control.boundary_changed is False:
+        state = "preserved"
+    else:
+        state = "unresolved"
+    authority = (
+        "stable"
+        if control.cap_after == control.cap_before
+        else "widens"
+        if control.cap_after > control.cap_before
+        else "tightens"
+    )
+    completed = _anthropic_completed(control)
+    admission = (
+        "unresolved"
+        if control.transition == "fresh_session" and not before_complete
+        else "overshot"
+        if max(completed) > control.cap_after
+        else "within_bound"
+    )
+    assumptions = []
+    if control.child_count is not None:
+        assumptions.append("completed session cost does not prove in-flight reservation")
+    return (
+        state,
+        authority,
+        admission,
+        (
+            _alignment(
+                "continuity",
+                "established" if state != "unresolved" else "unresolved",
+                "observed",
+                (),
+            ),
+            _alignment("derivation_integrity", "conditional", "documented", ()),
+            _alignment("isolation", "unresolved", "unestablished", ()),
+            _alignment("complete_mediation", "unresolved", "unestablished", ()),
+        ),
+        tuple(assumptions),
+    )
+
+
+def _anthropic_completed(control: AnthropicControl) -> tuple[int, ...]:
+    if control.transition == "fresh_session" and control.consumed_before is not None:
+        return tuple(
+            before + after
+            for before, after in zip(
+                control.consumed_before, control.final_costs, strict=True
+            )
+        )
+    return control.final_costs
+
+
+def _manifest_binding_matches(
+    mandate: Mandate,
+    mandate_bytes: bytes | None,
+    binding: ContinuityBinding,
+) -> bool:
+    if not isinstance(mandate_bytes, bytes):
+        return False
+    try:
+        parsed = loads(mandate_bytes.decode("utf-8"), source=mandate.source)
+    except (UnicodeDecodeError, ManifestError):
+        return False
+    principal_matches = binding.principal == mandate.identity or binding.principal in {
+        tool.principal for tool in mandate.tools
+    }
+    return (
+        parsed == mandate
+        and hashlib.sha256(mandate_bytes).hexdigest() == binding.mandate_sha256
+        and principal_matches
+    )
+
+
+def analyse_continuity(
+    mandate: Mandate,
+    provider: AgentCoreContinuity | AnthropicContinuity,
+    source_bytes: Mapping[str, bytes],
+    *,
+    as_of: datetime,
+    binding: ContinuityBinding | None = None,
+    binding_source_bytes: Mapping[str, bytes] | None = None,
+    mandate_bytes: bytes | None = None,
+    depth: int | None = None,
+) -> ContinuityAnalysis:
+    """Reconcile reviewed transitions without changing manifest authority.
+
+    Records are strictly re-read, source-verified, projected, and closed-profile
+    validated at this consumption boundary. Trust failures keep every transition
+    unresolved and always retain ordinary manifest reachability.
+    """
+
+    evaluated_at = _evaluation_time(as_of)
+    authority = analyse(mandate, depth=depth)
+    canonical_provider = (
+        AgentCoreContinuity.from_json(provider.to_json())
+        if isinstance(provider, AgentCoreContinuity)
+        else AnthropicContinuity.from_json(provider.to_json())
+    )
+    provider_graph = AuthorityIR.from_json(canonical_provider.to_ir().to_json())
+    provider_kind = (
+        "agentcore-continuity"
+        if isinstance(canonical_provider, AgentCoreContinuity)
+        else "anthropic-continuity"
+    )
+    provider_adapter = (
+        AGENTCORE_CONTINUITY_IR_ADAPTER
+        if isinstance(canonical_provider, AgentCoreContinuity)
+        else ANTHROPIC_CONTINUITY_IR_ADAPTER
+    )
+    findings: list[ContinuityFinding] = []
+    provider_ready = True
+    try:
+        canonical_provider.verify_sources(dict(source_bytes))
+        _validate_continuity_profile(provider_graph, provider_kind, provider_adapter)
+    except (ContinuityFormatError, IRFormatError) as exc:
+        provider_ready = False
+        findings.append(
+            ContinuityFinding("continuity.source-untrusted", None, str(exc), ())
+        )
+    if not _eligible_evidence(canonical_provider.evidence, evaluated_at):
+        provider_ready = False
+        findings.append(
+            ContinuityFinding(
+                "continuity.evidence-untrusted",
+                None,
+                "continuity profile is not exact, accepted, and current",
+                (provider_graph.sources[0].id,),
+            )
+        )
+
+    canonical_binding = None
+    binding_graph = None
+    binding_ready = False
+    if binding is not None:
+        canonical_binding = ContinuityBinding.from_json(binding.to_json())
+        binding_graph = AuthorityIR.from_json(canonical_binding.to_ir().to_json())
+        try:
+            canonical_binding.verify_sources(dict(binding_source_bytes or {}))
+            _validate_continuity_profile(
+                binding_graph,
+                "continuity-binding",
+                CONTINUITY_BINDING_IR_ADAPTER,
+            )
+            binding_ready = (
+                _eligible_evidence(canonical_binding.evidence, evaluated_at)
+                and canonical_binding.issued_at <= evaluated_at < canonical_binding.expires_at
+                and canonical_binding.provider == canonical_provider.provider
+                and (
+                    not isinstance(canonical_provider, AgentCoreContinuity)
+                    or canonical_binding.binding == canonical_provider.binding
+                )
+                and _manifest_binding_matches(mandate, mandate_bytes, canonical_binding)
+            )
+        except (ContinuityFormatError, IRFormatError):
+            binding_ready = False
+        if not binding_ready:
+            findings.append(
+                ContinuityFinding(
+                    "continuity.binding-untrusted",
+                    None,
+                    "continuity binding is not exact, accepted, current, and joined to the mandate",
+                    _binding_support(binding_graph),
+                )
+            )
+
+    outcomes = []
+    for control in canonical_provider.controls:
+        control_binding_support = (
+            _binding_support(binding_graph)
+            if isinstance(control, AgentCoreControl)
+            and control.same_mandate is True
+            and control.mediation == "exclusive_adapter"
+            else ()
+        )
+        support = tuple(
+            sorted(
+                set(
+                    _profile_support(
+                        provider_graph,
+                        control.id,
+                        canonical_provider.sources,
+                        control.sources,
+                    )
+                    + control_binding_support
+                )
+            )
+        )
+        if not provider_ready:
+            axes = (
+                "unresolved",
+                "unresolved",
+                "unresolved",
+                tuple(
+                    _alignment(check, "unresolved", "unestablished", support)
+                    for check in (
+                        "continuity",
+                        "derivation_integrity",
+                        "isolation",
+                        "complete_mediation",
+                    )
+                ),
+                (),
+            )
+        elif isinstance(control, AgentCoreControl):
+            axes = _agentcore_axes(control, binding_ready=binding_ready)
+        else:
+            axes = _anthropic_axes(control)
+        state, authority_change, admission, alignments, assumptions = axes
+        alignments = tuple(
+            ContinuityAlignment(item.check, item.status, item.strength, support)
+            for item in alignments
+        )
+        outcome = ContinuityOutcome(
+            canonical_provider.provider,
+            control.id,
+            control.transition,
+            (
+                "tool_argument.process_refund.amount"
+                if isinstance(control, AgentCoreControl)
+                else "session_cost"
+            ),
+            "integer" if isinstance(control, AgentCoreControl) else "minor_currency_unit",
+            (
+                control.provider_limits[0]
+                if isinstance(control, AgentCoreControl)
+                else control.cap_before
+            ),
+            (
+                control.provider_limits[-1]
+                if isinstance(control, AgentCoreControl)
+                else control.cap_after
+            ),
+            (
+                (control.outcomes.count("allow") * control.request_amount,)
+                if isinstance(control, AgentCoreControl)
+                else _anthropic_completed(control)
+            ),
+            state,
+            authority_change,
+            admission,
+            alignments,
+            assumptions,
+            support,
+        )
+        outcomes.append(outcome)
+        if provider_ready:
+            if state == "reset":
+                findings.append(
+                    ContinuityFinding(
+                        "continuity.state-reset",
+                        control.id,
+                        "consumed authority did not survive the transition",
+                        support,
+                    )
+                )
+            elif state == "unresolved":
+                findings.append(
+                    ContinuityFinding(
+                        "continuity.state-unresolved",
+                        control.id,
+                        "the capture cannot establish one mandate across the transition",
+                        support,
+                    )
+                )
+            if authority_change == "widens":
+                findings.append(
+                    ContinuityFinding(
+                        "continuity.authority-widens",
+                        control.id,
+                        "remaining authority increased without a cited successor approval",
+                        support,
+                    )
+                )
+            if admission == "overshot":
+                findings.append(
+                    ContinuityFinding(
+                        "continuity.admission-overshot",
+                        control.id,
+                        "completed usage exceeded the reviewed transition bound",
+                        support,
+                    )
+                )
+            for alignment in alignments:
+                if alignment.status != "established":
+                    findings.append(
+                        ContinuityFinding(
+                            f"continuity.{alignment.check.replace('_', '-')}-unresolved",
+                            control.id,
+                            f"{alignment.check.replace('_', ' ')} is {alignment.status}",
+                            support,
+                        )
+                    )
+    unique_findings = tuple(
+        dict.fromkeys(
+            (item.code, item.transition, item.message, item.support) for item in findings
+        )
+    )
+    return ContinuityAnalysis(
+        authority,
+        evaluated_at,
+        tuple(outcomes),
+        tuple(ContinuityFinding(*item) for item in unique_findings),
+    )
