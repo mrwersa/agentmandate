@@ -43,6 +43,14 @@ The governing invariant is:
 The contract records evidence for this invariant; it does not implement a
 distributed counter or transaction protocol.
 
+The invariant applies to any cumulative constraint whose decision depends on
+prior qualifying actions. The v1 records and analyzer are narrower: they compare
+only evidence-backed scalar quantities with an exact dimension and unit. They do
+not yet evaluate set-valued accumulators, one-time identifier issuance, arbitrary
+event histories, or policy meaning. Those require a new provider graph and
+versioned accumulator semantics rather than reinterpretation of `maximum` as a
+generic policy value.
+
 ## Two trust layers, not one transport format
 
 The common model is an analysis projection. It is not a universal capture
@@ -204,6 +212,10 @@ than pretending every provider exposes a ledger:
 
 `unknown` is not zero. Missing consumed state, missing reservation state, or an
 incomplete event order cannot prove preservation, reset, or strict admission.
+In v1, `reviewed maximum`, `consumed value`, and completed usage are scalar
+values. A set cardinality may be represented only when the reviewed constraint
+is itself the cardinality, not by discarding the identities from a set-valued
+policy.
 
 ## Analysis semantics
 
