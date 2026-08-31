@@ -1,6 +1,7 @@
 # Authority Continuity Contract
 
-Status: **proposed and experimental**. This is gate 1 of
+Status: **experimental; gates 1–3 complete, public exposure pending**. This is the
+contract for
 [#156](https://github.com/mrwersa/agentmandate/issues/156). It defines the
 smallest common analysis contract selected by the reviewed
 [AgentCore](evidence/agentcore-refund-policy/README.md) and
@@ -60,7 +61,7 @@ Neither profile may gain fields borrowed from the other. Unknown provider facts
 remain unknown. The projection admits only meanings proved by the profile's
 closed validator and digest-pinned sources.
 
-Gate 2a now implements these transports privately in
+Gate 2a implements these transports privately in
 `agentmandate._continuity`. The canonical migrations are pinned to the exact
 committed AgentCore and Anthropic bytes. Migration remains `unreviewed`: byte
 identity cannot manufacture an accountable reviewer or expiry, and changed
@@ -69,7 +70,7 @@ Each record names its adapter and version, uses a strict reader, verifies
 caller-supplied bytes without resolving paths, and preserves ordered provider
 outcomes. The AgentCore record has no cost accumulator, and the Anthropic
 record has no policy-revision or platform-verified mandate binding. No common continuity
-outcome is computed at this gate.
+outcome is computed by the transport reader itself.
 
 ## Reviewed binding
 
@@ -88,7 +89,6 @@ mandate and from provider observations. The minimum body is:
     "sha256": "<lowercase-sha256>",
     "principal": "caller"
   },
-  "issuer": "review-control-plane",
   "enforcement": {
     "provider": "aws-agentcore",
     "boundary_kind": "policy_session",
@@ -101,35 +101,31 @@ mandate and from provider observations. The minimum body is:
   },
   "derivation": {
     "algorithm": "sha256_uuid_v1",
-    "fields": [
-      "mandate.sha256",
-      "mandate.principal",
-      "enforcement.policy_sha256",
-      "validity.issued_at",
-      "validity.expires_at",
-      "issuer"
-    ],
     "boundary_alias": "reviewed-policy-session"
   },
   "signature": {
-    "algorithm": "ed25519",
-    "verification_source": "source:binding-verification"
+    "algorithm": "ed25519"
   },
   "mediation": {
-    "kind": "exclusive_adapter",
-    "source": "source:deployment-boundary"
+    "kind": "exclusive_adapter"
   },
   "sources": [
     {
-      "id": "source:binding-verification",
-      "kind": "signature-verification",
-      "locator": "evidence/binding-verification.json",
+      "id": "source:1",
+      "kind": "verification-key",
+      "locator": "evidence/binding-public-key.pem",
       "content_sha256": "<lowercase-sha256>"
     },
     {
-      "id": "source:deployment-boundary",
-      "kind": "mediation-boundary",
-      "locator": "evidence/deployment-boundary.json",
+      "id": "source:2",
+      "kind": "binding-evaluation",
+      "locator": "evidence/binding-result.json",
+      "content_sha256": "<lowercase-sha256>"
+    },
+    {
+      "id": "source:3",
+      "kind": "signed-binding",
+      "locator": "evidence/binding.json",
       "content_sha256": "<lowercase-sha256>"
     }
   ],
@@ -142,10 +138,11 @@ mandate and from provider observations. The minimum body is:
 }
 ```
 
-This is an illustrative shape, not a gate-2 fixture. The signed canonical body,
-signature bytes, public key and native verifier output remain provider or
-adapter sources. The zero-dependency core does not implement Ed25519. It accepts
-no `verified: true` boolean detached from digest-bound verifier evidence.
+This is the implemented v1 shape with placeholder values; the canonical gate-2
+fixture is normative. The signed canonical body, signature bytes, public key
+and native verifier output remain adapter sources. The zero-dependency core
+does not implement Ed25519. It accepts no `verified: true` boolean detached from
+digest-bound verifier evidence.
 
 `mediation.kind` is closed initially to `platform_verified`,
 `exclusive_adapter`, and `unestablished`. An exclusive adapter can make session
@@ -278,6 +275,30 @@ Anthropic reports session cost and AgentCore exposes temporal decisions rather
 than a portable accumulated-state value. No cell is synthesized to make the
 matrix rectangular.
 
+Gate 3 now implements this reconciliation privately. Every provider record and
+optional binding is serialized, strictly re-read, source-verified, projected,
+and closed-profile validated again at consumption. The result keeps ordinary
+manifest reachability unchanged beside per-transition alignments, the three
+outcome axes, typed before/after limits, completed values, assumptions, and
+named findings. The provider profiles keep the comparable units closed:
+AgentCore's captured `process_refund.amount` integer is not interchangeable with
+Anthropic's reported session-cost minor unit. The Anthropic transport preserves
+both predecessor and successor costs for fresh-session and cap-revision
+transitions; a successor cost alone cannot prove reset or preservation.
+Canonical migrations deliberately
+remain `unreviewed`; they therefore produce unresolved results until an
+accountable acceptance state is supplied. Tests exercise the accepted path
+with synthetic review state without rewriting the evidence fixtures.
+
+The common consumer also preserves a limitation exposed by the migration. The
+early AgentCore fresh-session and alpha-equivalent-revision captures establish
+provider behavior, but their `same_mandate` value is unknown. They cannot prove
+a mandate reset. The later signed binding plus policy-revision control does
+establish one mandate and yields `reset`, `widens`, and `overshot` as independent
+outcomes. Anthropic's digest-bound study identity supports its transition
+comparisons, while derivation and complete mediation remain conditional or
+unestablished because the managed service did not verify that local binding.
+
 ## Authority IR boundary
 
 Gate 2b uses standalone profiles. Candidate source entities are mandate binding,
@@ -353,9 +374,11 @@ stronger result.
 3. **Gate 2b — IR projection (complete):** the minimum evidence-backed source
    relations are registered; separate closed profiles validate content and
    semantic digests by regeneration; manifest `reach --ir` refuses them.
-4. **Gate 3 — private reconciliation:** reproduce every evidence-selected
-   control, adversarial trust failure, whole-transition comparison and legacy
-   byte-identity result. No public Python records.
+4. **Gate 3 — private reconciliation (complete):** the provider-neutral
+   consumer reproduces every evidence-supported control, preserves unknown
+   mandate joins as unresolved, separates reset, widening, and overshoot,
+   reports all four alignment checks independently, and retains byte-identical
+   manifest authority on trust failure. No public Python records.
 5. **Gate 4 — public exposure review:** challenge containment, output stability,
    no-partial-output behavior, evaluation-time determinism and composition with
    existing policy, condition, delegation and OTel surfaces before choosing a

@@ -4,6 +4,7 @@ import hashlib
 import json
 from copy import deepcopy
 from dataclasses import replace
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -12,9 +13,12 @@ import agentmandate._continuity as continuity
 from agentmandate._continuity import (
     AgentCoreContinuity,
     AnthropicContinuity,
+    ContinuityAnalysis,
     ContinuityBinding,
+    ContinuityEvidence,
     ContinuityFormatError,
     _agentcore_controls,
+    _anthropic_axes,
     _anthropic_controls,
     _boolean,
     _captured,
@@ -33,11 +37,14 @@ from agentmandate._continuity import (
     _utc,
     _validate_continuity_profile,
     _verify_sources,
+    analyse_continuity,
     migrate_agentcore_binding,
     migrate_agentcore_continuity,
     migrate_anthropic_continuity,
 )
 from agentmandate._ir import AuthorityIR, IRFormatError, _analyse_ir
+from agentmandate.manifest import load
+from agentmandate.reach import analyse
 
 ROOT = Path(__file__).parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
@@ -146,6 +153,9 @@ def test_migrations_preserve_provider_specific_unknowns_and_controls():
         2,
         2,
     )
+    assert next(
+        item for item in anthropic.controls if item.id == "fresh-sessions"
+    ).consumed_before == (1,) * 10
     assert next(item for item in anthropic.controls if item.id == "four-children").child_count == 4
     assert not hasattr(agentcore, "final_costs")
     assert not hasattr(anthropic, "revision_changed")
@@ -187,7 +197,7 @@ def test_continuity_profiles_project_registered_relations_and_round_trip():
     binding, agentcore, anthropic = _projected_profiles()
     assert (len(binding.entities), len(binding.facts), len(binding.edges)) == (3, 9, 2)
     assert (len(agentcore.entities), len(agentcore.facts), len(agentcore.edges)) == (45, 187, 52)
-    assert (len(anthropic.entities), len(anthropic.facts), len(anthropic.edges)) == (25, 111, 30)
+    assert (len(anthropic.entities), len(anthropic.facts), len(anthropic.edges)) == (25, 113, 30)
     assert {edge.relation for edge in binding.edges} == {"binds_mandate", "binds_boundary"}
     provider_relations = {
         "after_state",
@@ -203,7 +213,7 @@ def test_continuity_profiles_project_registered_relations_and_round_trip():
     } == {
         "continuity-binding": "1d1d3593d78fb58185b6846262c7c6f21b82af744e6cefa6450a69056c150af7",
         "agentcore-continuity": "4962f850b8b3736f1614385316f02f217a3f716d1d75ef894742fb0d717d1db9",
-        "anthropic-continuity": "260cf8b10c0fb70b600db5cb101a79211c4aaf957ccc35ec7b68a40b345955bc",
+        "anthropic-continuity": "4cdfba617447605f183c35bd7c3af4ceaf0b3b8735862f6c4e59b304a92ecdbd",
     }
     for graph in (binding, agentcore, anthropic):
         encoded = graph.to_json()
@@ -220,6 +230,7 @@ def test_provider_projection_preserves_distinct_state_shapes():
     anthropic_predicates = {fact.predicate for fact in anthropic.facts}
     assert "completed_values" not in agentcore_predicates
     assert "completed_values" in anthropic_predicates
+    assert sum(fact.predicate == "completed_values" for fact in anthropic.facts) == 8
     assert any(
         fact.predicate == "control" and fact.value["same_mandate"] is None
         for fact in agentcore.facts
@@ -317,6 +328,267 @@ def test_profile_validator_checks_content_digest_after_regeneration():
     )
     with pytest.raises(ContinuityFormatError, match="content digest"):
         _validate_continuity_profile(changed, kind, adapter)
+
+
+def _reviewed(record):
+    # A synthetic acceptance state exercises Gate 3 without retrospectively
+    # upgrading the canonical migrated evidence, which remains unreviewed.
+    return replace(
+        record,
+        evidence=ContinuityEvidence("exact", "accepted", "reviewer", "2027-08-30"),
+    )
+
+
+def _evaluation_time() -> datetime:
+    return datetime(2026, 8, 29, 12, tzinfo=timezone.utc)
+
+
+def _agentcore_analysis(**changes) -> ContinuityAnalysis:
+    path = AGENTCORE / "mandate.yaml"
+    mandate = load(path)
+    arguments = {
+        "provider": _reviewed(migrate_agentcore_continuity(_agentcore_contents())),
+        "source_bytes": _agentcore_contents(),
+        "as_of": _evaluation_time(),
+        "binding": _reviewed(migrate_agentcore_binding(_binding_contents())),
+        "binding_source_bytes": _binding_contents(),
+        "mandate_bytes": path.read_bytes(),
+    }
+    arguments.update(changes)
+    return analyse_continuity(mandate, **arguments)
+
+
+def _anthropic_analysis(**changes) -> ContinuityAnalysis:
+    path = AGENTCORE / "mandate.yaml"
+    arguments = {
+        "provider": _reviewed(migrate_anthropic_continuity(_anthropic_contents())),
+        "source_bytes": _anthropic_contents(),
+        "as_of": _evaluation_time(),
+    }
+    arguments.update(changes)
+    return analyse_continuity(load(path), **arguments)
+
+
+def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
+    result = _agentcore_analysis()
+    outcomes = {
+        item.transition: (item.state, item.authority_change, item.admission)
+        for item in result.outcomes
+    }
+    assert outcomes == {
+        "binding-revision": ("reset", "widens", "overshot"),
+        "byte-identical-write": ("preserved", "stable", "within_bound"),
+        "concurrent-session": ("preserved", "stable", "within_bound"),
+        "equivalent-revision": ("unresolved", "stable", "unresolved"),
+        "fresh-sessions": ("unresolved", "stable", "unresolved"),
+        "limit-revision": ("unresolved", "widens", "unresolved"),
+        "same-session": ("preserved", "stable", "within_bound"),
+        "signed-binding": ("preserved", "stable", "within_bound"),
+    }
+    signed = next(item for item in result.outcomes if item.transition == "signed-binding")
+    assert signed.kind == "same_boundary"
+    assert (
+        signed.dimension,
+        signed.unit,
+        signed.limit_before,
+        signed.limit_after,
+        signed.completed_values,
+    ) == ("tool_argument.process_refund.amount", "integer", 1000, 1000, (600,))
+    assert {item.check: item.status for item in signed.alignments} == {
+        "continuity": "established",
+        "derivation_integrity": "established",
+        "isolation": "conditional",
+        "complete_mediation": "conditional",
+    }
+    assert signed.assumptions == (
+        "continuity is conditional on the adapter being the exclusive path",
+    )
+    relations = {
+        edge.id: edge.relation
+        for edge in _reviewed(
+            migrate_agentcore_continuity(_agentcore_contents())
+        ).to_ir().edges
+    }
+    signed_relations = {
+        relations[item] for item in signed.support if item in relations
+    }
+    assert signed_relations == {
+        "after_state",
+        "before_state",
+        "observes_decision",
+    }
+    assert any(item.startswith("capture:") for item in signed.support)
+    assert any(item.startswith("edge:continuity_binding:") for item in signed.support)
+    unbound = next(item for item in result.outcomes if item.transition == "same-session")
+    assert not any(item.startswith("edge:continuity_binding:") for item in unbound.support)
+    assert next(
+        item for item in unbound.alignments if item.check == "complete_mediation"
+    ).strength == "unestablished"
+    concurrent = next(
+        item for item in result.outcomes if item.transition == "concurrent-session"
+    )
+    assert concurrent.assumptions == (
+        "completed decisions do not prove reservation of in-flight work",
+    )
+    assert {item.code for item in result.findings} >= {
+        "continuity.state-reset",
+        "continuity.authority-widens",
+        "continuity.admission-overshot",
+        "continuity.state-unresolved",
+        "continuity.complete-mediation-unresolved",
+    }
+    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+    assert not result.clean
+
+
+def test_anthropic_reconciliation_keeps_reset_widening_and_overshoot_separate():
+    result = _anthropic_analysis()
+    outcomes = {
+        item.transition: (item.state, item.authority_change, item.admission)
+        for item in result.outcomes
+    }
+    assert outcomes == {
+        "cap-increase": ("preserved", "widens", "within_bound"),
+        "four-children": ("preserved", "stable", "overshot"),
+        "fresh-sessions": ("reset", "stable", "overshot"),
+        "one-child": ("preserved", "stable", "overshot"),
+        "sequential": ("preserved", "stable", "within_bound"),
+        "two-children": ("preserved", "stable", "overshot"),
+    }
+    children = next(item for item in result.outcomes if item.transition == "four-children")
+    assert (
+        children.dimension,
+        children.unit,
+        children.limit_before,
+        children.limit_after,
+        children.completed_values,
+    ) == ("session_cost", "minor_currency_unit", 1, 1, (4,) * 10)
+    fresh = next(item for item in result.outcomes if item.transition == "fresh-sessions")
+    assert fresh.completed_values == (2,) * 10
+    assert children.assumptions == (
+        "completed session cost does not prove in-flight reservation",
+    )
+    assert {item.code for item in result.findings} >= {
+        "continuity.state-reset",
+        "continuity.authority-widens",
+        "continuity.admission-overshot",
+        "continuity.derivation-integrity-unresolved",
+        "continuity.complete-mediation-unresolved",
+    }
+    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+
+
+def test_unreviewed_or_tampered_profiles_fail_closed_with_full_authority():
+    path = AGENTCORE / "mandate.yaml"
+    mandate = load(path)
+    unreviewed = analyse_continuity(
+        mandate,
+        migrate_agentcore_continuity(_agentcore_contents()),
+        _agentcore_contents(),
+        as_of=_evaluation_time(),
+    )
+    assert {item.state for item in unreviewed.outcomes} == {"unresolved"}
+    assert {item.authority_change for item in unreviewed.outcomes} == {"unresolved"}
+    assert {item.admission for item in unreviewed.outcomes} == {"unresolved"}
+    assert {item.code for item in unreviewed.findings} == {
+        "continuity.evidence-untrusted"
+    }
+    assert unreviewed.authority == analyse(mandate)
+
+    contents = _agentcore_contents()
+    contents["docs/evidence/agentcore-refund-policy/temporal-repetition.json"] = b"changed"
+    tampered = _agentcore_analysis(source_bytes=contents)
+    assert {item.state for item in tampered.outcomes} == {"unresolved"}
+    assert "continuity.source-untrusted" in {item.code for item in tampered.findings}
+    assert tampered.authority == analyse(mandate)
+
+
+def test_binding_failures_never_establish_cross_boundary_reset():
+    path = AGENTCORE / "mandate.yaml"
+    mandate = load(path)
+    bad_binding = replace(
+        _reviewed(migrate_agentcore_binding(_binding_contents())),
+        mandate_sha256="0" * 64,
+    )
+    result = _agentcore_analysis(binding=bad_binding)
+    revision = next(
+        item for item in result.outcomes if item.transition == "binding-revision"
+    )
+    assert revision.state == "unresolved"
+    assert "continuity.binding-untrusted" in {item.code for item in result.findings}
+    assert result.authority == analyse(mandate)
+
+    result = _agentcore_analysis(binding_source_bytes={})
+    assert "continuity.binding-untrusted" in {item.code for item in result.findings}
+
+    no_binding = _agentcore_analysis(
+        binding=None,
+        binding_source_bytes=None,
+        mandate_bytes=None,
+    )
+    signed = next(item for item in no_binding.outcomes if item.transition == "signed-binding")
+    assert (signed.state, signed.authority_change, signed.admission) == (
+        "unresolved",
+        "unresolved",
+        "unresolved",
+    )
+    assert next(
+        item for item in signed.alignments if item.check == "derivation_integrity"
+    ).status == "unresolved"
+
+
+@pytest.mark.parametrize(
+    "as_of",
+    [
+        datetime(2026, 8, 29),
+        datetime(2026, 8, 29, 12, 0, 0, 1, tzinfo=timezone.utc),
+        datetime(2026, 8, 29, 12, tzinfo=timezone.utc).astimezone(
+            timezone.utc
+        ).replace(tzinfo=None),
+    ],
+)
+def test_continuity_analysis_requires_whole_second_utc_time(as_of):
+    with pytest.raises(ContinuityFormatError, match="whole-second UTC"):
+        _anthropic_analysis(as_of=as_of)
+
+
+def test_continuity_clean_requires_all_three_safe_axes():
+    result = _anthropic_analysis()
+    safe = replace(
+        result.outcomes[0],
+        state="preserved",
+        authority_change="stable",
+        admission="within_bound",
+    )
+    assert replace(result, findings=(), outcomes=(safe,)).clean
+    assert not replace(
+        result,
+        findings=(),
+        outcomes=(replace(safe, admission="unresolved"),),
+    ).clean
+
+
+def test_anthropic_axis_fallbacks_remain_closed():
+    control = migrate_anthropic_continuity(_anthropic_contents()).controls[0]
+    state, authority, _, _, _ = _anthropic_axes(
+        replace(control, transition="configuration_revision", boundary_changed=True)
+    )
+    assert state == "unresolved"
+    assert authority == "widens"
+    _, authority, _, _, _ = _anthropic_axes(
+        replace(control, cap_before=2, cap_after=1)
+    )
+    assert authority == "tightens"
+
+
+@pytest.mark.parametrize("mandate_bytes", [None, b"\xff"])
+def test_missing_or_unreadable_mandate_bytes_do_not_establish_a_binding(mandate_bytes):
+    result = _agentcore_analysis(mandate_bytes=mandate_bytes)
+    assert "continuity.binding-untrusted" in {item.code for item in result.findings}
+    revision = next(
+        item for item in result.outcomes if item.transition == "binding-revision"
+    )
+    assert revision.state == "unresolved"
 
 
 @pytest.mark.parametrize(
@@ -492,6 +764,8 @@ def test_anthropic_control_reader_rejects_bad_shapes():
         ([], "must be an array"),
         ([{**control, "transition": "wrong"}], "invalid value"),
         ([{**control, "final_costs": []}], "final_costs"),
+        ([{**control, "consumed_before": {}}], "array or null"),
+        ([{**control, "consumed_before": [1]}], "one value per trial"),
         ([{**control, "child_count": 0}], "integer"),
         ([{**control, "topology_complete": "yes"}], "boolean"),
         ([{**control, "final_costs": [1]}], "one value per trial"),
