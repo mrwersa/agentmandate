@@ -1,8 +1,9 @@
 {
-  "capture_date": "2026-08-30",
-  "capture_version": 1,
+  "capture_date": "2026-09-01",
+  "capture_version": 2,
+  "mcp_protocol": "2025-03-26",
   "provider": "AWS AgentCore Gateway Policy ENFORCE",
-  "raw_artifact_policy": "account identifiers, URLs, policy IDs, service timestamps, session IDs, signatures, private keys, and credentials remained in temporary storage",
+  "raw_artifact_policy": "account identifiers, URLs, service timestamps, and live session identifiers remained in temporary storage; committed events retain provider responses, request bodies, hashes, and stable aliases",
   "raw_artifacts_committed": false,
   "region": "us-east-1",
   "sources": [
@@ -13,6 +14,14 @@
     {
       "content_sha256": "9b2c3b8d432e0d84bdf68f5158cca03f7748fac44c318ae7b91295e565c39787",
       "locator": "capture_transition_controls.py"
+    },
+    {
+      "content_sha256": "4e92d365314c3fda801eaf9c95ee667232be566f5bcd8c695da808cbe6cc2e96",
+      "locator": "capture_transition_interface.py"
+    },
+    {
+      "content_sha256": "3315e9976b6dc93cefa88b178d9a2f52b62473e5c32dcf14cd2c63831e319e9c",
+      "locator": "capture_transition_repetition.py"
     },
     {
       "content_sha256": "75e5458d7556ba3ece4c62bdbe0f58cd0865a438492a00226d1e35bb194efbbf",
@@ -31,8 +40,44 @@
       "locator": "temporal-transition-cleanup.json"
     },
     {
-      "content_sha256": "305a5a2ffa62bab799bc2e2db70cae8455a33590e3c23ca18cf8c43beac4d888",
+      "content_sha256": "d4b0f01b4281a2a55b1779c27574e596e91e8d35439b387cc29b68d90221f783",
+      "locator": "temporal-transition-confirmation-cleanup.json"
+    },
+    {
+      "content_sha256": "d5060899ef3402a8a6d4e1153055071e382ba96f49958d034ff72e983cc3de8d",
+      "locator": "temporal-transition-confirmation-procedure.md"
+    },
+    {
+      "content_sha256": "fa67bfb45ec50e56519c71b3096a62595235c8bb018fd4ca7ec45278ef91d756",
+      "locator": "temporal-transition-confirmation-summary.json"
+    },
+    {
+      "content_sha256": "88ca9802b5904bff9187e2904afe74d0bf6acdbb6f56f7debb190acc7a99dee9",
+      "locator": "temporal-transition-deployment-correction.json"
+    },
+    {
+      "content_sha256": "096d695d0c08e61fcc5a1e1e4306ae9384fe2e150288aad09ce50f5ed390c704",
+      "locator": "temporal-transition-events.json"
+    },
+    {
+      "content_sha256": "534268329fbdfb9763e73e6c08021390dd848afde7ec153133ea9ec0fa2e7756",
+      "locator": "temporal-transition-interface.json"
+    },
+    {
+      "content_sha256": "af0bc194685b041ef89c3ff72a05f17e266afb1d095baa40b9eaef7af9e62556",
+      "locator": "temporal-transition-policy-a.dogwood"
+    },
+    {
+      "content_sha256": "63f6366e1a315c066109189cac682a87b41b7108c72c44ed52352fc73ebf1a65",
+      "locator": "temporal-transition-policy-b.dogwood"
+    },
+    {
+      "content_sha256": "fc8844fd7fcf39bedb7d035b800e34cdbe44998f07b1ab35452866798fca8808",
       "locator": "temporal-transition-procedure.md"
+    },
+    {
+      "content_sha256": "2616e4efec22658848d58bbccd7faff4aab28805dd76316c5d2835771ceef313",
+      "locator": "temporal-transition-validation-refusal.json"
     }
   ]
 }

@@ -40,6 +40,19 @@ def test_matching_citation_passes(tmp_path: Path):
     assert evidence_lint.lint_directory(d) == []
 
 
+def test_wrapped_matching_citation_passes_and_stale_digest_fails(tmp_path: Path):
+    capture = b"SELECT 1;\n"
+    d = _make(
+        tmp_path,
+        {"capture.json": capture},
+        f"`capture.json`, SHA-256\n`{_digest(capture)}`\n",
+    )
+    assert evidence_lint.lint_directory(d) == []
+
+    (d / "capture.json").write_bytes(b"changed")
+    assert "stale" in evidence_lint.lint_directory(d)[0]
+
+
 def test_stale_citation_is_an_error(tmp_path: Path):
     capture = b"SELECT 1;\n"
     stale = _digest(b"old bytes")

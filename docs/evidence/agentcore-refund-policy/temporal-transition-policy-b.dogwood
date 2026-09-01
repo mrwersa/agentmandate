@@ -1,0 +1,13 @@
+forbid (
+  principal is AgentCore::IamEntity,
+  action == AgentCore::Action::"TransitionTarget___process_refund",
+  resource == AgentCore::Gateway::"<reviewed-gateway-binding>"
+)
+when temporal {
+  exists (running_total: Long).
+    (sum amount for (amount: Long), (event_time: Timepoint).
+      where (formerly within 1h (AgentCore::Action::"TransitionTarget___process_refund"::request{
+        eventResource: resource, input.amount: amount
+      } && tp(event_time)))) == running_total
+    && running_total >= 1000
+};

@@ -184,25 +184,34 @@ Deny every time. The proposed concurrency race therefore did **not** reproduce
 under this synchronized two-request load. That negative result does not prove
 serialization for all loads.
 
-Ten policy-update trials exposed a different revision boundary. Each no-update
-control was Allow then Deny. After one allowed call, the active threshold was
-alternated between 1,000 and 1,001 and the control plane was polled until the
-new ACTIVE revision contained the exact requested statement. Reusing the old
-session failed closed in 10/10 trials with managed error `-32005`: the session
-was stale because policy changed. Following the diagnostic and starting a new
-session was allowed in 10/10 trials. Thus the service did not silently reuse
-stale history, but its required recovery reset that history: one reviewed
-mandate could reach an aggregate 1,200 across policy revisions unless another
-component preserves or re-approves the cumulative state.
+Ten threshold-changing trials first exposed the revision boundary. After one
+allowed call, the active threshold was alternated between 1,000 and 1,001 and
+the control plane was polled until the new ACTIVE revision contained the exact
+requested statement. Reusing the predecessor session failed closed in 10/10
+trials with managed error `-32005`. Following that diagnostic and starting a
+fresh session was allowed in 10/10 trials. The stale rejection is safe; the
+continuation interface is incomplete because the admitted recovery was not
+constrained by the full predecessor history.
 
-A further control separated a write from a semantic change. A byte-identical
-submission produced no new revision; the original session retained its history
-and denied the second 600. Ten textually distinct but alpha-equivalent updates
-each produced a new exact ACTIVE revision. In all 10/10 trials the old session
-was rejected as stale and a fresh session allowed 600. This result is about the
-observed revision boundary: it does not claim a general semantic-equivalence
-decision procedure, but shows that unchanged policy meaning did not preserve
-history once the managed revision changed.
+A new confirmation separated a write from changed policy meaning and fixed one
+external mandate digest across both arms. Ten byte-identical submissions
+created no new revision; in all 10/10 trials the original session retained its
+history and denied the second 600. Ten textually distinct but alpha-equivalent
+updates each produced a new exact ACTIVE revision; in all 10/10 trials the
+predecessor session was rejected as stale and the prescribed fresh-session
+recovery allowed 600. This result is about the two captured forms and revision
+boundary, not a general semantic-equivalence procedure or a claim about hidden
+state deletion.
+
+The confirmation commits sanitized event-level request and response bodies,
+policy polls, statement digests, and stable revision/session aliases. Its
+summary is derived from those records. The captured SDK interface contains
+policy lifecycle methods but no method named for history migration, settlement,
+reauthorisation, state transfer, or continuation. The strict validation mode
+rejected the unconditional permit as `Overly Permissive`; the active run used
+`IGNORE_ALL_FINDINGS`, and the evidence does not claim strict native semantic
+validation. An excluded preflight also identified and corrected a missing
+Gateway workload-token permission before any confirmation trial was counted.
 
 The signed-binding limit was then measured rather than inferred. In ten trials,
 the same mandate digest was retained while the policy digest and derived session
@@ -236,10 +245,12 @@ identities, signatures, session IDs and service timestamps remained in
 temporary raw files and were deleted after projection.
 
 `temporal-transition-index.json`, SHA-256
-`4d1488404381490ec7d8703764e8a83cd18e7a103995b1ba4cddd34dfff2eb12`,
-pins the two alpha-equivalent policy forms, capture transformer, procedure,
-ten-trial semantic-no-op and binding-revision projections, and verified cleanup.
-Raw cloud responses and binding material were not committed.
+`cae2c9d819efb6410aac900d63e28fb740bb03a2115d4194d447123107517f74`,
+pins the two alpha-equivalent forms, sanitized provider events, capture and
+interface transformers, both procedures, ten-trial byte-identical and
+alpha-equivalent projections, corrections, binding-revision projection, and
+verified cleanup. Live identifiers and timestamps remained in temporary raw
+storage; provider decision bodies and policy-state transitions are committed.
 
 `binding-index.json`, SHA-256
 `e047ead77b943b81b6afc537945531e56ca76adab3835fea5a76e9fa665c3179`,

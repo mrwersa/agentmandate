@@ -23,7 +23,9 @@ import re
 import sys
 from pathlib import Path
 
-CITATION = re.compile(r"`(?P<name>[^`\n]*)`, SHA-256 `(?P<digest>[0-9a-f]{64})`")
+CITATION = re.compile(
+    r"`(?P<name>[^`\n]*)`,\s+SHA-256\s+`(?P<digest>[0-9a-f]{64})`"
+)
 
 
 def _sha256(content: bytes) -> str:

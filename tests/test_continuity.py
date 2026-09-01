@@ -70,7 +70,7 @@ def _agentcore_contents() -> dict[str, bytes]:
     return _contents(
         [
             AGENTCORE / "temporal-repetition.json",
-            AGENTCORE / "temporal-semantic-noop-repetition.json",
+            AGENTCORE / "temporal-transition-confirmation-summary.json",
             AGENTCORE / "temporal-update-repetition.json",
             AGENTCORE / "binding-repetition.json",
             AGENTCORE / "binding-policy-revision-repetition.json",
@@ -212,7 +212,7 @@ def test_continuity_profiles_project_registered_relations_and_round_trip():
         for graph in (binding, agentcore, anthropic)
     } == {
         "continuity-binding": "1d1d3593d78fb58185b6846262c7c6f21b82af744e6cefa6450a69056c150af7",
-        "agentcore-continuity": "4962f850b8b3736f1614385316f02f217a3f716d1d75ef894742fb0d717d1db9",
+        "agentcore-continuity": "3ca277f288f953bf8a4049dc838962f4c8465de56bfd5dac761c962ae5dab0ac",
         "anthropic-continuity": "4cdfba617447605f183c35bd7c3af4ceaf0b3b8735862f6c4e59b304a92ecdbd",
     }
     for graph in (binding, agentcore, anthropic):
@@ -852,8 +852,8 @@ def test_binding_migration_rejects_changed_controls(monkeypatch):
             lambda raw: raw["results"].update(same_session_allow_then_deny=9),
         ),
         (
-            "temporal-semantic-noop-repetition.json",
-            lambda raw: raw["results"].update(distinct_active_revision=9),
+            "temporal-transition-confirmation-summary.json",
+            lambda raw: raw["results"].update(alpha_equivalent_revision_changed=9),
         ),
         (
             "temporal-update-repetition.json",

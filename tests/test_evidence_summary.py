@@ -140,14 +140,11 @@ def test_repeated_temporal_controls_are_in_the_summary() -> None:
     assert result["semantic_noop_revision"] == {
         "byte_identical_same_session_second_call": "deny",
         "byte_identical_write_created_revision": False,
-        "distinct_active_revision": 10,
+        "alpha_equivalent_revision_changed": 10,
+        "byte_identical_revision_unchanged": 10,
+        "byte_identical_second_request_denied": 10,
         "fresh_recovery_allowed": 10,
-        "old_session_rejected_as_stale": 10,
-        "update_to_active_ms": {
-            "maximum": 10514.814172,
-            "median": 8217.953572,
-            "minimum": 7076.166358,
-        },
+        "predecessor_session_rejected_as_stale": 10,
     }
     assert result["binding_policy_revision"] == {
         "old_binding_session_rejected_as_stale": 10,
