@@ -1,0 +1,9 @@
+{
+  "classification": "source ambiguity",
+  "validation_mode_requested": "FAIL_ON_ANY_FINDINGS",
+  "policy_role": "unconditional permit for the single reviewed tool",
+  "managed_result": "rejected",
+  "managed_finding": "Overly Permissive",
+  "active_validation_mode": "IGNORE_ALL_FINDINGS",
+  "claim_boundary": "the experiment evaluates active ENFORCE decisions but does not claim that strict native semantic validation accepted the policy set"
+}

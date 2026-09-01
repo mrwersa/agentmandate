@@ -1,0 +1,9 @@
+{
+  "classification": "deployment policy",
+  "excluded_capture": "initial confirmation attempt",
+  "observed_result": "the target returned an MCP error before execution",
+  "diagnosis": "the generated Gateway role lacked bedrock-agentcore:GetWorkloadAccessToken for its own workload identity",
+  "correction": "add that action only for the default directory and the task Gateway workload identity",
+  "confirmation_boundary": "one successful preflight preceded the twenty confirmation trials",
+  "failed_attempt_counted": false
+}

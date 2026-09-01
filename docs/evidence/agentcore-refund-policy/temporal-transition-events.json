@@ -1,0 +1,2906 @@
+{
+  "alpha_equivalent_trials": [
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 526.64411,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-0-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-0-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-0-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 440.661952,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-0-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-0-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-0-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 600.423024,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-0-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-0-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-0-successor"
+      },
+      "style": "b",
+      "trial": 0,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-48689a7ff8bc",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-a2174f36dfc8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 10,
+            "revision_alias": "revision-48689a7ff8bc",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 550.35478,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-1-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-1-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-1-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 430.846532,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-1-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-1-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-1-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 537.460796,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-1-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-1-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-1-successor"
+      },
+      "style": "a",
+      "trial": 1,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-73aa4cda396f",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-48689a7ff8bc",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 10,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 11,
+            "revision_alias": "revision-bfb0a81166c9",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 12,
+            "revision_alias": "revision-73aa4cda396f",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 544.644767,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-2-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-2-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-2-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 457.768043,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-2-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-2-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-2-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 537.384186,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-2-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-2-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-2-successor"
+      },
+      "style": "b",
+      "trial": 2,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-a4b2a4cbd13d",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-73aa4cda396f",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-4a3392ce4492",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-4a3392ce4492",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-4a3392ce4492",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-4a3392ce4492",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-4a3392ce4492",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-4a3392ce4492",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-a4b2a4cbd13d",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 513.854371,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-3-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-3-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-3-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 447.015913,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-3-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-3-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-3-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 641.479435,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-3-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-3-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-3-successor"
+      },
+      "style": "a",
+      "trial": 3,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-dc46be879cdb",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-a4b2a4cbd13d",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-6ef242a31121",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-dc46be879cdb",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 490.748871,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-4-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-4-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-4-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 401.752658,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-4-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-4-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-4-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 530.324056,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-4-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-4-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-4-successor"
+      },
+      "style": "b",
+      "trial": 4,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-af40e10ea18b",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-dc46be879cdb",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 10,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 11,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 12,
+            "revision_alias": "revision-bb5c081e0370",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 13,
+            "revision_alias": "revision-af40e10ea18b",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 594.992092,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-5-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-5-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-5-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 419.732871,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-5-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-5-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-5-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 571.647238,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-5-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-5-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-5-successor"
+      },
+      "style": "a",
+      "trial": 5,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-aad25218014f",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-af40e10ea18b",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-d6706fa25b88",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-aad25218014f",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 536.032377,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-6-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-6-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-6-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 429.571773,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-6-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-6-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-6-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 568.42476,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-6-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-6-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-6-successor"
+      },
+      "style": "b",
+      "trial": 6,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-r546407654919",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-aad25218014f",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-e8bd5daeff2a",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-r546407654919",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 524.13514,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-7-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-7-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-7-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 349.239185,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-7-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-7-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-7-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 549.253674,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-7-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-7-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-7-successor"
+      },
+      "style": "a",
+      "trial": 7,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-aecad11eb2e1",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-r546407654919",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-1ed574a4f7c0",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-aecad11eb2e1",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 547.273857,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-8-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-8-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-8-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 421.000965,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-8-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-8-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-8-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 589.133715,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-8-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-8-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-8-successor"
+      },
+      "style": "b",
+      "trial": 8,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-aec92aeb8af8",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-aecad11eb2e1",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-2dd4abee2193",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-aec92aeb8af8",
+            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 533.863053,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-9-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-9-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-9-predecessor"
+      },
+      "predecessor_after_call": {
+        "derived_outcome": "stale_session",
+        "elapsed_ms": 384.914435,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-9-predecessor-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32005,
+            "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+          },
+          "id": "equivalent-9-predecessor-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "equivalent-9-predecessor"
+      },
+      "recovery_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 532.489853,
+        "http_status": 200,
+        "request": {
+          "id": "equivalent-9-recovery",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "equivalent-9-recovery",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "equivalent-9-successor"
+      },
+      "style": "a",
+      "trial": 9,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-r588217258927",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-aec92aeb8af8",
+          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 1,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 2,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 3,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 4,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 5,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 6,
+            "revision_alias": "revision-61753aae9152",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-r588217258927",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": true,
+        "update_response_status": "UPDATING"
+      }
+    }
+  ],
+  "amount_per_call": 600,
+  "byte_identical_trials": [
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 483.48274,
+        "http_status": 200,
+        "request": {
+          "id": "byte-0-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-0-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-0-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 560.770977,
+        "http_status": 200,
+        "request": {
+          "id": "byte-0-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-0-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-0-session"
+      },
+      "trial": 0,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 457.958054,
+        "http_status": 200,
+        "request": {
+          "id": "byte-1-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-1-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-1-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 671.712537,
+        "http_status": 200,
+        "request": {
+          "id": "byte-1-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-1-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-1-session"
+      },
+      "trial": 1,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 529.518051,
+        "http_status": 200,
+        "request": {
+          "id": "byte-2-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-2-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-2-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 592.502619,
+        "http_status": 200,
+        "request": {
+          "id": "byte-2-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-2-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-2-session"
+      },
+      "trial": 2,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 414.170542,
+        "http_status": 200,
+        "request": {
+          "id": "byte-3-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-3-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-3-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 569.714034,
+        "http_status": 200,
+        "request": {
+          "id": "byte-3-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-3-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-3-session"
+      },
+      "trial": 3,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 559.657316,
+        "http_status": 200,
+        "request": {
+          "id": "byte-4-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-4-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-4-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 557.218181,
+        "http_status": 200,
+        "request": {
+          "id": "byte-4-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-4-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-4-session"
+      },
+      "trial": 4,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 477.430037,
+        "http_status": 200,
+        "request": {
+          "id": "byte-5-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-5-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-5-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 534.044495,
+        "http_status": 200,
+        "request": {
+          "id": "byte-5-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-5-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-5-session"
+      },
+      "trial": 5,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 446.616267,
+        "http_status": 200,
+        "request": {
+          "id": "byte-6-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-6-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-6-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 519.191707,
+        "http_status": 200,
+        "request": {
+          "id": "byte-6-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-6-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-6-session"
+      },
+      "trial": 6,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 442.988817,
+        "http_status": 200,
+        "request": {
+          "id": "byte-7-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-7-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-7-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 519.017837,
+        "http_status": 200,
+        "request": {
+          "id": "byte-7-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-7-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-7-session"
+      },
+      "trial": 7,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 706.619631,
+        "http_status": 200,
+        "request": {
+          "id": "byte-8-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-8-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-8-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 560.816142,
+        "http_status": 200,
+        "request": {
+          "id": "byte-8-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-8-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-8-session"
+      },
+      "trial": 8,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    },
+    {
+      "after_call": {
+        "derived_outcome": "deny",
+        "elapsed_ms": 522.04482,
+        "http_status": 200,
+        "request": {
+          "id": "byte-9-after",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+          },
+          "id": "byte-9-after",
+          "jsonrpc": "2.0"
+        },
+        "session_alias": "byte-9-session"
+      },
+      "before_call": {
+        "derived_outcome": "allow",
+        "elapsed_ms": 561.937781,
+        "http_status": 200,
+        "request": {
+          "id": "byte-9-before",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 600
+            },
+            "name": "TransitionTarget___process_refund"
+          }
+        },
+        "response": {
+          "id": "byte-9-before",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":600}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "session_alias": "byte-9-session"
+      },
+      "trial": 9,
+      "update": {
+        "after": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "before": {
+          "enforcement_mode": "ACTIVE",
+          "revision_alias": "revision-b3d0a4e629b5",
+          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "status": "ACTIVE",
+          "status_reasons": []
+        },
+        "polls": [
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 0,
+            "revision_alias": "revision-b3d0a4e629b5",
+            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "status": "ACTIVE",
+            "status_reasons": []
+          }
+        ],
+        "revision_changed": false,
+        "update_response_status": "UPDATING"
+      }
+    }
+  ],
+  "capture_version": 1,
+  "enforcement_mode": "ACTIVE",
+  "mandate_sha256": "78441a0ee8c4def86995a36a78362bccb616630054e7c0ed11c75c503a72e907",
+  "protocol": "MCP 2025-03-26",
+  "provider": "AWS AgentCore Gateway Policy",
+  "region": "us-east-1",
+  "request_domain": "representative",
+  "temporal_threshold": 1000,
+  "validation_mode": "IGNORE_ALL_FINDINGS"
+}

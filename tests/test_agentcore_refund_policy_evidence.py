@@ -76,6 +76,14 @@ capture_transition_controls = importlib.util.module_from_spec(_transition_spec)
 sys.modules["capture_transition_controls"] = capture_transition_controls
 _transition_spec.loader.exec_module(capture_transition_controls)
 
+_transition_repetition_spec = importlib.util.spec_from_file_location(
+    "capture_transition_repetition", EVIDENCE / "capture_transition_repetition.py"
+)
+assert _transition_repetition_spec is not None and _transition_repetition_spec.loader is not None
+capture_transition_repetition = importlib.util.module_from_spec(_transition_repetition_spec)
+sys.modules["capture_transition_repetition"] = capture_transition_repetition
+_transition_repetition_spec.loader.exec_module(capture_transition_repetition)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -185,6 +193,16 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert read_json("temporal-transition-cleanup.json") == read_json(
         "temporal-repetition-cleanup.json"
     )
+    assert read_json("temporal-transition-confirmation-cleanup.json") == {
+        "cdk_bootstrap": "retained",
+        "gateway": "absent",
+        "gateway_role": "absent",
+        "lambda": "absent",
+        "lambda_log_group": "absent",
+        "lambda_role": "absent",
+        "policies": "absent",
+        "policy_engine": "absent",
+    }
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -914,6 +932,47 @@ def test_transition_capture_regenerates_reviewed_artifacts(tmp_path: Path) -> No
     assert semantic["results"]["old_session_rejected_as_stale"] == 10
     assert binding["results"]["old_binding_session_rejected_as_stale"] == 10
     assert len(index["sources"]) == 7
+
+
+def test_transition_events_regenerate_the_repeated_summary(tmp_path: Path) -> None:
+    events = EVIDENCE / "temporal-transition-events.json"
+    output = tmp_path / "summary.json"
+
+    capture_transition_repetition.capture(events, output)
+
+    assert output.read_bytes() == (
+        EVIDENCE / "temporal-transition-confirmation-summary.json"
+    ).read_bytes()
+
+
+def test_transition_interface_has_no_state_continuation_operation() -> None:
+    interface = read_json("temporal-transition-interface.json")
+
+    assert interface["botocore_version"] == "1.43.85"
+    assert "UpdatePolicy" in interface["policy_session_history_operations"]
+    assert interface["state_continuation_operations"] == []
+    assert not any(
+        term in operation.lower()
+        for operation in interface["operations"]
+        for term in ("migrate", "reauthor", "settle", "transfer", "continuation")
+    )
+
+
+def test_transition_confirmation_preserves_corrections_and_hygiene() -> None:
+    correction = read_json("temporal-transition-deployment-correction.json")
+    refusal = read_json("temporal-transition-validation-refusal.json")
+    events = (EVIDENCE / "temporal-transition-events.json").read_text(encoding="utf-8")
+
+    assert correction["classification"] == "deployment policy"
+    assert correction["failed_attempt_counted"] is False
+    assert refusal["managed_finding"] == "Overly Permissive"
+    assert refusal["active_validation_mode"] == "IGNORE_ALL_FINDINGS"
+    assert not re.search(
+        r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
+        r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
+        events,
+        re.IGNORECASE,
+    )
 
 
 def test_repetition_capture_rejects_a_double_allow_concurrency_claim() -> None:

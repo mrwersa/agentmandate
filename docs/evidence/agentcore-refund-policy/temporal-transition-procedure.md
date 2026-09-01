@@ -1,5 +1,9 @@
 # Temporal transition controls
 
+Historical procedure retained for the 30 August capture. The repeated
+byte-identical and alpha-equivalent confirmation is specified separately in
+`temporal-transition-confirmation-procedure.md`.
+
 The capture ran on 30 August 2026 against one short-lived AWS IAM-authenticated
 AgentCore Gateway in `us-east-1`, one inert Lambda tool, and an ENFORCE-mode
 temporal policy. The tool echoed the requested amount and performed no financial
