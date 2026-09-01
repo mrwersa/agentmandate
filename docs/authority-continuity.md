@@ -266,6 +266,28 @@ AgentMandate does not claim that a provider promised transactional cancellation.
 
 ## Evidence-selected controls
 
+### Safe continuation across a policy revision
+
+The revision evidence supports a narrower property than “consumption never
+falls.” Fix one mandate, a predecessor policy and its accumulated state, and a
+successor policy reviewed as permitting the same requests. While no qualifying
+event expires or is compensated and the issuer has not amended the mandate,
+the successor must not admit a future action sequence that the predecessor
+state would refuse. The successor may be more conservative.
+
+AgentMandate must not decide semantic equivalence for a policy language. A
+provider profile may carry a reviewed comparability claim over a finite
+fixture, such as the two captured forms that differ only by consistent bound
+variable renaming. Missing or ineligible comparability evidence makes the
+safe-continuation verdict unresolved; it never turns a reset into a clean
+transition.
+
+A transition can discharge the property by preserving or conservatively
+translating consumed and in-flight state, fencing and settling predecessor work
+before successor work commits, or carrying an explicit issuer amendment that
+names the mandate and treatment of predecessor state. A configuration write is
+not by itself an issuer amendment.
+
 The gate-3 matrix must preserve all reviewed outcomes:
 
 | Transition | Required result |
@@ -363,6 +385,7 @@ Any future public presentation must keep these fields separate:
 - manifest authority result;
 - alignment checks and their evidence strength;
 - state-continuity, authority-change and admission outcomes;
+- the reviewed comparability boundary and safe-continuation verdict;
 - provider profile and transition identity;
 - caller-supplied evaluation time;
 - findings and explicit assumptions; and
@@ -392,7 +415,8 @@ stronger result.
    reports all four alignment checks independently, and retains byte-identical
    manifest authority on trust failure. No public Python records.
 5. **Gate 4 — public exposure review:** challenge containment, output stability,
-   no-partial-output behavior, evaluation-time determinism and composition with
+   no-partial-output behavior, evaluation-time determinism, the derivation of a
+   safe-continuation verdict from the three outcome axes, and composition with
    existing policy, condition, delegation and OTel surfaces before choosing a
    CLI or schema.
 
