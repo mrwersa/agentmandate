@@ -912,7 +912,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
     base = "docs/evidence/agentcore-refund-policy/"
     names = {
         "temporal-repetition.json": "temporal-decisions",
-        "temporal-semantic-noop-repetition.json": "revision-control",
+        "temporal-transition-confirmation-summary.json": "revision-control",
         "temporal-update-repetition.json": "revision-decisions",
         "binding-repetition.json": "binding-decisions",
         "binding-policy-revision-repetition.json": "binding-revision-decisions",
@@ -925,8 +925,8 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             base + "temporal-repetition.json": (
                 "2bb58ba1a567da8f2ac020585f56c2ac6a60a378e52cf29be8a221255f35cc57"
             ),
-            base + "temporal-semantic-noop-repetition.json": (
-                "84949d3ad093b8832c1eab2117bd1fba688f0676b48c56253da5b2e9135380c1"
+            base + "temporal-transition-confirmation-summary.json": (
+                "fa67bfb45ec50e56519c71b3096a62595235c8bb018fd4ca7ec45278ef91d756"
             ),
             base + "temporal-update-repetition.json": (
                 "c130c0c5aaf812dcc1a39d8e6b930cbf4bee667745876b0ab36911c5351bd7a5"
@@ -941,7 +941,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
     )
     source_by_locator = {source.locator: source.id for source in sources}
     temporal = _captured(contents, base + "temporal-repetition.json")
-    semantic = _captured(contents, base + "temporal-semantic-noop-repetition.json")
+    semantic = _captured(contents, base + "temporal-transition-confirmation-summary.json")
     update = _captured(contents, base + "temporal-update-repetition.json")
     binding = _captured(contents, base + "binding-repetition.json")
     binding_revision = _captured(contents, base + "binding-policy-revision-repetition.json")
@@ -953,9 +953,14 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             "fresh_sessions_allow_then_allow": 10,
             "same_session_allow_then_deny": 10,
         },
-        "semantic": semantic.get("results", {}).get("distinct_active_revision") == 10
-        and semantic.get("byte_identical_control", {}).get("revision", {}).get("revision_changed")
-        is False,
+        "semantic": semantic.get("results")
+        == {
+            "alpha_equivalent_revision_changed": 10,
+            "byte_identical_revision_unchanged": 10,
+            "byte_identical_second_request_denied": 10,
+            "fresh_recovery_allowed": 10,
+            "predecessor_session_rejected_as_stale": 10,
+        },
         "update": update.get("results", {}).get("old_session_rejected_as_stale") == 10,
         "binding": binding.get("results", {}).get("same_binding_allow_then_deny") == 10,
         "binding_revision": binding_revision.get("results", {}).get(
@@ -1015,7 +1020,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
         AgentCoreControl(
             "byte-identical-write",
             "configuration_revision",
-            1,
+            10,
             600,
             (1000,),
             ("allow", "deny"),
@@ -1024,7 +1029,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             False,
             None,
             "unestablished",
-            ref("temporal-semantic-noop-repetition.json"),
+            ref("temporal-transition-confirmation-summary.json"),
         ),
         AgentCoreControl(
             "equivalent-revision",
@@ -1038,7 +1043,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             True,
             None,
             "unestablished",
-            ref("temporal-semantic-noop-repetition.json"),
+            ref("temporal-transition-confirmation-summary.json"),
         ),
         AgentCoreControl(
             "limit-revision",
