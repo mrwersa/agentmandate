@@ -3,7 +3,7 @@
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 526.64411,
+        "elapsed_ms": 522.9427,
         "http_status": 200,
         "request": {
           "id": "equivalent-0-before",
@@ -33,7 +33,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 440.661952,
+        "elapsed_ms": 426.961021,
         "http_status": 200,
         "request": {
           "id": "equivalent-0-predecessor-after",
@@ -58,7 +58,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 600.423024,
+        "elapsed_ms": 623.210535,
         "http_status": 200,
         "request": {
           "id": "equivalent-0-recovery",
@@ -91,24 +91,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-48689a7ff8bc",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-14cf37c054f4",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -117,8 +122,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -127,8 +132,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -137,8 +142,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -147,8 +152,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -157,8 +162,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -167,8 +172,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -177,8 +182,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -187,8 +192,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 8,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-7b10faf9d79c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -197,30 +202,29 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 9,
-            "revision_alias": "revision-a2174f36dfc8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 10,
-            "revision_alias": "revision-48689a7ff8bc",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-14cf37c054f4",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (running_total: Long).\n    (sum amount for (amount: Long), (event_time: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amount\n      } && tp(event_time)))) == running_total\n    && running_total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 550.35478,
+        "elapsed_ms": 558.117685,
         "http_status": 200,
         "request": {
           "id": "equivalent-1-before",
@@ -250,7 +254,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 430.846532,
+        "elapsed_ms": 400.013324,
         "http_status": 200,
         "request": {
           "id": "equivalent-1-predecessor-after",
@@ -275,7 +279,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 537.460796,
+        "elapsed_ms": 579.624309,
         "http_status": 200,
         "request": {
           "id": "equivalent-1-recovery",
@@ -308,24 +312,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-73aa4cda396f",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-70f2e06b3e88",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-48689a7ff8bc",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-14cf37c054f4",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -334,8 +343,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -344,8 +353,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -354,8 +363,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -364,8 +373,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -374,8 +383,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -384,8 +393,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -394,8 +403,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ec754761e1",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -404,60 +413,29 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 8,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 9,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 10,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 11,
-            "revision_alias": "revision-bfb0a81166c9",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 12,
-            "revision_alias": "revision-73aa4cda396f",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-70f2e06b3e88",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 544.644767,
+        "elapsed_ms": 555.459502,
         "http_status": 200,
         "request": {
           "id": "equivalent-2-before",
@@ -487,7 +465,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 457.768043,
+        "elapsed_ms": 413.534791,
         "http_status": 200,
         "request": {
           "id": "equivalent-2-predecessor-after",
@@ -512,7 +490,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 537.384186,
+        "elapsed_ms": 580.792544,
         "http_status": 200,
         "request": {
           "id": "equivalent-2-recovery",
@@ -545,24 +523,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-a4b2a4cbd13d",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-1e2dd21e22aa",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-73aa4cda396f",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-70f2e06b3e88",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-4a3392ce4492",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -571,8 +554,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-4a3392ce4492",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -581,8 +564,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-4a3392ce4492",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -591,8 +574,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-4a3392ce4492",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -601,8 +584,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-4a3392ce4492",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -611,8 +594,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-4a3392ce4492",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -621,20 +604,49 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-a4b2a4cbd13d",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 7,
+            "revision_alias": "revision-aaa05dcc9400",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-1e2dd21e22aa",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (running_total: Long).\n    (sum amount for (amount: Long), (event_time: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amount\n      } && tp(event_time)))) == running_total\n    && running_total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 513.854371,
+        "elapsed_ms": 533.336762,
         "http_status": 200,
         "request": {
           "id": "equivalent-3-before",
@@ -664,7 +676,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 447.015913,
+        "elapsed_ms": 403.066591,
         "http_status": 200,
         "request": {
           "id": "equivalent-3-predecessor-after",
@@ -689,7 +701,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 641.479435,
+        "elapsed_ms": 509.110362,
         "http_status": 200,
         "request": {
           "id": "equivalent-3-recovery",
@@ -722,24 +734,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-dc46be879cdb",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-6be1d4606ce9",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-a4b2a4cbd13d",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-1e2dd21e22aa",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -748,8 +765,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -758,8 +775,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -768,8 +785,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -778,8 +795,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -788,8 +805,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -798,8 +815,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -808,8 +825,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -818,8 +835,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 8,
-            "revision_alias": "revision-6ef242a31121",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-a3291c4ae34d",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -828,20 +845,29 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 9,
-            "revision_alias": "revision-dc46be879cdb",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-6be1d4606ce9",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 490.748871,
+        "elapsed_ms": 504.800074,
         "http_status": 200,
         "request": {
           "id": "equivalent-4-before",
@@ -871,7 +897,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 401.752658,
+        "elapsed_ms": 402.482972,
         "http_status": 200,
         "request": {
           "id": "equivalent-4-predecessor-after",
@@ -896,7 +922,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 530.324056,
+        "elapsed_ms": 483.276496,
         "http_status": 200,
         "request": {
           "id": "equivalent-4-recovery",
@@ -929,24 +955,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-af40e10ea18b",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-12b589feb22b",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-dc46be879cdb",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-6be1d4606ce9",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -955,8 +986,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -965,8 +996,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -975,8 +1006,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -985,8 +1016,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -995,8 +1026,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1005,8 +1036,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1015,8 +1046,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-1ff4ace3006c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1025,70 +1056,29 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 8,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 9,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 10,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 11,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 12,
-            "revision_alias": "revision-bb5c081e0370",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
-            "status": "UPDATING",
-            "status_reasons": [
-              "Update initiated by user"
-            ]
-          },
-          {
-            "enforcement_mode": "ACTIVE",
-            "poll_index": 13,
-            "revision_alias": "revision-af40e10ea18b",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-12b589feb22b",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (running_total: Long).\n    (sum amount for (amount: Long), (event_time: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amount\n      } && tp(event_time)))) == running_total\n    && running_total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 594.992092,
+        "elapsed_ms": 537.532997,
         "http_status": 200,
         "request": {
           "id": "equivalent-5-before",
@@ -1118,7 +1108,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 419.732871,
+        "elapsed_ms": 421.459006,
         "http_status": 200,
         "request": {
           "id": "equivalent-5-predecessor-after",
@@ -1143,7 +1133,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 571.647238,
+        "elapsed_ms": 565.657032,
         "http_status": 200,
         "request": {
           "id": "equivalent-5-recovery",
@@ -1176,24 +1166,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-aad25218014f",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-12aa6f90f16a",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-af40e10ea18b",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-12b589feb22b",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1202,8 +1197,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1212,8 +1207,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1222,8 +1217,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1232,8 +1227,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1242,8 +1237,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1252,8 +1247,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-d6706fa25b88",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1262,20 +1257,49 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-aad25218014f",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-cde5596560f0",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-12aa6f90f16a",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 536.032377,
+        "elapsed_ms": 544.28258,
         "http_status": 200,
         "request": {
           "id": "equivalent-6-before",
@@ -1305,7 +1329,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 429.571773,
+        "elapsed_ms": 397.538707,
         "http_status": 200,
         "request": {
           "id": "equivalent-6-predecessor-after",
@@ -1330,7 +1354,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 568.42476,
+        "elapsed_ms": 650.608192,
         "http_status": 200,
         "request": {
           "id": "equivalent-6-recovery",
@@ -1363,24 +1387,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-r546407654919",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-2c018d87ad48",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-aad25218014f",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-12aa6f90f16a",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1389,8 +1418,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1399,8 +1428,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1409,8 +1438,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1419,8 +1448,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1429,8 +1458,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1439,8 +1468,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-e8bd5daeff2a",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1449,20 +1478,49 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-r546407654919",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-640c5c79614c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-2c018d87ad48",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (running_total: Long).\n    (sum amount for (amount: Long), (event_time: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amount\n      } && tp(event_time)))) == running_total\n    && running_total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 524.13514,
+        "elapsed_ms": 528.10851,
         "http_status": 200,
         "request": {
           "id": "equivalent-7-before",
@@ -1492,7 +1550,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 349.239185,
+        "elapsed_ms": 437.667815,
         "http_status": 200,
         "request": {
           "id": "equivalent-7-predecessor-after",
@@ -1517,7 +1575,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 549.253674,
+        "elapsed_ms": 550.947397,
         "http_status": 200,
         "request": {
           "id": "equivalent-7-recovery",
@@ -1550,24 +1608,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-aecad11eb2e1",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-de38a622f39b",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-r546407654919",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-2c018d87ad48",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1576,8 +1639,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1586,8 +1649,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1596,8 +1659,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1606,8 +1669,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1616,8 +1679,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1626,8 +1689,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-1ed574a4f7c0",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-95ea1c668d45",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1636,20 +1699,29 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-aecad11eb2e1",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-de38a622f39b",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 547.273857,
+        "elapsed_ms": 598.501475,
         "http_status": 200,
         "request": {
           "id": "equivalent-8-before",
@@ -1679,7 +1751,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 421.000965,
+        "elapsed_ms": 458.203915,
         "http_status": 200,
         "request": {
           "id": "equivalent-8-predecessor-after",
@@ -1704,7 +1776,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 589.133715,
+        "elapsed_ms": 553.771723,
         "http_status": 200,
         "request": {
           "id": "equivalent-8-recovery",
@@ -1737,24 +1809,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-aec92aeb8af8",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-e1f8c4345d7c",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-aecad11eb2e1",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-de38a622f39b",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1763,8 +1840,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1773,8 +1850,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1783,8 +1860,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1793,8 +1870,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1803,8 +1880,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1813,8 +1890,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1823,8 +1900,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-2dd4abee2193",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1833,20 +1910,39 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 8,
-            "revision_alias": "revision-aec92aeb8af8",
-            "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+            "revision_alias": "revision-0761fbeb1288",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-e1f8c4345d7c",
+            "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (running_total: Long).\n    (sum amount for (amount: Long), (event_time: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amount\n      } && tp(event_time)))) == running_total\n    && running_total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 533.863053,
+        "elapsed_ms": 565.893492,
         "http_status": 200,
         "request": {
           "id": "equivalent-9-before",
@@ -1876,7 +1972,7 @@
       },
       "predecessor_after_call": {
         "derived_outcome": "stale_session",
-        "elapsed_ms": 384.914435,
+        "elapsed_ms": 414.411513,
         "http_status": 200,
         "request": {
           "id": "equivalent-9-predecessor-after",
@@ -1901,7 +1997,7 @@
       },
       "recovery_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 532.489853,
+        "elapsed_ms": 613.354818,
         "http_status": 200,
         "request": {
           "id": "equivalent-9-recovery",
@@ -1934,24 +2030,29 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-r588217258927",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-60a515517a32",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-aec92aeb8af8",
-          "statement_sha256": "e04f1b84de9d7460d68ef3b00eeab8748117446222e082f82009842e8fb098fe",
+          "revision_alias": "revision-e1f8c4345d7c",
+          "statement_sha256": "e92fea15d546587a11c75c2f24ff6bf480292c2065be304af2366e3353651a0a",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1960,8 +2061,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 1,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1970,8 +2071,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 2,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1980,8 +2081,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 3,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -1990,8 +2091,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 4,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -2000,8 +2101,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 5,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -2010,8 +2111,8 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 6,
-            "revision_alias": "revision-61753aae9152",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "UPDATING",
             "status_reasons": [
               "Update initiated by user"
@@ -2020,14 +2121,43 @@
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 7,
-            "revision_alias": "revision-r588217258927",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 8,
+            "revision_alias": "revision-59a144f02c93",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+            "status": "UPDATING",
+            "status_reasons": [
+              "Update initiated by user"
+            ]
+          },
+          {
+            "enforcement_mode": "ACTIVE",
+            "poll_index": 9,
+            "revision_alias": "revision-60a515517a32",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": true,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     }
   ],
@@ -2036,7 +2166,7 @@
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 483.48274,
+        "elapsed_ms": 451.163729,
         "http_status": 200,
         "request": {
           "id": "byte-0-after",
@@ -2052,7 +2182,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-0-after",
           "jsonrpc": "2.0"
@@ -2061,7 +2191,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 560.770977,
+        "elapsed_ms": 579.662311,
         "http_status": 200,
         "request": {
           "id": "byte-0-before",
@@ -2093,36 +2223,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 457.958054,
+        "elapsed_ms": 487.558253,
         "http_status": 200,
         "request": {
           "id": "byte-1-after",
@@ -2138,7 +2282,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-1-after",
           "jsonrpc": "2.0"
@@ -2147,7 +2291,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 671.712537,
+        "elapsed_ms": 544.105793,
         "http_status": 200,
         "request": {
           "id": "byte-1-before",
@@ -2179,36 +2323,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 529.518051,
+        "elapsed_ms": 472.279872,
         "http_status": 200,
         "request": {
           "id": "byte-2-after",
@@ -2224,7 +2382,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-2-after",
           "jsonrpc": "2.0"
@@ -2233,7 +2391,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 592.502619,
+        "elapsed_ms": 586.214543,
         "http_status": 200,
         "request": {
           "id": "byte-2-before",
@@ -2265,36 +2423,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 414.170542,
+        "elapsed_ms": 441.350756,
         "http_status": 200,
         "request": {
           "id": "byte-3-after",
@@ -2310,7 +2482,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-3-after",
           "jsonrpc": "2.0"
@@ -2319,7 +2491,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 569.714034,
+        "elapsed_ms": 529.599323,
         "http_status": 200,
         "request": {
           "id": "byte-3-before",
@@ -2351,36 +2523,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 559.657316,
+        "elapsed_ms": 492.329351,
         "http_status": 200,
         "request": {
           "id": "byte-4-after",
@@ -2396,7 +2582,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-4-after",
           "jsonrpc": "2.0"
@@ -2405,7 +2591,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 557.218181,
+        "elapsed_ms": 551.695556,
         "http_status": 200,
         "request": {
           "id": "byte-4-before",
@@ -2437,36 +2623,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 477.430037,
+        "elapsed_ms": 458.889796,
         "http_status": 200,
         "request": {
           "id": "byte-5-after",
@@ -2482,7 +2682,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-5-after",
           "jsonrpc": "2.0"
@@ -2491,7 +2691,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 534.044495,
+        "elapsed_ms": 539.528185,
         "http_status": 200,
         "request": {
           "id": "byte-5-before",
@@ -2523,36 +2723,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 446.616267,
+        "elapsed_ms": 502.953302,
         "http_status": 200,
         "request": {
           "id": "byte-6-after",
@@ -2568,7 +2782,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-6-after",
           "jsonrpc": "2.0"
@@ -2577,7 +2791,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 519.191707,
+        "elapsed_ms": 548.135746,
         "http_status": 200,
         "request": {
           "id": "byte-6-before",
@@ -2609,36 +2823,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 442.988817,
+        "elapsed_ms": 492.842132,
         "http_status": 200,
         "request": {
           "id": "byte-7-after",
@@ -2654,7 +2882,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-7-after",
           "jsonrpc": "2.0"
@@ -2663,7 +2891,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 519.017837,
+        "elapsed_ms": 538.083741,
         "http_status": 200,
         "request": {
           "id": "byte-7-before",
@@ -2695,36 +2923,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 706.619631,
+        "elapsed_ms": 489.159975,
         "http_status": 200,
         "request": {
           "id": "byte-8-after",
@@ -2740,7 +2982,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-8-after",
           "jsonrpc": "2.0"
@@ -2749,7 +2991,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 560.816142,
+        "elapsed_ms": 506.630274,
         "http_status": 200,
         "request": {
           "id": "byte-8-before",
@@ -2781,36 +3023,50 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     },
     {
       "after_call": {
         "derived_outcome": "deny",
-        "elapsed_ms": 522.04482,
+        "elapsed_ms": 432.635914,
         "http_status": 200,
         "request": {
           "id": "byte-9-after",
@@ -2826,7 +3082,7 @@
         "response": {
           "error": {
             "code": -32002,
-            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to TransitionBudget-rfma48954o]"
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
           },
           "id": "byte-9-after",
           "jsonrpc": "2.0"
@@ -2835,7 +3091,7 @@
       },
       "before_call": {
         "derived_outcome": "allow",
-        "elapsed_ms": 561.937781,
+        "elapsed_ms": 543.074006,
         "http_status": 200,
         "request": {
           "id": "byte-9-before",
@@ -2867,30 +3123,44 @@
       "update": {
         "after": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
         },
         "before": {
           "enforcement_mode": "ACTIVE",
-          "revision_alias": "revision-b3d0a4e629b5",
-          "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+          "revision_alias": "revision-f028d0923740",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
           "status": "ACTIVE",
           "status_reasons": []
+        },
+        "managed_response": {
+          "enforcement_mode": "ACTIVE",
+          "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+          "status": "UPDATING"
         },
         "polls": [
           {
             "enforcement_mode": "ACTIVE",
             "poll_index": 0,
-            "revision_alias": "revision-b3d0a4e629b5",
-            "statement_sha256": "1cd28f8ba57835ae1ffe021ce67b9d5b83008fbc657b0ad99555b4d076879b00",
+            "revision_alias": "revision-f028d0923740",
+            "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
             "status": "ACTIVE",
             "status_reasons": []
           }
         ],
         "revision_changed": false,
-        "update_response_status": "UPDATING"
+        "submitted_request": {
+          "definition": {
+            "policy": {
+              "statement": "forbid (\n  principal is AgentCore::IamEntity,\n  action == AgentCore::Action::\"TransitionTarget___process_refund\",\n  resource == AgentCore::Gateway::\"<reviewed-gateway-binding>\"\n)\nwhen temporal {\n  exists (total: Long).\n    (sum amt for (amt: Long), (t: Timepoint).\n      where (formerly within 1h (AgentCore::Action::\"TransitionTarget___process_refund\"::request{\n        eventResource: resource, input.amount: amt\n      } && tp(t)))) == total\n    && total >= 1000\n};"
+            }
+          },
+          "enforcement_mode": "ACTIVE",
+          "operation": "UpdatePolicy",
+          "validation_mode": "IGNORE_ALL_FINDINGS"
+        }
       }
     }
   ],

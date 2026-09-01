@@ -19,11 +19,15 @@ Two preregistered arms ran ten times each:
    retried the predecessor session, then followed the managed diagnostic by
    retrying through a fresh session.
 
-`temporal-transition-events.json` preserves sanitized request and response
-bodies, policy status polls, statement digests, and pseudonymous revision and
-session identities. `temporal-transition-confirmation-summary.json` is derived
-from those events by `capture_transition_repetition.py`; expected values are not
-inputs to that derivation. The earlier
+`temporal-transition-events.json` preserves sanitized call bodies, every
+submitted `UpdatePolicy` request, its managed response, policy status polls,
+statement digests, and pseudonymous revision and session identities. The two
+submitted policy forms are committed separately, so the projector checks each
+trial's named form and digest rather than accepting a style label on faith.
+`temporal-transition-confirmation-summary.json` is derived from those events by
+`capture_transition_repetition.py`: the preregistered trial shape and outcomes
+are validation conditions, while every reported count is computed from the
+validated rows. The earlier
 `temporal-semantic-noop-repetition.json` remains unchanged as a historical
 migration input.
 
@@ -31,5 +35,6 @@ The first attempt was excluded because the generated Gateway role lacked the
 workload-token permission required for policy-session evaluation. The exact
 deployment-policy correction and the strict native validation refusal are
 preserved separately. Cleanup removed the Gateway, generated role, target,
-engine, policies, Lambda, Lambda role, and log group. Only the reusable CDK
-bootstrap remains.
+engine, policies, Lambda, Lambda role, and log group. The committed cleanup
+record contains the operation-level `Get*` not-found results and empty log-group
+query; only the reusable CDK bootstrap remains.

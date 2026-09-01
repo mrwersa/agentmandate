@@ -38,10 +38,20 @@ def _call(value: dict[str, Any], expected: str) -> None:
             raise ValueError("stale transition call lacks the managed stale-session diagnostic")
 
 
-def _update(value: dict[str, Any], changed: bool) -> dict[str, Any]:
+def _update(
+    value: dict[str, Any],
+    changed: bool,
+    *,
+    before_statement: str,
+    after_statement: str,
+) -> dict[str, Any]:
     before = value.get("before", {})
     after = value.get("after", {})
     polls = value.get("polls")
+    submitted = value.get("submitted_request", {})
+    managed = value.get("managed_response", {})
+    before_sha256 = hashlib.sha256(before_statement.encode()).hexdigest()
+    after_sha256 = hashlib.sha256(after_statement.encode()).hexdigest()
     if (
         value.get("revision_changed") is not changed
         or before.get("status") != "ACTIVE"
@@ -51,8 +61,18 @@ def _update(value: dict[str, Any], changed: bool) -> dict[str, Any]:
         or not isinstance(polls, list)
         or not polls
         or polls[-1] != {"poll_index": len(polls) - 1, **after}
+        or submitted.get("operation") != "UpdatePolicy"
+        or submitted.get("definition", {}).get("policy", {}).get("statement")
+        != after_statement
+        or submitted.get("validation_mode") != "IGNORE_ALL_FINDINGS"
+        or submitted.get("enforcement_mode") != "ACTIVE"
+        or managed.get("status") != "UPDATING"
+        or managed.get("enforcement_mode") != "ACTIVE"
+        or managed.get("statement_sha256") != after_sha256
+        or before.get("statement_sha256") != before_sha256
+        or after.get("statement_sha256") != after_sha256
     ):
-        raise ValueError("transition update does not match the reviewed ACTIVE revision")
+        raise ValueError("transition update does not match the reviewed submitted policy")
     aliases_differ = before.get("revision_alias") != after.get("revision_alias")
     statements_differ = before.get("statement_sha256") != after.get("statement_sha256")
     if aliases_differ is not changed or statements_differ is not changed:
@@ -67,7 +87,7 @@ def _update(value: dict[str, Any], changed: bool) -> dict[str, Any]:
     }
 
 
-def summary(value: dict[str, Any]) -> dict[str, Any]:
+def summary(value: dict[str, Any], policy_forms: dict[str, str]) -> dict[str, Any]:
     byte_trials = value.get("byte_identical_trials")
     equivalent_trials = value.get("alpha_equivalent_trials")
     if (
@@ -102,14 +122,21 @@ def summary(value: dict[str, Any]) -> dict[str, Any]:
             {
                 "trial": index,
                 "before_write": "allow",
-                "update": _update(trial["update"], False),
+                "update": _update(
+                    trial["update"],
+                    False,
+                    before_statement=policy_forms["a"],
+                    after_statement=policy_forms["a"],
+                ),
                 "same_session_after_write": "deny",
             }
         )
 
     equivalent_rows = []
     for index, trial in enumerate(equivalent_trials):
-        if trial.get("trial") != index or trial.get("style") not in {"a", "b"}:
+        expected_style = "b" if index % 2 == 0 else "a"
+        before_style = "a" if expected_style == "b" else "b"
+        if trial.get("trial") != index or trial.get("style") != expected_style:
             raise ValueError(f"alpha-equivalent trial {index} has invalid identity")
         _call(trial["before_call"], "allow")
         _call(trial["predecessor_after_call"], "stale_session")
@@ -124,7 +151,12 @@ def summary(value: dict[str, Any]) -> dict[str, Any]:
                 "trial": index,
                 "alpha_equivalent_form": trial["style"],
                 "before_update": "allow",
-                "update": _update(trial["update"], True),
+                "update": _update(
+                    trial["update"],
+                    True,
+                    before_statement=policy_forms[before_style],
+                    after_statement=policy_forms[expected_style],
+                ),
                 "predecessor_session_after_update": "stale_session",
                 "fresh_recovery_session": "allow",
             }
@@ -138,11 +170,22 @@ def summary(value: dict[str, Any]) -> dict[str, Any]:
         "byte_identical_trials": byte_rows,
         "alpha_equivalent_trials": equivalent_rows,
         "results": {
-            "byte_identical_revision_unchanged": 10,
-            "byte_identical_second_request_denied": 10,
-            "alpha_equivalent_revision_changed": 10,
-            "predecessor_session_rejected_as_stale": 10,
-            "fresh_recovery_allowed": 10,
+            "byte_identical_revision_unchanged": sum(
+                not row["update"]["revision_changed"] for row in byte_rows
+            ),
+            "byte_identical_second_request_denied": sum(
+                row["same_session_after_write"] == "deny" for row in byte_rows
+            ),
+            "alpha_equivalent_revision_changed": sum(
+                row["update"]["revision_changed"] for row in equivalent_rows
+            ),
+            "predecessor_session_rejected_as_stale": sum(
+                row["predecessor_session_after_update"] == "stale_session"
+                for row in equivalent_rows
+            ),
+            "fresh_recovery_allowed": sum(
+                row["fresh_recovery_session"] == "allow" for row in equivalent_rows
+            ),
         },
         "interpretation": (
             "under one external mandate digest, byte-identical writes preserved the revision "
@@ -155,7 +198,13 @@ def summary(value: dict[str, Any]) -> dict[str, Any]:
 
 def capture(events: Path, output: Path) -> None:
     """Derive the canonical reviewed summary from sanitized provider events."""
-    _write(output, summary(_read(events)))
+    policy_forms = {
+        style: (events.parent / f"temporal-transition-policy-{style}.dogwood").read_text(
+            encoding="utf-8"
+        ).rstrip("\n")
+        for style in ("a", "b")
+    }
+    _write(output, summary(_read(events), policy_forms))
 
 
 def build_index(root: Path) -> None:
@@ -175,6 +224,8 @@ def build_index(root: Path) -> None:
         "temporal-transition-deployment-correction.json",
         "temporal-transition-events.json",
         "temporal-transition-interface.json",
+        "temporal-transition-policy-a.dogwood",
+        "temporal-transition-policy-b.dogwood",
         "temporal-transition-procedure.md",
         "temporal-transition-validation-refusal.json",
     }

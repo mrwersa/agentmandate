@@ -1,10 +1,47 @@
 {
   "cdk_bootstrap": "retained",
-  "gateway": "absent",
-  "gateway_role": "absent",
-  "lambda": "absent",
-  "lambda_log_group": "absent",
-  "lambda_role": "absent",
-  "policies": "absent",
-  "policy_engine": "absent"
+  "checks": [
+    {
+      "operation": "GetGateway",
+      "outcome": "not_found",
+      "resource": "gateway"
+    },
+    {
+      "operation": "GetGatewayTarget",
+      "outcome": "not_found",
+      "resource": "gateway_target"
+    },
+    {
+      "operation": "GetPolicyEngine",
+      "outcome": "not_found",
+      "resource": "policy_engine"
+    },
+    {
+      "operation": "GetPolicy",
+      "outcome": "not_found",
+      "resource": "policy"
+    },
+    {
+      "operation": "GetFunction",
+      "outcome": "not_found",
+      "resource": "lambda"
+    },
+    {
+      "operation": "GetRole",
+      "outcome": "not_found",
+      "resource": "lambda_role"
+    },
+    {
+      "operation": "GetRole",
+      "outcome": "not_found",
+      "resource": "gateway_role"
+    },
+    {
+      "operation": "DescribeLogGroups",
+      "outcome": "empty_result",
+      "resource": "lambda_log_group"
+    }
+  ],
+  "cleanup_version": 2,
+  "region": "us-east-1"
 }

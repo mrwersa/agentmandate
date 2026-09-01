@@ -193,16 +193,10 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     assert read_json("temporal-transition-cleanup.json") == read_json(
         "temporal-repetition-cleanup.json"
     )
-    assert read_json("temporal-transition-confirmation-cleanup.json") == {
-        "cdk_bootstrap": "retained",
-        "gateway": "absent",
-        "gateway_role": "absent",
-        "lambda": "absent",
-        "lambda_log_group": "absent",
-        "lambda_role": "absent",
-        "policies": "absent",
-        "policy_engine": "absent",
-    }
+    transition_cleanup = read_json("temporal-transition-confirmation-cleanup.json")
+    assert transition_cleanup["cdk_bootstrap"] == "retained"
+    assert transition_cleanup["cleanup_version"] == 2
+    assert len(transition_cleanup["checks"]) == 8
 
 
 def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
@@ -945,6 +939,42 @@ def test_transition_events_regenerate_the_repeated_summary(tmp_path: Path) -> No
     ).read_bytes()
 
 
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (
+            lambda value: value["byte_identical_trials"][0]["update"][
+                "submitted_request"
+            ]["definition"]["policy"].update(statement="forbid;"),
+            "submitted policy",
+        ),
+        (
+            lambda value: value["byte_identical_trials"][0]["update"][
+                "managed_response"
+            ].update(status="ACTIVE"),
+            "submitted policy",
+        ),
+        (
+            lambda value: value["alpha_equivalent_trials"][0].update(style="a"),
+            "invalid identity",
+        ),
+    ],
+)
+def test_transition_capture_rejects_unproved_policy_writes(
+    tmp_path: Path, mutation: Any, message: str
+) -> None:
+    events = read_json("temporal-transition-events.json")
+    mutation(events)
+    events_path = tmp_path / "temporal-transition-events.json"
+    events_path.write_text(json.dumps(events), encoding="utf-8")
+    for style in ("a", "b"):
+        name = f"temporal-transition-policy-{style}.dogwood"
+        (tmp_path / name).write_bytes((EVIDENCE / name).read_bytes())
+
+    with pytest.raises(ValueError, match=message):
+        capture_transition_repetition.capture(events_path, tmp_path / "summary.json")
+
+
 def test_transition_interface_has_no_state_continuation_operation() -> None:
     interface = read_json("temporal-transition-interface.json")
 
@@ -961,12 +991,29 @@ def test_transition_interface_has_no_state_continuation_operation() -> None:
 def test_transition_confirmation_preserves_corrections_and_hygiene() -> None:
     correction = read_json("temporal-transition-deployment-correction.json")
     refusal = read_json("temporal-transition-validation-refusal.json")
+    cleanup = read_json("temporal-transition-confirmation-cleanup.json")
     events = (EVIDENCE / "temporal-transition-events.json").read_text(encoding="utf-8")
 
     assert correction["classification"] == "deployment policy"
     assert correction["failed_attempt_counted"] is False
     assert refusal["managed_finding"] == "Overly Permissive"
     assert refusal["active_validation_mode"] == "IGNORE_ALL_FINDINGS"
+    assert cleanup["cleanup_version"] == 2
+    assert {check["resource"] for check in cleanup["checks"]} == {
+        "gateway",
+        "gateway_role",
+        "gateway_target",
+        "lambda",
+        "lambda_log_group",
+        "lambda_role",
+        "policy",
+        "policy_engine",
+    }
+    assert all(
+        check["outcome"] in {"not_found", "empty_result"}
+        for check in cleanup["checks"]
+    )
+    assert "TransitionBudget-" not in events
     assert not re.search(
         r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
         r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
