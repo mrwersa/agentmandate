@@ -104,4 +104,7 @@ and an exhaustion-only rejection. Gates 1, 2a, and 2b now preserve that
 evidence in a strict private record, byte-stable migration, closed standalone
 Authority IR profile, and fail-closed private consumer. The committed migration
 remains unreviewed, so the consumer refuses to narrow from it without an
-accountable accepted review. Public bounded-producer behavior remains pending.
+accountable accepted review. The
+[Gate 4 review](../../bounded-producer-gate-4-review.md) therefore defers public
+bounded-producer behavior until that clean fixture and a stable presentation
+and composition contract exist.
