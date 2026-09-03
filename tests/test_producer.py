@@ -4,11 +4,13 @@ import hashlib
 import json
 from copy import deepcopy
 from dataclasses import replace
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
 
 import agentmandate._producer as producer
+from agentmandate import analyse, loads
 from agentmandate._ir import (
     AuthorityIR,
     Entity,
@@ -18,9 +20,11 @@ from agentmandate._ir import (
     _fact_id,
 )
 from agentmandate._producer import (
+    AppliedProducerBoundary,
     ProducerBoundary,
     ProducerBoundaryFormatError,
     ProducerEvidence,
+    ProducerSelection,
     _captured,
     _digest,
     _integer,
@@ -32,6 +36,7 @@ from agentmandate._producer import (
     _string,
     _strings,
     _validate_producer_profile,
+    analyse_producers,
     migrate_aws_iam_access_key_boundary,
 )
 
@@ -53,6 +58,45 @@ def _contents() -> dict[str, bytes]:
 
 def _raw() -> dict:
     return json.loads(FIXTURE.read_text())
+
+
+def _mandate():
+    path = EVIDENCE / "mandate.yaml"
+    return loads(path.read_text(), source=str(path.relative_to(ROOT)))
+
+
+def _reviewed(maximum: int = 2) -> ProducerBoundary:
+    boundary = ProducerBoundary.from_json(FIXTURE.read_text())
+    updated = replace(
+        boundary,
+        output=replace(
+            boundary.output,
+            capacity=replace(boundary.output.capacity, maximum=maximum),
+        ),
+        controls=replace(
+            boundary.controls,
+            accepted_through=replace(
+                boundary.controls.accepted_through, count=maximum
+            ),
+            exhausted_at=replace(
+                boundary.controls.exhausted_at, attempt=maximum + 1
+            ),
+        ),
+        evidence=ProducerEvidence("exact", "accepted", "reviewer", "2026-12-31"),
+    )
+    return ProducerBoundary.from_json(updated.to_json())
+
+
+def _selection(boundary: ProducerBoundary) -> ProducerSelection:
+    return ProducerSelection(
+        boundary.target.source,
+        boundary.target.binding,
+        boundary.target.producer,
+        boundary.target.producer_version,
+        boundary.partition.argument,
+        boundary.partition.binding,
+        boundary.output.scope,
+    )
 
 
 def _encoded(raw: object) -> str:
@@ -310,6 +354,388 @@ def test_producer_profile_checks_source_identity() -> None:
         _validate_producer_profile(
             replace(graph, sources=(changed_source,), facts=facts)
         )
+
+
+def test_private_analysis_applies_the_real_maximum_two_boundary() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    baseline = analyse(mandate)
+
+    result = analyse_producers(
+        mandate,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert [breach.kind for breach in baseline.breaches] == ["effect_count"]
+    assert len(baseline.breaches[0].path) == 3
+    assert result.authority.breaches == ()
+    assert result.findings == ()
+    assert result.applied == (
+        AppliedProducerBoundary(
+            boundary.id,
+            "create_access_key",
+            "access_key",
+            "reviewed-iam-user",
+            2,
+            result.applied[0].support,
+        ),
+    )
+    assert set(result.applied[0].support) >= {
+        boundary.to_ir().sources[0].id,
+        *[edge.id for edge in boundary.to_ir().edges],
+        "fact:tool:create_access_key:produces",
+        "fact:tool:create_access_key:unbounded",
+    }
+    assert result.as_of == "2026-09-03"
+
+    one_call_budget = replace(
+        mandate, limits=replace(mandate.limits, effects={"write": 1})
+    )
+    two_step = analyse_producers(
+        one_call_budget,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+    assert len(two_step.authority.breaches[0].path) == 2
+
+
+@pytest.mark.parametrize(
+    ("maximum", "breach_length"),
+    [(1, None), (3, 3)],
+)
+def test_private_analysis_synthetic_maximum_controls(
+    maximum: int, breach_length: int | None
+) -> None:
+    mandate = _mandate()
+    boundary = _reviewed(maximum)
+
+    result = analyse_producers(
+        mandate,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.applied[0].maximum == maximum
+    if breach_length is None:
+        assert result.authority.breaches == ()
+    else:
+        assert len(result.authority.breaches[0].path) == breach_length
+
+
+def test_no_producer_records_preserve_existing_authority() -> None:
+    mandate = _mandate()
+
+    result = analyse_producers(
+        mandate,
+        (),
+        {},
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.authority.as_dict() == analyse(mandate).as_dict()
+    assert result.findings == ()
+    assert result.applied == ()
+
+
+@pytest.mark.parametrize(
+    ("as_of", "message"),
+    [
+        (datetime(2026, 9, 3), "as_of must be a date"),
+        ("2026-09-03", "as_of must be a date"),
+    ],
+)
+def test_producer_analysis_requires_a_caller_date(as_of, message: str) -> None:
+    with pytest.raises(ProducerBoundaryFormatError, match=message):
+        analyse_producers(_mandate(), (), {}, as_of=as_of)  # type: ignore[arg-type]
+
+
+def test_producer_analysis_validates_selection_and_source_input_types() -> None:
+    with pytest.raises(ProducerBoundaryFormatError, match="ProducerSelection"):
+        analyse_producers(
+            _mandate(), (), {}, "selection", as_of=date(2026, 9, 3)  # type: ignore[arg-type]
+        )
+    with pytest.raises(ProducerBoundaryFormatError, match="map locators to bytes"):
+        analyse_producers(
+            _mandate(), (), {"source": "text"}, as_of=date(2026, 9, 3)  # type: ignore[dict-item]
+        )
+
+
+def test_missing_selection_retains_the_manifest_result() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+
+    result = analyse_producers(
+        mandate, (boundary,), _contents(), as_of=date(2026, 9, 3)
+    )
+
+    assert result.authority.as_dict() == analyse(mandate).as_dict()
+    assert [finding.message for finding in result.findings] == [
+        "producer boundary lacks one exact selected deployment and partition"
+    ]
+
+
+def test_selection_mismatch_is_a_finding_not_a_smaller_graph() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    selection = replace(_selection(boundary), producer_version="different")
+
+    result = analyse_producers(
+        mandate,
+        (boundary,),
+        _contents(),
+        (selection,),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.authority.as_dict() == analyse(mandate).as_dict()
+    assert "selected deployment and partition" in result.findings[0].message
+
+
+def test_absent_or_ineligible_manifest_producer_retains_authority() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    absent = replace(mandate, tools=())
+    absent_result = analyse_producers(
+        absent,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+    assert absent_result.findings[0].message == (
+        "producer target tool is not present in the mandate"
+    )
+
+    bounded_tool = replace(mandate.tools[0], unbounded=False)
+    bounded = replace(mandate, tools=(bounded_tool,))
+    bounded_result = analyse_producers(
+        bounded,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+    assert bounded_result.findings[0].message == (
+        "producer target is not an unbounded mandate producer of the selected scope"
+    )
+
+
+@pytest.mark.parametrize(
+    ("run_change", "message"),
+    [
+        (
+            {"inventory_completeness": "partial"},
+            "selected inventory is not complete",
+        ),
+        (
+            {"release_completeness": "partial"},
+            "release classification is not complete",
+        ),
+        (
+            {"release_tools": ("create_access_key",)},
+            "reachable release transition",
+        ),
+    ],
+)
+def test_incomplete_or_non_monotone_run_boundaries_do_not_narrow(
+    run_change: dict, message: str
+) -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    changed = ProducerBoundary.from_json(
+        replace(
+            boundary,
+            run_boundary=replace(boundary.run_boundary, **run_change),
+        ).to_json()
+    )
+
+    result = analyse_producers(
+        mandate,
+        (changed,),
+        _contents(),
+        (_selection(changed),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.authority.as_dict() == analyse(mandate).as_dict()
+    assert any(message in finding.message for finding in result.findings)
+
+
+def test_another_reachable_producer_of_the_scope_blocks_narrowing() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    competitor = replace(mandate.tools[0], name="other_producer")
+    expanded = replace(mandate, tools=(*mandate.tools, competitor))
+
+    result = analyse_producers(
+        expanded,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert any("another reachable producer" in item.message for item in result.findings)
+    assert result.applied == ()
+
+
+def test_distinct_selected_boundaries_can_bound_distinct_producers() -> None:
+    mandate = _mandate()
+    first = _reviewed(1)
+    second = ProducerBoundary.from_json(
+        replace(
+            first,
+            id="producer-boundaries/other-key",
+            target=replace(first.target, binding="other_producer"),
+            output=replace(first.output, scope="other_key"),
+            run_boundary=replace(
+                first.run_boundary, inventory=("other_producer",)
+            ),
+        ).to_json()
+    )
+    other_tool = replace(
+        mandate.tools[0], name="other_producer", produces="other_key"
+    )
+    expanded = replace(mandate, tools=(*mandate.tools, other_tool))
+
+    result = analyse_producers(
+        expanded,
+        (first, second),
+        _contents(),
+        (_selection(first), _selection(second)),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.findings == ()
+    assert [item.tool for item in result.applied] == [
+        "create_access_key",
+        "other_producer",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("evidence", "message"),
+    [
+        (
+            ProducerEvidence("heuristic", "accepted", "reviewer", "2026-12-31"),
+            "not exact and accepted",
+        ),
+        (
+            ProducerEvidence("exact", "contested", "reviewer", "2026-12-31"),
+            "not exact and accepted",
+        ),
+        (
+            ProducerEvidence("exact", "accepted", "reviewer", "2026-09-02"),
+            "missing accountability or expired",
+        ),
+    ],
+)
+def test_untrusted_or_expired_evidence_retains_authority(
+    evidence: ProducerEvidence, message: str
+) -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    changed = ProducerBoundary.from_json(replace(boundary, evidence=evidence).to_json())
+
+    result = analyse_producers(
+        mandate,
+        (changed,),
+        _contents(),
+        (_selection(changed),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.authority.as_dict() == analyse(mandate).as_dict()
+    assert any(message in finding.message for finding in result.findings)
+
+
+def test_unreviewed_migration_remains_ineligible() -> None:
+    mandate = _mandate()
+    boundary = migrate_aws_iam_access_key_boundary(_contents())
+
+    result = analyse_producers(
+        mandate,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.applied == ()
+    assert {item.message for item in result.findings} == {
+        "producer evidence is not exact and accepted",
+        "producer review is missing accountability or expired",
+    }
+
+
+def test_missing_or_changed_source_bytes_are_findings() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+    contents = _contents()
+    contents.pop(next(iter(contents)))
+
+    missing = analyse_producers(
+        mandate,
+        (boundary,),
+        contents,
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+    assert missing.findings[0].message == "producer source bytes failed verification"
+
+    contents = _contents()
+    contents[next(iter(contents))] = b"changed"
+    changed = analyse_producers(
+        mandate,
+        (boundary,),
+        contents,
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+    assert changed.findings[0].message == "producer source bytes failed verification"
+
+
+def test_duplicate_and_competing_boundaries_block_every_narrowing() -> None:
+    mandate = _mandate()
+    boundary = _reviewed()
+
+    result = analyse_producers(
+        mandate,
+        (boundary, boundary),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+    )
+
+    assert result.applied == ()
+    assert {item.message for item in result.findings} == {
+        "producer boundary id is declared more than once",
+        "multiple producer boundaries target the same tool",
+    }
+
+
+def test_depth_is_forwarded_to_the_private_search() -> None:
+    mandate = _mandate()
+    boundary = _reviewed(3)
+
+    result = analyse_producers(
+        mandate,
+        (boundary,),
+        _contents(),
+        (_selection(boundary),),
+        as_of=date(2026, 9, 3),
+        depth=2,
+    )
+
+    assert result.authority.depth == 2
+    assert result.authority.breaches == ()
 
 
 def test_reader_canonicalizes_set_like_collections() -> None:

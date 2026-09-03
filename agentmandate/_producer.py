@@ -12,7 +12,7 @@ import json
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from ._ir import (
@@ -27,6 +27,8 @@ from ._ir import (
     _entity_id,
     _fact_id,
 )
+from .manifest import Mandate
+from .reach import Authority, _analyse_with_trace
 
 PRODUCER_BOUNDARY_VERSION = 1
 PRODUCER_BOUNDARY_ADAPTER = "agentmandate.producer-boundary"
@@ -74,6 +76,51 @@ _PROFILE_PREDICATES = {
 
 class ProducerBoundaryFormatError(ValueError):
     """Raised when a private producer-boundary artifact is malformed."""
+
+
+@dataclass(frozen=True)
+class ProducerSelection:
+    """Caller-selected deployment and partition joined to boundary evidence."""
+
+    source: str
+    binding: str
+    producer: str
+    producer_version: str
+    partition_argument: str
+    partition_binding: str
+    output_scope: str
+
+
+@dataclass(frozen=True)
+class ProducerFinding:
+    """One fail-closed producer eligibility finding."""
+
+    boundary: str
+    tool: str
+    message: str
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class AppliedProducerBoundary:
+    """One producer cap admitted into the private bounded search."""
+
+    boundary: str
+    tool: str
+    output_scope: str
+    partition_binding: str
+    maximum: int
+    support: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ProducerAnalysis:
+    """Private producer-aware authority plus eligibility decisions."""
+
+    authority: Authority
+    findings: tuple[ProducerFinding, ...]
+    applied: tuple[AppliedProducerBoundary, ...]
+    as_of: str
 
 
 def _reject_constant(_: str) -> None:
@@ -1013,6 +1060,246 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
         raise ProducerBoundaryFormatError(
             "producer boundary IR source semantic_sha256 does not match the profile"
         )
+
+
+def analyse_producers(
+    mandate: Mandate,
+    boundaries: Sequence[ProducerBoundary],
+    source_bytes: Mapping[str, bytes],
+    selections: Sequence[ProducerSelection] = (),
+    *,
+    as_of: date,
+    depth: int | None = None,
+) -> ProducerAnalysis:
+    """Apply only current, exact producer bounds to private reachability."""
+    if isinstance(as_of, datetime) or not isinstance(as_of, date):
+        raise ProducerBoundaryFormatError("producer analysis as_of must be a date")
+    if not isinstance(selections, Sequence) or isinstance(selections, (str, bytes)) or any(
+        not isinstance(selection, ProducerSelection) for selection in selections
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer analysis selections must contain ProducerSelection records"
+        )
+    if not isinstance(source_bytes, Mapping) or any(
+        not isinstance(locator, str) or not isinstance(content, bytes)
+        for locator, content in source_bytes.items()
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer analysis sources must map locators to bytes"
+        )
+    evaluated_on = as_of.isoformat()
+    canonical = tuple(
+        ProducerBoundary.from_json(boundary.to_json()) for boundary in boundaries
+    )
+    graphs = tuple(boundary.to_ir() for boundary in canonical)
+    for graph in graphs:
+        _validate_producer_profile(graph)
+
+    baseline, _ = _analyse_with_trace(mandate, depth=depth)
+    tools = {tool.name: tool for tool in mandate.tools}
+    boundary_counts: dict[str, int] = {}
+    tool_counts: dict[str, int] = {}
+    for boundary in canonical:
+        boundary_counts[boundary.id] = boundary_counts.get(boundary.id, 0) + 1
+        binding = boundary.target.binding
+        tool_counts[binding] = tool_counts.get(binding, 0) + 1
+
+    findings: list[ProducerFinding] = []
+    applied: list[AppliedProducerBoundary] = []
+    caps: dict[str, int] = {}
+
+    def support_for(graph: AuthorityIR) -> tuple[str, ...]:
+        return tuple(
+            sorted(
+                {
+                    *(source.id for source in graph.sources),
+                    *(fact.id for fact in graph.facts),
+                    *(edge.id for edge in graph.edges),
+                }
+            )
+        )
+
+    def unresolved(
+        boundary: ProducerBoundary,
+        tool_name: str,
+        message: str,
+        support: tuple[str, ...],
+    ) -> None:
+        findings.append(ProducerFinding(boundary.id, tool_name, message, support))
+
+    for boundary, graph in sorted(
+        zip(canonical, graphs, strict=True), key=lambda item: item[0].id
+    ):
+        start = len(findings)
+        tool_name = boundary.target.binding
+        tool = tools.get(tool_name)
+        support = support_for(graph)
+
+        if boundary_counts[boundary.id] != 1:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer boundary id is declared more than once",
+                support,
+            )
+        if tool_counts[tool_name] != 1:
+            unresolved(
+                boundary,
+                tool_name,
+                "multiple producer boundaries target the same tool",
+                support,
+            )
+        matching_selections = [
+            selection
+            for selection in selections
+            if (
+                boundary.target.source,
+                boundary.target.binding,
+                boundary.target.producer,
+                boundary.target.producer_version,
+                boundary.partition.argument,
+                boundary.partition.binding,
+                boundary.output.scope,
+            )
+            == (
+                selection.source,
+                selection.binding,
+                selection.producer,
+                selection.producer_version,
+                selection.partition_argument,
+                selection.partition_binding,
+                selection.output_scope,
+            )
+        ]
+        if len(matching_selections) != 1:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer boundary lacks one exact selected deployment and partition",
+                support,
+            )
+        if tool is None:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer target tool is not present in the mandate",
+                support,
+            )
+        elif tool.produces != boundary.output.scope or not tool.unbounded:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer target is not an unbounded mandate producer of the selected scope",
+                support,
+            )
+        if (
+            boundary.run_boundary.inventory_completeness != "complete"
+            or tool_name not in boundary.run_boundary.inventory
+        ):
+            unresolved(
+                boundary,
+                tool_name,
+                "producer selected inventory is not complete for the target",
+                support,
+            )
+        if boundary.run_boundary.release_completeness != "complete":
+            unresolved(
+                boundary,
+                tool_name,
+                "producer release classification is not complete",
+                support,
+            )
+        reachable_releasers = set(boundary.run_boundary.release_tools).intersection(
+            baseline.reachable_tools
+        )
+        if reachable_releasers:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer capacity has a reachable release transition",
+                support,
+            )
+        competing_producers = {
+            item.name
+            for item in mandate.tools
+            if item.name != tool_name
+            and item.name in baseline.reachable_tools
+            and item.produces == boundary.output.scope
+        }
+        if competing_producers:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer output has another reachable producer",
+                support,
+            )
+        if (
+            boundary.evidence.confidence != "exact"
+            or boundary.evidence.review != "accepted"
+        ):
+            unresolved(
+                boundary,
+                tool_name,
+                "producer evidence is not exact and accepted",
+                support,
+            )
+        if (
+            boundary.evidence.reviewer is None
+            or boundary.evidence.expires is None
+            or boundary.evidence.expires < evaluated_on
+        ):
+            unresolved(
+                boundary,
+                tool_name,
+                "producer review is missing accountability or expired",
+                support,
+            )
+        try:
+            boundary.verify_sources(
+                {
+                    source.locator: source_bytes[source.locator]
+                    for source in boundary.sources
+                    if source.locator in source_bytes
+                }
+            )
+        except ProducerBoundaryFormatError:
+            unresolved(
+                boundary,
+                tool_name,
+                "producer source bytes failed verification",
+                support,
+            )
+
+        if len(findings) == start:
+            caps[tool_name] = boundary.output.capacity.maximum
+            tool_id = _entity_id("tool", tool_name)
+            applied_support = tuple(
+                sorted(
+                    {
+                        *support,
+                        _fact_id(tool_id, "produces"),
+                        _fact_id(tool_id, "unbounded"),
+                    }
+                )
+            )
+            applied.append(
+                AppliedProducerBoundary(
+                    boundary.id,
+                    tool_name,
+                    boundary.output.scope,
+                    boundary.partition.binding,
+                    boundary.output.capacity.maximum,
+                    applied_support,
+                )
+            )
+
+    authority, _ = _analyse_with_trace(mandate, depth=depth, producer_caps=caps)
+    return ProducerAnalysis(
+        authority,
+        tuple(dict.fromkeys(findings)),
+        tuple(applied),
+        evaluated_on,
+    )
 
 
 _IAM_BASE = "docs/evidence/aws-iam-access-keys/"

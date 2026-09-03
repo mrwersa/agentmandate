@@ -101,6 +101,7 @@ The bounded-producer initiative now has both required real distortions:
 AgentKit supplies quantity relationships, and this pinned IAM MCP deployment
 supplies finite authority-bearing cardinality with an accepted two-step control
 and an exhaustion-only rejection. Gates 1, 2a, and 2b now preserve that
-evidence in a strict private record, byte-stable migration, and closed
-standalone Authority IR profile. Private analysis and public bounded-producer
-behavior remain pending.
+evidence in a strict private record, byte-stable migration, closed standalone
+Authority IR profile, and fail-closed private consumer. The committed migration
+remains unreviewed, so the consumer refuses to narrow from it without an
+accountable accepted review. Public bounded-producer behavior remains pending.
