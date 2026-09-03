@@ -104,13 +104,13 @@ manifest shape.
 | **Two additional real graphs** ([delivered under the reassessed evidence gate](docs/evidence-metric-review.md); high confidence) | Coinbase AgentKit and GitHub MCP are too small a basis for a general IR. Add one data system and one SaaS/operations agent, preserving raw inventory, review corrections, and unrepresentable concepts. | Published, versioned sources and a reproducible extraction; choose graphs that are not primarily monetary. | Four independent graphs with explicit boundaries, preserved raw evidence, classified reviewer corrections, and linked model or product outcomes. Scanner precision is tracked separately and is not declared solved. Not a synthetic benchmark corpus. |
 | **Canonical authority IR with provenance** (delivered; high) | Today the manifest mixes reviewed intent and extracted facts. Represent every agent, tool, scope, principal, constraint, and source observation with origin, version, confidence, and review state. | Compatibility design for existing manifests and JSON; migration fixtures for every schema version. | Existing manifests round-trip without semantic change; every derived edge names its source. Not a universal agent execution format. |
 | **Dynamic inventory declarations** ([delivered](docs/dynamic-inventory-gate-4-review.md); high) | Static scan cannot enumerate provider-built tool lists and must fail closed. Add reviewed inventory boundaries for factories, providers, registries, and deployment configuration. | The [versioned contract](docs/dynamic-inventory.md), reader, inventory IR profile, drift reconciliation, and reviewed CLI preserve complete AgentKit and partial Sentry evidence. | Public drift proves the AgentKit boundary complete and names the evaluation date; every ineligible variant remains a finding. Sentry's JavaScript binding remains an explicit collector limitation, not a fabricated clean result. Never import or execute application code. |
-| **Import experiments: MCP, A2A, OpenAPI, Cedar, Rego** ([Cedar policy-language path delivered](docs/cedar-effective-diff-gate-5-review.md); other formats deferred; medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. Cedar starts with a pinned native allow/deny oracle and keeps parsing, validation, decision reproduction, deployment mapping, and authority eligibility separate. | Version-pinned fixtures and a mapping note for each format. Cedar has matched live one-tool IAM AgentCore revisions and a reviewed fail-closed CLI that reproduces Deny-to-Allow widening. MCP/A2A/OpenAPI and Rego remain gated on user pull and representative fixtures. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR. Not automatic trusted annotation, a Python Cedar evaluator, or production policy compilation. |
+| **Evidence import and alignment: MCP, A2A, OpenAPI, Cedar, Rego** ([Cedar path delivered](docs/cedar-effective-diff-gate-5-review.md); other formats deferred; medium) | Tool and policy facts live in incompatible formats. Prototype read-only import into the IR while preserving unknowns and unsupported semantics. This foundation layer covers source bundles, native validation, IR projection, deployment mapping, and exact decision alignment; revision comparison is the policy-control-plane consumer tracked below. | Version-pinned fixtures and a mapping note for each format. Cedar has a pinned native oracle, a live one-tool IAM AgentCore mapping, and reviewed fail-closed validation and alignment commands. MCP/A2A/OpenAPI and Rego remain gated on user pull and representative fixtures. | At least MCP/A2A/OpenAPI inventory and one policy language produce useful, reviewable IR and aligned decisions. Not automatic trusted annotation, a Python Cedar evaluator, production policy compilation, or by itself an effective-authority diff. |
 
 Dependencies: the IR design follows the new graph evidence, not the reverse.
 Policy experiments may remain disposable until the provenance representation is
 accepted.
 
-Cedar import gates 1–5 now have a contract, private strict bundle reader,
+Cedar's evidence-ingestion gates now have a contract, private strict bundle reader,
 digest-pinned official allow/deny fixture, and standalone IR projection. The
 projection preserves observed native decisions while explicitly marking policy
 inventory incomplete; a synthetic probe covers the schema-checked path that
@@ -118,9 +118,9 @@ the official fixture cannot. A separate
 [live AgentCore capture](docs/evidence/agentcore-refund-policy/README.md) proves
 one IAM principal, one Gateway tool, one ACTIVE policy attached in `ENFORCE`,
 an exact reviewed mapping, and opposite managed decisions. Its two request
-values remain representative. The reviewed effective-diff CLI reports
-exact-request alignment and live revision widening without mutating
-reachability. This completes the Cedar policy-language path, not the broader
+values remain representative. The later policy-control-plane consumer uses
+that alignment to report live revision widening without mutating reachability.
+This completes the Cedar path across both roadmap layers, not the broader
 MCP/A2A/OpenAPI/Rego initiative.
 
 The earlier [operational mapping audit](docs/cedar-operational-mapping-audit.md)
