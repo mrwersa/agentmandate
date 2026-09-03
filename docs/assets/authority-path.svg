@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
   <title id="title">A read-only tool widens a payment-dispute agent's effective authority</title>
-  <desc id="desc">Version one can issue one approved refund of up to 500 pounds. Version two adds a read-only case search that supplies more case scopes, making two individually valid refunds reachable and breaching the 500 pound run limit. AgentMandate reports the full counterexample path in CI.</desc>
+  <desc id="desc">Version one can issue one approved refund of up to 500 pounds. Version two adds a read-only case search that supplies more case scopes, making two individually valid refunds reachable and breaching the 500 pound mandate-wide limit. AgentMandate reports the full counterexample path in CI.</desc>
   <rect width="1200" height="620" fill="#f7f8fa"/>
 
   <text x="60" y="58" fill="#17202a" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">A read-only tool can widen spending authority</text>
-  <text x="60" y="91" fill="#53606d" font-family="Inter, Arial, sans-serif" font-size="17">Payment-dispute agent · £500 per case · £500 per run · human approval required</text>
+  <text x="60" y="91" fill="#53606d" font-family="Inter, Arial, sans-serif" font-size="17">Payment-dispute agent · £500 per case · £500 per mandate · human approval required</text>
 
   <rect x="60" y="130" width="500" height="350" rx="8" fill="#ffffff" stroke="#b8c2cc" stroke-width="2"/>
   <text x="88" y="170" fill="#17202a" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">Release 1 · bounded</text>
@@ -22,7 +22,7 @@
   <rect x="90" y="350" width="414" height="78" rx="6" fill="#f1f4f7"/>
   <text x="112" y="382" fill="#30404f" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600">Reachable total</text>
   <text x="480" y="382" text-anchor="end" fill="#17633f" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">£500</text>
-  <text x="112" y="408" fill="#53606d" font-family="Inter, Arial, sans-serif" font-size="14">Within the £500 run limit</text>
+  <text x="112" y="408" fill="#53606d" font-family="Inter, Arial, sans-serif" font-size="14">Within the £500 mandate-wide limit</text>
 
   <rect x="600" y="130" width="540" height="350" rx="8" fill="#ffffff" stroke="#dc6b3c" stroke-width="3"/>
   <text x="628" y="170" fill="#17202a" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">Release 2 · widened</text>
@@ -49,7 +49,7 @@
   <text x="950" y="354" text-anchor="middle" fill="#37604d" font-family="Inter, Arial, sans-serif" font-size="13">approved · £500</text>
 
   <rect id="breach-summary" x="630" y="395" width="450" height="55" rx="6" fill="#fdecea"/>
-  <text x="652" y="429" fill="#842f23" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600">First breaching path £1,000 &gt; £500 run limit</text>
+  <text x="652" y="429" fill="#842f23" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600">First breaching path £1,000 &gt; £500 mandate-wide limit</text>
 
   <line x1="600" y1="520" x2="1140" y2="520" stroke="#b8c2cc" stroke-width="2"/>
   <rect x="60" y="495" width="480" height="95" rx="8" fill="#17202a"/>

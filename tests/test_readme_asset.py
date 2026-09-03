@@ -10,7 +10,7 @@ SVG = {"svg": "http://www.w3.org/2000/svg"}
 def test_authority_path_matches_the_executable_counterexample() -> None:
     source = ASSET.read_text(encoding="utf-8")
 
-    assert "First breaching path £1,000 &gt; £500 run limit" in source
+    assert "First breaching path £1,000 &gt; £500 mandate-wide limit" in source
     assert "open_case → search_cases → issue_refund(case #1)" in source
     assert "→ issue_refund(case #2)" in source
     assert "Reachable total £1,000" not in source

@@ -1,39 +1,44 @@
-# Repository Guidelines
+# AGENTS.md — agentmandate
 
-Single Python package (`agentmandate/`, ~5k lines) that analyses what an AI agent is permitted to do: `manifest.py` loads manifests, `reach.py` searches reachable authority, `diff.py` compares manifests across releases, `cli.py` exposes the `mandate` command. Tests mirror module names (`agentmandate/diff.py` → `tests/test_diff.py`). `examples/` holds sample manifests, traces, and agent code; user docs go in `docs/`; maintenance scripts in `scripts/`.
+Single Python package `agentmandate/` (~16k lines, 21 modules). Core: `manifest.py` (loads/validates), `reach.py` (bounded breach search), `diff.py` (effective-authority compare), `cli.py` (`mandate` entrypoint). Also `scan`/`drift`/`verify`/`ir`/`inventory`/`_conditions`/`_delegation`/`_managed_cedar`/`obligations`/`scenarios`. `examples/` holds manifests/traces/sample agent; `docs/` user docs; `scripts/` maintenance; `probes/` synthetic graphs.
 
-## Commands
+## Commands (exact, verified from `pyproject.toml` / `.github/workflows/ci.yml`)
 
 ```bash
-python -m pip install -e ".[dev]"        # venv first
+python -m pip install -e ".[dev]"        # venv first; installs pyyaml+ruff for dev
 python -m pytest -q                      # full suite
+python -m pytest tests/test_reach.py -q  # single file
+python -m pytest tests/test_reach.py -k test_name -q  # single case
 python -m pytest -q --cov=agentmandate --cov-report=term-missing --cov-fail-under=100
-ruff check .                             # before pushing; CI enforces this exact rule set
-python -m build && python -m twine check dist/*   # release prep (needs `build`, `twine`)
+ruff check .                             # pinned rule set below; CI enforces exactly this
+python -m build && python -m twine check dist/*   # needs build+twine
 mandate --help                           # smoke-test editable install
+python scripts/evidence_lint.py          # only when touching docs/evidence/
 ```
 
-CI runs five required jobs: test matrix (3.10–3.14), lint, coverage, no-dependency-install, package. Run lint + coverage locally before opening a PR.
+CI required jobs (5 + gate): `test` matrix 3.10–3.14, `lint` (ruff), `coverage` (100%), `no-dependency-install`, `package` (build+twine+wheel smoke). Gate fails if any upstream fails. Run lint+coverage locally before PR.
 
-## Hard constraints
+No `opencode.json`, no pre-commit, no typecheck step — `ruff` is the only lint.
 
-- **Zero runtime dependencies in core.** `dependencies = []` is deliberate; CI installs the bare package and analyses a JSON manifest with nothing else present. PyYAML is an optional extra, imported lazily inside `manifest.py` (~line 341) with a missing-module error that names the fix. Do not add imports to core modules or move the yaml import to module level.
-- **100% statement coverage is a CI gate.** Every statement you add needs a test, including error paths and CLI exit codes. Uncovered lines fail the build even when all tests pass.
-- **Docs are tested.** `tests/test_readme_asset.py` asserts the `docs/assets/authority-path.svg` matches the executable counterexample in the README and that README prose contains **no literal version numbers** (the badge and PyPI carry them). Editing README or the diagram can break tests.
-- **Version lives only in `agentmandate/__init__.py`.** `pyproject.toml` reads it via hatch's dynamic version. Never put a version number anywhere else.
-- **Releases are automated**, cut by merging a PR that bumps `__version__` and moves changelog entries into a dated section (see RELEASING.md); a GitHub Release then publishes to PyPI via trusted publishing. Don't tag or publish by hand.
-- **Exit-code contract:** every analysis command exits non-zero on a finding and accepts `--json`, so they drop into CI unchanged. Preserve this when touching `cli.py`; tests assert specific exit codes.
+## Architecture & entrypoints
 
-## Style
+- Package `agentmandate/`; CLI `mandate = agentmandate.cli:main` (argparse, subparsers `lint|reach|diff|scan|drift|verify|ir|inventory|conditions|delegations|cedar|obligations|scenarios`).
+- `scan` reads `tools=[...]` / decorators statically — nothing imported/executed, framework need not be installed. One manifest per agent; use `--binding` or reject unions.
+- `reach --ir` / `ir export|validate` are the canonical Authority IR boundary; `conditions`/`delegations`/`cedar` validate-then-consume reviewed artifacts with explicit `--as-of` + captured bytes. Never compose `--ir` with conditional/delegation flags.
+- Tests mirror modules (`agentmandate/diff.py` → `tests/test_diff.py`); parametrized edge cases, no credentials/account IDs/trace IDs in fixtures.
 
-Python 3.10+, four-space indent, ruff line-length 100 with the pinned rule set in `pyproject.toml`. Type-annotated throughout; keep public exports explicit in `agentmandate/__init__.py` (`__all__`). A name importable but missing from `__all__` counts as a defect worth releasing over. `ManifestError` intentionally subclasses `ValueError` so callers catch either — that's why `TRY004` is ruff-ignored; don't "fix" it.
+## Hard constraints (CI will fail otherwise)
 
-## Testing
+- **Zero runtime deps:** `dependencies = []` in `pyproject.toml` deliberate. `no-dependency-install` job installs bare package and runs `mandate reach` on a JSON manifest. `PyYAML` is `optional-dependencies.yaml`, imported lazily inside `manifest.py:loads` (~341) with error naming `pip install "agentmandate[yaml]"`. Do not add imports to core or move yaml to top level.
+- **100% statement coverage gate:** every added statement needs a test, including error paths and CLI exit codes.
+- **Version lives only in `agentmandate/__init__.py:__version__`** (`0.14.0`); `pyproject.toml` reads via `hatch.version.path`. Never duplicate elsewhere. Package job asserts `metadata.version == __version__ == scripts/release_notes.py --print-version`.
+- **Docs are tested (`tests/test_readme_asset.py`):** README prose must contain **no literal `version X.Y.Z` / `agentmandate~=X.Y`** (badge+PyPI carry it); `docs/assets/authority-path.svg` must match the executable counterexample; `STABILITY.md` (and any prose `*.md` except `CHANGELOG.md`/`RELEASING.md`) must pin `agentmandate~=MAJOR.MINOR.0` exactly; every `mandate <cmd>` must appear in README.
+- **Exit-code contract (`cli.py:EXIT_*`):** `0` clean, `1` finding (lint error / reachable breach / widening diff / non-conformant replay), `2` usage/I/O/malformed. Every analysis command accepts `--json` and is a CI gate; `scan`/`ir export` write to stdout and are not gates. Preserve for `docs/ci.md`.
+- **Public API:** keep `agentmandate/__init__.py:__all__` exhaustive; importable but unlisted counts as defect. `ManifestError` intentionally subclasses `ValueError` (so callers catch either) — `TRY004` is ignored in `pyproject.toml:tool.ruff.lint.ignore`, don't "fix".
+- **Release automation only:** bump `__version__` + dated `CHANGELOG.md` section on a branch, merge to `main`; `release.yml` triggers on CI success on `main`, builds, then tags + GitHub Release + PyPI trusted publishing (`environment: pypi`). Never tag/publish by hand; `main` is protected.
 
-pytest, files named `test_*.py`. Add or update tests for every behavioral change; parameterize related edge cases instead of duplicating bodies. Fixtures must contain no credentials, customer data, account IDs, or real trace IDs.
+## Style & workflow
 
-## Workflow
-
-`main` is protected; everything lands via PR from a branch such as `feature/short-description` (also seen: `docs/…`, `fix/…`, `release/…`). Conventional Commit subjects (`feat:`, `fix:`, `docs:`, `release:`), imperative mood, one focused change per commit. Open an issue before starting a large extractor. Merge only after CI passes and review threads resolve.
-
-Cut a release whenever a user-visible change merges (API, CLI surface, README describing behavior differently, user-facing defect fix) — see RELEASING.md for the full triggers and non-triggers.
+- Python 3.10+, 4-space indent, `ruff` line-length 100, pinned `select = ["E","F","I","B","UP","SIM","C4","RET","PLR1730","FURB"]` in `pyproject.toml`.
+- Branches `feature/short-description` (also `docs/…`, `fix/…`, `release/…`); Conventional Commits (`feat:`, `fix:`, `docs:`, `release:`), imperative, one focused change per commit. Open an issue before large extractors. PR required, merge only after CI green + threads resolved.
+- Cut a release on any user-visible change (API/CLI surface, README behavior description, user-facing fix) per `RELEASING.md`; not for internal docs/evidence tidy-ups.

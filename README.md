@@ -8,9 +8,17 @@
 [![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
 
-Your agent's tools are each safe on their own. AgentMandate finds the limits it
-can slip past by **combining** them, and tells you when a release widened what
-it can reach.
+AgentMandate is a design-time authority analyzer for agentic AI systems. An AI
+agent is a goal-directed system, usually built around a language model, whose
+runtime supplies tools, identity, memory, policy, and the ability to cause
+effects. Those tools may each look safe on their own. AgentMandate finds the
+limits the agent can exceed by **combining** individually permitted calls, and
+tells you when a release widened what it can reach.
+
+A **mandate** is the reviewed, bounded unit of work the agent is allowed to
+carry out while its issuer may be absent. The manifest is the repository's
+machine-readable description of that mandate. AgentMandate analyses permission,
+not whether the model is likely to choose a particular path.
 
 Alpha. Apache-2.0.
 
@@ -20,8 +28,9 @@ Alpha. Apache-2.0.
 pip install "agentmandate[yaml]"
 ```
 
-A payment-dispute agent. Refunds are capped at 500 GBP per case, every refund
-needs human approval, and one run may move 500 GBP in total. It passes:
+A payment-dispute agent has one reviewed mandate. Refunds are capped at 500 GBP
+per case, every refund needs human approval, and the mandate may move 500 GBP in
+total. It passes:
 
 ```console
 $ mandate lint examples/dispute-resolver.yaml
@@ -51,10 +60,10 @@ BREACH  cumulative value 1000 GBP exceeds limit 500 GBP
 
 The cap is measured **per case**. The new tool hands the agent cases it did not
 open, and there is no fixed number of them, so a per-case ceiling stops
-bounding the run. Four individually permitted calls, both refunds approved by a
-human, 1,000 GBP reachable.
+bounding the mandate. Four individually permitted calls, both refunds approved
+by a human, 1,000 GBP reachable.
 
-![A read-only case search makes two approved refunds reachable and breaches the run limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
+![A read-only case search makes two approved refunds reachable and breaches the mandate-wide limit](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/authority-path.svg)
 
 ## Why a config diff is not an authority diff
 
@@ -106,9 +115,10 @@ offline.
 
 ## Where it fits, and what already exists
 
-This is analysis, not enforcement. It runs in CI against a manifest, it does
-not sit in the request path. The model proposes a tool call, while the platform
-still owns the workload identity, authorisation decision, and effect.
+This is design-time analysis, not runtime enforcement. It runs in CI against a
+manifest and does not sit in the request path. The agent's model proposes a tool
+call; the surrounding runtime supplies the tools and state; the platform still
+owns workload identity, the authorisation decision, and the real-world effect.
 
 | Tool | What it does | Relationship |
 |---|---|---|
@@ -118,7 +128,9 @@ still owns the workload identity, authorisation decision, and effect.
 | [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) | Attribute-based access control for tool calls | Enforces |
 | [OPA](https://www.openpolicyagent.org/docs), [Cedar](https://docs.cedarpolicy.com/) | Decide one authorisation at a time | Enforces |
 
-Use those to enforce. AgentMandate is the offline half: it analyses sequences of individually permitted calls and compares *effective* authority across releases.
+Use those to enforce. AgentMandate is the offline half: it analyses sequences
+of individually permitted calls and compares *effective authority*—what the
+agent can actually reach—across releases.
 
 **If you already run AgentCore Policy**, the gap is specific. The policy engine
 answers "may this principal invoke this tool now" by evaluating all applicable
@@ -179,9 +191,9 @@ effect is the more expensive mistake.
 
 ## Keeping the manifest honest
 
-A manifest is a claim. Two things quietly falsify it: somebody adds a tool to
-the agent and nobody edits the YAML, or a signature changes and the argument a
-ceiling was counted against stops existing.
+A manifest is a reviewed claim about one mandate. Two things quietly falsify
+it: somebody adds a tool to the agent and nobody edits the YAML, or a signature
+changes and the argument a ceiling was counted against stops existing.
 
 ```console
 $ mandate drift mandate.yaml --source src/agent
@@ -212,7 +224,9 @@ explicit evaluation date. See the
 
 ## The manifest
 
-Reachability needs three facts per tool that an ordinary tool schema does not carry: the effect class, which argument spends value, and which scope the ceiling is measured against.
+Reachability needs three facts per tool that an ordinary tool schema does not
+carry: the effect class, which argument spends value, and which scope the limit
+is measured against.
 
 ```yaml
 version: 1
@@ -242,7 +256,13 @@ tools:
 
 Asking for full preconditions and postconditions would be more expressive and would not get written. This is the minimum that makes compound analysis possible.
 
-A ceiling is the maximum **cumulative** value one tool may spend against one binding of its `scope_key`. `unbounded: true` marks a tool that can be called repeatedly to mint fresh bindings, which is what turns a per-scope ceiling into no ceiling at all.
+A **cumulative constraint** makes a decision depend on qualifying earlier
+actions. Its **limit** is the configured bound; its consumed state is what the
+runtime has already counted. In manifest v1, a `ceiling` is the maximum
+cumulative value one tool may spend against one binding of its `scope_key`.
+`unbounded: true` marks a tool that can be called repeatedly to mint fresh
+bindings, which is what turns a per-scope limit into no mandate-wide bound at
+all.
 
 ## Commands
 
@@ -316,7 +336,7 @@ manifest <- reviewed production incidents <- runtime policy and traces
 
 ## Scope
 
-Read every finding as **permitted by the reviewed manifest within this bounded
+Read every finding as **permitted by the reviewed mandate within this bounded
 abstraction**. It is not proof that the model will choose the path or that an
 undeclared downstream invariant will accept it.
 
@@ -325,6 +345,11 @@ What this does not do, on purpose:
 - **No enforcement.** No proxy, no runtime interception, no blocking.
 - **No data-flow reachability.** Finding that a read tool feeds an exfiltration path needs taint labels the manifest does not carry. Cumulative value and scope minting are what the current model supports honestly.
 - **No model behaviour.** Whether the agent *would* take a path is a different question from whether it *may*. This measures permission.
+- **No session or budget broker.** A runtime session is not automatically the
+  reviewed mandate, and a configured cumulative limit is not enough unless its
+  consumed state remains attached to that mandate. Continuity across sessions,
+  handoffs, and policy revisions is evidence-backed roadmap work, not a claim
+  made by the current reachability command.
 - **No inference of the fields that matter.** `mandate scan` reads agent source or an MCP catalogue and writes the skeleton, but it cannot know whether an effect is reversible or what a ceiling is measured against. It guesses conservatively and marks every guess `REVIEW`. Extract then annotate, never extract and trust.
 
 Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none exists at depth 20, and the report says when it truncated.

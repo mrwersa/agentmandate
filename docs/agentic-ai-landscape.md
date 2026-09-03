@@ -25,17 +25,21 @@ request. Gateways observe or enforce traffic. Scanners inspect code, packages,
 and tool descriptions. Evaluation systems measure what an agent *does* under
 selected tests. Governance frameworks organize accountability and evidence.
 
-AgentMandate's defensible question sits between these layers: **what outcomes
-can a sequence of individually permitted actions reach, and did that effective
-authority widen?** Mature authorization engines do not answer it because their
-unit is one decision. Runtime security products may detect action chains, but
-their public material does not establish a portable, review-time authority diff
-with short constructive counterexamples.
+AgentMandate's defensible questions sit between these layers: **what outcomes
+can a sequence of individually permitted actions reach, did that effective
+authority widen, and did consumed state remain attached to the reviewed unit of
+work across a lifecycle transition?** Mature authorization engines do not
+answer the first two because their usual unit is one decision. A stateful engine
+may answer the third only for its own session boundary, which is not by itself a
+verifiable mandate identity. Runtime security products may detect action
+chains, but their public material does not establish a portable, review-time
+authority diff or continuity result with short constructive counterexamples.
 
 The strategic opportunity is therefore not another proxy. It is an open
 authority intermediate representation (IR) that can ingest agents and policy,
 analyze compound reachability before deployment, export constraints to existing
-enforcement systems, and reconcile their decision evidence afterward.
+enforcement systems, and reconcile their decisions and authority-bearing state
+transitions afterward.
 
 ## Standards and policy baseline
 
