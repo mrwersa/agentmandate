@@ -1,6 +1,6 @@
 # Bounded Producer Contract
 
-Status: **experimental; gates 1, 2a, and 2b complete**. This is the contract for
+Status: **experimental; gates 1 through 3 complete**. This is the contract for
 [#128](https://github.com/mrwersa/agentmandate/issues/128). It defines the
 minimum trust and analysis contract selected by the
 [AWS IAM cardinality evidence](evidence/aws-iam-access-keys/README.md). It does
@@ -164,6 +164,31 @@ manifest-v1 reachability explicitly rejects the standalone source profile.
 Gate 2b adds no private narrowing analysis, manifest meaning, public export, or
 CLI surface.
 
+## Gate 3 implementation
+
+The private `analyse_producers` consumer canonicalizes every boundary through
+serialization and the strict reader, regenerates and validates its closed IR
+profile, verifies the exact caller-supplied source bytes, and joins it to an
+explicit caller-selected deployment, producer revision, output, and reviewed
+partition. It also requires an existing unbounded mandate producer, complete
+selected inventory, complete release classification, no reachable releaser or
+competing producer of the output scope, and current exact accepted evidence.
+
+Eligible records supply per-tool capacity to the existing breadth-first
+search. Once the producer has minted `maximum` live bindings, its next call is
+unavailable before reachability, effect counting, or state transition: the
+service rejected that attempted production, so it cannot support a successful
+path. Records that are absent, duplicate, competing, expired, incomplete,
+unreviewed, mismatched, lifecycle-ambiguous, or source-unverifiable retain the
+unmodified manifest analysis and produce provenance-bearing findings.
+
+The IAM maximum-two case removes the modeled third successful creation while
+retaining the first two. Test-only maxima one and three exercise both sides of
+the transition; they are controls, not evidence claims. The committed
+migration remains unreviewed and is therefore refused until a caller supplies
+an accountable accepted review. Gate 3 adds no public API, manifest field, CLI
+surface, runtime enforcement, reservation, or release semantics.
+
 ## Scope of a bound
 
 Every part of the boundary identity is load-bearing:
@@ -312,7 +337,7 @@ portfolio system, price oracle, or general accounting language.
 3. **Gate 2b — IR projection (complete):** register the minimum source relations, validate
    a closed standalone profile and semantic digest, and prove manifest
    `reach --ir` refuses it.
-4. **Gate 3 — private analysis:** consume only re-read/profile-validated
+4. **Gate 3 — private analysis (complete):** consume only re-read/profile-validated
    boundaries; reproduce maximum two, synthetic one/three controls, conflicts,
    expiry, selection mismatch, incomplete inventory, release ambiguity, and
    conservative fallback. All seven real graphs remain byte-identical with no

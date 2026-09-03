@@ -26,6 +26,7 @@ the reading of the manifest:
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -225,7 +226,10 @@ def _best_binding(tool: Tool, state: _State) -> tuple[int, Decimal] | None:
 
 
 def _analyse_with_trace(
-    mandate: Mandate, depth: int | None = None
+    mandate: Mandate,
+    depth: int | None = None,
+    *,
+    producer_caps: Mapping[str, int] | None = None,
 ) -> tuple[Authority, _ReachTrace]:
     """Walk the graph and retain shortest enabling paths for provenance.
 
@@ -237,6 +241,7 @@ def _analyse_with_trace(
         raise ValueError("depth must be a positive integer")
     total_cap = mandate.limits.total
     effect_caps = mandate.limits.effects
+    bounded_producers = producer_caps or {}
 
     reachable: set[str] = set()
     effects: set[tuple[str, str]] = set()
@@ -259,6 +264,16 @@ def _analyse_with_trace(
 
         for tool in mandate.tools:
             if not _enabled(tool, state):
+                continue
+            producer_cap = bounded_producers.get(tool.name)
+            if (
+                producer_cap is not None
+                and tool.produces is not None
+                and state.count(tool.produces) >= producer_cap
+            ):
+                # The reviewed producer rejected this transition before the
+                # effect succeeded, so it contributes neither a binding nor
+                # an effect call to the reachable path.
                 continue
 
             first_reach = tool.name not in reachable_paths

@@ -14,6 +14,12 @@ All notable changes to this project are documented here. The format follows
   controls, caller-supplied source digests, and semantic identity. Migration
   remains unreviewed; the profile is rejected by general reachability and does
   not change manifest authority or any public command.
+- A private producer-aware consumer re-reads and profile-validates every
+  boundary, verifies caller-supplied source bytes, requires an exact reviewed
+  deployment/partition match and a complete monotone run, and bounds only
+  successful producer transitions. Every trust failure retains the manifest's
+  stronger result with a provenance-bearing finding. No public API or CLI is
+  added.
 - Authority IR validation recognizes standalone authority-continuity binding,
   AgentCore policy-session, and Anthropic managed-budget profiles through
   `binds_mandate`, `binds_boundary`, `state_of`, `before_state`,
