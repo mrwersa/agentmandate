@@ -91,13 +91,15 @@ policy.
 No access-key ID, secret key, account ID, ARN, request ID, or trace ID is
 committed. The raw credential-bearing response cannot be retained safely, so
 the executable capture and independently authenticated aliases are the review
-artifact. This evidence selects a future finite-cardinality record shape; it
-does not itself change the manifest schema or analyzer.
+artifact. This evidence selects the private finite-cardinality record shape and
+canonical migration now implemented in `agentmandate._producer`. It does not
+itself change the manifest schema or analyzer.
 
 ## Gate consequence
 
 The bounded-producer initiative now has both required real distortions:
 AgentKit supplies quantity relationships, and this pinned IAM MCP deployment
 supplies finite authority-bearing cardinality with an accepted two-step control
-and an exhaustion-only rejection. Record design remains pending review; no
-bounded-producer behavior is delivered by this fixture.
+and an exhaustion-only rejection. Gates 1 and 2a now preserve that evidence in
+a strict private record and byte-stable migration. Authority IR projection,
+analysis, and public bounded-producer behavior remain pending.
