@@ -1791,6 +1791,9 @@ class ContinuityOutcome:
     state: str
     authority_change: str
     admission: str
+    comparability: str
+    issuer_amendment: str
+    safe_continuation: str
     alignments: tuple[ContinuityAlignment, ...]
     assumptions: tuple[str, ...]
     support: tuple[str, ...]
@@ -1808,10 +1811,7 @@ class ContinuityAnalysis:
     @property
     def clean(self) -> bool:
         return not self.findings and all(
-            item.state == "preserved"
-            and item.authority_change == "stable"
-            and item.admission == "within_bound"
-            for item in self.outcomes
+            item.safe_continuation == "satisfied" for item in self.outcomes
         )
 
 
@@ -1899,7 +1899,7 @@ def _agentcore_axes(
     outcomes = control.outcomes
     allowed = outcomes.count("allow")
 
-    missing_required_binding = control.mediation == "exclusive_adapter" and not binding_ready
+    missing_required_binding = control.same_mandate is True and not binding_ready
     if missing_required_binding:
         state = "unresolved"
     elif same_boundary and outcomes[:2] == ("allow", "deny"):
@@ -1932,18 +1932,19 @@ def _agentcore_axes(
         )
 
     continuity_status = "established" if state != "unresolved" else "unresolved"
-    derivation_status = "established" if not missing_required_binding and (
-        same_boundary or same_mandate
-    ) else "unresolved"
-    isolation_status = (
-        "conditional" if control.mediation == "exclusive_adapter" else "unresolved"
-    )
-    mediation_status = (
-        "conditional" if control.mediation == "exclusive_adapter" else "unresolved"
-    )
-    boundary_strength = (
-        "configured" if control.mediation == "exclusive_adapter" else "unestablished"
-    )
+    derivation_status = "established" if same_mandate else "unresolved"
+    if control.mediation == "platform_verified":
+        isolation_status = "established"
+        mediation_status = "established"
+        boundary_strength = "platform_verified"
+    elif control.mediation == "exclusive_adapter":
+        isolation_status = "conditional"
+        mediation_status = "conditional"
+        boundary_strength = "configured"
+    else:
+        isolation_status = "unresolved"
+        mediation_status = "unresolved"
+        boundary_strength = "unestablished"
     assumptions = []
     if control.intervals_overlap:
         assumptions.append("completed decisions do not prove reservation of in-flight work")
@@ -2030,6 +2031,58 @@ def _anthropic_completed(control: AnthropicControl) -> tuple[int, ...]:
             )
         )
     return control.final_costs
+
+
+def _transition_claims(
+    control: AgentCoreControl | AnthropicControl,
+    *,
+    provider_ready: bool,
+) -> tuple[str, str]:
+    """Return reviewed comparability and issuer-amendment states."""
+
+    if not provider_ready:
+        return "unresolved", "unresolved"
+    if isinstance(control, AgentCoreControl):
+        unchanged = control.boundary_changed is False and control.revision_changed is not True
+    else:
+        unchanged = control.boundary_changed is False and control.transition == "same_boundary"
+    if unchanged:
+        return "established", "not_required"
+    return "unresolved", "unresolved"
+
+
+def _safe_continuation(
+    state: str,
+    authority_change: str,
+    admission: str,
+    comparability: str,
+    issuer_amendment: str,
+    alignments: tuple[ContinuityAlignment, ...],
+) -> str:
+    """Derive the private three-valued safe-continuation verdict."""
+
+    if (
+        "unresolved" in {state, authority_change, admission, comparability, issuer_amendment}
+        or any(item.status != "established" for item in alignments)
+    ):
+        return "unresolved"
+    if issuer_amendment == "approved":
+        return "satisfied" if admission == "within_bound" else "violated"
+    if (
+        state == "reset"
+        or authority_change == "widens"
+        or admission == "overshot"
+    ):
+        return "violated"
+    if (
+        state == "preserved"
+        and authority_change in {"stable", "tightens"}
+        and admission == "within_bound"
+        and comparability == "established"
+        and issuer_amendment == "not_required"
+    ):
+        return "satisfied"
+    return "unresolved"
 
 
 def _manifest_binding_matches(
@@ -2149,9 +2202,7 @@ def analyse_continuity(
     for control in canonical_provider.controls:
         control_binding_support = (
             _binding_support(binding_graph)
-            if isinstance(control, AgentCoreControl)
-            and control.same_mandate is True
-            and control.mediation == "exclusive_adapter"
+            if isinstance(control, AgentCoreControl) and control.same_mandate is True
             else ()
         )
         support = tuple(
@@ -2192,6 +2243,18 @@ def analyse_continuity(
             ContinuityAlignment(item.check, item.status, item.strength, support)
             for item in alignments
         )
+        comparability, issuer_amendment = _transition_claims(
+            control,
+            provider_ready=provider_ready,
+        )
+        safe_continuation = _safe_continuation(
+            state,
+            authority_change,
+            admission,
+            comparability,
+            issuer_amendment,
+            alignments,
+        )
         outcome = ContinuityOutcome(
             canonical_provider.provider,
             control.id,
@@ -2220,6 +2283,9 @@ def analyse_continuity(
             state,
             authority_change,
             admission,
+            comparability,
+            issuer_amendment,
+            safe_continuation,
             alignments,
             assumptions,
             support,

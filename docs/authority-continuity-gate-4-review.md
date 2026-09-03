@@ -21,7 +21,7 @@ establish that join.
 | Provider-neutral reconciliation | Passed privately | The consumer re-reads artifacts, verifies caller bytes and review time, keeps manifest reachability unchanged, and reports state, authority change, admission, and four alignment checks separately |
 | Conservative failure | Passed privately | Unreviewed, expired, mismatched, unbound, source-invalid, or mediation-incomplete evidence remains unresolved beside full manifest authority |
 | Mandate binding | Partial | The AgentCore path has a digest-bound signed-binding evaluation, but migration remains unreviewed and the zero-dependency core intentionally does not perform Ed25519 verification; Anthropic has no provider-native mandate join |
-| Safe-continuation semantics | Open | Private results do not carry comparability evidence or a per-transition safe-continuation verdict; the aggregate `clean` helper is not a reviewed substitute and currently treats tightening as non-clean |
+| Safe-continuation semantics | Passed privately | Each outcome now keeps comparability, issuer-amendment state, and a three-valued verdict separate; tightening can satisfy the property, while missing joins, comparison, amendment treatment, or required alignments remain unresolved |
 | Accepted clean fixture | Open | Canonical migrations are unreviewed, test helpers inject acceptance in memory, and no end-to-end analyzed fixture can presently produce an evidence-supported clean result across all required alignment checks |
 | Presentation stability | Open | `ContinuityAnalysis` is an internal dataclass with no versioned envelope, strict result reader, checksum, closed finding-code registry, or canonical state fixtures |
 | Composition boundary | Open | IR is rejected by the private profile boundary, but no public pre-I/O refusal matrix exists for SARIF, Mermaid, OTel, conditions, delegations, producers, or Cedar analyses |
@@ -36,11 +36,11 @@ codes an accidental compatibility contract. More importantly, it would ask a
 caller to infer safe continuation from three axes that are intentionally
 independent.
 
-The next work is presentation and boundary work, not another provider
-experiment. Public exposure can be reconsidered after the result explicitly
-answers the narrow continuity question, proves both exit-0 and exit-1 paths,
-and refuses compositions that cannot preserve uncertainty. Manifest version 1,
-ordinary reachability, and the public Python API remain unchanged.
+The next work is an accepted clean fixture followed by presentation and
+boundary work, not another provider experiment. Public exposure can be
+reconsidered after the result proves both exit-0 and exit-1 paths and refuses
+compositions that cannot preserve uncertainty. Manifest version 1, ordinary
+reachability, and the public Python API remain unchanged.
 
 ## Semantics reproduced by the review
 
@@ -67,12 +67,13 @@ These are scoped observations, not universal provider claims. Overshoot is an
 admission outcome rather than a vulnerability verdict, and completed-event
 telemetry does not prove reservation of in-flight work.
 
-## Safe-continuation contract still required
+## Safe-continuation contract implemented privately
 
-The public result must not use `clean` as shorthand for all continuity claims.
-It needs a per-transition `safe_continuation` value with a closed vocabulary,
-at minimum `satisfied`, `violated`, and `unresolved`, plus the evidence that
-supports that conclusion.
+The private result no longer uses three-axis equality as shorthand for all
+continuity claims. Each outcome carries `comparability`, `issuer_amendment`,
+and a per-transition `safe_continuation` value closed to `satisfied`,
+`violated`, or `unresolved`. The aggregate `clean` property consumes only that
+explicit verdict and the complete finding set.
 
 For the current scalar profile, a satisfied verdict requires an eligible
 same-mandate join, comparable reviewed before/after limits, state that is
@@ -84,11 +85,18 @@ missing comparability, incomplete mediation, an expired binding, or an issuer
 amendment whose treatment of predecessor state is unknown leaves the verdict
 violated or unresolved according to the reviewed contract.
 
-The implementation must encode that derivation directly and test it. Today
-`ContinuityAnalysis.clean` accepts only `authority_change == "stable"`, does
-not expose comparability or an issuer-amendment decision, and is exercised as a
-synthetic property rather than by a complete eligible fixture. It therefore
-remains private and must not determine a public exit code.
+The private derivation now tests stable, tightening, widening, reset,
+overshoot, approved-amendment, conditional-alignment, and unresolved cases.
+An unchanged reviewed boundary can establish comparability without an
+amendment. Changed boundaries remain unresolved because the current artifacts
+carry neither reviewed comparability nor issuer-amendment treatment. “Same
+boundary” no longer establishes derivation integrity without an eligible
+same-mandate binding. `platform_verified` mediation can establish isolation and
+complete mediation; an exclusive adapter remains conditional.
+
+This completes the semantic prerequisite, not a public exit code. No current
+canonical fixture reaches `satisfied`, and no serialization contract exposes
+the new fields yet.
 
 ## Accepted-fixture requirement
 
@@ -189,9 +197,10 @@ rendered result must never be fed into another analyzer as authority.
 
 ## Exit conditions for reconsidering exposure
 
-1. Define and implement the per-transition comparability and
-   safe-continuation contract, including stable, tightening, widening, reset,
-   issuer-amendment, and unresolved tests.
+1. **Complete privately:** define and implement the per-transition
+   comparability and safe-continuation contract, including stable, tightening,
+   widening, reset, issuer-amendment, conditional-alignment, and unresolved
+   tests.
 2. Commit an accountable or explicitly synthetic accepted fixture that
    reaches a genuine clean/satisfied path while leaving the real unreviewed
    migrations honest.

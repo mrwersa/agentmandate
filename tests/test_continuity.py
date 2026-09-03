@@ -13,6 +13,7 @@ import agentmandate._continuity as continuity
 from agentmandate._continuity import (
     AgentCoreContinuity,
     AnthropicContinuity,
+    ContinuityAlignment,
     ContinuityAnalysis,
     ContinuityBinding,
     ContinuityEvidence,
@@ -31,9 +32,11 @@ from agentmandate._continuity import (
     _path,
     _profile_digest,
     _record,
+    _safe_continuation,
     _sources,
     _string,
     _strings,
+    _transition_claims,
     _utc,
     _validate_continuity_profile,
     _verify_sources,
@@ -385,6 +388,20 @@ def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
         "same-session": ("preserved", "stable", "within_bound"),
         "signed-binding": ("preserved", "stable", "within_bound"),
     }
+    assert {
+        item.transition: (item.comparability, item.issuer_amendment)
+        for item in result.outcomes
+    } == {
+        "binding-revision": ("unresolved", "unresolved"),
+        "byte-identical-write": ("established", "not_required"),
+        "concurrent-session": ("established", "not_required"),
+        "equivalent-revision": ("unresolved", "unresolved"),
+        "fresh-sessions": ("unresolved", "unresolved"),
+        "limit-revision": ("unresolved", "unresolved"),
+        "same-session": ("established", "not_required"),
+        "signed-binding": ("established", "not_required"),
+    }
+    assert {item.safe_continuation for item in result.outcomes} == {"unresolved"}
     signed = next(item for item in result.outcomes if item.transition == "signed-binding")
     assert signed.kind == "same_boundary"
     assert (
@@ -455,6 +472,17 @@ def test_anthropic_reconciliation_keeps_reset_widening_and_overshoot_separate():
         "sequential": ("preserved", "stable", "within_bound"),
         "two-children": ("preserved", "stable", "overshot"),
     }
+    assert {
+        item.transition: item.comparability for item in result.outcomes
+    } == {
+        "cap-increase": "unresolved",
+        "four-children": "unresolved",
+        "fresh-sessions": "unresolved",
+        "one-child": "unresolved",
+        "sequential": "established",
+        "two-children": "unresolved",
+    }
+    assert {item.safe_continuation for item in result.outcomes} == {"unresolved"}
     children = next(item for item in result.outcomes if item.transition == "four-children")
     assert (
         children.dimension,
@@ -490,6 +518,9 @@ def test_unreviewed_or_tampered_profiles_fail_closed_with_full_authority():
     assert {item.state for item in unreviewed.outcomes} == {"unresolved"}
     assert {item.authority_change for item in unreviewed.outcomes} == {"unresolved"}
     assert {item.admission for item in unreviewed.outcomes} == {"unresolved"}
+    assert {item.comparability for item in unreviewed.outcomes} == {"unresolved"}
+    assert {item.issuer_amendment for item in unreviewed.outcomes} == {"unresolved"}
+    assert {item.safe_continuation for item in unreviewed.outcomes} == {"unresolved"}
     assert {item.code for item in unreviewed.findings} == {
         "continuity.evidence-untrusted"
     }
@@ -552,20 +583,116 @@ def test_continuity_analysis_requires_whole_second_utc_time(as_of):
         _anthropic_analysis(as_of=as_of)
 
 
-def test_continuity_clean_requires_all_three_safe_axes():
+def test_continuity_clean_uses_the_explicit_safe_continuation_verdict():
     result = _anthropic_analysis()
     safe = replace(
         result.outcomes[0],
         state="preserved",
         authority_change="stable",
         admission="within_bound",
+        safe_continuation="satisfied",
     )
     assert replace(result, findings=(), outcomes=(safe,)).clean
     assert not replace(
         result,
         findings=(),
-        outcomes=(replace(safe, admission="unresolved"),),
+        outcomes=(replace(safe, safe_continuation="unresolved"),),
     ).clean
+
+
+def test_platform_verified_mediation_can_establish_all_alignment_checks():
+    control = next(
+        item
+        for item in migrate_agentcore_continuity(_agentcore_contents()).controls
+        if item.id == "signed-binding"
+    )
+    _, _, _, alignments, assumptions = continuity._agentcore_axes(
+        replace(control, mediation="platform_verified"),
+        binding_ready=True,
+    )
+    assert {item.status for item in alignments} == {"established"}
+    assert {
+        item.strength
+        for item in alignments
+        if item.check in {"isolation", "complete_mediation"}
+    } == {"platform_verified"}
+    assert assumptions == ()
+
+
+def test_transition_claims_require_an_unchanged_reviewed_boundary():
+    agentcore = next(
+        item
+        for item in migrate_agentcore_continuity(_agentcore_contents()).controls
+        if item.id == "same-session"
+    )
+    anthropic = next(
+        item
+        for item in migrate_anthropic_continuity(_anthropic_contents()).controls
+        if item.id == "sequential"
+    )
+    assert _transition_claims(agentcore, provider_ready=True) == (
+        "established",
+        "not_required",
+    )
+    assert _transition_claims(anthropic, provider_ready=True) == (
+        "established",
+        "not_required",
+    )
+    assert _transition_claims(agentcore, provider_ready=False) == (
+        "unresolved",
+        "unresolved",
+    )
+
+
+@pytest.mark.parametrize(
+    ("state", "authority", "admission", "comparability", "amendment", "expected"),
+    [
+        ("preserved", "stable", "within_bound", "established", "not_required", "satisfied"),
+        ("preserved", "tightens", "within_bound", "established", "not_required", "satisfied"),
+        ("reset", "stable", "within_bound", "established", "not_required", "violated"),
+        ("preserved", "widens", "within_bound", "established", "not_required", "violated"),
+        ("preserved", "stable", "overshot", "established", "not_required", "violated"),
+        ("reset", "widens", "within_bound", "established", "approved", "satisfied"),
+        ("preserved", "stable", "overshot", "established", "approved", "violated"),
+        ("preserved", "stable", "within_bound", "unresolved", "not_required", "unresolved"),
+        ("preserved", "stable", "within_bound", "established", "unknown", "unresolved"),
+    ],
+)
+def test_safe_continuation_keeps_axes_comparability_and_amendment_separate(
+    state,
+    authority,
+    admission,
+    comparability,
+    amendment,
+    expected,
+):
+    alignments = tuple(
+        ContinuityAlignment(check, "established", "observed", ())
+        for check in ("continuity", "derivation_integrity", "isolation", "complete_mediation")
+    )
+    assert (
+        _safe_continuation(
+            state,
+            authority,
+            admission,
+            comparability,
+            amendment,
+            alignments,
+        )
+        == expected
+    )
+    conditional = replace(alignments[-1], status="conditional")
+    assert (
+        _safe_continuation(
+            state,
+            authority,
+            admission,
+            comparability,
+            amendment,
+            (*alignments[:-1], conditional),
+        )
+        == "unresolved"
+    )
 
 
 def test_anthropic_axis_fallbacks_remain_closed():

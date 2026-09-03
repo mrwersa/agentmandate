@@ -324,6 +324,16 @@ remain `unreviewed`; they therefore produce unresolved results until an
 accountable acceptance state is supplied. Tests exercise the accepted path
 with synthetic review state without rewriting the evidence fixtures.
 
+The private consumer also derives `comparability`, `issuer_amendment`, and a
+three-valued `safe_continuation` verdict for every transition. A satisfied
+verdict requires an eligible same-mandate join, established comparability,
+complete required alignments, preserved state, no overshoot, and stable or
+tightened authority, unless a reviewed issuer amendment explicitly governs the
+transition. Changed boundaries remain unresolved because the current provider
+records carry no reviewed comparison or amendment treatment. The aggregate
+private `clean` property consumes this explicit verdict rather than re-deriving
+it from three labels.
+
 The common consumer also preserves a limitation exposed by the migration. The
 early AgentCore fresh-session and alpha-equivalent-revision captures establish
 provider behavior, but their `same_mandate` value is unknown. They cannot prove
@@ -412,13 +422,14 @@ stronger result.
 4. **Gate 3 — private reconciliation (complete):** the provider-neutral
    consumer reproduces every evidence-supported control, preserves unknown
    mandate joins as unresolved, separates reset, widening, and overshoot,
-   reports all four alignment checks independently, and retains byte-identical
-   manifest authority on trust failure. No public Python records.
+   reports all four alignment checks independently, derives explicit private
+   comparability, amendment, and safe-continuation states, and retains
+   byte-identical manifest authority on trust failure. No public Python records.
 5. **Gate 4 — public exposure review (complete; exposure deferred):** the
    [review](authority-continuity-gate-4-review.md) confirms the private
-   semantics but keeps them private until a safe-continuation contract,
-   accepted clean fixture, versioned result envelope, explicit composition
-   refusals, and CLI exit/no-partial-output tests are complete.
+   semantics but keeps them private until an accepted clean fixture, versioned
+   result envelope, explicit composition refusals, and CLI
+   exit/no-partial-output tests are complete.
 
 This initiative remains experimental and does not block 1.0. The generalized
 search problem across arbitrary durable agents, memories and sessions remains
