@@ -100,6 +100,7 @@ itself change the manifest schema or analyzer.
 The bounded-producer initiative now has both required real distortions:
 AgentKit supplies quantity relationships, and this pinned IAM MCP deployment
 supplies finite authority-bearing cardinality with an accepted two-step control
-and an exhaustion-only rejection. Gates 1 and 2a now preserve that evidence in
-a strict private record and byte-stable migration. Authority IR projection,
-analysis, and public bounded-producer behavior remain pending.
+and an exhaustion-only rejection. Gates 1, 2a, and 2b now preserve that
+evidence in a strict private record, byte-stable migration, and closed
+standalone Authority IR profile. Private analysis and public bounded-producer
+behavior remain pending.

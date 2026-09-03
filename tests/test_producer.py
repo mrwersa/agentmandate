@@ -9,6 +9,14 @@ from pathlib import Path
 import pytest
 
 import agentmandate._producer as producer
+from agentmandate._ir import (
+    AuthorityIR,
+    Entity,
+    Fact,
+    IRFormatError,
+    _analyse_ir,
+    _fact_id,
+)
 from agentmandate._producer import (
     ProducerBoundary,
     ProducerBoundaryFormatError,
@@ -19,9 +27,11 @@ from agentmandate._producer import (
     _load,
     _path,
     _pointer,
+    _profile_digest,
     _record,
     _string,
     _strings,
+    _validate_producer_profile,
     migrate_aws_iam_access_key_boundary,
 )
 
@@ -65,6 +75,241 @@ def test_canonical_migration_round_trips_and_verifies_caller_bytes() -> None:
     assert boundary.controls.accepted_through.count == 2
     assert boundary.controls.exhausted_at.attempt == 3
     assert boundary.evidence == ProducerEvidence("exact", "unreviewed", None, None)
+
+
+def _rehash(graph: AuthorityIR) -> AuthorityIR:
+    return replace(
+        graph,
+        sources=(
+            replace(
+                graph.sources[0],
+                semantic_sha256=_profile_digest(
+                    graph.entities, graph.facts, graph.edges
+                ),
+            ),
+        ),
+    )
+
+
+def test_producer_boundary_projects_a_closed_standalone_ir_profile() -> None:
+    boundary = ProducerBoundary.from_json(FIXTURE.read_text())
+    graph = boundary.to_ir()
+
+    assert AuthorityIR.from_json(graph.to_json()) == graph
+    assert graph.sources[0].adapter == "agentmandate.producer-boundary"
+    assert graph.sources[0].producer_version == "1.0.11"
+    assert {entity.kind for entity in graph.entities} == {
+        "producer_boundary",
+        "resource_binding",
+        "scope",
+        "tool",
+    }
+    assert {edge.relation for edge in graph.edges} == {
+        "bounds_output",
+        "bounds_producer",
+        "partitioned_by",
+    }
+    assert {fact.predicate for fact in graph.facts} >= {
+        "capacity_kind",
+        "capacity_maximum",
+        "controls",
+        "run_boundary",
+        "sources",
+    }
+
+
+def test_generic_reachability_refuses_the_standalone_producer_profile() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+
+    with pytest.raises(
+        IRFormatError, match="sources do not match the analyzable manifest-v1 profile"
+    ):
+        _analyse_ir(graph)
+
+
+def test_producer_profile_wraps_structural_ir_failures() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    broken = replace(graph, edges=(replace(graph.edges[0], support=()), *graph.edges[1:]))
+
+    with pytest.raises(ProducerBoundaryFormatError, match="structurally invalid"):
+        _validate_producer_profile(broken)
+
+    facts = tuple(
+        replace(fact, value={}) if fact.predicate == "output" else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ProducerBoundaryFormatError, match="structurally invalid"):
+        _validate_producer_profile(replace(graph, facts=facts))
+
+
+def test_producer_profile_requires_one_supported_source() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+
+    extra_source = replace(graph.sources[0], id="source:extra")
+    with pytest.raises(ProducerBoundaryFormatError, match="exactly one source"):
+        _validate_producer_profile(replace(graph, sources=(*graph.sources, extra_source)))
+    with pytest.raises(ProducerBoundaryFormatError, match="unsupported source"):
+        _validate_producer_profile(
+            replace(graph, sources=(replace(graph.sources[0], kind="other"),))
+        )
+
+
+def test_producer_profile_rejects_unknown_entity_kind() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    extra = Entity("mystery:extra", "mystery", "extra")
+
+    with pytest.raises(
+        ProducerBoundaryFormatError, match="one boundary and three typed targets"
+    ):
+        _validate_producer_profile(replace(graph, entities=(*graph.entities, extra)))
+
+
+def test_producer_profile_rejects_an_unknown_predicate() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    original = graph.facts[-1]
+    changed = replace(
+        original,
+        id=original.id.rsplit(":", maxsplit=1)[0] + ":unknown",
+        predicate="unknown",
+    )
+
+    with pytest.raises(ProducerBoundaryFormatError, match="unsupported predicate"):
+        _validate_producer_profile(replace(graph, facts=(*graph.facts[:-1], changed)))
+
+
+def test_producer_profile_rejects_unsupported_or_incomplete_fact_evidence() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    fact = graph.facts[0]
+    unsupported = replace(fact, evidence=())
+
+    with pytest.raises(ProducerBoundaryFormatError, match="unsupported evidence"):
+        _validate_producer_profile(replace(graph, facts=(unsupported, *graph.facts[1:])))
+    with pytest.raises(ProducerBoundaryFormatError, match="complete predicate set"):
+        _validate_producer_profile(replace(graph, facts=graph.facts[1:]))
+
+
+def test_producer_profile_requires_one_evidence_state() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    fact = graph.facts[0]
+    changed = replace(
+        fact,
+        evidence=(replace(fact.evidence[0], confidence="heuristic"),),
+    )
+
+    with pytest.raises(ProducerBoundaryFormatError, match="disagree on evidence state"):
+        _validate_producer_profile(_rehash(replace(graph, facts=(changed, *graph.facts[1:]))))
+
+
+def test_producer_profile_must_reconstruct_the_strict_record() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    facts = tuple(
+        replace(fact, value=0) if fact.predicate == "capacity_maximum" else fact
+        for fact in graph.facts
+    )
+
+    with pytest.raises(ProducerBoundaryFormatError, match="reconstruct a valid record"):
+        _validate_producer_profile(_rehash(replace(graph, facts=facts)))
+
+
+def test_producer_profile_entities_and_identity_must_match_the_record() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    extra = Entity("scope:extra", "scope", "extra")
+    extra_fact = Fact(
+        _fact_id(extra.id, "name"),
+        extra.id,
+        "name",
+        extra.name,
+        graph.facts[0].evidence,
+    )
+    expanded = replace(
+        graph,
+        entities=(*graph.entities, extra),
+        facts=(*graph.facts, extra_fact),
+    )
+    with pytest.raises(ProducerBoundaryFormatError, match="entities do not match"):
+        _validate_producer_profile(_rehash(expanded))
+
+    facts = tuple(
+        replace(fact, value="different")
+        if fact.predicate == "name" and fact.subject.startswith("producer_boundary:")
+        else fact
+        for fact in graph.facts
+    )
+    with pytest.raises(ProducerBoundaryFormatError, match="identity does not match"):
+        _validate_producer_profile(_rehash(replace(graph, facts=facts)))
+
+
+def test_producer_profile_relations_must_have_exact_support() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    edge = graph.edges[0]
+    changed = replace(edge, support=(*edge.support, graph.facts[0].id))
+
+    with pytest.raises(ProducerBoundaryFormatError, match="relations do not match"):
+        _validate_producer_profile(_rehash(replace(graph, edges=(changed, *graph.edges[1:]))))
+
+
+def test_producer_profile_fact_values_and_evidence_locations_are_closed() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    tool_name = next(
+        fact
+        for fact in graph.facts
+        if fact.predicate == "name" and fact.subject.startswith("tool:")
+    )
+    changed_name = replace(tool_name, value="different")
+    facts = tuple(changed_name if fact is tool_name else fact for fact in graph.facts)
+    with pytest.raises(ProducerBoundaryFormatError, match="facts do not match"):
+        _validate_producer_profile(_rehash(replace(graph, facts=facts)))
+
+    first = graph.facts[0]
+    changed_location = replace(
+        first, evidence=(replace(first.evidence[0], location="/different"),)
+    )
+    facts = (changed_location, *graph.facts[1:])
+    with pytest.raises(ProducerBoundaryFormatError, match="evidence locations"):
+        _validate_producer_profile(_rehash(replace(graph, facts=facts)))
+
+
+def test_producer_profile_checks_content_and_semantic_digests() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+
+    with pytest.raises(ProducerBoundaryFormatError, match="content_sha256"):
+        _validate_producer_profile(
+            replace(graph, sources=(replace(graph.sources[0], content_sha256="0" * 64),))
+        )
+    with pytest.raises(ProducerBoundaryFormatError, match="semantic_sha256"):
+        _validate_producer_profile(
+            replace(graph, sources=(replace(graph.sources[0], semantic_sha256="0" * 64),))
+        )
+
+
+def test_producer_profile_checks_source_producer_version() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+
+    with pytest.raises(ProducerBoundaryFormatError, match="identity does not match"):
+        _validate_producer_profile(
+            replace(graph, sources=(replace(graph.sources[0], producer_version="other"),))
+        )
+
+
+def test_producer_profile_checks_source_identity() -> None:
+    graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
+    changed_source = replace(graph.sources[0], id="source:renamed")
+    facts = tuple(
+        replace(
+            fact,
+            evidence=(replace(fact.evidence[0], source=changed_source.id),),
+        )
+        for fact in graph.facts
+    )
+    changed_source = replace(
+        changed_source,
+        semantic_sha256=_profile_digest(graph.entities, facts, graph.edges),
+    )
+
+    with pytest.raises(ProducerBoundaryFormatError, match="source identity"):
+        _validate_producer_profile(
+            replace(graph, sources=(changed_source,), facts=facts)
+        )
 
 
 def test_reader_canonicalizes_set_like_collections() -> None:

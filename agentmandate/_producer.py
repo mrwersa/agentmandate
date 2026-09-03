@@ -1,7 +1,8 @@
 """Private records for evidence-backed finite producer boundaries.
 
-The reader proves structure and caller-supplied byte identity only. It does not
-narrow reachability, project Authority IR, or treat migration as review.
+The reader proves structure and caller-supplied byte identity. Its standalone
+Authority IR projection remains ineligible for reachability analysis and does
+not treat migration as review.
 """
 
 from __future__ import annotations
@@ -9,10 +10,23 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from typing import Any
+
+from ._ir import (
+    AuthorityIR,
+    Edge,
+    Entity,
+    Evidence,
+    Fact,
+    IRFormatError,
+    Source,
+    _edge_id,
+    _entity_id,
+    _fact_id,
+)
 
 PRODUCER_BOUNDARY_VERSION = 1
 PRODUCER_BOUNDARY_ADAPTER = "agentmandate.producer-boundary"
@@ -32,6 +46,29 @@ _SOURCE_KINDS = {
     "upstream-inventory": "tool-catalogue",
     "capacity-controls": "producer-outcomes",
     "selected-run-boundary": "capture-adapter",
+}
+_PROFILE_PREDICATES = {
+    "producer_boundary": frozenset(
+        {
+            "adapter",
+            "capacity_kind",
+            "capacity_maximum",
+            "controls",
+            "expires",
+            "name",
+            "output",
+            "partition",
+            "partition_argument",
+            "producer",
+            "reviewer",
+            "run_boundary",
+            "sources",
+            "target",
+        }
+    ),
+    "resource_binding": frozenset({"name"}),
+    "scope": frozenset({"name"}),
+    "tool": frozenset({"name"}),
 }
 
 
@@ -292,6 +329,10 @@ class ProducerBoundary:
 
     def verify_sources(self, contents: Mapping[str, bytes]) -> None:
         _verify_sources(self.sources, contents)
+
+    def to_ir(self) -> AuthorityIR:
+        """Project this record into its closed, standalone Authority IR profile."""
+        return _to_producer_ir(self)
 
     @classmethod
     def from_json(cls, text: str) -> ProducerBoundary:
@@ -562,6 +603,416 @@ def _verify_sources(
             raise ProducerBoundaryFormatError(
                 f"producer boundary source bytes do not match locator {source.locator}"
             )
+
+
+def _profile_digest(
+    entities: Sequence[Entity], facts: Sequence[Fact], edges: Sequence[Edge]
+) -> str:
+    body = {
+        "entities": [item.as_dict() for item in sorted(entities, key=lambda item: item.id)],
+        "facts": [item.as_dict() for item in sorted(facts, key=lambda item: item.id)],
+        "edges": [item.as_dict() for item in sorted(edges, key=lambda item: item.id)],
+    }
+    encoded = json.dumps(
+        body, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _to_producer_ir(boundary: ProducerBoundary) -> AuthorityIR:
+    source_id = _entity_id("source", f"producer-boundary:{boundary.id}")
+    boundary_id = _entity_id("producer_boundary", boundary.id)
+    tool_id = _entity_id("tool", boundary.target.binding)
+    scope_id = _entity_id("scope", boundary.output.scope)
+    partition_id = _entity_id("resource_binding", boundary.partition.binding)
+    evidence_state = {
+        "confidence": boundary.evidence.confidence,
+        "review": boundary.evidence.review,
+    }
+
+    def evidence(location: str) -> tuple[Evidence, ...]:
+        return (Evidence(source_id, location, **evidence_state),)
+
+    entities = (
+        Entity(boundary_id, "producer_boundary", boundary.id),
+        Entity(tool_id, "tool", boundary.target.binding),
+        Entity(scope_id, "scope", boundary.output.scope),
+        Entity(partition_id, "resource_binding", boundary.partition.binding),
+    )
+    values: dict[str, Any] = {
+        "adapter": {"name": boundary.adapter_name, "version": boundary.adapter_version},
+        "capacity_kind": boundary.output.capacity.kind,
+        "capacity_maximum": boundary.output.capacity.maximum,
+        "controls": boundary.controls.as_dict(),
+        "expires": boundary.evidence.expires,
+        "name": boundary.id,
+        "output": scope_id,
+        "partition": partition_id,
+        "partition_argument": boundary.partition.argument,
+        "producer": tool_id,
+        "reviewer": boundary.evidence.reviewer,
+        "run_boundary": boundary.run_boundary.as_dict(),
+        "sources": [source.as_dict() for source in boundary.sources],
+        "target": boundary.target.as_dict(),
+    }
+    locations = {
+        "adapter": "/adapter",
+        "capacity_kind": "/output/capacity/kind",
+        "capacity_maximum": "/output/capacity/maximum",
+        "controls": "/controls",
+        "expires": "/evidence/expires",
+        "name": "/id",
+        "output": "/output/scope",
+        "partition": "/partition/binding",
+        "partition_argument": "/partition/argument",
+        "producer": "/target/binding",
+        "reviewer": "/evidence/reviewer",
+        "run_boundary": "/run_boundary",
+        "sources": "/sources",
+        "target": "/target",
+    }
+    facts = tuple(
+        Fact(
+            _fact_id(boundary_id, predicate),
+            boundary_id,
+            predicate,
+            value,
+            evidence(locations[predicate]),
+        )
+        for predicate, value in values.items()
+    ) + (
+        Fact(
+            _fact_id(tool_id, "name"),
+            tool_id,
+            "name",
+            boundary.target.binding,
+            evidence("/target/binding"),
+        ),
+        Fact(
+            _fact_id(scope_id, "name"),
+            scope_id,
+            "name",
+            boundary.output.scope,
+            evidence("/output/scope"),
+        ),
+        Fact(
+            _fact_id(partition_id, "name"),
+            partition_id,
+            "name",
+            boundary.partition.binding,
+            evidence("/partition/binding"),
+        ),
+    )
+    producer_support = tuple(
+        sorted(
+            _fact_id(boundary_id, predicate)
+            for predicate in ("producer", "target", "run_boundary")
+        )
+    )
+    output_support = tuple(
+        sorted(
+            _fact_id(boundary_id, predicate)
+            for predicate in ("output", "capacity_kind", "capacity_maximum")
+        )
+    )
+    partition_support = tuple(
+        sorted(
+            _fact_id(boundary_id, predicate)
+            for predicate in ("partition", "partition_argument")
+        )
+    )
+    edges = (
+        Edge(
+            _edge_id(boundary_id, "bounds_producer", tool_id),
+            boundary_id,
+            "bounds_producer",
+            tool_id,
+            producer_support,
+        ),
+        Edge(
+            _edge_id(boundary_id, "bounds_output", scope_id),
+            boundary_id,
+            "bounds_output",
+            scope_id,
+            output_support,
+        ),
+        Edge(
+            _edge_id(boundary_id, "partitioned_by", partition_id),
+            boundary_id,
+            "partitioned_by",
+            partition_id,
+            partition_support,
+        ),
+    )
+    ordered_entities = tuple(sorted(entities, key=lambda item: item.id))
+    ordered_facts = tuple(sorted(facts, key=lambda item: item.id))
+    ordered_edges = tuple(sorted(edges, key=lambda item: item.id))
+    graph = AuthorityIR(
+        1,
+        (
+            Source(
+                source_id,
+                "producer-boundary",
+                f"memory:producer-boundary:{boundary.id}",
+                boundary.producer_boundary_version,
+                boundary.target.producer_version,
+                _profile_digest(ordered_entities, ordered_facts, ordered_edges),
+                PRODUCER_BOUNDARY_ADAPTER,
+                PRODUCER_BOUNDARY_ADAPTER_VERSION,
+                hashlib.sha256(boundary.to_json().encode("utf-8")).hexdigest(),
+            ),
+        ),
+        ordered_entities,
+        ordered_facts,
+        ordered_edges,
+    )
+    _validate_producer_profile(graph)
+    return graph
+
+
+def _validate_producer_profile(graph: AuthorityIR) -> None:
+    """Require the complete producer profile without making it trusted policy."""
+    try:
+        graph.validate()
+    except (IRFormatError, TypeError) as exc:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile is structurally invalid"
+        ) from exc
+    if len(graph.sources) != 1:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile requires exactly one source"
+        )
+    source = graph.sources[0]
+    if (
+        source.kind != "producer-boundary"
+        or source.format_version != PRODUCER_BOUNDARY_VERSION
+        or source.adapter != PRODUCER_BOUNDARY_ADAPTER
+        or source.adapter_version != PRODUCER_BOUNDARY_ADAPTER_VERSION
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile has an unsupported source"
+        )
+    entities = {entity.id: entity for entity in graph.entities}
+    boundaries = [entity for entity in graph.entities if entity.kind == "producer_boundary"]
+    if len(boundaries) != 1 or any(
+        entity.kind not in _PROFILE_PREDICATES for entity in graph.entities
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile requires one boundary and three typed targets"
+        )
+    boundary_entity = boundaries[0]
+    facts: dict[tuple[str, str], Fact] = {}
+    for fact in graph.facts:
+        entity = entities[fact.subject]
+        if fact.predicate not in _PROFILE_PREDICATES[entity.kind]:
+            raise ProducerBoundaryFormatError(
+                "producer boundary IR profile contains an unsupported predicate"
+            )
+        if len(fact.evidence) != 1 or fact.evidence[0].source != source.id:
+            raise ProducerBoundaryFormatError(
+                "producer boundary IR profile fact has unsupported evidence"
+            )
+        facts[(fact.subject, fact.predicate)] = fact
+    required = {
+        (boundary_entity.id, predicate)
+        for predicate in _PROFILE_PREDICATES["producer_boundary"]
+    }
+    required.update(
+        (entity.id, "name")
+        for entity in graph.entities
+        if entity.kind != "producer_boundary"
+    )
+    if set(facts) != required:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile does not contain its complete predicate set"
+        )
+    boundary_facts = {
+        predicate: facts[(boundary_entity.id, predicate)]
+        for predicate in _PROFILE_PREDICATES["producer_boundary"]
+    }
+    evidence_states = {
+        (fact.evidence[0].confidence, fact.evidence[0].review)
+        for fact in graph.facts
+    }
+    if len(evidence_states) != 1:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile facts disagree on evidence state"
+        )
+    confidence, review = next(iter(evidence_states))
+    raw = {
+        "producer_boundary_version": source.format_version,
+        "id": boundary_entity.name,
+        "adapter": boundary_facts["adapter"].value,
+        "target": boundary_facts["target"].value,
+        "partition": {
+            "argument": boundary_facts["partition_argument"].value,
+            "binding": entities[boundary_facts["partition"].value].name,
+        },
+        "output": {
+            "scope": entities[boundary_facts["output"].value].name,
+            "capacity": {
+                "kind": boundary_facts["capacity_kind"].value,
+                "maximum": boundary_facts["capacity_maximum"].value,
+            },
+        },
+        "run_boundary": boundary_facts["run_boundary"].value,
+        "controls": boundary_facts["controls"].value,
+        "sources": boundary_facts["sources"].value,
+        "evidence": {
+            "confidence": confidence,
+            "review": review,
+            "reviewer": boundary_facts["reviewer"].value,
+            "expires": boundary_facts["expires"].value,
+        },
+    }
+    try:
+        record = ProducerBoundary.from_json(
+            json.dumps(raw, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+        )
+    except (KeyError, ProducerBoundaryFormatError) as exc:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile does not reconstruct a valid record"
+        ) from exc
+    expected_entities = {
+        _entity_id("producer_boundary", record.id): ("producer_boundary", record.id),
+        _entity_id("tool", record.target.binding): ("tool", record.target.binding),
+        _entity_id("scope", record.output.scope): ("scope", record.output.scope),
+        _entity_id("resource_binding", record.partition.binding): (
+            "resource_binding",
+            record.partition.binding,
+        ),
+    }
+    if {
+        identifier: (entity.kind, entity.name) for identifier, entity in entities.items()
+    } != expected_entities:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile entities do not match the record"
+        )
+    if (
+        boundary_facts["name"].value != record.id
+        or boundary_facts["producer"].value != _entity_id("tool", record.target.binding)
+        or source.producer_version != record.target.producer_version
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile identity does not match the record"
+        )
+    expected_values: dict[tuple[str, str], Any] = {
+        (boundary_entity.id, "adapter"): {
+            "name": record.adapter_name,
+            "version": record.adapter_version,
+        },
+        (boundary_entity.id, "capacity_kind"): record.output.capacity.kind,
+        (boundary_entity.id, "capacity_maximum"): record.output.capacity.maximum,
+        (boundary_entity.id, "controls"): record.controls.as_dict(),
+        (boundary_entity.id, "expires"): record.evidence.expires,
+        (boundary_entity.id, "name"): record.id,
+        (boundary_entity.id, "output"): _entity_id("scope", record.output.scope),
+        (boundary_entity.id, "partition"): _entity_id(
+            "resource_binding", record.partition.binding
+        ),
+        (boundary_entity.id, "partition_argument"): record.partition.argument,
+        (boundary_entity.id, "producer"): _entity_id("tool", record.target.binding),
+        (boundary_entity.id, "reviewer"): record.evidence.reviewer,
+        (boundary_entity.id, "run_boundary"): record.run_boundary.as_dict(),
+        (boundary_entity.id, "sources"): [item.as_dict() for item in record.sources],
+        (boundary_entity.id, "target"): record.target.as_dict(),
+    }
+    expected_values.update(
+        {
+            (entity.id, "name"): entity.name
+            for entity in graph.entities
+            if entity.kind != "producer_boundary"
+        }
+    )
+    if {key: fact.value for key, fact in facts.items()} != expected_values:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile facts do not match the record"
+        )
+    boundary_locations = {
+        "adapter": "/adapter",
+        "capacity_kind": "/output/capacity/kind",
+        "capacity_maximum": "/output/capacity/maximum",
+        "controls": "/controls",
+        "expires": "/evidence/expires",
+        "name": "/id",
+        "output": "/output/scope",
+        "partition": "/partition/binding",
+        "partition_argument": "/partition/argument",
+        "producer": "/target/binding",
+        "reviewer": "/evidence/reviewer",
+        "run_boundary": "/run_boundary",
+        "sources": "/sources",
+        "target": "/target",
+    }
+    entity_locations = {
+        "resource_binding": "/partition/binding",
+        "scope": "/output/scope",
+        "tool": "/target/binding",
+    }
+    if any(
+        fact.evidence[0].location
+        != (
+            boundary_locations[fact.predicate]
+            if fact.subject == boundary_entity.id
+            else entity_locations[entities[fact.subject].kind]
+        )
+        for fact in graph.facts
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile evidence locations do not match the record"
+        )
+    expected_edges = {
+        (
+            "bounds_producer",
+            _entity_id("tool", record.target.binding),
+            frozenset(
+                _fact_id(boundary_entity.id, item)
+                for item in ("producer", "target", "run_boundary")
+            ),
+        ),
+        (
+            "bounds_output",
+            _entity_id("scope", record.output.scope),
+            frozenset(
+                _fact_id(boundary_entity.id, item)
+                for item in ("output", "capacity_kind", "capacity_maximum")
+            ),
+        ),
+        (
+            "partitioned_by",
+            _entity_id("resource_binding", record.partition.binding),
+            frozenset(
+                _fact_id(boundary_entity.id, item)
+                for item in ("partition", "partition_argument")
+            ),
+        ),
+    }
+    actual_edges = {
+        (edge.relation, edge.target, frozenset(edge.support)) for edge in graph.edges
+    }
+    if actual_edges != expected_edges or any(
+        edge.source != boundary_entity.id for edge in graph.edges
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR profile relations do not match the record"
+        )
+    content_digest = hashlib.sha256(record.to_json().encode("utf-8")).hexdigest()
+    expected_source_id = _entity_id("source", f"producer-boundary:{record.id}")
+    if (
+        source.id != expected_source_id
+        or source.locator != f"memory:producer-boundary:{record.id}"
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR source identity does not match the record"
+        )
+    if source.content_sha256 != content_digest:
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR source content_sha256 does not match the record"
+        )
+    if source.semantic_sha256 != _profile_digest(graph.entities, graph.facts, graph.edges):
+        raise ProducerBoundaryFormatError(
+            "producer boundary IR source semantic_sha256 does not match the profile"
+        )
 
 
 _IAM_BASE = "docs/evidence/aws-iam-access-keys/"
