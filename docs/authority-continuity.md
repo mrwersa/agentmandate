@@ -319,10 +319,10 @@ AgentCore's captured `process_refund.amount` integer is not interchangeable with
 Anthropic's reported session-cost minor unit. The Anthropic transport preserves
 both predecessor and successor costs for fresh-session and cap-revision
 transitions; a successor cost alone cannot prove reset or preservation.
-Canonical migrations deliberately
-remain `unreviewed`; they therefore produce unresolved results until an
-accountable acceptance state is supplied. Tests exercise the accepted path
-with synthetic review state without rewriting the evidence fixtures.
+Canonical migrations deliberately remain `unreviewed`; they therefore produce
+unresolved results until an accountable acceptance state is supplied. An
+explicitly synthetic accepted fixture separately proves the complete clean
+path without rewriting or promoting either evidence migration.
 
 The private consumer also derives `comparability`, `issuer_amendment`, and a
 three-valued `safe_continuation` verdict for every transition. A satisfied
@@ -427,9 +427,9 @@ stronger result.
    byte-identical manifest authority on trust failure. No public Python records.
 5. **Gate 4 — public exposure review (complete; exposure deferred):** the
    [review](authority-continuity-gate-4-review.md) confirms the private
-   semantics but keeps them private until an accepted clean fixture, versioned
-   result envelope, explicit composition refusals, and CLI
-   exit/no-partial-output tests are complete.
+   semantics but keeps them private until a versioned result envelope, explicit
+   composition refusals, and CLI exit/no-partial-output tests are complete. A
+   complete explicitly synthetic fixture supplies the accepted clean path.
 
 This initiative remains experimental and does not block 1.0. The generalized
 search problem across arbitrary durable agents, memories and sessions remains

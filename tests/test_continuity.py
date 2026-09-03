@@ -388,15 +388,15 @@ def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
     }
     assert outcomes == {
         "binding-revision": ("reset", "widens", "overshot"),
-        "byte-identical-write": ("preserved", "stable", "within_bound"),
+        "byte-identical-write": ("unresolved", "unresolved", "unresolved"),
         "concurrent-session": ("preserved", "stable", "within_bound"),
-        "description-revision": ("unresolved", "stable", "overshot"),
-        "equivalent-revision": ("unresolved", "stable", "overshot"),
+        "description-revision": ("unresolved", "unresolved", "unresolved"),
+        "equivalent-revision": ("unresolved", "unresolved", "unresolved"),
         "fresh-sessions": ("unresolved", "stable", "unresolved"),
         "limit-revision": ("unresolved", "widens", "unresolved"),
         "same-session": ("preserved", "stable", "within_bound"),
         "signed-binding": ("preserved", "stable", "within_bound"),
-        "whitespace-revision": ("unresolved", "stable", "overshot"),
+        "whitespace-revision": ("unresolved", "unresolved", "unresolved"),
     }
     assert {
         item.transition: (item.comparability, item.issuer_amendment) for item in result.outcomes

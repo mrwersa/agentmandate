@@ -1,0 +1,1 @@
+{"agent":"synthetic-continuity-agent","tools":[{"effect":"read","name":"bounded_action","principal":"caller","requires":[],"requires_approval":false,"unbounded":false}],"version":1}
