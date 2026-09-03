@@ -225,8 +225,9 @@ The v1 finding-code vocabulary is closed:
 
 This completes one prerequisite from the Gate 4 review, not Gate 4 exposure.
 The records remain in the private module, no package export or CLI exists, and
-the accountable-fixture, composition-refusal, and CLI failure contracts remain
-open.
+the composition-refusal and CLI failure contracts remain open. A separate
+complete accepted fixture under `tests/fixtures/producer-accepted-synthetic/`
+provides a clean path without promoting the real unreviewed IAM migration.
 
 ## Scope of a bound
 
@@ -384,8 +385,9 @@ portfolio system, price oracle, or general accounting language.
 5. **Gate 4 — public exposure review (complete; exposure deferred):** the
    [recorded review](bounded-producer-gate-4-review.md) accepts the private
    semantics. Stable finding codes and the canonical private result envelope
-   are complete; an accountable clean fixture, explicit composition refusal,
-   and CLI failure tests remain before choosing any public surface.
+   are complete, and the accepted clean path has an explicitly synthetic
+   fixture. Explicit composition refusal and CLI failure tests remain before
+   choosing any public surface.
 
 Quantity records follow their own evidence-driven gates and do not delay the
 finite-cardinality reader. Finite cardinality remains private after its public

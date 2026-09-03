@@ -1,0 +1,1 @@
+{"fixture":"synthetic","producer":{"name":"synthetic.fixture","version":"1.0.0"},"tools":[{"name":"mint_access_token","output_scope":"access_token"}]}

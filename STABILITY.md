@@ -93,9 +93,10 @@ and analysis only. Finite producer cardinality likewise has a private versioned
 record, closed IR profile, analysis, and canonical
 `agentmandate.producers/v1` result envelope with stable finding codes. The
 result is unsupported private presentation and is not accepted as authority
-input. Public exposure remains deferred pending an accountable clean fixture,
-explicit composition behavior, and CLI failure tests. Structural validity
-never makes any of these records trusted mandate authority.
+input. An explicitly synthetic accepted fixture supplies the clean path while
+the real IAM migration remains unreviewed. Public exposure remains deferred
+pending explicit composition behavior and CLI failure tests. Structural
+validity never makes any of these records trusted mandate authority.
 
 Three areas remain deliberately under-modelled:
 

@@ -1,0 +1,1 @@
+{"agent":"synthetic-token-agent","identity":"spiffe://example/agents/synthetic-token-agent","limits":{"depth":3,"effects":{"write":2}},"tools":[{"effect":"write","name":"mint_access_token","principal":"service","produces":"access_token","unbounded":true}],"version":1}

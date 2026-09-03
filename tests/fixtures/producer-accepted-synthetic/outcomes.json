@@ -1,0 +1,1 @@
+{"fixture":"synthetic","outcomes":[{"attempt":1,"outcome":"created"},{"attempt":2,"outcome":"created"},{"attempt":3,"outcome":"rejected","reason":"capacity_exhausted"}],"partition":"reviewed-synthetic-tenant"}

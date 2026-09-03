@@ -25,6 +25,10 @@ All notable changes to this project are documented here. The format follows
   complete Authority, date, and checksum semantics across canonical clean,
   bounded, breached, unresolved, and truncated fixtures. It is presentation
   only and adds no public API or CLI.
+- A complete explicitly synthetic accepted producer fixture pins its manifest,
+  boundary, selection, catalogue, outcomes, and adapter bytes and reproduces
+  the maximum-two clean path. It does not promote or alter the unreviewed real
+  IAM migration.
 - Authority IR validation recognizes standalone authority-continuity binding,
   AgentCore policy-session, and Anthropic managed-budget profiles through
   `binds_mandate`, `binds_boundary`, `state_of`, `before_state`,
