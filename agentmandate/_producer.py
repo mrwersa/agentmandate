@@ -13,6 +13,7 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from ._ir import (
@@ -26,6 +27,7 @@ from ._ir import (
     _edge_id,
     _entity_id,
     _fact_id,
+    _from_mandate,
 )
 from .manifest import Mandate
 from .reach import Authority, _analyse_with_trace
@@ -33,6 +35,8 @@ from .reach import Authority, _analyse_with_trace
 PRODUCER_BOUNDARY_VERSION = 1
 PRODUCER_BOUNDARY_ADAPTER = "agentmandate.producer-boundary"
 PRODUCER_BOUNDARY_ADAPTER_VERSION = 1
+PRODUCER_RESULT_VERSION = 1
+PRODUCER_RESULT_SCHEMA = "agentmandate.producers/v1"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _REVIEWED_ALIAS = re.compile(r"reviewed-[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -49,6 +53,22 @@ _SOURCE_KINDS = {
     "capacity-controls": "producer-outcomes",
     "selected-run-boundary": "capture-adapter",
 }
+_FINDING_CODES = frozenset(
+    {
+        "producer.boundary-duplicate",
+        "producer.boundary-competing",
+        "producer.selection-unresolved",
+        "producer.target-missing",
+        "producer.target-ineligible",
+        "producer.inventory-incomplete",
+        "producer.release-incomplete",
+        "producer.release-reachable",
+        "producer.output-competing",
+        "producer.evidence-untrusted",
+        "producer.review-unresolved",
+        "producer.source-unresolved",
+    }
+)
 _PROFILE_PREDICATES = {
     "producer_boundary": frozenset(
         {
@@ -90,15 +110,36 @@ class ProducerSelection:
     partition_binding: str
     output_scope: str
 
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "source": self.source,
+            "binding": self.binding,
+            "producer": self.producer,
+            "producer_version": self.producer_version,
+            "partition_argument": self.partition_argument,
+            "partition_binding": self.partition_binding,
+            "output_scope": self.output_scope,
+        }
+
 
 @dataclass(frozen=True)
 class ProducerFinding:
     """One fail-closed producer eligibility finding."""
 
+    code: str
     boundary: str
     tool: str
     message: str
     support: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "code": self.code,
+            "boundary": self.boundary,
+            "tool": self.tool,
+            "message": self.message,
+            "support": list(self.support),
+        }
 
 
 @dataclass(frozen=True)
@@ -109,8 +150,46 @@ class AppliedProducerBoundary:
     tool: str
     output_scope: str
     partition_binding: str
+    capacity_kind: str
     maximum: int
     support: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "boundary": self.boundary,
+            "tool": self.tool,
+            "output_scope": self.output_scope,
+            "partition_binding": self.partition_binding,
+            "capacity_kind": self.capacity_kind,
+            "maximum": self.maximum,
+            "support": list(self.support),
+        }
+
+
+@dataclass(frozen=True)
+class ProducerManifestIdentity:
+    locator: str
+    semantic_sha256: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "locator": self.locator,
+            "semantic_sha256": self.semantic_sha256,
+        }
+
+
+@dataclass(frozen=True)
+class ProducerBoundaryIdentity:
+    id: str
+    content_sha256: str
+    semantic_sha256: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "id": self.id,
+            "content_sha256": self.content_sha256,
+            "semantic_sha256": self.semantic_sha256,
+        }
 
 
 @dataclass(frozen=True)
@@ -121,6 +200,434 @@ class ProducerAnalysis:
     findings: tuple[ProducerFinding, ...]
     applied: tuple[AppliedProducerBoundary, ...]
     as_of: str
+    manifest: ProducerManifestIdentity
+    boundaries: tuple[ProducerBoundaryIdentity, ...]
+    selections: tuple[ProducerSelection, ...]
+
+    def to_result(self) -> ProducerResult:
+        """Return the private, versioned presentation envelope."""
+        return ProducerResult(
+            PRODUCER_RESULT_VERSION,
+            PRODUCER_RESULT_SCHEMA,
+            self.as_of,
+            self.manifest,
+            self.boundaries,
+            self.selections,
+            self.authority.as_dict(),
+            self.applied,
+            self.findings,
+        )
+
+
+@dataclass(frozen=True)
+class ProducerResult:
+    """Private canonical presentation; never accepted as authority input."""
+
+    result_version: int
+    schema: str
+    as_of: str
+    manifest: ProducerManifestIdentity
+    boundaries: tuple[ProducerBoundaryIdentity, ...]
+    selections: tuple[ProducerSelection, ...]
+    authority: dict[str, Any]
+    applied: tuple[AppliedProducerBoundary, ...]
+    findings: tuple[ProducerFinding, ...]
+
+    def _body_dict(self) -> dict[str, Any]:
+        return {
+            "result_version": self.result_version,
+            "schema": self.schema,
+            "as_of": self.as_of,
+            "inputs": {
+                "manifest": self.manifest.as_dict(),
+                "boundaries": [item.as_dict() for item in self.boundaries],
+                "selections": [item.as_dict() for item in self.selections],
+            },
+            "authority": self.authority,
+            "applied": [item.as_dict() for item in self.applied],
+            "findings": [item.as_dict() for item in self.findings],
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        body = self._body_dict()
+        _validate_producer_result_body(self)
+        return {
+            **body,
+            "result_sha256": hashlib.sha256(_canonical_bytes(body)).hexdigest(),
+        }
+
+    def to_json(self) -> str:
+        return _canonical_bytes(self.as_dict()).decode("utf-8") + "\n"
+
+    @classmethod
+    def from_json(cls, text: str) -> ProducerResult:
+        return _producer_result_from_json(text)
+
+
+def _canonical_bytes(value: Any) -> bytes:
+    try:
+        return json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
+        ).encode("utf-8")
+    except (TypeError, ValueError) as exc:
+        raise ProducerBoundaryFormatError(
+            "producer result contains a non-canonical value"
+        ) from exc
+
+
+def _result_record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ProducerBoundaryFormatError(f"producer result {path} must be an object")
+    missing = sorted(fields - value.keys())
+    if missing:
+        raise ProducerBoundaryFormatError(
+            f"producer result {path} is missing field {missing[0]!r}"
+        )
+    extra = sorted(value.keys() - fields)
+    if extra:
+        raise ProducerBoundaryFormatError(
+            f"producer result {path} has unknown field {extra[0]!r}"
+        )
+    return value
+
+
+def _result_string(value: Any, path: str) -> str:
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise ProducerBoundaryFormatError(
+            f"producer result {path} must be a non-empty trimmed string"
+        )
+    return value
+
+
+def _result_digest(value: Any, path: str) -> str:
+    digest = _result_string(value, path)
+    if _SHA256.fullmatch(digest) is None:
+        raise ProducerBoundaryFormatError(
+            f"producer result {path} must be a lowercase SHA-256 digest"
+        )
+    return digest
+
+
+def _result_reviewed_binding(value: Any, path: str) -> str:
+    binding = _result_string(value, path)
+    if _REVIEWED_ALIAS.fullmatch(binding) is None:
+        raise ProducerBoundaryFormatError(
+            f"producer result {path} must be a reviewed non-secret alias"
+        )
+    return binding
+
+
+def _result_string_list(value: Any, path: str) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        raise ProducerBoundaryFormatError(f"producer result {path} must be an array")
+    items = tuple(_result_string(item, f"{path}/{index}") for index, item in enumerate(value))
+    if list(items) != sorted(set(items)):
+        raise ProducerBoundaryFormatError(
+            f"producer result {path} must contain sorted unique strings"
+        )
+    return items
+
+
+def _parse_manifest_identity(value: Any) -> ProducerManifestIdentity:
+    record = _result_record(value, "/inputs/manifest", {"locator", "semantic_sha256"})
+    return ProducerManifestIdentity(
+        _result_string(record["locator"], "/inputs/manifest/locator"),
+        _result_digest(record["semantic_sha256"], "/inputs/manifest/semantic_sha256"),
+    )
+
+
+def _parse_boundary_identities(value: Any) -> tuple[ProducerBoundaryIdentity, ...]:
+    if not isinstance(value, list):
+        raise ProducerBoundaryFormatError(
+            "producer result /inputs/boundaries must be an array"
+        )
+    items = tuple(
+        ProducerBoundaryIdentity(
+            _result_string(
+                (record := _result_record(
+                    item,
+                    f"/inputs/boundaries/{index}",
+                    {"id", "content_sha256", "semantic_sha256"},
+                ))["id"],
+                f"/inputs/boundaries/{index}/id",
+            ),
+            _result_digest(
+                record["content_sha256"],
+                f"/inputs/boundaries/{index}/content_sha256",
+            ),
+            _result_digest(
+                record["semantic_sha256"],
+                f"/inputs/boundaries/{index}/semantic_sha256",
+            ),
+        )
+        for index, item in enumerate(value)
+    )
+    identity_keys = [
+        (item.id, item.content_sha256, item.semantic_sha256) for item in items
+    ]
+    if identity_keys != sorted(identity_keys):
+        raise ProducerBoundaryFormatError(
+            "producer result /inputs/boundaries must be sorted"
+        )
+    return items
+
+
+def _parse_selections(value: Any) -> tuple[ProducerSelection, ...]:
+    if not isinstance(value, list):
+        raise ProducerBoundaryFormatError(
+            "producer result /inputs/selections must be an array"
+        )
+    fields = {
+        "source",
+        "binding",
+        "producer",
+        "producer_version",
+        "partition_argument",
+        "partition_binding",
+        "output_scope",
+    }
+    items = []
+    for index, item in enumerate(value):
+        record = _result_record(item, f"/inputs/selections/{index}", fields)
+        selection = ProducerSelection(
+            _path(record["source"], f"result /inputs/selections/{index}/source"),
+            _result_string(record["binding"], f"/inputs/selections/{index}/binding"),
+            _result_string(record["producer"], f"/inputs/selections/{index}/producer"),
+            _result_string(
+                record["producer_version"],
+                f"/inputs/selections/{index}/producer_version",
+            ),
+            _result_string(
+                record["partition_argument"],
+                f"/inputs/selections/{index}/partition_argument",
+            ),
+            _result_reviewed_binding(
+                record["partition_binding"],
+                f"result /inputs/selections/{index}/partition_binding",
+            ),
+            _result_string(
+                record["output_scope"], f"/inputs/selections/{index}/output_scope"
+            ),
+        )
+        items.append(selection)
+    keys = [tuple(item.as_dict().values()) for item in items]
+    if keys != sorted(keys):
+        raise ProducerBoundaryFormatError(
+            "producer result /inputs/selections must be sorted"
+        )
+    return tuple(items)
+
+
+def _validate_authority(value: Any) -> dict[str, Any]:
+    fields = {
+        "reachable_tools",
+        "effects",
+        "ungated_irreversible",
+        "service_principal_tools",
+        "max_extractable",
+        "breaches",
+        "depth",
+        "truncated",
+    }
+    authority = _result_record(value, "/authority", fields)
+    for field in (
+        "reachable_tools",
+        "ungated_irreversible",
+        "service_principal_tools",
+    ):
+        _result_string_list(authority[field], f"/authority/{field}")
+    effects = authority["effects"]
+    if not isinstance(effects, list) or any(
+        not isinstance(pair, list) or len(pair) != 2 for pair in effects
+    ):
+        raise ProducerBoundaryFormatError(
+            "producer result /authority/effects must contain string pairs"
+        )
+    effect_pairs = [
+        tuple(
+            _result_string(item, f"/authority/effects/{index}/{part}")
+            for part, item in enumerate(pair)
+        )
+        for index, pair in enumerate(effects)
+    ]
+    if effect_pairs != sorted(set(effect_pairs)):
+        raise ProducerBoundaryFormatError(
+            "producer result /authority/effects must be sorted and unique"
+        )
+    maximum = authority["max_extractable"]
+    if maximum is not None:
+        money = _result_record(maximum, "/authority/max_extractable", {"amount", "currency"})
+        amount = _result_string(money["amount"], "/authority/max_extractable/amount")
+        try:
+            parsed = Decimal(amount)
+        except InvalidOperation as exc:
+            raise ProducerBoundaryFormatError(
+                "producer result /authority/max_extractable/amount must be decimal"
+            ) from exc
+        if not parsed.is_finite() or str(parsed) != amount:
+            raise ProducerBoundaryFormatError(
+                "producer result /authority/max_extractable/amount must be canonical"
+            )
+        _result_string(money["currency"], "/authority/max_extractable/currency")
+    breaches = authority["breaches"]
+    if not isinstance(breaches, list):
+        raise ProducerBoundaryFormatError(
+            "producer result /authority/breaches must be an array"
+        )
+    for index, item in enumerate(breaches):
+        breach = _result_record(
+            item, f"/authority/breaches/{index}", {"kind", "detail", "path"}
+        )
+        _result_string(breach["kind"], f"/authority/breaches/{index}/kind")
+        _result_string(breach["detail"], f"/authority/breaches/{index}/detail")
+        path = breach["path"]
+        if not isinstance(path, list) or not path:
+            raise ProducerBoundaryFormatError(
+                f"producer result /authority/breaches/{index}/path must be a non-empty array"
+            )
+        for step, rendered in enumerate(path):
+            _result_string(rendered, f"/authority/breaches/{index}/path/{step}")
+    if type(authority["depth"]) is not int or authority["depth"] < 0:
+        raise ProducerBoundaryFormatError(
+            "producer result /authority/depth must be a non-negative integer"
+        )
+    if type(authority["truncated"]) is not bool:
+        raise ProducerBoundaryFormatError(
+            "producer result /authority/truncated must be a boolean"
+        )
+    return authority
+
+
+def _parse_applied(value: Any) -> tuple[AppliedProducerBoundary, ...]:
+    if not isinstance(value, list):
+        raise ProducerBoundaryFormatError("producer result /applied must be an array")
+    fields = {
+        "boundary",
+        "tool",
+        "output_scope",
+        "partition_binding",
+        "capacity_kind",
+        "maximum",
+        "support",
+    }
+    items = []
+    for index, item in enumerate(value):
+        record = _result_record(item, f"/applied/{index}", fields)
+        kind = _result_string(record["capacity_kind"], f"/applied/{index}/capacity_kind")
+        if kind not in _CAPACITY_KINDS:
+            raise ProducerBoundaryFormatError(
+                f"producer result /applied/{index}/capacity_kind is unsupported"
+            )
+        maximum = record["maximum"]
+        if type(maximum) is not int or maximum < 1:
+            raise ProducerBoundaryFormatError(
+                f"producer result /applied/{index}/maximum must be a positive integer"
+            )
+        items.append(
+            AppliedProducerBoundary(
+                _result_string(record["boundary"], f"/applied/{index}/boundary"),
+                _result_string(record["tool"], f"/applied/{index}/tool"),
+                _result_string(record["output_scope"], f"/applied/{index}/output_scope"),
+                _result_reviewed_binding(
+                    record["partition_binding"],
+                    f"result /applied/{index}/partition_binding",
+                ),
+                kind,
+                maximum,
+                _result_string_list(record["support"], f"/applied/{index}/support"),
+            )
+        )
+    if [item.boundary for item in items] != sorted({item.boundary for item in items}):
+        raise ProducerBoundaryFormatError(
+            "producer result /applied must have sorted unique boundary ids"
+        )
+    return tuple(items)
+
+
+def _parse_findings(value: Any) -> tuple[ProducerFinding, ...]:
+    if not isinstance(value, list):
+        raise ProducerBoundaryFormatError("producer result /findings must be an array")
+    items = []
+    fields = {"code", "boundary", "tool", "message", "support"}
+    for index, item in enumerate(value):
+        record = _result_record(item, f"/findings/{index}", fields)
+        code = _result_string(record["code"], f"/findings/{index}/code")
+        if code not in _FINDING_CODES:
+            raise ProducerBoundaryFormatError(
+                f"producer result /findings/{index}/code is unsupported"
+            )
+        items.append(
+            ProducerFinding(
+                code,
+                _result_string(record["boundary"], f"/findings/{index}/boundary"),
+                _result_string(record["tool"], f"/findings/{index}/tool"),
+                _result_string(record["message"], f"/findings/{index}/message"),
+                _result_string_list(record["support"], f"/findings/{index}/support"),
+            )
+        )
+    return tuple(items)
+
+
+def _parse_producer_result_body(value: Any) -> ProducerResult:
+    root = _result_record(
+        value,
+        "/",
+        {"result_version", "schema", "as_of", "inputs", "authority", "applied", "findings"},
+    )
+    if type(root["result_version"]) is not int or root["result_version"] != PRODUCER_RESULT_VERSION:
+        raise ProducerBoundaryFormatError("unsupported producer result version")
+    if root["schema"] != PRODUCER_RESULT_SCHEMA:
+        raise ProducerBoundaryFormatError("unsupported producer result schema")
+    evaluated_on = _result_string(root["as_of"], "/as_of")
+    try:
+        if (
+            _DATE.fullmatch(evaluated_on) is None
+            or date.fromisoformat(evaluated_on).isoformat() != evaluated_on
+        ):
+            raise ValueError
+    except ValueError as exc:
+        raise ProducerBoundaryFormatError(
+            "producer result /as_of must be a canonical calendar date"
+        ) from exc
+    inputs = _result_record(root["inputs"], "/inputs", {"manifest", "boundaries", "selections"})
+    return ProducerResult(
+        PRODUCER_RESULT_VERSION,
+        PRODUCER_RESULT_SCHEMA,
+        evaluated_on,
+        _parse_manifest_identity(inputs["manifest"]),
+        _parse_boundary_identities(inputs["boundaries"]),
+        _parse_selections(inputs["selections"]),
+        _validate_authority(root["authority"]),
+        _parse_applied(root["applied"]),
+        _parse_findings(root["findings"]),
+    )
+
+
+def _validate_producer_result_body(result: ProducerResult) -> None:
+    _parse_producer_result_body(result._body_dict())
+
+
+def _producer_result_from_json(text: str) -> ProducerResult:
+    value = _load(text, "producer result")
+    root = _result_record(
+        value,
+        "/",
+        {
+            "result_version",
+            "schema",
+            "as_of",
+            "inputs",
+            "authority",
+            "applied",
+            "findings",
+            "result_sha256",
+        },
+    )
+    claimed = _result_digest(root.pop("result_sha256"), "/result_sha256")
+    actual = hashlib.sha256(_canonical_bytes(root)).hexdigest()
+    if claimed != actual:
+        raise ProducerBoundaryFormatError("producer result SHA-256 does not match")
+    return _parse_producer_result_body(root)
 
 
 def _reject_constant(_: str) -> None:
@@ -1089,7 +1596,13 @@ def analyse_producers(
         )
     evaluated_on = as_of.isoformat()
     canonical = tuple(
-        ProducerBoundary.from_json(boundary.to_json()) for boundary in boundaries
+        sorted(
+            (
+                ProducerBoundary.from_json(boundary.to_json())
+                for boundary in boundaries
+            ),
+            key=lambda boundary: (boundary.id, boundary.to_json()),
+        )
     )
     graphs = tuple(boundary.to_ir() for boundary in canonical)
     for graph in graphs:
@@ -1122,14 +1635,15 @@ def analyse_producers(
     def unresolved(
         boundary: ProducerBoundary,
         tool_name: str,
+        code: str,
         message: str,
         support: tuple[str, ...],
     ) -> None:
-        findings.append(ProducerFinding(boundary.id, tool_name, message, support))
+        findings.append(
+            ProducerFinding(code, boundary.id, tool_name, message, support)
+        )
 
-    for boundary, graph in sorted(
-        zip(canonical, graphs, strict=True), key=lambda item: item[0].id
-    ):
+    for boundary, graph in zip(canonical, graphs, strict=True):
         start = len(findings)
         tool_name = boundary.target.binding
         tool = tools.get(tool_name)
@@ -1139,6 +1653,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.boundary-duplicate",
                 "producer boundary id is declared more than once",
                 support,
             )
@@ -1146,6 +1661,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.boundary-competing",
                 "multiple producer boundaries target the same tool",
                 support,
             )
@@ -1175,6 +1691,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.selection-unresolved",
                 "producer boundary lacks one exact selected deployment and partition",
                 support,
             )
@@ -1182,6 +1699,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.target-missing",
                 "producer target tool is not present in the mandate",
                 support,
             )
@@ -1189,6 +1707,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.target-ineligible",
                 "producer target is not an unbounded mandate producer of the selected scope",
                 support,
             )
@@ -1199,6 +1718,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.inventory-incomplete",
                 "producer selected inventory is not complete for the target",
                 support,
             )
@@ -1206,6 +1726,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.release-incomplete",
                 "producer release classification is not complete",
                 support,
             )
@@ -1216,6 +1737,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.release-reachable",
                 "producer capacity has a reachable release transition",
                 support,
             )
@@ -1230,6 +1752,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.output-competing",
                 "producer output has another reachable producer",
                 support,
             )
@@ -1240,6 +1763,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.evidence-untrusted",
                 "producer evidence is not exact and accepted",
                 support,
             )
@@ -1251,6 +1775,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.review-unresolved",
                 "producer review is missing accountability or expired",
                 support,
             )
@@ -1266,6 +1791,7 @@ def analyse_producers(
             unresolved(
                 boundary,
                 tool_name,
+                "producer.source-unresolved",
                 "producer source bytes failed verification",
                 support,
             )
@@ -1288,17 +1814,49 @@ def analyse_producers(
                     tool_name,
                     boundary.output.scope,
                     boundary.partition.binding,
+                    boundary.output.capacity.kind,
                     boundary.output.capacity.maximum,
                     applied_support,
                 )
             )
 
     authority, _ = _analyse_with_trace(mandate, depth=depth, producer_caps=caps)
+    manifest_graph = _from_mandate(mandate)
+    manifest_source = next(
+        source for source in manifest_graph.sources if source.id == "source:mandate"
+    )
+    boundary_identities = tuple(
+        ProducerBoundaryIdentity(
+            boundary.id,
+            graph.sources[0].content_sha256 or "",
+            graph.sources[0].semantic_sha256,
+        )
+        for boundary, graph in zip(canonical, graphs, strict=True)
+    )
+    canonical_selections = tuple(
+        sorted(
+            selections,
+            key=lambda item: (
+                item.source,
+                item.binding,
+                item.producer,
+                item.producer_version,
+                item.partition_argument,
+                item.partition_binding,
+                item.output_scope,
+            ),
+        )
+    )
     return ProducerAnalysis(
         authority,
         tuple(dict.fromkeys(findings)),
         tuple(applied),
         evaluated_on,
+        ProducerManifestIdentity(
+            manifest_source.locator, manifest_source.semantic_sha256
+        ),
+        boundary_identities,
+        canonical_selections,
     )
 
 

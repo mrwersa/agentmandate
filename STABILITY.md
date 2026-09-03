@@ -90,10 +90,12 @@ Conditional authority and delegation analysis now have public, versioned
 artifact and command surfaces, but they remain reviewed attachments rather than
 new manifest-v1 meanings. Authority continuity has private experimental records
 and analysis only. Finite producer cardinality likewise has a private versioned
-record, closed IR profile, and analysis, but its public exposure review is
-deferred pending a stable result envelope, accountable clean fixture, and
-explicit composition behavior. Structural validity never makes any of these
-records trusted mandate authority.
+record, closed IR profile, analysis, and canonical
+`agentmandate.producers/v1` result envelope with stable finding codes. The
+result is unsupported private presentation and is not accepted as authority
+input. Public exposure remains deferred pending an accountable clean fixture,
+explicit composition behavior, and CLI failure tests. Structural validity
+never makes any of these records trusted mandate authority.
 
 Three areas remain deliberately under-modelled:
 

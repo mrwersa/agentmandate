@@ -20,6 +20,11 @@ All notable changes to this project are documented here. The format follows
   successful producer transitions. Every trust failure retains the manifest's
   stronger result with a provenance-bearing finding. No public API or CLI is
   added.
+- A strict private `agentmandate.producers/v1` result envelope assigns stable
+  producer finding codes and pins manifest, boundary, selection, applied-cap,
+  complete Authority, date, and checksum semantics across canonical clean,
+  bounded, breached, unresolved, and truncated fixtures. It is presentation
+  only and adds no public API or CLI.
 - Authority IR validation recognizes standalone authority-continuity binding,
   AgentCore policy-session, and Anthropic managed-budget profiles through
   `binds_mandate`, `binds_boundary`, `state_of`, `before_state`,
