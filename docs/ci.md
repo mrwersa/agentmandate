@@ -128,6 +128,31 @@ Repeat attachment, chain, and locator mappings as needed. Delegation findings
 support human and JSON output; SARIF, Mermaid, `reach --ir`, and conditional
 composition fail before output rather than dropping uncertainty.
 
+Finite-producer evidence follows the same boundary. Validation proves record
+structure only. Reachability separately checks the exact deployment selection,
+all caller-mapped source bytes, complete monotone run, accepted review, expiry,
+and existing manifest producer:
+
+```yaml
+- run: mandate producers validate reviewed-boundary.json
+- run: >-
+    mandate reach mandate.yaml
+    --producer-boundary reviewed-boundary.json
+    --producer-source evidence/catalogue.json=catalogue.json
+    --producer-source evidence/outcomes.json=outcomes.json
+    --producer-source evidence/adapter.py=adapter.py
+    --producer-selection '{"source":"evidence/adapter.py","binding":"mint_token","producer":"reviewed.provider","producer_version":"1.0","partition_argument":"tenant","partition_binding":"reviewed-tenant","output_scope":"token"}'
+    --producer-as-of 2026-09-03
+    --json
+```
+
+Repeat boundaries, locator mappings, and explicit selection objects as needed.
+An unresolved producer finding writes the complete
+`agentmandate.producers/v1` result and exits 1. Malformed records or selections,
+invalid dates, missing or conflicting mappings, and undeclared locators exit 2
+with empty stdout. Authority IR, SARIF, Mermaid, condition, and delegation
+composition also fail before reading inputs or writing partial authority.
+
 Managed Cedar evidence also separates structural validation from trusted
 consumption. Source roots are explicit; the command reads exactly the locators
 declared by each oracle and refuses paths that escape the root:
@@ -166,5 +191,5 @@ one-off, not a gate.
 | Exit code | Meaning |
 |---|---|
 | `0` | Clean |
-| `1` | A finding: lint error, reachable breach, widening diff, or a non-conformant replay |
-| `2` | Usage or I/O error, malformed manifest/IR, unsupported IR version or analysis profile |
+| `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, or a non-conformant replay |
+| `2` | Usage or I/O error, malformed manifest/IR/attachment, unsupported composition, version, or analysis profile |

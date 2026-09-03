@@ -121,6 +121,49 @@ class ProducerSelection:
             "output_scope": self.output_scope,
         }
 
+    @classmethod
+    def from_json(cls, text: str) -> ProducerSelection:
+        """Strictly read one public command-line selection object."""
+        raw = _load(text, "producer selection")
+        fields = {
+            "source",
+            "binding",
+            "producer",
+            "producer_version",
+            "partition_argument",
+            "partition_binding",
+            "output_scope",
+        }
+        if not isinstance(raw, dict):
+            raise ProducerBoundaryFormatError("producer selection must be an object")
+        missing = sorted(fields - raw.keys())
+        if missing:
+            raise ProducerBoundaryFormatError(
+                f"producer selection is missing field {missing[0]!r}"
+            )
+        extra = sorted(raw.keys() - fields)
+        if extra:
+            raise ProducerBoundaryFormatError(
+                f"producer selection has unknown field {extra[0]!r}"
+            )
+        source = _path(raw["source"], "selection.source")
+        partition_binding = _string(
+            raw["partition_binding"], "selection.partition_binding"
+        )
+        if _REVIEWED_ALIAS.fullmatch(partition_binding) is None:
+            raise ProducerBoundaryFormatError(
+                "producer selection partition_binding must be a reviewed non-secret alias"
+            )
+        return cls(
+            source,
+            _string(raw["binding"], "selection.binding"),
+            _string(raw["producer"], "selection.producer"),
+            _string(raw["producer_version"], "selection.producer_version"),
+            _string(raw["partition_argument"], "selection.partition_argument"),
+            partition_binding,
+            _string(raw["output_scope"], "selection.output_scope"),
+        )
+
 
 @dataclass(frozen=True)
 class ProducerFinding:

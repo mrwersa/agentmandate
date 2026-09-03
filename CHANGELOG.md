@@ -6,25 +6,36 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.15.0 - 2026-09-03
+
 ### Added
 
+- `mandate producers validate` structurally validates finite-producer
+  boundaries. Producer-aware `mandate reach` verifies explicit deployment and
+  partition selections, caller-mapped source bytes, review dates, and closed
+  profiles before applying an evidence-backed concurrent maximum.
+- Producer-aware reach emits human `BOUNDED`/`UNRESOLVED` findings or the
+  canonical `agentmandate.producers/v1` result. Findings exit 1 after complete
+  output; malformed or incomplete inputs and unsupported IR, SARIF, Mermaid,
+  condition, or delegation composition exit 2 with empty stdout. Existing
+  reach output is unchanged when no producer inputs are supplied.
 - A strict private finite-producer-boundary reader, canonical IAM access-key
   migration, and standalone Authority IR profile preserve the evidence-backed
   concurrent maximum, partition, selected monotone run boundary, exact outcome
   controls, caller-supplied source digests, and semantic identity. Migration
   remains unreviewed; the profile is rejected by general reachability and does
-  not change manifest authority or any public command.
+  not change manifest v1 authority.
 - A private producer-aware consumer re-reads and profile-validates every
   boundary, verifies caller-supplied source bytes, requires an exact reviewed
   deployment/partition match and a complete monotone run, and bounds only
   successful producer transitions. Every trust failure retains the manifest's
-  stronger result with a provenance-bearing finding. No public API or CLI is
+  stronger result with a provenance-bearing finding. No public Python API is
   added.
-- A strict private `agentmandate.producers/v1` result envelope assigns stable
+- A strict versioned `agentmandate.producers/v1` result envelope assigns stable
   producer finding codes and pins manifest, boundary, selection, applied-cap,
   complete Authority, date, and checksum semantics across canonical clean,
   bounded, breached, unresolved, and truncated fixtures. It is presentation
-  only and adds no public API or CLI.
+  only and adds no public Python API.
 - A complete explicitly synthetic accepted producer fixture pins its manifest,
   boundary, selection, catalogue, outcomes, and adapter bytes and reproduces
   the maximum-two clean path. It does not promote or alter the unreviewed real

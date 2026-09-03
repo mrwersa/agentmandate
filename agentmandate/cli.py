@@ -40,6 +40,13 @@ from ._managed_cedar import (
     analyse_managed_cedar,
     compare_managed_cedar,
 )
+from ._producer import (
+    ProducerAnalysis,
+    ProducerBoundary,
+    ProducerBoundaryFormatError,
+    ProducerSelection,
+    analyse_producers,
+)
 from .diff import compare
 from .drift import compare as compare_drift
 from .findings import render_sarif, to_mermaid
@@ -151,6 +158,36 @@ def _add_delegation_options(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_producer_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--producer-boundary",
+        action="append",
+        default=None,
+        metavar="BOUNDARY",
+        help="reviewed finite-producer boundary; repeatable",
+    )
+    parser.add_argument(
+        "--producer-source",
+        action="append",
+        default=None,
+        metavar="LOCATOR=PATH",
+        help="captured bytes for one producer source locator; repeatable",
+    )
+    parser.add_argument(
+        "--producer-selection",
+        action="append",
+        default=None,
+        metavar="JSON",
+        help="selected deployment and reviewed partition JSON; repeatable",
+    )
+    parser.add_argument(
+        "--producer-as-of",
+        default=None,
+        metavar="YYYY-MM-DD",
+        help="explicit evaluation date for producer review expiry",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mandate",
@@ -203,6 +240,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_condition_options(reach_parser)
     _add_delegation_options(reach_parser)
+    _add_producer_options(reach_parser)
 
     ir_parser = subparsers.add_parser(
         "ir",
@@ -266,6 +304,19 @@ def build_parser() -> argparse.ArgumentParser:
     delegations_input = delegations_validate.add_mutually_exclusive_group(required=True)
     delegations_input.add_argument("--attachment", help="path to one attachment artifact")
     delegations_input.add_argument("--chain", help="path to one delegation-chain artifact")
+
+    producers_parser = subparsers.add_parser(
+        "producers",
+        help="structurally validate finite-producer boundaries",
+    )
+    producers_subparsers = producers_parser.add_subparsers(
+        dest="producers_command", required=True
+    )
+    producers_validate = producers_subparsers.add_parser(
+        "validate",
+        help="validate a boundary structurally without trusting its sources",
+    )
+    producers_validate.add_argument("boundary", help="path to one producer boundary")
 
     cedar_parser = subparsers.add_parser(
         "cedar",
@@ -588,6 +639,17 @@ def _run_delegations(args: argparse.Namespace) -> int:
             value = DelegationChain.from_json(_read_text(args.chain))
             output = f"valid delegation chain v{value.version}\n"
     except (DelegationFormatError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_OK
+
+
+def _run_producers(args: argparse.Namespace) -> int:
+    try:
+        value = ProducerBoundary.from_json(_read_text(args.boundary))
+        output = f"valid producer boundary v{value.producer_boundary_version}\n"
+    except (ProducerBoundaryFormatError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     sys.stdout.write(output)
@@ -930,6 +992,127 @@ def _render_delegations(analysis: DelegationAnalysis) -> str:
     return "\n".join(lines)
 
 
+def _producers_supplied(args: argparse.Namespace) -> bool:
+    return bool(
+        getattr(args, "producer_boundary", None)
+        or getattr(args, "producer_source", None)
+        or getattr(args, "producer_selection", None)
+        or getattr(args, "producer_as_of", None)
+    )
+
+
+def _producer_selection_key(selection: ProducerSelection) -> tuple[str, ...]:
+    return (
+        selection.source,
+        selection.binding,
+        selection.producer,
+        selection.producer_version,
+        selection.partition_argument,
+        selection.partition_binding,
+        selection.output_scope,
+    )
+
+
+def _producer_boundary_key(boundary: ProducerBoundary) -> tuple[str, ...]:
+    return (
+        boundary.target.source,
+        boundary.target.binding,
+        boundary.target.producer,
+        boundary.target.producer_version,
+        boundary.partition.argument,
+        boundary.partition.binding,
+        boundary.output.scope,
+    )
+
+
+def _producer_inputs(
+    args: argparse.Namespace,
+) -> tuple[
+    tuple[ProducerBoundary, ...],
+    dict[str, bytes],
+    tuple[ProducerSelection, ...],
+    date,
+] | None:
+    if not _producers_supplied(args):
+        return None
+    boundary_paths = args.producer_boundary or []
+    source_values = args.producer_source or []
+    selection_values = args.producer_selection or []
+    if not boundary_paths:
+        raise ProducerBoundaryFormatError("--producer-boundary is required")
+    if not source_values:
+        raise ProducerBoundaryFormatError("--producer-source is required")
+    if not selection_values:
+        raise ProducerBoundaryFormatError("--producer-selection is required")
+    if args.producer_as_of is None:
+        raise ProducerBoundaryFormatError("--producer-as-of is required")
+    try:
+        as_of = date.fromisoformat(args.producer_as_of)
+    except ValueError as exc:
+        raise ProducerBoundaryFormatError(
+            "--producer-as-of must be YYYY-MM-DD"
+        ) from exc
+    if as_of.isoformat() != args.producer_as_of:
+        raise ProducerBoundaryFormatError("--producer-as-of must be YYYY-MM-DD")
+
+    boundaries = tuple(
+        ProducerBoundary.from_json(_read_text(path)) for path in boundary_paths
+    )
+    selections = tuple(
+        ProducerSelection.from_json(value) for value in selection_values
+    )
+    boundary_keys = {_producer_boundary_key(boundary) for boundary in boundaries}
+    if any(_producer_selection_key(selection) not in boundary_keys for selection in selections):
+        raise ProducerBoundaryFormatError(
+            "--producer-selection does not match any --producer-boundary"
+        )
+
+    source_bytes: dict[str, bytes] = {}
+    for value in source_values:
+        if "=" not in value:
+            raise ProducerBoundaryFormatError(
+                "--producer-source must be LOCATOR=PATH"
+            )
+        locator, path = value.split("=", maxsplit=1)
+        if not locator or not path:
+            raise ProducerBoundaryFormatError(
+                "--producer-source must be LOCATOR=PATH"
+            )
+        content = Path(path).read_bytes()
+        previous = source_bytes.get(locator)
+        if previous is not None and previous != content:
+            raise ProducerBoundaryFormatError(
+                "one producer locator supplied different source bytes"
+            )
+        source_bytes[locator] = content
+    required_locators = {
+        source.locator for boundary in boundaries for source in boundary.sources
+    }
+    missing = sorted(required_locators - source_bytes.keys())
+    if missing:
+        raise ProducerBoundaryFormatError(
+            f"--producer-source is required for reviewed locator {missing[0]}"
+        )
+    if source_bytes.keys() - required_locators:
+        raise ProducerBoundaryFormatError(
+            "--producer-source includes an undeclared locator"
+        )
+    return boundaries, source_bytes, selections, as_of
+
+
+def _render_producers(analysis: ProducerAnalysis) -> str:
+    lines = [f"producers  evaluated as of {analysis.as_of}"]
+    for item in analysis.applied:
+        lines.append(
+            f"  BOUNDED     {item.tool}: {item.capacity_kind} maximum "
+            f"{item.maximum} ({item.boundary})"
+        )
+    for item in analysis.findings:
+        lines.append(f"  UNRESOLVED  {item.tool} ({item.code})")
+        lines.append(f"      {item.message}")
+    return "\n".join(lines)
+
+
 def _conditions_supplied(args: argparse.Namespace) -> bool:
     return bool(
         getattr(args, "condition", None)
@@ -1094,6 +1277,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "delegations":
         return _run_delegations(args)
 
+    if args.command == "producers":
+        return _run_producers(args)
+
     if args.command == "cedar":
         return _run_cedar(args)
 
@@ -1165,11 +1351,38 @@ def main(argv: Sequence[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return EXIT_USAGE
+        if _producers_supplied(args) and args.ir_snapshot is not None:
+            print(
+                "error: producer boundaries require a manifest and cannot be "
+                "composed with --ir",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if _producers_supplied(args) and (args.sarif or args.graph):
+            print(
+                "error: producer findings currently support human or --json "
+                "output, not --sarif or --graph",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if _producers_supplied(args) and _conditions_supplied(args):
+            print(
+                "error: producer and conditional findings cannot yet be composed safely",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        if _producers_supplied(args) and _delegations_supplied(args):
+            print(
+                "error: producer and delegation findings cannot yet be composed safely",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
 
     ir_result = None
     ir_json = None
     condition_inputs = None
     delegation_inputs = None
+    producer_inputs = None
     try:
         if args.command == "diff":
             before = load(args.before)
@@ -1185,12 +1398,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             condition_inputs = _condition_inputs(args)
         if args.command == "reach":
             delegation_inputs = _delegation_inputs(args)
+            producer_inputs = _producer_inputs(args)
     except (
         ConditionFormatError,
         DelegationFormatError,
         IRFormatError,
         ManifestError,
         OSError,
+        ProducerBoundaryFormatError,
         UnicodeError,
     ) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -1309,7 +1524,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_FINDING if any(f.severity == ERROR for f in findings) else EXIT_OK
 
     if args.command == "reach":
-        if delegation_inputs is not None:
+        if producer_inputs is not None:
+            boundaries, contents, selections, as_of = producer_inputs
+            producer_analysis = analyse_producers(
+                mandate,
+                boundaries,
+                contents,
+                selections,
+                as_of=as_of,
+                depth=args.depth,
+            )
+            delegation_analysis = None
+            conditional_analysis = None
+            authority = producer_analysis.authority
+        elif delegation_inputs is not None:
             (
                 attachments,
                 chains,
@@ -1329,6 +1557,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 target_binding=target_binding,
             )
             conditional_analysis = None
+            producer_analysis = None
             authority = delegation_analysis.authority
         elif condition_inputs is not None:
             conditions, contexts, contents, as_of = condition_inputs
@@ -1341,10 +1570,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 depth=args.depth,
             )
             delegation_analysis = None
+            producer_analysis = None
             authority = conditional_analysis.authority
         else:
             conditional_analysis = None
             delegation_analysis = None
+            producer_analysis = None
             authority = (
                 ir_result.authority
                 if ir_result is not None
@@ -1372,6 +1603,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif args.json and ir_result is not None:
             assert ir_json is not None
             sys.stdout.write(ir_json)
+        elif args.json and producer_analysis is not None:
+            sys.stdout.write(producer_analysis.to_result().to_json())
         else:
             payload = authority.as_dict()
             if conditional_analysis is not None:
@@ -1380,11 +1613,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             if delegation_analysis is not None:
                 payload["delegations"] = _delegation_payload(delegation_analysis)
                 text = f"{_render_delegations(delegation_analysis)}\n\n{text}"
+            if producer_analysis is not None:
+                text = f"{_render_producers(producer_analysis)}\n\n{text}"
             _emit(payload, args.json, text)
         finding = bool(authority.breaches) or bool(
             conditional_analysis is not None and conditional_analysis.findings
         ) or bool(
             delegation_analysis is not None and delegation_analysis.findings
+        ) or bool(
+            producer_analysis is not None and producer_analysis.findings
         )
         return EXIT_FINDING if finding else EXIT_OK
 

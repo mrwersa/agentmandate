@@ -1,12 +1,13 @@
 # Bounded Producer Contract
 
-Status: **experimental; gates 1 through 3 complete; Gate 4 exposure deferred**.
+Status: **experimental; gates 1 through 4 complete; CLI exposed**.
 This is the contract for
 [#128](https://github.com/mrwersa/agentmandate/issues/128). It defines the
 minimum trust and analysis contract selected by the
 [AWS IAM cardinality evidence](evidence/aws-iam-access-keys/README.md). It does
-not change manifest version 1, the analyzable Authority IR profile,
-reachability, or any public CLI.
+not change manifest version 1 or the analyzable Authority IR profile. Finite
+producer evidence remains a reviewed attachment consumed only through the
+explicit public CLI.
 
 The roadmap initiative contains two different losses. This contract addresses
 finite **binding cardinality** only. AgentKit's collateral, conversion, and
@@ -38,7 +39,7 @@ API rate limits, and response sizes constrain none of these authority sets.
 
 ## Producer-boundary artifact
 
-The private `producer_boundary_version: 1` artifact stays separate from the
+The standalone `producer_boundary_version: 1` artifact stays separate from the
 mandate. Reviewed intent says a tool may produce a scope; observed evidence
 says a particular deployment enforces a finite boundary.
 
@@ -190,9 +191,9 @@ migration remains unreviewed and is therefore refused until a caller supplies
 an accountable accepted review. Gate 3 adds no public API, manifest field, CLI
 surface, runtime enforcement, reservation, or release semantics.
 
-## Private result envelope
+## Result envelope
 
-The private consumer now separates analysis from presentation through the
+The consumer separates analysis from presentation through the
 versioned `agentmandate.producers/v1` result envelope. It records the explicit
 evaluation date; manifest semantic identity; boundary content and semantic
 identities; exact selections; applied tool, scope, partition, capacity kind,
@@ -223,11 +224,11 @@ The v1 finding-code vocabulary is closed:
 | `producer.review-unresolved` | reviewer, expiry, or current review is unresolved |
 | `producer.source-unresolved` | caller-supplied source bytes do not verify |
 
-This completes one prerequisite from the Gate 4 review, not Gate 4 exposure.
-The records remain in the private module, no package export or CLI exists, and
-the composition-refusal and CLI failure contracts remain open. A separate
-complete accepted fixture under `tests/fixtures/producer-accepted-synthetic/`
-provides a clean path without promoting the real unreviewed IAM migration.
+The envelope and finding codes are public through producer-aware
+`mandate reach --json`; their Python records remain private and unexported. Unsupported
+composition and malformed inputs are refused before output. A complete
+accepted fixture under `tests/fixtures/producer-accepted-synthetic/` provides a
+clean path without promoting the real unreviewed IAM migration.
 
 ## Scope of a bound
 
@@ -382,16 +383,15 @@ portfolio system, price oracle, or general accounting language.
    expiry, selection mismatch, incomplete inventory, release ambiguity, and
    conservative fallback. All seven real graphs remain byte-identical with no
    boundary input.
-5. **Gate 4 — public exposure review (complete; exposure deferred):** the
-   [recorded review](bounded-producer-gate-4-review.md) accepts the private
-   semantics. Stable finding codes and the canonical private result envelope
-   are complete, and the accepted clean path has an explicitly synthetic
-   fixture. Explicit composition refusal and CLI failure tests remain before
-   choosing any public surface.
+5. **Gate 4 — public exposure (complete):** the
+   [recorded review](bounded-producer-gate-4-review.md) accepts the semantics,
+   stable finding codes, canonical result envelope, explicitly synthetic clean
+   fixture, composition refusals, and CLI failure behavior. The Python records
+   remain private.
 
 Quantity records follow their own evidence-driven gates and do not delay the
-finite-cardinality reader. Finite cardinality remains private after its public
-review deferred exposure; the quantity track has not selected a contract.
+finite-cardinality reader. Finite cardinality is available through the reviewed
+CLI attachment boundary; the quantity track has not selected a contract.
 
 ## Explicit non-goals
 
