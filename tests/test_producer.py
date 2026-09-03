@@ -24,6 +24,7 @@ from agentmandate._producer import (
     ProducerBoundary,
     ProducerBoundaryFormatError,
     ProducerEvidence,
+    ProducerResult,
     ProducerSelection,
     _captured,
     _digest,
@@ -43,6 +44,7 @@ from agentmandate._producer import (
 ROOT = Path(__file__).parents[1]
 EVIDENCE = ROOT / "docs" / "evidence" / "aws-iam-access-keys"
 FIXTURE = ROOT / "tests" / "fixtures" / "producer-boundary-iam-v1.json"
+RESULT_FIXTURES = ROOT / "tests" / "fixtures"
 
 
 def _contents() -> dict[str, bytes]:
@@ -101,6 +103,66 @@ def _selection(boundary: ProducerBoundary) -> ProducerSelection:
 
 def _encoded(raw: object) -> str:
     return json.dumps(raw, separators=(",", ":"))
+
+
+def _result_cases():
+    mandate = _mandate()
+    reviewed = _reviewed()
+    maximum_three = _reviewed(3)
+    unresolved = ProducerBoundary.from_json(
+        replace(
+            reviewed,
+            evidence=ProducerEvidence("exact", "unreviewed", None, None),
+        ).to_json()
+    )
+    return {
+        "clean": analyse_producers(
+            replace(
+                mandate,
+                limits=replace(mandate.limits, effects={"write": 4}),
+            ),
+            (),
+            {},
+            as_of=date(2026, 9, 3),
+        ).to_result(),
+        "bounded": analyse_producers(
+            mandate,
+            (reviewed,),
+            _contents(),
+            (_selection(reviewed),),
+            as_of=date(2026, 9, 3),
+        ).to_result(),
+        "breached": analyse_producers(
+            mandate,
+            (maximum_three,),
+            _contents(),
+            (_selection(maximum_three),),
+            as_of=date(2026, 9, 3),
+        ).to_result(),
+        "unresolved": analyse_producers(
+            mandate,
+            (unresolved,),
+            _contents(),
+            (_selection(unresolved),),
+            as_of=date(2026, 9, 3),
+        ).to_result(),
+        "truncated": analyse_producers(
+            mandate,
+            (maximum_three,),
+            _contents(),
+            (_selection(maximum_three),),
+            as_of=date(2026, 9, 3),
+            depth=2,
+        ).to_result(),
+    }
+
+
+def _rehash_result(raw: dict) -> str:
+    body = {key: value for key, value in raw.items() if key != "result_sha256"}
+    raw["result_sha256"] = hashlib.sha256(
+        json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    return _encoded(raw)
 
 
 def test_canonical_migration_round_trips_and_verifies_caller_bytes() -> None:
@@ -379,6 +441,7 @@ def test_private_analysis_applies_the_real_maximum_two_boundary() -> None:
             "create_access_key",
             "access_key",
             "reviewed-iam-user",
+            "concurrent",
             2,
             result.applied[0].support,
         ),
@@ -719,6 +782,19 @@ def test_duplicate_and_competing_boundaries_block_every_narrowing() -> None:
         "producer boundary id is declared more than once",
         "multiple producer boundaries target the same tool",
     }
+    assert ProducerResult.from_json(result.to_result().to_json()) == result.to_result()
+
+    duplicate_selection = analyse_producers(
+        mandate,
+        (boundary,),
+        _contents(),
+        (_selection(boundary), _selection(boundary)),
+        as_of=date(2026, 9, 3),
+    )
+    assert duplicate_selection.findings[0].code == "producer.selection-unresolved"
+    assert ProducerResult.from_json(
+        duplicate_selection.to_result().to_json()
+    ) == duplicate_selection.to_result()
 
 
 def test_depth_is_forwarded_to_the_private_search() -> None:
@@ -736,6 +812,186 @@ def test_depth_is_forwarded_to_the_private_search() -> None:
 
     assert result.authority.depth == 2
     assert result.authority.breaches == ()
+
+
+@pytest.mark.parametrize("case", ["clean", "bounded", "breached", "unresolved", "truncated"])
+def test_producer_result_v1_canonical_fixtures(case: str) -> None:
+    result = _result_cases()[case]
+    expected = (RESULT_FIXTURES / f"producer-result-v1-{case}.json").read_text()
+
+    assert result.to_json() == expected
+    assert ProducerResult.from_json(expected) == result
+    assert ProducerResult.from_json(expected).to_json() == expected
+
+
+def test_producer_result_records_inputs_codes_and_capacity_semantics() -> None:
+    cases = _result_cases()
+    bounded = cases["bounded"].as_dict()
+    unresolved = cases["unresolved"].as_dict()
+
+    assert bounded["schema"] == "agentmandate.producers/v1"
+    assert bounded["result_version"] == 1
+    assert bounded["inputs"]["manifest"]["locator"].endswith("mandate.yaml")
+    assert len(bounded["inputs"]["boundaries"]) == 1
+    assert bounded["applied"][0]["capacity_kind"] == "concurrent"
+    assert bounded["applied"][0]["maximum"] == 2
+    assert {item["code"] for item in unresolved["findings"]} == {
+        "producer.evidence-untrusted",
+        "producer.review-unresolved",
+    }
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("{", "not valid JSON"),
+        ('{"value":NaN}', "non-canonical value"),
+        ("[]", "must be an object"),
+        ('{"result_sha256":"' + "0" * 64 + '"}', "missing field"),
+    ],
+)
+def test_producer_result_rejects_malformed_outer_envelopes(text: str, message: str) -> None:
+    with pytest.raises(ProducerBoundaryFormatError, match=message):
+        ProducerResult.from_json(text)
+
+
+def test_producer_result_rejects_unknown_outer_fields_and_bad_checksums() -> None:
+    raw = _result_cases()["bounded"].as_dict()
+    raw["unknown"] = True
+    with pytest.raises(ProducerBoundaryFormatError, match="unknown field"):
+        ProducerResult.from_json(_encoded(raw))
+
+    raw = _result_cases()["bounded"].as_dict()
+    raw["result_sha256"] = "not-a-digest"
+    with pytest.raises(ProducerBoundaryFormatError, match="lowercase SHA-256"):
+        ProducerResult.from_json(_encoded(raw))
+
+    raw = _result_cases()["bounded"].as_dict()
+    raw["as_of"] = "2026-09-04"
+    with pytest.raises(ProducerBoundaryFormatError, match="SHA-256 does not match"):
+        ProducerResult.from_json(_encoded(raw))
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (lambda raw: raw.update(result_version=True), "unsupported producer result version"),
+        (lambda raw: raw.update(schema="other/v1"), "unsupported producer result schema"),
+        (lambda raw: raw.update(as_of="2026-02-30"), "canonical calendar date"),
+        (lambda raw: raw.update(as_of="September"), "canonical calendar date"),
+        (lambda raw: raw["inputs"].update(extra=True), "unknown field"),
+        (lambda raw: raw["inputs"].update(manifest=[]), "must be an object"),
+        (
+            lambda raw: raw["inputs"]["manifest"].update(semantic_sha256="A" * 64),
+            "lowercase SHA-256",
+        ),
+        (lambda raw: raw["inputs"].update(boundaries={}), "must be an array"),
+        (
+            lambda raw: raw["inputs"].update(
+                boundaries=[
+                    raw["inputs"]["boundaries"][0],
+                    {
+                        **raw["inputs"]["boundaries"][0],
+                        "id": "a-boundary",
+                    },
+                ]
+            ),
+            "boundaries must be sorted",
+        ),
+        (lambda raw: raw["inputs"].update(selections={}), "must be an array"),
+        (
+            lambda raw: raw["inputs"].update(
+                selections=[
+                    raw["inputs"]["selections"][0],
+                    {
+                        **raw["inputs"]["selections"][0],
+                        "source": "a.py",
+                    },
+                ]
+            ),
+            "selections must be sorted",
+        ),
+        (
+            lambda raw: raw["inputs"]["selections"][0].update(
+                partition_binding="secret"
+            ),
+            "reviewed non-secret alias",
+        ),
+        (lambda raw: raw.update(authority=[]), "must be an object"),
+        (
+            lambda raw: raw["authority"].update(reachable_tools={}),
+            "must be an array",
+        ),
+        (
+            lambda raw: raw["authority"].update(reachable_tools=["z", "a"]),
+            "sorted unique strings",
+        ),
+        (lambda raw: raw["authority"].update(effects=["write"]), "string pairs"),
+        (
+            lambda raw: raw["authority"].update(effects=[["z", "a"], ["a", "z"]]),
+            "sorted and unique",
+        ),
+        (
+            lambda raw: raw["authority"].update(
+                max_extractable={"amount": "not-decimal", "currency": "USD"}
+            ),
+            "must be decimal",
+        ),
+        (
+            lambda raw: raw["authority"].update(
+                max_extractable={"amount": "NaN", "currency": "USD"}
+            ),
+            "must be canonical",
+        ),
+        (
+            lambda raw: raw["authority"].update(
+                max_extractable={"amount": "1", "currency": " "}
+            ),
+            "non-empty trimmed string",
+        ),
+        (lambda raw: raw["authority"].update(breaches={}), "must be an array"),
+        (
+            lambda raw: raw["authority"].update(
+                breaches=[{"kind": "effect", "detail": "detail", "path": []}]
+            ),
+            "non-empty array",
+        ),
+        (lambda raw: raw["authority"].update(depth=True), "non-negative integer"),
+        (lambda raw: raw["authority"].update(truncated=0), "must be a boolean"),
+        (lambda raw: raw.update(applied={}), "/applied must be an array"),
+        (
+            lambda raw: raw["applied"][0].update(capacity_kind="lifetime"),
+            "capacity_kind is unsupported",
+        ),
+        (
+            lambda raw: raw["applied"][0].update(maximum=0),
+            "maximum must be a positive integer",
+        ),
+        (
+            lambda raw: raw.update(applied=raw["applied"] * 2),
+            "sorted unique boundary ids",
+        ),
+        (lambda raw: raw.update(findings={}), "/findings must be an array"),
+        (
+            lambda raw: raw["findings"][0].update(code="producer.unknown"),
+            "code is unsupported",
+        ),
+    ],
+)
+def test_producer_result_strictly_validates_inner_contract(mutate, message: str) -> None:
+    case = "unresolved" if message == "code is unsupported" else "bounded"
+    raw = _result_cases()[case].as_dict()
+    mutate(raw)
+
+    with pytest.raises(ProducerBoundaryFormatError, match=message):
+        ProducerResult.from_json(_rehash_result(raw))
+
+
+def test_producer_result_rejects_noncanonical_programmatic_values() -> None:
+    with pytest.raises(ProducerBoundaryFormatError, match="non-canonical value"):
+        producer._canonical_bytes(float("nan"))
+    with pytest.raises(ProducerBoundaryFormatError, match="non-canonical value"):
+        producer._canonical_bytes(object())
 
 
 def test_reader_canonicalizes_set_like_collections() -> None:

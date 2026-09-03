@@ -4,7 +4,9 @@ Status: **review complete; public exposure deferred**. The public-boundary
 review was performed against merged commit `11ee72e` on 3 September 2026.
 Gates 1 through 3 establish a strict artifact, closed standalone Authority IR
 profile, and fail-closed private analysis. They do not yet establish a stable
-command or presentation contract.
+command or public presentation contract. A subsequent private implementation
+now satisfies the presentation-stability prerequisite recorded below without
+approving exposure.
 
 Structural validity remains separate from authority. Parsing a producer
 boundary proves neither that its source evidence is reviewed nor that its
@@ -19,7 +21,7 @@ finite capacity applies to the selected agent deployment and partition.
 | Conservative failure | Passed privately | Missing, duplicate, competing, expired, incomplete, unreviewed, mismatched, lifecycle-ambiguous, and source-unverifiable inputs retain the baseline manifest authority |
 | Default compatibility | Passed privately | With no producer records, the existing `analyse(mandate)` result remains byte-identical across the complete suite |
 | Accountable clean fixture | **Open** | The real IAM migration deliberately remains `unreviewed`; test-only accepted records cannot manufacture an accountable review |
-| Presentation stability | **Open** | `ProducerAnalysis` has no versioned JSON envelope, canonical fixture, stable finding codes, or replayable selection identity |
+| Presentation stability | Passed privately | `agentmandate.producers/v1` fixes stable finding codes, input identities, applied capacity semantics, complete Authority output, canonical SHA-256, and five canonical state fixtures |
 | Composition boundary | **Open** | Producer, condition, and delegation consumers cannot yet share one analysis/result envelope; Authority IR, SARIF, and Mermaid cannot preserve producer uncertainty |
 | CLI failure behavior | **Open** | No parser, pairing, complete-output, exit-code, or no-partial-output contract has been implemented for producer inputs |
 
@@ -34,8 +36,10 @@ authority consumers.
 
 The deferral does not reopen Gates 1 through 3. The reader, migration, IR
 profile, and private analysis remain useful experimental foundations. The
-roadmap should keep finite producer cardinality active and name the four public
-exit conditions above rather than describing analysis as unfinished.
+roadmap should keep finite producer cardinality active and name the three
+remaining public exit conditions above rather than describing analysis as
+unfinished. Completing a private presentation prerequisite does not make its
+module, records, or schema a supported interface.
 
 ## Reproduced private semantics
 
@@ -83,11 +87,10 @@ Before exposure, commit either:
 The review must be reproducible through the proposed command and must not turn
 IAM MCP 1.0.11 into a claim about current 1.0.23 behavior.
 
-## Required presentation contract
+## Private presentation contract implemented
 
-The private `ProducerAnalysis` record is not a public output schema. Before a
-CLI is approved, define a strict presentation such as
-`agentmandate.producers/v1` that includes:
+`ProducerAnalysis.to_result()` now creates the strict private
+`agentmandate.producers/v1` presentation. It includes:
 
 - the explicit evaluation date;
 - the input manifest identity and producer-boundary content identities;
@@ -99,6 +102,14 @@ CLI is approved, define a strict presentation such as
 - the complete effective `Authority`, including depth and truncation; and
 - a version/hash boundary or canonical fixtures sufficient to detect semantic
   output drift.
+
+The strict reader checks exact field sets and types, canonical ordering,
+closed finding and capacity vocabularies, calendar dates, reviewed non-secret
+partition aliases, manifest and boundary digests, complete Authority shape,
+and the envelope checksum. The result is presentation only and is never
+accepted as an authority input. Canonical fixtures cover clean, bounded,
+breached, unresolved, and truncated states. No class is exported from the
+package and no command renders or consumes this schema.
 
 Human output should use a separate `BOUNDED`/`UNRESOLVED` section. It must not
 rewrite a missing breach as proof of runtime enforcement. A producer finding
@@ -160,8 +171,10 @@ by feeding one rendered result into another analyzer.
 
 1. Commit an accountable accepted clean fixture or an explicitly synthetic
    accepted fixture with the real IAM record remaining unresolved.
-2. Define stable finding codes and a versioned, canonical result envelope with
-   clean, bounded, breached, unresolved, and truncated fixtures.
+2. **Complete privately:** define stable finding codes and a versioned,
+   canonical result envelope with clean, bounded, breached, unresolved, and
+   truncated fixtures. Public stability begins only if a later release exposes
+   it.
 3. Implement parser and renderer tests for success, finding, usage, malformed,
    missing-pair, conflicting-source, and no-partial-output behavior.
 4. Reject IR, SARIF, Mermaid, condition, and delegation composition before

@@ -190,6 +190,44 @@ migration remains unreviewed and is therefore refused until a caller supplies
 an accountable accepted review. Gate 3 adds no public API, manifest field, CLI
 surface, runtime enforcement, reservation, or release semantics.
 
+## Private result envelope
+
+The private consumer now separates analysis from presentation through the
+versioned `agentmandate.producers/v1` result envelope. It records the explicit
+evaluation date; manifest semantic identity; boundary content and semantic
+identities; exact selections; applied tool, scope, partition, capacity kind,
+maximum, and support; the complete effective Authority; and every unresolved
+finding with a stable machine-readable code. A canonical SHA-256 covers the
+whole result body.
+
+The reader is strict about exact fields and types, canonical ordering, closed
+codes, calendar dates, reviewed partition aliases, digests, and complete
+Authority output. Five canonical fixtures pin clean, bounded, breached,
+unresolved, and truncated states. Result bytes are presentation evidence only:
+they are never accepted as a mandate, boundary, or Authority IR input.
+
+The v1 finding-code vocabulary is closed:
+
+| Code | Eligibility failure |
+|---|---|
+| `producer.boundary-duplicate` | one boundary ID appears more than once |
+| `producer.boundary-competing` | multiple boundaries target one tool |
+| `producer.selection-unresolved` | the boundary lacks exactly one matching selection |
+| `producer.target-missing` | the selected tool is absent from the mandate |
+| `producer.target-ineligible` | the tool is not the matching unbounded producer |
+| `producer.inventory-incomplete` | selected inventory is incomplete or omits the tool |
+| `producer.release-incomplete` | release classification is incomplete |
+| `producer.release-reachable` | a classified release transition is reachable |
+| `producer.output-competing` | another reachable tool produces the same scope |
+| `producer.evidence-untrusted` | evidence is not both exact and accepted |
+| `producer.review-unresolved` | reviewer, expiry, or current review is unresolved |
+| `producer.source-unresolved` | caller-supplied source bytes do not verify |
+
+This completes one prerequisite from the Gate 4 review, not Gate 4 exposure.
+The records remain in the private module, no package export or CLI exists, and
+the accountable-fixture, composition-refusal, and CLI failure contracts remain
+open.
+
 ## Scope of a bound
 
 Every part of the boundary identity is load-bearing:
@@ -345,9 +383,9 @@ portfolio system, price oracle, or general accounting language.
    boundary input.
 5. **Gate 4 — public exposure review (complete; exposure deferred):** the
    [recorded review](bounded-producer-gate-4-review.md) accepts the private
-   semantics but requires an accountable clean fixture, stable finding codes
-   and result envelope, explicit composition refusal, and CLI failure tests
-   before choosing any public surface.
+   semantics. Stable finding codes and the canonical private result envelope
+   are complete; an accountable clean fixture, explicit composition refusal,
+   and CLI failure tests remain before choosing any public surface.
 
 Quantity records follow their own evidence-driven gates and do not delay the
 finite-cardinality reader. Finite cardinality remains private after its public
