@@ -85,15 +85,24 @@ artifact, and the private Python records remain unsupported.
 
 ## What is most likely to change
 
-The manifest schema. Three areas are known to be under-modelled:
+The manifest schema and the way standalone evidence profiles compose with it.
+Conditional authority and delegation analysis now have public, versioned
+artifact and command surfaces, but they remain reviewed attachments rather than
+new manifest-v1 meanings. Authority continuity has private experimental records
+and analysis only. Structural validity never makes any of these records trusted
+mandate authority.
+
+Three areas remain deliberately under-modelled:
 
 - **Data-flow labels.** Detecting that a read tool feeds an exfiltration path
   needs taint labels the manifest does not carry today.
-- **Conditional authority.** Real controls depend on case state, time of day,
-  and cumulative history. The current model has ceilings and scopes and nothing
-  else.
-- **Multi-agent delegation.** One agent handing authority to another is common
-  and is not represented at all.
+- **Resource relationships and bounded producers.** Manifest v1 cannot express
+  fixed ownership or containment relationships, or a finite producer boundary
+  between one binding and `unbounded: true`.
+- **Authority continuity.** The public commands do not yet reconcile whether
+  consumed state stayed attached to one mandate across a session, handoff, or
+  policy revision. This remains separate from general cross-session search.
 
-Adding any of these will change the schema, and the `version` field is how that
-will be handled.
+Integrating any of these into manifest authority may change the schema. The
+`version` field is how that will be handled; standalone artifact versions may
+instead evolve independently when the manifest meaning is unchanged.

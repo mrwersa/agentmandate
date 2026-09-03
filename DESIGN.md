@@ -2,11 +2,13 @@
 
 ## The problem this exists for
 
-An agent's authority is not written down in one place. It is spread across tool
-schemas, framework configuration, the IAM roles the tools run under, and a
-prompt that asks nicely. Nobody can answer "what can this agent do" by reading
-any single one of those, and nobody can answer "what changed" by reading a pull
-request, because reachability composes and text does not.
+An AI agent is more than its language model. The surrounding runtime supplies
+instructions, tools, memory, credentials, and execution. Its authority is not
+written down in one place: it is spread across tool schemas, framework
+configuration, workload identity, policy, and a prompt that asks nicely. Nobody
+can answer "what can this agent do" by reading any one of those, and nobody can
+answer "what changed" by reading a pull request, because reachability composes
+and text does not.
 
 Many agent scanners check one tool at a time. That finds the tool with no
 approval gate, which is worth finding. It cannot find the case where every tool
@@ -15,13 +17,22 @@ any one tool.
 
 ## The authority model
 
-A mandate is a set of tools over a set of scopes.
+A mandate is one reviewed, bounded unit of work. Manifest v1 models its tool
+authority as a set of tools over a set of scopes.
 
 AgentMandate sits at the action boundary of an agent loop. The model may sense,
 reason, plan, and propose a tool call. The platform still owns the workload
 identity, authorisation decision, and real-world effect. A prompt can shape
 model behaviour, but it is not an authority boundary. This project analyses
 the tool authority the platform exposes and the paths that authority permits.
+
+That reachability question is separate from authority continuity. A cumulative
+constraint depends on both its configured limit and the runtime's consumed
+state. Even correct per-request enforcement does not bound one mandate if a
+fresh session, handoff, or policy revision restores capacity the mandate has
+already spent. The experimental continuity profile reconciles that lifecycle
+question without changing manifest-v1 reachability or turning AgentMandate into
+a session broker or distributed counter.
 
 A **scope** is a type of resource the agent can hold a binding to, such as
 `case` or `ledger`. Scopes are types, not instances: the analysis reasons about
@@ -158,8 +169,10 @@ compound. Running both is the intended shape.
 
 The same boundary applies to multi-agent systems. A supervisor choosing a
 worker is behaviour. The identity and tools delegated to that worker are
-authority. The current manifest describes one agent or one deliberately
-reviewed union of agents, and it does not yet model delegation between them.
+authority. Manifest v1 still describes one agent or one deliberately reviewed
+union of agents. The public delegation attachment separately represents and
+checks actor history, validity, audience, and attenuation without silently
+changing that manifest meaning.
 
 ## Counting effects, not only value
 

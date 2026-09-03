@@ -40,18 +40,25 @@ reachable sequence before release and checks recorded control evidence after
 execution. It is not the model's planner and it is not the runtime policy
 engine.
 
-## Four claims that must not be collapsed
+## Claims that must not be collapsed
 
 | Layer | Question | Owner |
 |---|---|---|
-| Permitted reachability | Can a legal sequence reach a breach under the reviewed manifest? | `mandate reach` |
+| Permitted reachability | Can a legal sequence reach a breach under the reviewed mandate description? | `mandate reach` |
 | Behaviour | Does the agent choose that path for the reviewed scenario? | Your evaluation harness |
 | Enforcement | Does each deployed call satisfy runtime policy? | Cedar, OPA, AgentCore Policy, or another gateway |
-| Conformance | Do recorded calls carry and respect the controls the manifest declares? | `mandate verify` |
+| Conformance | Do recorded calls carry and respect the controls the reviewed mandate declares? | `mandate verify` |
 
 A static witness is not a prediction about model behaviour. A passing scenario
 does not prove the authority is absent. A clean runtime trace does not prove an
 untaken path is impossible.
+
+A fifth, experimental lifecycle claim remains separate from all four: did the
+consumed state bounding one reviewed mandate survive a named session, handoff,
+or policy transition? Correct per-request decisions and a stable session
+identifier do not establish that continuity. The private continuity work
+reconciles evidence for this question; it does not yet add a public command to
+the loop above.
 
 ## Two outputs for two kinds of test
 
