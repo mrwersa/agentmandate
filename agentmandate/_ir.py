@@ -102,6 +102,12 @@ RELATIONS = {
     "after_state": Relation("transition", "boundary_state", "one", "single", "after"),
     "at_hop": Relation("principal", "hop", "one", "single", "hop"),
     "before_state": Relation("transition", "boundary_state", "one", "single", "before"),
+    "bounds_output": Relation(
+        "producer_boundary", "scope", "one", "single", "output"
+    ),
+    "bounds_producer": Relation(
+        "producer_boundary", "tool", "one", "single", "producer"
+    ),
     "binds_boundary": Relation(
         "continuity_binding", "enforcement_boundary", "one", "single", "boundary"
     ),
@@ -134,6 +140,9 @@ RELATIONS = {
     "narrows_to": Relation("condition", "effect", "one", "single", "effect"),
     "observes_decision": Relation(
         "transition", "decision", "many", "union", "decisions"
+    ),
+    "partitioned_by": Relation(
+        "producer_boundary", "resource_binding", "one", "single", "partition"
     ),
     "maps_to_tool": Relation("policy_action", "tool", "one", "single", "tool"),
     "produces": Relation("tool", "scope", "one", "single", "produces"),

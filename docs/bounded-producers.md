@@ -1,10 +1,11 @@
 # Bounded Producer Contract
 
-Status: **experimental; gates 1 and 2a complete**. This is the contract for
+Status: **experimental; gates 1, 2a, and 2b complete**. This is the contract for
 [#128](https://github.com/mrwersa/agentmandate/issues/128). It defines the
 minimum trust and analysis contract selected by the
 [AWS IAM cardinality evidence](evidence/aws-iam-access-keys/README.md). It does
-not change manifest version 1, Authority IR, reachability, or any public CLI.
+not change manifest version 1, the analyzable Authority IR profile,
+reachability, or any public CLI.
 
 The roadmap initiative contains two different losses. This contract addresses
 finite **binding cardinality** only. AgentKit's collateral, conversion, and
@@ -36,7 +37,7 @@ API rate limits, and response sizes constrain none of these authority sets.
 
 ## Producer-boundary artifact
 
-The candidate `producer_boundary_version: 1` artifact stays separate from the
+The private `producer_boundary_version: 1` artifact stays separate from the
 mandate. Reviewed intent says a tool may produce a scope; observed evidence
 says a particular deployment enforces a finite boundary.
 
@@ -141,8 +142,27 @@ cleanup, sanitization, package revision, and deployment controls, then emits
 `unreviewed`: byte identity cannot manufacture an accountable reviewer or
 expiry. No reader path opens a locator or reads a clock.
 
-Gate 2a adds no analysis, Authority IR relation, public Python export, manifest
-meaning, or CLI surface. Those remain behind their separate gates.
+Gate 2a adds no analysis, public Python export, manifest meaning, or CLI
+surface. Those remain behind their separate gates.
+
+## Gate 2b implementation
+
+The private reader projects each boundary into a closed standalone Authority
+IR profile. It registers `bounds_producer`, `bounds_output`, and
+`partitioned_by` with typed endpoints, emits one boundary plus its tool, scope,
+and reviewed partition-binding entities, and preserves capacity, controls,
+run-boundary completeness, original sources, and evidence state as explicit
+facts. One producer-boundary source pins the record bytes, adapter version,
+producer revision, and a semantic digest recomputed over entities, facts, and
+edges.
+
+The producer-specific validator first applies generic IR structural checks,
+then reconstructs the strict boundary record and verifies the complete entity,
+fact, evidence, relation-support, content-digest, and semantic-digest sets.
+This makes the projection portable without making it authority: generic
+manifest-v1 reachability explicitly rejects the standalone source profile.
+Gate 2b adds no private narrowing analysis, manifest meaning, public export, or
+CLI surface.
 
 ## Scope of a bound
 
@@ -238,9 +258,9 @@ that a call observed after analysis will succeed.
 
 ## Authority IR profile
 
-Gate 2 projects the artifact through a standalone profile, not the analyzable
-manifest-v1 profile. The minimum proposed entities are producer boundary,
-tool, output scope, and partition binding. Candidate source relations are:
+Gate 2b projects the artifact through a standalone profile, not the analyzable
+manifest-v1 profile. Its entities are producer boundary, tool, output scope,
+and partition binding. Its source relations are:
 
 | Relation | Endpoints | Cardinality and support |
 |---|---|---|
@@ -255,11 +275,11 @@ validation proves structure; the closed producer validator proves these
 semantics. `_analyse_ir` continues to reject the standalone profile. Only an
 explicit producer consumer may combine it with manifest authority.
 
-Relation names and endpoints remain proposals until the registry review. No
-derived relation is needed for gate 2. Gate 3 may add a provenance-bearing
-`bounded_by` result edge only if its support names the manifest production,
-boundary, partition, verified outcome, and eligibility facts needed to replay
-the narrowing.
+The registry now fixes those relation names and endpoints for the private
+profile. No derived relation is needed for gate 2b. Gate 3 may add a
+provenance-bearing `bounded_by` result edge only if its support names the
+manifest production, boundary, partition, verified outcome, and eligibility
+facts needed to replay the narrowing.
 
 ## Quantity track stays separate
 
@@ -283,13 +303,13 @@ portfolio system, price oracle, or general accounting language.
 
 ## Delivery gates
 
-1. **Gate 1 — contract:** challenge this scope, especially partition identity,
+1. **Gate 1 — contract (complete):** challenge this scope, especially partition identity,
    concurrent versus cumulative semantics, monotone-run eligibility, and the
    separation from quantity.
 2. **Gate 2a — reader and migration (complete):** a strict private boundary reader,
    canonical IAM migration fixture, caller-bytes digest verification, exact
    outcome controls, and adversarial record tests. No analysis.
-3. **Gate 2b — IR projection:** register the minimum source relations, validate
+3. **Gate 2b — IR projection (complete):** register the minimum source relations, validate
    a closed standalone profile and semantic digest, and prove manifest
    `reach --ir` refuses it.
 4. **Gate 3 — private analysis:** consume only re-read/profile-validated
