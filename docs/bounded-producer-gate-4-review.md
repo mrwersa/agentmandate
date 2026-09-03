@@ -20,7 +20,7 @@ finite capacity applies to the selected agent deployment and partition.
 | Trusted bounded search | Passed privately | Maximum two preserves the first two IAM productions and removes the rejected third transition before binding or effect accounting |
 | Conservative failure | Passed privately | Missing, duplicate, competing, expired, incomplete, unreviewed, mismatched, lifecycle-ambiguous, and source-unverifiable inputs retain the baseline manifest authority |
 | Default compatibility | Passed privately | With no producer records, the existing `analyse(mandate)` result remains byte-identical across the complete suite |
-| Accountable clean fixture | **Open** | The real IAM migration deliberately remains `unreviewed`; test-only accepted records cannot manufacture an accountable review |
+| Accepted clean fixture | Passed synthetically | A complete fixture explicitly labels its producer, partition, reviewer, catalogue, outcomes, and adapter as synthetic; the real IAM migration remains `unreviewed` |
 | Presentation stability | Passed privately | `agentmandate.producers/v1` fixes stable finding codes, input identities, applied capacity semantics, complete Authority output, canonical SHA-256, and five canonical state fixtures |
 | Composition boundary | **Open** | Producer, condition, and delegation consumers cannot yet share one analysis/result envelope; Authority IR, SARIF, and Mermaid cannot preserve producer uncertainty |
 | CLI failure behavior | **Open** | No parser, pairing, complete-output, exit-code, or no-partial-output contract has been implemented for producer inputs |
@@ -36,7 +36,7 @@ authority consumers.
 
 The deferral does not reopen Gates 1 through 3. The reader, migration, IR
 profile, and private analysis remain useful experimental foundations. The
-roadmap should keep finite producer cardinality active and name the three
+roadmap should keep finite producer cardinality active and name the two
 remaining public exit conditions above rather than describing analysis as
 unfinished. Completing a private presentation prerequisite does not make its
 module, records, or schema a supported interface.
@@ -68,7 +68,7 @@ authority in place. Applied decisions additionally cite the manifest
 producer's `produces` and `unbounded` facts. No-boundary analysis uses the
 existing search without producer caps.
 
-## Accountable-fixture requirement
+## Accepted-fixture requirement satisfied synthetically
 
 The canonical IAM migration correctly emits `review: unreviewed`. Digest
 identity and deterministic migration prove which bytes were interpreted; they
@@ -77,15 +77,21 @@ its review lifetime. Unit tests promote an in-memory copy solely to exercise
 the eligibility rule. That is a test control, not a reviewed artifact suitable
 for a public clean-path claim.
 
-Before exposure, commit either:
+The review allowed either:
 
 1. an accountable accepted review of the version-pinned IAM boundary, naming
    reviewer and expiry without adding raw identifiers or credentials; or
 2. a clearly synthetic accepted boundary plus its source bytes, while keeping
    the real IAM migration as the public unresolved case.
 
-The review must be reproducible through the proposed command and must not turn
-IAM MCP 1.0.11 into a claim about current 1.0.23 behavior.
+The second path is now complete in
+`tests/fixtures/producer-accepted-synthetic/`. Its manifest, boundary,
+selection, catalogue, outcomes, and adapter are committed; every identity is
+explicitly synthetic; every source digest is checked; and private analysis
+reproduces the accepted maximum-two clean path. The real IAM migration remains
+unreviewed. This supplies deterministic public-boundary test input without
+turning IAM MCP 1.0.11 into a claim about current 1.0.23 behavior or inventing
+an accountable provider review.
 
 ## Private presentation contract implemented
 
@@ -169,8 +175,9 @@ by feeding one rendered result into another analyzer.
 
 ## Exit criteria for a later exposure PR
 
-1. Commit an accountable accepted clean fixture or an explicitly synthetic
-   accepted fixture with the real IAM record remaining unresolved.
+1. **Complete synthetically:** commit an accountable accepted clean fixture or
+   an explicitly synthetic accepted fixture with the real IAM record remaining
+   unresolved.
 2. **Complete privately:** define stable finding codes and a versioned,
    canonical result envelope with clean, bounded, breached, unresolved, and
    truncated fixtures. Public stability begins only if a later release exposes

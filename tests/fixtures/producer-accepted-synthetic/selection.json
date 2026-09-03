@@ -1,0 +1,1 @@
+{"binding":"mint_access_token","output_scope":"access_token","partition_argument":"tenant","partition_binding":"reviewed-synthetic-tenant","producer":"synthetic.fixture","producer_version":"1.0.0","source":"tests/fixtures/producer-accepted-synthetic/adapter.py"}
