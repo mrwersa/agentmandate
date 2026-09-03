@@ -1,6 +1,6 @@
 # Bounded Producer Contract
 
-Status: **proposed and experimental**. This is gate 1 of
+Status: **experimental; gates 1 and 2a complete**. This is the contract for
 [#128](https://github.com/mrwersa/agentmandate/issues/128). It defines the
 minimum trust and analysis contract selected by the
 [AWS IAM cardinality evidence](evidence/aws-iam-access-keys/README.md). It does
@@ -116,12 +116,33 @@ says a particular deployment enforces a finite boundary.
 }
 ```
 
-The example is illustrative until gate 2 commits a canonical migration
-fixture. A strict reader will use exact field sets, immutable canonical
+The example shows the reviewed record shape. Gate 2a's canonical migration
+fixture is normative for the committed IAM evidence. The strict reader uses
+exact field sets, immutable canonical
 collections, lowercase SHA-256 digests, repository-relative POSIX locators,
 non-empty stripped identifiers, positive integer maxima, and one typed error
 boundary that never echoes rejected values. It hashes caller-supplied bytes
 only and reads neither files, networks, credentials, nor clocks.
+
+## Gate 2a implementation
+
+The private `agentmandate._producer` module implements boundary version 1. Its
+reader canonicalizes set-like inventory, release-tool, and source collections;
+requires one source for each of upstream inventory, capacity controls, and the
+selected run boundary; checks control references; and keeps structural validity
+separate from evidence acceptance.
+
+The canonical migration consumes exactly three caller-supplied sources: the
+29-tool catalogue, sanitized live outcome, and capture adapter. It verifies
+their reviewed digests, rechecks the selected tool schema, two authenticated
+successful productions, exhaustion-only third rejection, shared principal,
+cleanup, sanitization, package revision, and deployment controls, then emits
+`tests/fixtures/producer-boundary-iam-v1.json`. Migration evidence remains
+`unreviewed`: byte identity cannot manufacture an accountable reviewer or
+expiry. No reader path opens a locator or reads a clock.
+
+Gate 2a adds no analysis, Authority IR relation, public Python export, manifest
+meaning, or CLI surface. Those remain behind their separate gates.
 
 ## Scope of a bound
 
@@ -265,7 +286,7 @@ portfolio system, price oracle, or general accounting language.
 1. **Gate 1 — contract:** challenge this scope, especially partition identity,
    concurrent versus cumulative semantics, monotone-run eligibility, and the
    separation from quantity.
-2. **Gate 2a — reader and migration:** add a strict private boundary reader,
+2. **Gate 2a — reader and migration (complete):** a strict private boundary reader,
    canonical IAM migration fixture, caller-bytes digest verification, exact
    outcome controls, and adversarial record tests. No analysis.
 3. **Gate 2b — IR projection:** register the minimum source relations, validate

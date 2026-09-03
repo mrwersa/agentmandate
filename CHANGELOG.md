@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- A strict private finite-producer-boundary reader and canonical IAM access-key
+  migration preserve the evidence-backed concurrent maximum, partition,
+  selected monotone run boundary, exact outcome controls, and caller-supplied
+  source digests. Migration remains unreviewed and does not change manifest
+  authority, reachability, Authority IR, or any public command.
 - Authority IR validation recognizes standalone authority-continuity binding,
   AgentCore policy-session, and Anthropic managed-budget profiles through
   `binds_mandate`, `binds_boundary`, `state_of`, `before_state`,
