@@ -1,7 +1,7 @@
 # Authority Continuity Contract
 
-Status: **experimental; gates 1–3 complete, public exposure pending**. This is the
-contract for
+Status: **experimental; gates 1–3 complete; Gate 4 exposure deferred**. This is
+the contract for
 [#156](https://github.com/mrwersa/agentmandate/issues/156). It defines the
 smallest common analysis contract selected by the reviewed
 [AgentCore](evidence/agentcore-refund-policy/README.md) and
@@ -414,11 +414,11 @@ stronger result.
    mandate joins as unresolved, separates reset, widening, and overshoot,
    reports all four alignment checks independently, and retains byte-identical
    manifest authority on trust failure. No public Python records.
-5. **Gate 4 — public exposure review:** challenge containment, output stability,
-   no-partial-output behavior, evaluation-time determinism, the derivation of a
-   safe-continuation verdict from the three outcome axes, and composition with
-   existing policy, condition, delegation and OTel surfaces before choosing a
-   CLI or schema.
+5. **Gate 4 — public exposure review (complete; exposure deferred):** the
+   [review](authority-continuity-gate-4-review.md) confirms the private
+   semantics but keeps them private until a safe-continuation contract,
+   accepted clean fixture, versioned result envelope, explicit composition
+   refusals, and CLI exit/no-partial-output tests are complete.
 
 This initiative remains experimental and does not block 1.0. The generalized
 search problem across arbitrary durable agents, memories and sessions remains
