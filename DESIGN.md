@@ -64,6 +64,14 @@ open.
 That is the defect the package exists to find, and it is invisible tool by
 tool. Both halves look correct in isolation. Only the composition is wrong.
 
+Some deployments enforce a smaller finite producer cardinality. That fact is
+not manifest intent and cannot be inferred from a quota document or tool
+schema. A standalone reviewed producer boundary may narrow one exact
+deployment, output scope, resource partition, and monotone run only after its
+selected source bytes and review lifetime verify. Any ambiguity retains the
+stronger `unbounded` graph with a finding. The attachment changes design-time
+reachability; it is not a runtime reservation or enforcement mechanism.
+
 ## The search
 
 Breadth-first over states, where a state is the bindings held and the value

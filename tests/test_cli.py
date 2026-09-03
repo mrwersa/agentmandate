@@ -31,6 +31,12 @@ CEDAR_MANIFEST = CEDAR_EVIDENCE / "mandate.yaml"
 CEDAR_BASELINE = CEDAR_EVIDENCE / "managed-oracle-v1.json"
 CEDAR_CANDIDATE = CEDAR_EVIDENCE / "candidate-managed-oracle-v1.json"
 CEDAR_DIFF_RESULT = ROOT / "tests/fixtures/cedar-effective-diff-v1.json"
+PRODUCER_FIXTURE = ROOT / "tests/fixtures/producer-accepted-synthetic"
+PRODUCER_BOUNDARY = PRODUCER_FIXTURE / "boundary.json"
+PRODUCER_MANIFEST = PRODUCER_FIXTURE / "manifest.json"
+PRODUCER_MANIFEST_INPUT = str(PRODUCER_MANIFEST.relative_to(ROOT))
+PRODUCER_SELECTION = PRODUCER_FIXTURE / "selection.json"
+PRODUCER_RESULT = ROOT / "tests/fixtures/producer-reach-result-v1.json"
 
 CONDITIONAL_MANIFEST = """
 agent: sql-agent
@@ -90,6 +96,30 @@ def delegation_args(*, as_of: str = "2026-08-25T12:00:00Z") -> list[str]:
         "--delegation-target-binding",
         "agent",
     ]
+
+
+def producer_args(*, as_of: str = "2026-09-03") -> list[str]:
+    args = [
+        "--producer-boundary",
+        str(PRODUCER_BOUNDARY),
+    ]
+    for name in ("catalogue.json", "outcomes.json", "adapter.py"):
+        path = PRODUCER_FIXTURE / name
+        args.extend(
+            [
+                "--producer-source",
+                f"tests/fixtures/producer-accepted-synthetic/{name}={path}",
+            ]
+        )
+    args.extend(
+        [
+            "--producer-selection",
+            PRODUCER_SELECTION.read_text(encoding="utf-8"),
+            "--producer-as-of",
+            as_of,
+        ]
+    )
+    return args
 
 
 def write_delegation_manifest(tmp_path: Path) -> Path:
@@ -528,6 +558,234 @@ def test_reach_refuses_delegation_ir_and_condition_composition(capsys):
     assert main(["reach", V1, *delegation_args(), *condition_args()]) == EXIT_USAGE
     captured = capsys.readouterr()
     assert captured.out == "" and "cannot yet be composed safely" in captured.err
+
+
+def test_producers_validate_is_structural_only(capsys, tmp_path):
+    assert main(["producers", "validate", str(PRODUCER_BOUNDARY)]) == EXIT_OK
+    captured = capsys.readouterr()
+    assert captured.out == "valid producer boundary v1\n"
+    assert captured.err == ""
+
+    invalid = tmp_path / "boundary.json"
+    invalid.write_text("{}", encoding="utf-8")
+    assert main(["producers", "validate", str(invalid)]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "missing field" in captured.err
+
+    assert main(["producers", "validate", str(tmp_path / "absent.json")]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "error:" in captured.err
+
+
+def test_reach_applies_accepted_producer_boundary(capsys):
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *producer_args()]) == EXIT_OK
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "BOUNDED     mint_access_token: concurrent maximum 2" in captured.out
+    assert "no reachable breach" in captured.out
+
+    assert main(
+        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), "--json"]
+    ) == EXIT_OK
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    payload = json.loads(captured.out)
+    assert payload["schema"] == "agentmandate.producers/v1"
+    assert payload["applied"][0]["maximum"] == 2
+    assert payload["findings"] == []
+    assert payload["authority"]["breaches"] == []
+
+
+def test_producer_public_json_fixture_is_byte_stable(capsys):
+    assert main(
+        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), "--json"]
+    ) == EXIT_OK
+    assert capsys.readouterr().out == PRODUCER_RESULT.read_text(encoding="utf-8")
+
+
+def test_reach_producer_findings_emit_complete_output_and_exit_one(capsys):
+    args = producer_args()
+    selection_index = args.index("--producer-selection") + 1
+    args.insert(selection_index + 1, args[selection_index])
+    args.insert(selection_index + 1, "--producer-selection")
+
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *args, "--json"]) == EXIT_FINDING
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert captured.err == ""
+    assert payload["authority"]["breaches"]
+    assert payload["applied"] == []
+    assert payload["findings"][0]["code"] == "producer.selection-unresolved"
+    assert len(payload["inputs"]["selections"]) == 2
+
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *args]) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "UNRESOLVED  mint_access_token (producer.selection-unresolved)" in captured.out
+
+
+@pytest.mark.parametrize("format_flag", ["--sarif", "--graph"])
+def test_reach_refuses_producer_formats_before_output(format_flag, capsys):
+    assert main(
+        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), format_flag]
+    ) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "human or --json" in captured.err
+
+
+@pytest.mark.parametrize("other", ["ir", "conditions", "delegations"])
+def test_reach_refuses_producer_composition_before_output(other, capsys):
+    if other == "ir":
+        arguments = ["reach", "--ir", "unused.json", *producer_args()]
+        message = "cannot be composed with --ir"
+    elif other == "conditions":
+        arguments = [
+            "reach",
+            PRODUCER_MANIFEST_INPUT,
+            *producer_args(),
+            *condition_args(),
+        ]
+        message = "producer and conditional findings cannot yet be composed safely"
+    else:
+        arguments = [
+            "reach",
+            PRODUCER_MANIFEST_INPUT,
+            *producer_args(),
+            *delegation_args(),
+        ]
+        message = "producer and delegation findings cannot yet be composed safely"
+
+    assert main(arguments) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+@pytest.mark.parametrize(
+    ("remove", "message"),
+    [
+        ("--producer-boundary", "--producer-boundary is required"),
+        ("--producer-source", "--producer-source is required"),
+        ("--producer-selection", "--producer-selection is required"),
+        ("--producer-as-of", "--producer-as-of is required"),
+    ],
+)
+def test_reach_requires_complete_producer_option_groups(remove, message, capsys):
+    args = producer_args()
+    while remove in args:
+        index = args.index(remove)
+        del args[index : index + 2]
+
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *args]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+@pytest.mark.parametrize("as_of", ["20260903", "2026-99-03"])
+def test_reach_rejects_invalid_producer_dates(as_of, capsys):
+    assert main(
+        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(as_of=as_of)]
+    ) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "YYYY-MM-DD" in captured.err
+
+
+def test_reach_rejects_malformed_producer_boundary_without_output(tmp_path, capsys):
+    invalid = tmp_path / "boundary.json"
+    invalid.write_text("{}", encoding="utf-8")
+    args = producer_args()
+    args[args.index("--producer-boundary") + 1] = str(invalid)
+
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *args]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "missing field" in captured.err
+
+
+@pytest.mark.parametrize(
+    ("selection", "message"),
+    [
+        ("{", "not valid JSON"),
+        ("[]", "must be an object"),
+        (json.dumps({"source": "a.py"}), "missing field"),
+        (
+            json.dumps(
+                {
+                    **json.loads(PRODUCER_SELECTION.read_text(encoding="utf-8")),
+                    "unknown": True,
+                }
+            ),
+            "unknown field",
+        ),
+        (
+            json.dumps(
+                {
+                    **json.loads(PRODUCER_SELECTION.read_text(encoding="utf-8")),
+                    "partition_binding": "secret",
+                }
+            ),
+            "reviewed non-secret alias",
+        ),
+        (
+            json.dumps(
+                {
+                    **json.loads(PRODUCER_SELECTION.read_text(encoding="utf-8")),
+                    "producer_version": "other",
+                }
+            ),
+            "does not match any",
+        ),
+    ],
+)
+def test_reach_rejects_invalid_producer_selections(selection, message, capsys):
+    args = producer_args()
+    args[args.index("--producer-selection") + 1] = selection
+
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *args]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+def test_reach_rejects_bad_producer_source_mappings(capsys, tmp_path):
+    base = producer_args()
+    first = base.index("--producer-source")
+    cases = [
+        ([*base[: first + 1], "bad", *base[first + 2 :]], "LOCATOR=PATH"),
+        ([*base[: first + 1], "=bad", *base[first + 2 :]], "LOCATOR=PATH"),
+        (
+            [
+                *base[: first + 1],
+                "tests/fixtures/producer-accepted-synthetic/catalogue.json="
+                + str(tmp_path / "absent.json"),
+                *base[first + 2 :],
+            ],
+            "error:",
+        ),
+        ([*base[:first], *base[first + 2 :]], "required for reviewed locator"),
+        (
+            [*base, "--producer-source", f"undeclared={PRODUCER_SELECTION}"],
+            "undeclared locator",
+        ),
+        (
+            [
+                *base,
+                "--producer-source",
+                "tests/fixtures/producer-accepted-synthetic/catalogue.json="
+                + str(PRODUCER_SELECTION),
+            ],
+            "different source bytes",
+        ),
+    ]
+    for args, message in cases:
+        assert main(["reach", PRODUCER_MANIFEST_INPUT, *args]) == EXIT_USAGE
+        captured = capsys.readouterr()
+        assert captured.out == "" and message in captured.err
 
 
 def test_reach_applies_reviewed_conditional_authority(tmp_path, capsys):

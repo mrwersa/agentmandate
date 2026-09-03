@@ -106,7 +106,7 @@ Authority IR profile, and fail-closed private consumer. The committed migration
 remains unreviewed, so the consumer refuses to narrow from it without an
 accountable accepted review. The
 [Gate 4 review](../../bounded-producer-gate-4-review.md) therefore keeps this
-real record unresolved. A separate explicitly synthetic fixture now supplies
-the accepted clean path, and the private stable presentation is complete;
-public bounded-producer behavior remains deferred pending composition refusal
-and CLI failure contracts.
+real record unresolved. A separate explicitly synthetic fixture supplies the
+accepted clean path. The public CLI and stable presentation preserve that
+distinction, refuse unsupported composition, and report malformed inputs
+without partial output.

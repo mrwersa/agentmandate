@@ -20,15 +20,16 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.14.0
+agentmandate~=0.15.0
 ```
 
 ## Versioned authority artifacts
 
 The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
-`mandate cedar`, and `mandate reach --ir` CLI surfaces are public. The Python records remain private
-and are not exported from `agentmandate`. Their explicit artifact versions
-separate compatibility from package releases:
+`mandate producers`, `mandate cedar`, and reviewed `mandate reach` attachment
+surfaces are public. The Python records remain private and are not exported
+from `agentmandate`. Their explicit artifact versions separate compatibility
+from package releases:
 
 - `ir_version` changes when graph records, relations, or canonicalization
   change incompatibly.
@@ -47,6 +48,9 @@ separate compatibility from package releases:
   changes incompatibly. Cedar alignment and revision output use the independent
   `agentmandate.cedar-alignment/v1` and
   `agentmandate.cedar-effective-diff/v1` presentation schemas.
+- `producer_boundary_version` changes when the finite-producer evidence record
+  changes incompatibly. Producer-aware reach output uses the independent,
+  canonical `agentmandate.producers/v1` result schema and closed finding codes.
 
 Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
@@ -83,29 +87,37 @@ unchanged manifest authority on uncertainty. Their JSON names all input and
 per-request evidence digests. The presentation is not accepted as an authority
 artifact, and the private Python records remain unsupported.
 
+`mandate producers validate` likewise proves boundary structure only.
+Manifest-mode `reach` rechecks every closed producer profile, caller-mapped
+source digest, exact deployment and reviewed partition selection, complete
+monotone run, evidence state, and expiry. Its canonical result is presentation,
+not an authority input. Findings preserve baseline manifest authority and exit
+1 after complete output. Malformed or incomplete inputs exit 2 with empty
+stdout. IR, SARIF, Mermaid, condition, and delegation composition are refused
+before any input is read or output written.
+
 ## What is most likely to change
 
 The manifest schema and the way standalone evidence profiles compose with it.
 Conditional authority and delegation analysis now have public, versioned
 artifact and command surfaces, but they remain reviewed attachments rather than
 new manifest-v1 meanings. Authority continuity has private experimental records
-and analysis only. Finite producer cardinality likewise has a private versioned
-record, closed IR profile, analysis, and canonical
-`agentmandate.producers/v1` result envelope with stable finding codes. The
-result is unsupported private presentation and is not accepted as authority
-input. An explicitly synthetic accepted fixture supplies the clean path while
-the real IAM migration remains unreviewed. Public exposure remains deferred
-pending explicit composition behavior and CLI failure tests. Structural
-validity never makes any of these records trusted mandate authority.
+and analysis only. Finite producer cardinality has a public validate-then-consume
+CLI around its versioned boundary, closed IR profile, fail-closed analysis, and
+canonical `agentmandate.producers/v1` result envelope. Its Python records remain
+private, and the result is not accepted as authority input. An explicitly
+synthetic accepted fixture supplies the clean path while the real IAM migration
+remains unreviewed. Structural validity never makes any of these records trusted
+mandate authority.
 
 Three areas remain deliberately under-modelled:
 
 - **Data-flow labels.** Detecting that a read tool feeds an exfiltration path
   needs taint labels the manifest does not carry today.
-- **Resource relationships and bounded producers.** Manifest v1 cannot express
-  fixed ownership or containment relationships, or a finite producer boundary
-  between one binding and `unbounded: true`. Private producer analysis does not
-  make that boundary a supported manifest or command-line contract.
+- **Resource relationships and quantities.** Manifest v1 cannot express fixed
+  ownership or containment relationships. Finite producer cardinality stays a
+  reviewed attachment rather than manifest meaning; evidence-backed value
+  relationships still lack a selected quantity contract.
 - **Authority continuity.** The public commands do not yet reconcile whether
   consumed state stayed attached to one mandate across a session, handoff, or
   policy revision. This remains separate from general cross-session search.

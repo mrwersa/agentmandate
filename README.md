@@ -276,6 +276,7 @@ all.
 | `mandate inventory` | Structurally validates a dynamic-inventory declaration without accepting its membership as authority |
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |
 | `mandate delegations` | Structurally validates a delegation attachment or chain without accepting it as authority |
+| `mandate producers` | Structurally validates a finite-producer boundary without accepting its sources as authority |
 | `mandate cedar` | Structurally validates managed policy evidence, aligns exact decisions with reviewed authority, or compares matched requests across policy revisions |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing. Reads [OpenTelemetry traces](https://github.com/mrwersa/agentmandate/blob/main/docs/traces.md) with `--otel` |
@@ -305,6 +306,30 @@ a canonical, hashed result envelope containing the search boundary, ordered
 counterexamples, and provenance graph. There is deliberately no `import`
 command: parsing evidence is not accepting authority. The format and hash
 boundaries are specified in [docs/authority-ir.md](docs/authority-ir.md).
+
+Reviewed finite-producer evidence can replace an `unbounded: true` transition
+with an evidence-backed concurrent maximum for one exact deployment, output,
+and partition. Validate the boundary structurally, then pass every named source
+byte, the explicit selection, and the review date to `reach`:
+
+```bash
+mandate producers validate reviewed-boundary.json
+mandate reach mandate.yaml \
+  --producer-boundary reviewed-boundary.json \
+  --producer-source evidence/catalogue.json=catalogue.json \
+  --producer-source evidence/outcomes.json=outcomes.json \
+  --producer-source evidence/adapter.py=adapter.py \
+  --producer-selection '{"source":"evidence/adapter.py","binding":"mint_token","producer":"reviewed.provider","producer_version":"1.0","partition_argument":"tenant","partition_binding":"reviewed-tenant","output_scope":"token"}' \
+  --producer-as-of 2026-09-03 --json
+```
+
+The result is the canonical `agentmandate.producers/v1` envelope. Unreviewed,
+expired, incomplete, conflicting, mismatched, or unverifiable evidence remains
+visible as a finding and leaves the stronger manifest authority unchanged.
+Producer inputs currently refuse Authority IR, SARIF, Mermaid, conditional,
+and delegation composition before output. The boundary describes analyzed
+authority; it is not runtime quota enforcement. See
+[the bounded-producer contract](docs/bounded-producers.md).
 
 `verify` is what keeps the rest honest. A manifest nobody checks is a wish, and
 the declaration drifts from the implementation the moment somebody ships a

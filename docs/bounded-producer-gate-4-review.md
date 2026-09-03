@@ -1,12 +1,10 @@
 # Bounded Producer Gate 4 Review
 
-Status: **review complete; public exposure deferred**. The public-boundary
+Status: **review complete; CLI exposure approved**. The public-boundary
 review was performed against merged commit `11ee72e` on 3 September 2026.
 Gates 1 through 3 establish a strict artifact, closed standalone Authority IR
-profile, and fail-closed private analysis. They do not yet establish a stable
-command or public presentation contract. A subsequent private implementation
-now satisfies the presentation-stability prerequisite recorded below without
-approving exposure.
+profile, and fail-closed private analysis. Subsequent implementation satisfies
+the accepted-fixture, presentation, composition, and CLI exit conditions below.
 
 Structural validity remains separate from authority. Parsing a producer
 boundary proves neither that its source evidence is reviewed nor that its
@@ -22,24 +20,21 @@ finite capacity applies to the selected agent deployment and partition.
 | Default compatibility | Passed privately | With no producer records, the existing `analyse(mandate)` result remains byte-identical across the complete suite |
 | Accepted clean fixture | Passed synthetically | A complete fixture explicitly labels its producer, partition, reviewer, catalogue, outcomes, and adapter as synthetic; the real IAM migration remains `unreviewed` |
 | Presentation stability | Passed privately | `agentmandate.producers/v1` fixes stable finding codes, input identities, applied capacity semantics, complete Authority output, canonical SHA-256, and five canonical state fixtures |
-| Composition boundary | **Open** | Producer, condition, and delegation consumers cannot yet share one analysis/result envelope; Authority IR, SARIF, and Mermaid cannot preserve producer uncertainty |
-| CLI failure behavior | **Open** | No parser, pairing, complete-output, exit-code, or no-partial-output contract has been implemented for producer inputs |
+| Composition boundary | Passed | Producer inputs refuse Authority IR, SARIF, Mermaid, condition, and delegation composition before reading inputs or writing output |
+| CLI failure behavior | Passed | Structural validation and manifest-mode consumption implement explicit pairing, complete result output, exit 1 findings, and exit 2 no-partial-output failures |
 
 ## Closing verdict
 
-**Do not expose a producer CLI or public Python API yet.** The private
-cardinality semantics pass their implementation gate, but the public contract
-would otherwise be inferred from internal dataclasses and English messages.
-That would make unstable selection, finding, and composition behavior part of
-the supported interface without the replay boundary required of other
-authority consumers.
+**Expose the reviewed CLI and result schema; keep the Python records private.**
+The command now makes selection, finding, composition, and failure behavior
+explicit rather than asking callers to infer a contract from internal
+dataclasses or English messages. Structural validation remains separate from
+trusted manifest-mode consumption.
 
-The deferral does not reopen Gates 1 through 3. The reader, migration, IR
-profile, and private analysis remain useful experimental foundations. The
-roadmap should keep finite producer cardinality active and name the two
-remaining public exit conditions above rather than describing analysis as
-unfinished. Completing a private presentation prerequisite does not make its
-module, records, or schema a supported interface.
+Gates 1 through 3 remain the semantic foundation. Gate 4 adds only the
+validate-then-consume command boundary, versioned presentation, and explicit
+refusals. It does not add producer meaning to manifest v1 or make a result an
+authority input.
 
 ## Reproduced private semantics
 
@@ -93,9 +88,9 @@ unreviewed. This supplies deterministic public-boundary test input without
 turning IAM MCP 1.0.11 into a claim about current 1.0.23 behavior or inventing
 an accountable provider review.
 
-## Private presentation contract implemented
+## Presentation contract implemented
 
-`ProducerAnalysis.to_result()` now creates the strict private
+`ProducerAnalysis.to_result()` creates the strict
 `agentmandate.producers/v1` presentation. It includes:
 
 - the explicit evaluation date;
@@ -115,7 +110,8 @@ partition aliases, manifest and boundary digests, complete Authority shape,
 and the envelope checksum. The result is presentation only and is never
 accepted as an authority input. Canonical fixtures cover clean, bounded,
 breached, unresolved, and truncated states. No class is exported from the
-package and no command renders or consumes this schema.
+package. Producer-aware `reach --json` renders this schema directly; no command
+accepts it as authority input.
 
 Human output should use a separate `BOUNDED`/`UNRESOLVED` section. It must not
 rewrite a missing breach as proof of runtime enforcement. A producer finding
@@ -124,7 +120,7 @@ argument pairs, or unsupported composition must exit 2 with empty stdout.
 Legacy reach output must remain byte-identical when no producer inputs are
 supplied.
 
-## Proposed CLI shape, not yet approved
+## Approved CLI shape
 
 The narrowest plausible surface follows the established validate-then-consume
 boundary:
@@ -138,21 +134,21 @@ mandate reach MANIFEST \
   --producer-as-of YYYY-MM-DD
 ```
 
-`producers validate` would establish structural validity only. Manifest-mode
-`reach` would reread and revalidate the profile, verify all named source bytes,
-and apply only eligible boundaries. Boundaries and selections should be
+`producers validate` establishes structural validity only. Manifest-mode
+`reach` rereads and revalidates the profile, verifies all named source bytes,
+and applies only eligible boundaries. Boundaries and selections are
 repeatable and paired by an explicit identity rather than positional order.
-Named locator mappings are preferable because several boundaries may share
+Named locator mappings allow several boundaries to share
 the same catalogue or capture adapter. Conflicting bytes for one locator,
-missing declared locators, and undeclared locator mappings should be usage
+missing declared locators, and undeclared locator mappings are usage
 errors.
 
-This syntax is a review sketch, not a compatibility promise. A public Python
-export remains a separate decision.
+This syntax and `agentmandate.producers/v1` are public compatibility contracts.
+A public Python export remains a separate decision.
 
 ## Composition decision
 
-Public producer inputs must initially be refused in every output or analysis
+Public producer inputs are refused in every output or analysis
 mode that cannot preserve their uncertainty:
 
 - `reach --ir`: standalone producer and manifest profiles are deliberately
@@ -166,31 +162,30 @@ mode that cannot preserve their uncertainty:
 - delegation analysis: its attenuation/widening envelope cannot currently
   carry producer decisions or unresolved capacity evidence.
 
-These combinations should fail before output, as existing condition and
+These combinations fail before output, as existing condition and
 delegation combinations do. Supporting condition-plus-producer or
 delegation-plus-producer later requires one consumer to validate both closed
 profiles, perform one search, retain all findings, and define whether either
 uncertainty blocks sibling narrowing on the same tool. It must not be achieved
 by feeding one rendered result into another analyzer.
 
-## Exit criteria for a later exposure PR
+## Exit criteria for exposure
 
 1. **Complete synthetically:** commit an accountable accepted clean fixture or
    an explicitly synthetic accepted fixture with the real IAM record remaining
    unresolved.
-2. **Complete privately:** define stable finding codes and a versioned,
-   canonical result envelope with clean, bounded, breached, unresolved, and
-   truncated fixtures. Public stability begins only if a later release exposes
-   it.
-3. Implement parser and renderer tests for success, finding, usage, malformed,
+2. **Complete:** define stable finding codes and a versioned, canonical result
+   envelope with clean, bounded, breached, unresolved, and truncated fixtures;
+   this exposure release makes that presentation contract public.
+3. **Complete:** implement parser and renderer tests for success, finding, usage, malformed,
    missing-pair, conflicting-source, and no-partial-output behavior.
-4. Reject IR, SARIF, Mermaid, condition, and delegation composition before
+4. **Complete:** reject IR, SARIF, Mermaid, condition, and delegation composition before
    reading or rendering partial authority, unless a reviewed joint consumer
    and combined schema exist.
-5. Reproduce byte-identical legacy output with no producer options and rerun
+5. **Complete:** reproduce byte-identical legacy output with no producer options and rerun
    all evidence graphs through the public boundary.
-6. Record the release impact: any new command, reach option, or presentation
-   schema is a user-visible minor release under `RELEASING.md`.
+6. **Complete:** release the new command, reach options, and presentation schema
+   as a user-visible minor release under `RELEASING.md`.
 
 ## Non-goals
 
