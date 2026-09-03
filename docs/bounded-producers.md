@@ -1,6 +1,7 @@
 # Bounded Producer Contract
 
-Status: **experimental; gates 1 through 3 complete**. This is the contract for
+Status: **experimental; gates 1 through 3 complete; Gate 4 exposure deferred**.
+This is the contract for
 [#128](https://github.com/mrwersa/agentmandate/issues/128). It defines the
 minimum trust and analysis contract selected by the
 [AWS IAM cardinality evidence](evidence/aws-iam-access-keys/README.md). It does
@@ -342,13 +343,15 @@ portfolio system, price oracle, or general accounting language.
    expiry, selection mismatch, incomplete inventory, release ambiguity, and
    conservative fallback. All seven real graphs remain byte-identical with no
    boundary input.
-5. **Gate 4 — public exposure review:** challenge trust failures, containment,
-   output stability, no-partial-output behavior, and composition with existing
-   conditions/delegations before choosing any CLI or schema surface.
+5. **Gate 4 — public exposure review (complete; exposure deferred):** the
+   [recorded review](bounded-producer-gate-4-review.md) accepts the private
+   semantics but requires an accountable clean fixture, stable finding codes
+   and result envelope, explicit composition refusal, and CLI failure tests
+   before choosing any public surface.
 
 Quantity records follow their own evidence-driven gates and do not delay the
-finite-cardinality reader. Neither track is delivered until its public review
-is recorded.
+finite-cardinality reader. Finite cardinality remains private after its public
+review deferred exposure; the quantity track has not selected a contract.
 
 ## Explicit non-goals
 

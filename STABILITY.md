@@ -89,8 +89,11 @@ The manifest schema and the way standalone evidence profiles compose with it.
 Conditional authority and delegation analysis now have public, versioned
 artifact and command surfaces, but they remain reviewed attachments rather than
 new manifest-v1 meanings. Authority continuity has private experimental records
-and analysis only. Structural validity never makes any of these records trusted
-mandate authority.
+and analysis only. Finite producer cardinality likewise has a private versioned
+record, closed IR profile, and analysis, but its public exposure review is
+deferred pending a stable result envelope, accountable clean fixture, and
+explicit composition behavior. Structural validity never makes any of these
+records trusted mandate authority.
 
 Three areas remain deliberately under-modelled:
 
@@ -98,7 +101,8 @@ Three areas remain deliberately under-modelled:
   needs taint labels the manifest does not carry today.
 - **Resource relationships and bounded producers.** Manifest v1 cannot express
   fixed ownership or containment relationships, or a finite producer boundary
-  between one binding and `unbounded: true`.
+  between one binding and `unbounded: true`. Private producer analysis does not
+  make that boundary a supported manifest or command-line contract.
 - **Authority continuity.** The public commands do not yet reconcile whether
   consumed state stayed attached to one mandate across a session, handoff, or
   policy revision. This remains separate from general cross-session search.
