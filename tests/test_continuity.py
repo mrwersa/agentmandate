@@ -18,6 +18,7 @@ from agentmandate._continuity import (
     ContinuityBinding,
     ContinuityEvidence,
     ContinuityFormatError,
+    ContinuityResult,
     _agentcore_controls,
     _anthropic_axes,
     _anthropic_controls,
@@ -378,6 +379,13 @@ def _anthropic_analysis(**changes) -> ContinuityAnalysis:
     }
     arguments.update(changes)
     return analyse_continuity(load(path), **arguments)
+
+
+@pytest.mark.parametrize("analysis", [_agentcore_analysis, _anthropic_analysis])
+def test_private_continuity_result_round_trips_migrated_provider_profiles(analysis):
+    result = analysis().to_result()
+
+    assert ContinuityResult.from_json(result.to_json()) == result
 
 
 def test_agentcore_reconciliation_preserves_reviewed_control_matrix():

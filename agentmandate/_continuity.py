@@ -14,6 +14,7 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from ._ir import (
@@ -27,6 +28,7 @@ from ._ir import (
     _edge_id,
     _entity_id,
     _fact_id,
+    _from_mandate,
 )
 from ._ir import (
     Evidence as IREvidence,
@@ -41,6 +43,8 @@ CONTINUITY_BINDING_IR_ADAPTER = "agentmandate.continuity-binding-ir"
 AGENTCORE_CONTINUITY_IR_ADAPTER = "agentmandate.agentcore-continuity-ir"
 ANTHROPIC_CONTINUITY_IR_ADAPTER = "agentmandate.anthropic-continuity-ir"
 CONTINUITY_IR_ADAPTER_VERSION = 1
+CONTINUITY_RESULT_VERSION = 1
+CONTINUITY_RESULT_SCHEMA = "agentmandate.continuity/v1"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
@@ -59,6 +63,21 @@ _TRANSITIONS = frozenset(
 )
 _OUTCOMES = frozenset(
     {"allow", "deny", "stale_session", "budget_reached", "rejected_before_network"}
+)
+_FINDING_CODES = frozenset(
+    {
+        "continuity.source-untrusted",
+        "continuity.evidence-untrusted",
+        "continuity.binding-untrusted",
+        "continuity.state-reset",
+        "continuity.state-unresolved",
+        "continuity.authority-widens",
+        "continuity.admission-overshot",
+        "continuity.continuity-unresolved",
+        "continuity.derivation-integrity-unresolved",
+        "continuity.isolation-unresolved",
+        "continuity.complete-mediation-unresolved",
+    }
 )
 
 
@@ -1795,6 +1814,14 @@ class ContinuityFinding:
     message: str
     support: tuple[str, ...]
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "code": self.code,
+            "transition": self.transition,
+            "message": self.message,
+            "support": list(self.support),
+        }
+
 
 @dataclass(frozen=True)
 class ContinuityAlignment:
@@ -1804,6 +1831,14 @@ class ContinuityAlignment:
     status: str
     strength: str
     support: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "check": self.check,
+            "status": self.status,
+            "strength": self.strength,
+            "support": list(self.support),
+        }
 
 
 @dataclass(frozen=True)
@@ -1828,6 +1863,52 @@ class ContinuityOutcome:
     assumptions: tuple[str, ...]
     support: tuple[str, ...]
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "provider": self.provider,
+            "transition": self.transition,
+            "kind": self.kind,
+            "dimension": self.dimension,
+            "unit": self.unit,
+            "limit_before": self.limit_before,
+            "limit_after": self.limit_after,
+            "completed_values": list(self.completed_values),
+            "state": self.state,
+            "authority_change": self.authority_change,
+            "admission": self.admission,
+            "comparability": self.comparability,
+            "issuer_amendment": self.issuer_amendment,
+            "safe_continuation": self.safe_continuation,
+            "alignments": [item.as_dict() for item in self.alignments],
+            "assumptions": list(self.assumptions),
+            "support": list(self.support),
+        }
+
+
+@dataclass(frozen=True)
+class ContinuityManifestIdentity:
+    locator: str
+    semantic_sha256: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {"locator": self.locator, "semantic_sha256": self.semantic_sha256}
+
+
+@dataclass(frozen=True)
+class ContinuityArtifactIdentity:
+    kind: str
+    id: str
+    content_sha256: str
+    semantic_sha256: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "kind": self.kind,
+            "id": self.id,
+            "content_sha256": self.content_sha256,
+            "semantic_sha256": self.semantic_sha256,
+        }
+
 
 @dataclass(frozen=True)
 class ContinuityAnalysis:
@@ -1837,12 +1918,430 @@ class ContinuityAnalysis:
     as_of: str
     outcomes: tuple[ContinuityOutcome, ...]
     findings: tuple[ContinuityFinding, ...]
+    manifest: ContinuityManifestIdentity
+    provider: ContinuityArtifactIdentity
+    binding: ContinuityArtifactIdentity | None
 
     @property
     def clean(self) -> bool:
         return not self.findings and all(
             item.safe_continuation == "satisfied" for item in self.outcomes
         )
+
+    def to_result(self) -> ContinuityResult:
+        """Return the private versioned presentation envelope."""
+        return ContinuityResult(
+            CONTINUITY_RESULT_VERSION,
+            CONTINUITY_RESULT_SCHEMA,
+            self.as_of,
+            self.manifest,
+            self.provider,
+            self.binding,
+            self.authority.as_dict(),
+            self.outcomes,
+            self.findings,
+        )
+
+
+@dataclass(frozen=True)
+class ContinuityResult:
+    """Private canonical presentation; never accepted as authority input."""
+
+    result_version: int
+    schema: str
+    as_of: str
+    manifest: ContinuityManifestIdentity
+    provider: ContinuityArtifactIdentity
+    binding: ContinuityArtifactIdentity | None
+    authority: dict[str, Any]
+    outcomes: tuple[ContinuityOutcome, ...]
+    findings: tuple[ContinuityFinding, ...]
+
+    def _body_dict(self) -> dict[str, Any]:
+        return {
+            "result_version": self.result_version,
+            "schema": self.schema,
+            "as_of": self.as_of,
+            "inputs": {
+                "manifest": self.manifest.as_dict(),
+                "provider": self.provider.as_dict(),
+                "binding": None if self.binding is None else self.binding.as_dict(),
+            },
+            "authority": self.authority,
+            "outcomes": [item.as_dict() for item in self.outcomes],
+            "findings": [item.as_dict() for item in self.findings],
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        body = self._body_dict()
+        _parse_continuity_result_body(body)
+        return {
+            **body,
+            "result_sha256": hashlib.sha256(_canonical_json(body).encode()).hexdigest(),
+        }
+
+    def to_json(self) -> str:
+        return _canonical_json(self.as_dict()) + "\n"
+
+    @classmethod
+    def from_json(cls, text: str) -> ContinuityResult:
+        return _continuity_result_from_json(text)
+
+
+_ALIGNMENT_CHECKS = (
+    "continuity",
+    "derivation_integrity",
+    "isolation",
+    "complete_mediation",
+)
+_ALIGNMENT_STATUSES = frozenset({"established", "conditional", "unresolved"})
+_ALIGNMENT_STRENGTHS = frozenset(
+    {"observed", "documented", "platform_verified", "configured", "unestablished"}
+)
+_STATES = frozenset({"preserved", "reset", "unresolved"})
+_AUTHORITY_CHANGES = frozenset({"stable", "widens", "tightens", "unresolved"})
+_ADMISSIONS = frozenset({"within_bound", "overshot", "unresolved"})
+_COMPARABILITY = frozenset({"established", "unresolved"})
+_ISSUER_AMENDMENTS = frozenset({"not_required", "approved", "unresolved"})
+_SAFE_CONTINUATION = frozenset({"satisfied", "violated", "unresolved"})
+_ARTIFACT_KINDS = frozenset(
+    {"continuity-binding", "agentcore-continuity", "anthropic-continuity"}
+)
+
+
+def _result_record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ContinuityFormatError(f"continuity result {path} must be an object")
+    missing = sorted(fields - value.keys())
+    if missing:
+        raise ContinuityFormatError(
+            f"continuity result {path} is missing field {missing[0]!r}"
+        )
+    extra = sorted(value.keys() - fields)
+    if extra:
+        raise ContinuityFormatError(
+            f"continuity result {path} has unknown field {extra[0]!r}"
+        )
+    return value
+
+
+def _result_strings(value: Any, path: str, *, allow_empty: bool = True) -> tuple[str, ...]:
+    if not isinstance(value, list) or (not allow_empty and not value):
+        raise ContinuityFormatError(f"continuity result {path} must be an array")
+    items = tuple(_string(item, f"result{path}/{index}") for index, item in enumerate(value))
+    if list(items) != sorted(set(items)):
+        raise ContinuityFormatError(
+            f"continuity result {path} must contain sorted unique strings"
+        )
+    return items
+
+
+def _result_identity(value: Any, path: str) -> ContinuityArtifactIdentity:
+    record = _result_record(
+        value, path, {"kind", "id", "content_sha256", "semantic_sha256"}
+    )
+    kind = _string(record["kind"], f"result{path}/kind")
+    if kind not in _ARTIFACT_KINDS:
+        raise ContinuityFormatError(f"continuity result {path}/kind is unsupported")
+    return ContinuityArtifactIdentity(
+        kind,
+        _string(record["id"], f"result{path}/id"),
+        _digest(record["content_sha256"], f"result{path}/content_sha256"),
+        _digest(record["semantic_sha256"], f"result{path}/semantic_sha256"),
+    )
+
+
+def _validate_result_authority(value: Any) -> dict[str, Any]:
+    fields = {
+        "reachable_tools",
+        "effects",
+        "ungated_irreversible",
+        "service_principal_tools",
+        "max_extractable",
+        "breaches",
+        "depth",
+        "truncated",
+    }
+    authority = _result_record(value, "/authority", fields)
+    for field in ("reachable_tools", "ungated_irreversible", "service_principal_tools"):
+        _result_strings(authority[field], f"/authority/{field}")
+    effects = authority["effects"]
+    if not isinstance(effects, list) or any(
+        not isinstance(pair, list) or len(pair) != 2 for pair in effects
+    ):
+        raise ContinuityFormatError(
+            "continuity result /authority/effects must contain string pairs"
+        )
+    pairs = [
+        tuple(
+            _string(item, f"result/authority/effects/{index}/{part}")
+            for part, item in enumerate(pair)
+        )
+        for index, pair in enumerate(effects)
+    ]
+    if pairs != sorted(set(pairs)):
+        raise ContinuityFormatError(
+            "continuity result /authority/effects must be sorted and unique"
+        )
+    maximum = authority["max_extractable"]
+    if maximum is not None:
+        money = _result_record(maximum, "/authority/max_extractable", {"amount", "currency"})
+        amount = _string(money["amount"], "result/authority/max_extractable/amount")
+        try:
+            parsed = Decimal(amount)
+        except InvalidOperation as exc:
+            raise ContinuityFormatError(
+                "continuity result /authority/max_extractable/amount must be decimal"
+            ) from exc
+        if not parsed.is_finite() or str(parsed) != amount:
+            raise ContinuityFormatError(
+                "continuity result /authority/max_extractable/amount must be canonical"
+            )
+        _string(money["currency"], "result/authority/max_extractable/currency")
+    breaches = authority["breaches"]
+    if not isinstance(breaches, list):
+        raise ContinuityFormatError("continuity result /authority/breaches must be an array")
+    for index, item in enumerate(breaches):
+        breach = _result_record(
+            item, f"/authority/breaches/{index}", {"kind", "detail", "path"}
+        )
+        _string(breach["kind"], f"result/authority/breaches/{index}/kind")
+        _string(breach["detail"], f"result/authority/breaches/{index}/detail")
+        path = breach["path"]
+        if not isinstance(path, list) or not path:
+            raise ContinuityFormatError(
+                f"continuity result /authority/breaches/{index}/path must be non-empty"
+            )
+        for step, rendered in enumerate(path):
+            _string(rendered, f"result/authority/breaches/{index}/path/{step}")
+    _integer(authority["depth"], "result/authority/depth")
+    _boolean(authority["truncated"], "result/authority/truncated")
+    return authority
+
+
+def _parse_alignment(value: Any, path: str) -> ContinuityAlignment:
+    record = _result_record(value, path, {"check", "status", "strength", "support"})
+    check = _string(record["check"], f"result{path}/check")
+    status = _string(record["status"], f"result{path}/status")
+    strength = _string(record["strength"], f"result{path}/strength")
+    if check not in _ALIGNMENT_CHECKS or status not in _ALIGNMENT_STATUSES:
+        raise ContinuityFormatError(f"continuity result {path} has unsupported alignment state")
+    if strength not in _ALIGNMENT_STRENGTHS:
+        raise ContinuityFormatError(f"continuity result {path}/strength is unsupported")
+    return ContinuityAlignment(
+        check, status, strength, _result_strings(record["support"], f"{path}/support")
+    )
+
+
+def _parse_outcomes(value: Any) -> tuple[ContinuityOutcome, ...]:
+    if not isinstance(value, list) or not value:
+        raise ContinuityFormatError("continuity result /outcomes must be a non-empty array")
+    fields = {
+        "provider",
+        "transition",
+        "kind",
+        "dimension",
+        "unit",
+        "limit_before",
+        "limit_after",
+        "completed_values",
+        "state",
+        "authority_change",
+        "admission",
+        "comparability",
+        "issuer_amendment",
+        "safe_continuation",
+        "alignments",
+        "assumptions",
+        "support",
+    }
+    items = []
+    for index, item in enumerate(value):
+        path = f"/outcomes/{index}"
+        record = _result_record(item, path, fields)
+        completed = record["completed_values"]
+        if not isinstance(completed, list) or not completed:
+            raise ContinuityFormatError(
+                f"continuity result {path}/completed_values must be non-empty"
+            )
+        completed_values = tuple(
+            _integer(number, f"result{path}/completed_values/{offset}")
+            for offset, number in enumerate(completed)
+        )
+        alignments = record["alignments"]
+        if not isinstance(alignments, list):
+            raise ContinuityFormatError(f"continuity result {path}/alignments must be an array")
+        parsed_alignments = tuple(
+            _parse_alignment(alignment, f"{path}/alignments/{offset}")
+            for offset, alignment in enumerate(alignments)
+        )
+        if tuple(alignment.check for alignment in parsed_alignments) != _ALIGNMENT_CHECKS:
+            raise ContinuityFormatError(
+                f"continuity result {path}/alignments must cover the canonical checks"
+            )
+        state = _string(record["state"], f"result{path}/state")
+        authority_change = _string(
+            record["authority_change"], f"result{path}/authority_change"
+        )
+        admission = _string(record["admission"], f"result{path}/admission")
+        comparability = _string(record["comparability"], f"result{path}/comparability")
+        amendment = _string(record["issuer_amendment"], f"result{path}/issuer_amendment")
+        verdict = _string(record["safe_continuation"], f"result{path}/safe_continuation")
+        if (
+            state not in _STATES
+            or authority_change not in _AUTHORITY_CHANGES
+            or admission not in _ADMISSIONS
+            or comparability not in _COMPARABILITY
+            or amendment not in _ISSUER_AMENDMENTS
+            or verdict not in _SAFE_CONTINUATION
+        ):
+            raise ContinuityFormatError(f"continuity result {path} has an unsupported outcome")
+        outcome = ContinuityOutcome(
+            _string(record["provider"], f"result{path}/provider"),
+            _string(record["transition"], f"result{path}/transition"),
+            _string(record["kind"], f"result{path}/kind"),
+            _string(record["dimension"], f"result{path}/dimension"),
+            _string(record["unit"], f"result{path}/unit"),
+            _integer(record["limit_before"], f"result{path}/limit_before", minimum=1),
+            _integer(record["limit_after"], f"result{path}/limit_after", minimum=1),
+            completed_values,
+            state,
+            authority_change,
+            admission,
+            comparability,
+            amendment,
+            verdict,
+            parsed_alignments,
+            _result_strings(record["assumptions"], f"{path}/assumptions"),
+            _result_strings(record["support"], f"{path}/support"),
+        )
+        if verdict != _safe_continuation(
+            outcome.state,
+            outcome.authority_change,
+            outcome.admission,
+            outcome.comparability,
+            outcome.issuer_amendment,
+            outcome.alignments,
+        ):
+            raise ContinuityFormatError(
+                f"continuity result {path}/safe_continuation is inconsistent"
+            )
+        items.append(outcome)
+    transitions = [item.transition for item in items]
+    if transitions != sorted(set(transitions)):
+        raise ContinuityFormatError(
+            "continuity result /outcomes must have sorted unique transition identities"
+        )
+    return tuple(items)
+
+
+def _parse_findings(value: Any) -> tuple[ContinuityFinding, ...]:
+    if not isinstance(value, list):
+        raise ContinuityFormatError("continuity result /findings must be an array")
+    items = []
+    for index, item in enumerate(value):
+        path = f"/findings/{index}"
+        record = _result_record(item, path, {"code", "transition", "message", "support"})
+        code = _string(record["code"], f"result{path}/code")
+        if code not in _FINDING_CODES:
+            raise ContinuityFormatError(f"continuity result {path}/code is unsupported")
+        transition = record["transition"]
+        if transition is not None:
+            transition = _string(transition, f"result{path}/transition")
+        items.append(
+            ContinuityFinding(
+                code,
+                transition,
+                _string(record["message"], f"result{path}/message"),
+                _result_strings(record["support"], f"{path}/support"),
+            )
+        )
+    keys = [(item.code, item.transition, item.message, item.support) for item in items]
+    if len(keys) != len(set(keys)):
+        raise ContinuityFormatError("continuity result /findings must be unique")
+    return tuple(items)
+
+
+def _parse_continuity_result_body(value: Any) -> ContinuityResult:
+    root = _result_record(
+        value,
+        "/",
+        {"result_version", "schema", "as_of", "inputs", "authority", "outcomes", "findings"},
+    )
+    if (
+        type(root["result_version"]) is not int
+        or root["result_version"] != CONTINUITY_RESULT_VERSION
+    ):
+        raise ContinuityFormatError("unsupported continuity result version")
+    if root["schema"] != CONTINUITY_RESULT_SCHEMA:
+        raise ContinuityFormatError("unsupported continuity result schema")
+    inputs = _result_record(root["inputs"], "/inputs", {"manifest", "provider", "binding"})
+    manifest = _result_record(
+        inputs["manifest"], "/inputs/manifest", {"locator", "semantic_sha256"}
+    )
+    provider = _result_identity(inputs["provider"], "/inputs/provider")
+    if provider.kind == "continuity-binding":
+        raise ContinuityFormatError("continuity result provider identity has the wrong kind")
+    binding = inputs["binding"]
+    parsed_binding = None if binding is None else _result_identity(binding, "/inputs/binding")
+    if parsed_binding is not None and parsed_binding.kind != "continuity-binding":
+        raise ContinuityFormatError("continuity result binding identity has the wrong kind")
+    outcomes = _parse_outcomes(root["outcomes"])
+    expected_provider = (
+        "aws-agentcore" if provider.kind == "agentcore-continuity" else "Anthropic"
+    )
+    if any(outcome.provider != expected_provider for outcome in outcomes):
+        raise ContinuityFormatError(
+            "continuity result outcome provider does not match its input profile"
+        )
+    findings = _parse_findings(root["findings"])
+    transitions = {outcome.transition for outcome in outcomes}
+    if any(
+        finding.transition is not None and finding.transition not in transitions
+        for finding in findings
+    ):
+        raise ContinuityFormatError(
+            "continuity result finding cites an unknown transition"
+        )
+    return ContinuityResult(
+        CONTINUITY_RESULT_VERSION,
+        CONTINUITY_RESULT_SCHEMA,
+        _utc(root["as_of"], "result.as_of"),
+        ContinuityManifestIdentity(
+            _string(manifest["locator"], "result.inputs.manifest.locator"),
+            _digest(
+                manifest["semantic_sha256"], "result.inputs.manifest.semantic_sha256"
+            ),
+        ),
+        provider,
+        parsed_binding,
+        _validate_result_authority(root["authority"]),
+        outcomes,
+        findings,
+    )
+
+
+def _continuity_result_from_json(text: str) -> ContinuityResult:
+    value = _load(text, "continuity result")
+    root = _result_record(
+        value,
+        "/",
+        {
+            "result_version",
+            "schema",
+            "as_of",
+            "inputs",
+            "authority",
+            "outcomes",
+            "findings",
+            "result_sha256",
+        },
+    )
+    claimed = _digest(root.pop("result_sha256"), "result.result_sha256")
+    actual = hashlib.sha256(_canonical_json(root).encode()).hexdigest()
+    if claimed != actual:
+        raise ContinuityFormatError("continuity result SHA-256 does not match")
+    return _parse_continuity_result_body(root)
 
 
 def _evaluation_time(as_of: datetime) -> str:
@@ -2368,9 +2867,37 @@ def analyse_continuity(
     unique_findings = tuple(
         dict.fromkeys((item.code, item.transition, item.message, item.support) for item in findings)
     )
+    manifest_source = next(
+        source for source in _from_mandate(mandate).sources if source.id == "source:mandate"
+    )
+    provider_source = provider_graph.sources[0]
+    provider_identity = ContinuityArtifactIdentity(
+        provider_kind,
+        (
+            canonical_provider.binding
+            if isinstance(canonical_provider, AgentCoreContinuity)
+            else canonical_provider.binding_sha256
+        ),
+        provider_source.content_sha256 or "",
+        provider_source.semantic_sha256,
+    )
+    binding_identity = None
+    if canonical_binding is not None and binding_graph is not None:
+        binding_source = binding_graph.sources[0]
+        binding_identity = ContinuityArtifactIdentity(
+            "continuity-binding",
+            canonical_binding.id,
+            binding_source.content_sha256 or "",
+            binding_source.semantic_sha256,
+        )
     return ContinuityAnalysis(
         authority,
         evaluated_at,
         tuple(outcomes),
         tuple(ContinuityFinding(*item) for item in unique_findings),
+        ContinuityManifestIdentity(
+            manifest_source.locator, manifest_source.semantic_sha256
+        ),
+        provider_identity,
+        binding_identity,
     )

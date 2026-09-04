@@ -427,9 +427,10 @@ stronger result.
    byte-identical manifest authority on trust failure. No public Python records.
 5. **Gate 4 — public exposure review (complete; exposure deferred):** the
    [review](authority-continuity-gate-4-review.md) confirms the private
-   semantics but keeps them private until a versioned result envelope, explicit
-   composition refusals, and CLI exit/no-partial-output tests are complete. A
-   complete explicitly synthetic fixture supplies the accepted clean path.
+   semantics but keeps them private until explicit composition refusals and CLI
+   exit/no-partial-output tests are complete. A complete explicitly synthetic
+   fixture supplies the accepted clean path, and `agentmandate.continuity/v1`
+   supplies the private canonical presentation envelope.
 
 This initiative remains experimental and does not block 1.0. The generalized
 search problem across arbitrary durable agents, memories and sessions remains

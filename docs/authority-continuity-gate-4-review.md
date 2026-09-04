@@ -23,7 +23,7 @@ establish that join.
 | Mandate binding | Partial | The AgentCore path has a digest-bound signed-binding evaluation, but migration remains unreviewed and the zero-dependency core intentionally does not perform Ed25519 verification; Anthropic has no provider-native mandate join |
 | Safe-continuation semantics | Passed privately | Each outcome now keeps comparability, issuer-amendment state, and a three-valued verdict separate; tightening can satisfy the property, while missing joins, comparison, amendment treatment, or required alignments remain unresolved |
 | Accepted clean fixture | Passed synthetically | A complete fixture explicitly labels its mandate, binding, boundary, provider control, reviewer, and sources as synthetic; both real migrations remain `unreviewed` |
-| Presentation stability | Open | `ContinuityAnalysis` is an internal dataclass with no versioned envelope, strict result reader, checksum, closed finding-code registry, or canonical state fixtures |
+| Presentation stability | Passed privately | `agentmandate.continuity/v1` has a strict canonical reader, checksum, closed finding-code registry, complete input identities and manifest Authority, and eight canonical state fixtures |
 | Composition boundary | Open | IR is rejected by the private profile boundary, but no public pre-I/O refusal matrix exists for SARIF, Mermaid, OTel, conditions, delegations, producers, or Cedar analyses |
 | CLI failure behavior | Open | No public parser, renderer, explicit input pairing, exit-code tests, or complete-output/no-partial-output tests exist |
 
@@ -36,11 +36,11 @@ codes an accidental compatibility contract. More importantly, it would ask a
 caller to infer safe continuation from three axes that are intentionally
 independent.
 
-The next work is presentation and boundary work, not another provider
-experiment. Public exposure can be reconsidered after the result schema and
-CLI prove both exit-0 and exit-1 paths and refuse compositions that cannot
-preserve uncertainty. Manifest version 1, ordinary reachability, and the
-public Python API remain unchanged.
+The next work is composition and CLI boundary review, not another provider
+experiment. Public exposure can be reconsidered after the CLI proves both
+exit-0 and exit-1 paths and refuses compositions that cannot preserve
+uncertainty. Manifest version 1, ordinary reachability, and the public Python
+API remain unchanged.
 
 ## Semantics reproduced by the review
 
@@ -126,10 +126,9 @@ changing one side from `platform_verified` to `exclusive_adapter` makes the
 join unresolved. The real AgentCore and Anthropic migrations remain unreviewed
 canonical finding paths and are not promoted retrospectively.
 
-## Presentation contract required
+## Presentation contract implemented privately
 
-A versioned canonical result, provisionally `agentmandate.continuity/v1`, must
-include:
+The versioned canonical `agentmandate.continuity/v1` result includes:
 
 - evaluation time and complete manifest `Authority`, including depth and
   truncation;
@@ -142,12 +141,12 @@ include:
   and
 - findings with stable machine-readable codes and complete provenance.
 
-The schema name is a placeholder until implementation review. The strict
-reader must enforce exact fields, types, ordering, closed vocabularies,
+The strict reader enforces exact fields, types, ordering, closed vocabularies,
 canonical UTC time, complete Authority shape, semantic identities, and an
-envelope checksum. Canonical fixtures must cover at least satisfied, reset,
-widened, tightened, overshot, unresolved, untrusted, and truncated results.
-The result is presentation only and must never be accepted as authority input.
+envelope checksum. Canonical fixtures cover satisfied, reset, widened,
+tightened, overshot, unresolved, untrusted, and truncated results. The result
+is presentation only and is never accepted as authority input. Its Python
+records and schema remain private and unsupported.
 
 Human output must show manifest authority separately from transition outcomes
 and assumptions. A finding exits 1 only after complete human or JSON output.
@@ -211,9 +210,9 @@ rendered result must never be fed into another analyzer as authority.
 2. **Complete synthetically:** commit an accountable or explicitly synthetic
    accepted fixture that reaches a genuine clean/satisfied path while leaving
    the real unreviewed migrations honest.
-3. Implement a strict versioned result envelope, closed finding codes, checksum,
-   and canonical satisfied, unsafe, unresolved, untrusted, and truncated
-   fixtures.
+3. **Complete privately:** implement a strict versioned result envelope, closed
+   finding codes, checksum, and canonical satisfied, reset, widened, tightened,
+   overshot, unresolved, untrusted, and truncated fixtures.
 4. Review a validate-then-consume CLI shape with explicit artifact identity,
    source pairing, binding requirements, UTC evaluation time, human and JSON
    rendering, exit 0/1/2, complete-output, and no-partial-output tests.

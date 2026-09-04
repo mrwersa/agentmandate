@@ -39,8 +39,8 @@ model initiatives completed together. The present frontier is:
 | State | Initiatives |
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, and finite producer cardinality |
-| **Active** | Authority continuity has strict readers, closed IR profiles, private reconciliation, an explicit private safe-continuation verdict, a synthetic accepted clean fixture, and a [Gate 4 review that defers exposure](docs/authority-continuity-gate-4-review.md) |
-| **Ready next** | Add the versioned continuity result envelope, then composition refusals and CLI failure tests |
+| **Active** | Authority continuity has strict readers, closed IR profiles, private reconciliation, an explicit private safe-continuation verdict, a synthetic accepted clean fixture, a private versioned result envelope, and a [Gate 4 review that defers exposure](docs/authority-continuity-gate-4-review.md) |
+| **Ready next** | Add composition refusals, then review the CLI shape and its exit/no-partial-output tests |
 | **Evidence-blocked** | Resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
