@@ -20,9 +20,7 @@ from agentmandate.reach import analyse
 ROOT = Path(__file__).parents[1]
 EVIDENCE = ROOT / "docs" / "evidence" / "agentcore-refund-policy"
 
-_spec = importlib.util.spec_from_file_location(
-    "measure_analysis", EVIDENCE / "measure_analysis.py"
-)
+_spec = importlib.util.spec_from_file_location("measure_analysis", EVIDENCE / "measure_analysis.py")
 assert _spec is not None and _spec.loader is not None
 measure_analysis = importlib.util.module_from_spec(_spec)
 sys.modules["measure_analysis"] = measure_analysis
@@ -269,9 +267,7 @@ def test_live_candidate_preserves_the_boundary_and_widens_the_exact_request() ->
     candidate_contents = contents(candidate)
     baseline.verify_sources(baseline_contents)
     candidate.verify_sources(candidate_contents)
-    assert baseline.to_json() == (EVIDENCE / "managed-oracle-v1.json").read_text(
-        encoding="utf-8"
-    )
+    assert baseline.to_json() == (EVIDENCE / "managed-oracle-v1.json").read_text(encoding="utf-8")
     assert candidate.to_json() == (EVIDENCE / "candidate-managed-oracle-v1.json").read_text(
         encoding="utf-8"
     )
@@ -293,12 +289,8 @@ def test_live_candidate_preserves_the_boundary_and_widens_the_exact_request() ->
     assert all(len(item.support) == 6 for item in result.changes)
     assert read_json("candidate-allow-request.json") == read_json("allow-request.json")
     assert read_json("candidate-widen-request.json") == read_json("deny-request.json")
-    assert read_json("candidate-tools-list-request.json") == read_json(
-        "tools-list-request.json"
-    )
-    assert read_json("candidate-tools-list-response.json") == read_json(
-        "tools-list-response.json"
-    )
+    assert read_json("candidate-tools-list-request.json") == read_json("tools-list-request.json")
+    assert read_json("candidate-tools-list-response.json") == read_json("tools-list-response.json")
     widen_text = read_json("candidate-widen-response.json")["result"]["content"][0]["text"]
     assert json.loads(widen_text) == {
         "amount": 2000,
@@ -434,9 +426,7 @@ def test_managed_control_capture_rejects_wrong_outcomes_and_inventory(tmp_path: 
     _write_control_raw(raw)
     response = json.loads((raw / "agentmandate-paper-noop-500.raw").read_text(encoding="utf-8"))
     response["id"] = "wrong"
-    (raw / "agentmandate-paper-noop-500.raw").write_text(
-        json.dumps(response), encoding="utf-8"
-    )
+    (raw / "agentmandate-paper-noop-500.raw").write_text(json.dumps(response), encoding="utf-8")
     with pytest.raises(ValueError, match="response does not match"):
         capture_controls.capture(raw, tmp_path / "bad-response")
 
@@ -627,8 +617,10 @@ def _write_binding_raw(root: Path) -> None:
         "workloadIdentityDetails": {"workloadIdentityArn": "present-only-in-raw"},
     }
     (root / "gateway-state.raw").write_text(json.dumps(gateway), encoding="utf-8")
-    budget = (EVIDENCE / "binding-policy.dogwood").read_text(encoding="utf-8").replace(
-        "<reviewed-gateway-binding>", "raw-gateway-resource"
+    budget = (
+        (EVIDENCE / "binding-policy.dogwood")
+        .read_text(encoding="utf-8")
+        .replace("<reviewed-gateway-binding>", "raw-gateway-resource")
     )
     permit = (
         "permit (principal is AgentCore::IamEntity, "
@@ -673,10 +665,7 @@ def _write_binding_raw(root: Path) -> None:
             "isError": True,
             "_meta": {
                 "debug": {
-                    "text": (
-                        "not authorized to perform: "
-                        "bedrock-agentcore:GetWorkloadAccessToken"
-                    )
+                    "text": ("not authorized to perform: bedrock-agentcore:GetWorkloadAccessToken")
                 }
             },
         }
@@ -934,29 +923,59 @@ def test_transition_events_regenerate_the_repeated_summary(tmp_path: Path) -> No
 
     capture_transition_repetition.capture(events, output)
 
-    assert output.read_bytes() == (
-        EVIDENCE / "temporal-transition-confirmation-summary.json"
-    ).read_bytes()
+    assert (
+        output.read_bytes()
+        == (EVIDENCE / "temporal-transition-confirmation-summary.json").read_bytes()
+    )
+    result = json.loads(output.read_text())
+    assert result["transition_confirmation_version"] == 3
+    assert result["results"] == {
+        "alpha_equivalent_revision_changed": 10,
+        "byte_identical_revision_unchanged": 10,
+        "byte_identical_second_request_denied": 10,
+        "description_only_revision_changed": True,
+        "description_only_statement_changed": False,
+        "fresh_successor_allow_then_deny": 21,
+        "maximum_transition_seconds": 15.377992,
+        "predecessor_session_rejected_as_stale": 21,
+        "whitespace_only_revision_changed": 10,
+    }
 
 
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [
         (
-            lambda value: value["byte_identical_trials"][0]["update"][
-                "submitted_request"
-            ]["definition"]["policy"].update(statement="forbid;"),
+            lambda value: value["byte_identical_trials"][0]["update"]["submitted_request"][
+                "definition"
+            ]["policy"].update(statement="forbid;"),
             "submitted policy",
         ),
         (
-            lambda value: value["byte_identical_trials"][0]["update"][
-                "managed_response"
-            ].update(status="ACTIVE"),
+            lambda value: value["byte_identical_trials"][0]["update"]["managed_response"].update(
+                status="ACTIVE"
+            ),
             "submitted policy",
         ),
         (
             lambda value: value["alpha_equivalent_trials"][0].update(style="a"),
             "invalid identity",
+        ),
+        (
+            lambda value: value["whitespace_only_trials"][0].update(variant="compact"),
+            "invalid identity",
+        ),
+        (
+            lambda value: value["alpha_equivalent_trials"][0]["recovery_after_call"].update(
+                derived_outcome="allow"
+            ),
+            "reviewed request and outcome",
+        ),
+        (
+            lambda value: value["byte_identical_trials"][0]["after_call"].update(
+                session_alias="different-session"
+            ),
+            "changed session",
         ),
     ],
 )
@@ -970,6 +989,9 @@ def test_transition_capture_rejects_unproved_policy_writes(
     for style in ("a", "b"):
         name = f"temporal-transition-policy-{style}.dogwood"
         (tmp_path / name).write_bytes((EVIDENCE / name).read_bytes())
+    (tmp_path / "temporal-transition-metadata-events.json").write_bytes(
+        (EVIDENCE / "temporal-transition-metadata-events.json").read_bytes()
+    )
 
     with pytest.raises(ValueError, match=message):
         capture_transition_repetition.capture(events_path, tmp_path / "summary.json")
@@ -993,6 +1015,9 @@ def test_transition_confirmation_preserves_corrections_and_hygiene() -> None:
     refusal = read_json("temporal-transition-validation-refusal.json")
     cleanup = read_json("temporal-transition-confirmation-cleanup.json")
     events = (EVIDENCE / "temporal-transition-events.json").read_text(encoding="utf-8")
+    metadata_events = (EVIDENCE / "temporal-transition-metadata-events.json").read_text(
+        encoding="utf-8"
+    )
 
     assert correction["classification"] == "deployment policy"
     assert correction["failed_attempt_counted"] is False
@@ -1009,17 +1034,25 @@ def test_transition_confirmation_preserves_corrections_and_hygiene() -> None:
         "policy",
         "policy_engine",
     }
-    assert all(
-        check["outcome"] in {"not_found", "empty_result"}
-        for check in cleanup["checks"]
-    )
-    assert "TransitionBudget-" not in events
+    assert all(check["outcome"] in {"not_found", "empty_result"} for check in cleanup["checks"])
+    assert "TransitionBudget-" not in events + metadata_events
     assert not re.search(
         r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
         r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
-        events,
+        events + metadata_events,
         re.IGNORECASE,
     )
+
+
+def test_transition_capture_rejects_unproved_metadata_update(tmp_path: Path) -> None:
+    events = EVIDENCE / "temporal-transition-events.json"
+    metadata = read_json("temporal-transition-metadata-events.json")
+    metadata["statement_changed"] = True
+    metadata_path = tmp_path / "metadata.json"
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="preserve the reviewed statement"):
+        capture_transition_repetition.capture(events, tmp_path / "summary.json", metadata_path)
 
 
 def test_repetition_capture_rejects_a_double_allow_concurrency_claim() -> None:
@@ -1102,7 +1135,7 @@ def test_committed_evidence_contains_no_live_aws_identity_or_credential() -> Non
 
     policy = (EVIDENCE / "policy.cedar").read_text(encoding="utf-8")
     state = read_json("managed-state.json")
-    assert '<reviewed-gateway-binding>' in policy
+    assert "<reviewed-gateway-binding>" in policy
     assert state["sanitization"] == {
         "decision_messages_changed": False,
         "omitted": [

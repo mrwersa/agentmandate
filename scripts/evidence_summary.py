@@ -500,16 +500,21 @@ def _temporal_repetitions(root: Path) -> dict[str, Any]:
         or differences.get("median") != 0.8011319999999955
         or differences.get("q1") != -54.94211799999998
         or differences.get("q3") != 45.14932324999998
-        or semantic_noop.get("semantic_noop_revision_version") != 2
+        or semantic_noop.get("transition_confirmation_version") != 3
         or len(semantic_noop.get("byte_identical_trials", [])) != 10
         or len(semantic_noop.get("alpha_equivalent_trials", [])) != 10
+        or len(semantic_noop.get("whitespace_only_trials", [])) != 10
         or semantic_noop.get("results")
         != {
             "alpha_equivalent_revision_changed": 10,
             "byte_identical_revision_unchanged": 10,
             "byte_identical_second_request_denied": 10,
-            "fresh_recovery_allowed": 10,
-            "predecessor_session_rejected_as_stale": 10,
+            "description_only_revision_changed": True,
+            "description_only_statement_changed": False,
+            "fresh_successor_allow_then_deny": 21,
+            "maximum_transition_seconds": 15.377992,
+            "predecessor_session_rejected_as_stale": 21,
+            "whitespace_only_revision_changed": 10,
         }
         or binding_revision.get("binding_policy_revision_version") != 1
         or binding_revision.get("trials") != 10

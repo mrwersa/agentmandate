@@ -143,8 +143,12 @@ def test_repeated_temporal_controls_are_in_the_summary() -> None:
         "alpha_equivalent_revision_changed": 10,
         "byte_identical_revision_unchanged": 10,
         "byte_identical_second_request_denied": 10,
-        "fresh_recovery_allowed": 10,
-        "predecessor_session_rejected_as_stale": 10,
+        "description_only_revision_changed": True,
+        "description_only_statement_changed": False,
+        "fresh_successor_allow_then_deny": 21,
+        "maximum_transition_seconds": 15.377992,
+        "predecessor_session_rejected_as_stale": 21,
+        "whitespace_only_revision_changed": 10,
     }
     assert result["binding_policy_revision"] == {
         "old_binding_session_rejected_as_stale": 10,

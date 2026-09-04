@@ -780,8 +780,12 @@
         "byte_identical_same_session_second_call": "deny",
         "byte_identical_second_request_denied": 10,
         "byte_identical_write_created_revision": false,
-        "fresh_recovery_allowed": 10,
-        "predecessor_session_rejected_as_stale": 10
+        "description_only_revision_changed": true,
+        "description_only_statement_changed": false,
+        "fresh_successor_allow_then_deny": 21,
+        "maximum_transition_seconds": 15.377992,
+        "predecessor_session_rejected_as_stale": 21,
+        "whitespace_only_revision_changed": 10
       },
       "session_cells": {
         "concurrent_exactly_one_allow": 10,
