@@ -272,6 +272,50 @@ more than one framework and authority domain; and security plus trace-retention
 guidance has external review. Policy export and fleet features may remain
 preview after 1.0 if their contracts have not earned stability.
 
+### Pre-1.0 consolidation and repository history
+
+AgentMandate already has public PyPI distributions and GitHub release tags. A
+lack of known production adoption does not make those artifacts unpublished.
+Released tags, formats, and links must therefore remain recoverable even if the
+pre-1.0 implementation is simplified.
+
+Contract consolidation and Git history are separate decisions:
+
+- The manifest version governs reviewed mandate meaning. Authority IR,
+  evidence attachments, adapters, and result envelopes retain independent
+  versions because they change for different reasons. They must not be
+  collapsed into one top-level version.
+- `ceiling`, `scope_key`, and `unbounded` are not legacy spellings of `limit`,
+  `scope`, and finite `capacity`. They describe a per-tool bound, its partition
+  key, and an unbounded producer. Any replacement needs an evidence-backed
+  semantic design rather than a mechanical rename.
+- Private migration readers and superseded transports may be removed before
+  1.0 once their canonical outputs and source evidence remain replayable from
+  evidence tooling. Public CLI and artifact changes follow `STABILITY.md`: a
+  pre-1.0 minor release, migration notes, and fixtures for every affected
+  contract.
+
+The consolidation window is **after the authority-continuity Gate 4 decision
+and before 1.0**. At that point:
+
+1. inventory every public contract, private compatibility path, fixture, and
+   historical reader;
+2. remove unused private paths and move evidence-only migrations out of the
+   runtime package;
+3. decide whether any public contract needs a new version, then migrate it
+   independently with byte-pinned before/after fixtures;
+4. rerun the zero-dependency, package, evidence, and 100% coverage gates; and
+5. cut one reviewed pre-1.0 baseline before declaring the stable surface.
+
+Do not rewrite history after 1.0. If a one-time clean baseline is still wanted,
+the safest remaining window is immediately before 1.0, after consolidation.
+Preserve the current graph in an immutable archive tag and an offline bundle;
+leave every published release tag on its original commit; update or retain all
+gate-review commit references; then replace `main` once under an explicit,
+reviewed operation plan. This changes repository presentation only. It cannot
+erase PyPI releases or their compatibility obligations. Normal pull requests
+continue to use squash merges without rewriting published history.
+
 ## Historical evidence retained
 
 The initial adoption loop shipped before this roadmap: `scan` and source
