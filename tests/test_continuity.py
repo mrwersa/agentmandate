@@ -590,6 +590,35 @@ def test_continuity_analysis_requires_whole_second_utc_time(as_of):
         _anthropic_analysis(as_of=as_of)
 
 
+@pytest.mark.parametrize(
+    "composition",
+    ["ir", "sarif", "mermaid", "otel", "conditions", "delegations", "producers", "cedar"],
+)
+def test_continuity_refuses_unsupported_composition_before_analysis(
+    composition, monkeypatch
+):
+    def unexpected_analysis(*args, **kwargs):
+        raise AssertionError("manifest analysis ran before composition refusal")
+
+    monkeypatch.setattr(continuity, "analyse", unexpected_analysis)
+
+    with pytest.raises(
+        ContinuityFormatError,
+        match=rf"cannot yet be composed with {composition}",
+    ):
+        _agentcore_analysis(composition=frozenset({composition}))
+
+
+def test_continuity_refuses_unknown_composition_before_analysis(monkeypatch):
+    def unexpected_analysis(*args, **kwargs):
+        raise AssertionError("manifest analysis ran before composition refusal")
+
+    monkeypatch.setattr(continuity, "analyse", unexpected_analysis)
+
+    with pytest.raises(ContinuityFormatError, match="unsupported.*future-consumer"):
+        _agentcore_analysis(composition=frozenset({"future-consumer"}))
+
+
 def test_continuity_clean_uses_the_explicit_safe_continuation_verdict():
     result = _anthropic_analysis()
     safe = replace(

@@ -402,9 +402,11 @@ Any future public presentation must keep these fields separate:
 - source and semantic digests sufficient for offline replay.
 
 Human and JSON output complete before a finding exit. Usage or malformed input
-fails before stdout. SARIF, Mermaid, OTel and Authority IR composition remain
-unsupported until each can carry transition uncertainty without implying a
-stronger result.
+fails before stdout. The private consumer now refuses IR, SARIF, Mermaid, OTel,
+condition, delegation, producer, and Cedar composition before manifest
+analysis. The eventual CLI must invoke that guard before file I/O. Each
+combination remains unsupported until it can carry transition uncertainty
+without implying a stronger result.
 
 ## Delivery gates
 
@@ -427,8 +429,8 @@ stronger result.
    byte-identical manifest authority on trust failure. No public Python records.
 5. **Gate 4 — public exposure review (complete; exposure deferred):** the
    [review](authority-continuity-gate-4-review.md) confirms the private
-   semantics but keeps them private until explicit composition refusals and CLI
-   exit/no-partial-output tests are complete. A complete explicitly synthetic
+   semantics but keeps them private until the composition guard is wired before
+   CLI I/O and exit/no-partial-output tests are complete. A complete explicitly synthetic
    fixture supplies the accepted clean path, and `agentmandate.continuity/v1`
    supplies the private canonical presentation envelope.
 

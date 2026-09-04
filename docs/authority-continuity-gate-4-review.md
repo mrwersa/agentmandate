@@ -24,7 +24,7 @@ establish that join.
 | Safe-continuation semantics | Passed privately | Each outcome now keeps comparability, issuer-amendment state, and a three-valued verdict separate; tightening can satisfy the property, while missing joins, comparison, amendment treatment, or required alignments remain unresolved |
 | Accepted clean fixture | Passed synthetically | A complete fixture explicitly labels its mandate, binding, boundary, provider control, reviewer, and sources as synthetic; both real migrations remain `unreviewed` |
 | Presentation stability | Passed privately | `agentmandate.continuity/v1` has a strict canonical reader, checksum, closed finding-code registry, complete input identities and manifest Authority, and eight canonical state fixtures |
-| Composition boundary | Open | IR is rejected by the private profile boundary, but no public pre-I/O refusal matrix exists for SARIF, Mermaid, OTel, conditions, delegations, producers, or Cedar analyses |
+| Composition boundary | Passed privately; CLI wiring open | The private consumer rejects IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar composition before manifest analysis; the public CLI must invoke that guard before reading files or writing output |
 | CLI failure behavior | Open | No public parser, renderer, explicit input pairing, exit-code tests, or complete-output/no-partial-output tests exist |
 
 ## Closing verdict
@@ -36,9 +36,9 @@ codes an accidental compatibility contract. More importantly, it would ask a
 caller to infer safe continuation from three axes that are intentionally
 independent.
 
-The next work is composition and CLI boundary review, not another provider
-experiment. Public exposure can be reconsidered after the CLI proves both
-exit-0 and exit-1 paths and refuses compositions that cannot preserve
+The next work is CLI boundary review, not another provider experiment. Public
+exposure can be reconsidered after the CLI proves exit-0 and exit-1 paths,
+invokes the private composition guard before I/O, and preserves every
 uncertainty. Manifest version 1, ordinary reachability, and the public Python
 API remain unchanged.
 
@@ -200,6 +200,13 @@ Support later requires one consumer to validate all participating artifacts,
 retain every unresolved finding, define a combined schema, and preserve the
 distinction between request authorization, reachability, and continuity. One
 rendered result must never be fed into another analyzer as authority.
+
+The private consumer now accepts a closed composition request and rejects all
+eight named combinations before manifest analysis or access to supplied source
+bytes. It also rejects unknown future composition names rather than silently
+ignoring them. The eventual CLI must construct that request from parsed options
+and call the guard before opening the manifest, provider, binding, or capture
+paths. Only that wiring can complete the public pre-I/O claim.
 
 ## Exit conditions for reconsidering exposure
 
