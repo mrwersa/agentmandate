@@ -127,13 +127,20 @@ def test_migrations_preserve_provider_specific_unknowns_and_controls():
     agentcore = migrate_agentcore_continuity(_agentcore_contents())
     anthropic = migrate_anthropic_continuity(_anthropic_contents())
 
-    assert len(agentcore.controls) == 8
+    assert len(agentcore.controls) == 10
     assert next(
         item for item in agentcore.controls if item.id == "equivalent-revision"
     ).outcomes == (
         "allow",
         "stale_session",
         "allow",
+        "deny",
+    )
+    assert next(
+        item for item in agentcore.controls if item.id == "whitespace-revision"
+    ).same_mandate
+    assert (
+        next(item for item in agentcore.controls if item.id == "description-revision").trials == 1
     )
     assert next(item for item in agentcore.controls if item.id == "signed-binding").mediation == (
         "exclusive_adapter"
@@ -156,9 +163,10 @@ def test_migrations_preserve_provider_specific_unknowns_and_controls():
         2,
         2,
     )
-    assert next(
-        item for item in anthropic.controls if item.id == "fresh-sessions"
-    ).consumed_before == (1,) * 10
+    assert (
+        next(item for item in anthropic.controls if item.id == "fresh-sessions").consumed_before
+        == (1,) * 10
+    )
     assert next(item for item in anthropic.controls if item.id == "four-children").child_count == 4
     assert not hasattr(agentcore, "final_costs")
     assert not hasattr(anthropic, "revision_changed")
@@ -199,7 +207,7 @@ def _profile_contract(graph: AuthorityIR) -> tuple[str, str]:
 def test_continuity_profiles_project_registered_relations_and_round_trip():
     binding, agentcore, anthropic = _projected_profiles()
     assert (len(binding.entities), len(binding.facts), len(binding.edges)) == (3, 9, 2)
-    assert (len(agentcore.entities), len(agentcore.facts), len(agentcore.edges)) == (45, 187, 52)
+    assert (len(agentcore.entities), len(agentcore.facts), len(agentcore.edges)) == (60, 249, 69)
     assert (len(anthropic.entities), len(anthropic.facts), len(anthropic.edges)) == (25, 113, 30)
     assert {edge.relation for edge in binding.edges} == {"binds_mandate", "binds_boundary"}
     provider_relations = {
@@ -215,7 +223,7 @@ def test_continuity_profiles_project_registered_relations_and_round_trip():
         for graph in (binding, agentcore, anthropic)
     } == {
         "continuity-binding": "1d1d3593d78fb58185b6846262c7c6f21b82af744e6cefa6450a69056c150af7",
-        "agentcore-continuity": "3ca277f288f953bf8a4049dc838962f4c8465de56bfd5dac761c962ae5dab0ac",
+        "agentcore-continuity": "501d39993027fe13a61cf6984df64203a7200aa1d7d4c8769c786fcb95d1f54d",
         "anthropic-continuity": "4cdfba617447605f183c35bd7c3af4ceaf0b3b8735862f6c4e59b304a92ecdbd",
     }
     for graph in (binding, agentcore, anthropic):
@@ -382,24 +390,27 @@ def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
         "binding-revision": ("reset", "widens", "overshot"),
         "byte-identical-write": ("preserved", "stable", "within_bound"),
         "concurrent-session": ("preserved", "stable", "within_bound"),
-        "equivalent-revision": ("unresolved", "stable", "unresolved"),
+        "description-revision": ("unresolved", "stable", "overshot"),
+        "equivalent-revision": ("unresolved", "stable", "overshot"),
         "fresh-sessions": ("unresolved", "stable", "unresolved"),
         "limit-revision": ("unresolved", "widens", "unresolved"),
         "same-session": ("preserved", "stable", "within_bound"),
         "signed-binding": ("preserved", "stable", "within_bound"),
+        "whitespace-revision": ("unresolved", "stable", "overshot"),
     }
     assert {
-        item.transition: (item.comparability, item.issuer_amendment)
-        for item in result.outcomes
+        item.transition: (item.comparability, item.issuer_amendment) for item in result.outcomes
     } == {
         "binding-revision": ("unresolved", "unresolved"),
         "byte-identical-write": ("established", "not_required"),
         "concurrent-session": ("established", "not_required"),
+        "description-revision": ("unresolved", "unresolved"),
         "equivalent-revision": ("unresolved", "unresolved"),
         "fresh-sessions": ("unresolved", "unresolved"),
         "limit-revision": ("unresolved", "unresolved"),
         "same-session": ("established", "not_required"),
         "signed-binding": ("established", "not_required"),
+        "whitespace-revision": ("unresolved", "unresolved"),
     }
     assert {item.safe_continuation for item in result.outcomes} == {"unresolved"}
     signed = next(item for item in result.outcomes if item.transition == "signed-binding")
@@ -422,13 +433,9 @@ def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
     )
     relations = {
         edge.id: edge.relation
-        for edge in _reviewed(
-            migrate_agentcore_continuity(_agentcore_contents())
-        ).to_ir().edges
+        for edge in _reviewed(migrate_agentcore_continuity(_agentcore_contents())).to_ir().edges
     }
-    signed_relations = {
-        relations[item] for item in signed.support if item in relations
-    }
+    signed_relations = {relations[item] for item in signed.support if item in relations}
     assert signed_relations == {
         "after_state",
         "before_state",
@@ -438,12 +445,11 @@ def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
     assert any(item.startswith("edge:continuity_binding:") for item in signed.support)
     unbound = next(item for item in result.outcomes if item.transition == "same-session")
     assert not any(item.startswith("edge:continuity_binding:") for item in unbound.support)
-    assert next(
-        item for item in unbound.alignments if item.check == "complete_mediation"
-    ).strength == "unestablished"
-    concurrent = next(
-        item for item in result.outcomes if item.transition == "concurrent-session"
+    assert (
+        next(item for item in unbound.alignments if item.check == "complete_mediation").strength
+        == "unestablished"
     )
+    concurrent = next(item for item in result.outcomes if item.transition == "concurrent-session")
     assert concurrent.assumptions == (
         "completed decisions do not prove reservation of in-flight work",
     )
@@ -472,9 +478,7 @@ def test_anthropic_reconciliation_keeps_reset_widening_and_overshoot_separate():
         "sequential": ("preserved", "stable", "within_bound"),
         "two-children": ("preserved", "stable", "overshot"),
     }
-    assert {
-        item.transition: item.comparability for item in result.outcomes
-    } == {
+    assert {item.transition: item.comparability for item in result.outcomes} == {
         "cap-increase": "unresolved",
         "four-children": "unresolved",
         "fresh-sessions": "unresolved",
@@ -493,9 +497,7 @@ def test_anthropic_reconciliation_keeps_reset_widening_and_overshoot_separate():
     ) == ("session_cost", "minor_currency_unit", 1, 1, (4,) * 10)
     fresh = next(item for item in result.outcomes if item.transition == "fresh-sessions")
     assert fresh.completed_values == (2,) * 10
-    assert children.assumptions == (
-        "completed session cost does not prove in-flight reservation",
-    )
+    assert children.assumptions == ("completed session cost does not prove in-flight reservation",)
     assert {item.code for item in result.findings} >= {
         "continuity.state-reset",
         "continuity.authority-widens",
@@ -521,9 +523,7 @@ def test_unreviewed_or_tampered_profiles_fail_closed_with_full_authority():
     assert {item.comparability for item in unreviewed.outcomes} == {"unresolved"}
     assert {item.issuer_amendment for item in unreviewed.outcomes} == {"unresolved"}
     assert {item.safe_continuation for item in unreviewed.outcomes} == {"unresolved"}
-    assert {item.code for item in unreviewed.findings} == {
-        "continuity.evidence-untrusted"
-    }
+    assert {item.code for item in unreviewed.findings} == {"continuity.evidence-untrusted"}
     assert unreviewed.authority == analyse(mandate)
 
     contents = _agentcore_contents()
@@ -542,9 +542,7 @@ def test_binding_failures_never_establish_cross_boundary_reset():
         mandate_sha256="0" * 64,
     )
     result = _agentcore_analysis(binding=bad_binding)
-    revision = next(
-        item for item in result.outcomes if item.transition == "binding-revision"
-    )
+    revision = next(item for item in result.outcomes if item.transition == "binding-revision")
     assert revision.state == "unresolved"
     assert "continuity.binding-untrusted" in {item.code for item in result.findings}
     assert result.authority == analyse(mandate)
@@ -563,9 +561,10 @@ def test_binding_failures_never_establish_cross_boundary_reset():
         "unresolved",
         "unresolved",
     )
-    assert next(
-        item for item in signed.alignments if item.check == "derivation_integrity"
-    ).status == "unresolved"
+    assert (
+        next(item for item in signed.alignments if item.check == "derivation_integrity").status
+        == "unresolved"
+    )
 
 
 @pytest.mark.parametrize(
@@ -573,9 +572,9 @@ def test_binding_failures_never_establish_cross_boundary_reset():
     [
         datetime(2026, 8, 29),
         datetime(2026, 8, 29, 12, 0, 0, 1, tzinfo=timezone.utc),
-        datetime(2026, 8, 29, 12, tzinfo=timezone.utc).astimezone(
-            timezone.utc
-        ).replace(tzinfo=None),
+        datetime(2026, 8, 29, 12, tzinfo=timezone.utc)
+        .astimezone(timezone.utc)
+        .replace(tzinfo=None),
     ],
 )
 def test_continuity_analysis_requires_whole_second_utc_time(as_of):
@@ -612,9 +611,7 @@ def test_platform_verified_mediation_can_establish_all_alignment_checks():
     )
     assert {item.status for item in alignments} == {"established"}
     assert {
-        item.strength
-        for item in alignments
-        if item.check in {"isolation", "complete_mediation"}
+        item.strength for item in alignments if item.check in {"isolation", "complete_mediation"}
     } == {"platform_verified"}
     assert assumptions == ()
 
@@ -702,9 +699,7 @@ def test_anthropic_axis_fallbacks_remain_closed():
     )
     assert state == "unresolved"
     assert authority == "widens"
-    _, authority, _, _, _ = _anthropic_axes(
-        replace(control, cap_before=2, cap_after=1)
-    )
+    _, authority, _, _, _ = _anthropic_axes(replace(control, cap_before=2, cap_after=1))
     assert authority == "tightens"
 
 
@@ -712,9 +707,7 @@ def test_anthropic_axis_fallbacks_remain_closed():
 def test_missing_or_unreadable_mandate_bytes_do_not_establish_a_binding(mandate_bytes):
     result = _agentcore_analysis(mandate_bytes=mandate_bytes)
     assert "continuity.binding-untrusted" in {item.code for item in result.findings}
-    revision = next(
-        item for item in result.outcomes if item.transition == "binding-revision"
-    )
+    revision = next(item for item in result.outcomes if item.transition == "binding-revision")
     assert revision.state == "unresolved"
 
 

@@ -193,19 +193,23 @@ fresh session was allowed in 10/10 trials. The stale rejection is safe; the
 continuation interface is incomplete because the admitted recovery was not
 constrained by the full predecessor history.
 
-A new confirmation separated a write from changed policy meaning and fixed one
-external mandate digest across both arms. Ten byte-identical submissions
-created no new revision; in all 10/10 trials the original session retained its
-history and denied the second 600. Ten textually distinct but alpha-equivalent
-updates each produced a new exact ACTIVE revision; in all 10/10 trials the
-predecessor session was rejected as stale and the prescribed fresh-session
-recovery allowed 600. This result is about the two captured forms and revision
-boundary, not a general semantic-equivalence procedure or a claim about hidden
-state deletion.
+A new confirmation separated revision creation from changes to policy meaning
+and fixed one external mandate digest throughout. Byte-identical and
+bound-variable-renaming trials were interleaved. Ten byte-identical submissions
+created no new revision. In all 10/10 trials the original session retained its
+history and denied the second 600. Ten bound-variable renamings and ten
+whitespace-only rewrites each produced a new exact ACTIVE revision. In every
+trial the predecessor session was rejected as stale, then one fresh successor
+session allowed 600 and denied a second 600. Both policy forms served as the
+successor in five renaming trials. A separate description-only update supplied
+no statement, retained the statement digest, created a revision, and produced
+the same stale, Allow, Deny sequence. These cells locate observed revision
+triggers. They do not define a general semantic-equivalence procedure.
 
-The confirmation commits sanitized event-level request and response bodies,
-policy polls, statement digests, and stable revision/session aliases. Its
-summary is derived from those records. The captured SDK interface contains
+The confirmation commits sanitised event-level request and response bodies,
+UTC timestamps, policy polls, statement digests, and stable revision and
+session aliases. Its summary is derived from those records and verifies every
+transition inside the policy's one-hour window. The captured SDK interface contains
 policy lifecycle methods but no method named for history migration, settlement,
 reauthorisation, state transfer, or continuation. The strict validation mode
 rejected the unconditional permit as `Overly Permissive`; the active run used
@@ -244,13 +248,12 @@ reviewed cell vectors, correction and verified cleanup state. Live URLs, AWS
 identities, signatures, session IDs and service timestamps remained in
 temporary raw files and were deleted after projection.
 
-`temporal-transition-index.json`, SHA-256
-`cae2c9d819efb6410aac900d63e28fb740bb03a2115d4194d447123107517f74`,
-pins the two alpha-equivalent forms, sanitized provider events, capture and
-interface transformers, both procedures, ten-trial byte-identical and
-alpha-equivalent projections, corrections, binding-revision projection, and
-verified cleanup. Live identifiers and timestamps remained in temporary raw
-storage; provider decision bodies and policy-state transitions are committed.
+`temporal-transition-index.json` pins the two alpha-equivalent forms,
+sanitised provider events, UTC timestamps, capture and interface transformers,
+both procedures, the three ten-trial arms, the description-only cell,
+corrections, binding-revision projection, and verified cleanup. Live
+identifiers remained in temporary raw storage. Provider decision bodies and
+policy-state transitions are committed.
 
 `binding-index.json`, SHA-256
 `e047ead77b943b81b6afc537945531e56ca76adab3835fea5a76e9fa665c3179`,

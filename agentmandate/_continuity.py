@@ -640,9 +640,7 @@ def _anthropic_controls(value: Any, source_ids: set[str]) -> tuple[AnthropicCont
                 f"continuity contract {path}.consumed_before must be an array or null"
             )
         else:
-            before = tuple(
-                _integer(cost, f"{path}.consumed_before[]") for cost in before_raw
-            )
+            before = tuple(_integer(cost, f"{path}.consumed_before[]") for cost in before_raw)
         child = raw["child_count"]
         child = None if child is None else _integer(child, f"{path}.child_count", minimum=1)
         topology = raw["topology_complete"]
@@ -926,7 +924,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
                 "2bb58ba1a567da8f2ac020585f56c2ac6a60a378e52cf29be8a221255f35cc57"
             ),
             base + "temporal-transition-confirmation-summary.json": (
-                "fa67bfb45ec50e56519c71b3096a62595235c8bb018fd4ca7ec45278ef91d756"
+                "129c018ea16266e51187cf9d499fa989ed93cb3d33da8b8a591891dedf17d512"
             ),
             base + "temporal-update-repetition.json": (
                 "c130c0c5aaf812dcc1a39d8e6b930cbf4bee667745876b0ab36911c5351bd7a5"
@@ -958,8 +956,12 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             "alpha_equivalent_revision_changed": 10,
             "byte_identical_revision_unchanged": 10,
             "byte_identical_second_request_denied": 10,
-            "fresh_recovery_allowed": 10,
-            "predecessor_session_rejected_as_stale": 10,
+            "description_only_revision_changed": True,
+            "description_only_statement_changed": False,
+            "fresh_successor_allow_then_deny": 21,
+            "maximum_transition_seconds": 15.377992,
+            "predecessor_session_rejected_as_stale": 21,
+            "whitespace_only_revision_changed": 10,
         },
         "update": update.get("results", {}).get("old_session_rejected_as_stale") == 10,
         "binding": binding.get("results", {}).get("same_binding_allow_then_deny") == 10,
@@ -1024,7 +1026,7 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             600,
             (1000,),
             ("allow", "deny"),
-            None,
+            True,
             False,
             False,
             None,
@@ -1037,8 +1039,36 @@ def migrate_agentcore_continuity(contents: dict[str, bytes]) -> AgentCoreContinu
             10,
             600,
             (1000,),
-            ("allow", "stale_session", "allow"),
+            ("allow", "stale_session", "allow", "deny"),
+            True,
+            True,
+            True,
             None,
+            "unestablished",
+            ref("temporal-transition-confirmation-summary.json"),
+        ),
+        AgentCoreControl(
+            "whitespace-revision",
+            "configuration_revision",
+            10,
+            600,
+            (1000,),
+            ("allow", "stale_session", "allow", "deny"),
+            True,
+            True,
+            True,
+            None,
+            "unestablished",
+            ref("temporal-transition-confirmation-summary.json"),
+        ),
+        AgentCoreControl(
+            "description-revision",
+            "configuration_revision",
+            1,
+            600,
+            (1000,),
+            ("allow", "stale_session", "allow", "deny"),
+            True,
             True,
             True,
             None,
@@ -1822,9 +1852,7 @@ def _evaluation_time(as_of: datetime) -> str:
         or as_of.utcoffset() != timezone.utc.utcoffset(as_of)
         or as_of.microsecond
     ):
-        raise ContinuityFormatError(
-            "continuity analysis as_of must be a whole-second UTC datetime"
-        )
+        raise ContinuityFormatError("continuity analysis as_of must be a whole-second UTC datetime")
     return as_of.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -1927,9 +1955,7 @@ def _agentcore_axes(
     if missing_required_binding or (control.boundary_changed and not same_mandate):
         admission = "unresolved"
     else:
-        admission = (
-            "overshot" if completed > control.provider_limits[-1] else "within_bound"
-        )
+        admission = "overshot" if completed > control.provider_limits[-1] else "within_bound"
 
     continuity_status = "established" if state != "unresolved" else "unresolved"
     derivation_status = "established" if same_mandate else "unresolved"
@@ -1975,12 +2001,17 @@ def _anthropic_axes(
     if control.transition == "fresh_session":
         state = "reset" if before_complete else "unresolved"
     elif control.transition == "limit_revision":
-        state = "preserved" if before_complete and all(
-            after >= before
-            for before, after in zip(
-                control.consumed_before or (), control.final_costs, strict=True
+        state = (
+            "preserved"
+            if before_complete
+            and all(
+                after >= before
+                for before, after in zip(
+                    control.consumed_before or (), control.final_costs, strict=True
+                )
             )
-        ) else "unresolved"
+            else "unresolved"
+        )
     elif control.boundary_changed is False:
         state = "preserved"
     else:
@@ -2026,9 +2057,7 @@ def _anthropic_completed(control: AnthropicControl) -> tuple[int, ...]:
     if control.transition == "fresh_session" and control.consumed_before is not None:
         return tuple(
             before + after
-            for before, after in zip(
-                control.consumed_before, control.final_costs, strict=True
-            )
+            for before, after in zip(control.consumed_before, control.final_costs, strict=True)
         )
     return control.final_costs
 
@@ -2061,18 +2090,13 @@ def _safe_continuation(
 ) -> str:
     """Derive the private three-valued safe-continuation verdict."""
 
-    if (
-        "unresolved" in {state, authority_change, admission, comparability, issuer_amendment}
-        or any(item.status != "established" for item in alignments)
+    if "unresolved" in {state, authority_change, admission, comparability, issuer_amendment} or any(
+        item.status != "established" for item in alignments
     ):
         return "unresolved"
     if issuer_amendment == "approved":
         return "satisfied" if admission == "within_bound" else "violated"
-    if (
-        state == "reset"
-        or authority_change == "widens"
-        or admission == "overshot"
-    ):
+    if state == "reset" or authority_change == "widens" or admission == "overshot":
         return "violated"
     if (
         state == "preserved"
@@ -2149,9 +2173,7 @@ def analyse_continuity(
         _validate_continuity_profile(provider_graph, provider_kind, provider_adapter)
     except (ContinuityFormatError, IRFormatError) as exc:
         provider_ready = False
-        findings.append(
-            ContinuityFinding("continuity.source-untrusted", None, str(exc), ())
-        )
+        findings.append(ContinuityFinding("continuity.source-untrusted", None, str(exc), ()))
     if not _eligible_evidence(canonical_provider.evidence, evaluated_at):
         provider_ready = False
         findings.append(
@@ -2339,9 +2361,7 @@ def analyse_continuity(
                         )
                     )
     unique_findings = tuple(
-        dict.fromkeys(
-            (item.code, item.transition, item.message, item.support) for item in findings
-        )
+        dict.fromkeys((item.code, item.transition, item.message, item.support) for item in findings)
     )
     return ContinuityAnalysis(
         authority,

@@ -1,0 +1,264 @@
+{
+  "before_call": {
+    "derived_outcome": "allow",
+    "elapsed_ms": 594.384851,
+    "finished_at": "2026-09-04T00:02:32.699272Z",
+    "http_status": 200,
+    "request": {
+      "id": "metadata-before",
+      "jsonrpc": "2.0",
+      "method": "tools/call",
+      "params": {
+        "arguments": {
+          "amount": 600
+        },
+        "name": "TransitionTarget___process_refund"
+      }
+    },
+    "response": {
+      "id": "metadata-before",
+      "jsonrpc": "2.0",
+      "result": {
+        "content": [
+          {
+            "text": "{\"processed\":true,\"amount\":600}",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      }
+    },
+    "session_alias": "metadata-predecessor",
+    "started_at": "2026-09-04T00:02:32.104849Z"
+  },
+  "capture_finished_at": "2026-09-04T00:02:44.848483Z",
+  "capture_started_at": "2026-09-04T00:02:32.104849Z",
+  "capture_version": 1,
+  "changed_field": "description",
+  "predecessor_after_call": {
+    "derived_outcome": "stale_session",
+    "elapsed_ms": 345.687637,
+    "finished_at": "2026-09-04T00:02:43.875412Z",
+    "http_status": 200,
+    "request": {
+      "id": "metadata-predecessor-after",
+      "jsonrpc": "2.0",
+      "method": "tools/call",
+      "params": {
+        "arguments": {
+          "amount": 600
+        },
+        "name": "TransitionTarget___process_refund"
+      }
+    },
+    "response": {
+      "error": {
+        "code": -32005,
+        "message": "Tool Execution Denied: Policy session is stale. Policies were updated after the session started. Start a new session and retry."
+      },
+      "id": "metadata-predecessor-after",
+      "jsonrpc": "2.0"
+    },
+    "session_alias": "metadata-predecessor",
+    "started_at": "2026-09-04T00:02:43.529706Z"
+  },
+  "protocol": "MCP 2025-03-26",
+  "provider": "AWS AgentCore Gateway Policy",
+  "recovery_after_call": {
+    "derived_outcome": "deny",
+    "elapsed_ms": 411.65821,
+    "finished_at": "2026-09-04T00:02:44.848483Z",
+    "http_status": 200,
+    "request": {
+      "id": "metadata-recovery-after",
+      "jsonrpc": "2.0",
+      "method": "tools/call",
+      "params": {
+        "arguments": {
+          "amount": 600
+        },
+        "name": "TransitionTarget___process_refund"
+      }
+    },
+    "response": {
+      "error": {
+        "code": -32002,
+        "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-temporal-policy>]"
+      },
+      "id": "metadata-recovery-after",
+      "jsonrpc": "2.0"
+    },
+    "session_alias": "metadata-successor",
+    "started_at": "2026-09-04T00:02:44.436792Z"
+  },
+  "recovery_call": {
+    "derived_outcome": "allow",
+    "elapsed_ms": 424.87921,
+    "finished_at": "2026-09-04T00:02:44.341327Z",
+    "http_status": 200,
+    "request": {
+      "id": "metadata-recovery",
+      "jsonrpc": "2.0",
+      "method": "tools/call",
+      "params": {
+        "arguments": {
+          "amount": 600
+        },
+        "name": "TransitionTarget___process_refund"
+      }
+    },
+    "response": {
+      "id": "metadata-recovery",
+      "jsonrpc": "2.0",
+      "result": {
+        "content": [
+          {
+            "text": "{\"processed\":true,\"amount\":600}",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      }
+    },
+    "session_alias": "metadata-successor",
+    "started_at": "2026-09-04T00:02:43.916422Z"
+  },
+  "region": "us-east-1",
+  "revision_changed": true,
+  "statement_changed": false,
+  "update": {
+    "after": {
+      "enforcement_mode": "ACTIVE",
+      "observed_at": "2026-09-04T00:02:43.482443Z",
+      "revision_alias": "revision-meta-after",
+      "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+      "status": "ACTIVE",
+      "status_reasons": []
+    },
+    "before": {
+      "enforcement_mode": "ACTIVE",
+      "observed_at": "2026-09-04T00:02:32.008694Z",
+      "revision_alias": "revision-8c1357ead98f",
+      "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+      "status": "ACTIVE",
+      "status_reasons": []
+    },
+    "managed_status": "UPDATING",
+    "polls": [
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:33.108314Z",
+        "poll_index": 0,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:34.262158Z",
+        "poll_index": 1,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:35.406135Z",
+        "poll_index": 2,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:36.560513Z",
+        "poll_index": 3,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:37.718892Z",
+        "poll_index": 4,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:38.870541Z",
+        "poll_index": 5,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:40.033678Z",
+        "poll_index": 6,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:41.176490Z",
+        "poll_index": 7,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:42.323560Z",
+        "poll_index": 8,
+        "revision_alias": "revision-46ca6a0e0d89",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "UPDATING",
+        "status_reasons": [
+          "Update initiated by user"
+        ]
+      },
+      {
+        "enforcement_mode": "ACTIVE",
+        "observed_at": "2026-09-04T00:02:43.482443Z",
+        "poll_index": 9,
+        "revision_alias": "revision-meta-after",
+        "statement_sha256": "74afafddef75d5e411c4543ec8469382826f25874da65cd84e4e057856544307",
+        "status": "ACTIVE",
+        "status_reasons": []
+      }
+    ],
+    "requested_at": "2026-09-04T00:02:32.699417Z",
+    "submitted_request": {
+      "changed_field": "description",
+      "definition_supplied": false,
+      "operation": "UpdatePolicy"
+    }
+  }
+}
