@@ -1,6 +1,6 @@
 # AGENTS.md — agentmandate
 
-Single Python package `agentmandate/` (~19k lines, 22 modules). Core: `manifest.py` (loads/validates), `reach.py` (bounded breach search), `diff.py` (effective-authority compare), `cli.py` (`mandate` entrypoint). Also `scan`/`drift`/`verify`/`ir`/`inventory`/`_conditions`/`_delegation`/`_managed_cedar`/`_producer`/`obligations`/`scenarios`. `examples/` holds manifests/traces/sample agent; `docs/` user docs; `scripts/` maintenance; `probes/` synthetic graphs.
+Single Python package `agentmandate/` (~19k lines, 23 modules). Core: `manifest.py` (loads/validates), `reach.py` (bounded breach search), `diff.py` (effective-authority compare), `cli.py` (`mandate` entrypoint). Also `scan`/`drift`/`verify`/`ir`/`inventory`/`_conditions`/`_delegation`/`_managed_cedar`/`_producer`/`obligations`/`scenarios`. `examples/` holds manifests/traces/sample agent; `docs/` user docs; `scripts/` maintenance; `probes/` synthetic graphs.
 
 ## Commands (exact, verified from `pyproject.toml` / `.github/workflows/ci.yml`)
 
