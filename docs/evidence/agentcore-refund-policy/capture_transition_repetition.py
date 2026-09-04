@@ -19,7 +19,20 @@ def _write(path: Path, value: Any) -> None:
 
 
 def _instant(value: str) -> datetime:
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError("transition timestamp is not canonical UTC") from exc
+    canonical = parsed.isoformat(timespec="microseconds").replace("+00:00", "Z")
+    if value != canonical:
+        raise ValueError("transition timestamp is not canonical UTC")
+    return parsed
+
+
+def _ordered(label: str, *values: str) -> None:
+    instants = tuple(_instant(value) for value in values)
+    if any(before > after for before, after in zip(instants, instants[1:], strict=False)):
+        raise ValueError(f"{label} timestamps are not causally ordered")
 
 
 def _call(value: dict[str, Any], expected: str) -> None:
@@ -61,6 +74,7 @@ def _update(
         or after.get("enforcement_mode") != "ACTIVE"
         or not isinstance(polls, list)
         or not polls
+        or any(poll.get("poll_index") != index for index, poll in enumerate(polls))
         or polls[-1] != {"poll_index": len(polls) - 1, **after}
         or submitted.get("operation") != "UpdatePolicy"
         or submitted.get("definition", {}).get("policy", {}).get("statement") != after_text
@@ -74,6 +88,14 @@ def _update(
         or _instant(value["requested_at"]) > _instant(value["completed_at"])
     ):
         raise ValueError("transition update does not match the reviewed submitted policy")
+    _ordered(
+        "transition update",
+        value["requested_at"],
+        *(poll["observed_at"] for poll in polls),
+        value["completed_at"],
+    )
+    if _instant(before["observed_at"]) > _instant(value["completed_at"]):
+        raise ValueError("transition update before-state observation follows completion")
     aliases_differ = before.get("revision_alias") != after.get("revision_alias")
     if aliases_differ is not changed or (not changed and before_hash != after_hash):
         raise ValueError("transition revision and statement identity disagree")
@@ -94,6 +116,19 @@ def _transition(
     _call(trial["predecessor_after_call"], "stale_session")
     _call(trial["recovery_call"], "allow")
     _call(trial["recovery_after_call"], "deny")
+    _ordered(
+        f"transition trial {index}",
+        trial["before_call"]["started_at"],
+        trial["before_call"]["finished_at"],
+        trial["update"]["requested_at"],
+        trial["update"]["completed_at"],
+        trial["predecessor_after_call"]["started_at"],
+        trial["predecessor_after_call"]["finished_at"],
+        trial["recovery_call"]["started_at"],
+        trial["recovery_call"]["finished_at"],
+        trial["recovery_after_call"]["started_at"],
+        trial["recovery_after_call"]["finished_at"],
+    )
     predecessor = trial["before_call"]["session_alias"]
     successor = trial["recovery_call"]["session_alias"]
     if (
@@ -136,6 +171,7 @@ def _metadata(value: dict[str, Any], statement: str) -> dict[str, Any]:
         or update.get("managed_status") != "UPDATING"
         or not isinstance(polls, list)
         or not polls
+        or any(poll.get("poll_index") != index for index, poll in enumerate(polls))
         or polls[-1] != {"poll_index": len(polls) - 1, **after}
         or before.get("revision_alias") == after.get("revision_alias")
         or before.get("statement_sha256") != digest
@@ -146,6 +182,22 @@ def _metadata(value: dict[str, Any], statement: str) -> dict[str, Any]:
     _call(value["predecessor_after_call"], "stale_session")
     _call(value["recovery_call"], "allow")
     _call(value["recovery_after_call"], "deny")
+    _ordered(
+        "metadata-only transition",
+        before["observed_at"],
+        value["capture_started_at"],
+        value["before_call"]["started_at"],
+        value["before_call"]["finished_at"],
+        update["requested_at"],
+        *(poll["observed_at"] for poll in polls),
+        value["predecessor_after_call"]["started_at"],
+        value["predecessor_after_call"]["finished_at"],
+        value["recovery_call"]["started_at"],
+        value["recovery_call"]["finished_at"],
+        value["recovery_after_call"]["started_at"],
+        value["recovery_after_call"]["finished_at"],
+        value["capture_finished_at"],
+    )
     predecessor = value["before_call"]["session_alias"]
     successor = value["recovery_call"]["session_alias"]
     elapsed = (
@@ -206,6 +258,15 @@ def summary(
             raise ValueError(f"byte-identical trial {index} has invalid identity")
         _call(trial["before_call"], "allow")
         _call(trial["after_call"], "deny")
+        _ordered(
+            f"byte-identical trial {index}",
+            trial["before_call"]["started_at"],
+            trial["before_call"]["finished_at"],
+            trial["update"]["requested_at"],
+            trial["update"]["completed_at"],
+            trial["after_call"]["started_at"],
+            trial["after_call"]["finished_at"],
+        )
         if trial["before_call"]["session_alias"] != trial["after_call"]["session_alias"]:
             raise ValueError(f"byte-identical trial {index} changed session")
         byte_rows.append(
@@ -228,6 +289,19 @@ def summary(
         row["alpha_equivalent_form"] = after_style
         rename_rows.append(row)
 
+    for index, (byte_trial, rename_trial) in enumerate(
+        zip(byte_trials, rename_trials, strict=True)
+    ):
+        schedule = [
+            byte_trial["before_call"]["started_at"],
+            byte_trial["after_call"]["finished_at"],
+            rename_trial["before_call"]["started_at"],
+            rename_trial["recovery_after_call"]["finished_at"],
+        ]
+        if index + 1 < len(byte_trials):
+            schedule.append(byte_trials[index + 1]["before_call"]["started_at"])
+        _ordered(f"interleaved trial pair {index}", *schedule)
+
     compact = forms["a"]
     spaced = compact.replace("when temporal {\n", "when temporal {\n\n", 1)
     whitespace_rows = []
@@ -239,6 +313,16 @@ def summary(
         row = _transition(trial, index, before_text, after_text)
         row["variant"] = variant
         whitespace_rows.append(row)
+
+    _ordered(
+        "capture window",
+        value["capture_started_at"],
+        byte_trials[0]["before_call"]["started_at"],
+        rename_trials[-1]["recovery_after_call"]["finished_at"],
+        whitespace_trials[0]["before_call"]["started_at"],
+        whitespace_trials[-1]["recovery_after_call"]["finished_at"],
+        value["capture_finished_at"],
+    )
 
     metadata_row = _metadata(metadata, compact)
     transitions = [*rename_rows, *whitespace_rows, metadata_row]

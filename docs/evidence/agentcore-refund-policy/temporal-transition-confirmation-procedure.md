@@ -32,9 +32,11 @@ against the policy's one-hour window.
 
 `temporal-transition-confirmation-summary.json` is derived from those records
 by `capture_transition_repetition.py`. Trial shape and outcomes are validation
-conditions, while every reported count and interval is computed from validated
-events. The earlier `temporal-semantic-noop-repetition.json` remains unchanged
-as a historical migration input.
+conditions. The projector also requires canonical microsecond UTC timestamps,
+causal call/update/poll ordering, the stated byte/rename interleaving, and the
+overall capture bounds. Every reported count and interval is computed from
+those validated events. The earlier `temporal-semantic-noop-repetition.json`
+remains unchanged as a historical migration input.
 
 The first attempt was excluded because the generated Gateway role lacked the
 workload-token permission required for policy-session evaluation. The exact

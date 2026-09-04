@@ -20,7 +20,7 @@
       "locator": "capture_transition_interface.py"
     },
     {
-      "content_sha256": "5accc0897005566aba6a03a513dd73ebb032483458cd13b841868d6ac9d04241",
+      "content_sha256": "13c30acf7ed942cf82be5454bbbfb0c25aae0f24922c876e8f449e4d1e2ec6fe",
       "locator": "capture_transition_repetition.py"
     },
     {
@@ -44,7 +44,7 @@
       "locator": "temporal-transition-confirmation-cleanup.json"
     },
     {
-      "content_sha256": "c0f6ff823073533bd8976fea1885e281f6645b9175821ca833a551940fb92b50",
+      "content_sha256": "a93ceb5bdac79c48a3b347252e32239c2546513c5377dd63d07a6cd78607b2b1",
       "locator": "temporal-transition-confirmation-procedure.md"
     },
     {

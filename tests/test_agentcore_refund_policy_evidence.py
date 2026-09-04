@@ -977,6 +977,42 @@ def test_transition_events_regenerate_the_repeated_summary(tmp_path: Path) -> No
             ),
             "changed session",
         ),
+        (
+            lambda value: value["byte_identical_trials"][0]["before_call"].update(
+                started_at="2026-09-03T23:55:44.052772+00:00"
+            ),
+            "canonical UTC",
+        ),
+        (
+            lambda value: value["alpha_equivalent_trials"][0]["recovery_call"].update(
+                started_at=value["alpha_equivalent_trials"][0]["predecessor_after_call"][
+                    "started_at"
+                ]
+            ),
+            "causally ordered",
+        ),
+        (
+            lambda value: value["alpha_equivalent_trials"][0]["before_call"].update(
+                started_at=value["byte_identical_trials"][0]["before_call"]["started_at"]
+            ),
+            "interleaved trial pair",
+        ),
+        (
+            lambda value: value["byte_identical_trials"][0]["update"]["before"].update(
+                observed_at="2026-09-03T23:55:45.373105Z"
+            ),
+            "before-state observation follows completion",
+        ),
+        (
+            lambda value: value["whitespace_only_trials"][0]["update"]["polls"][0].update(
+                poll_index=1
+            ),
+            "submitted policy",
+        ),
+        (
+            lambda value: value.update(capture_finished_at="2026-09-03T23:59:00.000000Z"),
+            "capture window",
+        ),
     ],
 )
 def test_transition_capture_rejects_unproved_policy_writes(
