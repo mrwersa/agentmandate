@@ -79,10 +79,35 @@ _FINDING_CODES = frozenset(
         "continuity.complete-mediation-unresolved",
     }
 )
+_UNSUPPORTED_COMPOSITIONS = frozenset(
+    {
+        "cedar",
+        "conditions",
+        "delegations",
+        "ir",
+        "mermaid",
+        "otel",
+        "producers",
+        "sarif",
+    }
+)
 
 
 class ContinuityFormatError(ValueError):
     """Raised when a private continuity artifact is malformed."""
+
+
+def _refuse_continuity_composition(composition: frozenset[str]) -> None:
+    unknown = sorted(composition - _UNSUPPORTED_COMPOSITIONS)
+    if unknown:
+        raise ContinuityFormatError(
+            f"unsupported authority-continuity composition {unknown[0]!r}"
+        )
+    if composition:
+        requested = ", ".join(sorted(composition))
+        raise ContinuityFormatError(
+            f"authority continuity cannot yet be composed with {requested}"
+        )
 
 
 def _reject_constant(_: str) -> None:
@@ -2580,6 +2605,7 @@ def analyse_continuity(
     binding_source_bytes: Mapping[str, bytes] | None = None,
     mandate_bytes: bytes | None = None,
     depth: int | None = None,
+    composition: frozenset[str] = frozenset(),
 ) -> ContinuityAnalysis:
     """Reconcile reviewed transitions without changing manifest authority.
 
@@ -2588,6 +2614,7 @@ def analyse_continuity(
     unresolved and always retain ordinary manifest reachability.
     """
 
+    _refuse_continuity_composition(composition)
     evaluated_at = _evaluation_time(as_of)
     authority = analyse(mandate, depth=depth)
     canonical_provider = (
