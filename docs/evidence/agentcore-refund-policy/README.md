@@ -248,7 +248,9 @@ reviewed cell vectors, correction and verified cleanup state. Live URLs, AWS
 identities, signatures, session IDs and service timestamps remained in
 temporary raw files and were deleted after projection.
 
-`temporal-transition-index.json` pins the two alpha-equivalent forms,
+`temporal-transition-index.json`, SHA-256
+`41ac9c334c90b9ea4fffc56f4f3eac1f15e31ffe5970e8ba6b052bd3979b323a`,
+pins the two alpha-equivalent forms,
 sanitised provider events, UTC timestamps, capture and interface transformers,
 both procedures, the three ten-trial arms, the description-only cell,
 corrections, binding-revision projection, and verified cleanup. Live
