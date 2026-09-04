@@ -22,7 +22,7 @@ establish that join.
 | Conservative failure | Passed privately | Unreviewed, expired, mismatched, unbound, source-invalid, or mediation-incomplete evidence remains unresolved beside full manifest authority |
 | Mandate binding | Partial | The AgentCore path has a digest-bound signed-binding evaluation, but migration remains unreviewed and the zero-dependency core intentionally does not perform Ed25519 verification; Anthropic has no provider-native mandate join |
 | Safe-continuation semantics | Passed privately | Each outcome now keeps comparability, issuer-amendment state, and a three-valued verdict separate; tightening can satisfy the property, while missing joins, comparison, amendment treatment, or required alignments remain unresolved |
-| Accepted clean fixture | Open | Canonical migrations are unreviewed, test helpers inject acceptance in memory, and no end-to-end analyzed fixture can presently produce an evidence-supported clean result across all required alignment checks |
+| Accepted clean fixture | Passed synthetically | A complete fixture explicitly labels its mandate, binding, boundary, provider control, reviewer, and sources as synthetic; both real migrations remain `unreviewed` |
 | Presentation stability | Open | `ContinuityAnalysis` is an internal dataclass with no versioned envelope, strict result reader, checksum, closed finding-code registry, or canonical state fixtures |
 | Composition boundary | Open | IR is rejected by the private profile boundary, but no public pre-I/O refusal matrix exists for SARIF, Mermaid, OTel, conditions, delegations, producers, or Cedar analyses |
 | CLI failure behavior | Open | No public parser, renderer, explicit input pairing, exit-code tests, or complete-output/no-partial-output tests exist |
@@ -36,11 +36,11 @@ codes an accidental compatibility contract. More importantly, it would ask a
 caller to infer safe continuation from three axes that are intentionally
 independent.
 
-The next work is an accepted clean fixture followed by presentation and
-boundary work, not another provider experiment. Public exposure can be
-reconsidered after the result proves both exit-0 and exit-1 paths and refuses
-compositions that cannot preserve uncertainty. Manifest version 1, ordinary
-reachability, and the public Python API remain unchanged.
+The next work is presentation and boundary work, not another provider
+experiment. Public exposure can be reconsidered after the result schema and
+CLI prove both exit-0 and exit-1 paths and refuse compositions that cannot
+preserve uncertainty. Manifest version 1, ordinary reachability, and the
+public Python API remain unchanged.
 
 ## Semantics reproduced by the review
 
@@ -94,19 +94,18 @@ boundary” no longer establishes derivation integrity without an eligible
 same-mandate binding. `platform_verified` mediation can establish isolation and
 complete mediation; an exclusive adapter remains conditional.
 
-This completes the semantic prerequisite, not a public exit code. No current
-canonical fixture reaches `satisfied`, and no serialization contract exposes
-the new fields yet.
+This completes the semantic prerequisite, not a public exit code. The explicit
+synthetic fixture now reaches `satisfied`, but no serialization contract
+exposes the new fields yet.
 
-## Accepted-fixture requirement
+## Accepted-fixture requirement satisfied synthetically
 
 Byte-exact migrations prove which committed captures were interpreted. They do
 not supply an accountable reviewer, review lifetime, or provider-native mandate
-binding. The current tests replace evidence metadata in memory to exercise
-Gate 3; that is a unit-test control, not a public clean-path claim.
+binding. The older tests replace evidence metadata in memory to exercise Gate
+3; that remains a unit-test control rather than a public clean-path claim.
 
-Before exposure, commit either an accountable accepted fixture or an explicitly
-synthetic accepted fixture that includes:
+The accepted synthetic fixture now includes:
 
 - mandate bytes and identity;
 - a binding, provider record, and every declared source byte;
@@ -115,9 +114,17 @@ synthetic accepted fixture that includes:
 - an explicit evaluation time within all half-open validity windows; and
 - an expected `satisfied` safe-continuation result.
 
-The real AgentCore and Anthropic migrations may remain unreviewed and serve as
-canonical unresolved or finding paths. A synthetic fixture must say so in all
-identities and must not promote either provider experiment retrospectively.
+`tests/fixtures/continuity-accepted-synthetic/` pins those bytes and identities.
+Private analysis strictly rereads both records, regenerates both IR profiles,
+verifies all source bytes and the mandate digest, checks the evaluation time,
+and produces one `preserved`/`stable`/`within_bound` transition with established
+comparability, no required amendment, all four alignments established, no
+findings, and `safe_continuation: satisfied`.
+
+The fixture also proves that provider-control and binding mediation must match;
+changing one side from `platform_verified` to `exclusive_adapter` makes the
+join unresolved. The real AgentCore and Anthropic migrations remain unreviewed
+canonical finding paths and are not promoted retrospectively.
 
 ## Presentation contract required
 
@@ -201,9 +208,9 @@ rendered result must never be fed into another analyzer as authority.
    comparability and safe-continuation contract, including stable, tightening,
    widening, reset, issuer-amendment, conditional-alignment, and unresolved
    tests.
-2. Commit an accountable or explicitly synthetic accepted fixture that
-   reaches a genuine clean/satisfied path while leaving the real unreviewed
-   migrations honest.
+2. **Complete synthetically:** commit an accountable or explicitly synthetic
+   accepted fixture that reaches a genuine clean/satisfied path while leaving
+   the real unreviewed migrations honest.
 3. Implement a strict versioned result envelope, closed finding codes, checksum,
    and canonical satisfied, unsafe, unresolved, untrusted, and truncated
    fixtures.

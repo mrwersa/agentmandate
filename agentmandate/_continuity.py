@@ -2257,7 +2257,12 @@ def analyse_continuity(
                 (),
             )
         elif isinstance(control, AgentCoreControl):
-            axes = _agentcore_axes(control, binding_ready=binding_ready)
+            control_binding_ready = (
+                binding_ready
+                and canonical_binding is not None
+                and canonical_binding.mediation == control.mediation
+            )
+            axes = _agentcore_axes(control, binding_ready=control_binding_ready)
         else:
             axes = _anthropic_axes(control)
         state, authority_change, admission, alignments, assumptions = axes
