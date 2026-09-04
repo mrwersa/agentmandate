@@ -14,7 +14,6 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
-from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from ._ir import (
@@ -33,6 +32,7 @@ from ._ir import (
 from ._ir import (
     Evidence as IREvidence,
 )
+from ._result import validate_authority
 from .manifest import Mandate, ManifestError, loads
 from .reach import Authority, analyse
 
@@ -2052,71 +2052,12 @@ def _result_identity(value: Any, path: str) -> ContinuityArtifactIdentity:
 
 
 def _validate_result_authority(value: Any) -> dict[str, Any]:
-    fields = {
-        "reachable_tools",
-        "effects",
-        "ungated_irreversible",
-        "service_principal_tools",
-        "max_extractable",
-        "breaches",
-        "depth",
-        "truncated",
-    }
-    authority = _result_record(value, "/authority", fields)
-    for field in ("reachable_tools", "ungated_irreversible", "service_principal_tools"):
-        _result_strings(authority[field], f"/authority/{field}")
-    effects = authority["effects"]
-    if not isinstance(effects, list) or any(
-        not isinstance(pair, list) or len(pair) != 2 for pair in effects
-    ):
-        raise ContinuityFormatError(
-            "continuity result /authority/effects must contain string pairs"
-        )
-    pairs = [
-        tuple(
-            _string(item, f"result/authority/effects/{index}/{part}")
-            for part, item in enumerate(pair)
-        )
-        for index, pair in enumerate(effects)
-    ]
-    if pairs != sorted(set(pairs)):
-        raise ContinuityFormatError(
-            "continuity result /authority/effects must be sorted and unique"
-        )
-    maximum = authority["max_extractable"]
-    if maximum is not None:
-        money = _result_record(maximum, "/authority/max_extractable", {"amount", "currency"})
-        amount = _string(money["amount"], "result/authority/max_extractable/amount")
-        try:
-            parsed = Decimal(amount)
-        except InvalidOperation as exc:
-            raise ContinuityFormatError(
-                "continuity result /authority/max_extractable/amount must be decimal"
-            ) from exc
-        if not parsed.is_finite() or str(parsed) != amount:
-            raise ContinuityFormatError(
-                "continuity result /authority/max_extractable/amount must be canonical"
-            )
-        _string(money["currency"], "result/authority/max_extractable/currency")
-    breaches = authority["breaches"]
-    if not isinstance(breaches, list):
-        raise ContinuityFormatError("continuity result /authority/breaches must be an array")
-    for index, item in enumerate(breaches):
-        breach = _result_record(
-            item, f"/authority/breaches/{index}", {"kind", "detail", "path"}
-        )
-        _string(breach["kind"], f"result/authority/breaches/{index}/kind")
-        _string(breach["detail"], f"result/authority/breaches/{index}/detail")
-        path = breach["path"]
-        if not isinstance(path, list) or not path:
-            raise ContinuityFormatError(
-                f"continuity result /authority/breaches/{index}/path must be non-empty"
-            )
-        for step, rendered in enumerate(path):
-            _string(rendered, f"result/authority/breaches/{index}/path/{step}")
-    _integer(authority["depth"], "result/authority/depth")
-    _boolean(authority["truncated"], "result/authority/truncated")
-    return authority
+    return validate_authority(
+        value,
+        error_type=ContinuityFormatError,
+        result_name="continuity result",
+        whitespace_term="stripped",
+    )
 
 
 def _parse_alignment(value: Any, path: str) -> ContinuityAlignment:

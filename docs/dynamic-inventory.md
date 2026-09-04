@@ -19,11 +19,11 @@ It lets `drift` compare a captured member set with the agent's declared
 authority while preserving why the static read stopped. It is not permission,
 discovery, or proof that an upstream system told the truth.
 
-## Candidate artifact
+## Version 1 artifact
 
 The declaration is a separate, versioned JSON artifact. Keeping it outside the
 mandate prevents observed inventory from becoming reviewed intent merely by
-parsing. A candidate v1 body contains:
+parsing. The v1 body contains:
 
 ```json
 {
@@ -159,7 +159,7 @@ No command may import application modules, invoke providers, query registries,
 or make network requests. Capture is an explicit upstream step whose bytes are
 reviewed and passed to AgentMandate.
 
-The public candidate uses paired, repeatable `--inventory-declaration` and
+The public CLI uses paired, repeatable `--inventory-declaration` and
 `--inventory-capture` options. `--inventory-selection` is a JSON object and
 `--inventory-as-of` is an ISO date. Pairing is positional, but the capture is
 stored under the declaration's locator only after the caller supplies it; the
@@ -181,13 +181,14 @@ not verify captured bytes or make the membership eligible for drift.
 1. **Contract:** challenge this record shape against AgentKit and Sentry,
    especially boundary identity, selector secrets, and hidden dispatch.
 2. **Reader:** add canonical fixtures, a strict typed-error boundary, digest
-   verification, and no trust-bearing CLI behavior. **Implemented privately:**
+   verification, and no trust-bearing validation behaviour. **Implemented:**
    AgentKit is complete at its reviewed provider boundary; Sentry is partial
    because its captured eight-tool surface omits hidden dispatch targets.
 3. **Reconciliation:** resolve literal and declared dynamic members through the
-   same `Inventory`/`drift` path; prove incomplete evidence cannot authorize a
-   removal. **Implemented privately:** complete AgentKit evidence discharges
-   the dynamic binding; partial Sentry and expired evidence remain unresolved.
+   same `Inventory`/`drift` path; prove incomplete evidence cannot authorise a
+   removal. **Implemented behind the public CLI:** complete AgentKit evidence
+   discharges the dynamic binding; partial Sentry and expired evidence remain
+   unresolved.
 4. **Public CLI:** expose declaration input only after failure behavior and
    output stability are reviewed across both fixtures. **Passed:** both
    declarations cross structural validation; complete AgentKit evidence

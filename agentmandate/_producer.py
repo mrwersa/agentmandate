@@ -13,7 +13,6 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
-from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from ._ir import (
@@ -29,6 +28,7 @@ from ._ir import (
     _fact_id,
     _from_mandate,
 )
+from ._result import validate_authority
 from .manifest import Mandate
 from .reach import Authority, _analyse_with_trace
 
@@ -462,83 +462,12 @@ def _parse_selections(value: Any) -> tuple[ProducerSelection, ...]:
 
 
 def _validate_authority(value: Any) -> dict[str, Any]:
-    fields = {
-        "reachable_tools",
-        "effects",
-        "ungated_irreversible",
-        "service_principal_tools",
-        "max_extractable",
-        "breaches",
-        "depth",
-        "truncated",
-    }
-    authority = _result_record(value, "/authority", fields)
-    for field in (
-        "reachable_tools",
-        "ungated_irreversible",
-        "service_principal_tools",
-    ):
-        _result_string_list(authority[field], f"/authority/{field}")
-    effects = authority["effects"]
-    if not isinstance(effects, list) or any(
-        not isinstance(pair, list) or len(pair) != 2 for pair in effects
-    ):
-        raise ProducerBoundaryFormatError(
-            "producer result /authority/effects must contain string pairs"
-        )
-    effect_pairs = [
-        tuple(
-            _result_string(item, f"/authority/effects/{index}/{part}")
-            for part, item in enumerate(pair)
-        )
-        for index, pair in enumerate(effects)
-    ]
-    if effect_pairs != sorted(set(effect_pairs)):
-        raise ProducerBoundaryFormatError(
-            "producer result /authority/effects must be sorted and unique"
-        )
-    maximum = authority["max_extractable"]
-    if maximum is not None:
-        money = _result_record(maximum, "/authority/max_extractable", {"amount", "currency"})
-        amount = _result_string(money["amount"], "/authority/max_extractable/amount")
-        try:
-            parsed = Decimal(amount)
-        except InvalidOperation as exc:
-            raise ProducerBoundaryFormatError(
-                "producer result /authority/max_extractable/amount must be decimal"
-            ) from exc
-        if not parsed.is_finite() or str(parsed) != amount:
-            raise ProducerBoundaryFormatError(
-                "producer result /authority/max_extractable/amount must be canonical"
-            )
-        _result_string(money["currency"], "/authority/max_extractable/currency")
-    breaches = authority["breaches"]
-    if not isinstance(breaches, list):
-        raise ProducerBoundaryFormatError(
-            "producer result /authority/breaches must be an array"
-        )
-    for index, item in enumerate(breaches):
-        breach = _result_record(
-            item, f"/authority/breaches/{index}", {"kind", "detail", "path"}
-        )
-        _result_string(breach["kind"], f"/authority/breaches/{index}/kind")
-        _result_string(breach["detail"], f"/authority/breaches/{index}/detail")
-        path = breach["path"]
-        if not isinstance(path, list) or not path:
-            raise ProducerBoundaryFormatError(
-                f"producer result /authority/breaches/{index}/path must be a non-empty array"
-            )
-        for step, rendered in enumerate(path):
-            _result_string(rendered, f"/authority/breaches/{index}/path/{step}")
-    if type(authority["depth"]) is not int or authority["depth"] < 0:
-        raise ProducerBoundaryFormatError(
-            "producer result /authority/depth must be a non-negative integer"
-        )
-    if type(authority["truncated"]) is not bool:
-        raise ProducerBoundaryFormatError(
-            "producer result /authority/truncated must be a boolean"
-        )
-    return authority
+    return validate_authority(
+        value,
+        error_type=ProducerBoundaryFormatError,
+        result_name="producer result",
+        whitespace_term="trimmed",
+    )
 
 
 def _parse_applied(value: Any) -> tuple[AppliedProducerBoundary, ...]:

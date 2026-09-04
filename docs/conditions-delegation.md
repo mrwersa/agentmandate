@@ -1,25 +1,18 @@
 # Conditions and delegation contract
 
-Status: **proposed and experimental**. This document is gate 1 of the
-Phase-2 initiatives for conditional authority and delegation chains. It
-defines the record shapes, trust rules, and evidence gates to test before
-either becomes a manifest schema change. It does not alter manifest version 1,
-the Authority IR analysis profile, or reachability behaviour. Structural
-`mandate ir validate` recognition of the new relations is additive; it proves
-graph integrity only and does not accept the records as authority.
+Status: **conditional CLI exposed; original delegation shape superseded**.
+This document records the shared foundation for conditional authority and
+delegation chains. Both remain reviewed attachments rather than manifest-v1
+meaning. Structural validation proves graph or artifact integrity only;
+manifest-mode analysis separately establishes whether the evidence is eligible
+to narrow authority.
 
-Gate 2a's context and grant readers, gate 2b's tool-side readers and IR
-projections, and the conditional half of gate 3 are implemented privately.
-Structural projection does not make a condition or principal eligible for
-analysis. A real
-[Authorizer delegation capture](evidence/authorizer-delegation/README.md) now
-closes the missing-chain prerequisite but fails the provisional record shape
-honestly; delegation semantics and every public surface remain gated on the
-[evidence-driven revision](delegation-v2.md). The grant-v1 examples below
-remain the implemented private transport until that revision passes its
-migration gate; they are not the target analysis contract. The revised private
-reader now preserves both the synthetic v1 grant and all four Authorizer hops,
-but no IR or reachability path consumes those records.
+The condition and context records below are exposed through `mandate
+conditions validate` and manifest-mode `reach` and `drift`. The original
+grant-v1 examples are retained as design history, not as the current delegation
+contract. Real Authorizer evidence invalidated that shape; the implemented
+[delegation-chain contract](delegation-v2.md) now preserves ordered actors,
+absolute validity, and separately reviewed deployment mappings.
 
 ## Problem boundary
 
@@ -52,16 +45,16 @@ This mirrors the existing rule that absent control evidence fails closed, and
 extends it: uncertainty about *when* authority applies resolves to the most
 protective reading already in the document.
 
-## Candidate records
+## Condition v1 and superseded grant-v1 records
 
-Gate 1 narrows this initiative explicitly to **conditional effects**: whether
-a call's effect class depends on its arguments or dispatch target. Approval
-state, time windows, status, and request-context conditions stay future work —
-they need operand sources this contract cannot yet define, and the committed
-evidence does not ask for them. Conditions and delegations are declared on
-tools in a future manifest version, projected into Authority IR facts and
-registered relations exactly as `contains_tool` was. Shapes are illustrative
-until fixtures prove them.
+The condition-v1 surface narrows this initiative explicitly to **conditional
+effects**: whether a call's effect class depends on its arguments or dispatch
+target. Approval state, time windows, status, and request-context conditions
+stay future work because they need operand sources this contract cannot yet
+define, and the committed evidence does not ask for them. Current conditions
+and delegations remain standalone reviewed attachments projected into Authority IR facts and
+registered relations. Moving either into manifest meaning would require a
+future manifest version.
 
 ### Condition context
 
@@ -397,14 +390,14 @@ findings.
    IR projection behind registered relations (done).
 3. **Analysis:** conditional effects and delegation hops inside `reach` and
    `drift`, with provenance-cited counterexamples; all four graphs unchanged
-   under conservative defaults. The private conditional reachability consumer
-   and source-drift reconciliation are done; genuine delegation-chain evidence
-   is captured and its revised private records now project through closed IR
-   profiles consumed by a private, fail-closed analyzer. Public delegation
-   exposure remains pending; a genuine widening claim still requires an
-   operational scope-to-tool mapping.
-4. **Public exposure:** CLI and conditional presentation schema approved by
-   the [closing gate review](conditional-authority-gate-4-review.md).
+   under conservative defaults. The conditional reachability consumer and
+   source-drift reconciliation are done. Genuine delegation-chain evidence is
+   captured, and its revised private records project through closed IR profiles
+   consumed by a fail-closed analyser. A genuine non-synthetic widening claim
+   still requires an operational scope-to-tool mapping.
+4. **Public exposure:** condition and delegation CLI presentation schemas were
+   approved by their [condition](conditional-authority-gate-4-review.md) and
+   [delegation](delegation-gate-4-review.md) closing reviews.
 
 ## Non-goals
 

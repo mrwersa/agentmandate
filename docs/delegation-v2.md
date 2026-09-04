@@ -1,13 +1,12 @@
 # Delegation record revision
 
-Status: **proposed and experimental**. This is the post-evidence contract for
-issue [#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
-private, synthetic grant-v1 delegation shape only after fixtures and profile
-validation land. No current command accepts this format as analyzable
-authority. The private strict reader and both canonical migration fixtures are
-implemented. A private, closed Authority IR projection preserves the records
-behind registered relations, and the private analysis consumer re-validates
-those profiles before making decisions. Public exposure remains gated.
+Status: **public CLI and v1 attachment contract; Python records private**. This
+is the post-evidence contract for issue
+[#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
+synthetic grant-v1 shape. `mandate delegations validate` checks structure;
+manifest-mode `mandate reach` separately re-validates the closed Authority IR
+profiles, captured bytes, reviewed domains, expiry, and hop attenuation before
+using the attachment. Compatibility follows `STABILITY.md`.
 
 ## Evidence-driven changes
 
@@ -23,7 +22,7 @@ The revision therefore records a chain, not an isolated synthetic grant. It
 also separates facts observed at the issuer from reviewed deployment mappings.
 Unknown mappings remain explicit and cannot become empty authority.
 
-## Candidate chain record
+## Version 1 chain record
 
 ```json
 {
@@ -220,17 +219,18 @@ The implementation and analysis gates are:
 5. keep all four manifest evidence graphs and existing conditional outputs
    byte-identical under conservative defaults.
 
-Items 1–5 are implemented as private records, migrations, projection,
-adversarial profile tests, and a fail-closed analysis consumer. The consumer
+Items 1–5 are implemented as private Python records, migrations, projection,
+adversarial profile tests, and a fail-closed analysis consumer behind the
+public CLI. The consumer
 requires a canonical caller-supplied UTC timestamp, treats expiry as exclusive,
 and checks that every complete comparable downstream surface is a subset of
 its predecessor before comparing the attached tool with its referenced hop.
 Unknown, partial, cross-domain, expired, or unverifiable inputs produce named
-unresolved findings and cannot produce widening claims. Delegation analysis
-remains private after this gate. Its first non-synthetic widening
-counterexample still requires an operational, digest-pinned deployment mapping
-from scopes to tools and effects. The CLI exposure passed its
-[closing review](delegation-gate-4-review.md) behind the same consumer.
+unresolved findings and cannot produce widening claims. The first
+non-synthetic widening counterexample still requires an operational,
+digest-pinned deployment mapping from scopes to tools and effects. CLI exposure
+passed its [closing review](delegation-gate-4-review.md) behind the same
+consumer.
 
 A standalone chain profile requires one confidence/review state so conflicting
 claims cannot be silently merged. Reviewer names remain per-fact accountability

@@ -1,8 +1,9 @@
 # Authority IR compatibility contract
 
-Status: **proposed and experimental**. This document defines the contract to
-test before an Authority IR becomes a public format. It does not change
-manifest schema version 1 or the guarantees in `STABILITY.md`.
+Status: **public CLI and v1 artifact contract; Python records private**. The
+reviewed CLI exposes canonical export, structural validation, and a closed
+manifest-v1 analysis profile. This format does not change manifest schema
+version 1. Compatibility follows `STABILITY.md`.
 
 ## Why a separate IR
 
@@ -16,7 +17,7 @@ The IR is an analysis interchange format, not an agent execution protocol. It
 does not carry prompts, model configuration, tool implementations, credentials,
 or request payloads.
 
-## Candidate record model
+## Version 1 record model
 
 An IR snapshot contains four deterministic tables:
 
@@ -91,13 +92,13 @@ view, but it cannot cancel an accepted edge. The relation registry must declare
 cardinality and these merge semantics before reachability consumes a new
 relation.
 
-The private v1 registry separates source and derived relations. Manifest source
+The v1 registry separates source and derived relations. Manifest source
 relations are `acts_as`, `ceiling_on`, `produces`, `requires`, and
 `role_contains`. `contains_tool` belongs to the dynamic-inventory profile.
-The experimental condition/principal profiles add `has_condition`,
-`uses_context`, `narrows_to`, `constrained_by`, and `under_grant`; none can make
-a graph eligible for manifest-v1 analysis. Derived relations are closed and
-purpose-specific:
+The reviewed condition and delegation attachment profiles add `has_condition`,
+`uses_context`, `narrows_to`, `constrained_by`, and `under_grant`. None makes a
+standalone graph eligible for manifest-v1 `reach --ir` analysis. Derived
+relations are closed and purpose-specific:
 
 | Relation | Endpoints | Required support |
 |---|---|---|
@@ -229,7 +230,7 @@ The three version axes are independent. `ir_version` governs graph records and
 relations. Adapter versions in source records govern projection semantics and
 therefore may change source and result digests without changing either format.
 `result_version` governs envelope fields, their meaning, and canonicalization.
-The private v1 reader is strict: adding, removing, or reinterpreting a hashed
+The v1 reader is strict: adding, removing, or reinterpreting a hashed
 field requires a result-version change.
 
 ## Delivery and acceptance gates

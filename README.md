@@ -8,7 +8,7 @@
 [![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/mrwersa/agentmandate/blob/main/LICENSE)
 
-AgentMandate is a design-time authority analyzer for agentic AI systems. An AI
+AgentMandate is a design-time authority analyser for agentic AI systems. An AI
 agent is a goal-directed system, usually built around a language model, whose
 runtime supplies tools, identity, memory, policy, and the ability to cause
 effects. Those tools may each look safe on their own. AgentMandate finds the
@@ -17,7 +17,7 @@ tells you when a release widened what it can reach.
 
 A **mandate** is the reviewed, bounded unit of work the agent is allowed to
 carry out while its issuer may be absent. The manifest is the repository's
-machine-readable description of that mandate. AgentMandate analyses permission,
+machine-readable description of that mandate. AgentMandate analyses authority,
 not whether the model is likely to choose a particular path.
 
 Alpha. Apache-2.0.
@@ -117,14 +117,15 @@ offline.
 
 This is design-time analysis, not runtime enforcement. It runs in CI against a
 manifest and does not sit in the request path. The agent's model proposes a tool
-call; the surrounding runtime supplies the tools and state; the platform still
-owns workload identity, the authorisation decision, and the real-world effect.
+call; the surrounding runtime supplies the tools and state. The deployment's
+identity, authorisation, and application components still control whether the
+real-world effect occurs.
 
 | Tool | What it does | Relationship |
 |---|---|---|
 | [Policy in Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html) | Evaluates all applicable Cedar policies for each gateway tool invocation, with default-deny, forbid-wins, and analysis that flags always-allow and always-deny policies | Enforces each invocation. Its documented analysis is policy-level, not a model of a sequence of permitted calls |
 | [AgentWard](https://github.com/agentward-ai/agentward) | Runtime proxy enforcing policy per call, diffs two policy files | Enforces. Diffs declared text rather than reachable authority |
-| [AgentShield (affaan-m)](https://github.com/affaan-m/agentshield) | Scans agent configuration and MCP servers, drift gate over findings | Scans. Drift is over finding counts, not permission direction; it is distinct from the aiconnai project with the same name |
+| [AgentShield (affaan-m)](https://github.com/affaan-m/agentshield) | Scans agent configuration and MCP servers, drift gate over findings | Scans. Drift is over finding counts, not effective-authority direction; it is distinct from the aiconnai project with the same name |
 | [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) | Attribute-based access control for tool calls | Enforces |
 | [OPA](https://www.openpolicyagent.org/docs), [Cedar](https://docs.cedarpolicy.com/) | Decide one authorisation at a time | Enforces |
 
@@ -369,7 +370,7 @@ What this does not do, on purpose:
 
 - **No enforcement.** No proxy, no runtime interception, no blocking.
 - **No data-flow reachability.** Finding that a read tool feeds an exfiltration path needs taint labels the manifest does not carry. Cumulative value and scope minting are what the current model supports honestly.
-- **No model behaviour.** Whether the agent *would* take a path is a different question from whether it *may*. This measures permission.
+- **No model behaviour.** Whether the agent *would* take a path is a different question from whether it *may*. This measures permitted authority.
 - **No session or budget broker.** A runtime session is not automatically the
   reviewed mandate, and a configured cumulative limit is not enough unless its
   consumed state remains attached to that mandate. Continuity across sessions,
@@ -381,6 +382,8 @@ Search is bounded by `limits.depth`. No breach at depth 8 is not proof that none
 
 ## Documentation
 
+- [docs/README.md](docs/README.md) — a map of current contracts, experimental
+  work, decision records, and evidence
 - [DESIGN.md](DESIGN.md) — the authority model, why the search is shaped this way, and what was left out
 - [docs/evaluation-loop.md](docs/evaluation-loop.md) — how authority analysis, scenario evaluation, runtime policy, and production feedback remain distinct
 - [docs/test-obligations.md](docs/test-obligations.md) — decision-point obligations and the AgentVerity bridge

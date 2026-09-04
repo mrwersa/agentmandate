@@ -318,6 +318,11 @@ def test_continuity_result_rejects_unknown_fields_and_bad_checksum():
             "completed_values must be non-empty",
         ),
         (lambda raw: raw["outcomes"][0].update(alignments={}), "must be an array"),
+        (lambda raw: raw["outcomes"][0].update(assumptions={}), "must be an array"),
+        (
+            lambda raw: raw["outcomes"][0].update(assumptions=["z", "a"]),
+            "sorted unique strings",
+        ),
         (
             lambda raw: raw["outcomes"][0]["alignments"].reverse(),
             "canonical checks",

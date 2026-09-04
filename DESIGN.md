@@ -21,10 +21,12 @@ A mandate is one reviewed, bounded unit of work. Manifest v1 models its tool
 authority as a set of tools over a set of scopes.
 
 AgentMandate sits at the action boundary of an agent loop. The model may sense,
-reason, plan, and propose a tool call. The platform still owns the workload
-identity, authorisation decision, and real-world effect. A prompt can shape
-model behaviour, but it is not an authority boundary. This project analyses
-the tool authority the platform exposes and the paths that authority permits.
+reason, plan, and propose a tool call. The surrounding runtime supplies the
+workload identity and routes the call through the deployed authorisation
+decision point. Application code causes the real-world effect. A prompt can
+shape model behaviour, but it is not an authority boundary. This project
+analyses the tool authority those components expose and the paths that
+authority permits.
 
 That reachability question is separate from authority continuity. A cumulative
 constraint depends on both its configured limit and the runtime's consumed
@@ -111,8 +113,8 @@ does not make reachability more precise.
 both, rather than comparing their text. The two come apart routinely, which is
 the entire argument for the command:
 
-- Adding a read-only tool changes no permission and can make a money ceiling
-  unenforceable. This is the shipped example.
+- Adding a read-only tool changes no declared authority and can make a money
+  ceiling unenforceable. This is the shipped example.
 - Renaming a tool changes every line of the config diff and no authority.
 - Relaxing one enum in a schema is one character and can open a scope.
 
@@ -253,8 +255,8 @@ surface, it is well covered by others, and mixing analysis with enforcement
 makes both harder to reason about.
 
 **Model behaviour.** Whether an agent *would* take a path is a different
-question from whether it *may*. This measures permission. The behavioural
-question needs the agent in the loop and belongs in a testing tool.
+question from whether it *may*. This measures permitted authority. The
+behavioural question needs the agent in the loop and belongs in a testing tool.
 
 **Inferring the fields that matter.** `mandate scan` reads an MCP catalogue and
 writes the skeleton, which removes the typing. It cannot remove the thinking,

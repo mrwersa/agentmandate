@@ -918,6 +918,8 @@ def test_producer_result_rejects_unknown_outer_fields_and_bad_checksums() -> Non
             "reviewed non-secret alias",
         ),
         (lambda raw: raw.update(authority=[]), "must be an object"),
+        (lambda raw: raw["authority"].pop("depth"), "missing field"),
+        (lambda raw: raw["authority"].update(extra=True), "unknown field"),
         (
             lambda raw: raw["authority"].update(reachable_tools={}),
             "must be an array",
@@ -959,6 +961,15 @@ def test_producer_result_rejects_unknown_outer_fields_and_bad_checksums() -> Non
         (lambda raw: raw["authority"].update(depth=True), "non-negative integer"),
         (lambda raw: raw["authority"].update(truncated=0), "must be a boolean"),
         (lambda raw: raw.update(applied={}), "/applied must be an array"),
+        (
+            lambda raw: raw["applied"][0].update(boundary=" "),
+            "non-empty trimmed string",
+        ),
+        (lambda raw: raw["applied"][0].update(support={}), "must be an array"),
+        (
+            lambda raw: raw["applied"][0].update(support=["z", "a"]),
+            "sorted unique strings",
+        ),
         (
             lambda raw: raw["applied"][0].update(capacity_kind="lifetime"),
             "capacity_kind is unsupported",
