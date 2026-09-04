@@ -96,16 +96,24 @@ not an authority input. Findings preserve baseline manifest authority and exit
 stdout. IR, SARIF, Mermaid, condition, and delegation composition are refused
 before any input is read or output written.
 
+Authority continuity has a private `agentmandate.continuity/v1` presentation
+envelope with a strict reader, closed finding codes, input identities, complete
+manifest Authority, per-transition outcomes, and a checksum. It is unsupported,
+is not an authority input, and has no public Python or CLI surface. Canonical
+fixtures cover satisfied, reset, widened, tightened, overshot, unresolved,
+untrusted, and truncated results.
+
 ## What is most likely to change
 
 The manifest schema and the way standalone evidence profiles compose with it.
 Conditional authority and delegation analysis now have public, versioned
 artifact and command surfaces, but they remain reviewed attachments rather than
-new manifest-v1 meanings. Authority continuity has private experimental records
-and analysis only. Finite producer cardinality has a public validate-then-consume
-CLI around its versioned boundary, closed IR profile, fail-closed analysis, and
-canonical `agentmandate.producers/v1` result envelope. Its Python records remain
-private, and the result is not accepted as authority input. An explicitly
+new manifest-v1 meanings. Authority continuity has private experimental
+records, analysis, and result presentation only. Finite producer cardinality
+has a public validate-then-consume CLI around its versioned boundary, closed IR
+profile, fail-closed analysis, and canonical `agentmandate.producers/v1` result
+envelope. Its Python records remain private, and the result is not accepted as
+authority input. An explicitly
 synthetic accepted fixture supplies the clean path while the real IAM migration
 remains unreviewed. Structural validity never makes any of these records trusted
 mandate authority.
