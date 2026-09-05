@@ -1937,7 +1937,7 @@ class ContinuityArtifactIdentity:
 
 @dataclass(frozen=True)
 class ContinuityAnalysis:
-    """Private Gate 3 result beside unchanged manifest authority."""
+    """Internal reconciliation result beside unchanged manifest authority."""
 
     authority: Authority
     as_of: str
@@ -1954,7 +1954,7 @@ class ContinuityAnalysis:
         )
 
     def to_result(self) -> ContinuityResult:
-        """Return the private versioned presentation envelope."""
+        """Return the versioned CLI presentation envelope."""
         return ContinuityResult(
             CONTINUITY_RESULT_VERSION,
             CONTINUITY_RESULT_SCHEMA,
@@ -1970,7 +1970,7 @@ class ContinuityAnalysis:
 
 @dataclass(frozen=True)
 class ContinuityResult:
-    """Private canonical presentation; never accepted as authority input."""
+    """Internal record for canonical CLI output; never an authority input."""
 
     result_version: int
     schema: str

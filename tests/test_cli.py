@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from agentmandate import __version__
+from agentmandate._continuity import ContinuityResult
 from agentmandate.cli import EXIT_FINDING, EXIT_OK, EXIT_USAGE, main
 
 EXAMPLES = Path(__file__).resolve().parent.parent / "examples"
@@ -37,6 +38,10 @@ PRODUCER_MANIFEST = PRODUCER_FIXTURE / "manifest.json"
 PRODUCER_MANIFEST_INPUT = str(PRODUCER_MANIFEST.relative_to(ROOT))
 PRODUCER_SELECTION = PRODUCER_FIXTURE / "selection.json"
 PRODUCER_RESULT = ROOT / "tests/fixtures/producer-reach-result-v1.json"
+CONTINUITY_FIXTURE = ROOT / "tests/fixtures/continuity-accepted-synthetic"
+CONTINUITY_MANIFEST = CONTINUITY_FIXTURE / "manifest.json"
+CONTINUITY_PROVIDER = CONTINUITY_FIXTURE / "provider.json"
+CONTINUITY_BINDING = CONTINUITY_FIXTURE / "binding.json"
 
 CONDITIONAL_MANIFEST = """
 agent: sql-agent
@@ -96,6 +101,32 @@ def delegation_args(*, as_of: str = "2026-08-25T12:00:00Z") -> list[str]:
         "--delegation-target-binding",
         "agent",
     ]
+
+
+def continuity_args(*, binding: bool = True) -> list[str]:
+    arguments = [
+        "--continuity-provider",
+        str(CONTINUITY_PROVIDER),
+        "--continuity-source",
+        "tests/fixtures/continuity-accepted-synthetic/provider-control.json="
+        + str(CONTINUITY_FIXTURE / "provider-control.json"),
+        "--continuity-as-of",
+        "2026-09-03T12:00:00Z",
+    ]
+    if binding:
+        arguments.extend(
+            [
+                "--continuity-binding",
+                str(CONTINUITY_BINDING),
+                "--continuity-binding-source",
+                "tests/fixtures/continuity-accepted-synthetic/binding-verification.json="
+                + str(CONTINUITY_FIXTURE / "binding-verification.json"),
+                "--continuity-binding-source",
+                "tests/fixtures/continuity-accepted-synthetic/policy.json="
+                + str(CONTINUITY_FIXTURE / "policy.json"),
+            ]
+        )
+    return arguments
 
 
 def producer_args(*, as_of: str = "2026-09-03") -> list[str]:
@@ -577,6 +608,221 @@ def test_producers_validate_is_structural_only(capsys, tmp_path):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "error:" in captured.err
+
+
+@pytest.mark.parametrize(
+    ("artifact", "label"),
+    [
+        ("continuity-binding-v1.json", "continuity binding"),
+        ("agentcore-continuity-v1.json", "AgentCore continuity profile"),
+        ("anthropic-continuity-v1.json", "Anthropic continuity profile"),
+    ],
+)
+def test_continuity_validate_is_structural_only(artifact, label, capsys):
+    path = ROOT / "tests/fixtures" / artifact
+
+    assert main(["continuity", "validate", str(path)]) == EXIT_OK
+    captured = capsys.readouterr()
+    assert captured.out == f"valid {label} v1\n"
+    assert captured.err == ""
+
+
+def test_continuity_validate_rejects_unknown_or_malformed_artifacts(tmp_path, capsys):
+    cases = ["{", "[]", "{}", '{"continuity_binding_version":1,"agentcore_continuity_version":1}']
+    for index, content in enumerate(cases):
+        path = tmp_path / f"invalid-{index}.json"
+        path.write_text(content, encoding="utf-8")
+        assert main(["continuity", "validate", str(path)]) == EXIT_USAGE
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert "error:" in captured.err
+
+    assert main(["continuity", "validate", str(tmp_path / "absent")]) == EXIT_USAGE
+    assert capsys.readouterr().out == ""
+
+
+def test_continuity_reconcile_emits_complete_json_and_human_output(capsys):
+    command = [
+        "continuity",
+        "reconcile",
+        str(CONTINUITY_MANIFEST.relative_to(ROOT)),
+        *continuity_args(),
+    ]
+    assert main([*command, "--json"]) == EXIT_OK
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert captured.err == ""
+    assert payload["schema"] == "agentmandate.continuity/v1"
+    assert payload["authority"]["reachable_tools"] == ["bounded_action"]
+    assert payload["outcomes"][0]["safe_continuation"] == "satisfied"
+    assert payload["findings"] == []
+    assert captured.out.endswith("\n")
+    assert ContinuityResult.from_json(captured.out).to_json() == captured.out
+
+    assert main(command) == EXIT_OK
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert "SATISFIED   synthetic-preserved-boundary" in captured.out
+    assert "alignment complete_mediation=established (platform_verified)" in captured.out
+    assert '"reachable_tools": [' in captured.out
+
+
+def test_continuity_reconcile_findings_exit_one_after_complete_output(capsys):
+    command = [
+        "continuity",
+        "reconcile",
+        str(CONTINUITY_MANIFEST.relative_to(ROOT)),
+        *continuity_args(binding=False),
+    ]
+    assert main([*command, "--json"]) == EXIT_FINDING
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert captured.err == ""
+    assert payload["authority"]["reachable_tools"] == ["bounded_action"]
+    assert payload["outcomes"][0]["safe_continuation"] == "unresolved"
+    assert payload["findings"]
+
+    assert main(command) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert "UNRESOLVED" in captured.out
+    assert "FINDING" in captured.out
+
+
+@pytest.mark.parametrize(
+    ("flag", "name"),
+    [
+        ("--cedar", "cedar"),
+        ("--condition", "conditions"),
+        ("--delegation", "delegations"),
+        ("--ir", "ir"),
+        ("--graph", "mermaid"),
+        ("--otel", "otel"),
+        ("--producer", "producers"),
+        ("--sarif", "sarif"),
+    ],
+)
+def test_continuity_refuses_composition_before_file_io(flag, name, monkeypatch, capsys):
+    def unexpected_read(*_args, **_kwargs):
+        raise AssertionError("continuity composition read an input")
+
+    monkeypatch.setattr(Path, "read_text", unexpected_read)
+    monkeypatch.setattr(Path, "read_bytes", unexpected_read)
+    command = [
+        "continuity",
+        "reconcile",
+        "absent-manifest",
+        "--continuity-provider",
+        "absent-provider",
+        "--continuity-as-of",
+        "2026-09-03T12:00:00Z",
+        flag,
+    ]
+    assert main(command) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert f"cannot yet be composed with {name}" in captured.err
+
+
+@pytest.mark.parametrize(
+    ("extra", "message"),
+    [
+        (["--continuity-as-of", "20260903"], "YYYY-MM-DDTHH:MM:SSZ"),
+        (["--continuity-source", "bad"], "LOCATOR=PATH"),
+        (["--continuity-source", "=bad"], "LOCATOR=PATH"),
+        (["--continuity-source", "extra=missing"], "required for"),
+        (["--continuity-binding-source", "extra=missing"], "--continuity-binding is required"),
+    ],
+)
+def test_continuity_reconcile_usage_failures_have_no_output(extra, message, capsys):
+    base = [
+        "continuity",
+        "reconcile",
+        str(CONTINUITY_MANIFEST),
+        "--continuity-provider",
+        str(CONTINUITY_PROVIDER),
+        "--continuity-as-of",
+        "2026-09-03T12:00:00Z",
+    ]
+    if extra[0] == "--continuity-as-of":
+        base[-1] = extra[1]
+    else:
+        base.extend(extra)
+    assert main(base) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert message in captured.err
+
+
+def test_continuity_reconcile_rejects_bad_pairing_and_artifact_roles(capsys):
+    base = [
+        "continuity",
+        "reconcile",
+        str(CONTINUITY_MANIFEST),
+        "--continuity-provider",
+        str(CONTINUITY_PROVIDER),
+        "--continuity-as-of",
+        "2026-09-03T12:00:00Z",
+    ]
+    cases = [
+        (
+            [*base, "--continuity-binding", str(CONTINUITY_BINDING)],
+            "--continuity-binding-source is required",
+        ),
+        (
+            [
+                *base[: base.index("--continuity-provider") + 1],
+                str(CONTINUITY_BINDING),
+                *base[base.index("--continuity-provider") + 2 :],
+            ],
+            "requires a provider profile",
+        ),
+        (
+            [
+                *base,
+                "--continuity-binding",
+                str(CONTINUITY_PROVIDER),
+                "--continuity-binding-source",
+                "placeholder=missing",
+            ],
+            "requires a binding artifact",
+        ),
+    ]
+    for command, message in cases:
+        assert main(command) == EXIT_USAGE
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert message in captured.err
+
+
+def test_continuity_reconcile_rejects_duplicate_and_extra_source_locators(capsys):
+    source = (
+        "tests/fixtures/continuity-accepted-synthetic/provider-control.json="
+        + str(CONTINUITY_FIXTURE / "provider-control.json")
+    )
+    base = [
+        "continuity",
+        "reconcile",
+        str(CONTINUITY_MANIFEST),
+        *continuity_args(binding=False),
+    ]
+    assert main([*base, "--continuity-source", source]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "repeats locator" in captured.err
+
+    assert main([*base, "--continuity-source", f"extra={CONTINUITY_PROVIDER}"]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "not declared" in captured.err
+
+
+def test_continuity_reconcile_rejects_noncanonical_short_year(capsys):
+    args = continuity_args(binding=False)
+    args[args.index("--continuity-as-of") + 1] = "999-09-03T12:00:00Z"
+    assert main(["continuity", "reconcile", str(CONTINUITY_MANIFEST), *args]) == EXIT_USAGE
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "YYYY-MM-DDTHH:MM:SSZ" in captured.err
 
 
 def test_reach_applies_accepted_producer_boundary(capsys):

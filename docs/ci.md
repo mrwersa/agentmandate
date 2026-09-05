@@ -153,6 +153,32 @@ invalid dates, missing or conflicting mappings, and undeclared locators exit 2
 with empty stdout. Authority IR, SARIF, Mermaid, condition, and delegation
 composition also fail before reading inputs or writing partial authority.
 
+Authority continuity remains separate from reachability. Validation checks one
+record's structure; reconciliation verifies every declared source byte and an
+optional mandate binding before deciding whether consumed authority safely
+survived each named transition:
+
+```yaml
+- run: mandate continuity validate provider.json
+- run: mandate continuity validate binding.json
+- run: >-
+    mandate continuity reconcile mandate.json
+    --continuity-provider provider.json
+    --continuity-source evidence/provider.json=provider-capture.json
+    --continuity-binding binding.json
+    --continuity-binding-source evidence/verification.json=verification.json
+    --continuity-binding-source evidence/policy.json=policy.json
+    --continuity-as-of 2026-09-03T12:00:00Z
+    --json
+```
+
+The command exits 0 only when every transition has
+`safe_continuation: satisfied`. A violated or unresolved transition writes the
+complete `agentmandate.continuity/v1` result and exits 1. Malformed or
+incomplete artifacts and mappings exit 2 with empty stdout. IR, SARIF,
+Mermaid, OTel, condition, delegation, producer, and Cedar composition is
+refused before any input is read.
+
 Managed Cedar evidence also separates structural validation from trusted
 consumption. Source roots are explicit; the command reads exactly the locators
 declared by each oracle and refuses paths that escape the root:
