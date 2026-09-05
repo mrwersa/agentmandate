@@ -20,16 +20,16 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.15.0
+agentmandate~=0.16.0
 ```
 
 ## Versioned authority artifacts
 
 The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
-`mandate producers`, `mandate cedar`, and reviewed `mandate reach` attachment
-surfaces are public. The Python records remain private and are not exported
-from `agentmandate`. Their explicit artifact versions separate compatibility
-from package releases:
+`mandate producers`, `mandate continuity`, `mandate cedar`, and reviewed
+`mandate reach` attachment surfaces are public. The Python records remain
+private and are not exported from `agentmandate`. Their explicit artifact
+versions separate compatibility from package releases:
 
 - `ir_version` changes when graph records, relations, or canonicalization
   change incompatibly.
@@ -51,6 +51,10 @@ from package releases:
 - `producer_boundary_version` changes when the finite-producer evidence record
   changes incompatibly. Producer-aware reach output uses the independent,
   canonical `agentmandate.producers/v1` result schema and closed finding codes.
+- Continuity binding, AgentCore, and Anthropic artifact versions change
+  independently when their strict records change incompatibly. Reconciliation
+  output uses the canonical `agentmandate.continuity/v1` result schema and
+  closed finding codes.
 
 Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
@@ -96,27 +100,26 @@ not an authority input. Findings preserve baseline manifest authority and exit
 stdout. IR, SARIF, Mermaid, condition, and delegation composition are refused
 before any input is read or output written.
 
-Authority continuity has a private `agentmandate.continuity/v1` presentation
-envelope with a strict reader, closed finding codes, input identities, complete
-manifest Authority, per-transition outcomes, and a checksum. It is unsupported,
-is not an authority input, and has no public Python or CLI surface. Canonical
-fixtures cover satisfied, reset, widened, tightened, overshot, unresolved,
-untrusted, and truncated results.
+`mandate continuity validate` proves artifact structure only.
+`mandate continuity reconcile` rechecks the provider profile, exact caller-mapped source
+bytes, optional mandate binding and its source bytes, evidence state, and UTC
+evaluation time. Its canonical result is presentation, not an authority input.
+Violations and unresolved trust retain complete manifest Authority and exit 1
+after complete output. Malformed or incomplete inputs exit 2 with empty stdout.
+IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar
+composition are refused before any input is read. The Python records remain
+private.
 
 ## What is most likely to change
 
 The manifest schema and the way standalone evidence profiles compose with it.
-Conditional authority and delegation analysis now have public, versioned
-artifact and command surfaces, but they remain reviewed attachments rather than
-new manifest-v1 meanings. Authority continuity has private experimental
-records, analysis, and result presentation only. Finite producer cardinality
-has a public validate-then-consume CLI around its versioned boundary, closed IR
-profile, fail-closed analysis, and canonical `agentmandate.producers/v1` result
-envelope. Its Python records remain private, and the result is not accepted as
-authority input. An explicitly
-synthetic accepted fixture supplies the clean path while the real IAM migration
-remains unreviewed. Structural validity never makes any of these records trusted
-mandate authority.
+Conditional authority, delegation analysis, finite producer cardinality, and
+authority continuity have public, versioned validate-then-consume command
+surfaces, but remain reviewed attachments rather than new manifest-v1 meanings.
+Their Python records remain private, and presentation results are not accepted
+as authority input. Explicitly synthetic accepted fixtures supply producer and
+continuity clean paths while the real migrations remain unreviewed. Structural
+validity never makes any of these records trusted mandate authority.
 
 Three areas remain deliberately under-modelled:
 
@@ -126,9 +129,9 @@ Three areas remain deliberately under-modelled:
   ownership or containment relationships. Finite producer cardinality stays a
   reviewed attachment rather than manifest meaning; evidence-backed value
   relationships still lack a selected quantity contract.
-- **Authority continuity.** The public commands do not yet reconcile whether
-  consumed state stayed attached to one mandate across a session, handoff, or
-  policy revision. This remains separate from general cross-session search.
+- **General cross-session reachability.** Continuity reconciliation covers only
+  reviewed, named scalar cumulative transitions. It does not search arbitrary
+  durable agents, memories, sessions, or asynchronous work.
 
 Integrating any of these into manifest authority may change the schema. The
 `version` field is how that will be handled; standalone artifact versions may

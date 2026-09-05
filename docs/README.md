@@ -38,11 +38,12 @@ change an analysis result:
 - [Managed Cedar evidence](cedar-import.md) and
   [effective policy revision comparison](cedar-effective-diff.md)
 - [Finite producer cardinality](bounded-producers.md)
+- [Authority continuity](authority-continuity.md)
 
-[Authority continuity](authority-continuity.md) remains private and
-experimental. It asks whether consumed state remains attached to one reviewed
-mandate across a session, handoff, or policy revision. A session identifier is
-evidence for that question, not the mandate itself.
+Authority continuity remains experimental and its Python records remain
+private. Its public CLI asks whether consumed state remains attached to one
+reviewed mandate across a session, handoff, or policy revision. A session
+identifier is evidence for that question, not the mandate itself.
 
 ## Decision records and evidence
 

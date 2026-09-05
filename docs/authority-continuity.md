@@ -1,12 +1,12 @@
 # Authority Continuity Contract
 
-Status: **experimental; gates 1–3 complete; Gate 4 exposure deferred**. This is
-the contract for
+Status: **experimental; gates 1–4 complete; public CLI delivered**. This is the
+contract for
 [#156](https://github.com/mrwersa/agentmandate/issues/156). It defines the
 smallest common analysis contract selected by the reviewed
 [AgentCore](evidence/agentcore-refund-policy/README.md) and
 [Anthropic](evidence/anthropic-managed-budget/README.md) evidence. It does not
-change manifest version 1, Authority IR, reachability, or any public CLI.
+change manifest version 1, Authority IR, or ordinary reachability.
 
 ## Question and invariant
 
@@ -402,10 +402,9 @@ Any future public presentation must keep these fields separate:
 - source and semantic digests sufficient for offline replay.
 
 Human and JSON output complete before a finding exit. Usage or malformed input
-fails before stdout. The private consumer now refuses IR, SARIF, Mermaid, OTel,
-condition, delegation, producer, and Cedar composition before manifest
-analysis. The eventual CLI must invoke that guard before file I/O. Each
-combination remains unsupported until it can carry transition uncertainty
+fails before stdout. The CLI now invokes the private guard to refuse IR, SARIF,
+Mermaid, OTel, condition, delegation, producer, and Cedar composition before
+file I/O. Each combination remains unsupported until it can carry transition uncertainty
 without implying a stronger result.
 
 ## Delivery gates
@@ -427,12 +426,13 @@ without implying a stronger result.
    reports all four alignment checks independently, derives explicit private
    comparability, amendment, and safe-continuation states, and retains
    byte-identical manifest authority on trust failure. No public Python records.
-5. **Gate 4 — public exposure review (complete; exposure deferred):** the
-   [review](authority-continuity-gate-4-review.md) confirms the private
-   semantics but keeps them private until the composition guard is wired before
-   CLI I/O and exit/no-partial-output tests are complete. A complete explicitly synthetic
-   fixture supplies the accepted clean path, and `agentmandate.continuity/v1`
-   supplies the private canonical presentation envelope.
+5. **Gate 4 — public exposure (complete):** the
+   [review](authority-continuity-gate-4-review.md) approves the
+   validate-then-consume CLI after explicit pairing, pre-I/O composition
+   refusal, human and canonical JSON rendering, and exit/no-partial-output
+   tests. A complete explicitly synthetic fixture supplies the accepted clean
+   path, and `agentmandate.continuity/v1` supplies the public canonical
+   presentation envelope. Python records remain private.
 
 This initiative remains experimental and does not block 1.0. The generalized
 search problem across arbitrary durable agents, memories and sessions remains

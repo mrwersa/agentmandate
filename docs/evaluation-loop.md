@@ -56,9 +56,10 @@ untaken path is impossible.
 A fifth, experimental lifecycle claim remains separate from all four: did the
 consumed state bounding one reviewed mandate survive a named session, handoff,
 or policy transition? Correct per-request decisions and a stable session
-identifier do not establish that continuity. The private continuity work
-reconciles evidence for this question; it does not yet add a public command to
-the loop above.
+identifier do not establish that continuity. Continuity reconciliation handles
+this question through `mandate continuity`; it remains
+a separate lifecycle result rather than another reachability or runtime-policy
+claim.
 
 ## Two outputs for two kinds of test
 

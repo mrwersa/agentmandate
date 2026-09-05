@@ -278,6 +278,7 @@ all.
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |
 | `mandate delegations` | Structurally validates a delegation attachment or chain without accepting it as authority |
 | `mandate producers` | Structurally validates a finite-producer boundary without accepting its sources as authority |
+| `mandate continuity` | Structurally validates continuity evidence or reconciles whether consumed authority safely survives a named transition |
 | `mandate cedar` | Structurally validates managed policy evidence, aligns exact decisions with reviewed authority, or compares matched requests across policy revisions |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing. Reads [OpenTelemetry traces](https://github.com/mrwersa/agentmandate/blob/main/docs/traces.md) with `--otel` |
@@ -331,6 +332,31 @@ Producer inputs currently refuse Authority IR, SARIF, Mermaid, conditional,
 and delegation composition before output. The boundary describes analyzed
 authority; it is not runtime quota enforcement. See
 [the bounded-producer contract](docs/bounded-producers.md).
+
+Authority continuity is a separate lifecycle question: did consumed state stay
+attached to the same mandate across a session, handoff, or policy revision?
+Validate each artifact structurally, then reconcile the provider observation
+with its exact source bytes, optional mandate binding, and explicit UTC time:
+
+```bash
+mandate continuity validate provider.json
+mandate continuity validate binding.json
+mandate continuity reconcile mandate.json \
+  --continuity-provider provider.json \
+  --continuity-source evidence/provider.json=provider-capture.json \
+  --continuity-binding binding.json \
+  --continuity-binding-source evidence/verification.json=verification.json \
+  --continuity-binding-source evidence/policy.json=policy.json \
+  --continuity-as-of 2026-09-03T12:00:00Z --json
+```
+
+The canonical `agentmandate.continuity/v1` result reports state continuity,
+authority change, admission, comparability, issuer amendment, and a
+three-valued `safe_continuation` verdict for each transition. A session
+identifier is never treated as a mandate. Violated or unresolved continuity
+exits 1 after complete output; malformed, incomplete, or unsupported composed
+inputs exit 2 with empty standard output. See the
+[authority-continuity contract](docs/authority-continuity.md).
 
 `verify` is what keeps the rest honest. A manifest nobody checks is a wish, and
 the declaration drifts from the implementation the moment somebody ships a

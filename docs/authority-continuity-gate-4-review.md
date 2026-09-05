@@ -1,10 +1,9 @@
 # Authority Continuity Gate 4 Review
 
-Status: **review complete; public exposure deferred**. This review was
-performed against merged commit `fff91d0` on 3 September 2026. Gates 1 through
-3 establish strict private artifacts, separate closed Authority IR profiles,
-and fail-closed reconciliation. They do not yet establish a stable public
-result or command contract.
+Status: **review complete; public CLI exposure approved**. The initial review
+was performed against merged commit `fff91d0` on 3 September 2026 and closed
+after its six exit conditions were met. The evidence records and Python types
+remain private; the validate-then-consume CLI and versioned result are public.
 
 A provider session is not a mandate. A session identifier, policy revision,
 or provider budget can identify observed enforcement state, but only an
@@ -24,23 +23,17 @@ establish that join.
 | Safe-continuation semantics | Passed privately | Each outcome now keeps comparability, issuer-amendment state, and a three-valued verdict separate; tightening can satisfy the property, while missing joins, comparison, amendment treatment, or required alignments remain unresolved |
 | Accepted clean fixture | Passed synthetically | A complete fixture explicitly labels its mandate, binding, boundary, provider control, reviewer, and sources as synthetic; both real migrations remain `unreviewed` |
 | Presentation stability | Passed privately | `agentmandate.continuity/v1` has a strict canonical reader, checksum, closed finding-code registry, complete input identities and manifest Authority, and eight canonical state fixtures |
-| Composition boundary | Passed privately; CLI wiring open | The private consumer rejects IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar composition before manifest analysis; the public CLI must invoke that guard before reading files or writing output |
-| CLI failure behavior | Open | No public parser, renderer, explicit input pairing, exit-code tests, or complete-output/no-partial-output tests exist |
+| Composition boundary | Passed | The CLI invokes the closed guard before I/O and rejects IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar composition |
+| CLI failure behavior | Passed | Explicit locator pairing, UTC parsing, human and canonical JSON output, exit 0/1/2, complete-output, and empty-stdout failure tests are pinned |
 
 ## Closing verdict
 
-**Keep authority continuity private.** The private consumer is suitable for
-challenging the model and replaying the two evidence families, but exposing it
-now would make internal dataclass fields and dynamically constructed finding
-codes an accidental compatibility contract. More importantly, it would ask a
-caller to infer safe continuation from three axes that are intentionally
-independent.
-
-The next work is CLI boundary review, not another provider experiment. Public
-exposure can be reconsidered after the CLI proves exit-0 and exit-1 paths,
-invokes the private composition guard before I/O, and preserves every
-uncertainty. Manifest version 1, ordinary reachability, and the public Python
-API remain unchanged.
+**Expose the reviewed CLI, not the internal records.** The canonical result
+keeps state continuity, authority change, admission, comparability, issuer
+amendment, and `safe_continuation` distinct, so callers do not need to infer a
+verdict from partial axes. The CLI preserves every uncertainty and the full
+manifest Authority. Manifest version 1, ordinary reachability, and the public
+Python API remain unchanged.
 
 ## Semantics reproduced by the review
 
@@ -126,7 +119,7 @@ changing one side from `platform_verified` to `exclusive_adapter` makes the
 join unresolved. The real AgentCore and Anthropic migrations remain unreviewed
 canonical finding paths and are not promoted retrospectively.
 
-## Presentation contract implemented privately
+## Presentation contract
 
 The versioned canonical `agentmandate.continuity/v1` result includes:
 
@@ -145,18 +138,17 @@ The strict reader enforces exact fields, types, ordering, closed vocabularies,
 canonical UTC time, complete Authority shape, semantic identities, and an
 envelope checksum. Canonical fixtures cover satisfied, reset, widened,
 tightened, overshot, unresolved, untrusted, and truncated results. The result
-is presentation only and is never accepted as authority input. Its Python
-records and schema remain private and unsupported.
+is presentation only and is never accepted as authority input. Its schema is
+public through the CLI; its Python records remain private and unsupported.
 
 Human output must show manifest authority separately from transition outcomes
 and assumptions. A finding exits 1 only after complete human or JSON output.
 Malformed structure, invalid time, incomplete option groups, conflicting
 source mappings, or unsupported composition exits 2 with empty stdout.
 
-## CLI boundary to review
+## Approved CLI boundary
 
-The eventual surface should follow the existing validate-then-consume pattern,
-but this sketch is **not approved syntax**:
+The approved surface follows the existing validate-then-consume pattern:
 
 ```text
 mandate continuity validate ARTIFACT
@@ -168,16 +160,16 @@ mandate continuity reconcile MANIFEST \
   --continuity-as-of YYYY-MM-DDTHH:MM:SSZ
 ```
 
-Validation would prove structure only. Reconciliation must reread and validate
+Validation proves structure only. Reconciliation rereads and validates
 the provider-specific profile, require exactly the source locators it declares,
 pair an optional binding by explicit identity rather than argument position,
 and require mandate bytes when a binding claims their digest. The command must
 not accept a raw session identifier as evidence that two observations belong
 to one mandate.
 
-Provider-specific validation may ultimately need explicit artifact kinds or
-subcommands because binding, AgentCore, and Anthropic records have independent
-versions. That choice must be settled before command names become public.
+Validation selects the strict reader from the artifact's unique version field;
+ambiguous or unknown artifact kinds fail as usage. Binding, AgentCore, and
+Anthropic records retain independent versions.
 
 ## Composition decision
 
@@ -201,12 +193,10 @@ retain every unresolved finding, define a combined schema, and preserve the
 distinction between request authorization, reachability, and continuity. One
 rendered result must never be fed into another analyzer as authority.
 
-The private consumer now accepts a closed composition request and rejects all
+The CLI constructs a closed composition request and the consumer rejects all
 eight named combinations before manifest analysis or access to supplied source
 bytes. It also rejects unknown future composition names rather than silently
-ignoring them. The eventual CLI must construct that request from parsed options
-and call the guard before opening the manifest, provider, binding, or capture
-paths. Only that wiring can complete the public pre-I/O claim.
+ignoring them.
 
 ## Exit conditions for reconsidering exposure
 
@@ -220,13 +210,13 @@ paths. Only that wiring can complete the public pre-I/O claim.
 3. **Complete privately:** implement a strict versioned result envelope, closed
    finding codes, checksum, and canonical satisfied, reset, widened, tightened,
    overshot, unresolved, untrusted, and truncated fixtures.
-4. Review a validate-then-consume CLI shape with explicit artifact identity,
+4. **Complete:** review a validate-then-consume CLI shape with explicit artifact identity,
    source pairing, binding requirements, UTC evaluation time, human and JSON
    rendering, exit 0/1/2, complete-output, and no-partial-output tests.
-5. Refuse IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar
+5. **Complete:** refuse IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar
    composition before I/O unless a reviewed joint consumer preserves every
    uncertainty.
-6. Reproduce byte-identical existing command output when no continuity inputs
+6. **Complete:** reproduce byte-identical existing command output when no continuity inputs
    are supplied, keep the Python records private, and release any public CLI or
    schema as a user-visible minor version under `RELEASING.md`.
 

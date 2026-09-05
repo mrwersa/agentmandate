@@ -6,6 +6,27 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.16.0 - 2026-09-05
+
+### Added
+
+- `mandate continuity validate` structurally validates binding, AgentCore, and
+  Anthropic continuity artifacts without accepting their evidence as mandate
+  authority.
+- `mandate continuity reconcile` verifies exact caller-mapped source bytes, an
+  optional digest-bound mandate binding, reviewed evidence, and an explicit UTC
+  evaluation time. It reports whether consumed authority safely survives each
+  named lifecycle transition while retaining complete manifest Authority.
+- Human output keeps transition outcomes and assumptions separate from
+  reachability. JSON output uses the canonical
+  `agentmandate.continuity/v1` envelope. Violated or unresolved transitions
+  exit 1 after complete output; malformed or incomplete inputs exit 2 with
+  empty stdout.
+- IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar
+  composition is refused before file I/O until a reviewed joint consumer can
+  preserve every uncertainty. Continuity Python records remain private and
+  manifest version 1 is unchanged.
+
 ## 0.15.0 - 2026-09-03
 
 ### Added

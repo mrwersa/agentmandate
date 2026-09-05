@@ -7,7 +7,7 @@ import hashlib
 import json
 import sys
 from collections.abc import Sequence
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +19,15 @@ from ._conditions import (
     ToolCondition,
     analyse_conditions,
     reconcile_condition_drift,
+)
+from ._continuity import (
+    AgentCoreContinuity,
+    AnthropicContinuity,
+    ContinuityAnalysis,
+    ContinuityBinding,
+    ContinuityFormatError,
+    _refuse_continuity_composition,
+    analyse_continuity,
 )
 from ._delegation import (
     DelegationAnalysis,
@@ -317,6 +326,63 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate a boundary structurally without trusting its sources",
     )
     producers_validate.add_argument("boundary", help="path to one producer boundary")
+
+    continuity_parser = subparsers.add_parser(
+        "continuity",
+        help="validate or reconcile reviewed authority-continuity evidence",
+    )
+    continuity_subparsers = continuity_parser.add_subparsers(
+        dest="continuity_command", required=True
+    )
+    continuity_validate = continuity_subparsers.add_parser(
+        "validate",
+        help="validate one continuity artifact without trusting its evidence",
+    )
+    continuity_validate.add_argument("artifact", help="path to one continuity artifact")
+    continuity_reconcile = continuity_subparsers.add_parser(
+        "reconcile",
+        help="reconcile reviewed lifecycle transitions with manifest authority",
+    )
+    _add_manifest(continuity_reconcile)
+    continuity_reconcile.add_argument(
+        "--continuity-provider", required=True, metavar="PROVIDER_RECORD"
+    )
+    continuity_reconcile.add_argument(
+        "--continuity-source",
+        action="append",
+        default=None,
+        metavar="LOCATOR=CAPTURE",
+        help="captured bytes for one provider source locator; repeatable",
+    )
+    continuity_reconcile.add_argument("--continuity-binding", metavar="BINDING")
+    continuity_reconcile.add_argument(
+        "--continuity-binding-source",
+        action="append",
+        default=None,
+        metavar="LOCATOR=CAPTURE",
+        help="captured bytes for one binding source locator; repeatable",
+    )
+    continuity_reconcile.add_argument(
+        "--continuity-as-of",
+        required=True,
+        metavar="UTC_TIMESTAMP",
+        help="whole-second UTC timestamp used for evidence validity",
+    )
+    continuity_reconcile.add_argument("--depth", type=_positive_int, default=None)
+    continuity_reconcile.add_argument(
+        "--json", action="store_true", help="canonical machine-readable output"
+    )
+    for option in (
+        "--cedar",
+        "--condition",
+        "--delegation",
+        "--ir",
+        "--graph",
+        "--otel",
+        "--producer",
+        "--sarif",
+    ):
+        continuity_reconcile.add_argument(option, action="store_true", help=argparse.SUPPRESS)
 
     cedar_parser = subparsers.add_parser(
         "cedar",
@@ -654,6 +720,184 @@ def _run_producers(args: argparse.Namespace) -> int:
         return EXIT_USAGE
     sys.stdout.write(output)
     return EXIT_OK
+
+
+def _continuity_artifact(
+    text: str,
+) -> ContinuityBinding | AgentCoreContinuity | AnthropicContinuity:
+    try:
+        raw = json.loads(text)
+    except (json.JSONDecodeError, TypeError, ValueError) as exc:
+        raise ContinuityFormatError("continuity artifact is not valid JSON") from exc
+    if not isinstance(raw, dict):
+        raise ContinuityFormatError("continuity artifact must be an object")
+    readers = {
+        "continuity_binding_version": ContinuityBinding,
+        "agentcore_continuity_version": AgentCoreContinuity,
+        "anthropic_continuity_version": AnthropicContinuity,
+    }
+    matches = [reader for field, reader in readers.items() if field in raw]
+    if len(matches) != 1:
+        raise ContinuityFormatError(
+            "continuity artifact must declare exactly one supported artifact version"
+        )
+    return matches[0].from_json(text)
+
+
+def _continuity_timestamp(value: str) -> datetime:
+    try:
+        parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
+    except ValueError as exc:
+        raise ContinuityFormatError(
+            "--continuity-as-of must be YYYY-MM-DDTHH:MM:SSZ"
+        ) from exc
+    return parsed
+
+
+def _continuity_source_paths(values: list[str] | None, option: str) -> dict[str, str]:
+    paths: dict[str, str] = {}
+    for value in values or []:
+        if "=" not in value:
+            raise ContinuityFormatError(f"{option} must be LOCATOR=PATH")
+        locator, path = value.split("=", 1)
+        if not locator or not path:
+            raise ContinuityFormatError(f"{option} must be LOCATOR=PATH")
+        if locator in paths:
+            raise ContinuityFormatError(f"{option} repeats locator {locator}")
+        paths[locator] = path
+    return paths
+
+
+def _continuity_sources(
+    paths: dict[str, str],
+    declared: tuple,
+    option: str,
+) -> dict[str, bytes]:
+    expected = {source.locator for source in declared}
+    if set(paths) != expected:
+        missing = sorted(expected - set(paths))
+        extra = sorted(set(paths) - expected)
+        locator = (missing or extra)[0]
+        relation = "required for" if missing else "not declared by"
+        raise ContinuityFormatError(f"{option} locator {locator} is {relation} the artifact")
+    return {locator: Path(path).read_bytes() for locator, path in paths.items()}
+
+
+def _continuity_composition(args: argparse.Namespace) -> frozenset[str]:
+    names = {
+        "cedar": "cedar",
+        "condition": "conditions",
+        "delegation": "delegations",
+        "ir": "ir",
+        "graph": "mermaid",
+        "otel": "otel",
+        "producer": "producers",
+        "sarif": "sarif",
+    }
+    return frozenset(value for name, value in names.items() if getattr(args, name))
+
+
+def _render_continuity(analysis: ContinuityAnalysis) -> str:
+    lines = [f"authority continuity  evaluated as of {analysis.as_of}"]
+    for outcome in analysis.outcomes:
+        lines.extend(
+            (
+                f"{outcome.safe_continuation.upper():<10}  {outcome.transition}",
+                f"  provider={outcome.provider} kind={outcome.kind}",
+                f"  state={outcome.state} authority={outcome.authority_change} "
+                f"admission={outcome.admission}",
+                f"  comparability={outcome.comparability} "
+                f"issuer_amendment={outcome.issuer_amendment}",
+            )
+        )
+        for alignment in outcome.alignments:
+            lines.append(
+                f"  alignment {alignment.check}={alignment.status} ({alignment.strength})"
+            )
+        lines.extend(f"  assumption: {item}" for item in outcome.assumptions)
+    for finding in analysis.findings:
+        subject = "" if finding.transition is None else f" [{finding.transition}]"
+        lines.append(f"FINDING     {finding.code}{subject}: {finding.message}")
+    lines.append("AUTHORITY")
+    authority = json.dumps(analysis.authority.as_dict(), indent=2)
+    lines.extend(f"  {line}" for line in authority.splitlines())
+    return "\n".join(lines)
+
+
+def _run_continuity(args: argparse.Namespace) -> int:
+    try:
+        if args.continuity_command == "validate":
+            artifact = _continuity_artifact(_read_text(args.artifact))
+            labels = {
+                ContinuityBinding: "continuity binding",
+                AgentCoreContinuity: "AgentCore continuity profile",
+                AnthropicContinuity: "Anthropic continuity profile",
+            }
+            print(f"valid {labels[type(artifact)]} v{artifact.version}")
+            return EXIT_OK
+
+        composition = _continuity_composition(args)
+        _refuse_continuity_composition(composition)
+        as_of = _continuity_timestamp(args.continuity_as_of)
+        provider_paths = _continuity_source_paths(
+            args.continuity_source, "--continuity-source"
+        )
+        binding_paths = _continuity_source_paths(
+            args.continuity_binding_source, "--continuity-binding-source"
+        )
+        if args.continuity_binding is None and binding_paths:
+            raise ContinuityFormatError(
+                "--continuity-binding is required with --continuity-binding-source"
+            )
+        if args.continuity_binding is not None and not binding_paths:
+            raise ContinuityFormatError(
+                "--continuity-binding-source is required with --continuity-binding"
+            )
+
+        provider = _continuity_artifact(_read_text(args.continuity_provider))
+        if isinstance(provider, ContinuityBinding):
+            raise ContinuityFormatError("--continuity-provider requires a provider profile")
+        binding = None
+        if args.continuity_binding is not None:
+            candidate = _continuity_artifact(_read_text(args.continuity_binding))
+            if not isinstance(candidate, ContinuityBinding):
+                raise ContinuityFormatError("--continuity-binding requires a binding artifact")
+            binding = candidate
+        provider_sources = _continuity_sources(
+            provider_paths, provider.sources, "--continuity-source"
+        )
+        binding_sources = (
+            None
+            if binding is None
+            else _continuity_sources(
+                binding_paths, binding.sources, "--continuity-binding-source"
+            )
+        )
+        manifest_path = Path(args.manifest)
+        mandate_bytes = manifest_path.read_bytes()
+        mandate = loads(mandate_bytes.decode("utf-8"), source=str(manifest_path))
+        analysis = analyse_continuity(
+            mandate,
+            provider,
+            provider_sources,
+            as_of=as_of,
+            binding=binding,
+            binding_source_bytes=binding_sources,
+            mandate_bytes=mandate_bytes,
+            depth=args.depth,
+            composition=composition,
+        )
+    except (ContinuityFormatError, ManifestError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+
+    if args.json:
+        sys.stdout.write(analysis.to_result().to_json())
+    else:
+        print(_render_continuity(analysis))
+    return EXIT_OK if analysis.clean else EXIT_FINDING
 
 
 def _cedar_date(value: str) -> date:
@@ -1279,6 +1523,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "producers":
         return _run_producers(args)
+
+    if args.command == "continuity":
+        return _run_continuity(args)
 
     if args.command == "cedar":
         return _run_cedar(args)
