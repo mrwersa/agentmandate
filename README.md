@@ -335,19 +335,24 @@ authority; it is not runtime quota enforcement. See
 
 Authority continuity is a separate lifecycle question: did consumed state stay
 attached to the same mandate across a session, handoff, or policy revision?
-Validate each artifact structurally, then reconcile the provider observation
-with its exact source bytes, optional mandate binding, and explicit UTC time:
+The runnable example uses a common customer-support control: one mandate may
+refund at most GBP 1,000. It refunds GBP 600, reconnects in a fresh provider
+session, and attempts another GBP 600. The safe result denies the second
+refund because the first remains consumed. A reset would allow GBP 1,200 under
+one mandate even though each session looks locally compliant.
+
+![A reviewed binding carries GBP 600 of consumed refund authority into a fresh session; resetting it would let one GBP 1,000 mandate complete GBP 1,200](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/continuity-refund.svg)
+
+Run the deterministic synthetic example:
 
 ```bash
-mandate continuity validate provider.json
-mandate continuity validate binding.json
-mandate continuity reconcile mandate.json \
-  --continuity-provider provider.json \
-  --continuity-source evidence/provider.json=provider-capture.json \
-  --continuity-binding binding.json \
-  --continuity-binding-source evidence/verification.json=verification.json \
-  --continuity-binding-source evidence/policy.json=policy.json \
-  --continuity-as-of 2026-09-03T12:00:00Z --json
+mandate continuity reconcile examples/continuity-refund/manifest.json \
+  --continuity-provider examples/continuity-refund/provider.json \
+  --continuity-source examples/continuity-refund/provider-control.json=examples/continuity-refund/provider-control.json \
+  --continuity-binding examples/continuity-refund/binding.json \
+  --continuity-binding-source examples/continuity-refund/binding-verification.json=examples/continuity-refund/binding-verification.json \
+  --continuity-binding-source examples/continuity-refund/policy.json=examples/continuity-refund/policy.json \
+  --continuity-as-of 2026-09-06T12:00:00Z --json
 ```
 
 The canonical `agentmandate.continuity/v1` result reports state continuity,
@@ -356,6 +361,7 @@ three-valued `safe_continuation` verdict for each transition. A session
 identifier is never treated as a mandate. Violated or unresolved continuity
 exits 1 after complete output; malformed, incomplete, or unsupported composed
 inputs exit 2 with empty standard output. See the
+[example walkthrough](examples/continuity-refund/README.md) and
 [authority-continuity contract](docs/authority-continuity.md).
 
 `verify` is what keeps the rest honest. A manifest nobody checks is a wish, and

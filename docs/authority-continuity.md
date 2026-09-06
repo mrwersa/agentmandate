@@ -43,6 +43,24 @@ The governing invariant is:
 The contract records evidence for this invariant; it does not implement a
 distributed counter or transaction protocol.
 
+## Runnable refund example
+
+The public example uses a customer-support refund agent with one GBP 1,000
+mandate-wide cumulative limit. A GBP 600 refund is admitted before a fresh
+provider session reconnect. With continuity, the second GBP 600 attempt is
+denied because GBP 600 remains consumed. The counterfactual reset admits it and
+the mandate completes GBP 1,200.
+
+![Observed continuity denies a second GBP 600 refund after reconnect; a counterfactual state reset lets one GBP 1,000 mandate complete GBP 1,200](assets/continuity-refund.svg)
+
+Both paths are executable synthetic controls in
+[`examples/continuity-refund/`](../examples/continuity-refund/README.md). The
+safe path exits 0; the reset/overshoot path exits 1 while retaining complete
+manifest Authority. The example illustrates the contract and makes no claim
+about a provider. The [evidence plan](continuity-evidence-plan.md) specifies the
+matched lifecycle pairs and raw fields needed to replace synthetic controls
+with stronger provider results.
+
 The invariant applies to any cumulative constraint whose decision depends on
 prior qualifying actions. The v1 records and analyzer are narrower: they compare
 only evidence-backed scalar quantities with an exact dimension and unit. They do

@@ -22,7 +22,7 @@ No `opencode.json`, no pre-commit, no typecheck step — `ruff` is the only lint
 
 ## Architecture & entrypoints
 
-- Package `agentmandate/`; CLI `mandate = agentmandate.cli:main` (argparse, subparsers `lint|reach|diff|scan|drift|verify|ir|inventory|conditions|delegations|producers|cedar|obligations|scenarios`).
+- Package `agentmandate/`; CLI `mandate = agentmandate.cli:main` (argparse, subparsers `lint|reach|diff|scan|drift|verify|ir|inventory|conditions|delegations|producers|continuity|cedar|obligations|scenarios`).
 - `scan` reads `tools=[...]` / decorators statically — nothing imported/executed, framework need not be installed. One manifest per agent; use `--binding` or reject unions.
 - `reach --ir` / `ir export|validate` are the canonical Authority IR boundary; `conditions`/`delegations`/`cedar` validate-then-consume reviewed artifacts with explicit `--as-of` + captured bytes. Never compose `--ir` with conditional/delegation flags.
 - Tests mirror modules (`agentmandate/diff.py` → `tests/test_diff.py`); parametrized edge cases, no credentials/account IDs/trace IDs in fixtures.

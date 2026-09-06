@@ -49,6 +49,14 @@ sequences a reviewed mandate permits. Authority continuity asks whether consumed
 state remains attached to that mandate across a named lifecycle transition.
 Neither result substitutes for the other.
 
+The delivered continuity surface now has a
+[counterfactual evidence plan](docs/continuity-evidence-plan.md). Its next
+provider captures vary session, process, policy revision, principal,
+deployment, retry, and concurrency one factor at a time so later results can
+identify the state-owning boundary rather than merely add more allow/deny
+examples. This evidence work can proceed alongside the pre-1.0 consolidation
+audit without changing the public contract.
+
 ## Outcomes and boundaries
 
 The target workflow is:
