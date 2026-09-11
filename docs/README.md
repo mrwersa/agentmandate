@@ -26,6 +26,8 @@ guarantee.
   manifest-v1 analysis profile.
 - [Stability](../STABILITY.md): supported public surfaces and versioning.
 - [Roadmap](../ROADMAP.md): delivered, active, evidence-blocked, and later work.
+- [Pre-1.0 consolidation audit](pre-1.0-consolidation-audit.md): public contracts,
+  private compatibility paths, fixture coverage, and ordered cleanup candidates.
 
 ## Reviewed evidence attachments
 
