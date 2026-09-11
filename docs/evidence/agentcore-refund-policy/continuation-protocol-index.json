@@ -6,6 +6,10 @@
   "region": "us-east-1",
   "sources": [
     {
+      "content_sha256": "d214a3ad962c20ec84003c9debd06166d03b190c11d1176e0dd31ad1d5b5c66b",
+      "locator": "capture_continuation_live.py"
+    },
+    {
       "content_sha256": "8ad4f3d69582e9ee58fa24ee197a69af1f6a4b11a60ef0cf6920e6dfa7a731fe",
       "locator": "continuation-candidate-permit-a-700.dogwood"
     },
