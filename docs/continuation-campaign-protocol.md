@@ -38,7 +38,10 @@ tool that returns the requested amount, and one policy engine attached in
 GBP 600.
 
 **Base state.** Before every trial the policy is the permit plus forbid form
-`a` at threshold 1,000 with description text `D0`. If the engine is not in that
+`a` at threshold 1,000 with description text `D0`. (Annotation added after
+execution: under the validation rule below, "base state" means the selected
+candidate's base form. The single permit was selected, so its base form served
+as the base state.) If the engine is not in that
 state, a reset update is applied and polled to `ACTIVE`; reset events are
 recorded and never scored. The trial's predecessor session is created only
 after the base revision is `ACTIVE`.
