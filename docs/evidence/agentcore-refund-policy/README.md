@@ -9,10 +9,12 @@ captures prove a managed Deny-to-Allow revision for one exact request. They do
 not make imported policy analyzable authority or expose the private comparison
 through the CLI.
 
-The proposed [authority continuity contract](../../authority-continuity.md)
-uses the later temporal, binding and revision controls in this evidence package
-as gate fixtures. No current command accepts those records as authority or as a
-continuity assessment.
+The [authority continuity contract](../../authority-continuity.md) uses the
+later temporal, binding and revision controls in this evidence package as gate
+fixtures. `mandate continuity` consumes their strict canonical profiles, not
+these raw records directly. `python scripts/migrate_continuity_evidence.py`
+replays the evidence-to-profile conversion while retaining `unreviewed` as the
+real migration's review state.
 
 ## Reproduced controls
 

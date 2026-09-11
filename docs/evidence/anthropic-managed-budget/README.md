@@ -4,9 +4,11 @@ This package tests whether a second managed architecture places cumulative
 authority at a session boundary that is not joined natively to a reviewed
 mandate. Issue #143 tracked the staged execution.
 
-The proposed [authority continuity contract](../../authority-continuity.md)
-uses the single-agent and multiagent results as gate fixtures. No current
-command accepts them as authority or as a continuity assessment.
+The [authority continuity contract](../../authority-continuity.md) uses the
+single-agent and multiagent results as gate fixtures. `mandate continuity`
+consumes their strict canonical profile, not these raw records directly.
+`python scripts/migrate_continuity_evidence.py` replays the evidence-to-profile
+conversion while retaining `unreviewed` as the real migration's review state.
 
 ## Evidence boundary and provenance
 

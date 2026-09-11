@@ -15,5 +15,11 @@ and copy [TEMPLATE.md](TEMPLATE.md) into `docs/evidence/<subject>/README.md`.
 Keep raw captures, generated scanner output, and reviewed manifests separate so
 review never turns observation into intent silently.
 
+Continuity's evidence-specific converters live outside the installed package.
+Run `python scripts/migrate_continuity_evidence.py` from the repository root to
+regenerate all three canonical continuity profiles from their digest-pinned
+AgentCore and Anthropic sources and compare them byte for byte. The command
+proves replay and source identity; it does not promote their review state.
+
 `probes/` is the exception: it contains shaped, synthetic questions that may
 expose a design problem but cannot justify a schema or roadmap claim by itself.
