@@ -6,7 +6,7 @@
   "region": "us-east-1",
   "sources": [
     {
-      "content_sha256": "a2c662b145b31f04888ffa7f68f09a39da7c8ad7859c8816e629a6d3ce4e493d",
+      "content_sha256": "f8ae19d9dde6b21859e3af7c9a63c2cc2148ecb1dc4663f4975e0eb8f6f06fb1",
       "locator": "capture_continuation_live.py"
     },
     {
@@ -20,6 +20,14 @@
     {
       "content_sha256": "eefe2a49962d0b17054a251eca348c577bb158cb1361d32bfba3dcd74a7ca120",
       "locator": "continuation-candidate-permit-b.dogwood"
+    },
+    {
+      "content_sha256": "111d00e8acd0c571131908fe4f29ac6f2416bde292db1018262d6e7e6dfd5c34",
+      "locator": "continuation-corrections.json"
+    },
+    {
+      "content_sha256": "3f3496f8f684321eeaaefd7ecf2bae90a2677c9145539c413abad0b8222999f1",
+      "locator": "continuation-diagnostic-protocol.json"
     },
     {
       "content_sha256": "81788f4f4c59a609213bcab7ae2af997b9bf0cabf9dfc44c3c443ffc65a0f79a",

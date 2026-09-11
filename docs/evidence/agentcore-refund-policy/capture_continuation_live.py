@@ -397,7 +397,10 @@ class Live:
         }
 
     def update(
-        self, statement: str | None = None, description: str | None = None
+        self,
+        statement: str | None = None,
+        description: str | None = None,
+        enforcement_mode: bool = False,
     ) -> dict[str, Any]:
         before = self.policy_snapshot()
         request: dict[str, Any] = {
@@ -409,6 +412,8 @@ class Live:
             request["definition"] = {"policy": {"statement": statement}}
         if description is not None:
             request["description"] = {"optionalValue": description}
+        if enforcement_mode:
+            request["enforcementMode"] = "ACTIVE"
         requested = _now()
         response = self.ctl.update_policy(**request)
         polls, stable = [], 0
@@ -443,6 +448,7 @@ class Live:
                 "statement_sha256": _digest(statement) if statement is not None else None,
                 "description": description,
                 "validation_mode": self.form["mode"],
+                "sets_enforcement_mode": enforcement_mode,
             },
             "managed_response": {
                 "status": response.get("status"),
@@ -651,6 +657,54 @@ class Live:
         record["nonconforming_reasons"] = problems
         return record
 
+    def configure(self, name: str, configuration: dict[str, Any]) -> None:
+        for policy_id in list(self.state["created"].get("policies", [])):
+            self._delete_policy(policy_id)
+        mode = configuration["validation_mode"]
+        permit_id = None
+        if configuration["companion"] is not None:
+            permit_id = self._create_policy(
+                "ContinuationPermit",
+                self._statement(configuration["companion"]),
+                "Continuation evidence permit",
+                mode,
+            )
+        budget_id = self._create_policy(
+            "ContinuationBudget",
+            self._statement(configuration["base"]),
+            self.protocol["descriptions"]["D0"],
+            mode,
+        )
+        self.form = {
+            "mode": mode,
+            "candidate": {"id": name, "base": configuration["base"]},
+            "permit_id": permit_id,
+            "budget_id": budget_id,
+        }
+
+    def diagnostic_trial(self, configuration: dict[str, Any], index: int) -> dict[str, Any]:
+        record: dict[str, Any] = {"trial": index, "reset": self.ensure_base()}
+        base = self._statement(configuration["base"])
+        predecessor = str(uuid.uuid4())
+        label = f"{self.form['candidate']['id']}-{index}"
+        record["before_call"] = self.call(predecessor, f"{label}-before", 600)
+        record["update"] = self.update(
+            statement=base, enforcement_mode=configuration["update_sets_enforcement_mode"]
+        )
+        record["predecessor_after_call"] = self.call(predecessor, f"{label}-after", 600)
+        calls = [record["before_call"], record["predecessor_after_call"]]
+        record["elapsed_monotonic_seconds"] = (
+            calls[-1]["finished"]["monotonic_ns"] - calls[0]["started"]["monotonic_ns"]
+        ) / 1e9
+        problems = [
+            call["request"]["id"]
+            for call in calls
+            if call["http_status"] != 200 or call["derived_outcome"] == "error"
+        ]
+        record["conforming"] = not problems
+        record["nonconforming_reasons"] = problems
+        return record
+
     def cleanup(self) -> list[dict[str, Any]]:
         created, results = self.state["created"], []
 
@@ -813,11 +867,75 @@ def run(output: Path) -> int:
     return 3 if outcome["stopped"] else 0
 
 
+def run_diagnostic(output: Path) -> int:
+    protocol = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
+    diagnostic_path = HERE / "continuation-diagnostic-protocol.json"
+    diagnostic = json.loads(diagnostic_path.read_text(encoding="utf-8"))
+    output.mkdir(parents=True, exist_ok=False)
+    live = Live(output, protocol)
+    outcome: dict[str, Any] = {"started": _now(), "stopped": None}
+    try:
+        live.deploy()
+        names = list(diagnostic["configurations"])
+        random.Random(diagnostic["design"]["random_seed"]).shuffle(names)
+        _write(output / "block-order.json", names)
+        for name in names:
+            configuration = diagnostic["configurations"][name]
+            live.configure(name, configuration)
+            block: dict[str, Any] = {"configuration": name, "controls": live.controls(name)}
+            block["trials"] = []
+            _write(output / f"block-{name}.json", block)
+            if not block["controls"]["matches_prediction"]:
+                raise StopCampaign(f"controls did not match their predictions in {name}")
+            nonconforming = 0
+            for index in range(diagnostic["design"]["trials_per_configuration"]):
+                try:
+                    record = live.diagnostic_trial(configuration, index)
+                except (
+                    botocore.exceptions.ClientError,
+                    botocore.exceptions.BotoCoreError,
+                    RuntimeError,
+                ) as exc:
+                    record = {"trial": index, "conforming": False, "error": _error(exc)}
+                block["trials"].append(record)
+                _write(output / f"block-{name}.json", block)
+                if not record["conforming"]:
+                    nonconforming += 1
+                    if nonconforming > 2:
+                        raise StopCampaign(f"more than two nonconforming trials in {name}")
+    except StopCampaign as exc:
+        outcome["stopped"] = str(exc)
+    except (
+        botocore.exceptions.ClientError,
+        botocore.exceptions.BotoCoreError,
+        RuntimeError,
+    ) as exc:
+        outcome["stopped"] = f"capture error: {_error(exc)}"
+    finally:
+        cleanup = live.cleanup()
+        _write(output / "cleanup.json", cleanup)
+        outcome.update(
+            {
+                "finished": _now(),
+                "cleanup_complete": all(item["verified_absent"] for item in cleanup),
+                "protocol_sha256": hashlib.sha256(PROTOCOL_PATH.read_bytes()).hexdigest(),
+                "diagnostic_protocol_sha256": hashlib.sha256(
+                    diagnostic_path.read_bytes()
+                ).hexdigest(),
+            }
+        )
+        _write(output / "run.json", outcome)
+    return 3 if outcome["stopped"] else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--diagnostic", action="store_true")
     args = parser.parse_args(argv)
     try:
+        if args.diagnostic:
+            return run_diagnostic(args.output)
         return run(args.output)
     except (OSError, RuntimeError, botocore.exceptions.BotoCoreError) as exc:
         print(f"error: {exc}", file=sys.stderr)

@@ -1,0 +1,17 @@
+{
+  "continuation_corrections_version": 1,
+  "corrections": [
+    {
+      "class": "protocol amendment",
+      "failed_outcomes_entered_result": false,
+      "id": "continuation-managed-001",
+      "result": "Before execution, the work-unit bound after each transition was raised from 20 to 40. Classification thresholds were unchanged."
+    },
+    {
+      "class": "extractor defect",
+      "failed_outcomes_entered_result": false,
+      "id": "continuation-managed-002",
+      "result": "The capture driver compared the refusal message as an exact substring and labelled genuine HTTP 400 refusals not_refused, because the service wraps the field name in backticks. The projector derives the preregistered classification from the retained status, the message with backticks removed, and the unchanged retrieved cap."
+    }
+  ]
+}

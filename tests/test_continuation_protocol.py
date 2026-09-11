@@ -80,6 +80,32 @@ def test_managed_agents_classification_margins_do_not_overlap():
     assert protocol["eligibility"]["concurrent_threads"] == 1
 
 
+def test_diagnostic_amendment_isolates_byte_identical_writes_with_pinned_templates():
+    diagnostic = json.loads((AGENTCORE / "continuation-diagnostic-protocol.json").read_text())
+    protocol = _protocol(AGENTCORE)
+
+    assert diagnostic["status"] == "preregistered_not_executed"
+    assert diagnostic["amends"] == "continuation-protocol.json"
+    assert diagnostic["mandate"] == protocol["mandate"]
+    assert diagnostic["design"]["trials_per_configuration"] == 10
+    assert diagnostic["design"]["random_seed"] == 20260914
+    configurations = diagnostic["configurations"]
+    assert list(configurations) == [
+        "earlier_configuration",
+        "earlier_without_enforcement_mode",
+        "current_with_enforcement_mode",
+    ]
+    for configuration in configurations.values():
+        assert configuration["prediction"] == "unknown"
+        assert configuration["base"] in protocol["templates"]
+        assert configuration["companion"] in (None, *protocol["templates"])
+    earlier, without = (
+        configurations["earlier_configuration"],
+        configurations["earlier_without_enforcement_mode"],
+    )
+    assert {**earlier, "update_sets_enforcement_mode": False} == without
+
+
 def test_both_protocols_share_the_mandate_and_never_replace_trials():
     agentcore = _protocol(AGENTCORE)
     anthropic = _protocol(ANTHROPIC)
