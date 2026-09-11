@@ -41,6 +41,10 @@ replay must not be labeled proof that AgentCore attached or enforced a policy.
 Gate 5 uses a separate versioned managed profile; it does not weaken
 `CedarBundle` v1's required sources.
 
+Both artifact families consume the same strict mapping-v1 vocabulary from the
+private `_cedar_mapping` module. This keeps mapping semantics identical while
+allowing the evidence-only local bundle reader to be consolidated separately.
+
 ## Managed capture record
 
 The candidate `managed_oracle_version: 1` index is canonical JSON with exact

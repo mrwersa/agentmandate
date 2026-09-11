@@ -10,6 +10,9 @@ from typing import Any
 
 import pytest
 
+import agentmandate._cedar as cedar_runtime
+import agentmandate._cedar_mapping as cedar_mapping
+import agentmandate._managed_cedar as managed_runtime
 from agentmandate._ir import AuthorityIR, Entity, IRFormatError, Source, _analyse_ir, _entity_id
 from agentmandate._managed_cedar import (
     ManagedOracle,
@@ -27,6 +30,12 @@ ORACLE = ROOT / "managed-oracle-v1.json"
 
 def raw_oracle() -> dict[str, Any]:
     return json.loads(ORACLE.read_text(encoding="utf-8"))
+
+
+def test_local_and_managed_cedar_share_the_isolated_mapping_parser() -> None:
+    assert cedar_runtime._mapping is cedar_mapping._mapping
+    assert managed_runtime._mapping is cedar_mapping._mapping
+    assert managed_runtime.CedarMapping is cedar_mapping.CedarMapping
 
 
 def source_bytes(oracle: ManagedOracle) -> dict[str, bytes]:

@@ -18,7 +18,7 @@ from datetime import date, datetime
 from pathlib import PurePosixPath
 from typing import Any
 
-from ._cedar import CedarBundleFormatError, CedarMapping, _mapping
+from ._cedar_mapping import CedarBundleFormatError, CedarMapping, _mapping
 from ._ir import (
     IR_VERSION,
     AuthorityIR,
