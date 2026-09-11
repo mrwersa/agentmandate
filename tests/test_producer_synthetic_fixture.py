@@ -10,9 +10,9 @@ from agentmandate._producer import (
     ProducerResult,
     ProducerSelection,
     analyse_producers,
-    migrate_aws_iam_access_key_boundary,
 )
 from scripts.evidence_lint import lint_directory
+from scripts.migrate_producer_evidence import migrate_aws_iam_access_key_boundary
 
 ROOT = Path(__file__).parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "producer-accepted-synthetic"

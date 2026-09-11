@@ -135,14 +135,16 @@ requires one source for each of upstream inventory, capacity controls, and the
 selected run boundary; checks control references; and keeps structural validity
 separate from evidence acceptance.
 
-The canonical migration consumes exactly three caller-supplied sources: the
-29-tool catalogue, sanitized live outcome, and capture adapter. It verifies
+The repository-only `scripts/migrate_producer_evidence.py` migration consumes
+exactly three caller-supplied sources: the 29-tool catalogue, sanitized live
+outcome, and capture adapter. It verifies
 their reviewed digests, rechecks the selected tool schema, two authenticated
 successful productions, exhaustion-only third rejection, shared principal,
 cleanup, sanitization, package revision, and deployment controls, then emits
 `tests/fixtures/producer-boundary-iam-v1.json`. Migration evidence remains
 `unreviewed`: byte identity cannot manufacture an accountable reviewer or
-expiry. No reader path opens a locator or reads a clock.
+expiry. The installed reader contains no migration converter; no reader path
+opens a locator or reads a clock.
 
 Gate 2a adds no analysis, public Python export, manifest meaning, or CLI
 surface. Those remain behind their separate gates.
