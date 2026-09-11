@@ -1,0 +1,39 @@
+{
+  "deployment_continuity_refusal_index_version": 1,
+  "provider": "AWS AgentCore Gateway Policy",
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "406556f3cc2be0d831a6dc8160aa8e833fb9ce258d74d92f263cf0aba7efb656",
+      "locator": "capture_deployment_continuity_refusal.py"
+    },
+    {
+      "content_sha256": "42dc0ffa6245d3e48d56e9f3d9d022bf39e4a854f494b7fda259ba7e591160f1",
+      "locator": "deployment-continuity-candidate-action-type.dogwood"
+    },
+    {
+      "content_sha256": "c1b1077ee8bf2956431274d1c5ead0b5511ac28ac0a86a24ef81cd869636ce69",
+      "locator": "deployment-continuity-candidate-tool-specific.dogwood"
+    },
+    {
+      "content_sha256": "34cea03748eb77a533c2989194693c8868ddc4c8c56b87e15eeffb0a67729980",
+      "locator": "deployment-continuity-candidate-unconstrained.dogwood"
+    },
+    {
+      "content_sha256": "9bfbf268a4c22c49751d0fe302cedc739136dc47893f3c8d6e3e8f363370bb29",
+      "locator": "deployment-continuity-cleanup.json"
+    },
+    {
+      "content_sha256": "16455a72b945364f440a76fbd2fb4338d4a657075faa704b35584902f7ba7dc4",
+      "locator": "deployment-continuity-corrections.json"
+    },
+    {
+      "content_sha256": "97d250a1b004810d024338436e9e60d949dde33bf21c2476fa9e7cb41035275b",
+      "locator": "deployment-continuity-procedure.md"
+    },
+    {
+      "content_sha256": "303769cba4c2ecc6b1f238b7c525999abe35e7cb0a0940b6de6c0d5866d4f923",
+      "locator": "deployment-continuity-refusal.json"
+    }
+  ]
+}
