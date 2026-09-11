@@ -1,6 +1,6 @@
 # Pre-1.0 compatibility and consolidation audit
 
-Status: **inventory current through `d063f00`; Cedar mapping split complete**.
+Status: **reviewed baseline complete against `a308e6b`; released as `0.17.0`**.
 This is the first step of the consolidation window in `ROADMAP.md`. It records
 what must remain compatible before implementation is simplified. It does not
 change a reader, schema, command, or result.
@@ -161,11 +161,34 @@ Before relocating any converter, a replacement replay check must:
 4. keep the real evidence review state unchanged; and
 5. run under the zero-dependency repository checks where practical.
 
+## Reviewed baseline
+
+The consolidation sequence completed without changing a public Python name,
+CLI command or exit status, supported artifact version, result envelope, or
+manifest meaning. Package `0.17.0` records that implementation baseline; the
+package version does not replace any artifact's independent version.
+
+Rooted in the consolidated runtime at `a308e6b`, the release baseline is:
+
+| Check | Reviewed result |
+|---|---|
+| Public Python API | 51 names in exhaustive `agentmandate.__all__` |
+| CLI | 15 top-level commands with the nested modes and exit contract above |
+| Installed runtime | 23 Python modules, 17,444 physical lines, zero mandatory dependencies |
+| Runtime coverage | 7,278 statements, 100% on Python 3.12 |
+| Test suite | 1,616 tests passed; Python 3.10–3.14 remain required in CI |
+| Repository replay | Continuity, producer, delegation, principal-v1, and native Cedar tools all reproduce their canonical fixtures |
+| Package | Wheel and sdist pass `twine check`; isolated wheel runs JSON reach with no dependencies |
+
+The installed runtime retains only the shared Cedar mapping-v1 parser needed
+by managed Cedar. The repository retains every relocated converter or
+historical reader in executable tooling. The compatibility decision remains:
+no public contract needs a new version before 1.0.
+
 ## Consolidation sequence
 
-The next PRs should remain independently reviewable:
-
-1. rerun every release gate and record the reviewed pre-1.0 baseline.
+The ordered consolidation work is complete. New contract work resumes through
+the ordinary evidence gates and independent artifact-version rules above.
 
 Repository-history cleanup is a separate decision and must not be combined
 with any contract or migration change.

@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.17.0 - 2026-09-11
+
+### Added
+
+- A runnable synthetic refund-continuity example demonstrates preserved
+  cross-session authority and a reset-state counterfactual with digest-pinned
+  inputs, executable CLI assertions, and an evidence-capture plan.
+
+### Changed
+
+- Apart from the package version, the reviewed pre-1.0 baseline keeps every
+  public Python, CLI, artifact, and result contract unchanged while moving
+  continuity, producer, delegation,
+  principal-v1, and native Cedar evidence conversion or replay out of the
+  installed runtime package.
+- Managed Cedar now owns a dedicated shared mapping-v1 parser. Historical
+  principal-v1 and local Cedar bundle readers remain byte-exact repository
+  replay tools rather than installed runtime inputs.
+
 ## 0.16.0 - 2026-09-05
 
 ### Added

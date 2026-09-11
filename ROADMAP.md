@@ -38,9 +38,9 @@ model initiatives completed together. The present frontier is:
 
 | State | Initiatives |
 |---|---|
-| **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, and the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md) |
-| **Active** | Pre-1.0 consolidation: the [compatibility inventory](docs/pre-1.0-consolidation-audit.md) is complete; next relocate evidence-only migrations while preserving published artifact versions and byte-exact replay |
-| **Ready next** | Move continuity evidence converters out of the runtime package, then repeat for producer and delegation paths, rerun every release gate, and cut one reviewed pre-1.0 baseline |
+| **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
+| **Active** | Authority-continuity evidence: execute the one-factor counterfactual matrix in the [capture plan](docs/continuity-evidence-plan.md) without changing the public contract |
+| **Ready next** | Capture provider-backed continuity controls across session, process, policy revision, principal, deployment, retry, and concurrency boundaries; use those results to identify the state-owning boundary |
 | **Evidence-blocked** | Resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
@@ -54,7 +54,7 @@ The delivered continuity surface now has a
 provider captures vary session, process, policy revision, principal,
 deployment, retry, and concurrency one factor at a time so later results can
 identify the state-owning boundary rather than merely add more allow/deny
-examples. This evidence work can proceed alongside the pre-1.0 consolidation
+examples. This evidence work resumes after the completed pre-1.0 consolidation
 audit without changing the public contract.
 
 ## Outcomes and boundaries
@@ -303,8 +303,8 @@ Contract consolidation and Git history are separate decisions:
   pre-1.0 minor release, migration notes, and fixtures for every affected
   contract.
 
-The consolidation window is **now open after the authority-continuity Gate 4
-decision and before 1.0**:
+The consolidation window opened after the authority-continuity Gate 4 decision
+and completed in the reviewed `0.17.0` baseline:
 
 1. inventory every public contract, private compatibility path, fixture, and
    historical reader;
@@ -315,7 +315,7 @@ decision and before 1.0**:
 4. rerun the zero-dependency, package, evidence, and 100% coverage gates; and
 5. cut one reviewed pre-1.0 baseline before declaring the stable surface.
 
-Do not rewrite history after 1.0. If a one-time clean baseline is still wanted,
+Do not rewrite history after 1.0. If a one-time clean history is still wanted,
 the safest remaining window is immediately before 1.0, after consolidation.
 Preserve the current graph in an immutable archive tag and an offline bundle;
 leave every published release tag on its original commit; update or retain all

@@ -44,3 +44,19 @@ def test_audit_pins_every_evidence_converter_during_relocation() -> None:
     missing = sorted(name for name in converters if f"`{name}`" not in source)
 
     assert not missing, f"pre-1.0 audit omits evidence converters: {', '.join(missing)}"
+
+
+def test_reviewed_baseline_pins_release_and_replay_tools() -> None:
+    source = AUDIT.read_text(encoding="utf-8")
+    assert f"released as `{agentmandate.__version__}`" in source
+
+    replay_tools = (
+        "scripts/migrate_continuity_evidence.py",
+        "scripts/migrate_producer_evidence.py",
+        "scripts/migrate_delegation_evidence.py",
+        "scripts/replay_principal_v1.py",
+        "scripts/replay_cedar_bundle_v1.py",
+    )
+    missing = [path for path in replay_tools if f"`{path}`" not in source]
+
+    assert not missing, f"reviewed baseline omits replay tools: {', '.join(missing)}"
