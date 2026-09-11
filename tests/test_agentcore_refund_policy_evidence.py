@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from agentmandate._cedar import _mapping
+from agentmandate._cedar_mapping import _mapping
 from agentmandate._managed_cedar import ManagedOracle, compare_managed_cedar
 from agentmandate.manifest import load
 from agentmandate.reach import analyse
