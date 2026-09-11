@@ -31,5 +31,11 @@ repository-only. Run `python scripts/migrate_delegation_evidence.py` to replay
 both the legacy grant chain and the real Authorizer chain against their
 canonical fixtures and verify their declared source bytes.
 
+The three principal-v1 fixtures predate delegation attachment v2. Run
+`python scripts/replay_principal_v1.py` to round-trip them and reproduce their
+pinned Authority IR projections. Attachment v2 replaces the delegated-user
+consumption path only; it has no equivalent for the historical fixed-user
+credential or intersecting-principal shapes.
+
 `probes/` is the exception: it contains shaped, synthetic questions that may
 expose a design problem but cannot justify a schema or roadmap claim by itself.

@@ -241,6 +241,12 @@ Intended semantics:
 
 ### Intersecting principals
 
+> **Historical record:** principal v1 was never consumed by a public CLI and
+> now lives only in `scripts/replay_principal_v1.py`. Delegation attachment v2
+> replaces its delegated-user path, but does not represent fixed-user
+> credentials or principal intersections. Their fixtures and pinned IR digests
+> remain replayable without implying current runtime support.
+
 AWS-style intersections (cloud credentials meeting a database role) are
 recorded as a second structured kind, `intersecting`, listing the principals
 that jointly bound the call:

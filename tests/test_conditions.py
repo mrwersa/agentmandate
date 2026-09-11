@@ -8,15 +8,15 @@ from pathlib import Path
 
 import pytest
 
+import agentmandate._conditions as conditions_runtime
+import scripts.replay_principal_v1 as principal_v1_replay
 from agentmandate import analyse, loads
 from agentmandate._conditions import (
     ConditionContext,
     ConditionFormatError,
     ToolCondition,
-    ToolPrincipal,
     _profile_digest,
     _validate_condition_profile,
-    _validate_principal_profile,
     analyse_conditions,
     reconcile_condition_drift,
 )
@@ -24,6 +24,7 @@ from agentmandate._inventory import InventoryReconciliation
 from agentmandate._ir import AuthorityIR, Entity, Fact, _entity_id, _fact_id
 from agentmandate.inventory import collect
 from scripts.migrate_delegation_evidence import GRANT_VERSION, Grant
+from scripts.replay_principal_v1 import ToolPrincipal, _validate_principal_profile
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CONTEXT = FIXTURES / "condition-context-select-v1.json"
@@ -536,6 +537,16 @@ def test_tool_principal_fixtures_round_trip_and_project_canonically(
     assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
     assert {edge.relation for edge in graph.edges} == relations
     assert all(fact.evidence[0].confidence == "exact" for fact in graph.facts)
+
+
+def test_repository_replay_preserves_all_principal_v1_fixtures() -> None:
+    principal_v1_replay.verify_fixtures()
+
+
+def test_principal_v1_reader_and_projection_are_not_runtime_members() -> None:
+    assert not hasattr(conditions_runtime, "ToolPrincipal")
+    assert not hasattr(conditions_runtime, "_principal_to_ir")
+    assert not hasattr(conditions_runtime, "_validate_principal_profile")
 
 
 @pytest.mark.parametrize("path", sorted(PROJECTION_DIGESTS), ids=lambda path: path.stem)
