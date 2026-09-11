@@ -39,8 +39,8 @@ model initiatives completed together. The present frontier is:
 | State | Initiatives |
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, and the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md) |
-| **Active** | Pre-1.0 consolidation: inventory public contracts and private compatibility paths, then remove only unused private legacy while preserving published artifact versions and evidence replay |
-| **Ready next** | Complete the consolidation audit, decide any independent artifact migrations, rerun every release gate, and cut one reviewed pre-1.0 baseline |
+| **Active** | Pre-1.0 consolidation: the [compatibility inventory](docs/pre-1.0-consolidation-audit.md) is complete; next relocate evidence-only migrations while preserving published artifact versions and byte-exact replay |
+| **Ready next** | Move continuity evidence converters out of the runtime package, then repeat for producer and delegation paths, rerun every release gate, and cut one reviewed pre-1.0 baseline |
 | **Evidence-blocked** | Resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
