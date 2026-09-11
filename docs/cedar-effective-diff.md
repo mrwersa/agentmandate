@@ -42,8 +42,9 @@ Gate 5 uses a separate versioned managed profile; it does not weaken
 `CedarBundle` v1's required sources.
 
 Both artifact families consume the same strict mapping-v1 vocabulary from the
-private `_cedar_mapping` module. This keeps mapping semantics identical while
-allowing the evidence-only local bundle reader to be consolidated separately.
+private `_cedar_mapping` module. The evidence-only local bundle reader now
+lives in `scripts/replay_cedar_bundle_v1.py`; managed Cedar remains the sole
+installed consumer of the shared mapping parser.
 
 ## Managed capture record
 

@@ -1,4 +1,4 @@
-"""Private records for digest-pinned Cedar policy capture bundles.
+"""Replay private Cedar bundle-v1 records from digest-pinned evidence.
 
 The reader proves record structure and captured-byte identity.  It does not
 parse Cedar, reproduce a decision, trust a deployment mapping, or make a
@@ -14,9 +14,10 @@ from base64 import b64decode
 from binascii import Error as Base64Error
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from ._cedar_mapping import (
+from agentmandate._cedar_mapping import (
     CedarBundleFormatError,
     CedarMapping,
     _integer,
@@ -26,7 +27,7 @@ from ._cedar_mapping import (
     _relative,
     _strings,
 )
-from ._ir import (
+from agentmandate._ir import (
     IR_VERSION,
     AuthorityIR,
     Edge,
@@ -38,7 +39,7 @@ from ._ir import (
     _entity_id,
     _fact_id,
 )
-from ._ir import Evidence as IREvidence
+from agentmandate._ir import Evidence as IREvidence
 
 BUNDLE_VERSION = 1
 CEDAR_IR_ADAPTER = "agentmandate.cedar-bundle"
@@ -732,3 +733,36 @@ def _validate_cedar_profile(graph: AuthorityIR) -> None:
         request_source = facts[(entity.id, "source")].value
         if not isinstance(request_source, str) or source_kinds.get(request_source) != "request":
             raise CedarBundleFormatError("Cedar IR profile request has an invalid source")
+
+
+ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE = ROOT / "docs" / "evidence" / "cedar-document-cloud"
+BUNDLE_PATH = EVIDENCE / "bundle.json"
+BUNDLE_SHA256 = "592699ddc1c20cadf8a1914d18f815bbd49363bbacbe97a1b9a78f458e5860e7"
+PROJECTION_SHA256 = "48a092ce3e555c5d144263b32351d9572bcd7a71cf16c5dc6ee86dc25cbae9c5"
+
+
+def verify_fixture() -> None:
+    bundle_bytes = BUNDLE_PATH.read_bytes()
+    if hashlib.sha256(bundle_bytes).hexdigest() != BUNDLE_SHA256:
+        raise CedarBundleFormatError("Cedar bundle replay source digest has changed")
+    bundle = CedarBundle.from_json(bundle_bytes.decode("utf-8"))
+    if bundle.to_json().encode("utf-8") != bundle_bytes:
+        raise CedarBundleFormatError("Cedar bundle replay is not byte-canonical")
+    contents = {
+        source.locator: (EVIDENCE / source.locator).read_bytes()
+        for source in bundle.sources
+    }
+    bundle.verify_sources(contents)
+    projection_digest = hashlib.sha256(bundle.to_ir().to_json().encode("utf-8")).hexdigest()
+    if projection_digest != PROJECTION_SHA256:
+        raise CedarBundleFormatError("Cedar bundle replay projection has changed")
+
+
+def main() -> None:
+    verify_fixture()
+    print("Cedar bundle-v1 replay: canonical fixture and projection match")
+
+
+if __name__ == "__main__":
+    main()

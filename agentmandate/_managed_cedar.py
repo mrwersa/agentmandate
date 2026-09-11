@@ -1,8 +1,9 @@
 """Private records for digest-pinned managed Cedar enforcement captures.
 
-This profile is deliberately separate from :mod:`agentmandate._cedar`.  A
-managed AgentCore response does not expose the local Cedar schema, entities,
-validation diagnostics, or determining policies required by ``CedarBundle``.
+This profile is deliberately separate from the repository-only Cedar bundle
+replay. A managed AgentCore response does not expose the local Cedar schema,
+entities, validation diagnostics, or determining policies required by that
+historical bundle.
 The reader proves transport structure and caller-supplied byte identity only;
 analysis eligibility is a later gate.
 """

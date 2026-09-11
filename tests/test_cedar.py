@@ -10,12 +10,6 @@ from typing import Any
 
 import pytest
 
-from agentmandate._cedar import (
-    CedarBundle,
-    CedarBundleFormatError,
-    _profile_digest,
-    _validate_cedar_profile,
-)
 from agentmandate._ir import (
     AuthorityIR,
     Entity,
@@ -24,6 +18,13 @@ from agentmandate._ir import (
     _analyse_ir,
     _entity_id,
     _fact_id,
+)
+from scripts.replay_cedar_bundle_v1 import (
+    CedarBundle,
+    CedarBundleFormatError,
+    _profile_digest,
+    _validate_cedar_profile,
+    verify_fixture,
 )
 
 ROOT = Path(__file__).parents[1] / "docs" / "evidence" / "cedar-document-cloud"
@@ -113,6 +114,10 @@ def test_the_official_bundle_is_canonical_and_digest_bound() -> None:
     bundle.verify_sources(
         {source.locator: (ROOT / source.locator).read_bytes() for source in bundle.sources}
     )
+
+
+def test_repository_replay_preserves_the_canonical_bundle_and_projection() -> None:
+    verify_fixture()
 
 
 def rehash(graph: AuthorityIR) -> AuthorityIR:

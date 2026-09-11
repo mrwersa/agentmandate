@@ -37,5 +37,11 @@ pinned Authority IR projections. Attachment v2 replaces the delegated-user
 consumption path only; it has no equivalent for the historical fixed-user
 credential or intersecting-principal shapes.
 
+The native Cedar bundle is historical repository evidence rather than a
+runtime input. Run `python scripts/replay_cedar_bundle_v1.py` to verify the
+canonical document-cloud bundle digest, every declared source byte, and its
+pinned Authority IR projection. Managed Cedar retains the shared mapping-v1
+parser in the installed package.
+
 `probes/` is the exception: it contains shaped, synthetic questions that may
 expose a design problem but cannot justify a schema or roadmap claim by itself.

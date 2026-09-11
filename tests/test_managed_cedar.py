@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import importlib.util
 import json
 from dataclasses import replace
 from datetime import date, datetime
@@ -10,7 +11,6 @@ from typing import Any
 
 import pytest
 
-import agentmandate._cedar as cedar_runtime
 import agentmandate._cedar_mapping as cedar_mapping
 import agentmandate._managed_cedar as managed_runtime
 from agentmandate._ir import AuthorityIR, Entity, IRFormatError, Source, _analyse_ir, _entity_id
@@ -33,9 +33,9 @@ def raw_oracle() -> dict[str, Any]:
 
 
 def test_local_and_managed_cedar_share_the_isolated_mapping_parser() -> None:
-    assert cedar_runtime._mapping is cedar_mapping._mapping
     assert managed_runtime._mapping is cedar_mapping._mapping
     assert managed_runtime.CedarMapping is cedar_mapping.CedarMapping
+    assert importlib.util.find_spec("agentmandate._cedar") is None
 
 
 def source_bytes(oracle: ManagedOracle) -> dict[str, bytes]:
