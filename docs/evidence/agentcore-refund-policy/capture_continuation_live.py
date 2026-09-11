@@ -408,7 +408,7 @@ class Live:
         if statement is not None:
             request["definition"] = {"policy": {"statement": statement}}
         if description is not None:
-            request["description"] = description
+            request["description"] = {"optionalValue": description}
         requested = _now()
         response = self.ctl.update_policy(**request)
         polls, stable = [], 0
@@ -486,7 +486,11 @@ class Live:
                 ):
                     self.update(statement=text)
                     attempt["steps"].append(f"{label} validated")
-            except (botocore.exceptions.ClientError, RuntimeError) as exc:
+            except (
+                botocore.exceptions.ClientError,
+                botocore.exceptions.BotoCoreError,
+                RuntimeError,
+            ) as exc:
                 attempt["validated"] = False
                 attempt["error"] = _error(exc)
                 attempts.append(attempt)
@@ -772,7 +776,11 @@ def run(output: Path) -> int:
         for position, item in enumerate(order, 1):
             try:
                 record = live.trial(item["arm"], item["trial"])
-            except (botocore.exceptions.ClientError, RuntimeError) as exc:
+            except (
+                botocore.exceptions.ClientError,
+                botocore.exceptions.BotoCoreError,
+                RuntimeError,
+            ) as exc:
                 record = {**item, "conforming": False, "error": _error(exc)}
             record["order"] = position
             _write(output / f"trial-{position:02d}.json", record)
@@ -785,7 +793,11 @@ def run(output: Path) -> int:
         outcome["postflight_matches_prediction"] = postflight["matches_prediction"]
     except StopCampaign as exc:
         outcome["stopped"] = str(exc)
-    except (botocore.exceptions.ClientError, RuntimeError) as exc:
+    except (
+        botocore.exceptions.ClientError,
+        botocore.exceptions.BotoCoreError,
+        RuntimeError,
+    ) as exc:
         outcome["stopped"] = f"capture error: {_error(exc)}"
     finally:
         cleanup = live.cleanup()

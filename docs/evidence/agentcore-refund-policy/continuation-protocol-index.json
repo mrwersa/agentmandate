@@ -6,7 +6,7 @@
   "region": "us-east-1",
   "sources": [
     {
-      "content_sha256": "d214a3ad962c20ec84003c9debd06166d03b190c11d1176e0dd31ad1d5b5c66b",
+      "content_sha256": "a2c662b145b31f04888ffa7f68f09a39da7c8ad7859c8816e629a6d3ce4e493d",
       "locator": "capture_continuation_live.py"
     },
     {
@@ -40,6 +40,10 @@
     {
       "content_sha256": "0f7b530daac148fe745bda47f26228f5a96bd0db93d830661335b8b7add51591",
       "locator": "continuation-protocol.json"
+    },
+    {
+      "content_sha256": "f654b8c6195c2bda48421ed4cb11b28da2cc67d0583bd38f3b899d43de0f1552",
+      "locator": "project_continuation.py"
     }
   ],
   "status": "preregistered_not_executed"
