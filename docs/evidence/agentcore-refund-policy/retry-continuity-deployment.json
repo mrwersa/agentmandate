@@ -1,0 +1,59 @@
+{
+  "gateway": {
+    "alias": "retry-continuity-gateway",
+    "authorizer": "AWS_IAM",
+    "exception_level": "DEBUG",
+    "policy_engine_mode": "ENFORCE",
+    "protocol": "MCP",
+    "status": "READY"
+  },
+  "gateway_role_correction": {
+    "action": "bedrock-agentcore:GetWorkloadAccessToken",
+    "resources": [
+      "default-workload-directory",
+      "exact-gateway-workload-identity"
+    ],
+    "wildcard": false
+  },
+  "policies": [
+    {
+      "enforcement_mode": "ACTIVE",
+      "name": "RetryCaptureBudget",
+      "status": "ACTIVE"
+    },
+    {
+      "enforcement_mode": "ACTIVE",
+      "name": "RetryCapturePermit",
+      "status": "ACTIVE"
+    }
+  ],
+  "policy_engine": {
+    "alias": "retry-policy-engine",
+    "status": "ACTIVE"
+  },
+  "provider": "AWS AgentCore Gateway Policy",
+  "region": "us-east-1",
+  "retry_continuity_deployment_version": 1,
+  "stack_inventory": {
+    "AWS::BedrockAgentCore::Gateway": 1,
+    "AWS::BedrockAgentCore::GatewayTarget": 1,
+    "AWS::BedrockAgentCore::PolicyEngine": 1,
+    "AWS::CDK::Metadata": 1,
+    "AWS::IAM::Policy": 1,
+    "AWS::IAM::Role": 2,
+    "AWS::Lambda::Function": 1,
+    "AWS::Logs::LogGroup": 1
+  },
+  "target": {
+    "alias": "retry-target",
+    "status": "READY",
+    "type": "LAMBDA"
+  },
+  "temporary_principals_after_capture": 0,
+  "versions": {
+    "agentcore_cli": "0.28.1",
+    "aws_cli": "2.36.8",
+    "boto3": "1.43.93",
+    "botocore": "1.43.93"
+  }
+}

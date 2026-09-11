@@ -58,14 +58,24 @@ history selected by the policy, so it cannot be the intended one-factor
 counterfactual. The [sanitized refusal](evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal)
 records three managed authoring attempts and zero data-plane requests.
 
-Idempotent retry remains the next executable cell. The
-[continuation campaign](continuation-campaign-protocol.md) closed the tightening
-cell on 11 September 2026: after a revision from 1,000 to 700, prescribed
-recovery admitted a 600 request that carried predecessor consumption would
-refuse in 10 of 10 trials. It also re-ran the revision matrix under native
+The completed-response retransmission cell is also captured. Reusing the exact
+request bytes and JSON-RPC identifier produced a distinct second target
+execution in 10/10 trials, and a later probe proved the repeated GBP 400 input
+contributed to the cumulative bound. Fresh-ID controls behaved identically.
+This does not cover ambiguous timeouts, automatic transport or interceptor
+retries, or an application idempotency key.
+
+The [continuation campaign](continuation-campaign-protocol.md) closed the
+tightening cell on 11 September 2026: after a revision from 1,000 to 700,
+prescribed recovery admitted a 600 request that carried predecessor consumption
+would refuse in 10 of 10 trials. It also re-ran the revision matrix under native
 validation and found byte-identical writes deduplicated only in the earlier
 permit and forbid configuration. Managed Agents, by contrast, carried consumed
 spend across a lowered live cap in 10 of 10 trials.
+
+Together these captures close the executable retry and reviewed tightening
+cells. The deployment cell remains evidence-blocked; further provider work
+should follow a consolidated review of the resulting continuity boundary.
 
 ## Capture bundle per trial
 

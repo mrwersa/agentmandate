@@ -302,6 +302,41 @@ pins the three exact candidates, sanitized provider diagnostics, procedure,
 correction log, verifier, and seven-check cleanup record. Each rejected stack
 reached rollback complete and was deleted. No live identifier was retained.
 
+## Completed-request retransmission control
+
+The next control tested whether reusing a JSON-RPC request identifier prevents
+a completed Gateway tool call from being admitted or executed again. Each
+trial sent GBP 400, waited 250 ms after the complete response, retransmitted
+GBP 400, then sent a fresh-ID GBP 300 probe under the same IAM principal,
+Gateway, ACTIVE policy revision, and provider session. The same-ID arm reused
+the exact first request bytes; the control changed only the JSON-RPC `id`.
+
+Both arms were Allow–Allow–Deny in 10/10 shuffled trials. Every admitted call
+returned a distinct sanitized Lambda execution marker, including all ten
+byte-identical same-ID retransmissions. The final probe therefore observed GBP
+1,100 of cumulative requests in both arms. Under this tested boundary, reusing
+the JSON-RPC identifier neither cached the response nor prevented the second
+execution from contributing to temporal history.
+
+This is deliberately not called provider idempotency. The reviewed
+[Gateway policy invocation contract](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/use-gateway-with-policy.html)
+documents the policy-session header but no data-plane idempotency token;
+`clientToken` idempotency belongs to control-plane resource creation. AWS also
+advises applications that [Gateway interceptor Lambdas may receive duplicate
+invocations](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-interceptors.html),
+but this experiment did not use an interceptor. It tested manual
+retransmission only after a completed response—not an ambiguous timeout,
+automatic transport or SDK retry, or application-supplied idempotency key.
+
+`retry-continuity-index.json`, SHA-256
+`8a6a08af01bbb2e80e2c846facc407723983382e9abf2e20bb6dfe8a253d4ad6`,
+pins all 62 sanitized requests and responses, execution aliases, exact policy
+and Lambda sources, retry contract, deployment, procedure, corrections,
+summary, projector, and eight-check cleanup record. The temporary principal
+and access key were removed in `finally`; one residual log group was detected
+and explicitly deleted. No live request, execution, identity, policy, resource,
+session, or account identifier was retained.
+
 `temporal-repetition-index.json`, SHA-256
 `cb3e8546157a4a2f9b7d48b8e20666a212fd6b418de669d682c5a4f5bec31cba`,
 pins the capture transformer, procedure, both sanitised policy revisions, full
@@ -501,7 +536,9 @@ measurements. The principal-change control created one further task-scoped
 deployment, two temporary IAM users, 40 paired managed requests, and four
 single-request controls. The deployment-continuity follow-up attempted three
 policy creations across three fully rolled-back task stacks and made zero
-data-plane requests.
+data-plane requests. The completed-request retransmission control created one
+task-scoped deployment, made 62 managed requests, and used one temporary IAM
+principal whose access key remained in memory.
 Each task used an AgentCore
 Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
 task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)

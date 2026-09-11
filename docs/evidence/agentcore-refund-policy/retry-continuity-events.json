@@ -1,0 +1,2227 @@
+{
+  "capture_finished_at": "2026-09-11T19:32:57.930523Z",
+  "capture_started_at": "2026-09-11T19:32:04.195655Z",
+  "controls": [
+    {
+      "amount": 500,
+      "call": {
+        "duration_ms": 807.899488,
+        "execution_alias": "execution-41",
+        "finished_at": "2026-09-11T19:32:17.759069Z",
+        "http_status": 200,
+        "outcome": "allow",
+        "request": {
+          "id": "below-control",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 500
+            },
+            "name": "RetryTarget___process_refund"
+          }
+        },
+        "request_bytes": "{\"id\":\"below-control\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":500},\"name\":\"RetryTarget___process_refund\"}}",
+        "request_sha256": "e2ce2e0c57d81fb340a475390fa323359612a2bd4abc37552f6bd0b545a043a0",
+        "response": {
+          "id": "below-control",
+          "jsonrpc": "2.0",
+          "result": {
+            "content": [
+              {
+                "text": "{\"processed\":true,\"amount\":500,\"execution_marker\":\"execution-41\"}",
+                "type": "text"
+              }
+            ],
+            "isError": false
+          }
+        },
+        "started_at": "2026-09-11T19:32:16.951144Z"
+      },
+      "outcome": "allow"
+    },
+    {
+      "amount": 1000,
+      "call": {
+        "duration_ms": 435.198394,
+        "execution_alias": null,
+        "finished_at": "2026-09-11T19:32:18.194656Z",
+        "http_status": 200,
+        "outcome": "deny",
+        "request": {
+          "id": "boundary-control",
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "amount": 1000
+            },
+            "name": "RetryTarget___process_refund"
+          }
+        },
+        "request_bytes": "{\"id\":\"boundary-control\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":1000},\"name\":\"RetryTarget___process_refund\"}}",
+        "request_sha256": "07bc00aa1b4659394fc4b2e3b8cb5535a4c60731e3534568a9d8c7bc1ce0034b",
+        "response": {
+          "error": {
+            "code": -32002,
+            "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+          },
+          "id": "boundary-control",
+          "jsonrpc": "2.0"
+        },
+        "started_at": "2026-09-11T19:32:17.759446Z"
+      },
+      "outcome": "deny"
+    }
+  ],
+  "gateway": "<reviewed-retry-continuity-gateway>",
+  "mandate_binding": "external experiment invariant; Gateway did not inspect it",
+  "mandate_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "policy_engine": "<reviewed-retry-continuity-policy-engine>",
+  "principal": "temporary-iam-principal",
+  "provider": "AWS AgentCore Gateway Policy",
+  "provider_session_scope": "one fresh UUID per three-call trial",
+  "provider_state": {
+    "completed": "unavailable",
+    "configured_limit": 1000,
+    "consumed": "unavailable",
+    "in_flight": "unavailable",
+    "remaining": "unavailable",
+    "reserved": "unavailable"
+  },
+  "random_seed": 20260911,
+  "region": "us-east-1",
+  "retry_continuity_events_version": 1,
+  "retry_contract": {
+    "completed_response_before_retransmission": true,
+    "fixed_retry_delay_ms": 250.0,
+    "json_rpc_id_role": "correlation identifier candidate",
+    "provider_data_plane_idempotency_token": "not documented",
+    "sdk_retries": 0,
+    "transport_retries": 0
+  },
+  "trial_order": [
+    "same_id",
+    "fresh_id",
+    "same_id",
+    "fresh_id",
+    "fresh_id",
+    "same_id",
+    "fresh_id",
+    "fresh_id",
+    "same_id",
+    "same_id",
+    "same_id",
+    "same_id",
+    "same_id",
+    "fresh_id",
+    "fresh_id",
+    "same_id",
+    "fresh_id",
+    "same_id",
+    "fresh_id",
+    "fresh_id"
+  ],
+  "trials": [
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 497.445085,
+          "execution_alias": "execution-1",
+          "finished_at": "2026-09-11T19:32:18.692496Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-1-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-1-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "f5bc99f9222f9b148ac5329a2d16ac1d19617bfb5c1670d499d20fce2a426693",
+          "response": {
+            "id": "same_id-1-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-1\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:18.195041Z"
+        },
+        {
+          "duration_ms": 532.44753,
+          "execution_alias": "execution-2",
+          "finished_at": "2026-09-11T19:32:19.475938Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-1-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-1-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "f5bc99f9222f9b148ac5329a2d16ac1d19617bfb5c1670d499d20fce2a426693",
+          "response": {
+            "id": "same_id-1-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-2\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:18.943467Z"
+        },
+        {
+          "duration_ms": 457.519623,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:20.184532Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-1-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-1-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "d7b989af342e1bfe1734e69729d9a9d42fe37073c8ea1ebfa7b74b7622db75bb",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-1-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:19.726983Z"
+        }
+      ],
+      "index": 1,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-1"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 532.075984,
+          "execution_alias": "execution-3",
+          "finished_at": "2026-09-11T19:32:20.716981Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-1-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-1-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "43eee0057ecb53a0cf17de610f43834e118bff7cbeba2af49142f050c2d70982",
+          "response": {
+            "id": "fresh_id-1-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-3\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:20.184895Z"
+        },
+        {
+          "duration_ms": 514.055155,
+          "execution_alias": "execution-4",
+          "finished_at": "2026-09-11T19:32:21.481731Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-1-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-1-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "b528494202eadc5fdd86fc9136bb07e92d9419bf56ff4f73978e184ded8935e1",
+          "response": {
+            "id": "fresh_id-1-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-4\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:20.967656Z"
+        },
+        {
+          "duration_ms": 443.910149,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:22.176278Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-1-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-1-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "2c68aa3fe4e5c749327bf8c17fc4caa7366b43800690b884c027958205a10606",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-1-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:21.732349Z"
+        }
+      ],
+      "index": 1,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-1"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 531.425336,
+          "execution_alias": "execution-5",
+          "finished_at": "2026-09-11T19:32:22.708305Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-2-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-2-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "de11fa33eb424445ce8d8827b8ad89e3f4ff8da12d1d1d16ef031bc45c3a925b",
+          "response": {
+            "id": "same_id-2-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-5\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:22.176860Z"
+        },
+        {
+          "duration_ms": 505.620256,
+          "execution_alias": "execution-6",
+          "finished_at": "2026-09-11T19:32:23.464553Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-2-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-2-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "de11fa33eb424445ce8d8827b8ad89e3f4ff8da12d1d1d16ef031bc45c3a925b",
+          "response": {
+            "id": "same_id-2-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-6\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:22.958913Z"
+        },
+        {
+          "duration_ms": 432.823849,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:24.148267Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-2-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-2-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "416d67c1aa7186f73130babf952b2aa7f03c4a39b6ee45b817ffb1ab290d6fd3",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-2-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:23.715422Z"
+        }
+      ],
+      "index": 2,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-2"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 507.002114,
+          "execution_alias": "execution-7",
+          "finished_at": "2026-09-11T19:32:24.655675Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-2-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-2-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "c4ae87fff782ac25455fec6fa45b9586b0538a66b8db04092422d832710b0557",
+          "response": {
+            "id": "fresh_id-2-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-7\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:24.148663Z"
+        },
+        {
+          "duration_ms": 521.232929,
+          "execution_alias": "execution-8",
+          "finished_at": "2026-09-11T19:32:25.427556Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-2-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-2-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "76202efc922fa1a6d781d1e5336ec56bfb83789de131c261b69290377b5b3d34",
+          "response": {
+            "id": "fresh_id-2-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-8\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:24.906302Z"
+        },
+        {
+          "duration_ms": 457.63169,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:26.140446Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-2-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-2-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "b4ca7fbfc9f9f39a5a76cc7717f4ce91a4cd3a99b026c62e21f71722f5a86b4e",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-2-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:25.682797Z"
+        }
+      ],
+      "index": 2,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-2"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 561.189371,
+          "execution_alias": "execution-9",
+          "finished_at": "2026-09-11T19:32:26.702033Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-3-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-3-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "441f1bc668a990750fa1a23b7e4f3562fd5c89a865ca359b1dc63fb6685a7fd2",
+          "response": {
+            "id": "fresh_id-3-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-9\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:26.140834Z"
+        },
+        {
+          "duration_ms": 512.211381,
+          "execution_alias": "execution-10",
+          "finished_at": "2026-09-11T19:32:27.465556Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-3-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-3-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "ae427b5fc7076165287a9522ff7d54dd1ee1cf8c9fdeb163d049704e03fd5021",
+          "response": {
+            "id": "fresh_id-3-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-10\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:26.953316Z"
+        },
+        {
+          "duration_ms": 466.933542,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:28.183334Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-3-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-3-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "3927509930a498980b68220fa841745f7a25ba0d9f3d773bc29bd4fe136cd575",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-3-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:27.716382Z"
+        }
+      ],
+      "index": 3,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-3"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 539.285942,
+          "execution_alias": "execution-11",
+          "finished_at": "2026-09-11T19:32:28.723364Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-3-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-3-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "b5bdf416cedf94b749ae7ed2ee4d53f994e497eb2616e4c6cd99240dd20b9717",
+          "response": {
+            "id": "same_id-3-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-11\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:28.184057Z"
+        },
+        {
+          "duration_ms": 500.074566,
+          "execution_alias": "execution-12",
+          "finished_at": "2026-09-11T19:32:29.474927Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-3-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-3-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "b5bdf416cedf94b749ae7ed2ee4d53f994e497eb2616e4c6cd99240dd20b9717",
+          "response": {
+            "id": "same_id-3-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-12\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:28.974835Z"
+        },
+        {
+          "duration_ms": 466.229045,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:30.192285Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-3-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-3-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "f46c75dc0ef84031fc7268bb7b0c797122bfb6c3e2c2d565b0572a3a879f0ae9",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-3-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:29.726038Z"
+        }
+      ],
+      "index": 3,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-3"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 502.548251,
+          "execution_alias": "execution-13",
+          "finished_at": "2026-09-11T19:32:30.695351Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-4-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-4-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "b9644cbf401f68c3926786b8a9c38bb154ff4456dd367ef7e3193901640f231e",
+          "response": {
+            "id": "fresh_id-4-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-13\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:30.192788Z"
+        },
+        {
+          "duration_ms": 548.254433,
+          "execution_alias": "execution-14",
+          "finished_at": "2026-09-11T19:32:31.494680Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-4-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-4-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "7414a1d0e336de139d93f717d9f66316805c0b70d67caa1742e160a298ba283f",
+          "response": {
+            "id": "fresh_id-4-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-14\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:30.946400Z"
+        },
+        {
+          "duration_ms": 434.940012,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:32.185129Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-4-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-4-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "836072fba70b9bf1afa4aeed9ce07106dff69cddc13283c1267943410ddacb24",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-4-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:31.750167Z"
+        }
+      ],
+      "index": 4,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-4"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 611.547827,
+          "execution_alias": "execution-15",
+          "finished_at": "2026-09-11T19:32:32.797225Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-5-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-5-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "43d4b5472655f315d101ae4675d2c193253e284026b88b1c93df09cc031a3e93",
+          "response": {
+            "id": "fresh_id-5-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-15\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:32.185661Z"
+        },
+        {
+          "duration_ms": 505.182067,
+          "execution_alias": "execution-16",
+          "finished_at": "2026-09-11T19:32:33.553581Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-5-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-5-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "b04aae32fa037afd64c3cb6de1dcf20588334d5801111047539cddc71221a949",
+          "response": {
+            "id": "fresh_id-5-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-16\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:33.048367Z"
+        },
+        {
+          "duration_ms": 463.048739,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:34.271734Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-5-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-5-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "c87b622388c08fe2f6b45e42b99e215d8f917c2ada0622ec737c056c8808b154",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-5-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:33.808656Z"
+        }
+      ],
+      "index": 5,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-5"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 507.324513,
+          "execution_alias": "execution-17",
+          "finished_at": "2026-09-11T19:32:34.779456Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-4-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-4-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "e9bd328cc07810bc306cb331438bb75393ffd01e25f9d77dcc3eb04187a33175",
+          "response": {
+            "id": "same_id-4-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-17\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:34.272119Z"
+        },
+        {
+          "duration_ms": 489.74176,
+          "execution_alias": "execution-18",
+          "finished_at": "2026-09-11T19:32:35.522612Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-4-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-4-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "e9bd328cc07810bc306cb331438bb75393ffd01e25f9d77dcc3eb04187a33175",
+          "response": {
+            "id": "same_id-4-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-18\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:35.032839Z"
+        },
+        {
+          "duration_ms": 434.360656,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:36.207649Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-4-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-4-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "dbc2ca4a1e83f8a3a8d7dc86b220c19927638badfae0243d4c45e547d8798289",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-4-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:35.773269Z"
+        }
+      ],
+      "index": 4,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-4"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 463.154277,
+          "execution_alias": "execution-19",
+          "finished_at": "2026-09-11T19:32:36.671179Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-5-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-5-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "cffd9a9031de459d3224e7a4f619beb42b627c332843726c774d946dc7f9d62c",
+          "response": {
+            "id": "same_id-5-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-19\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:36.208014Z"
+        },
+        {
+          "duration_ms": 511.70562,
+          "execution_alias": "execution-20",
+          "finished_at": "2026-09-11T19:32:37.433498Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-5-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-5-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "cffd9a9031de459d3224e7a4f619beb42b627c332843726c774d946dc7f9d62c",
+          "response": {
+            "id": "same_id-5-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-20\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:36.921774Z"
+        },
+        {
+          "duration_ms": 473.645668,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:38.157738Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-5-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-5-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "233a859b16ac54124a4fa33b706c349e6e6dbf194d61163dc18f8577e5e9e731",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-5-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:37.684072Z"
+        }
+      ],
+      "index": 5,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-5"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 509.090544,
+          "execution_alias": "execution-21",
+          "finished_at": "2026-09-11T19:32:38.667264Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-6-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-6-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "301ea5fd5d6517bc48f450c1b30a8ef5cbe4d05436ba9f64fc8d2564da4ef260",
+          "response": {
+            "id": "same_id-6-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-21\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:38.158162Z"
+        },
+        {
+          "duration_ms": 516.247859,
+          "execution_alias": "execution-22",
+          "finished_at": "2026-09-11T19:32:38.765727Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-6-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-6-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "301ea5fd5d6517bc48f450c1b30a8ef5cbe4d05436ba9f64fc8d2564da4ef260",
+          "response": {
+            "id": "same_id-6-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-22\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:38.917842Z"
+        },
+        {
+          "duration_ms": 446.808433,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:39.463750Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-6-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-6-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "35dd09cf569ba83d2722c2e948cfcb9548efe5ef9490c3b40808e3966b7680dc",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-6-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:39.016921Z"
+        }
+      ],
+      "index": 6,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-6"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 539.463048,
+          "execution_alias": "execution-23",
+          "finished_at": "2026-09-11T19:32:40.004170Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-7-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-7-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "17a24f70ecff410dec624291af26b6725997b2431072d98b86af36ee3484121d",
+          "response": {
+            "id": "same_id-7-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-23\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:39.464517Z"
+        },
+        {
+          "duration_ms": 540.950004,
+          "execution_alias": "execution-24",
+          "finished_at": "2026-09-11T19:32:40.796004Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-7-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-7-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "17a24f70ecff410dec624291af26b6725997b2431072d98b86af36ee3484121d",
+          "response": {
+            "id": "same_id-7-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-24\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:40.255022Z"
+        },
+        {
+          "duration_ms": 442.283305,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:41.488940Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-7-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-7-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "993b210c40d73167a4b5c25bbd2ead032044c0b96c21f928b6a773049559b27c",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-7-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:41.046637Z"
+        }
+      ],
+      "index": 7,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-7"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 430.185763,
+          "execution_alias": "execution-25",
+          "finished_at": "2026-09-11T19:32:41.919687Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-8-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-8-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "d8de9244382d598cc85bb26dd2f5f23cd794445960e9dab5624293a5f730bbfb",
+          "response": {
+            "id": "same_id-8-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-25\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:41.489485Z"
+        },
+        {
+          "duration_ms": 501.270839,
+          "execution_alias": "execution-26",
+          "finished_at": "2026-09-11T19:32:42.671820Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-8-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-8-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "d8de9244382d598cc85bb26dd2f5f23cd794445960e9dab5624293a5f730bbfb",
+          "response": {
+            "id": "same_id-8-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-26\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:42.170522Z"
+        },
+        {
+          "duration_ms": 435.039266,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:43.358752Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-8-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-8-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "a47f8a74da3b6ad29130dd1fd34803afec84dbf50d7dedd2110f132df3f854e4",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-8-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:42.923689Z"
+        }
+      ],
+      "index": 8,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-8"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 507.793782,
+          "execution_alias": "execution-27",
+          "finished_at": "2026-09-11T19:32:43.867686Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-6-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-6-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "fd08cb0dddf6cbcbb47b47a4326141a6ef92786f1e08294ee02b447fbff82256",
+          "response": {
+            "id": "fresh_id-6-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-27\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:43.359862Z"
+        },
+        {
+          "duration_ms": 480.854261,
+          "execution_alias": "execution-28",
+          "finished_at": "2026-09-11T19:32:44.600115Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-6-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-6-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "85bfd1681d781af2134f41d6c91317ca20b9bfaa35c8924de6efa3ea6109f649",
+          "response": {
+            "id": "fresh_id-6-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-28\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:44.119239Z"
+        },
+        {
+          "duration_ms": 433.807689,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:45.286080Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-6-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-6-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "5b115a184c4405c672a2aaad0461a95293dc88a587a9c49680017afda143bf03",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-6-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:44.852251Z"
+        }
+      ],
+      "index": 6,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-6"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 485.097871,
+          "execution_alias": "execution-29",
+          "finished_at": "2026-09-11T19:32:45.771564Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-7-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-7-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "256198fa9c122bde66bceb85de4aad3241646291ce2ca1125649045bae806a07",
+          "response": {
+            "id": "fresh_id-7-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-29\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:45.286456Z"
+        },
+        {
+          "duration_ms": 515.939285,
+          "execution_alias": "execution-30",
+          "finished_at": "2026-09-11T19:32:46.538254Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-7-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-7-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "bcb4d371674d6dfa2fad4de68181fb790306470181f11e43d8c4ccbf3032423e",
+          "response": {
+            "id": "fresh_id-7-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-30\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:46.022296Z"
+        },
+        {
+          "duration_ms": 659.558244,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:47.448555Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-7-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-7-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "dfe302bcbf4f17bc8304a0babe5801c36172677bb1d4eeb099855cb8eda17932",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-7-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:46.788927Z"
+        }
+      ],
+      "index": 7,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-7"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 491.533081,
+          "execution_alias": "execution-31",
+          "finished_at": "2026-09-11T19:32:47.940494Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-9-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-9-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "610af089abe1a9fc3df3b155bf7012713e79ea7360369ef140f3d1a1314046fd",
+          "response": {
+            "id": "same_id-9-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-31\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:47.448949Z"
+        },
+        {
+          "duration_ms": 528.405266,
+          "execution_alias": "execution-32",
+          "finished_at": "2026-09-11T19:32:48.719708Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-9-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-9-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "610af089abe1a9fc3df3b155bf7012713e79ea7360369ef140f3d1a1314046fd",
+          "response": {
+            "id": "same_id-9-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-32\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:48.191284Z"
+        },
+        {
+          "duration_ms": 455.636408,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:49.427293Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-9-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-9-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "805db718cbccf0776ec137f85161ea0979e4136035fdc10a3ac83489c5baf6ac",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-9-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:48.971633Z"
+        }
+      ],
+      "index": 9,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-9"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 537.8569,
+          "execution_alias": "execution-33",
+          "finished_at": "2026-09-11T19:32:49.965675Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-8-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-8-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "17bf3ebda97922dc42e0a21eacca6786c74d33621434b576958f7bc364bb8924",
+          "response": {
+            "id": "fresh_id-8-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-33\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:49.427802Z"
+        },
+        {
+          "duration_ms": 507.239136,
+          "execution_alias": "execution-34",
+          "finished_at": "2026-09-11T19:32:50.727160Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-8-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-8-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "37b4808844306aaa35346f6aa58d6314c74f89e315b1f50fcc5da5aded1331a6",
+          "response": {
+            "id": "fresh_id-8-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-34\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:50.219903Z"
+        },
+        {
+          "duration_ms": 471.588636,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:51.449545Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-8-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-8-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "c1eb02c51d0e6096ac7928137a6e69b1e97a46c5093bae346be383d66860c686",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-8-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:50.977929Z"
+        }
+      ],
+      "index": 8,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-8"
+    },
+    {
+      "arm": "same_id",
+      "calls": [
+        {
+          "duration_ms": 497.822697,
+          "execution_alias": "execution-35",
+          "finished_at": "2026-09-11T19:32:51.947991Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-10-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-10-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "64393e442ff4ad9321294925c65cb16f755af93f596f84d3d57f652349e22fdd",
+          "response": {
+            "id": "same_id-10-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-35\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:51.450150Z"
+        },
+        {
+          "duration_ms": 552.57989,
+          "execution_alias": "execution-36",
+          "finished_at": "2026-09-11T19:32:52.751162Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "same_id-10-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-10-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "64393e442ff4ad9321294925c65cb16f755af93f596f84d3d57f652349e22fdd",
+          "response": {
+            "id": "same_id-10-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-36\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:52.198565Z"
+        },
+        {
+          "duration_ms": 1002.739111,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:54.004495Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "same_id-10-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"same_id-10-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "28bd2c0189eb15bba7a873ba2f2e2939a6e2be543f19088ef720148077ae6263",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "same_id-10-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:53.001737Z"
+        }
+      ],
+      "index": 10,
+      "retry_delay_ms": 250,
+      "session_alias": "same_id-10"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 495.957972,
+          "execution_alias": "execution-37",
+          "finished_at": "2026-09-11T19:32:54.501075Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-9-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-9-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "74b07970492d067c7d5c7b5554660fab725a48a4fddcc54ee86ecf3366e2de5b",
+          "response": {
+            "id": "fresh_id-9-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-37\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:54.005101Z"
+        },
+        {
+          "duration_ms": 498.376844,
+          "execution_alias": "execution-38",
+          "finished_at": "2026-09-11T19:32:55.250292Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-9-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-9-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "88721790cf11ca66ded6c0947f0f4023f51611b85cb919a07185215bb8a36862",
+          "response": {
+            "id": "fresh_id-9-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-38\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:54.751882Z"
+        },
+        {
+          "duration_ms": 460.271044,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:55.961577Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-9-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-9-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "a1fd45471e3e2062635fdd81b29570a255b1d26dfc6c2f294ac06e0591306409",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-9-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:55.501288Z"
+        }
+      ],
+      "index": 9,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-9"
+    },
+    {
+      "arm": "fresh_id",
+      "calls": [
+        {
+          "duration_ms": 500.47623,
+          "execution_alias": "execution-39",
+          "finished_at": "2026-09-11T19:32:56.462423Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-10-base",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-10-base\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "86e3fcba7de01ccb4b9fa4a984cec87fabd8d8727b49f99fccd5ef9387ea573c",
+          "response": {
+            "id": "fresh_id-10-base",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-39\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:55.961937Z"
+        },
+        {
+          "duration_ms": 503.256364,
+          "execution_alias": "execution-40",
+          "finished_at": "2026-09-11T19:32:57.220819Z",
+          "http_status": 200,
+          "outcome": "allow",
+          "request": {
+            "id": "fresh_id-10-retry",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 400
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-10-retry\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":400},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "9e30416f37eb05fc13ca4d4c99f43c4bce4c58a17408dda502b23694fceb3472",
+          "response": {
+            "id": "fresh_id-10-retry",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":400,\"execution_marker\":\"execution-40\"}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T19:32:56.717530Z"
+        },
+        {
+          "duration_ms": 456.812527,
+          "execution_alias": null,
+          "finished_at": "2026-09-11T19:32:57.930446Z",
+          "http_status": 200,
+          "outcome": "deny",
+          "request": {
+            "id": "fresh_id-10-probe",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 300
+              },
+              "name": "RetryTarget___process_refund"
+            }
+          },
+          "request_bytes": "{\"id\":\"fresh_id-10-probe\",\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"arguments\":{\"amount\":300},\"name\":\"RetryTarget___process_refund\"}}",
+          "request_sha256": "611a6d9a7064c2107fccbd3be60b5fc4d9c066df2611b63820dad4e15b92721f",
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-retry-budget-policy>]"
+            },
+            "id": "fresh_id-10-probe",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T19:32:57.473615Z"
+        }
+      ],
+      "index": 10,
+      "retry_delay_ms": 250,
+      "session_alias": "fresh_id-10"
+    }
+  ]
+}
