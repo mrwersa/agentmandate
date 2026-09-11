@@ -112,6 +112,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     transition_indexed = {source["locator"] for source in transition_index["sources"]}
     principal_index = read_json("principal-continuity-index.json")
     principal_indexed = {source["locator"] for source in principal_index["sources"]}
+    continuation_index = read_json("continuation-protocol-index.json")
+    continuation_indexed = {source["locator"] for source in continuation_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -128,6 +130,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "temporal-repetition-index.json",
             "temporal-transition-index.json",
             "principal-continuity-index.json",
+            "continuation-protocol-index.json",
         }
     }
 
@@ -167,6 +170,16 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
     )
+    assert continuation_indexed.isdisjoint(
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        | repetition_indexed
+        | transition_indexed
+        | principal_indexed
+    )
     assert (
         indexed
         | controls_indexed
@@ -176,6 +189,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
         | principal_indexed
+        | continuation_indexed
         == committed
     )
     for source in (
@@ -187,6 +201,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *repetition_index["sources"],
         *transition_index["sources"],
         *principal_index["sources"],
+        *continuation_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]

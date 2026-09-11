@@ -1,0 +1,101 @@
+{
+  "continuation_protocol_version": 1,
+  "status": "preregistered_not_executed",
+  "provider": "Anthropic",
+  "service": "Managed Agents",
+  "beta": "managed-agents-2026-04-01",
+  "sdk": "anthropic==1.2.0",
+  "sdk_change_rule": "if the pinned SDK lacks session budget updates or agent updates, pin the first release that provides both and record the change as a correction before any trial",
+  "model": "claude-haiku-4-5-20251001",
+  "mandate": {
+    "path": "examples/continuity-refund/manifest.json",
+    "sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326"
+  },
+  "framing": "contrast, not replication: no documented transition invalidates a live session",
+  "environment": {
+    "type": "cloud",
+    "networking": {
+      "type": "limited",
+      "allowed_hosts": [],
+      "allow_mcp_servers": false,
+      "allow_package_managers": false
+    }
+  },
+  "agent": {
+    "system": "Follow the user's output instruction exactly. Do not use tools.",
+    "tools": []
+  },
+  "work_unit": "Return exactly 120 repetitions of the token ALPHA, separated by one space, and nothing else.",
+  "wait_rule": "after each work event, require a session.status_idle event ordered after the sent event and an idle session status; after each budget or agent update, require the update to be echoed before more work",
+  "pilot": {
+    "excluded_from_results": true,
+    "sessions": 3,
+    "continue_rule": "median work units per reported cent is at least 2"
+  },
+  "trials_per_cell": 10,
+  "random_seed": 20260913,
+  "order": "all 30 cell trials shuffled together with random_seed",
+  "cells": {
+    "lowered_cap_carries_spend": {
+      "create_cap_cents": 10,
+      "consume_until_reported_cents_at_least": 3,
+      "lowered_cap": "reported_cents_at_update + 2",
+      "then": "repeat work units until budget_reached, at most 20",
+      "measure": "added_cents = final reported cents - reported cents at update",
+      "classification": {
+        "carry": "budget_reached and added_cents <= 3",
+        "reset": "added_cents >= 5",
+        "indeterminate": "any other result"
+      },
+      "post_budget_probe": "a user.message must be refused with HTTP 400",
+      "prediction": "carry"
+    },
+    "cap_at_or_below_spend_refused": {
+      "create_cap_cents": 10,
+      "consume_until_reported_cents_at_least": 3,
+      "attempted_cap": "reported_cents_at_update - 1",
+      "prediction": {
+        "status": 400,
+        "message": "budget.max_list_cost must be greater than the session's consumed list cost",
+        "retrieved_cap_cents": 10
+      }
+    },
+    "agent_update_leaves_live_session": {
+      "agent": "fresh agent for every trial",
+      "create_cap_cents": 6,
+      "consume_until_reported_cents_at_least": 2,
+      "agent_update": "change the agent description; the returned version must be the previous version plus one",
+      "then": "repeat work units until budget_reached, at most 20",
+      "classification": {
+        "pinned_and_retained": "session still references the original agent version and final reported cents <= 7",
+        "reset": "final reported cents >= 8",
+        "indeterminate": "any other result"
+      },
+      "prediction": "pinned_and_retained"
+    }
+  },
+  "documentation_snapshots": [
+    "https://platform.claude.com/docs/en/managed-agents/budgets",
+    "https://platform.claude.com/docs/en/managed-agents/session-operations",
+    "https://platform.claude.com/docs/en/managed-agents/agent-setup",
+    "https://platform.claude.com/docs/en/managed-agents/sessions"
+  ],
+  "eligibility": {
+    "application_retries": 0,
+    "concurrent_threads": 1,
+    "nonconforming_trials": "retain and report; never replace or omit",
+    "nonconforming_conditions": [
+      "missing idle confirmation",
+      "session status terminated or rescheduling during a scored step",
+      "work-unit bound reached without budget_reached"
+    ],
+    "stop_when": [
+      "the pilot continue_rule fails",
+      "more than two nonconforming trials in one cell",
+      "cleanup fails",
+      "projected spend exceeds spend_ceiling_usd"
+    ]
+  },
+  "cleanup": "delete every session with a typed not-found proof, archive every agent, delete the environment",
+  "spend_ceiling_usd": 5
+}

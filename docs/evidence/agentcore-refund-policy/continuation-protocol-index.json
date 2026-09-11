@@ -1,0 +1,42 @@
+{
+  "continuation_protocol_index_version": 1,
+  "provider": "AWS AgentCore Gateway Policy ENFORCE",
+  "raw_artifact_policy": "no live capture has run; the protocol and policy templates contain placeholders only",
+  "raw_artifacts_committed": false,
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "8ad4f3d69582e9ee58fa24ee197a69af1f6a4b11a60ef0cf6920e6dfa7a731fe",
+      "locator": "continuation-candidate-permit-a-700.dogwood"
+    },
+    {
+      "content_sha256": "78aa0e50807d55a49cad1319ff2d595fe7ccacea9677e38db383303d7cde2616",
+      "locator": "continuation-candidate-permit-a.dogwood"
+    },
+    {
+      "content_sha256": "eefe2a49962d0b17054a251eca348c577bb158cb1361d32bfba3dcd74a7ca120",
+      "locator": "continuation-candidate-permit-b.dogwood"
+    },
+    {
+      "content_sha256": "81788f4f4c59a609213bcab7ae2af997b9bf0cabf9dfc44c3c443ffc65a0f79a",
+      "locator": "continuation-forbid-a-700.dogwood"
+    },
+    {
+      "content_sha256": "29c7b7d31125d982b625b49517e7bd0aaa4f7f106ea9be095f5a9ed67d12bdb1",
+      "locator": "continuation-forbid-a.dogwood"
+    },
+    {
+      "content_sha256": "30eafdf63c291e715c1975b576badb458bff4b79c955d02abe352c08a77227bb",
+      "locator": "continuation-forbid-b.dogwood"
+    },
+    {
+      "content_sha256": "b3d18e7d6f117af264b4a10a4a726961932b363b6c928bf5f502d9b4be4f7c1d",
+      "locator": "continuation-permit.cedar"
+    },
+    {
+      "content_sha256": "0f7b530daac148fe745bda47f26228f5a96bd0db93d830661335b8b7add51591",
+      "locator": "continuation-protocol.json"
+    }
+  ],
+  "status": "preregistered_not_executed"
+}
