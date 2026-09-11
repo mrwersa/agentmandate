@@ -63,10 +63,11 @@ digest-pinned files. The index records:
   source digest; and
 - capture adapter identity/version and an explicit completeness statement.
 
-The core package does not gain a Cedar parser or runtime dependency. A capture
+The core package does not gain a Cedar language parser or runtime dependency. A capture
 script invokes a pinned official Cedar distribution, preserves its raw output,
-and emits the JSON index. The private reader only validates that index and its
-digests.
+and emits the JSON index. The repository-only
+`scripts/replay_cedar_bundle_v1.py` reader validates that index, its digests,
+and its pinned IR projection; it is not installed with the runtime package.
 Caller-supplied bytes are hashed; the reader does not fetch policy stores,
 execute Cedar, read credentials, or consult the wall clock.
 

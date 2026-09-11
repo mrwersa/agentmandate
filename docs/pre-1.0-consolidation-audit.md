@@ -1,6 +1,6 @@
 # Pre-1.0 compatibility and consolidation audit
 
-Status: **inventory current through `ca84961`; principal-v1 relocation complete**.
+Status: **inventory current through `d063f00`; Cedar mapping split complete**.
 This is the first step of the consolidation window in `ROADMAP.md`. It records
 what must remain compatible before implementation is simplified. It does not
 change a reader, schema, command, or result.
@@ -94,7 +94,7 @@ Python type is unsupported, not that the CLI format is private.
 | Delegation chain | `delegation_version: 1`; IR adapter 1 | `delegations validate`, `reach`; chain fixtures | Retain |
 | Delegation attachment | `principal_version: 2`; IR adapter 1 | `delegations validate`, `reach`; attachment-v2 fixture | Retain |
 | Delegation presentation | `agentmandate.delegations/v1` | canonical CLI fixture and CLI tests | Retain |
-| Local Cedar bundle | `bundle_version: 1`; shared mapping 1; IR adapter 1 | private native reader and IR projection; pinned document-cloud evidence | Relocation candidate after parser split |
+| Local Cedar bundle | `bundle_version: 1`; shared mapping 1; IR adapter 1 | repository-only replay; pinned document-cloud evidence | Retain outside runtime |
 | Managed Cedar oracle | `managed_oracle_version: 1`; capture and IR adapters 1; mapping 1 | `cedar validate`, `align`, `diff`; AgentCore evidence | Retain |
 | Cedar presentations | `agentmandate.cedar-alignment/v1`, `agentmandate.cedar-effective-diff/v1` | canonical alignment and diff fixtures | Retain |
 | Producer boundary | `producer_boundary_version: 1`; IR adapter 1 | `producers validate`, producer-aware `reach`; IAM and accepted synthetic fixtures | Retain |
@@ -129,7 +129,7 @@ owning evidence directory only after an executable replay replacement exists.
 | `DelegationChain.from_authorizer_capture` / `migrate_authorizer_capture` | `scripts/migrate_delegation_evidence.py` regenerates the canonical Authorizer chain | Relocated; retain evidence tool |
 | `ToolPrincipal` v1 reader and IR projection | `scripts/replay_principal_v1.py` round-trips three fixtures and pins their IR digests | Relocated; retain historical replay |
 | Shared Cedar mapping-v1 parser | `_cedar_mapping.py`; consumed by local bundles and managed Cedar | Retain in runtime |
-| `CedarBundle` v1 reader and local IR projection | Native Cedar evidence tests only after the mapping parser split | Relocate after byte-stable repository replay |
+| `CedarBundle` v1 reader and local IR projection | `scripts/replay_cedar_bundle_v1.py` verifies the bundle, sources, and pinned IR digest | Relocated; retain historical replay |
 | `migrate_aws_iam_access_key_boundary` | `scripts/migrate_producer_evidence.py` regenerates `producer-boundary-iam-v1.json` | Relocated; retain evidence tool |
 | `migrate_agentcore_binding` | `scripts/migrate_continuity_evidence.py` regenerates `continuity-binding-v1.json` | Relocated; retain evidence tool |
 | `migrate_agentcore_continuity` | `scripts/migrate_continuity_evidence.py` regenerates `agentcore-continuity-v1.json` | Relocated; retain evidence tool |
@@ -165,9 +165,7 @@ Before relocating any converter, a replacement replay check must:
 
 The next PRs should remain independently reviewable:
 
-1. relocate the now-isolated native Cedar bundle reader and projection after
-   adding byte-stable repository replay; and
-2. rerun every release gate and record the reviewed pre-1.0 baseline.
+1. rerun every release gate and record the reviewed pre-1.0 baseline.
 
 Repository-history cleanup is a separate decision and must not be combined
 with any contract or migration change.

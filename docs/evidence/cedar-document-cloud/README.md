@@ -42,6 +42,11 @@ also performs the byte comparison when the pinned package is already installed;
 normal Python CI does not download Node packages. This keeps core dependency
 and offline-test guarantees while leaving a one-command native recapture.
 
+From the repository root, `python scripts/replay_cedar_bundle_v1.py` verifies
+the canonical bundle digest, every declared source byte, and the pinned
+Authority IR projection. The evidence reader is repository-only and is not
+part of the installed package.
+
 ## Reproduced results
 
 | Request | Decision | Determining policies | Schema-based request parsing |
