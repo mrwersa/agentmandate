@@ -10,10 +10,8 @@ import pytest
 
 from agentmandate import analyse, loads
 from agentmandate._conditions import (
-    GRANT_VERSION,
     ConditionContext,
     ConditionFormatError,
-    Grant,
     ToolCondition,
     ToolPrincipal,
     _profile_digest,
@@ -25,6 +23,7 @@ from agentmandate._conditions import (
 from agentmandate._inventory import InventoryReconciliation
 from agentmandate._ir import AuthorityIR, Entity, Fact, _entity_id, _fact_id
 from agentmandate.inventory import collect
+from scripts.migrate_delegation_evidence import GRANT_VERSION, Grant
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CONTEXT = FIXTURES / "condition-context-select-v1.json"

@@ -21,6 +21,8 @@ three assumptions in grant v1:
 The revision therefore records a chain, not an isolated synthetic grant. It
 also separates facts observed at the issuer from reviewed deployment mappings.
 Unknown mappings remain explicit and cannot become empty authority.
+The grant-v1 and Authorizer converters are retained in the repository-only
+`scripts/migrate_delegation_evidence.py` replay tool, not the installed runtime.
 
 ## Version 1 chain record
 

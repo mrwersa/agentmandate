@@ -1,6 +1,6 @@
 # Pre-1.0 compatibility and consolidation audit
 
-Status: **inventory current through `4c45f63`; IAM relocation in progress**.
+Status: **inventory current through `407fef1`; producer relocation complete**.
 This is the first step of the consolidation window in `ROADMAP.md`. It records
 what must remain compatible before implementation is simplified. It does not
 change a reader, schema, command, or result.
@@ -125,8 +125,8 @@ owning evidence directory only after an executable replay replacement exists.
 |---|---|---|
 | `_ir._from_mandate`, `_to_mandate`, `_analyse_ir` and `_IRAnalysis.from_json` | Public IR export/reach CLI and result revalidation | Retain in runtime |
 | Manifest-default adapter | Required to distinguish schema defaults from observed source facts | Retain in runtime |
-| `Grant.from_json` and `DelegationChain.from_grant_v1` | Tests and the committed grant-v1 to chain-v1 migration | Relocate together after byte-stable replay exists |
-| `DelegationChain.from_authorizer_capture` | Tests generate the canonical Authorizer chain from captured evidence | Relocate to Authorizer evidence tooling |
+| `Grant.from_json` and `DelegationChain.from_grant_v1` / `migrate_grant_v1` | `scripts/migrate_delegation_evidence.py` regenerates the committed grant-v1 chain | Relocated; retain evidence tool |
+| `DelegationChain.from_authorizer_capture` / `migrate_authorizer_capture` | `scripts/migrate_delegation_evidence.py` regenerates the canonical Authorizer chain | Relocated; retain evidence tool |
 | `ToolPrincipal` v1 reader and IR projection | Tests and principal evidence fixtures only; superseded in consumption by delegation attachment v2 | Removal candidate after fixture replay audit |
 | `CedarBundle` v1 reader and local IR projection | Native Cedar evidence tests; managed Cedar imports its mapping parser | Split mapping parser, then relocate the local evidence reader if no CLI caller emerges |
 | `migrate_aws_iam_access_key_boundary` | `scripts/migrate_producer_evidence.py` regenerates `producer-boundary-iam-v1.json` | Relocated; retain evidence tool |
@@ -164,8 +164,8 @@ Before relocating any converter, a replacement replay check must:
 
 The next PRs should remain independently reviewable:
 
-1. move the Authorizer converters and retire the private grant-v1 and principal-v1
-   records only after their canonical chain and attachment outputs replay;
+1. audit principal-v1 fixture replay, then retire its private reader and IR
+   projection if delegation attachment v2 preserves every required output;
 2. separate the shared Cedar mapping parser from the local bundle reader, then
    decide whether the native bundle projection still belongs in runtime; and
 3. rerun every release gate and record the reviewed pre-1.0 baseline.

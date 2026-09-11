@@ -26,5 +26,10 @@ The IAM producer evidence converter is likewise repository-only. Run
 boundary from its digest-pinned catalogue, sanitized capture, and adapter and
 compare it byte for byte. The migration remains `unreviewed`.
 
+Delegation's superseded grant-v1 reader and evidence converters are also
+repository-only. Run `python scripts/migrate_delegation_evidence.py` to replay
+both the legacy grant chain and the real Authorizer chain against their
+canonical fixtures and verify their declared source bytes.
+
 `probes/` is the exception: it contains shaped, synthetic questions that may
 expose a design problem but cannot justify a schema or roadmap claim by itself.

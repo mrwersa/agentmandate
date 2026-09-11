@@ -14,7 +14,6 @@ from ._conditions import (
     GRANT_EFFECTS,
     ConditionFormatError,
     Evidence,
-    Grant,
     ToolTarget,
     _canonical_name,
     _evidence,
@@ -435,125 +434,6 @@ class DelegationChain:
                 ):
                     raise DelegationFormatError("delegation sources disagree on a locator digest")
         return chain
-
-    @classmethod
-    def from_grant_v1(cls, grant: Grant) -> DelegationChain:
-        if grant.source is None or grant.source.content_sha256 is None:
-            raise DelegationFormatError(
-                "delegation grant-v1 migration requires a digest-pinned source"
-            )
-        source = DelegationSource(
-            grant.source.kind,
-            grant.source.locator,
-            "",
-            grant.source.content_sha256,
-        )
-
-        def dimension(members: tuple[str, ...]) -> SurfaceDimension:
-            return SurfaceDimension(
-                grant.audience,
-                "deployment_policy",
-                "complete",
-                members,
-                grant.evidence,
-                source,
-            )
-
-        hop = DelegationHop(
-            "hop-1",
-            grant.grantor,
-            (grant.actor,),
-            "complete",
-            grant.audience,
-            DelegationValidity("date_window", issued=grant.issued, expires=grant.expires),
-            dimension(grant.scopes),
-            dimension(grant.tools),
-            dimension(grant.effects),
-            grant.evidence,
-            source,
-        )
-        return cls(DELEGATION_VERSION, grant.id, grant.subject, (hop,))
-
-    @classmethod
-    def from_authorizer_capture(cls, text: str, evidence: Evidence) -> DelegationChain:
-        """Project the pinned, sanitized Authorizer evidence without adding policy."""
-        raw = _translate(
-            _record,
-            _translate(_load_json, text, "Authorizer capture"),
-            "capture",
-            {"capture_version", "deployment", "hops", "implementation", "rejections", "subject"},
-        )
-        if raw["capture_version"] != 1 or not isinstance(raw["hops"], list) or not raw["hops"]:
-            raise DelegationFormatError("delegation Authorizer capture has an unsupported shape")
-        subject = _translate(
-            _record, raw["subject"], "capture.subject", {"alias", "initial_scopes"}
-        )
-        subject_name = _translate(_canonical_name, subject, "alias", "capture.subject")
-        content = text.encode("utf-8")
-        digest = hashlib.sha256(content).hexdigest()
-        locator = "docs/evidence/authorizer-delegation/capture.json"
-        hops: list[DelegationHop] = []
-        for index, item in enumerate(raw["hops"]):
-            path = f"capture.hops[{index}]"
-            value = _translate(
-                _record,
-                item,
-                path,
-                {
-                    "actor",
-                    "actor_chain",
-                    "audience",
-                    "grantor",
-                    "hop",
-                    "issued_token_type",
-                    "scopes",
-                    "subject",
-                    "ttl_seconds",
-                },
-            )
-            actors = _members(value["actor_chain"], f"{path}.actor_chain")
-            actors = tuple(value["actor_chain"])
-            if (
-                value["actor"] != actors[0]
-                or value["subject"] != subject_name
-                or value["hop"] != index + 1
-            ):
-                raise DelegationFormatError("delegation Authorizer hop identity is inconsistent")
-            ttl = value["ttl_seconds"]
-            if isinstance(ttl, bool) or not isinstance(ttl, int) or ttl <= 0:
-                raise DelegationFormatError("delegation Authorizer TTL must be a positive integer")
-            hop_source = DelegationSource("oauth-claims", locator, f"/hops/{index}", digest)
-            scope_source = DelegationSource(
-                "oauth-claims", locator, f"/hops/{index}/scopes", digest
-            )
-            scopes = SurfaceDimension(
-                _translate(_canonical_name, value, "grantor", path),
-                "issuer",
-                "complete",
-                _members(value["scopes"], f"{path}.scopes"),
-                evidence,
-                scope_source,
-            )
-            unknown = SurfaceDimension(None, "unavailable", "unknown", ())
-            hops.append(
-                DelegationHop(
-                    f"hop-{index + 1}",
-                    value["grantor"],
-                    actors,
-                    "complete",
-                    value["audience"],
-                    DelegationValidity("duration", ttl_seconds=ttl),
-                    scopes,
-                    unknown,
-                    unknown,
-                    evidence,
-                    hop_source,
-                )
-            )
-        projected = cls(DELEGATION_VERSION, "authorizer-demo-chain", subject_name, tuple(hops))
-        # Re-read to apply the same continuity and strict-profile checks as external input.
-        return cls.from_json(projected.to_json())
-
 
 def _delegation_to_ir(value: DelegationChain) -> AuthorityIR:
     source_id = _entity_id("source", f"delegation-chain:{value.id}")

@@ -76,6 +76,12 @@ SHA-256, `708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89`.
 The capture was run twice with fresh identifiers and tokens; both outputs were
 byte-identical.
 
+From the repository root, run
+`python scripts/migrate_delegation_evidence.py` to project this digest-pinned
+capture into `tests/fixtures/delegation-chain-authorizer-v1.json`, compare the
+result byte for byte, and verify the chain's declared source bytes. This
+evidence-specific converter is not installed with the runtime package.
+
 ## Review corrections
 
 1. **Extractor defect:** after the host wall clock stepped backward by roughly
