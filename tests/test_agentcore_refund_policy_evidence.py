@@ -131,6 +131,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     transition_indexed = {source["locator"] for source in transition_index["sources"]}
     principal_index = read_json("principal-continuity-index.json")
     principal_indexed = {source["locator"] for source in principal_index["sources"]}
+    continuation_index = read_json("continuation-protocol-index.json")
+    continuation_indexed = {source["locator"] for source in continuation_index["sources"]}
     deployment_index = read_json("deployment-continuity-refusal-index.json")
     deployment_indexed = {source["locator"] for source in deployment_index["sources"]}
     retry_index = read_json("retry-continuity-index.json")
@@ -151,6 +153,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "temporal-repetition-index.json",
             "temporal-transition-index.json",
             "principal-continuity-index.json",
+            "continuation-protocol-index.json",
             "deployment-continuity-refusal-index.json",
             "retry-continuity-index.json",
         }
@@ -192,6 +195,16 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
     )
+    assert continuation_indexed.isdisjoint(
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        | repetition_indexed
+        | transition_indexed
+        | principal_indexed
+    )
     assert deployment_indexed.isdisjoint(
         indexed
         | controls_indexed
@@ -201,6 +214,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
         | principal_indexed
+        | continuation_indexed
     )
     assert retry_indexed.isdisjoint(
         indexed
@@ -222,6 +236,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
         | principal_indexed
+        | continuation_indexed
         | deployment_indexed
         | retry_indexed
         == committed
@@ -235,6 +250,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *repetition_index["sources"],
         *transition_index["sources"],
         *principal_index["sources"],
+        *continuation_index["sources"],
         *deployment_index["sources"],
         *retry_index["sources"],
     ):

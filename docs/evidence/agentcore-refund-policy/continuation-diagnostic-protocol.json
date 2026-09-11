@@ -1,0 +1,67 @@
+{
+  "continuation_diagnostic_protocol_version": 1,
+  "status": "preregistered_not_executed",
+  "amends": "continuation-protocol.json",
+  "registered": "2026-09-11",
+  "reason": "In the accepted continuation capture, byte-identical statement writes created a revision and made the predecessor session stale in 10 of 10 trials, the opposite of the 3 to 4 September capture. The runs differ in policy form, validation mode, whether the update request sets enforcementMode, and date.",
+  "question": "Does a byte-identical statement write create a revision under the earlier configuration today, and does the enforcementMode parameter change that?",
+  "mandate": {
+    "path": "examples/continuity-refund/manifest.json",
+    "sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326"
+  },
+  "deployment": "one fresh dedicated stack built by capture_continuation_live.py, identical to the accepted continuation capture",
+  "request_amount": 600,
+  "configurations": {
+    "earlier_configuration": {
+      "companion": "continuation-permit.cedar",
+      "base": "continuation-forbid-a.dogwood",
+      "validation_mode": "IGNORE_ALL_FINDINGS",
+      "update_sets_enforcement_mode": true,
+      "prediction": "unknown"
+    },
+    "earlier_without_enforcement_mode": {
+      "companion": "continuation-permit.cedar",
+      "base": "continuation-forbid-a.dogwood",
+      "validation_mode": "IGNORE_ALL_FINDINGS",
+      "update_sets_enforcement_mode": false,
+      "prediction": "unknown"
+    },
+    "current_with_enforcement_mode": {
+      "companion": null,
+      "base": "continuation-candidate-permit-a.dogwood",
+      "validation_mode": "FAIL_ON_ANY_FINDINGS",
+      "update_sets_enforcement_mode": true,
+      "prediction": "unknown"
+    }
+  },
+  "design": {
+    "blocks": "one block per configuration, block order shuffled with random_seed",
+    "block_setup": "delete any existing policies, create the configuration's policies in its validation mode, wait for ACTIVE, then run the block's controls",
+    "controls_per_block": {
+      "single_below": {"amount": 500, "prediction": "allow"},
+      "single_boundary": {"amount": 1000, "prediction": "deny"},
+      "same_session_pair": {"amounts": [600, 600], "prediction": ["allow", "deny"]}
+    },
+    "trial": "600 in a fresh session; resubmit the exact active statement with the configuration's parameters; poll as in the continuation protocol; reuse the predecessor session for a second 600",
+    "trials_per_configuration": 10,
+    "random_seed": 20260914
+  },
+  "separation_limit": "the permit and forbid pair cannot pass FAIL_ON_ANY_FINDINGS, so earlier_configuration and current_with_enforcement_mode differ in both policy form and validation mode; this diagnostic cannot separate those two factors",
+  "eligibility": {
+    "application_retries": 0,
+    "nonconforming_trials": "retain and report; never replace or omit",
+    "stop_when": [
+      "a block's controls do not match their predictions",
+      "more than two nonconforming trials in one configuration",
+      "cleanup fails"
+    ]
+  },
+  "outcome_wording": {
+    "earlier_configuration_no_revision": "the earlier deduplication reproduces under its configuration today, so the isolating control is configuration-dependent rather than withdrawn",
+    "earlier_configuration_revision": "byte-identical writes now create revisions under the earlier configuration, so provider behaviour changed after 4 September 2026; both dates are reported",
+    "enforcement_mode_differs": "setting enforcementMode on the update changes whether an identical write creates a revision",
+    "current_differs_from_earlier_while_earlier_deduplicates": "policy form or validation mode changes deduplication; this diagnostic cannot say which",
+    "mixed": "report the distribution per configuration without attributing a cause"
+  },
+  "spend_ceiling_usd": 5
+}

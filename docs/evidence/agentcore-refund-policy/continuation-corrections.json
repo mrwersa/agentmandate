@@ -1,0 +1,11 @@
+{
+  "continuation_corrections_version": 1,
+  "corrections": [
+    {
+      "class": "extractor defect",
+      "failed_outcomes_entered_result": false,
+      "id": "continuation-agentcore-001",
+      "result": "UpdatePolicy requires the description as an optionalValue structure. The first attempt stopped on that parameter after deployment, validation selection, and a matching pre-flight, before any scored trial, and removed every created resource. The accepted run repeated deployment, validation selection, and pre-flight from scratch."
+    }
+  ]
+}

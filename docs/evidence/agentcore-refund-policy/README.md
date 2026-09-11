@@ -385,6 +385,74 @@ remained in temporary deployment and status outputs only. Tests regenerate the
 reviewed fixture from equivalent raw shapes, re-run both comparisons, verify
 every nested digest, and require the two allowed sequence calls.
 
+## Continuation revision matrix
+
+`continuation-protocol.json`, SHA-256
+`0f7b530daac148fe745bda47f26228f5a96bd0db93d830661335b8b7add51591`, was
+committed before any live call. The accepted capture ran from 16:42 to 16:59
+UTC on 11 September 2026 against one dedicated AWS IAM-authenticated Gateway in
+`us-east-1`, one inert Lambda tool, and one policy engine in `ENFORCE`, with one
+operator identity signing every call. Each call was GBP 600.
+
+Native validation decided the policy form. The permit and forbid pair failed
+`FAIL_ON_ANY_FINDINGS` because the separate permit was reported as overly
+permissive. The single permit whose temporal condition keeps the total below
+the threshold validated in its base, renamed, whitespace, and tightened forms,
+so the whole matrix ran under `FAIL_ON_ANY_FINDINGS`. Pre-flight and
+post-flight controls matched their predictions, and no trial was nonconforming.
+
+| Arm, 10 trials each | New revision | Predecessor reuse | Fresh successor |
+|---|---|---|---|
+| Bound-variable renaming | 10 | stale | Allow then Deny |
+| Whitespace only | 10 | stale | Allow then Deny |
+| Description only | 10 | stale | Allow then Deny |
+| Tightening 1,000 to 700 | 10 | stale | Allow then Deny |
+| Byte-identical statement | 10 | stale | not run |
+| Identical description | 10 | stale | Allow then Deny |
+
+The tightening arm is the discriminating cell. After 600 was admitted under a
+1,000 threshold, the revision to 700 made the predecessor stale and the fresh
+successor admitted its first 600 in 10 of 10 trials. Carried consumption would
+have refused that request because 600 plus 600 reaches 700. A non-widening
+revision therefore restored capacity that the predecessor state refused.
+Revisions reached `ACTIVE` in 5 to 12 status polls, and the longest scored
+sequence took 16.4 seconds, well inside the one-hour window.
+
+Byte-identical statement writes created revisions, contrary to the prediction
+from the earlier capture. `continuation-diagnostic-protocol.json`, SHA-256
+`3f3496f8f684321eeaaefd7ecf2bae90a2677c9145539c413abad0b8222999f1`, was
+committed before a separate diagnostic that ran from 17:06 to 17:11 UTC:
+
+| Configuration, 10 trials each | New revision | Same session after write |
+|---|---|---|
+| Permit and forbid pair, `IGNORE_ALL_FINDINGS`, update sets `enforcementMode` | 0 | Deny |
+| Permit and forbid pair, `IGNORE_ALL_FINDINGS`, update omits `enforcementMode` | 0 | Deny |
+| Single permit, `FAIL_ON_ANY_FINDINGS`, update sets `enforcementMode` | 10 | stale |
+
+The earlier deduplication reproduces under its original configuration, so the
+byte-identical control is configuration-dependent rather than withdrawn. The
+`enforcementMode` parameter does not change the outcome. Policy form or
+validation mode does, and this diagnostic cannot separate the two because the
+pair cannot pass `FAIL_ON_ANY_FINDINGS`.
+
+`continuation-events.json`, SHA-256
+`b8f366492f156fa9e1854feea01d458e0e21caf528f85d7d03a38d56bc775ba6`,
+`continuation-deployment.json`, SHA-256
+`d9bca41ce79eaae746f76f5da312b5b488ab6aca6c94eab5b2dd47b619f76c98`, and
+`continuation-summary.json`, SHA-256
+`b8884532eba05cf2481e771af9b89e4bc7073a40239eadae05ed06774e7ecc1d`, are the
+sanitised projection of the accepted capture. `continuation-diagnostic-events.json`,
+SHA-256 `e9140cb8a0b7e677cb42a7562cc1bcec334fad1257306671a4b47f0abaa4ff3f`, and
+`continuation-diagnostic-summary.json`, SHA-256
+`a4dc80c48bc74e3071a280d185d4fb4782388580b1b1a5ab6511dd85ac0253d8`, project the
+diagnostic. `project_continuation.py` replaces session, account, resource, and
+URL identifiers with aliases and maps every captured statement digest to a
+pinned template. `capture_continuation_live.py` is the driver.
+`continuation-corrections.json` records one excluded first attempt that stopped
+on a request-shape defect before any scored trial and removed every resource.
+Both accepted runs removed their Gateway, target, engine, policies, Lambda, log
+group, and roles, and verified each absent.
+
 ## Provenance and integrity
 
 [`capture-index.json`](capture-index.json) records the AgentCore CLI version,

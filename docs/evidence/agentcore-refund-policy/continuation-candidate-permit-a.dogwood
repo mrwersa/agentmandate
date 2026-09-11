@@ -1,0 +1,13 @@
+permit (
+  principal is AgentCore::IamEntity,
+  action == AgentCore::Action::"ContinuationTarget___process_refund",
+  resource == AgentCore::Gateway::"<reviewed-continuation-gateway>"
+)
+when temporal {
+  exists (total: Long).
+    (sum amt for (amt: Long), (t: Timepoint).
+      where (formerly within 1h (AgentCore::Action::"ContinuationTarget___process_refund"::request{
+        eventResource: resource, input.amount: amt
+      } && tp(t)))) == total
+    && total < 1000
+};

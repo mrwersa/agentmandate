@@ -65,9 +65,17 @@ contributed to the cumulative bound. Fresh-ID controls behaved identically.
 This does not cover ambiguous timeouts, automatic transport or interceptor
 retries, or an application idempotency key.
 
-Tightening or widening has evidence for stale-session invalidation and fresh
-recovery, but not for a reviewed translation of predecessor consumption into
-restored capacity; that stronger cell is the next executable control.
+The [continuation campaign](continuation-campaign-protocol.md) closed the
+tightening cell on 11 September 2026: after a revision from 1,000 to 700,
+prescribed recovery admitted a 600 request that carried predecessor consumption
+would refuse in 10 of 10 trials. It also re-ran the revision matrix under native
+validation and found byte-identical writes deduplicated only in the earlier
+permit and forbid configuration. Managed Agents, by contrast, carried consumed
+spend across a lowered live cap in 10 of 10 trials.
+
+Together these captures close the executable retry and reviewed tightening
+cells. The deployment cell remains evidence-blocked; further provider work
+should follow a consolidated review of the resulting continuity boundary.
 
 ## Capture bundle per trial
 
