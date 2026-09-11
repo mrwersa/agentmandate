@@ -1,0 +1,39 @@
+{
+  "cdk_bootstrap": "retained",
+  "checks": [
+    {
+      "outcome": "not_found",
+      "resource": "stack-1"
+    },
+    {
+      "outcome": "not_found",
+      "resource": "gateway-1"
+    },
+    {
+      "outcome": "not_found",
+      "resource": "policy_engine-1"
+    },
+    {
+      "outcome": "not_found",
+      "resource": "lambda-1"
+    },
+    {
+      "outcome": "deleted_residual",
+      "resource": "log_group-1"
+    },
+    {
+      "outcome": "not_found",
+      "resource": "iam_role-1"
+    },
+    {
+      "outcome": "not_found",
+      "resource": "iam_role-2"
+    },
+    {
+      "outcome": "not_found",
+      "resource": "temporary_principal-1"
+    }
+  ],
+  "policies_deleted_before_engine": 2,
+  "retry_continuity_cleanup_version": 1
+}

@@ -1,0 +1,18 @@
+{
+  "claim_limit": "completed-response retransmission only; no ambiguous timeout, interceptor retry, transport retry, or application idempotency key was tested",
+  "conclusion": "completed byte-identical retransmission with the same JSON-RPC identifier was executed and accumulated again in every reviewed trial",
+  "fresh_id": {
+    "allow_allow_deny": 10,
+    "distinct_second_executions": 10,
+    "identifier_only_changes": 10
+  },
+  "managed_requests": 62,
+  "retry_continuity_summary_version": 1,
+  "same_id": {
+    "allow_allow_deny": 10,
+    "byte_identical_retransmissions": 10,
+    "distinct_second_executions": 10
+  },
+  "trial_allowed_target_executions": 40,
+  "trials_per_arm": 10
+}

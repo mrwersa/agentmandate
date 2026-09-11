@@ -1,0 +1,22 @@
+{
+  "correction_log_version": 1,
+  "entries": [
+    {
+      "classification": "deployment policy",
+      "id": "retry-continuity-001",
+      "result": "added GetWorkloadAccessToken for exactly the default workload directory and the Gateway workload identity; no wildcard resource"
+    },
+    {
+      "classification": "source ambiguity",
+      "id": "retry-continuity-002",
+      "result": "created policies after the Gateway became READY because the managed authoring contract requires its exact resource identity"
+    },
+    {
+      "classification": "deployment policy",
+      "id": "retry-continuity-003",
+      "result": "CloudFormation removed the stack but retained the exact Lambda log group; the cleanup runner detected and deleted that residual"
+    }
+  ],
+  "excluded_trials": 0,
+  "excluded_data_plane_requests": 0
+}
