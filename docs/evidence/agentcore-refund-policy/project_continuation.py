@@ -289,12 +289,114 @@ def project(source: Path, output: Path) -> dict[str, Any]:
     return summary
 
 
+def _diagnostic_summary(blocks: list[dict[str, Any]]) -> dict[str, Any]:
+    configurations: dict[str, Any] = {}
+    for block in blocks:
+        scored = [trial for trial in block["trials"] if trial["conforming"]]
+        configurations[block["configuration"]] = {
+            "validation_mode": block["validation_mode"],
+            "update_sets_enforcement_mode": block["update_sets_enforcement_mode"],
+            "controls_match": block["controls"]["matches_prediction"],
+            "trials": len(block["trials"]),
+            "nonconforming": len(block["trials"]) - len(scored),
+            "revision_changed": sum(trial["update"]["revision_changed"] for trial in scored),
+            "managed_response_status": _count(
+                [trial["update"]["managed_response"]["status"] for trial in scored]
+            ),
+            "predecessor_after_update": _count(
+                [trial["predecessor_after_call"]["derived_outcome"] for trial in scored]
+            ),
+        }
+    return configurations
+
+
+def project_diagnostic(source: Path, output: Path) -> dict[str, Any]:
+    projector = Projector(source)
+    diagnostic_path = HERE / "continuation-diagnostic-protocol.json"
+    diagnostic = _read(diagnostic_path)
+    if projector.run["diagnostic_protocol_sha256"] != _sha256(diagnostic_path):
+        raise ValueError("capture did not use the committed diagnostic protocol")
+    order = _read(source / "block-order.json")
+    blocks = []
+    for name in order:
+        path = source / f"block-{name}.json"
+        if not path.exists():
+            continue
+        raw = _read(path)
+        configuration = diagnostic["configurations"][name]
+        trials = []
+        for record in raw["trials"]:
+            trial: dict[str, Any] = {"trial": record["trial"], "conforming": record["conforming"]}
+            if "error" in record:
+                trial["error"] = _scrub(record["error"])
+            else:
+                trial.update(
+                    {
+                        "reset": projector.update(record["reset"]),
+                        "before_call": projector.call(record["before_call"]),
+                        "update": projector.update(record["update"]),
+                        "predecessor_after_call": projector.call(record["predecessor_after_call"]),
+                        "elapsed_monotonic_seconds": record["elapsed_monotonic_seconds"],
+                        "nonconforming_reasons": record["nonconforming_reasons"],
+                    }
+                )
+            trials.append(trial)
+        blocks.append(
+            {
+                "configuration": name,
+                "validation_mode": configuration["validation_mode"],
+                "update_sets_enforcement_mode": configuration["update_sets_enforcement_mode"],
+                "controls": projector.controls(raw["controls"]),
+                "trials": trials,
+            }
+        )
+    cleanup = [
+        {
+            "kind": item["kind"],
+            "verified_absent": item["verified_absent"],
+            "error": _scrub(item.get("error")),
+        }
+        for item in _read(source / "cleanup.json")
+    ]
+    events = {
+        "continuation_diagnostic_events_version": 1,
+        "diagnostic_protocol_sha256": _sha256(diagnostic_path),
+        "mandate_sha256": diagnostic["mandate"]["sha256"],
+        "block_order": order,
+        "blocks": blocks,
+        "stopped": _scrub(projector.run["stopped"]),
+        "cleanup": cleanup,
+        "cleanup_complete": projector.run["cleanup_complete"],
+        "raw_capture_sha256": {
+            path.name: _sha256(path)
+            for path in sorted(source.iterdir())
+            if path.is_file() and path.suffix == ".json"
+        },
+    }
+    summary = {
+        "continuation_diagnostic_summary_version": 1,
+        "stopped": events["stopped"],
+        "cleanup_complete": events["cleanup_complete"],
+        "configurations": _diagnostic_summary(blocks),
+        "separation_limit": diagnostic["separation_limit"],
+    }
+    output.mkdir(parents=True, exist_ok=True)
+    for name, value in (
+        ("continuation-diagnostic-events.json", events),
+        ("continuation-diagnostic-summary.json", summary),
+    ):
+        (output / name).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+    return summary
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("--output", type=Path, default=HERE)
+    parser.add_argument("--diagnostic", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(project(args.source, args.output), indent=2, sort_keys=True))
+    runner = project_diagnostic if args.diagnostic else project
+    print(json.dumps(runner(args.source, args.output), indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

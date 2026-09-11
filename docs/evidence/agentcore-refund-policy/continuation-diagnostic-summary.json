@@ -1,0 +1,50 @@
+{
+  "cleanup_complete": true,
+  "configurations": {
+    "current_with_enforcement_mode": {
+      "controls_match": true,
+      "managed_response_status": {
+        "UPDATING": 10
+      },
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "trials": 10,
+      "update_sets_enforcement_mode": true,
+      "validation_mode": "FAIL_ON_ANY_FINDINGS"
+    },
+    "earlier_configuration": {
+      "controls_match": true,
+      "managed_response_status": {
+        "UPDATING": 10
+      },
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "deny": 10
+      },
+      "revision_changed": 0,
+      "trials": 10,
+      "update_sets_enforcement_mode": true,
+      "validation_mode": "IGNORE_ALL_FINDINGS"
+    },
+    "earlier_without_enforcement_mode": {
+      "controls_match": true,
+      "managed_response_status": {
+        "UPDATING": 10
+      },
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "deny": 10
+      },
+      "revision_changed": 0,
+      "trials": 10,
+      "update_sets_enforcement_mode": false,
+      "validation_mode": "IGNORE_ALL_FINDINGS"
+    }
+  },
+  "continuation_diagnostic_summary_version": 1,
+  "separation_limit": "the permit and forbid pair cannot pass FAIL_ON_ANY_FINDINGS, so earlier_configuration and current_with_enforcement_mode differ in both policy form and validation mode; this diagnostic cannot separate those two factors",
+  "stopped": null
+}

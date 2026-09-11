@@ -1,7 +1,7 @@
 {
   "continuation_protocol_index_version": 1,
   "provider": "AWS AgentCore Gateway Policy ENFORCE",
-  "raw_artifact_policy": "no live capture has run; the protocol and policy templates contain placeholders only",
+  "raw_artifact_policy": "live account, resource, request, and session identifiers remained in temporary private captures and were replaced by aliases in the committed projections",
   "raw_artifacts_committed": false,
   "region": "us-east-1",
   "sources": [
@@ -26,8 +26,24 @@
       "locator": "continuation-corrections.json"
     },
     {
+      "content_sha256": "d9bca41ce79eaae746f76f5da312b5b488ab6aca6c94eab5b2dd47b619f76c98",
+      "locator": "continuation-deployment.json"
+    },
+    {
+      "content_sha256": "e9140cb8a0b7e677cb42a7562cc1bcec334fad1257306671a4b47f0abaa4ff3f",
+      "locator": "continuation-diagnostic-events.json"
+    },
+    {
       "content_sha256": "3f3496f8f684321eeaaefd7ecf2bae90a2677c9145539c413abad0b8222999f1",
       "locator": "continuation-diagnostic-protocol.json"
+    },
+    {
+      "content_sha256": "a4dc80c48bc74e3071a280d185d4fb4782388580b1b1a5ab6511dd85ac0253d8",
+      "locator": "continuation-diagnostic-summary.json"
+    },
+    {
+      "content_sha256": "b8f366492f156fa9e1854feea01d458e0e21caf528f85d7d03a38d56bc775ba6",
+      "locator": "continuation-events.json"
     },
     {
       "content_sha256": "81788f4f4c59a609213bcab7ae2af997b9bf0cabf9dfc44c3c443ffc65a0f79a",
@@ -50,9 +66,13 @@
       "locator": "continuation-protocol.json"
     },
     {
-      "content_sha256": "f654b8c6195c2bda48421ed4cb11b28da2cc67d0583bd38f3b899d43de0f1552",
+      "content_sha256": "b8884532eba05cf2481e771af9b89e4bc7073a40239eadae05ed06774e7ecc1d",
+      "locator": "continuation-summary.json"
+    },
+    {
+      "content_sha256": "da2e830fe8994f5a8e5a40406f5642cb9289642e42d0800a232fd8c8b79f8347",
       "locator": "project_continuation.py"
     }
   ],
-  "status": "preregistered_not_executed"
+  "status": "executed"
 }

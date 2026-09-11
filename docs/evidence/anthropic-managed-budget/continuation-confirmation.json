@@ -1,0 +1,3774 @@
+{
+  "cleanup": {
+    "agents_archived": 11,
+    "complete": true,
+    "environment_deleted": true,
+    "sessions_deleted_and_verified_absent": 33
+  },
+  "continuation_evidence_version": 1,
+  "documentation": [
+    {
+      "fetched_utc": "2026-09-11T16:26:09.037326Z",
+      "sha256": "3e50ef40aee0dae92eba92cb2b29ce45ee43f00c9a620fa393f95aa874639476",
+      "url": "https://platform.claude.com/docs/en/managed-agents/budgets"
+    },
+    {
+      "fetched_utc": "2026-09-11T16:26:09.750643Z",
+      "sha256": "ff0e11f784d89cfda51c95637c0a9d3fb4694d00d93dcf80541ae74f9b8f07b7",
+      "url": "https://platform.claude.com/docs/en/managed-agents/session-operations"
+    },
+    {
+      "fetched_utc": "2026-09-11T16:26:10.522361Z",
+      "sha256": "e7df653f0ef24ed54879cd968b3ce63ca132a8bb53d07a8f6619e989bd1841bc",
+      "url": "https://platform.claude.com/docs/en/managed-agents/agent-setup"
+    },
+    {
+      "fetched_utc": "2026-09-11T16:26:11.280198Z",
+      "sha256": "11c82b1ba41d1a010f3bbdc1147f3dea73aeca071f90553f1d743372a95ba11f",
+      "url": "https://platform.claude.com/docs/en/managed-agents/sessions"
+    }
+  ],
+  "model": "claude-haiku-4-5-20251001",
+  "pilot": {
+    "continue": true,
+    "excluded_from_results": true,
+    "median_units_per_reported_cent": 2.0,
+    "units_per_cent": [
+      2.0,
+      2.0,
+      2.0
+    ]
+  },
+  "protocol_sha256": "956dfde27eec01bb3c9f1fe7524c9b105ba1531571592aae1e61075f2c2b3620",
+  "raw_capture_sha256": {
+    "cell-order.json": "2e6728aa5f7925bd434414a14bfab80e3a581f4f2e428450aea1f767d91ca36b",
+    "cleanup.json": "2fd09f69cc8a9535c75a66d27e9f77210f3036e622b8215db3478612b21598c7",
+    "documentation.json": "ba2ba070705d09a97b18c0fd83fa21dbf58a3f0119ddac60d23d4f278f62904a",
+    "pilot.json": "353e1962cc61d0dc08969c868093f03fa369eeaf9971d3862086b57916854c19",
+    "run.json": "bef37455481af7fe026e6fe22aea324468f0745381e085631f9c181c1b6b3c84",
+    "trial-01.json": "1adc63036d91662a7510e46d409530a0b446ef571343c635d51fd7302046459a",
+    "trial-02.json": "472b2d0fedcf6e46240633dfd5dcf49c606ea0172898ec8d37c2c72c39e5882d",
+    "trial-03.json": "f044e22f6c8cffa7084d8a3fc714240e12ee748d350a04bb99bf2f8c7c791cdf",
+    "trial-04.json": "1123a2a9b9fc7d1847875391c756d8eef6c4f62008f2144fd0c97f0ca1760277",
+    "trial-05.json": "04812bf2ec452e0fe99716057bbddb5f27322aec582a9e3ad05dec3d4123f4c8",
+    "trial-06.json": "bf0432a031f0ad073859579233faee3a0e077e95c12714f6e0c5f510a3deeffa",
+    "trial-07.json": "38e08bdcb2d9e084ad124fce6717c1a1236ae290c18039b977f7fcaa937d7936",
+    "trial-08.json": "66937cad6f2395783f1c0865b5a5f2d32bd14d1be0681ce6ff1f7eebede0655d",
+    "trial-09.json": "4421cb1265e3200774cc4a2703c666039c8a588d21997694479531b55aa634df",
+    "trial-10.json": "5dd68727b6f2c499aee8f9367f33fc21eb77d4983c0d6f9c5938fceb14b7b195",
+    "trial-11.json": "c978b45c7a2efe19b366aab0803601bbe51c8e34c8cbe349b737dc2798e944b2",
+    "trial-12.json": "d5a1879889ccc74c350d3e03c545a9977f3f6cb2556faf0547f5d7b0dc8e920a",
+    "trial-13.json": "8c2ec9b9567dab3af040ae766c498a329ff5c9d5ef2463c5964e76a0778aff0e",
+    "trial-14.json": "7a012fc976e872079145e695f1e9552074b0511c7fa47aa182eeb4065b8233b9",
+    "trial-15.json": "4ccd4ee5760283d277efe14bcdabb800abfae4f54f8a8d7ba623b5791aea3cd5",
+    "trial-16.json": "d94c84cd15072f5b4c386242f3696ec4dbe20f0ecfaf8cd79df13d745f9260ee",
+    "trial-17.json": "14b7ca9c45b9031d6f008da9d15dc3396a03cb71ef51bb7444a60c1156bd1bbe",
+    "trial-18.json": "269bc0b06e31aee8f1ceaa169ef8fd57e166c6d31895be8c464618504ce704c6",
+    "trial-19.json": "2c9684c8e140196e1f1c920f3fc3bd92a71b92e8717d0ac3bd5a906c8b6ea668",
+    "trial-20.json": "867f5222b9e94677d5c0902276fa7a9569cbaaf87beceb8054db52b42993fac4",
+    "trial-21.json": "af94577c23088cdc3818b1ebee66516c6a0f8d60d20458946fc9f55fca04b21a",
+    "trial-22.json": "46ec7d08bb2f30731f253cf29c08823687ee5350d8ea8b7fb4d0cd77a47e4b3f",
+    "trial-23.json": "064ac543c540039bef6c64879315ccb4430dbc3eb96204db8d91480297dbb3d4",
+    "trial-24.json": "6f70e946330bfa1713ed00571d6209e9e5a3e5410f27e575817601f1ee7444b4",
+    "trial-25.json": "2beb3c449c1701c787585b505d50f986c88513a1f335fbbce80cf42d958a7c12",
+    "trial-26.json": "105304dd8a1e5597734f66728a759cbfebc0d820a3522d1b6d65231af91e9e29",
+    "trial-27.json": "2a3a91d5e8fddd7d3935a64f6a873c05fd05c6ce103d353bb279b2c5fdde3080",
+    "trial-28.json": "d3bcb90c12d7f084f7678f431bb62cb7d55519716c7be67576fddec41e5e6977",
+    "trial-29.json": "be85df4817b9728a2f26f58f0dad543fe49b5a50c0d5ad6065e21adaa63dd56f",
+    "trial-30.json": "1553d7fcf8ddc8e633defe6ecc14324af7c69d3e206aa468bdf7a91e8a521ef1"
+  },
+  "spent_reported_cents": 147,
+  "stopped": null,
+  "trials": [
+    {
+      "after_update": [
+        {
+          "duration_ns": 7690145563,
+          "finished_utc": "2026-09-11T16:28:14.160575Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:06.470457Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7730272091,
+          "finished_utc": "2026-09-11T16:28:21.890897Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:14.160640Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5526951814,
+          "finished_utc": "2026-09-11T16:28:27.417862Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:21.890937Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6126973617,
+          "finished_utc": "2026-09-11T16:28:32.944213Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:27.417914Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 7504462228,
+          "finished_utc": "2026-09-11T16:28:40.448711Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:32.944271Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 7523597958,
+          "finished_utc": "2026-09-11T16:28:47.972335Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:40.448765Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 8277104795,
+          "finished_utc": "2026-09-11T16:28:56.249480Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:47.972398Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 6230993836,
+          "finished_utc": "2026-09-11T16:29:01.881806Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:28:56.249535Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 5929885933,
+          "finished_utc": "2026-09-11T16:29:07.811729Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:01.881871Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 8522445797,
+          "finished_utc": "2026-09-11T16:27:46.007027Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:27:37.484590Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7433839002,
+          "finished_utc": "2026-09-11T16:27:53.440901Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:27:46.007092Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5511684555,
+          "finished_utc": "2026-09-11T16:27:58.350731Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:27:53.440965Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7655371450,
+          "finished_utc": "2026-09-11T16:28:06.006151Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:27:58.350777Z",
+          "work_unit": 4
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:29:08.013980Z",
+      "order": 1,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:27:36.704045Z",
+      "trial": 10
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5309481973,
+          "finished_utc": "2026-09-11T16:29:43.109016Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:37.799562Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5303386721,
+          "finished_utc": "2026-09-11T16:29:48.412444Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:43.109079Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5309818251,
+          "finished_utc": "2026-09-11T16:29:53.722284Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:48.412496Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7534293248,
+          "finished_utc": "2026-09-11T16:30:01.256602Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:53.722352Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6697240232,
+          "finished_utc": "2026-09-11T16:30:07.354871Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:01.256692Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5885260424,
+          "finished_utc": "2026-09-11T16:30:13.240171Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:07.354942Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5712153487,
+          "finished_utc": "2026-09-11T16:30:18.952360Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:13.240237Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 7924107180,
+          "finished_utc": "2026-09-11T16:30:26.876638Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:18.952428Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 5625002726,
+          "finished_utc": "2026-09-11T16:30:32.501657Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:26.876688Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 5371968697,
+          "finished_utc": "2026-09-11T16:29:14.456505Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:09.084519Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6992095028,
+          "finished_utc": "2026-09-11T16:29:21.448475Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:14.456533Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5679930496,
+          "finished_utc": "2026-09-11T16:29:27.128565Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:21.448662Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5389619304,
+          "finished_utc": "2026-09-11T16:29:31.921202Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:27.128628Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5318267594,
+          "finished_utc": "2026-09-11T16:29:37.239510Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:29:31.921262Z",
+          "work_unit": 5
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:30:32.744172Z",
+      "order": 2,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:29:08.284481Z",
+      "trial": 1
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 6734852700,
+          "finished_utc": "2026-09-11T16:30:39.594213Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:33.462036Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7108665834,
+          "finished_utc": "2026-09-11T16:30:46.702913Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:39.594271Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5197795945,
+          "finished_utc": "2026-09-11T16:30:51.900733Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:46.702967Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7262168092,
+          "finished_utc": "2026-09-11T16:30:59.162939Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:51.900797Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5167717005,
+          "finished_utc": "2026-09-11T16:31:04.330692Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:30:59.162998Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 7066492268,
+          "finished_utc": "2026-09-11T16:31:10.787698Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:04.330746Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 7132452660,
+          "finished_utc": "2026-09-11T16:31:17.920180Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:10.787750Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:31:18.352228Z",
+      "order": 3,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:31:18.352173Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:31:17.920235Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:30:32.993881Z",
+      "trial": 7
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 7132358611,
+          "finished_utc": "2026-09-11T16:32:09.997777Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:02.865440Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7152071827,
+          "finished_utc": "2026-09-11T16:32:16.527713Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:09.997829Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5586794123,
+          "finished_utc": "2026-09-11T16:32:22.114546Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:16.527775Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5453742410,
+          "finished_utc": "2026-09-11T16:32:27.568321Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:22.114600Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5484681376,
+          "finished_utc": "2026-09-11T16:32:33.053027Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:27.568372Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 8831443200,
+          "finished_utc": "2026-09-11T16:31:27.914555Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:19.083114Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6911903727,
+          "finished_utc": "2026-09-11T16:31:34.826502Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:27.914620Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7155044782,
+          "finished_utc": "2026-09-11T16:31:41.363706Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:34.826553Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5002567332,
+          "finished_utc": "2026-09-11T16:31:46.366320Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:41.363775Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5107266427,
+          "finished_utc": "2026-09-11T16:31:51.473616Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:46.366371Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5462860808,
+          "finished_utc": "2026-09-11T16:31:56.936509Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:51.473669Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5397844026,
+          "finished_utc": "2026-09-11T16:32:02.334384Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:31:56.936560Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:32:02.865386Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:32:02.334436Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:32:33.281532Z",
+      "order": 4,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:31:18.547516Z",
+      "trial": 9
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 7188801254,
+          "finished_utc": "2026-09-11T16:33:09.507807Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:02.319036Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5048436445,
+          "finished_utc": "2026-09-11T16:33:13.978304Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:09.507862Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5130716796,
+          "finished_utc": "2026-09-11T16:33:19.109064Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:13.978370Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5133605646,
+          "finished_utc": "2026-09-11T16:33:24.242696Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:19.109115Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6920999387,
+          "finished_utc": "2026-09-11T16:33:31.163718Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:24.242751Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5371525242,
+          "finished_utc": "2026-09-11T16:33:36.535278Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:31.163784Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 7624625548,
+          "finished_utc": "2026-09-11T16:33:44.159939Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:36.535343Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 5402299298,
+          "finished_utc": "2026-09-11T16:33:48.973748Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:44.160002Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 5308595367,
+          "finished_utc": "2026-09-11T16:33:54.282367Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:48.973811Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 7890760768,
+          "finished_utc": "2026-09-11T16:32:41.559160Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:34.276819Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5174030066,
+          "finished_utc": "2026-09-11T16:32:46.733182Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:41.559189Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5020581026,
+          "finished_utc": "2026-09-11T16:32:51.753806Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:46.733251Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 4952512542,
+          "finished_utc": "2026-09-11T16:32:56.706362Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:51.753874Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5166883877,
+          "finished_utc": "2026-09-11T16:33:01.873279Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:32:56.706427Z",
+          "work_unit": 5
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:33:54.470446Z",
+      "order": 5,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:32:33.546674Z",
+      "trial": 2
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 6755871831,
+          "finished_utc": "2026-09-11T16:34:01.940795Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:33:55.184924Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6897414765,
+          "finished_utc": "2026-09-11T16:34:08.838237Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:01.940846Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6856382187,
+          "finished_utc": "2026-09-11T16:34:15.694663Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:08.838287Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5844745039,
+          "finished_utc": "2026-09-11T16:34:20.945972Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:15.694687Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5106191011,
+          "finished_utc": "2026-09-11T16:34:26.052199Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:20.946029Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5103482181,
+          "finished_utc": "2026-09-11T16:34:31.155711Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:26.052249Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 8070455913,
+          "finished_utc": "2026-09-11T16:34:39.226194Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:31.155758Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:34:39.607647Z",
+      "order": 6,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:34:39.607617Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:34:39.226242Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:33:54.684327Z",
+      "trial": 6
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5048658522,
+          "finished_utc": "2026-09-11T16:35:17.068223Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:12.019585Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 4956469385,
+          "finished_utc": "2026-09-11T16:35:21.427520Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:17.068269Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5031940699,
+          "finished_utc": "2026-09-11T16:35:26.459491Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:21.427578Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5052663124,
+          "finished_utc": "2026-09-11T16:35:31.512185Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:26.459549Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5146806078,
+          "finished_utc": "2026-09-11T16:35:36.659022Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:31.512241Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5168693707,
+          "finished_utc": "2026-09-11T16:35:41.827745Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:36.659078Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5312429400,
+          "finished_utc": "2026-09-11T16:35:47.140200Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:41.827800Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 5308036928,
+          "finished_utc": "2026-09-11T16:35:51.848963Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:47.140260Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 5361181866,
+          "finished_utc": "2026-09-11T16:35:57.210161Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:51.849008Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 6646735716,
+          "finished_utc": "2026-09-11T16:34:47.147041Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:40.500308Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5974523924,
+          "finished_utc": "2026-09-11T16:34:52.525120Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:47.147088Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5221592416,
+          "finished_utc": "2026-09-11T16:34:57.746730Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:52.525163Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6814540722,
+          "finished_utc": "2026-09-11T16:35:04.561298Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:34:57.746785Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6966207962,
+          "finished_utc": "2026-09-11T16:35:11.527541Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:04.561355Z",
+          "work_unit": 5
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:35:57.403172Z",
+      "order": 7,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:34:39.805231Z",
+      "trial": 3
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5201526348,
+          "finished_utc": "2026-09-11T16:36:47.268100Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:42.066601Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5158577503,
+          "finished_utc": "2026-09-11T16:36:52.426713Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:47.268158Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6849385713,
+          "finished_utc": "2026-09-11T16:36:58.678530Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:52.426763Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5419822195,
+          "finished_utc": "2026-09-11T16:37:04.098405Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:58.678590Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5431730842,
+          "finished_utc": "2026-09-11T16:37:09.530128Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:04.098430Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 8650679308,
+          "finished_utc": "2026-09-11T16:36:06.753898Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:35:58.103218Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5076802085,
+          "finished_utc": "2026-09-11T16:36:11.830733Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:06.753954Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5065690011,
+          "finished_utc": "2026-09-11T16:36:16.896435Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:11.830781Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5027938698,
+          "finished_utc": "2026-09-11T16:36:21.924414Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:16.896502Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6083348413,
+          "finished_utc": "2026-09-11T16:36:27.408588Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:21.924470Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 7013259181,
+          "finished_utc": "2026-09-11T16:36:34.421874Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:27.408627Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 7112095284,
+          "finished_utc": "2026-09-11T16:36:41.533972Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:36:34.421904Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:36:42.066545Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:36:41.534023Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:37:09.778374Z",
+      "order": 8,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:35:57.630745Z",
+      "trial": 10
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 5043655634,
+          "finished_utc": "2026-09-11T16:37:15.977358Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:10.933697Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5053443910,
+          "finished_utc": "2026-09-11T16:37:21.030763Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:15.977406Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7097604576,
+          "finished_utc": "2026-09-11T16:37:27.529877Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:21.030880Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5054582766,
+          "finished_utc": "2026-09-11T16:37:32.584486Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:27.529936Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5916678331,
+          "finished_utc": "2026-09-11T16:37:38.501221Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:32.584551Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5004556347,
+          "finished_utc": "2026-09-11T16:37:43.505772Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:38.501250Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5339856919,
+          "finished_utc": "2026-09-11T16:37:48.845661Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:43.505832Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 5164665459,
+          "finished_utc": "2026-09-11T16:37:54.010364Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:48.845719Z",
+          "work_unit": 8
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:37:54.407316Z",
+      "order": 9,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:37:54.407250Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:37:54.010412Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:37:10.003437Z",
+      "trial": 5
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 7946288322,
+          "finished_utc": "2026-09-11T16:38:02.462389Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:37:55.114103Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7807129118,
+          "finished_utc": "2026-09-11T16:38:10.269557Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:02.462449Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5456138000,
+          "finished_utc": "2026-09-11T16:38:15.725722Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:10.269603Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6997986234,
+          "finished_utc": "2026-09-11T16:38:22.723724Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:15.725767Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 7161974617,
+          "finished_utc": "2026-09-11T16:38:29.885729Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:22.723783Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5044688091,
+          "finished_utc": "2026-09-11T16:38:34.332153Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:29.885787Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 8966074100,
+          "finished_utc": "2026-09-11T16:38:43.298262Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:34.332213Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:38:43.698910Z",
+      "order": 10,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:38:43.698842Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:38:43.298317Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:37:54.623692Z",
+      "trial": 8
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5159896464,
+          "finished_utc": "2026-09-11T16:39:32.030319Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:26.870443Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5355633658,
+          "finished_utc": "2026-09-11T16:39:36.785716Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:32.030368Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6828713802,
+          "finished_utc": "2026-09-11T16:39:43.614457Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:36.785767Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5338956064,
+          "finished_utc": "2026-09-11T16:39:48.953447Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:43.614514Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 7920610542,
+          "finished_utc": "2026-09-11T16:39:56.874086Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:48.953498Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 5093751273,
+          "finished_utc": "2026-09-11T16:38:49.510911Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:44.417153Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7747213683,
+          "finished_utc": "2026-09-11T16:38:57.258144Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:49.510958Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6932359770,
+          "finished_utc": "2026-09-11T16:39:03.592207Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:38:57.258202Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7176537241,
+          "finished_utc": "2026-09-11T16:39:10.768775Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:03.592264Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5210084323,
+          "finished_utc": "2026-09-11T16:39:15.978894Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:10.768830Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5209694966,
+          "finished_utc": "2026-09-11T16:39:21.188615Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:15.978943Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5170905726,
+          "finished_utc": "2026-09-11T16:39:26.359552Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:21.188665Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:39:26.870397Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:39:26.359597Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:39:57.128518Z",
+      "order": 11,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:38:43.914568Z",
+      "trial": 3
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 8744882769,
+          "finished_utc": "2026-09-11T16:40:05.937465Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:39:57.808710Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7005384020,
+          "finished_utc": "2026-09-11T16:40:12.942880Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:05.937529Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5044518272,
+          "finished_utc": "2026-09-11T16:40:17.987437Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:12.942945Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 8035298480,
+          "finished_utc": "2026-09-11T16:40:26.022762Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:17.987493Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5249112040,
+          "finished_utc": "2026-09-11T16:40:31.271906Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:26.022824Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5087783428,
+          "finished_utc": "2026-09-11T16:40:36.359721Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:31.271969Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 9179410915,
+          "finished_utc": "2026-09-11T16:40:44.918151Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:36.359785Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:40:45.342118Z",
+      "order": 12,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:40:45.342054Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:40:44.918205Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:39:57.332869Z",
+      "trial": 9
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5515041939,
+          "finished_utc": "2026-09-11T16:41:21.260946Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:15.745935Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5679373619,
+          "finished_utc": "2026-09-11T16:41:26.940369Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:21.261010Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6993872629,
+          "finished_utc": "2026-09-11T16:41:33.934247Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:26.940407Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5649982884,
+          "finished_utc": "2026-09-11T16:41:39.584263Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:33.934306Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6589806756,
+          "finished_utc": "2026-09-11T16:41:45.592220Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:39.584322Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5746255652,
+          "finished_utc": "2026-09-11T16:41:51.338506Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:45.592282Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5797960940,
+          "finished_utc": "2026-09-11T16:41:57.136500Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:51.338572Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 8507306376,
+          "finished_utc": "2026-09-11T16:42:05.643825Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:57.136554Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 6167986919,
+          "finished_utc": "2026-09-11T16:42:11.210155Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:05.643889Z",
+          "work_unit": 9
+        },
+        {
+          "duration_ns": 6036375177,
+          "finished_utc": "2026-09-11T16:42:17.246655Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:11.210305Z",
+          "work_unit": 10
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 7319385291,
+          "finished_utc": "2026-09-11T16:40:53.661646Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:46.342267Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 8902805212,
+          "finished_utc": "2026-09-11T16:41:02.564478Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:40:53.661702Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5912441216,
+          "finished_utc": "2026-09-11T16:41:07.856068Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:02.564540Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7365271911,
+          "finished_utc": "2026-09-11T16:41:15.221378Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:41:07.856131Z",
+          "work_unit": 4
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:42:17.438667Z",
+      "order": 13,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:40:45.563778Z",
+      "trial": 8
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5219169558,
+          "finished_utc": "2026-09-11T16:43:05.435514Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:00.216372Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5173540478,
+          "finished_utc": "2026-09-11T16:43:10.609089Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:05.435575Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5903340564,
+          "finished_utc": "2026-09-11T16:43:15.907445Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:10.609148Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 10117185117,
+          "finished_utc": "2026-09-11T16:43:26.024663Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:15.907504Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5392119118,
+          "finished_utc": "2026-09-11T16:43:31.416807Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:26.024718Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 7027682858,
+          "finished_utc": "2026-09-11T16:42:25.356916Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:18.329237Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5120446940,
+          "finished_utc": "2026-09-11T16:42:30.477394Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:25.356978Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5077898911,
+          "finished_utc": "2026-09-11T16:42:35.555328Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:30.477458Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7106120948,
+          "finished_utc": "2026-09-11T16:42:42.661486Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:35.555388Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5076021441,
+          "finished_utc": "2026-09-11T16:42:47.126716Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:42.661539Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 7111566106,
+          "finished_utc": "2026-09-11T16:42:54.238299Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:47.126756Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5395716790,
+          "finished_utc": "2026-09-11T16:42:59.634037Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:42:54.238347Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:43:00.216317Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:42:59.634098Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:43:31.656310Z",
+      "order": 14,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:42:17.810105Z",
+      "trial": 1
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 7122877076,
+          "finished_utc": "2026-09-11T16:44:07.852163Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:00.729345Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5145194621,
+          "finished_utc": "2026-09-11T16:44:12.997418Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:07.852253Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5123439448,
+          "finished_utc": "2026-09-11T16:44:17.510615Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:12.997479Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7117292287,
+          "finished_utc": "2026-09-11T16:44:24.627932Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:17.510668Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 7168022669,
+          "finished_utc": "2026-09-11T16:44:31.795989Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:24.627995Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5377631766,
+          "finished_utc": "2026-09-11T16:44:37.173640Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:31.796053Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 8058903329,
+          "finished_utc": "2026-09-11T16:44:45.232605Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:37.173728Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 6446067065,
+          "finished_utc": "2026-09-11T16:44:51.068495Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:45.232670Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 5287103874,
+          "finished_utc": "2026-09-11T16:44:56.355622Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:51.068548Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 8802118432,
+          "finished_utc": "2026-09-11T16:43:41.452987Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:32.650862Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7189996289,
+          "finished_utc": "2026-09-11T16:43:48.033740Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:41.453038Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7083436651,
+          "finished_utc": "2026-09-11T16:43:55.117208Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:48.033800Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5123202355,
+          "finished_utc": "2026-09-11T16:44:00.240442Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:43:55.117270Z",
+          "work_unit": 4
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:44:56.555087Z",
+      "order": 15,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:43:31.913915Z",
+      "trial": 9
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 7188900693,
+          "finished_utc": "2026-09-11T16:45:44.944301Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:37.755428Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7219994625,
+          "finished_utc": "2026-09-11T16:45:52.164331Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:44.944358Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5140040261,
+          "finished_utc": "2026-09-11T16:45:56.694962Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:52.164382Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5611480447,
+          "finished_utc": "2026-09-11T16:46:02.306452Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:56.695003Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6507966438,
+          "finished_utc": "2026-09-11T16:46:08.814453Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:02.306512Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 8716759240,
+          "finished_utc": "2026-09-11T16:45:06.030489Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:44:57.313737Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6928893741,
+          "finished_utc": "2026-09-11T16:45:12.959417Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:06.030554Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7897033339,
+          "finished_utc": "2026-09-11T16:45:20.856481Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:12.959479Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5057425854,
+          "finished_utc": "2026-09-11T16:45:25.303475Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:20.856547Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6900707609,
+          "finished_utc": "2026-09-11T16:45:32.204210Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:25.303529Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5057390045,
+          "finished_utc": "2026-09-11T16:45:37.261648Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:45:32.204266Z",
+          "work_unit": 6
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:45:37.755372Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:45:37.261676Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:46:09.066655Z",
+      "order": 16,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:44:56.799964Z",
+      "trial": 6
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 8019286066,
+          "finished_utc": "2026-09-11T16:47:00.174521Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:52.765717Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5395947971,
+          "finished_utc": "2026-09-11T16:47:05.570577Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:00.174652Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7666388019,
+          "finished_utc": "2026-09-11T16:47:13.237004Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:05.570640Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5578647440,
+          "finished_utc": "2026-09-11T16:47:18.815673Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:13.237057Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6592010077,
+          "finished_utc": "2026-09-11T16:47:25.407850Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:18.815855Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 4960497707,
+          "finished_utc": "2026-09-11T16:46:14.735603Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:09.775101Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6903682741,
+          "finished_utc": "2026-09-11T16:46:21.639314Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:14.735655Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6947878296,
+          "finished_utc": "2026-09-11T16:46:27.979231Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:21.639366Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5091651333,
+          "finished_utc": "2026-09-11T16:46:33.070911Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:27.979292Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5006279174,
+          "finished_utc": "2026-09-11T16:46:38.077231Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:33.070976Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 8828664337,
+          "finished_utc": "2026-09-11T16:46:46.905919Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:38.077283Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5378060449,
+          "finished_utc": "2026-09-11T16:46:52.283997Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:46:46.905979Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:46:52.765660Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:46:52.284080Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:47:25.644802Z",
+      "order": 17,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 3,
+        "final_reported_cents": 6
+      },
+      "started_utc": "2026-09-11T16:46:09.293768Z",
+      "trial": 5
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5147076312,
+          "finished_utc": "2026-09-11T16:47:57.902492Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:52.755441Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7773672202,
+          "finished_utc": "2026-09-11T16:48:05.053805Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:57.902548Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6181022172,
+          "finished_utc": "2026-09-11T16:48:11.234857Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:05.053866Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5060292171,
+          "finished_utc": "2026-09-11T16:48:16.295182Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:11.234919Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5150862601,
+          "finished_utc": "2026-09-11T16:48:21.446077Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:16.295247Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5313737963,
+          "finished_utc": "2026-09-11T16:48:26.759862Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:21.446145Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 7636234165,
+          "finished_utc": "2026-09-11T16:48:33.772205Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:26.759915Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 5333693701,
+          "finished_utc": "2026-09-11T16:48:39.105938Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:33.772269Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 7923811246,
+          "finished_utc": "2026-09-11T16:48:47.029787Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:39.105998Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 6859847275,
+          "finished_utc": "2026-09-11T16:47:32.838732Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:26.593964Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5130512709,
+          "finished_utc": "2026-09-11T16:47:37.969348Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:32.838861Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7158182282,
+          "finished_utc": "2026-09-11T16:47:45.127565Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:37.969411Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7200992875,
+          "finished_utc": "2026-09-11T16:47:52.328591Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:47:45.127622Z",
+          "work_unit": 4
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:48:47.222372Z",
+      "order": 18,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:47:25.870564Z",
+      "trial": 7
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5018733172,
+          "finished_utc": "2026-09-11T16:49:23.022060Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:18.003359Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7104741620,
+          "finished_utc": "2026-09-11T16:49:30.126846Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:23.022125Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6956618114,
+          "finished_utc": "2026-09-11T16:49:36.490138Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:30.126892Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6578467051,
+          "finished_utc": "2026-09-11T16:49:43.068634Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:36.490196Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5400210450,
+          "finished_utc": "2026-09-11T16:49:48.468880Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:43.068698Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5426392493,
+          "finished_utc": "2026-09-11T16:49:53.895323Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:48.468943Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 6762203916,
+          "finished_utc": "2026-09-11T16:50:00.657539Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:53.895362Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 7836801875,
+          "finished_utc": "2026-09-11T16:50:07.896628Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:00.657588Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 7867368101,
+          "finished_utc": "2026-09-11T16:50:15.764087Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:07.896746Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 8908059940,
+          "finished_utc": "2026-09-11T16:48:57.103740Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:48.195685Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5026943379,
+          "finished_utc": "2026-09-11T16:49:02.130623Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:48:57.103807Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6963129982,
+          "finished_utc": "2026-09-11T16:49:08.484130Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:02.130785Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 9058766580,
+          "finished_utc": "2026-09-11T16:49:17.542943Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:49:08.484188Z",
+          "work_unit": 4
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:50:15.953993Z",
+      "order": 19,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:48:47.488484Z",
+      "trial": 4
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5058139610,
+          "finished_utc": "2026-09-11T16:50:47.854637Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:42.796527Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5239890251,
+          "finished_utc": "2026-09-11T16:50:53.094558Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:47.854698Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7047231256,
+          "finished_utc": "2026-09-11T16:51:00.141823Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:53.094619Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5304597532,
+          "finished_utc": "2026-09-11T16:51:05.446452Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:00.141881Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5012967868,
+          "finished_utc": "2026-09-11T16:51:09.846557Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:05.446507Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5333474144,
+          "finished_utc": "2026-09-11T16:51:15.180069Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:09.846618Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5148332710,
+          "finished_utc": "2026-09-11T16:51:20.328427Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:15.180120Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 5314143163,
+          "finished_utc": "2026-09-11T16:51:25.642615Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:20.328482Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 5302886096,
+          "finished_utc": "2026-09-11T16:51:30.945500Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:25.642644Z",
+          "work_unit": 9
+        },
+        {
+          "duration_ns": 7824011783,
+          "finished_utc": "2026-09-11T16:51:38.769539Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:30.945554Z",
+          "work_unit": 10
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 8814382625,
+          "finished_utc": "2026-09-11T16:50:25.682775Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:16.868397Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7017980178,
+          "finished_utc": "2026-09-11T16:50:32.700788Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:25.682837Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5058307405,
+          "finished_utc": "2026-09-11T16:50:37.759141Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:32.700849Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5158372274,
+          "finished_utc": "2026-09-11T16:50:42.306671Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:50:37.759179Z",
+          "work_unit": 4
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:51:38.953356Z",
+      "order": 20,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:50:16.191056Z",
+      "trial": 5
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5038022064,
+          "finished_utc": "2026-09-11T16:52:23.032169Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:17.994169Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6129220646,
+          "finished_utc": "2026-09-11T16:52:29.161414Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:23.032220Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5518048971,
+          "finished_utc": "2026-09-11T16:52:34.679497Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:29.161472Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6408057981,
+          "finished_utc": "2026-09-11T16:52:41.087566Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:34.679548Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5326790972,
+          "finished_utc": "2026-09-11T16:52:45.802769Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:41.087639Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5306132038,
+          "finished_utc": "2026-09-11T16:52:51.108889Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:45.802820Z",
+          "work_unit": 6
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 6164833406,
+          "finished_utc": "2026-09-11T16:51:45.233731Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:39.680310Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6720386341,
+          "finished_utc": "2026-09-11T16:51:51.954147Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:45.233787Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5882479150,
+          "finished_utc": "2026-09-11T16:51:57.836668Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:51.954203Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5032352626,
+          "finished_utc": "2026-09-11T16:52:02.869025Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:51:57.836704Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 4975143486,
+          "finished_utc": "2026-09-11T16:52:07.844204Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:02.869081Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5212837828,
+          "finished_utc": "2026-09-11T16:52:12.445571Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:07.844251Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5029518044,
+          "finished_utc": "2026-09-11T16:52:17.475104Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:12.445621Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:52:17.994123Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:52:17.475172Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:52:51.325750Z",
+      "order": 21,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:51:39.178844Z",
+      "trial": 2
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 8427670433,
+          "finished_utc": "2026-09-11T16:53:00.489305Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:52:52.061630Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7007015841,
+          "finished_utc": "2026-09-11T16:53:07.496335Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:00.489351Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 4963445214,
+          "finished_utc": "2026-09-11T16:53:12.459813Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:07.496396Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 4980637385,
+          "finished_utc": "2026-09-11T16:53:16.831043Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:12.459870Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5209632327,
+          "finished_utc": "2026-09-11T16:53:22.040717Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:16.831096Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5104379644,
+          "finished_utc": "2026-09-11T16:53:27.145100Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:22.040749Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 4942506331,
+          "finished_utc": "2026-09-11T16:53:32.087636Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:27.145151Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:53:32.473196Z",
+      "order": 22,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:53:32.473025Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:53:32.087685Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:52:51.557992Z",
+      "trial": 1
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 6850158220,
+          "finished_utc": "2026-09-11T16:53:40.067492Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:33.217336Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6882212998,
+          "finished_utc": "2026-09-11T16:53:46.949739Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:40.067549Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5086349410,
+          "finished_utc": "2026-09-11T16:53:51.427058Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:46.949789Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7959688008,
+          "finished_utc": "2026-09-11T16:53:59.386776Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:51.427114Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 8331952344,
+          "finished_utc": "2026-09-11T16:54:07.718752Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:53:59.386828Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5252358661,
+          "finished_utc": "2026-09-11T16:54:12.971146Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:07.718810Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5060729372,
+          "finished_utc": "2026-09-11T16:54:18.031906Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:12.971198Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:54:18.412164Z",
+      "order": 23,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:54:18.412099Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:54:18.031957Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:53:32.695019Z",
+      "trial": 4
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 6748161698,
+          "finished_utc": "2026-09-11T16:54:25.211268Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:19.073399Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6699513414,
+          "finished_utc": "2026-09-11T16:54:31.910811Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:25.211325Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6841403772,
+          "finished_utc": "2026-09-11T16:54:38.752241Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:31.910868Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6833212545,
+          "finished_utc": "2026-09-11T16:54:45.585496Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:38.752304Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5937267405,
+          "finished_utc": "2026-09-11T16:54:50.905644Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:45.585543Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5922254284,
+          "finished_utc": "2026-09-11T16:54:56.827932Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:50.905709Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 4999000856,
+          "finished_utc": "2026-09-11T16:55:01.826974Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:54:56.827997Z",
+          "work_unit": 7
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:55:02.244342Z",
+      "order": 24,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:55:02.244273Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:55:01.827029Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:54:18.614257Z",
+      "trial": 3
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 8670167772,
+          "finished_utc": "2026-09-11T16:55:11.657543Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:02.987373Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 8874215402,
+          "finished_utc": "2026-09-11T16:55:20.531782Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:11.657596Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 4964242708,
+          "finished_utc": "2026-09-11T16:55:24.869092Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:20.531844Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 4934440303,
+          "finished_utc": "2026-09-11T16:55:29.803567Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:24.869153Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 4911400363,
+          "finished_utc": "2026-09-11T16:55:34.714995Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:29.803626Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 7009507829,
+          "finished_utc": "2026-09-11T16:55:41.724540Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:34.715061Z",
+          "work_unit": 6
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:55:42.110333Z",
+      "order": 25,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T16:55:42.110264Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T16:55:41.724601Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:55:02.448745Z",
+      "trial": 2
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 6458950451,
+          "finished_utc": "2026-09-11T16:56:43.020007Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:36.561076Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6193111459,
+          "finished_utc": "2026-09-11T16:56:49.213145Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:43.020066Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7593867533,
+          "finished_utc": "2026-09-11T16:56:56.807049Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:49.213210Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6882682900,
+          "finished_utc": "2026-09-11T16:57:03.095216Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:56.807110Z",
+          "work_unit": 4
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 4863917639,
+          "finished_utc": "2026-09-11T16:55:47.670273Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:42.806354Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6918130824,
+          "finished_utc": "2026-09-11T16:55:53.956987Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:47.670330Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 19083402092,
+          "finished_utc": "2026-09-11T16:56:13.040419Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:55:53.957043Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6830759530,
+          "finished_utc": "2026-09-11T16:56:19.871200Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:13.040474Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 4963184122,
+          "finished_utc": "2026-09-11T16:56:24.834423Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:19.871266Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 4965679040,
+          "finished_utc": "2026-09-11T16:56:29.183793Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:24.834489Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 6888545283,
+          "finished_utc": "2026-09-11T16:56:36.072374Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:56:29.183856Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:56:36.560930Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:56:36.072432Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:57:03.339323Z",
+      "order": 26,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:55:42.315948Z",
+      "trial": 8
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5043963251,
+          "finished_utc": "2026-09-11T16:57:56.279295Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:51.235363Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5287960040,
+          "finished_utc": "2026-09-11T16:58:00.951586Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:56.279361Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6861062461,
+          "finished_utc": "2026-09-11T16:58:07.812680Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:00.951647Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7750358025,
+          "finished_utc": "2026-09-11T16:58:15.563075Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:07.812743Z",
+          "work_unit": 4
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 8256873639,
+          "finished_utc": "2026-09-11T16:57:12.300058Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:04.043187Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 8075822749,
+          "finished_utc": "2026-09-11T16:57:20.375962Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:12.300166Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5209928505,
+          "finished_utc": "2026-09-11T16:57:25.585921Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:20.376023Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 8087247334,
+          "finished_utc": "2026-09-11T16:57:33.061048Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:25.585984Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5133688588,
+          "finished_utc": "2026-09-11T16:57:38.194770Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:33.061112Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5235109582,
+          "finished_utc": "2026-09-11T16:57:43.429916Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:38.194834Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 7218892755,
+          "finished_utc": "2026-09-11T16:57:50.649097Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:57:43.430193Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T16:57:51.235313Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T16:57:50.649163Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:58:15.806627Z",
+      "order": 27,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T16:57:03.560016Z",
+      "trial": 7
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 5713124166,
+          "finished_utc": "2026-09-11T16:58:56.455691Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:50.742592Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6086528180,
+          "finished_utc": "2026-09-11T16:59:02.542265Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:56.455746Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 8136835113,
+          "finished_utc": "2026-09-11T16:59:10.054871Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:02.542293Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6229611868,
+          "finished_utc": "2026-09-11T16:59:16.284511Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:10.054930Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 8443782338,
+          "finished_utc": "2026-09-11T16:59:24.728331Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:16.284576Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 6509859302,
+          "finished_utc": "2026-09-11T16:59:31.238218Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:24.728390Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 6697619175,
+          "finished_utc": "2026-09-11T16:59:37.313714Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:31.238283Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 6748804249,
+          "finished_utc": "2026-09-11T16:59:44.062542Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:37.313767Z",
+          "work_unit": 8
+        },
+        {
+          "duration_ns": 8389328390,
+          "finished_utc": "2026-09-11T16:59:52.451910Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 6,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:44.062604Z",
+          "work_unit": 9
+        }
+      ],
+      "agent_update": {
+        "original_version": 1,
+        "reported_cents": 2,
+        "session_version_after_update": 1,
+        "updated_version": 2
+      },
+      "before_update": [
+        {
+          "duration_ns": 6905255436,
+          "finished_utc": "2026-09-11T16:58:23.723039Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:16.817792Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 6201882657,
+          "finished_utc": "2026-09-11T16:58:29.924951Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:23.723099Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 6367568385,
+          "finished_utc": "2026-09-11T16:58:35.652725Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:29.925015Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 7174589115,
+          "finished_utc": "2026-09-11T16:58:42.827346Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:35.652789Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 7437140568,
+          "finished_utc": "2026-09-11T16:58:50.264522Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:58:42.827410Z",
+          "work_unit": 5
+        }
+      ],
+      "cell": "agent_update_leaves_live_session",
+      "classification": "pinned_and_retained",
+      "conforming": true,
+      "finished_utc": "2026-09-11T16:59:52.666476Z",
+      "order": 28,
+      "result": {
+        "final_reported_cents": 6,
+        "session_version_at_budget": 1
+      },
+      "started_utc": "2026-09-11T16:58:16.080381Z",
+      "trial": 6
+    },
+    {
+      "before_update": [
+        {
+          "duration_ns": 6839177769,
+          "finished_utc": "2026-09-11T17:00:00.242954Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T16:59:53.403860Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5393758123,
+          "finished_utc": "2026-09-11T17:00:05.636825Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:00.243092Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7006836842,
+          "finished_utc": "2026-09-11T17:00:12.022441Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:05.636883Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 6132020274,
+          "finished_utc": "2026-09-11T17:00:18.154482Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:12.022491Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5289458168,
+          "finished_utc": "2026-09-11T17:00:23.443973Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:18.154541Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5123538334,
+          "finished_utc": "2026-09-11T17:00:28.567538Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:23.444026Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 5106138984,
+          "finished_utc": "2026-09-11T17:00:33.673726Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:28.567594Z",
+          "work_unit": 7
+        },
+        {
+          "duration_ns": 4994449561,
+          "finished_utc": "2026-09-11T17:00:38.668186Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:33.673752Z",
+          "work_unit": 8
+        }
+      ],
+      "cell": "cap_at_or_below_spend_refused",
+      "classification": "refused",
+      "conforming": true,
+      "finished_utc": "2026-09-11T17:00:38.452905Z",
+      "order": 29,
+      "result": {
+        "attempted_cap": 2,
+        "completed_utc": "2026-09-11T17:00:38.452801Z",
+        "refusal": {
+          "error_type": "BadRequestError",
+          "message": "`budget.max_list_cost` must be greater than the session's consumed list cost",
+          "status_code": 400
+        },
+        "reported_cents": 3,
+        "requested_utc": "2026-09-11T17:00:38.668217Z",
+        "retrieved_cap": 10
+      },
+      "started_utc": "2026-09-11T16:59:52.956136Z",
+      "trial": 10
+    },
+    {
+      "after_update": [
+        {
+          "duration_ns": 7139743670,
+          "finished_utc": "2026-09-11T17:01:25.643386Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:18.503554Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 7093661852,
+          "finished_utc": "2026-09-11T17:01:32.737088Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:25.643449Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 5961820719,
+          "finished_utc": "2026-09-11T17:01:38.698934Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 4,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:32.737140Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5502097545,
+          "finished_utc": "2026-09-11T17:01:43.582346Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:38.698990Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 6630605953,
+          "finished_utc": "2026-09-11T17:01:50.212954Z",
+          "idle_reason": "budget_reached",
+          "list_cost_minor_units": 5,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:43.582381Z",
+          "work_unit": 5
+        }
+      ],
+      "before_update": [
+        {
+          "duration_ns": 5031555576,
+          "finished_utc": "2026-09-11T17:00:44.164620Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:39.133079Z",
+          "work_unit": 1
+        },
+        {
+          "duration_ns": 5098579651,
+          "finished_utc": "2026-09-11T17:00:49.263217Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 0,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:44.164670Z",
+          "work_unit": 2
+        },
+        {
+          "duration_ns": 7045046382,
+          "finished_utc": "2026-09-11T17:00:56.308296Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:49.263282Z",
+          "work_unit": 3
+        },
+        {
+          "duration_ns": 5081119602,
+          "finished_utc": "2026-09-11T17:01:01.389471Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 1,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:00:56.308360Z",
+          "work_unit": 4
+        },
+        {
+          "duration_ns": 5075352439,
+          "finished_utc": "2026-09-11T17:01:06.464816Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:01.389500Z",
+          "work_unit": 5
+        },
+        {
+          "duration_ns": 5163604047,
+          "finished_utc": "2026-09-11T17:01:11.010020Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 2,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:06.464880Z",
+          "work_unit": 6
+        },
+        {
+          "duration_ns": 6998370399,
+          "finished_utc": "2026-09-11T17:01:18.008423Z",
+          "idle_reason": "end_turn",
+          "list_cost_minor_units": 3,
+          "session_status": "idle",
+          "started_utc": "2026-09-11T17:01:11.010082Z",
+          "work_unit": 7
+        }
+      ],
+      "cap_update": {
+        "completed_utc": "2026-09-11T17:01:18.503506Z",
+        "reported_cents": 3,
+        "requested_cap": 5,
+        "requested_utc": "2026-09-11T17:01:18.008484Z",
+        "response_cap": 5,
+        "retrieved_cap": 5
+      },
+      "cell": "lowered_cap_carries_spend",
+      "classification": "carry",
+      "conforming": true,
+      "finished_utc": "2026-09-11T17:01:50.441793Z",
+      "order": 30,
+      "post_budget_refusal": {
+        "error_type": "BadRequestError",
+        "message": "session budget reached: consumed list cost has met `budget.max_list_cost`; only `user.tool_confirmation`, `user.tool_result`, `user.custom_tool_result`, and `user.interrupt` are accepted until the budget is raised (rejected `user.message` at events[0])",
+        "status_code": 400
+      },
+      "result": {
+        "added_cents": 2,
+        "final_reported_cents": 5
+      },
+      "started_utc": "2026-09-11T17:00:38.666259Z",
+      "trial": 4
+    }
+  ],
+  "trials_per_cell_observed": {
+    "agent_update_leaves_live_session": 10,
+    "cap_at_or_below_spend_refused": 10,
+    "lowered_cap_carries_spend": 10
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "arms": {
+    "bound_variable_renaming": {
+      "maximum_elapsed_seconds": 14.027875911,
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "successor_sequence": {
+        "allow-deny": 10
+      },
+      "trials": 10
+    },
+    "byte_identical_statement": {
+      "maximum_elapsed_seconds": 15.225135196,
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "trials": 10
+    },
+    "description_only": {
+      "maximum_elapsed_seconds": 16.392029392,
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "successor_sequence": {
+        "allow-deny": 10
+      },
+      "trials": 10
+    },
+    "identical_description": {
+      "maximum_elapsed_seconds": 14.002031049,
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "successor_sequence": {
+        "allow-deny": 10
+      },
+      "trials": 10
+    },
+    "tightening_to_700": {
+      "discrimination": {
+        "carry_refuses_first_successor_call": 0,
+        "reset_admits_first_successor_call": 10
+      },
+      "maximum_elapsed_seconds": 12.889155424,
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "successor_sequence": {
+        "allow-deny": 10
+      },
+      "trials": 10
+    },
+    "whitespace_only": {
+      "maximum_elapsed_seconds": 15.055870359,
+      "nonconforming": 0,
+      "predecessor_after_update": {
+        "stale_session": 10
+      },
+      "revision_changed": 10,
+      "successor_sequence": {
+        "allow-deny": 10
+      },
+      "trials": 10
+    }
+  },
+  "candidate": "single_permit",
+  "continuation_summary_version": 1,
+  "controls": {
+    "postflight": true,
+    "preflight": true
+  },
+  "mandate_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "provider_state_snapshot": "unavailable",
+  "stopped": null,
+  "validation_mode": "FAIL_ON_ANY_FINDINGS"
+}

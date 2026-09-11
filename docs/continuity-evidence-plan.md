@@ -50,10 +50,14 @@ and observed Allow–Allow across distinct IAM principals in 10/10 balanced
 trials, while same-principal controls were Allow–Deny in 10/10. This locates
 the tested history at least at the principal×session boundary.
 
-Region or deployment change and idempotent retry remain unexecuted. Tightening
-or widening has evidence for stale-session invalidation and fresh recovery,
-but not for a reviewed translation of predecessor consumption into restored
-capacity; that stronger cell also remains open.
+Region or deployment change and idempotent retry remain unexecuted. The
+[continuation campaign](continuation-campaign-protocol.md) closed the tightening
+cell on 11 September 2026: after a revision from 1,000 to 700, prescribed
+recovery admitted a 600 request that carried predecessor consumption would
+refuse in 10 of 10 trials. It also re-ran the revision matrix under native
+validation and found byte-identical writes deduplicated only in the earlier
+permit and forbid configuration. Managed Agents, by contrast, carried consumed
+spend across a lowered live cap in 10 of 10 trials.
 
 ## Capture bundle per trial
 

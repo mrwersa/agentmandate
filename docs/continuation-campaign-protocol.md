@@ -1,6 +1,11 @@
 # Continuation campaign protocol
 
-Status: **preregistered, not executed.** Nothing in this document is a result.
+Status: **preregistered and executed on 11 September 2026.** This document
+remains the frozen design and contains no results. Results are in the
+[AgentCore revision matrix](evidence/agentcore-refund-policy/README.md#continuation-revision-matrix)
+and the [Managed Agents contrast](evidence/anthropic-managed-budget/README.md#continuation-contrast).
+An unanticipated byte-identical result led to a separately preregistered
+[diagnostic amendment](evidence/agentcore-refund-policy/continuation-diagnostic-protocol.json).
 The machine-readable protocols are
 [`agentcore-refund-policy/continuation-protocol.json`](evidence/agentcore-refund-policy/continuation-protocol.json)
 and

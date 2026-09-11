@@ -1,0 +1,27 @@
+{
+  "claim_boundary": "single-thread sessions on one model, prompt, and environment; whole-cent reported list cost with the documented one-request overshoot; provider cost is not application authority",
+  "continuation_summary_version": 1,
+  "framing": "contrast, not replication: no documented transition invalidates a live session",
+  "model": "claude-haiku-4-5-20251001",
+  "results": {
+    "agent_update_leaves_live_session": {
+      "classifications": {
+        "pinned_and_retained": 10
+      },
+      "trials": 10
+    },
+    "cap_at_or_below_spend_refused": {
+      "classifications": {
+        "refused": 10
+      },
+      "trials": 10
+    },
+    "lowered_cap_carries_spend": {
+      "classifications": {
+        "carry": 10
+      },
+      "trials": 10
+    }
+  },
+  "stopped": null
+}

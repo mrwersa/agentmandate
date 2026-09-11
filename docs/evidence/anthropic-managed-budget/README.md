@@ -166,3 +166,48 @@ shows shared accounting across handoff and a concurrency-dependent overshoot
 inside one correctly identified session. It still does not replicate
 AgentCore's policy-revision transition, and Anthropic still does not verify the
 reviewed mandate binding.
+
+## Continuation contrast
+
+`continuation-protocol.json`, SHA-256
+`956dfde27eec01bb3c9f1fe7524c9b105ba1531571592aae1e61075f2c2b3620`, was
+committed before any live call. One pre-execution amendment raised the
+post-transition work-unit bound from 20 to 40 without changing a classification
+threshold. The capture ran from 16:27 to 17:02 UTC on 11 September 2026 against
+`claude-haiku-4-5-20251001`, with one thread per session. The excluded
+three-session pilot measured two work units per reported cent in every session,
+which met the preregistered continue rule.
+
+Managed Agents exposes no transition that invalidates a live session, so these
+cells are a contrast with AgentCore's revision result rather than a replication.
+
+- **Lowered cap carries spend:** in 10 of 10 trials, lowering a live cap to two
+  cents above reported spend stopped the session at `budget_reached` after 2
+  cents of added spend in nine trials and 3 cents in one. A reset would have
+  allowed at least 5 cents. Every post-budget message was refused with HTTP 400.
+- **Cap at or below spend:** in 10 of 10 trials, setting the cap one cent below
+  reported spend returned HTTP 400 and left the retrieved cap at 10 cents. The
+  service quotes the field name in backticks, which the documented message does
+  not.
+- **Agent update during a live session:** in 10 of 10 trials, a description
+  update created exactly one new agent version, the live session stayed on its
+  original version, and it stopped at its 6-cent cap with 6 cents reported.
+- **Cleanup:** 33 sessions were deleted and verified absent, 11 agents were
+  archived, and the environment was deleted. Reported list cost across the
+  capture was 147 cents.
+
+`continuation-confirmation.json`, SHA-256
+`7d550f3380cf8e7a88c6749dafc514e778f724d3028de38a999d97403294356c`, is the
+identifier-free projection of the private trial files by
+`project_continuation.py`. `continuation-summary.json`, SHA-256
+`21d4bf9ad99fa34b48307c047afd0f79220970601fd8013424c490a63bcbc250`, holds the
+derived counts, and `capture_continuation.py` is the capture driver. The
+driver's own refusal label compared the message too strictly;
+`continuation-corrections.json` records that defect, and every classification
+is re-derived from the retained status, message, and cap.
+
+This establishes that one agent platform carries consumed state across a
+non-widening change to a live cumulative limit, refuses a limit at or below
+consumed state, and keeps a live session's version and spend when its agent is
+revised. It does not show what happens when work moves to a new session or
+agent version, where a budget can only be attached at creation.

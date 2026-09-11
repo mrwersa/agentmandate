@@ -39,8 +39,8 @@ model initiatives completed together. The present frontier is:
 | State | Initiatives |
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
-| **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; finish the remaining one-factor cells without changing the public contract |
-| **Ready next** | Capture region or deployment change, then idempotent retry; separately test whether tightened or widened revisions can restore capacity without losing predecessor consumption |
+| **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary, and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision still restoring capacity; finish the remaining one-factor cells without changing the public contract |
+| **Ready next** | Capture region or deployment change, then idempotent retry |
 | **Evidence-blocked** | Resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 

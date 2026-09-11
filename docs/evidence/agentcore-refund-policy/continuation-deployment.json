@@ -1,0 +1,153 @@
+{
+  "cleanup": [
+    {
+      "error": null,
+      "kind": "policy",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "policy",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "gateway_target",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "gateway",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "policy_engine",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "lambda",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "lambda_log_group",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "lambda_role",
+      "verified_absent": true
+    },
+    {
+      "error": null,
+      "kind": "gateway_role",
+      "verified_absent": true
+    }
+  ],
+  "cleanup_complete": true,
+  "continuation_deployment_version": 1,
+  "deployment": {
+    "boto3": "1.43.92",
+    "gateway": {
+      "authorizer": "AWS_IAM",
+      "policy_engine_mode": "ENFORCE",
+      "protocol": "MCP",
+      "status": "READY"
+    }
+  },
+  "raw_capture_sha256": {
+    "cleanup.json": "5a41e3c6745a57e3008f58f56a163167f472ed4ce4b2a4ea8b1601d17f9113a6",
+    "order.json": "22f74900f1d6986391baa172586a92ce4bc817ced1c796ecbe1005fcde432baa",
+    "postflight.json": "538b113da77ed40269056d0e80230971c7cbfcd4344cbb8d19e991a4d233fa10",
+    "preflight.json": "39bd45a42f57a031e10bfa18a01908b277cc3341bdd31f4a142060f2d57e3c7a",
+    "resources.json": "401f631ab96e75b0d96e67aa6660ec7c72a32ae49f2692f6d9f91bc05ad01b87",
+    "run.json": "a3845b6f9b5e063e349eb03673072fb022ea7d951d6d08cb899a91600609823a",
+    "trial-01.json": "8e48398e4b693889fb7ad291afbcd64672665efd4c1eb0615e483fc2e2a993fd",
+    "trial-02.json": "36fdeb4eec334f7ab96dc44f40caa33febae73fc08acbc22e756831a0bd68a14",
+    "trial-03.json": "3ba5aaf5300ad4291c3887b2225e968c829737b9d8bb8c2529a11aa60b40ebd8",
+    "trial-04.json": "52b4c7a86459588bd81fc63aef227b7907ad8846a6174a03b9bdc2ffb1006b91",
+    "trial-05.json": "358d74f708a21fbdf2432ffb7db42b4a2dc3e9a064f0e26a558c5ca2b3602d9a",
+    "trial-06.json": "c21318bd405a8de583f25f371c479a22ac782e7ad61119921da427738d199d2c",
+    "trial-07.json": "9be03fb16f7e593ef88d4a4f764293110bcc5e9f0a6c9b92628e581a1d8d3209",
+    "trial-08.json": "fda9550fa1d3ca14f306bf0950b7bc457dd7a9f76bd52891822d74cac2075f9b",
+    "trial-09.json": "a57b6dca191eb85674d56f76aeed9ac8086f91404e0419dcbc975977589db89f",
+    "trial-10.json": "1d9362e076cbc06c323a8676f436d1a61cb6b2b06e27d9a1dbce357d90634db5",
+    "trial-11.json": "7f2b5a781385b62f6a9b318b358e6e5f8211002249e5e60ed62b3251dab29225",
+    "trial-12.json": "c2a1debfb4a1d137cae75604b38aec95912a31547ea77a35a5781948b05634d1",
+    "trial-13.json": "47b4353fc54a992dcbcf80d7ee3a9201589ca5ceef4fce1d9878fe2820b56e8e",
+    "trial-14.json": "27562717629e5e6e35e98d45b26afe9a28896a1006c97adeb29d5a5d35675747",
+    "trial-15.json": "b5f434e2185b0f6413058917789800f4965a0eb3345c920e471875774672328a",
+    "trial-16.json": "44f30e60b9b4a2bf38de08d48fe6acf347151f50a0aa0c08801d0bff6339ea28",
+    "trial-17.json": "4df72381b56fa8ab3e7acc94dbd609e95edb0d5fe21291b565254993b7d7b60d",
+    "trial-18.json": "4ecaa555ac0a3f1e5cf51da82e8a7a79cf7df085ef1fd223e8c7e44514f4d2e7",
+    "trial-19.json": "4ab9f658ab147a4a3e881a0c4aa9bf135d3d9ebb6c5f209402ecc6a0e215b192",
+    "trial-20.json": "36d52ce8f41dd463845e89fab83bd3d7460737e58ce42bfe9171660528491b75",
+    "trial-21.json": "60eaaefff2a0b11aa41b47cdb8e4d9b652db98a4a70302496d918752d1ce10fa",
+    "trial-22.json": "67ad18ae08f9a7fe294cecf671e51d92b4c68a5601e9bfd859b629b14ce370d4",
+    "trial-23.json": "6d7f31dda7463c9b79084522a559c8c805488fd6592cbaa85841769d83044aa5",
+    "trial-24.json": "cefb5aa560780efe9b21d6a7dba20dc4140390456c5510ed7ea4803d3b93751a",
+    "trial-25.json": "2e29e21afa3798e4563ef77146bbdd3404502fa70c9564b02d12ad6af56c1f09",
+    "trial-26.json": "60cfce3924df739058ceeca857b350bedf9f12128f5441f1631dc34469ebacc5",
+    "trial-27.json": "ad9f42fa1c3d52b5e00f1da6bd82922d45ff267a5d70d9ce21503af459e3bd0c",
+    "trial-28.json": "1014eb204fd4bfdc26dad45e1927cf3c7e3c279e0b8b672c9e72eba2cc06219f",
+    "trial-29.json": "158b2a654ec50eba128ecb36734763e42d783f03751c2522cd26f0407b23f1e2",
+    "trial-30.json": "c1f8370f1c2500917cca59ca383f0366bc10d9622e4fd3c74a14f50b709648b7",
+    "trial-31.json": "1dfd15a4f9bf951c120b3fef57f01dd0456237be2f1b4a8c1a90b9d1b494a085",
+    "trial-32.json": "75de01a436439c1f53cd86a8dbc48c3723a72ae0cd26ca13a386d49e0e31a274",
+    "trial-33.json": "36fdb58a29bc180159c89ecbe68dd975ce67e12f66cfa75d0fce23a3c67db52a",
+    "trial-34.json": "abff3cee370054b7f55bbbd430da9c6d58ee25c78253a22b6d410e4a2ea847df",
+    "trial-35.json": "3b1339698f6c5d56f41588911bfc3ac95eb9cf7afcfcf4dceea83b2a1c9dfc1f",
+    "trial-36.json": "69ce07f39f18fa982266805fe2c56d7ff2a0d354d906c974e0add1ca7a23b364",
+    "trial-37.json": "6251a2e07969986a9092095cbbcd1baff6faff74572a4e8948667c1b85e7208c",
+    "trial-38.json": "4fa9112ff670f9d2d09a6fe2d6c4332d2210a784c8c47d820e4ceac95e032b0f",
+    "trial-39.json": "6d716561fea3dee6cc9236a57239ac48e35e8fb180aab65c6405a3350e228cb2",
+    "trial-40.json": "edf4978ba8b38fab9ab9ad47a6bb6549318685a3ca3ea73490cecf55be020f94",
+    "trial-41.json": "623cf8583cff73418185837129552be54b91265c04e1285e27911d6e101aa1c2",
+    "trial-42.json": "11a9309164f0f3017a6ddd87dab0d5c2b5fb30ff4ddb407107d79475c62b7b9b",
+    "trial-43.json": "fff35063b560ddacc6b796c12c1fb537a3da134e89c62897bc90ed953682d81d",
+    "trial-44.json": "bb71aa5a13380bda939462e1dea84fb3d6a7a2db3e69ba3ea2776cde8887936a",
+    "trial-45.json": "c9e55beb569312f49310cea0700dacae800d03a9057117277ad2fb63a28432d2",
+    "trial-46.json": "35295a88bdc7e373664d8cb61f3b2edea745405e0aa3ba0b2cc96df21e79420f",
+    "trial-47.json": "c5925ebecabcaf56fe540de70d4553abe42e2d460e2cab5c8933c0cc8661b116",
+    "trial-48.json": "27ba6d3582deeb4a1b8abec2c8ae955e880192a693557f238d2c044f094ee84a",
+    "trial-49.json": "8c04e98aef56000aa0cf02bf8de10a1dbfaf91601759f60846a1dcf86c5b0460",
+    "trial-50.json": "acf727c607f7cbef32d5caef1decf2f90974d510a9926da1eae24ed3bbad3963",
+    "trial-51.json": "6c1031c55a680e8e82409d84b41077533c7320e6b4bbd5ebbcb0e05695ece3e5",
+    "trial-52.json": "4120b982a301a98e25311bfce8ab85894152b3d43c4e8e29441d5b29dd6b02dc",
+    "trial-53.json": "366c97dd06a34462885902f7936201c43353250e54d5eaf32f06311ad6898958",
+    "trial-54.json": "e4489ad2f9f5852e15e75651aa0c4900723478aed7e8978ebcb869930020150b",
+    "trial-55.json": "d2598466c735fe8d0c5853a3a53519af2f73633ebed6506edbf45cb2eab3204d",
+    "trial-56.json": "3efa31bf9b96e787530597462deebebe2b379a0f11a8d0e853e109d38df51d60",
+    "trial-57.json": "319b10d201a90e8f410cc8b9c5baf4a324689da094f9982f113f600051f1afd5",
+    "trial-58.json": "8817a3ce281a91df2ca362923054da20931b6880fcd16a83daaf32c407c74eba",
+    "trial-59.json": "2ef5587b7f5416084facf3ea1b16981e05b4742377d1099d8076e9ff81ab41fd",
+    "trial-60.json": "863ef89455c2d785a5b0f8f4a4f013ea5cbc6aae17073236f8a8c0603e428305"
+  },
+  "stopped": null,
+  "validation_attempts": [
+    {
+      "candidate": "permit_and_forbid",
+      "error": {
+        "code": null,
+        "message": "ContinuationPermit entered CREATE_FAILED: ['Overly Permissive: Policy Engine will allow every request for the specified principal (AgentCore::IamEntity), action (ContinuationTarget___process_refund) and resource (<reviewed-resource>) combination if the policy is added or updated']",
+        "type": "RuntimeError"
+      },
+      "steps": [],
+      "validated": false
+    },
+    {
+      "candidate": "single_permit",
+      "error": null,
+      "steps": [
+        "base validated",
+        "renamed validated",
+        "whitespace validated",
+        "tightened validated",
+        "base validated"
+      ],
+      "validated": true
+    }
+  ]
+}
