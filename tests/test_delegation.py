@@ -7,8 +7,11 @@ from pathlib import Path
 
 import pytest
 
+import agentmandate._conditions as conditions
+import agentmandate._delegation as delegation
+import scripts.migrate_delegation_evidence as delegation_migrations
 from agentmandate import analyse, load, loads
-from agentmandate._conditions import Evidence, Grant, _profile_digest
+from agentmandate._conditions import Evidence, _profile_digest
 from agentmandate._delegation import (
     DELEGATION_ADAPTER,
     DELEGATION_ADAPTER_VERSION,
@@ -32,6 +35,11 @@ from agentmandate._ir import (
     _entity_id,
     _fact_id,
 )
+from scripts.migrate_delegation_evidence import (
+    Grant,
+    migrate_authorizer_capture,
+    migrate_grant_v1,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 GRANT = FIXTURES / "delegation-grant-v1.json"
@@ -46,7 +54,7 @@ REVIEW = Evidence("exact", "accepted", "evidence-review", "2027-08-25")
 
 
 def authorizer_chain() -> DelegationChain:
-    return DelegationChain.from_authorizer_capture(AUTHORIZER.read_text(encoding="utf-8"), REVIEW)
+    return migrate_authorizer_capture(AUTHORIZER.read_text(encoding="utf-8"), REVIEW)
 
 
 def raw_chain() -> dict:
@@ -152,9 +160,20 @@ def test_authorizer_projection_is_canonical_and_verifies_its_source():
         )
 
 
+def test_repository_migration_check_replays_both_canonical_fixtures():
+    delegation_migrations.verify_fixtures()
+
+
+def test_evidence_converters_and_grant_reader_are_not_runtime_members():
+    assert not hasattr(conditions, "Grant")
+    assert not hasattr(delegation, "migrate_grant_v1")
+    assert not hasattr(DelegationChain, "from_grant_v1")
+    assert not hasattr(DelegationChain, "from_authorizer_capture")
+
+
 def test_grant_v1_migrates_without_precision_or_evidence_upgrade():
     old = Grant.from_json(GRANT.read_text(encoding="utf-8"))
-    chain = DelegationChain.from_grant_v1(old)
+    chain = migrate_grant_v1(old)
     hop = chain.hops[0]
 
     assert chain.id == old.id and chain.subject == old.subject
@@ -175,7 +194,7 @@ def test_grant_v1_without_digest_cannot_be_upgraded_during_migration():
     del raw["source"]["content_sha256"]
 
     with pytest.raises(DelegationFormatError, match="digest-pinned"):
-        DelegationChain.from_grant_v1(Grant.from_json(json.dumps(raw)))
+        migrate_grant_v1(Grant.from_json(json.dumps(raw)))
 
 
 def test_partial_actor_history_taints_every_chain_derived_decision():
@@ -333,7 +352,7 @@ def test_authorizer_adapter_rejects_unsupported_or_inconsistent_capture(mutate):
     raw = json.loads(AUTHORIZER.read_text(encoding="utf-8"))
     mutate(raw)
     with pytest.raises(DelegationFormatError):
-        DelegationChain.from_authorizer_capture(json.dumps(raw), REVIEW)
+        migrate_authorizer_capture(json.dumps(raw), REVIEW)
 
 
 def test_projection_digest_is_pinned_for_stability():
@@ -351,7 +370,7 @@ def test_projection_digest_is_pinned_for_stability():
             id="authorizer",
         ),
         pytest.param(
-            DelegationChain.from_grant_v1(Grant.from_json(GRANT.read_text(encoding="utf-8"))),
+            migrate_grant_v1(Grant.from_json(GRANT.read_text(encoding="utf-8"))),
             "a5b2ad851500cd8f554e9bab124b7b291dee431815812b73ce5345d63066528d",
             id="migrated-grant",
         ),

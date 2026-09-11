@@ -153,7 +153,9 @@ Intended semantics:
 > **Superseded candidate:** the real chain demonstrated that this private v1
 > shape cannot preserve ordered actors, token-resolution validity, or partial
 > authority surfaces. [Delegation record revision](delegation-v2.md) defines
-> the replacement and its fail-closed migration gates.
+> the replacement and its fail-closed migration gates. Its reader now lives
+> only in `scripts/migrate_delegation_evidence.py` for repository replay; the
+> installed runtime consumes delegation-chain v1 instead.
 
 A delegation is verifiable only against a reviewed grant artifact — the same
 separation that keeps inventory captures outside the mandate:

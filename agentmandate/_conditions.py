@@ -1,7 +1,7 @@
-"""Experimental records for condition contexts and delegation grants.
+"""Experimental records for condition contexts and tool-side attachments.
 
 Gates 2a and 2b of the conditions-and-delegation contract: strict external
-context and grant readers, private tool-side condition and structured-principal
+context readers, private tool-side condition and structured-principal
 records, their closed Authority IR projections, and private trust consumers.
 Nothing is exported from :mod:`agentmandate`.
 """
@@ -38,7 +38,6 @@ if TYPE_CHECKING:
     from .inventory import Inventory
 
 CONDITION_CONTEXT_VERSION = 1
-GRANT_VERSION = 1
 TOOL_CONDITION_VERSION = 1
 TOOL_PRINCIPAL_VERSION = 1
 CONDITION_PREDICATES = frozenset({"dispatch_target", "statement_class"})
@@ -53,19 +52,6 @@ _CONTEXT_ROOT_FIELDS = {
     "target",
     "domain",
     "completeness",
-    "evidence",
-    "source",
-}
-_GRANT_ROOT_FIELDS = {
-    "grant_version",
-    "id",
-    "grantor",
-    "subject",
-    "actor",
-    "audience",
-    "surface",
-    "issued",
-    "expires",
     "evidence",
     "source",
 }
@@ -511,158 +497,6 @@ class ConditionContext:
             completeness=completeness,
             evidence=evidence,
             source=context_source,
-        )
-
-
-@dataclass(frozen=True)
-class Grant:
-    """The reviewed authority surface a subject conferred on one actor."""
-
-    version: int
-    id: str
-    grantor: str
-    subject: str
-    actor: str
-    audience: str
-    scopes: tuple[str, ...]
-    tools: tuple[str, ...]
-    effects: tuple[str, ...]
-    issued: str
-    expires: str
-    evidence: Evidence
-    source: ContextSource | None = None
-
-    def as_dict(self) -> dict[str, Any]:
-        result: dict[str, Any] = {
-            "grant_version": self.version,
-            "id": self.id,
-            "grantor": self.grantor,
-            "subject": self.subject,
-            "actor": self.actor,
-            "audience": self.audience,
-            "surface": {
-                "scopes": list(self.scopes),
-                "tools": list(self.tools),
-                "effects": list(self.effects),
-            },
-            "issued": self.issued,
-            "expires": self.expires,
-            "evidence": self.evidence.as_dict(),
-        }
-        if self.source is not None:
-            result["source"] = self.source.as_dict()
-        return result
-
-    def to_json(self) -> str:
-        return json.dumps(
-            self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        ) + "\n"
-
-    def verify_source(self, content: bytes) -> None:
-        if not isinstance(content, bytes):
-            raise ConditionFormatError(
-                "condition contract grant.verify_source requires bytes"
-            )
-        if self.source is None or self.source.content_sha256 is None:
-            raise ConditionFormatError(
-                "condition contract grant declares no content digest to verify"
-            )
-        if self.source.content_sha256 != hashlib.sha256(content).hexdigest():
-            raise ConditionFormatError(
-                "condition contract grant source.content_sha256 does not match "
-                "the supplied bytes"
-            )
-
-    @classmethod
-    def from_json(cls, text: str) -> Grant:
-        raw = _record(
-            _load_json(text, "grant"), "grant", set(), _GRANT_ROOT_FIELDS
-        )
-        version = raw.get("grant_version")
-        if isinstance(version, bool) or not isinstance(version, int):
-            raise ConditionFormatError(
-                "condition contract grant_version must be an integer; this "
-                f"build reads {GRANT_VERSION}"
-            )
-        if version != GRANT_VERSION:
-            raise ConditionFormatError(
-                f"unsupported grant version {version}; this build reads "
-                f"{GRANT_VERSION}"
-            )
-        body = _record(
-            raw,
-            "grant",
-            {
-                "id", "grantor", "subject", "actor", "audience", "surface",
-                "issued", "expires", "evidence",
-            },
-            {"grant_version", "source"},
-        )
-
-        identifier = _nonempty_string(body, "id", "grant")
-        grantor = _nonempty_string(body, "grantor", "grant")
-        subject = _nonempty_string(body, "subject", "grant")
-        actor = _nonempty_string(body, "actor", "grant")
-        audience = _nonempty_string(body, "audience", "grant")
-        issued = _canonical_date(body, "issued", "grant")
-        expires = _canonical_date(body, "expires", "grant")
-        if issued > expires:
-            raise ConditionFormatError(
-                "condition contract grant.issued must not be after grant.expires"
-            )
-
-        surface = _record(
-            body["surface"],
-            "grant.surface",
-            {"effects", "scopes", "tools"},
-        )
-        # The effect set is the single source of truth for irreversible
-        # authority; there is no separate boolean to disagree with it.
-        effects = _canonical_members(
-            surface["effects"], "grant.surface", "effects", allowed=GRANT_EFFECTS
-        )
-        scopes = _canonical_members(surface["scopes"], "grant.surface", "scopes")
-        tools = _canonical_members(surface["tools"], "grant.surface", "tools")
-
-        evidence = _evidence(body["evidence"], "grant")
-
-        grant_source: ContextSource | None = None
-        if "source" in body:
-            source_raw = _record(
-                body["source"],
-                "grant.source",
-                {"kind", "locator"},
-                {"producer_version", "content_sha256"},
-            )
-            grant_source = ContextSource(
-                kind=_nonempty_string(source_raw, "kind", "grant.source"),
-                locator=_relative_path(source_raw, "locator", "grant.source"),
-                producer_version=source_raw.get("producer_version"),
-                content_sha256=_digest_string(
-                    source_raw, "content_sha256", "grant.source"
-                ),
-            )
-            producer = grant_source.producer_version
-            if producer is not None and not isinstance(producer, str):
-                raise ConditionFormatError(
-                    "condition contract grant.source.producer_version must be "
-                    "a string or null"
-                )
-
-        return cls(
-            version=version,
-            id=identifier,
-            grantor=grantor,
-            subject=subject,
-            actor=actor,
-            audience=audience,
-            scopes=scopes,
-            tools=tools,
-            effects=effects,
-            issued=issued,
-            expires=expires,
-            evidence=evidence,
-            source=grant_source,
         )
 
 
