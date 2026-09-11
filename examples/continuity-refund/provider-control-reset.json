@@ -1,0 +1,1 @@
+{"boundary_changed":true,"completed_before_transition":600,"counterfactual_reset_total":1200,"interpretation":"the new provider session resets consumed state and admits a second GBP 600 refund under the same GBP 1000 mandate","outcomes":["allow","allow"],"provider_limit":1000,"request_amount":600,"same_mandate":true,"transition":"fresh_session"}

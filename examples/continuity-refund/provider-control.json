@@ -1,0 +1,1 @@
+{"boundary_changed":false,"completed_before_transition":600,"counterfactual_reset_total":1200,"interpretation":"the second GBP 600 refund is denied because the first GBP 600 remains consumed after reconnect","outcomes":["allow","deny"],"provider_limit":1000,"request_amount":600,"same_mandate":true,"transition":"fresh_session"}

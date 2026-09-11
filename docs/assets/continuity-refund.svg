@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620" role="img" aria-labelledby="title description">
+  <title id="title">A refund mandate preserved across a provider session reconnect</title>
+  <desc id="description">A one-thousand-pound refund mandate permits a six-hundred-pound refund in session A. A reviewed mandate binding carries the consumed amount into session B, where a second six-hundred-pound attempt is denied. A counterfactual reset would allow the second refund and complete twelve hundred pounds.</desc>
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; fill: #17212b; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 15px; fill: #536273; }
+      .heading { font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #17212b; }
+      .body { font-family: Arial, sans-serif; font-size: 14px; fill: #253342; }
+      .small { font-family: Arial, sans-serif; font-size: 13px; fill: #536273; }
+      .box { stroke: #8a98a8; stroke-width: 1.5; rx: 10; }
+      .flow { stroke: #536273; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+  <rect width="1000" height="620" fill="#ffffff"/>
+  <text x="40" y="48" class="title">One mandate, two provider sessions, one refund total</text>
+  <text x="40" y="76" class="subtitle">Customer support refund agent · mandate-wide cumulative limit £1,000</text>
+
+  <rect id="mandate" x="40" y="108" width="920" height="62" class="box" fill="#edf4ff"/>
+  <text x="62" y="135" class="heading">Reviewed mandate</text>
+  <text x="62" y="157" class="body">process_refund · caller authority · total refunds ≤ £1,000 · human approval required</text>
+
+  <text x="40" y="214" class="heading" fill="#17633a">Observed safe continuation</text>
+  <rect id="session-a" x="40" y="235" width="250" height="112" class="box" fill="#e9f6ef"/>
+  <text x="60" y="264" class="heading">Session A</text>
+  <text x="60" y="289" class="body">Refund £600 → ALLOW</text>
+  <text x="60" y="314" class="body">Consumed: £600</text>
+  <text x="60" y="335" class="small">Remaining: £400</text>
+
+  <path d="M290 291 H355" class="flow"/>
+  <text x="316" y="283" class="heading">→</text>
+  <rect id="binding" x="355" y="235" width="290" height="112" class="box" fill="#fff7dc"/>
+  <text x="375" y="264" class="heading">Fresh session reconnect</text>
+  <text x="375" y="289" class="body">Mandate + principal + boundary</text>
+  <text x="375" y="314" class="body">joined by reviewed binding</text>
+  <text x="375" y="335" class="small">Consumed £600 stays attached</text>
+
+  <path d="M645 291 H710" class="flow"/>
+  <text x="671" y="283" class="heading">→</text>
+  <rect id="session-b-safe" x="710" y="235" width="250" height="112" class="box" fill="#e9f6ef"/>
+  <text x="730" y="264" class="heading">Session B</text>
+  <text x="730" y="289" class="body">Refund £600 → DENY</text>
+  <text x="730" y="314" class="body">£600 + £600 &gt; £1,000</text>
+  <text x="730" y="335" class="small">safe continuation: satisfied</text>
+
+  <text x="40" y="403" class="heading" fill="#9a2f2f">Counterfactual: session state resets</text>
+  <rect id="counterfactual-reset" x="40" y="424" width="605" height="112" class="box" fill="#fdecea"/>
+  <text x="60" y="453" class="heading">Fresh session starts at consumed £0</text>
+  <text x="60" y="478" class="body">The same £600 request appears below the session-local £1,000 limit → ALLOW</text>
+  <text x="60" y="503" class="body">But the reviewed mandate has now completed £600 + £600 = £1,200</text>
+  <text x="60" y="524" class="small">Correct per-request decisions do not prove mandate continuity.</text>
+
+  <path d="M645 480 H710" class="flow"/>
+  <text x="671" y="472" class="heading">→</text>
+  <rect id="counterfactual-breach" x="710" y="424" width="250" height="112" class="box" fill="#fdecea"/>
+  <text x="730" y="453" class="heading">Unsafe result</text>
+  <text x="730" y="478" class="body">Completed: £1,200</text>
+  <text x="730" y="503" class="body">Mandate limit: £1,000</text>
+  <text x="730" y="524" class="small">reset + overshot findings</text>
+
+  <text x="40" y="584" class="small">The committed example is synthetic. It demonstrates the contract; it is not a claim about provider behavior.</text>
+</svg>

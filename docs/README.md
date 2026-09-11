@@ -43,7 +43,10 @@ change an analysis result:
 Authority continuity remains experimental and its Python records remain
 private. Its public CLI asks whether consumed state remains attached to one
 reviewed mandate across a session, handoff, or policy revision. A session
-identifier is evidence for that question, not the mandate itself.
+identifier is evidence for that question, not the mandate itself. The
+[next evidence plan](continuity-evidence-plan.md) defines matched
+counterfactual captures for session, revision, process, principal, deployment,
+retry, and concurrency boundaries.
 
 ## Decision records and evidence
 
