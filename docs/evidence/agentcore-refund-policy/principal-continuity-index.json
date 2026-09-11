@@ -1,0 +1,46 @@
+{
+  "capture_date": "2026-09-11",
+  "principal_continuity_capture_version": 1,
+  "provider": "AWS AgentCore Gateway Policy ENFORCE",
+  "raw_artifact_policy": "live account, resource, policy, request and session identifiers remained in temporary files and were deleted after reviewed projection",
+  "raw_artifacts_committed": false,
+  "region": "us-east-1",
+  "sources": [
+    {
+      "content_sha256": "7468b28691d794285cecd666c2712a2f1d69b6dd4af922cca6278fc4aaf0bb64",
+      "locator": "capture_principal_continuity.py"
+    },
+    {
+      "content_sha256": "a587948f683c16736f41da33f675d90a618ff2ef3235e783d7ba3c57d000ca0f",
+      "locator": "principal-continuity-budget.dogwood"
+    },
+    {
+      "content_sha256": "3ea96cfec12201c649364dc0232e5248a5e1049ea51c5c970c1ee531f83a63f4",
+      "locator": "principal-continuity-cleanup.json"
+    },
+    {
+      "content_sha256": "151bff97016809fac3caed3ce6742f542848cfafa9bed32aa9d8f4c02e4afcc7",
+      "locator": "principal-continuity-corrections.json"
+    },
+    {
+      "content_sha256": "31adf3af0bf4bd6ac868284703628ab2807cf0ce1d33892cb783d3f0918ec5bb",
+      "locator": "principal-continuity-deployment.json"
+    },
+    {
+      "content_sha256": "07a203e38d15bae630fa6029591c899633a06a3ec9c654856903fc5f527ca09d",
+      "locator": "principal-continuity-events.json"
+    },
+    {
+      "content_sha256": "567afddbd8ab86303c8f8d23db3f4c9fa32593302ea12e3c18a98edcb0c958a2",
+      "locator": "principal-continuity-permit.cedar"
+    },
+    {
+      "content_sha256": "20508f920079233b9876a9c3a116b9662c7589e9bb94b5ef9e0bcb18ab5a2cc3",
+      "locator": "principal-continuity-procedure.md"
+    },
+    {
+      "content_sha256": "a0ac8836aa03a9608d9f9703abcf8443dd120ec13012e2164fefd49d283fd229",
+      "locator": "principal-continuity-summary.json"
+    }
+  ]
+}

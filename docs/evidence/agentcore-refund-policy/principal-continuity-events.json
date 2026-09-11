@@ -1,0 +1,1624 @@
+{
+  "capture_finished_at": "2026-09-11T15:07:37.004286Z",
+  "capture_started_at": "2026-09-11T15:07:15.706864Z",
+  "controls": [
+    {
+      "duration_ms": 483.869315,
+      "finished_at": "2026-09-11T15:07:35.586501Z",
+      "outcome": "allow",
+      "principal_alias": "a",
+      "request": {
+        "id": "A-below",
+        "jsonrpc": "2.0",
+        "method": "tools/call",
+        "params": {
+          "arguments": {
+            "amount": 500
+          },
+          "name": "PrincipalTarget___process_refund"
+        }
+      },
+      "response": {
+        "id": "A-below",
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"processed\":true,\"amount\":500}",
+              "type": "text"
+            }
+          ],
+          "isError": false
+        }
+      },
+      "session_alias": "control-a-500",
+      "started_at": "2026-09-11T15:07:35.102614Z",
+      "wall_clock_delta_ms": 483.887
+    },
+    {
+      "duration_ms": 448.929247,
+      "finished_at": "2026-09-11T15:07:36.035583Z",
+      "outcome": "deny",
+      "principal_alias": "a",
+      "request": {
+        "id": "A-over",
+        "jsonrpc": "2.0",
+        "method": "tools/call",
+        "params": {
+          "arguments": {
+            "amount": 1000
+          },
+          "name": "PrincipalTarget___process_refund"
+        }
+      },
+      "response": {
+        "error": {
+          "code": -32002,
+          "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+        },
+        "id": "A-over",
+        "jsonrpc": "2.0"
+      },
+      "session_alias": "control-a-1000",
+      "started_at": "2026-09-11T15:07:35.586642Z",
+      "wall_clock_delta_ms": 448.941
+    },
+    {
+      "duration_ms": 501.998363,
+      "finished_at": "2026-09-11T15:07:36.537927Z",
+      "outcome": "allow",
+      "principal_alias": "b",
+      "request": {
+        "id": "B-below",
+        "jsonrpc": "2.0",
+        "method": "tools/call",
+        "params": {
+          "arguments": {
+            "amount": 500
+          },
+          "name": "PrincipalTarget___process_refund"
+        }
+      },
+      "response": {
+        "id": "B-below",
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"processed\":true,\"amount\":500}",
+              "type": "text"
+            }
+          ],
+          "isError": false
+        }
+      },
+      "session_alias": "control-b-500",
+      "started_at": "2026-09-11T15:07:36.035905Z",
+      "wall_clock_delta_ms": 502.022
+    },
+    {
+      "duration_ms": 465.806489,
+      "finished_at": "2026-09-11T15:07:37.004072Z",
+      "outcome": "deny",
+      "principal_alias": "b",
+      "request": {
+        "id": "B-over",
+        "jsonrpc": "2.0",
+        "method": "tools/call",
+        "params": {
+          "arguments": {
+            "amount": 1000
+          },
+          "name": "PrincipalTarget___process_refund"
+        }
+      },
+      "response": {
+        "error": {
+          "code": -32002,
+          "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+        },
+        "id": "B-over",
+        "jsonrpc": "2.0"
+      },
+      "session_alias": "control-b-1000",
+      "started_at": "2026-09-11T15:07:36.538241Z",
+      "wall_clock_delta_ms": 465.831
+    }
+  ],
+  "mandate_binding": "external experiment invariant; Gateway did not inspect it",
+  "mandate_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "principal_continuity_events_version": 1,
+  "principal_identity": {
+    "aliases": [
+      "a",
+      "b"
+    ],
+    "authenticated_by": "AWS_IAM",
+    "proof": "distinct STS GetCallerIdentity results validated before trials",
+    "raw_identifiers_retained": false
+  },
+  "protocol": "MCP 2025-03-26",
+  "provider": "AWS AgentCore Gateway Policy",
+  "provider_state": {
+    "completed": "unavailable",
+    "configured_limit": 1000,
+    "consumed": "unavailable",
+    "in_flight": "unavailable",
+    "remaining": "unavailable",
+    "reserved": "unavailable"
+  },
+  "random_seed": 20260911,
+  "region": "us-east-1",
+  "retry": {
+    "application_retries": 0,
+    "sdk_max_attempts": 0
+  },
+  "sanitisation": {
+    "omitted": [
+      "AWS account identifier",
+      "Amazon Resource Names",
+      "access keys",
+      "Gateway URL",
+      "live policy identifiers",
+      "provider session identifiers"
+    ],
+    "raw_live_files_deleted_after_projection": true
+  },
+  "sdk": {
+    "boto3": "1.43.92",
+    "botocore": "1.43.92"
+  },
+  "tool": "PrincipalTarget___process_refund",
+  "trials": [
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 1044.6649,
+          "finished_at": "2026-09-11T15:07:16.751570Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-3-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-same-3-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:15.706864Z",
+          "wall_clock_delta_ms": 1044.706
+        },
+        {
+          "duration_ms": 454.548398,
+          "finished_at": "2026-09-11T15:07:17.206357Z",
+          "outcome": "deny",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-3-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "B-same-3-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:16.751791Z",
+          "wall_clock_delta_ms": 454.566
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "b"
+      ],
+      "session_alias": "same-3",
+      "trial": 3
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 469.685232,
+          "finished_at": "2026-09-11T15:07:17.676258Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-6-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-6-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:17.206558Z",
+          "wall_clock_delta_ms": 469.7
+        },
+        {
+          "duration_ms": 530.939759,
+          "finished_at": "2026-09-11T15:07:18.207365Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-6-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-6-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:17.676412Z",
+          "wall_clock_delta_ms": 530.953
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "b"
+      ],
+      "session_alias": "changed-6",
+      "trial": 6
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 551.735958,
+          "finished_at": "2026-09-11T15:07:18.759242Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-1-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-same-1-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:18.207497Z",
+          "wall_clock_delta_ms": 551.745
+        },
+        {
+          "duration_ms": 459.894784,
+          "finished_at": "2026-09-11T15:07:19.219307Z",
+          "outcome": "deny",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-1-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "B-same-1-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:18.759399Z",
+          "wall_clock_delta_ms": 459.908
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "b"
+      ],
+      "session_alias": "same-1",
+      "trial": 1
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 500.560757,
+          "finished_at": "2026-09-11T15:07:19.720130Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-7-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-7-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:19.219551Z",
+          "wall_clock_delta_ms": 500.579
+        },
+        {
+          "duration_ms": 453.071461,
+          "finished_at": "2026-09-11T15:07:20.173351Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-7-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-7-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:19.720270Z",
+          "wall_clock_delta_ms": 453.081
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "a"
+      ],
+      "session_alias": "changed-7",
+      "trial": 7
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 521.002871,
+          "finished_at": "2026-09-11T15:07:20.694690Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-8-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-8-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:20.173667Z",
+          "wall_clock_delta_ms": 521.023
+        },
+        {
+          "duration_ms": 522.986462,
+          "finished_at": "2026-09-11T15:07:21.217918Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-8-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-8-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:20.694914Z",
+          "wall_clock_delta_ms": 523.004
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "b"
+      ],
+      "session_alias": "changed-8",
+      "trial": 8
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 434.852363,
+          "finished_at": "2026-09-11T15:07:21.652957Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-9-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-same-9-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:21.218092Z",
+          "wall_clock_delta_ms": 434.865
+        },
+        {
+          "duration_ms": 455.056787,
+          "finished_at": "2026-09-11T15:07:22.108225Z",
+          "outcome": "deny",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-9-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "B-same-9-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:21.653149Z",
+          "wall_clock_delta_ms": 455.076
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "b"
+      ],
+      "session_alias": "same-9",
+      "trial": 9
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 465.056204,
+          "finished_at": "2026-09-11T15:07:22.573591Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-2-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-2-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:22.108506Z",
+          "wall_clock_delta_ms": 465.085
+        },
+        {
+          "duration_ms": 520.875538,
+          "finished_at": "2026-09-11T15:07:23.094638Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-2-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-2-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:22.573748Z",
+          "wall_clock_delta_ms": 520.89
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "b"
+      ],
+      "session_alias": "changed-2",
+      "trial": 2
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 497.663322,
+          "finished_at": "2026-09-11T15:07:23.592575Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-3-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-3-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:23.094891Z",
+          "wall_clock_delta_ms": 497.684
+        },
+        {
+          "duration_ms": 507.784358,
+          "finished_at": "2026-09-11T15:07:24.100578Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-3-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-3-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:23.592775Z",
+          "wall_clock_delta_ms": 507.803
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "a"
+      ],
+      "session_alias": "changed-3",
+      "trial": 3
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 492.150676,
+          "finished_at": "2026-09-11T15:07:24.592989Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-4-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-same-4-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:24.100820Z",
+          "wall_clock_delta_ms": 492.169
+        },
+        {
+          "duration_ms": 441.471188,
+          "finished_at": "2026-09-11T15:07:25.034634Z",
+          "outcome": "deny",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-4-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "A-same-4-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:24.593148Z",
+          "wall_clock_delta_ms": 441.486
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "a"
+      ],
+      "session_alias": "same-4",
+      "trial": 4
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 507.91198,
+          "finished_at": "2026-09-11T15:07:25.542821Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-7-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-same-7-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:25.034888Z",
+          "wall_clock_delta_ms": 507.933
+        },
+        {
+          "duration_ms": 455.281375,
+          "finished_at": "2026-09-11T15:07:25.998325Z",
+          "outcome": "deny",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-7-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "B-same-7-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:25.543026Z",
+          "wall_clock_delta_ms": 455.299
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "b"
+      ],
+      "session_alias": "same-7",
+      "trial": 7
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 452.946892,
+          "finished_at": "2026-09-11T15:07:26.451431Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-5-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-same-5-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:25.998471Z",
+          "wall_clock_delta_ms": 452.96
+        },
+        {
+          "duration_ms": 446.630026,
+          "finished_at": "2026-09-11T15:07:26.898372Z",
+          "outcome": "deny",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-same-5-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "B-same-5-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:26.451717Z",
+          "wall_clock_delta_ms": 446.655
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "b"
+      ],
+      "session_alias": "same-5",
+      "trial": 5
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 520.409243,
+          "finished_at": "2026-09-11T15:07:27.418956Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-6-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-same-6-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:26.898532Z",
+          "wall_clock_delta_ms": 520.424
+        },
+        {
+          "duration_ms": 453.747339,
+          "finished_at": "2026-09-11T15:07:27.873002Z",
+          "outcome": "deny",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-6-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "A-same-6-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:27.419228Z",
+          "wall_clock_delta_ms": 453.774
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "a"
+      ],
+      "session_alias": "same-6",
+      "trial": 6
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 484.443491,
+          "finished_at": "2026-09-11T15:07:28.357848Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-8-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-same-8-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:27.873374Z",
+          "wall_clock_delta_ms": 484.474
+        },
+        {
+          "duration_ms": 450.186783,
+          "finished_at": "2026-09-11T15:07:28.230135Z",
+          "outcome": "deny",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-8-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "A-same-8-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:28.358015Z",
+          "wall_clock_delta_ms": -127.88
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "a"
+      ],
+      "session_alias": "same-8",
+      "trial": 8
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 483.97317,
+          "finished_at": "2026-09-11T15:07:28.714291Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-5-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-5-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:28.230305Z",
+          "wall_clock_delta_ms": 483.986
+        },
+        {
+          "duration_ms": 451.616256,
+          "finished_at": "2026-09-11T15:07:29.166061Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-5-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-5-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:28.714432Z",
+          "wall_clock_delta_ms": 451.629
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "a"
+      ],
+      "session_alias": "changed-5",
+      "trial": 5
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 504.909536,
+          "finished_at": "2026-09-11T15:07:29.671240Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-0-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-0-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:29.166311Z",
+          "wall_clock_delta_ms": 504.929
+        },
+        {
+          "duration_ms": 487.178314,
+          "finished_at": "2026-09-11T15:07:30.158719Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-0-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-0-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:29.671515Z",
+          "wall_clock_delta_ms": 487.204
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "b"
+      ],
+      "session_alias": "changed-0",
+      "trial": 0
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 532.9274,
+          "finished_at": "2026-09-11T15:07:30.691881Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-2-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-same-2-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:30.158935Z",
+          "wall_clock_delta_ms": 532.946
+        },
+        {
+          "duration_ms": 434.541581,
+          "finished_at": "2026-09-11T15:07:31.126638Z",
+          "outcome": "deny",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-2-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "A-same-2-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:30.692078Z",
+          "wall_clock_delta_ms": 434.56
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "a"
+      ],
+      "session_alias": "same-2",
+      "trial": 2
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 531.087447,
+          "finished_at": "2026-09-11T15:07:31.658007Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-4-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-4-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:31.126899Z",
+          "wall_clock_delta_ms": 531.108
+        },
+        {
+          "duration_ms": 473.826007,
+          "finished_at": "2026-09-11T15:07:32.132074Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-4-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-4-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:31.658228Z",
+          "wall_clock_delta_ms": 473.846
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "b"
+      ],
+      "session_alias": "changed-4",
+      "trial": 4
+    },
+    {
+      "arm": "same",
+      "calls": [
+        {
+          "duration_ms": 496.703047,
+          "finished_at": "2026-09-11T15:07:32.629002Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-0-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-same-0-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:32.132281Z",
+          "wall_clock_delta_ms": 496.721
+        },
+        {
+          "duration_ms": 441.511646,
+          "finished_at": "2026-09-11T15:07:33.070847Z",
+          "outcome": "deny",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-same-0-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "error": {
+              "code": -32002,
+              "message": "Tool Execution Denied: Tool call not allowed due to policy enforcement [Policy evaluation denied due to <reviewed-principal-budget-policy>]"
+            },
+            "id": "A-same-0-second",
+            "jsonrpc": "2.0"
+          },
+          "started_at": "2026-09-11T15:07:32.629297Z",
+          "wall_clock_delta_ms": 441.55
+        }
+      ],
+      "principal_sequence": [
+        "a",
+        "a"
+      ],
+      "session_alias": "same-0",
+      "trial": 0
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 503.558429,
+          "finished_at": "2026-09-11T15:07:33.574704Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-1-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-1-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:33.071124Z",
+          "wall_clock_delta_ms": 503.58
+        },
+        {
+          "duration_ms": 497.683828,
+          "finished_at": "2026-09-11T15:07:34.072636Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-1-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-1-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:33.574932Z",
+          "wall_clock_delta_ms": 497.704
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "a"
+      ],
+      "session_alias": "changed-1",
+      "trial": 1
+    },
+    {
+      "arm": "changed",
+      "calls": [
+        {
+          "duration_ms": 580.409336,
+          "finished_at": "2026-09-11T15:07:34.653563Z",
+          "outcome": "allow",
+          "principal_alias": "b",
+          "request": {
+            "id": "B-changed-9-first",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "B-changed-9-first",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:34.073041Z",
+          "wall_clock_delta_ms": 580.522
+        },
+        {
+          "duration_ms": 448.536371,
+          "finished_at": "2026-09-11T15:07:35.102354Z",
+          "outcome": "allow",
+          "principal_alias": "a",
+          "request": {
+            "id": "A-changed-9-second",
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+              "arguments": {
+                "amount": 600
+              },
+              "name": "PrincipalTarget___process_refund"
+            }
+          },
+          "response": {
+            "id": "A-changed-9-second",
+            "jsonrpc": "2.0",
+            "result": {
+              "content": [
+                {
+                  "text": "{\"processed\":true,\"amount\":600}",
+                  "type": "text"
+                }
+              ],
+              "isError": false
+            }
+          },
+          "started_at": "2026-09-11T15:07:34.653797Z",
+          "wall_clock_delta_ms": 448.557
+        }
+      ],
+      "principal_sequence": [
+        "b",
+        "a"
+      ],
+      "session_alias": "changed-9",
+      "trial": 9
+    }
+  ]
+}

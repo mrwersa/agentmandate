@@ -40,6 +40,21 @@ Randomize pair order where the provider permits it and run enough repetitions
 to expose non-deterministic handoff or propagation behavior. Ten trials per
 cell is a useful minimum for reproducibility, not a statistical guarantee.
 
+## Execution status
+
+The AgentCore refund evidence now covers the same-session, reconnect, separate
+client-process, byte-identical revision, semantic no-op revision, threshold
+revision, principal-change, and synchronized-concurrency cells with repeated
+provider trials. The principal-change control held the provider session fixed
+and observed Allow–Allow across distinct IAM principals in 10/10 balanced
+trials, while same-principal controls were Allow–Deny in 10/10. This locates
+the tested history at least at the principal×session boundary.
+
+Region or deployment change and idempotent retry remain unexecuted. Tightening
+or widening has evidence for stale-session invalidation and fresh recovery,
+but not for a reviewed translation of predecessor consumption into restored
+capacity; that stronger cell also remains open.
+
 ## Capture bundle per trial
 
 Retain exact raw bytes plus a small normalized index. The index should include:

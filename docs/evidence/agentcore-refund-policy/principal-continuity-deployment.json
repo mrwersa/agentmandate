@@ -1,0 +1,64 @@
+{
+  "agentcore_cli": "0.24.2",
+  "boto3": "1.43.92",
+  "botocore": "1.43.92",
+  "gateway": {
+    "alias": "principal-continuity-gateway",
+    "authorizer": "AWS_IAM",
+    "policy_engine_mode": "ENFORCE",
+    "protocol": "MCP",
+    "search_type": "SEMANTIC",
+    "status": "READY"
+  },
+  "gateway_role_correction": {
+    "action": "bedrock-agentcore:GetWorkloadAccessToken",
+    "effect": "Allow",
+    "resources": [
+      "default-workload-directory",
+      "exact-gateway-workload-identity"
+    ],
+    "wildcard": false
+  },
+  "policies": [
+    {
+      "definition_kind": "policy",
+      "enforcement_mode": "ACTIVE",
+      "name": "PrincipalBudget",
+      "statement_sha256": "a587948f683c16736f41da33f675d90a618ff2ef3235e783d7ba3c57d000ca0f",
+      "status": "ACTIVE"
+    },
+    {
+      "definition_kind": "policy",
+      "enforcement_mode": "ACTIVE",
+      "name": "PrincipalPermit",
+      "statement_sha256": "567afddbd8ab86303c8f8d23db3f4c9fa32593302ea12e3c18a98edcb0c958a2",
+      "status": "ACTIVE"
+    }
+  ],
+  "policy_engine": {
+    "alias": "principal-policy-engine",
+    "status": "ACTIVE"
+  },
+  "principal_continuity_deployment_version": 1,
+  "provider": "AWS AgentCore Gateway Policy",
+  "provider_state_snapshot": "unavailable",
+  "region": "us-east-1",
+  "stack_inventory": {
+    "AWS::BedrockAgentCore::Gateway": 1,
+    "AWS::BedrockAgentCore::GatewayTarget": 1,
+    "AWS::BedrockAgentCore::Policy": 2,
+    "AWS::BedrockAgentCore::PolicyEngine": 1,
+    "AWS::CDK::Metadata": 1,
+    "AWS::IAM::Policy": 1,
+    "AWS::IAM::Role": 2,
+    "AWS::Lambda::Function": 1,
+    "AWS::Logs::LogGroup": 1
+  },
+  "state_continuation_operations": [],
+  "target": {
+    "alias": "principal-target",
+    "status": "READY",
+    "type": "LAMBDA"
+  },
+  "temporary_principals_after_capture": 0
+}

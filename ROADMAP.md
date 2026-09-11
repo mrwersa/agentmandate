@@ -39,8 +39,8 @@ model initiatives completed together. The present frontier is:
 | State | Initiatives |
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
-| **Active** | Authority-continuity evidence: execute the one-factor counterfactual matrix in the [capture plan](docs/continuity-evidence-plan.md) without changing the public contract |
-| **Ready next** | Capture provider-backed continuity controls across session, process, policy revision, principal, deployment, retry, and concurrency boundaries; use those results to identify the state-owning boundary |
+| **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; finish the remaining one-factor cells without changing the public contract |
+| **Ready next** | Capture region or deployment change, then idempotent retry; separately test whether tightened or widened revisions can restore capacity without losing predecessor consumption |
 | **Evidence-blocked** | Resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
@@ -52,10 +52,12 @@ Neither result substitutes for the other.
 The delivered continuity surface now has a
 [counterfactual evidence plan](docs/continuity-evidence-plan.md). Its next
 provider captures vary session, process, policy revision, principal,
-deployment, retry, and concurrency one factor at a time so later results can
+deployment, retry, and concurrency one factor at a time so results can
 identify the state-owning boundary rather than merely add more allow/deny
-examples. This evidence work resumes after the completed pre-1.0 consolidation
-audit without changing the public contract.
+examples. Session, process, revision, principal, and synchronized-concurrency
+controls are now captured; deployment and retry remain. This evidence work
+continues after the completed pre-1.0 consolidation audit without changing the
+public contract.
 
 ## Outcomes and boundaries
 
