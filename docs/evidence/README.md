@@ -21,5 +21,10 @@ regenerate all three canonical continuity profiles from their digest-pinned
 AgentCore and Anthropic sources and compare them byte for byte. The command
 proves replay and source identity; it does not promote their review state.
 
+The IAM producer evidence converter is likewise repository-only. Run
+`python scripts/migrate_producer_evidence.py` to regenerate the canonical IAM
+boundary from its digest-pinned catalogue, sanitized capture, and adapter and
+compare it byte for byte. The migration remains `unreviewed`.
+
 `probes/` is the exception: it contains shaped, synthetic questions that may
 expose a design problem but cannot justify a schema or roadmap claim by itself.

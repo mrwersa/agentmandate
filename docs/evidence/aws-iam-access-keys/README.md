@@ -92,8 +92,10 @@ No access-key ID, secret key, account ID, ARN, request ID, or trace ID is
 committed. The raw credential-bearing response cannot be retained safely, so
 the executable capture and independently authenticated aliases are the review
 artifact. This evidence selects the private finite-cardinality record shape and
-canonical migration now implemented in `agentmandate._producer`. It does not
-itself change the manifest schema or analyzer.
+canonical migration implemented in the repository-only
+`scripts/migrate_producer_evidence.py` tool. Run it from the repository root to
+reproduce the canonical fixture byte for byte. It does not itself change the
+manifest schema or analyzer, and it is not installed with the runtime package.
 
 ## Gate consequence
 

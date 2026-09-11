@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 import agentmandate._producer as producer
+import scripts.migrate_producer_evidence as producer_migrations
 from agentmandate import analyse, loads
 from agentmandate._ir import (
     AuthorityIR,
@@ -26,7 +27,6 @@ from agentmandate._producer import (
     ProducerEvidence,
     ProducerResult,
     ProducerSelection,
-    _captured,
     _digest,
     _integer,
     _load,
@@ -38,6 +38,9 @@ from agentmandate._producer import (
     _strings,
     _validate_producer_profile,
     analyse_producers,
+)
+from scripts.migrate_producer_evidence import (
+    _captured,
     migrate_aws_iam_access_key_boundary,
 )
 
@@ -181,6 +184,14 @@ def test_canonical_migration_round_trips_and_verifies_caller_bytes() -> None:
     assert boundary.controls.accepted_through.count == 2
     assert boundary.controls.exhausted_at.attempt == 3
     assert boundary.evidence == ProducerEvidence("exact", "unreviewed", None, None)
+
+
+def test_repository_migration_check_replays_canonical_fixture() -> None:
+    producer_migrations.verify_fixture()
+
+
+def test_evidence_converter_is_not_an_installed_runtime_member() -> None:
+    assert not hasattr(producer, "migrate_aws_iam_access_key_boundary")
 
 
 def _rehash(graph: AuthorityIR) -> AuthorityIR:
@@ -1204,10 +1215,10 @@ def test_private_helpers_reject_unsafe_values() -> None:
 
 
 def _rehashed(monkeypatch, contents: dict[str, bytes]) -> None:
-    sources = deepcopy(producer._IAM_SOURCES)
+    sources = deepcopy(producer_migrations._IAM_SOURCES)
     for locator, (kind, role, _digest_value) in sources.items():
         sources[locator] = (kind, role, hashlib.sha256(contents[locator]).hexdigest())
-    monkeypatch.setattr(producer, "_IAM_SOURCES", sources)
+    monkeypatch.setattr(producer_migrations, "_IAM_SOURCES", sources)
 
 
 def _replace_json(
