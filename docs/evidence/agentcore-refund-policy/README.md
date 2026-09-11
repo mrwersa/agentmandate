@@ -277,6 +277,31 @@ procedure, corrections, derived summary, and eight-check cleanup record. Live
 account, resource, policy, request, identity, and session identifiers remained
 in temporary raw files and were deleted after projection.
 
+## Deployment-continuity authoring refusal
+
+The next one-factor control attempted to hold one shared policy engine, exact
+policy bytes and revision, IAM principal, region, target/action shape, request
+sequence, and provider session fixed while changing only Gateway deployment
+identity. AgentCore refused all three policy forms before any Gateway request.
+A tool-specific action must name an exact Gateway resource; an action-type
+scope is invalid; and the valid unconstrained-action form cannot declare the
+exact request event and is independently rejected because every temporal
+predicate must include `eventResource: resource`.
+
+Those requirements make Gateway identity part of both policy authoring and
+history selection. Cloning the policy for a second Gateway would change its
+resource binding and explicitly select different history, so an Allow or Deny
+could not distinguish provider state placement from policy semantics. This is
+a managed authoring limitation, not runtime evidence that cumulative history
+is preserved or reset across deployments. All attempts used
+`IGNORE_ALL_FINDINGS`; zero data-plane requests were made.
+
+`deployment-continuity-refusal-index.json`, SHA-256
+`46097058418bcf4ee9996a98fe13be86ced85a2abd8c70ee12a7a270aa31c44f`,
+pins the three exact candidates, sanitized provider diagnostics, procedure,
+correction log, verifier, and seven-check cleanup record. Each rejected stack
+reached rollback complete and was deleted. No live identifier was retained.
+
 `temporal-repetition-index.json`, SHA-256
 `cb3e8546157a4a2f9b7d48b8e20666a212fd6b418de669d682c5a4f5bec31cba`,
 pins the capture transformer, procedure, both sanitised policy revisions, full
@@ -474,7 +499,9 @@ same inert shape. The latency follow-up recreated that one-tool shape once more
 and made 36 managed requests: one inventory call, five warm-ups, and 30 retained
 measurements. The principal-change control created one further task-scoped
 deployment, two temporary IAM users, 40 paired managed requests, and four
-single-request controls.
+single-request controls. The deployment-continuity follow-up attempted three
+policy creations across three fully rolled-back task stacks and made zero
+data-plane requests.
 Each task used an AgentCore
 Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
 task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)

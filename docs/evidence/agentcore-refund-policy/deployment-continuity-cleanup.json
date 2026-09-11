@@ -1,0 +1,37 @@
+{
+  "cleanup_version": 1,
+  "checked_at": "2026-09-11T20:08:00Z",
+  "retained": [
+    "account CDK bootstrap resources"
+  ],
+  "checks": [
+    {
+      "resource": "CloudFormation stack AgentCore-deploymentcapture-default",
+      "outcome": "not_found"
+    },
+    {
+      "resource": "AgentCore Gateways BoundaryA and BoundaryB",
+      "outcome": "empty_result"
+    },
+    {
+      "resource": "AgentCore policy engine SharedPolicyEngine",
+      "outcome": "empty_result"
+    },
+    {
+      "resource": "Lambda functions matching the experiment names",
+      "outcome": "empty_result"
+    },
+    {
+      "resource": "CloudWatch log groups matching the experiment names",
+      "outcome": "empty_result"
+    },
+    {
+      "resource": "IAM roles matching the experiment names",
+      "outcome": "empty_result"
+    },
+    {
+      "resource": "customer-managed IAM policies matching the experiment names",
+      "outcome": "empty_result"
+    }
+  ]
+}

@@ -50,7 +50,15 @@ and observed Allow–Allow across distinct IAM principals in 10/10 balanced
 trials, while same-principal controls were Allow–Deny in 10/10. This locates
 the tested history at least at the principal×session boundary.
 
-Region or deployment change and idempotent retry remain unexecuted. The
+The same-region deployment cell is now evidence-blocked by the managed policy
+contract. Tool-specific policies must name an exact Gateway, and every
+temporal predicate must bind `eventResource` to that current resource. A
+second deployment therefore changes both the policy resource binding and the
+history selected by the policy, so it cannot be the intended one-factor
+counterfactual. The [sanitized refusal](evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal)
+records three managed authoring attempts and zero data-plane requests.
+
+Idempotent retry remains the next executable cell. The
 [continuation campaign](continuation-campaign-protocol.md) closed the tightening
 cell on 11 September 2026: after a revision from 1,000 to 700, prescribed
 recovery admitted a 600 request that carried predecessor consumption would

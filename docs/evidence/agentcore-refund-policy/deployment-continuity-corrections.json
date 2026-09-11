@@ -1,0 +1,26 @@
+{
+  "correction_log_version": 1,
+  "entries": [
+    {
+      "classification": "source ambiguity",
+      "id": "deployment-continuity-001",
+      "result": "CLI help advertised exception level ALL while the installed command accepted DEBUG; no cloud resource existed"
+    },
+    {
+      "classification": "extractor defect",
+      "id": "deployment-continuity-002",
+      "result": "the generated CDK packager required project-relative Lambda paths, pyproject files, and uv; local synthesis failures created no cloud resources"
+    },
+    {
+      "classification": "extractor defect",
+      "id": "deployment-continuity-003",
+      "result": "matching target names across two configured Gateways collided in a generated CDK output identifier; the planned direct-control-plane second Gateway was never created"
+    },
+    {
+      "classification": "source ambiguity",
+      "id": "deployment-continuity-004",
+      "result": "three policy candidates were rejected during stack creation; every failed stack reached rollback complete and was deleted before the next attempt"
+    }
+  ],
+  "excluded_data_plane_requests": 0
+}
