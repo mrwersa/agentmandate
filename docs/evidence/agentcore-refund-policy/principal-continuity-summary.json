@@ -1,0 +1,32 @@
+{
+  "claim_boundary": "ten balanced principal changes under one Gateway and policy revision; allow/deny outcomes with provider state fields unavailable, not a claim about all identities",
+  "finding": "under the tested service and policy versions, cumulative history was isolated by authenticated IAM principal as well as policy-session identifier",
+  "mandate_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "principal_continuity_summary_version": 1,
+  "request_amount": 600,
+  "results": {
+    "changed_principal_aggregate": 1200,
+    "changed_principal_allow_then_allow": 10,
+    "direction_counts": {
+      "a_to_b": 5,
+      "b_to_a": 5
+    },
+    "managed_call_ms": {
+      "maximum": 1044.6649,
+      "minimum": 434.541581
+    },
+    "same_principal_allow_then_deny": 10,
+    "single_request_controls": {
+      "principal_a": {
+        "below_500": "allow",
+        "boundary_1000": "deny"
+      },
+      "principal_b": {
+        "below_500": "allow",
+        "boundary_1000": "deny"
+      }
+    }
+  },
+  "threshold": 1000,
+  "trials_per_arm": 10
+}

@@ -1,0 +1,47 @@
+{
+  "corrections": [
+    {
+      "class": "extractor defect",
+      "failed_outcomes_entered_result": false,
+      "id": "principal-continuity-001",
+      "result": "the CLI help named exception level ALL while the installed command accepted DEBUG"
+    },
+    {
+      "class": "deployment policy",
+      "failed_outcomes_entered_result": false,
+      "id": "principal-continuity-002",
+      "result": "disabling semantic search projected unsupported searchType NONE; the empty validation stack was deleted and the supported SEMANTIC default was used"
+    },
+    {
+      "class": "extractor dependency",
+      "failed_outcomes_entered_result": false,
+      "id": "principal-continuity-003",
+      "result": "the local CDK packager required uv and the aws login credential provider required AWS CRT; both were installed only in the temporary capture environment"
+    },
+    {
+      "class": "deployment policy",
+      "failed_outcomes_entered_result": false,
+      "id": "principal-continuity-004",
+      "result": "the generated Gateway role lacked GetWorkloadAccessToken for its default workload directory and exact Gateway identity; two failed trial sets were excluded before the narrow two-resource permission was applied"
+    },
+    {
+      "class": "source ambiguity",
+      "failed_outcomes_entered_result": false,
+      "id": "principal-continuity-005",
+      "result": "the aws login root session could not assume roles, so no Gateway request was sent and the roles were deleted before two temporary IAM users were used as the principal pair"
+    },
+    {
+      "class": "propagation timing",
+      "failed_outcomes_entered_result": false,
+      "id": "principal-continuity-006",
+      "result": "the first temporary access key was not immediately accepted by STS; no Gateway request was sent, the user was deleted, and the accepted capture retried identity establishment before starting any trial"
+    },
+    {
+      "class": "measurement clock",
+      "failed_outcomes_entered_result": true,
+      "id": "principal-continuity-007",
+      "result": "one accepted call crossed a 127.88 ms host UTC regression while its monotonic duration remained positive; raw UTC endpoints are retained and monotonic time establishes causal ordering"
+    }
+  ],
+  "corrections_version": 1
+}

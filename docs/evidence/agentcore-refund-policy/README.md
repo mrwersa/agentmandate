@@ -243,6 +243,40 @@ extractor defect, and excluded before all ten reviewed trials were rerun.
 Cleanup removed the Gateway, engine, policies, Lambda, role and log group; only
 the reusable CDK bootstrap remains.
 
+## Principal-change continuity control
+
+A new one-factor capture held the refund mandate, Gateway, Lambda target,
+ACTIVE policy revision, region, request sequence, and exact provider session
+identifier fixed while changing only the authenticated IAM principal. The
+same-principal arm was Allow then Deny in 10/10 trials. The changed-principal
+arm was Allow then Allow in 10/10 trials, split evenly between principal A to B
+and B to A. Both principals independently allowed a single 500 and denied a
+single 1,000 request.
+
+Under this tested service and policy version, cumulative history was therefore
+isolated by authenticated principal as well as policy-session identifier. A
+caller that changes either input starts outside the predecessor history. That
+is not cross-principal leakage, but it means a mandate-level cumulative bound
+cannot rely on a session identifier alone when authority may move between IAM
+principals. The provider exposed no consumed, remaining, reserved, in-flight,
+or completed state snapshot, so the conclusion is limited to the repeated
+decision sequence.
+
+The capture used two temporary IAM users because the operator's root login
+could not assume roles. Distinct STS identities were verified before the first
+trial; access keys never reached disk; keys, policies, and users were deleted
+in a `finally` block. One call crossed a 127.88 ms host UTC regression while
+its monotonic interval remained positive and sequential. The raw UTC endpoints
+and negative delta are retained, and causal validation uses monotonic time.
+
+`principal-continuity-index.json`, SHA-256
+`81972ff6288675709e202cf1d4c39b980c076837c689080b787ef01ce871fbb4`,
+pins the exact sanitized policies, event-level requests and responses,
+principal/session aliases, deployment and SDK boundary, capture projector,
+procedure, corrections, derived summary, and eight-check cleanup record. Live
+account, resource, policy, request, identity, and session identifiers remained
+in temporary raw files and were deleted after projection.
+
 `temporal-repetition-index.json`, SHA-256
 `cb3e8546157a4a2f9b7d48b8e20666a212fd6b418de669d682c5a4f5bec31cba`,
 pins the capture transformer, procedure, both sanitised policy revisions, full
@@ -370,7 +404,9 @@ more task-scoped deployment with a stateless permit and a Dogwood sum policy.
 The mandate-binding control created one final task-scoped deployment with the
 same inert shape. The latency follow-up recreated that one-tool shape once more
 and made 36 managed requests: one inventory call, five warm-ups, and 30 retained
-measurements.
+measurements. The principal-change control created one further task-scoped
+deployment, two temporary IAM users, 40 paired managed requests, and four
+single-request controls.
 Each task used an AgentCore
 Gateway and policy engine, a Lambda function, a CloudWatch log group, and a
 task-specific IAM role. The official [`agentcore remove all`](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-getting-started.html)

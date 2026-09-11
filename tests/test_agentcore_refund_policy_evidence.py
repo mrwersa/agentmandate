@@ -82,6 +82,14 @@ capture_transition_repetition = importlib.util.module_from_spec(_transition_repe
 sys.modules["capture_transition_repetition"] = capture_transition_repetition
 _transition_repetition_spec.loader.exec_module(capture_transition_repetition)
 
+_principal_spec = importlib.util.spec_from_file_location(
+    "capture_principal_continuity", EVIDENCE / "capture_principal_continuity.py"
+)
+assert _principal_spec is not None and _principal_spec.loader is not None
+capture_principal_continuity = importlib.util.module_from_spec(_principal_spec)
+sys.modules["capture_principal_continuity"] = capture_principal_continuity
+_principal_spec.loader.exec_module(capture_principal_continuity)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -102,6 +110,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     repetition_indexed = {source["locator"] for source in repetition_index["sources"]}
     transition_index = read_json("temporal-transition-index.json")
     transition_indexed = {source["locator"] for source in transition_index["sources"]}
+    principal_index = read_json("principal-continuity-index.json")
+    principal_indexed = {source["locator"] for source in principal_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -117,6 +127,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "temporal-index.json",
             "temporal-repetition-index.json",
             "temporal-transition-index.json",
+            "principal-continuity-index.json",
         }
     }
 
@@ -147,6 +158,15 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | latency_indexed
         | repetition_indexed
     )
+    assert principal_indexed.isdisjoint(
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        | repetition_indexed
+        | transition_indexed
+    )
     assert (
         indexed
         | controls_indexed
@@ -155,6 +175,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | latency_indexed
         | repetition_indexed
         | transition_indexed
+        | principal_indexed
         == committed
     )
     for source in (
@@ -165,6 +186,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *latency_index["sources"],
         *repetition_index["sources"],
         *transition_index["sources"],
+        *principal_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
@@ -1078,6 +1100,73 @@ def test_transition_confirmation_preserves_corrections_and_hygiene() -> None:
         events + metadata_events,
         re.IGNORECASE,
     )
+
+
+def test_principal_continuity_capture_is_balanced_and_fail_closed(tmp_path: Path) -> None:
+    events = read_json("principal-continuity-events.json")
+    summary = read_json("principal-continuity-summary.json")
+    deployment = read_json("principal-continuity-deployment.json")
+
+    capture_principal_continuity.verify(EVIDENCE, ROOT)
+    assert summary["results"]["same_principal_allow_then_deny"] == 10
+    assert summary["results"]["changed_principal_allow_then_allow"] == 10
+    assert summary["results"]["changed_principal_aggregate"] == 1200
+    assert summary["results"]["direction_counts"] == {"a_to_b": 5, "b_to_a": 5}
+    assert summary["results"]["single_request_controls"] == {
+        "principal_a": {"below_500": "allow", "boundary_1000": "deny"},
+        "principal_b": {"below_500": "allow", "boundary_1000": "deny"},
+    }
+    assert events["principal_identity"]["raw_identifiers_retained"] is False
+    assert events["provider_state"] == {
+        "configured_limit": 1000,
+        "consumed": "unavailable",
+        "remaining": "unavailable",
+        "reserved": "unavailable",
+        "in_flight": "unavailable",
+        "completed": "unavailable",
+    }
+    assert deployment["gateway_role_correction"]["wildcard"] is False
+    assert deployment["state_continuation_operations"] == []
+    assert deployment["temporary_principals_after_capture"] == 0
+
+    deltas = [
+        call["wall_clock_delta_ms"]
+        for row in events["trials"]
+        for call in row["calls"]
+        if call["wall_clock_delta_ms"] < 0
+    ]
+    assert deltas == [-127.88]
+    assert all(
+        call["duration_ms"] > 0
+        for row in events["trials"]
+        for call in row["calls"]
+    )
+
+    for source in read_json("principal-continuity-index.json")["sources"]:
+        (tmp_path / source["locator"]).write_bytes((EVIDENCE / source["locator"]).read_bytes())
+    mutated = json.loads((tmp_path / "principal-continuity-events.json").read_text())
+    changed = next(row for row in mutated["trials"] if row["arm"] == "changed")
+    changed["calls"][1]["outcome"] = "deny"
+    (tmp_path / "principal-continuity-events.json").write_text(json.dumps(mutated))
+    with pytest.raises(ValueError, match="reviewed outcomes have drifted"):
+        capture_principal_continuity.verify(tmp_path, ROOT)
+
+
+def test_principal_continuity_bundle_contains_no_live_identifiers() -> None:
+    text = "".join(
+        (EVIDENCE / source["locator"]).read_text(encoding="utf-8")
+        for source in read_json("principal-continuity-index.json")["sources"]
+    )
+    assert not re.search(
+        r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
+        r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
+        text,
+        re.IGNORECASE,
+    )
+    cleanup = read_json("principal-continuity-cleanup.json")
+    assert cleanup["cleanup_version"] == 1
+    assert len(cleanup["checks"]) == 8
+    assert all(check["outcome"] in {"not_found", "empty_result"} for check in cleanup["checks"])
 
 
 def test_transition_capture_rejects_unproved_metadata_update(tmp_path: Path) -> None:

@@ -1,0 +1,44 @@
+{
+  "cdk_bootstrap": "retained",
+  "checks": [
+    {
+      "outcome": "not_found",
+      "provider_code": "ValidationError",
+      "resource": "cloudformation_stack"
+    },
+    {
+      "outcome": "not_found",
+      "provider_code": "ResourceNotFoundException",
+      "resource": "gateway"
+    },
+    {
+      "outcome": "not_found",
+      "provider_code": "ResourceNotFoundException",
+      "resource": "policy_engine"
+    },
+    {
+      "outcome": "not_found",
+      "provider_code": "NoSuchEntity",
+      "resource": "iam_role_0"
+    },
+    {
+      "outcome": "not_found",
+      "provider_code": "NoSuchEntity",
+      "resource": "iam_role_1"
+    },
+    {
+      "outcome": "not_found",
+      "provider_code": "ResourceNotFoundException",
+      "resource": "lambda_0"
+    },
+    {
+      "outcome": "empty_result",
+      "resource": "lambda_log_group"
+    },
+    {
+      "outcome": "empty_result",
+      "resource": "temporary_principal_users"
+    }
+  ],
+  "cleanup_version": 1
+}
