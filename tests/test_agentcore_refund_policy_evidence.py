@@ -101,6 +101,14 @@ capture_deployment_continuity_refusal = importlib.util.module_from_spec(
 sys.modules["capture_deployment_continuity_refusal"] = capture_deployment_continuity_refusal
 _deployment_refusal_spec.loader.exec_module(capture_deployment_continuity_refusal)
 
+_retry_spec = importlib.util.spec_from_file_location(
+    "capture_retry_continuity", EVIDENCE / "capture_retry_continuity.py"
+)
+assert _retry_spec is not None and _retry_spec.loader is not None
+capture_retry_continuity = importlib.util.module_from_spec(_retry_spec)
+sys.modules["capture_retry_continuity"] = capture_retry_continuity
+_retry_spec.loader.exec_module(capture_retry_continuity)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -125,6 +133,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     principal_indexed = {source["locator"] for source in principal_index["sources"]}
     deployment_index = read_json("deployment-continuity-refusal-index.json")
     deployment_indexed = {source["locator"] for source in deployment_index["sources"]}
+    retry_index = read_json("retry-continuity-index.json")
+    retry_indexed = {source["locator"] for source in retry_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -142,6 +152,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "temporal-transition-index.json",
             "principal-continuity-index.json",
             "deployment-continuity-refusal-index.json",
+            "retry-continuity-index.json",
         }
     }
 
@@ -191,6 +202,17 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | transition_indexed
         | principal_indexed
     )
+    assert retry_indexed.isdisjoint(
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        | repetition_indexed
+        | transition_indexed
+        | principal_indexed
+        | deployment_indexed
+    )
     assert (
         indexed
         | controls_indexed
@@ -201,6 +223,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | transition_indexed
         | principal_indexed
         | deployment_indexed
+        | retry_indexed
         == committed
     )
     for source in (
@@ -213,6 +236,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *transition_index["sources"],
         *principal_index["sources"],
         *deployment_index["sources"],
+        *retry_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
@@ -1241,6 +1265,81 @@ def test_deployment_continuity_refusal_has_clean_cleanup_and_no_identifiers() ->
     cleanup = read_json("deployment-continuity-cleanup.json")
     assert len(cleanup["checks"]) == 7
     assert all(row["outcome"] in {"not_found", "empty_result"} for row in cleanup["checks"])
+
+
+def test_retry_continuity_capture_executes_and_accumulates_same_id_retries(
+    tmp_path: Path,
+) -> None:
+    events = read_json("retry-continuity-events.json")
+    summary = read_json("retry-continuity-summary.json")
+    contract = read_json("retry-continuity-contract.json")
+    capture_retry_continuity.verify(EVIDENCE, ROOT)
+
+    assert summary["same_id"] == {
+        "allow_allow_deny": 10,
+        "byte_identical_retransmissions": 10,
+        "distinct_second_executions": 10,
+    }
+    assert summary["fresh_id"] == {
+        "allow_allow_deny": 10,
+        "identifier_only_changes": 10,
+        "distinct_second_executions": 10,
+    }
+    assert summary["managed_requests"] == 62
+    assert summary["trial_allowed_target_executions"] == 40
+    assert contract["experiment"] == {
+        "completed_response_before_retransmission": True,
+        "fixed_delay_ms": 250,
+        "sdk_retries": 0,
+        "transport_retries": 0,
+        "ambiguous_timeout_simulated": False,
+        "interceptor_retry_tested": False,
+        "application_idempotency_key_tested": False,
+    }
+
+    same = [row for row in events["trials"] if row["arm"] == "same_id"]
+    fresh = [row for row in events["trials"] if row["arm"] == "fresh_id"]
+    assert len(same) == len(fresh) == 10
+    assert all(row["calls"][0]["request_bytes"] == row["calls"][1]["request_bytes"] for row in same)
+    assert all(
+        row["calls"][0]["execution_alias"] != row["calls"][1]["execution_alias"]
+        for row in same
+    )
+    assert all(
+        [call["outcome"] for call in row["calls"]] == ["allow", "allow", "deny"]
+        for row in events["trials"]
+    )
+
+    index = read_json("retry-continuity-index.json")
+    for source in index["sources"]:
+        (tmp_path / source["locator"]).write_bytes((EVIDENCE / source["locator"]).read_bytes())
+    (tmp_path / "retry-continuity-index.json").write_bytes(
+        (EVIDENCE / "retry-continuity-index.json").read_bytes()
+    )
+    mutated = json.loads((tmp_path / "retry-continuity-events.json").read_text())
+    mutated["trials"][0]["calls"][2]["outcome"] = "allow"
+    (tmp_path / "retry-continuity-events.json").write_text(json.dumps(mutated))
+    with pytest.raises(ValueError, match="reviewed outcomes have drifted"):
+        capture_retry_continuity.verify(tmp_path, ROOT)
+
+
+def test_retry_continuity_bundle_has_clean_cleanup_and_no_identifiers() -> None:
+    index = read_json("retry-continuity-index.json")
+    text = "".join(
+        (EVIDENCE / source["locator"]).read_text(encoding="utf-8")
+        for source in index["sources"]
+    )
+    assert not re.search(
+        r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
+        r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
+        text,
+        re.IGNORECASE,
+    )
+    cleanup = read_json("retry-continuity-cleanup.json")
+    assert len(cleanup["checks"]) == 8
+    assert sum(row["outcome"] == "deleted_residual" for row in cleanup["checks"]) == 1
+    assert cleanup["policies_deleted_before_engine"] == 2
+    assert read_json("retry-continuity-deployment.json")["temporary_principals_after_capture"] == 0
 
 
 def test_transition_capture_rejects_unproved_metadata_update(tmp_path: Path) -> None:

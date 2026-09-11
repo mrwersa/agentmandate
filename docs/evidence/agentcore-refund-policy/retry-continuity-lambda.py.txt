@@ -1,0 +1,7 @@
+def handler(event, context):
+    arguments = event.get("arguments", event)
+    return {
+        "processed": True,
+        "amount": arguments.get("amount"),
+        "execution_marker": context.aws_request_id,
+    }

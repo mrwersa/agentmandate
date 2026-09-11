@@ -1,0 +1,51 @@
+{
+  "provider": "AWS AgentCore Gateway Policy",
+  "region": "us-east-1",
+  "retry_continuity_index_version": 1,
+  "sources": [
+    {
+      "content_sha256": "a7b06bf7eeb3f12cf35b62690c19492358545dc87f8f60b12373905dd0e63cc6",
+      "locator": "capture_retry_continuity.py"
+    },
+    {
+      "content_sha256": "8789b345d2e26f2f157dc1dc1c77cdef287eb947e7c176dc36239ce2c2d38bc8",
+      "locator": "retry-continuity-budget.dogwood"
+    },
+    {
+      "content_sha256": "323cb03f1aa0873f0a139fa59b9f76ec2491ff04ac86b8c518ef147bdf7b1e6e",
+      "locator": "retry-continuity-cleanup.json"
+    },
+    {
+      "content_sha256": "557ddb3e336d8465ee456f9e3ba84772c8afe6fbb47c60b2483bfe6e5055259d",
+      "locator": "retry-continuity-contract.json"
+    },
+    {
+      "content_sha256": "507cd132cc5164b6a6dd1899cbe3c854c6436a27fefcabff0551da1595274f54",
+      "locator": "retry-continuity-corrections.json"
+    },
+    {
+      "content_sha256": "ae4f241a17218c665374a18028e28b3e37a24c609e09f5585e1a7d64b267035f",
+      "locator": "retry-continuity-deployment.json"
+    },
+    {
+      "content_sha256": "f64f681b0ae35550fcb101483f07b9bb1d1f9cd091cef164b8790dea514ebdc3",
+      "locator": "retry-continuity-events.json"
+    },
+    {
+      "content_sha256": "3c33d4f7e72efe854ad01cd13f211e9e6b79fb33416896859cae91b5e2c460ae",
+      "locator": "retry-continuity-lambda.py.txt"
+    },
+    {
+      "content_sha256": "555785e0b9d0a3462468f36e8fcaf8a0a2314728ab62277ae37b04d29e39bd74",
+      "locator": "retry-continuity-permit.cedar"
+    },
+    {
+      "content_sha256": "99632309873e8e0187e109c7661c0aec636032637ddfb87c195fb5007efea3e0",
+      "locator": "retry-continuity-procedure.md"
+    },
+    {
+      "content_sha256": "e34d9374c879ed350a86609b987f481798b72152ef61f8c0cb51105c8792a617",
+      "locator": "retry-continuity-summary.json"
+    }
+  ]
+}

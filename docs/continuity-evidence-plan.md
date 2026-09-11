@@ -58,10 +58,16 @@ history selected by the policy, so it cannot be the intended one-factor
 counterfactual. The [sanitized refusal](evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal)
 records three managed authoring attempts and zero data-plane requests.
 
-Idempotent retry remains the next executable cell. Tightening or widening has
-evidence for stale-session invalidation and fresh recovery, but not for a
-reviewed translation of predecessor consumption into restored capacity; that
-stronger cell also remains open.
+The completed-response retransmission cell is also captured. Reusing the exact
+request bytes and JSON-RPC identifier produced a distinct second target
+execution in 10/10 trials, and a later probe proved the repeated GBP 400 input
+contributed to the cumulative bound. Fresh-ID controls behaved identically.
+This does not cover ambiguous timeouts, automatic transport or interceptor
+retries, or an application idempotency key.
+
+Tightening or widening has evidence for stale-session invalidation and fresh
+recovery, but not for a reviewed translation of predecessor consumption into
+restored capacity; that stronger cell is the next executable control.
 
 ## Capture bundle per trial
 

@@ -1,0 +1,28 @@
+{
+  "retry_continuity_contract_version": 1,
+  "reviewed_at": "2026-09-11",
+  "provider": "AWS AgentCore Gateway",
+  "distinctions": {
+    "control_plane_client_token": "documented idempotency token for resource-creation APIs; outside this experiment",
+    "gateway_tool_invocation_token": "no data-plane idempotency token documented in the reviewed invocation contract",
+    "json_rpc_id": "request-response correlation identifier candidate; no provider idempotency guarantee claimed",
+    "policy_session_id": "caller-supplied temporal-history grouping key, held fixed within each trial",
+    "execution_marker": "Lambda invocation request identifier used only to distinguish executions, then sanitized"
+  },
+  "reviewed_primary_sources": [
+    "Use an AgentCore Gateway with Policy in AgentCore",
+    "Policy sessions and identity propagation",
+    "Using interceptors with Gateway",
+    "CreateGateway API reference",
+    "Model Context Protocol schema reference"
+  ],
+  "experiment": {
+    "completed_response_before_retransmission": true,
+    "fixed_delay_ms": 250,
+    "sdk_retries": 0,
+    "transport_retries": 0,
+    "ambiguous_timeout_simulated": false,
+    "interceptor_retry_tested": false,
+    "application_idempotency_key_tested": false
+  }
+}
