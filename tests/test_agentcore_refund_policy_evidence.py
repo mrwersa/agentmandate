@@ -90,6 +90,17 @@ capture_principal_continuity = importlib.util.module_from_spec(_principal_spec)
 sys.modules["capture_principal_continuity"] = capture_principal_continuity
 _principal_spec.loader.exec_module(capture_principal_continuity)
 
+_deployment_refusal_spec = importlib.util.spec_from_file_location(
+    "capture_deployment_continuity_refusal",
+    EVIDENCE / "capture_deployment_continuity_refusal.py",
+)
+assert _deployment_refusal_spec is not None and _deployment_refusal_spec.loader is not None
+capture_deployment_continuity_refusal = importlib.util.module_from_spec(
+    _deployment_refusal_spec
+)
+sys.modules["capture_deployment_continuity_refusal"] = capture_deployment_continuity_refusal
+_deployment_refusal_spec.loader.exec_module(capture_deployment_continuity_refusal)
+
 
 def read_json(name: str) -> Any:
     return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))
@@ -112,6 +123,8 @@ def test_capture_index_pins_every_operational_artifact() -> None:
     transition_indexed = {source["locator"] for source in transition_index["sources"]}
     principal_index = read_json("principal-continuity-index.json")
     principal_indexed = {source["locator"] for source in principal_index["sources"]}
+    deployment_index = read_json("deployment-continuity-refusal-index.json")
+    deployment_indexed = {source["locator"] for source in deployment_index["sources"]}
     committed = {
         path.name
         for path in EVIDENCE.iterdir()
@@ -128,6 +141,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
             "temporal-repetition-index.json",
             "temporal-transition-index.json",
             "principal-continuity-index.json",
+            "deployment-continuity-refusal-index.json",
         }
     }
 
@@ -167,6 +181,16 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
     )
+    assert deployment_indexed.isdisjoint(
+        indexed
+        | controls_indexed
+        | temporal_indexed
+        | binding_indexed
+        | latency_indexed
+        | repetition_indexed
+        | transition_indexed
+        | principal_indexed
+    )
     assert (
         indexed
         | controls_indexed
@@ -176,6 +200,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         | repetition_indexed
         | transition_indexed
         | principal_indexed
+        | deployment_indexed
         == committed
     )
     for source in (
@@ -187,6 +212,7 @@ def test_capture_index_pins_every_operational_artifact() -> None:
         *repetition_index["sources"],
         *transition_index["sources"],
         *principal_index["sources"],
+        *deployment_index["sources"],
     ):
         content = (EVIDENCE / source["locator"]).read_bytes()
         assert hashlib.sha256(content).hexdigest() == source["content_sha256"]
@@ -1167,6 +1193,54 @@ def test_principal_continuity_bundle_contains_no_live_identifiers() -> None:
     assert cleanup["cleanup_version"] == 1
     assert len(cleanup["checks"]) == 8
     assert all(check["outcome"] in {"not_found", "empty_result"} for check in cleanup["checks"])
+
+
+def test_deployment_continuity_refusal_is_bounded_and_fail_closed(tmp_path: Path) -> None:
+    refusal = read_json("deployment-continuity-refusal.json")
+    capture_deployment_continuity_refusal.verify(EVIDENCE)
+
+    assert refusal["accepted_data_plane_requests"] == 0
+    assert refusal["result"] == "one-factor experiment refused before data-plane trials"
+    assert refusal["claim_limit"] == (
+        "this is an authoring and validation result, not an observation of runtime state "
+        "preservation or reset"
+    )
+    assert refusal["sdk_boundary"] == {
+        "agentcore_cli": "0.28.1",
+        "aws_cli": "2.36.8",
+        "policy_validation_mode": "IGNORE_ALL_FINDINGS",
+    }
+    assert len(refusal["attempts"]) == 3
+    assert all(row["outcome"] == "create-policy rejected" for row in refusal["attempts"])
+
+    index = read_json("deployment-continuity-refusal-index.json")
+    for source in index["sources"]:
+        (tmp_path / source["locator"]).write_bytes((EVIDENCE / source["locator"]).read_bytes())
+    (tmp_path / "deployment-continuity-refusal-index.json").write_bytes(
+        (EVIDENCE / "deployment-continuity-refusal-index.json").read_bytes()
+    )
+    mutated = json.loads((tmp_path / "deployment-continuity-refusal.json").read_text())
+    mutated["attempts"][2]["outcome"] = "accepted"
+    (tmp_path / "deployment-continuity-refusal.json").write_text(json.dumps(mutated))
+    with pytest.raises(ValueError, match="refusal sequence has drifted"):
+        capture_deployment_continuity_refusal.verify(tmp_path)
+
+
+def test_deployment_continuity_refusal_has_clean_cleanup_and_no_identifiers() -> None:
+    index = read_json("deployment-continuity-refusal-index.json")
+    text = "".join(
+        (EVIDENCE / source["locator"]).read_text(encoding="utf-8")
+        for source in index["sources"]
+    )
+    assert not re.search(
+        r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
+        r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b",
+        text,
+        re.IGNORECASE,
+    )
+    cleanup = read_json("deployment-continuity-cleanup.json")
+    assert len(cleanup["checks"]) == 7
+    assert all(row["outcome"] in {"not_found", "empty_result"} for row in cleanup["checks"])
 
 
 def test_transition_capture_rejects_unproved_metadata_update(tmp_path: Path) -> None:

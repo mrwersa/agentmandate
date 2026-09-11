@@ -39,9 +39,9 @@ model initiatives completed together. The present frontier is:
 | State | Initiatives |
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
-| **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; finish the remaining one-factor cells without changing the public contract |
-| **Ready next** | Capture region or deployment change, then idempotent retry; separately test whether tightened or widened revisions can restore capacity without losing predecessor consumption |
-| **Evidence-blocked** | Resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
+| **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; the deployment cell is now explicitly evidence-blocked by the provider's mandatory Gateway history partition |
+| **Ready next** | Capture idempotent retry; separately test whether tightened or widened revisions can restore capacity without losing predecessor consumption |
+| **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
 This ordering keeps two analyses distinct. Reachability asks which legal tool-call
@@ -55,7 +55,8 @@ provider captures vary session, process, policy revision, principal,
 deployment, retry, and concurrency one factor at a time so results can
 identify the state-owning boundary rather than merely add more allow/deny
 examples. Session, process, revision, principal, and synchronized-concurrency
-controls are now captured; deployment and retry remain. This evidence work
+controls are now captured. Deployment is blocked by the provider's mandatory
+Gateway resource binding and retry remains executable. This evidence work
 continues after the completed pre-1.0 consolidation audit without changing the
 public contract.
 

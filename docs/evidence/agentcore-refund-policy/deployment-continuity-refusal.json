@@ -1,0 +1,56 @@
+{
+  "accepted_data_plane_requests": 0,
+  "capture_date": "2026-09-11",
+  "deployment_continuity_refusal_version": 1,
+  "intended_boundary": {
+    "changed": [
+      "Gateway deployment identity",
+      "Gateway resource identity"
+    ],
+    "held_fixed": [
+      "reviewed mandate",
+      "authenticated IAM principal",
+      "region",
+      "shared policy engine",
+      "policy bytes and revision",
+      "provider session identifier",
+      "target name and tool schema",
+      "request sequence"
+    ]
+  },
+  "provider": "AWS AgentCore Gateway Policy",
+  "region": "us-east-1",
+  "result": "one-factor experiment refused before data-plane trials",
+  "attempts": [
+    {
+      "candidate": "deployment-continuity-candidate-tool-specific.dogwood",
+      "diagnostic": "a constrained action scope must constrain resource to a specific AgentCore Gateway resource",
+      "outcome": "create-policy rejected",
+      "reason": "an exact tool action cannot be paired with a Gateway-type resource scope"
+    },
+    {
+      "candidate": "deployment-continuity-candidate-action-type.dogwood",
+      "diagnostic": "action is Type is not valid in the action scope",
+      "outcome": "create-policy rejected",
+      "reason": "the action-type form cannot remove the exact-action constraint"
+    },
+    {
+      "candidate": "deployment-continuity-candidate-unconstrained.dogwood",
+      "diagnostics": [
+        "the exact request event is not declared without a tool-specific Gateway schema",
+        "each temporal predicate must include eventResource: resource"
+      ],
+      "outcome": "create-policy rejected",
+      "reason": "the remaining valid action scope cannot define a cross-Gateway temporal predicate"
+    }
+  ],
+  "claim": "the tested provider contract cannot express byte-identical cumulative history across Gateway deployment identities",
+  "claim_limit": "this is an authoring and validation result, not an observation of runtime state preservation or reset",
+  "raw_identifiers_retained": false,
+  "sdk_boundary": {
+    "agentcore_cli": "0.28.1",
+    "aws_cli": "2.36.8",
+    "policy_validation_mode": "IGNORE_ALL_FINDINGS"
+  },
+  "state_snapshot": "unavailable"
+}
