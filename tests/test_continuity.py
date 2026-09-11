@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 import agentmandate._continuity as continuity
+import scripts.migrate_continuity_evidence as continuity_migrations
 from agentmandate._continuity import (
     AgentCoreContinuity,
     AnthropicContinuity,
@@ -23,13 +24,11 @@ from agentmandate._continuity import (
     _anthropic_axes,
     _anthropic_controls,
     _boolean,
-    _captured,
     _date,
     _digest,
     _evidence,
     _integer,
     _load,
-    _migration_sources,
     _path,
     _profile_digest,
     _record,
@@ -42,13 +41,18 @@ from agentmandate._continuity import (
     _validate_continuity_profile,
     _verify_sources,
     analyse_continuity,
-    migrate_agentcore_binding,
-    migrate_agentcore_continuity,
-    migrate_anthropic_continuity,
 )
 from agentmandate._ir import AuthorityIR, IRFormatError, _analyse_ir
 from agentmandate.manifest import load
 from agentmandate.reach import analyse
+from scripts.migrate_continuity_evidence import (
+    _captured,
+    _migration_sources,
+    migrate_agentcore_binding,
+    migrate_agentcore_continuity,
+    migrate_anthropic_continuity,
+    verify_fixtures,
+)
 
 ROOT = Path(__file__).parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
@@ -122,6 +126,16 @@ def test_canonical_migrations_are_byte_stable(migrate, contents, reader, fixture
     assert migrated.to_json() == expected
     assert reader.from_json(expected).to_json() == expected
     migrated.verify_sources(contents())
+
+
+def test_repository_migration_check_replays_all_canonical_fixtures():
+    verify_fixtures()
+
+
+def test_evidence_converters_are_not_installed_runtime_members():
+    assert not hasattr(continuity, "migrate_agentcore_binding")
+    assert not hasattr(continuity, "migrate_agentcore_continuity")
+    assert not hasattr(continuity, "migrate_anthropic_continuity")
 
 
 def test_migrations_preserve_provider_specific_unknowns_and_controls():
@@ -594,9 +608,7 @@ def test_continuity_analysis_requires_whole_second_utc_time(as_of):
     "composition",
     ["ir", "sarif", "mermaid", "otel", "conditions", "delegations", "producers", "cedar"],
 )
-def test_continuity_refuses_unsupported_composition_before_analysis(
-    composition, monkeypatch
-):
+def test_continuity_refuses_unsupported_composition_before_analysis(composition, monkeypatch):
     def unexpected_analysis(*args, **kwargs):
         raise AssertionError("manifest analysis ran before composition refusal")
 
@@ -972,7 +984,7 @@ def _allow_rehashed_migration(monkeypatch):
             {locator: hashlib.sha256(contents[locator]).hexdigest() for locator in kinds},
         )
 
-    monkeypatch.setattr(continuity, "_migration_sources", rehashed)
+    monkeypatch.setattr(continuity_migrations, "_migration_sources", rehashed)
 
 
 @pytest.mark.parametrize(

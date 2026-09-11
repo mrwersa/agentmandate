@@ -1,6 +1,6 @@
 # Pre-1.0 compatibility and consolidation audit
 
-Status: **inventory complete against `4f3e13d`; removal decisions pending**.
+Status: **inventory current through `8477d07`; first relocation in progress**.
 This is the first step of the consolidation window in `ROADMAP.md`. It records
 what must remain compatible before implementation is simplified. It does not
 change a reader, schema, command, or result.
@@ -13,8 +13,9 @@ have independent version boundaries, and their canonical fixtures exercise the
 formats currently consumed by the CLI. Consolidation should preserve those
 boundaries rather than replace them with one package-wide artifact version.
 
-Five evidence converters and two superseded private record families are
-candidates to leave the runtime package. They are not deletion candidates yet:
+Five evidence-converter families, implemented by six entry points, and two
+superseded private record families are candidates to leave the runtime package.
+They are not deletion candidates yet:
 each must first move to repository evidence tooling, reproduce its committed
 canonical output byte for byte, and leave no runtime caller. The local Cedar
 bundle reader is a further split candidate because managed Cedar reuses its
@@ -129,9 +130,9 @@ owning evidence directory only after an executable replay replacement exists.
 | `ToolPrincipal` v1 reader and IR projection | Tests and principal evidence fixtures only; superseded in consumption by delegation attachment v2 | Removal candidate after fixture replay audit |
 | `CedarBundle` v1 reader and local IR projection | Native Cedar evidence tests; managed Cedar imports its mapping parser | Split mapping parser, then relocate the local evidence reader if no CLI caller emerges |
 | `migrate_aws_iam_access_key_boundary` | Producer tests generate `producer-boundary-iam-v1.json` from captured bytes | Relocate to IAM evidence tooling |
-| `migrate_agentcore_binding` | Continuity tests generate `continuity-binding-v1.json` | Relocate to AgentCore evidence tooling |
-| `migrate_agentcore_continuity` | Continuity tests generate `agentcore-continuity-v1.json` | Relocate to AgentCore evidence tooling |
-| `migrate_anthropic_continuity` | Continuity tests generate `anthropic-continuity-v1.json` | Relocate to Anthropic evidence tooling |
+| `migrate_agentcore_binding` | `scripts/migrate_continuity_evidence.py` regenerates `continuity-binding-v1.json` | Relocated; retain evidence tool |
+| `migrate_agentcore_continuity` | `scripts/migrate_continuity_evidence.py` regenerates `agentcore-continuity-v1.json` | Relocated; retain evidence tool |
+| `migrate_anthropic_continuity` | `scripts/migrate_continuity_evidence.py` regenerates `anthropic-continuity-v1.json` | Relocated; retain evidence tool |
 | Strict private result readers for IR, producer, and continuity envelopes | Canonical fixture validation and recomputation checks | Retain in runtime |
 
 No converter above is called by `cli.py`. Removing one without replacement
@@ -163,15 +164,13 @@ Before relocating any converter, a replacement replay check must:
 
 The next PRs should remain independently reviewable:
 
-1. move the three continuity converters to AgentCore and Anthropic evidence
-   tooling, because they are the largest evidence-only block and have complete
-   canonical fixtures;
-2. move the IAM producer converter using the same pattern;
-3. move the Authorizer converters and retire the private grant-v1 and principal-v1
+1. move the IAM producer converter using the established continuity evidence
+   replay pattern;
+2. move the Authorizer converters and retire the private grant-v1 and principal-v1
    records only after their canonical chain and attachment outputs replay;
-4. separate the shared Cedar mapping parser from the local bundle reader, then
+3. separate the shared Cedar mapping parser from the local bundle reader, then
    decide whether the native bundle projection still belongs in runtime; and
-5. rerun every release gate and record the reviewed pre-1.0 baseline.
+4. rerun every release gate and record the reviewed pre-1.0 baseline.
 
 Repository-history cleanup is a separate decision and must not be combined
 with any contract or migration change.
