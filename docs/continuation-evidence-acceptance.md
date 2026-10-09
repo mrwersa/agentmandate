@@ -27,6 +27,12 @@ an expiry of **8 November 2026**. Under the current consumer, an accepted eviden
 record remains eligible through its expiry date in UTC. Expiry limits reliance
 on the review, not the existence of the historical observations.
 
+**Renewal checkpoint: 6 November 2026, owner mrwersa.** Decide whether to renew
+on the same pinned materials, request a revised packet, or let acceptance lapse.
+The existing expiry is unchanged: 8 November inclusive UTC, with ineligibility
+from 9 November at 00:00 UTC. Supplying or accepting mandate-binding evidence
+does not renew this separate provider-evidence decision.
+
 ## Exact materials
 
 The profile schema remains v1. These are file-byte SHA-256 digests, including
@@ -155,6 +161,10 @@ the reviewer string or provide a cryptographic signature for this decision.
 | Concerns or exclusions | Original raw captures not independently verified; no mandate identity, safe-continuation, or deployment approval |
 | Accepted-profile byte digest | `aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace` |
 | Mandate-binding acceptance | Separate decision; owner and evidence pending |
+
+Follow-up on 9 October 2026: the maintainer directed that binding approval stay
+deferred while the [gaps are audited](continuation-binding-gap-audit.md).
+This leaves the accepted observations, conditions, and expiry unchanged.
 
 The maintainer supplied the following reason verbatim:
 
