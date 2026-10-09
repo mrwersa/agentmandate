@@ -1,29 +1,29 @@
 # AgentCore continuation evidence acceptance packet
 
-Prepared: 9 October 2026. Status: **pending human decision**.
+Prepared: 9 October 2026. Status: **accepted for the six scoped historical
+observations, through 8 November 2026 UTC**.
 
 Accountable maintainer for this decision: **mrwersa**, assigned in the
-maintainer conversation on 9 October 2026. That assignment does not accept the
-evidence. The deployment owner for a separate mandate-binding decision remains
-unassigned.
+maintainer conversation on 9 October 2026. The maintainer subsequently supplied
+the explicit acceptance recorded below. The deployment owner for a separate
+mandate-binding decision remains unassigned.
 
-## Decision requested
+## Decision scope
 
-Decide whether the committed, sanitised September AgentCore continuation
-records and their projection are acceptable evidence for the six scoped
-observations below. This decision concerns historical provider observations.
+The maintainer accepts the committed, sanitised September AgentCore continuation
+records and their projection as evidence for the six scoped observations below.
+This decision concerns historical provider observations.
 It does not approve a workflow, establish mandate intent, or establish an
 enforced mandate/principal/boundary join.
 
 Review base: commit `21fee7014bb31fa585c4eabe14a657dd2521729e`.
 The projection was independently code-reviewed in
 [PR #209](https://github.com/mrwersa/agentmandate/pull/209). That review and its
-passing checks are preparation for this decision, not human evidence acceptance.
+passing checks supported the decision; the explicit maintainer sign-off below
+is the human evidence acceptance.
 
-The maintainer should record one of **accept**, **reject**, or **defer**, with
-reasons. Acceptance needs an explicit expiry. A proposed initial review period
-ends **8 November 2026**, thirty days after preparation; that date is a proposal,
-not an assigned expiry. Under the current consumer, an accepted evidence
+The maintainer selected **accept**, supplied reasons and conditions, and assigned
+an expiry of **8 November 2026**. Under the current consumer, an accepted evidence
 record remains eligible through its expiry date in UTC. Expiry limits reliance
 on the review, not the existence of the historical observations.
 
@@ -52,13 +52,13 @@ the source-linked policy templates, and the separately captured configuration
 diagnostic. The diagnostic explains a limitation of interpretation; this
 packet does not accept it as another profile or merge its trials into the 60.
 
-## Claims to review
+## Accepted historical claims
 
 Every row describes ten trials in the 11 September 2026 capture, using the
 selected single-permit form, `FAIL_ON_ANY_FINDINGS`, an enforcing IAM Gateway,
 and requests of 600. These are scoped observations, not provider-wide rules.
 
-| Arm | Observation proposed for acceptance |
+| Arm | Accepted observation |
 |---|---|
 | Byte-identical statement | A revision was created and the predecessor became stale in ten trials. Recovery was not measured. |
 | Bound-variable renaming | A revision was created; predecessor reuse was stale; a fresh successor allowed 600 and then refused another 600 in ten trials. |
@@ -72,9 +72,9 @@ separate historical fixture where byte-identical submission did not create a
 revision. The configuration diagnostic does not isolate policy form from
 validation mode. Neither record establishes universal deduplication behaviour.
 
-## Human review questions
+## Human review basis
 
-The accountable maintainer must make these judgments explicitly:
+The packet presented these questions to the accountable maintainer:
 
 - Are the capture procedure, sanitisation, source provenance, trial inclusion,
   and declared limitations sufficient for the intended historical claims?
@@ -89,10 +89,10 @@ The accountable maintainer must make these judgments explicitly:
 Digest equality establishes which bytes were reviewed. It does not authenticate
 the original live service execution or independently validate sanitisation.
 The deployment record includes hashes of raw captures, but the raw captures
-are not supplied by this packet. If those records or a capture-operator
-attestation are necessary to the maintainer's judgment, the decision stays
-deferred until that evidence is available. Code replay cannot answer that
-provenance question on the maintainer's behalf.
+are not supplied by this packet. The maintainer explicitly acknowledged that
+the original raw captures have not been independently verified and judged the
+available provenance sufficient for these historical observations. This does
+not convert replay into independent verification of the original execution.
 
 ## Automated review support
 
@@ -108,15 +108,24 @@ python -m pytest tests/test_continuation_profile.py tests/test_continuation_evid
 These check the pinned files, canonical projection, native decisions, trial
 identities, summary agreement, existing CLI path, and evidence gaps. Tests
 with synthetic acceptance show the consumer's remaining limitations; they are
-not an acceptance record. Coverage measures exercised statements, not the
-truth of the capture or sufficiency of its interpretation.
+not an acceptance record. Separate regression checks exercise the real accepted
+profile, including the expiry boundary and changed source bytes. Coverage
+measures exercised statements, not the truth of the capture or sufficiency of
+its interpretation.
 
-## What acceptance would change
+## Accepted profile and remaining gaps
 
-After an explicit acceptance and expiry, create a separate accepted profile
-with the same controls and capture sources, changing only evidence metadata.
-Record its byte digest and the dated human decision here. The canonical
-archival fixture and its migration remain unreviewed and byte-exact.
+The separate
+[accepted profile](continuity-reviews/agentcore-continuation-2026-10-09.json)
+has the same controls and capture sources, changing only evidence metadata to
+`review: accepted`, `reviewer: mrwersa`, and `expires: 2026-11-08`.
+Its file-byte SHA-256 is
+`aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace`.
+This later review artifact lives outside the historical capture directory and
+its frozen capture index. The canonical archival fixture and its migration
+remain unreviewed and byte-exact. Acceptance is pinned to the materials above
+at the review base; it must not be regenerated for changed captures or
+projections without another human decision.
 
 Within the accepted review period, the current consumer can report the
 numeric limit as stable in five arms and tightening in one. The recorded
@@ -138,16 +147,22 @@ the reviewer string or provide a cryptographic signature for this decision.
 | Field | Current value |
 |---|---|
 | Accountable maintainer | mrwersa |
-| Decision | Pending |
-| Decision timestamp | Not recorded |
-| Accepted scope and reasons | Not recorded |
-| Expiry | Not assigned; proposed 2026-11-08 |
-| Concerns or exclusions | Not recorded |
-| Accepted-profile byte digest | No accepted profile created |
+| Decision | ACCEPT |
+| Decision date | 2026-10-09, explicit maintainer message |
+| Recording timestamp | 2026-10-09T12:53:28Z; repository recording time, not the message timestamp |
+| Accepted scope and reasons | Six historical observations at review base `21fee7014bb31fa585c4eabe14a657dd2521729e`; exact reason below |
+| Expiry | 2026-11-08, inclusive UTC date |
+| Concerns or exclusions | Original raw captures not independently verified; no mandate identity, safe-continuation, or deployment approval |
+| Accepted-profile byte digest | `aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace` |
 | Mandate-binding acceptance | Separate decision; owner and evidence pending |
 
-Merging this packet records the review assignment and materials. It does not
-change the pending decision or authorize an accepted artifact. An acceptance
-must identify this packet's exact scope and an expiry; a rejection or deferral
-should identify the disputed claim or missing evidence. Partial acceptance
-needs a revised packet and separately scoped profile before consumption.
+The maintainer supplied the following reason verbatim:
+
+> I’m satisfied that the evidence is sufficiently documented, scoped, and tested to support the six historical AgentCore observations. The projection has been independently reviewed, and the limitations are clearly stated. While the original raw captures have not been independently verified, I consider the available provenance and reproducible checks sufficient for accepting these as historical observations, not as proof of mandate continuity.
+
+The maintainer supplied the following conditions verbatim:
+
+> Acceptance applies only to the six scoped observations and the pinned evidence at commit `21fee7014bb31fa585c4eabe14a657dd2521729e`. It does not establish mandate identity, safe continuation, or deployment approval. Those remain separate decisions requiring additional evidence.
+
+The source of acceptance is this explicit human decision, not the preparation
+of the packet, its earlier merge, an automated check, or an agent's code review.

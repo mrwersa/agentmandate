@@ -1,12 +1,14 @@
 # Continuity evidence consolidation
 
-Status: first profile projection implemented, 9 October 2026. Evidence
+Status: first profile projected and its six historical observations accepted
+by **mrwersa** on 9 October 2026, expiring 8 November 2026. Mandate-binding
 acceptance and the remaining capture families are still open.
 
-The [acceptance packet](continuation-evidence-acceptance.md) assigns the human
-evidence decision to maintainer **mrwersa**, pins its review materials, and
-separates that decision from deployment-owner acceptance of a mandate binding.
-The evidence decision and expiry remain pending.
+The [acceptance record](continuation-evidence-acceptance.md) contains the human
+decision, exact reason and conditions, and pinned review materials. A separate
+[accepted profile](continuity-reviews/agentcore-continuation-2026-10-09.json)
+records that decision's reviewer and expiry. Deployment-owner acceptance of a
+mandate binding remains separate and pending.
 
 The September AgentCore continuation matrix now has its own canonical
 [`agentcore-continuation-v1.json`](../tests/fixtures/agentcore-continuation-v1.json).
@@ -53,29 +55,31 @@ attribute the difference to either one or infer a provider-wide deduplication ru
 
 ## Trust and interpretation
 
-The artifact remains `unreviewed`. Its `binding` is the campaign protocol's
+The canonical archival artifact remains `unreviewed`. Its `binding` is the campaign protocol's
 logical Gateway placeholder, not a verified mandate/principal binding.
 `same_mandate` stays unknown and mediation stays unestablished. Merely naming
 the same manifest in a study protocol does not establish an enforced join.
 
 Structural validation succeeds. Reconciliation through the existing CLI
 produces all six observations and complete manifest Authority, exits 1, and
-leaves the state, admission, and safe-continuation verdicts unresolved. Even a
-synthetic acceptance in tests cannot fill the missing binding: it can expose
-the tightening of the numeric limit, but cannot establish mandate continuity.
+leaves the state, admission, and safe-continuation verdicts unresolved. The
+separate accepted profile exposes tightening of the numeric limit while its
+review is eligible, but the missing binding still prevents establishing mandate
+continuity. Expired review or changed source bytes make its evidence ineligible.
 The unchanged historical signed binding must not be attached to this campaign
 as if it covered the new deployment.
 
 Code review of the projection does not constitute accountable acceptance of
-the provider evidence. Acceptance still needs a named reviewer, expiry,
-source review, and the joins required by the consumer. A fixture refresh must
-not silently change that status.
+the provider evidence. The maintainer's explicit acceptance supplies the named
+reviewer and expiry for the pinned historical observations; the joins required
+for mandate continuity remain absent. A fixture refresh must not transfer that
+acceptance to changed evidence.
 
 ## Remaining work
 
 | Capture family | Current disposition | Required next evidence or modeling decision |
 |---|---|---|
-| AgentCore revision matrix | Separate canonical profile; unreviewed | Establish the campaign's mandate/principal/boundary join before claiming a mandate reset; separately review comparability and amendment treatment |
+| AgentCore revision matrix | Archival profile remains unreviewed; separate accepted historical-evidence profile expires 2026-11-08 | Establish the campaign's mandate/principal/boundary join before claiming a mandate reset; separately review comparability and amendment treatment |
 | AgentCore configuration diagnostic | Source evidence and independent replay tests | Preserve the configuration comparison without treating it as a same-mandate state transition |
 | AgentCore principal change | Captured control | Represent principal identity and boundary selection explicitly; do not relabel a principal change as a fresh session |
 | AgentCore completed retransmission | Captured control | Preserve completed execution and repeated accumulation; do not generalise to ambiguous timeouts, pending reservations, or idempotency |
