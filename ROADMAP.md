@@ -45,7 +45,7 @@ model initiatives completed together. The present frontier is:
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
-| **Active consolidation** | [Continuity profiles](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Two completed-retransmission prefixes now have an unreviewed projection; the mixed-amount denied probe remains in pinned sources, and a captured clock inconsistency is explicit. Archival profiles and historical migrations remain unreviewed and byte-exact |
+| **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change observations now preserve the principal×session boundary in a repository-only artifact that the current runtime rejects. Archival records and historical migrations remain unreviewed and byte-exact |
 | **Ready next** | Binding approval is deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md). Locate contemporaneous mandate/principal/deployment and mediation evidence; changed-revision comparability/amendment claims also need a reviewed consumer extension. No mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
@@ -81,8 +81,14 @@ The completed-request retransmission projection preserves two 400-unit execution
 per trial even when the JSON-RPC ID is reused. Its scalar profile covers only
 the completed prefix; full-trace consumption, including the denied 300-unit
 probe, remains a separate modeling decision. Review and mandate-binding gaps
-remain unresolved. The next consolidation candidate is the principal-change
-control, retaining its distinct principal×session boundary.
+remain unresolved. Principal-change observations now retain principal order,
+shared session aliases and per-principal totals separately from runtime profiles.
+The next contract decision ([#214](https://github.com/mrwersa/agentmandate/issues/214))
+is a versioned principal-aware consumer with explicit
+cross-principal mandate/accounting semantics; the current v1 profile cannot
+represent that boundary faithfully. The
+[consumer gate](docs/continuity-evidence-consolidation.md#principal-and-session-observations)
+does not grant historical-evidence acceptance or a shared-mandate binding.
 The Managed Agents continuation capture has no local mandate/principal binding
 record to populate the existing profile's binding digest.
 

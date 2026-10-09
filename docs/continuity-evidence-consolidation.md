@@ -7,6 +7,8 @@ acceptance and the remaining capture families are still open.
 The completed-request retransmission capture now also has an **unreviewed**
 completed-prefix projection. It preserves repeated execution in the existing
 scalar profile; it does not extend the acceptance of the six revision arms.
+The principal-change capture has a separate **unreviewed, repository-only**
+observation record. It is not a runtime continuity profile.
 
 The [acceptance record](continuation-evidence-acceptance.md) contains the human
 decision, exact reason and conditions, and pinned review materials. A separate
@@ -123,6 +125,15 @@ repair the clocks or treat them as independent proof of response ordering;
 250 ms delay are claims of the captured procedure and contract. The cause of
 the wall-clock inconsistency is not established here.
 
+The sequencing claim concerns program order: the procedure says the driver
+received the complete response before sending again. The second execution is
+supported separately by its distinct Lambda execution marker in the native
+response. Neither argument is computed from wall-clock differences. The clock
+anomaly therefore weakens interval evidence without contradicting those two
+records. This does not independently authenticate the driver run: the committed
+retransmission projector checks the recorded completed-response contract, and
+the projection retains that attestation boundary.
+
 The profile has `confidence: exact`, `review: unreviewed`, unknown
 `same_mandate`, and unestablished mediation. Its Gateway placeholder identifies
 the capture, not a verified mandate/principal binding. The source explicitly
@@ -146,13 +157,74 @@ reservation, automatic retry, or application idempotency key was tested.
 No human acceptance is recorded for these new observations, and the older
 signed binding or September revision-matrix acceptance must not be reused.
 
+## Principal and session observations
+
+[`agentcore-principal-observations-v1.json`](../tests/fixtures/agentcore-principal-observations-v1.json)
+preserves 20 trial pairs and four independent single-request controls from the
+principal-change capture. It is a repository-only archival format, with no
+continuity verdict, not another input supported by `mandate continuity`.
+Both `validate` and `reconcile` reject it with exit 2; tests pin that boundary.
+
+| Recorded principal sequence | Session within each pair | Pairs | Outcomes | Observed completed amount by principal |
+|---|---|---|---|---|
+| A → A | Same | 5 | Allow, Deny | A: 600 |
+| B → B | Same | 5 | Allow, Deny | B: 600 |
+| A → B | Same | 5 | Allow, Allow | A: 600; B: 600 |
+| B → A | Same | 5 | Allow, Allow | B: 600; A: 600 |
+
+The 1,200 sum in a changed-principal pair is observed execution **across
+principals**, not established consumption under one mandate. The artifact
+preserves each principal sequence, the shared session alias, the original event
+pointer and call order, native outcome, request amount, recorded clocks, and
+per-principal totals. Provider ledger quantities remain unavailable.
+`same_mandate` remains unknown and mediation unestablished. The retained STS
+distinct-identity statement is a capture claim; the original identity results
+and session identifiers were sanitized away.
+
+[`scripts/project_principal_observations.py`](../scripts/project_principal_observations.py)
+pins the complete existing ten-file bundle, including its index, policy bytes,
+original sanitizer and procedure. It verifies source and policy joins, all 44
+native request/response records, balanced directions, the committed shuffled
+order, distinct request identities, session aliases, and summary counts. It
+reads the original sanitizer as pinned bytes; it does not execute that code or
+repeat a provider call. Reproduce the artifact with:
+
+```sh
+python scripts/project_principal_observations.py
+```
+
+**Timing boundary:** one recorded call has a wall-clock delta of -127.88 ms
+and a positive duration of 450.186783 ms. Both remain unchanged. The pinned
+original sanitizer required ordered raw monotonic endpoints, but it omitted
+those endpoints from the committed events. The new projection can recheck the
+UTC delta and preserve the recorded duration; it cannot independently repeat
+the original causal-order check. It supplies no inferred interval-overlap value.
+
+**Runtime consumer gate ([#214](https://github.com/mrwersa/agentmandate/issues/214)):**
+v1 `AgentCoreControl` has no before/after principal
+fields and its closed transition vocabulary has no principal-change member.
+`fresh_session` would misname this experiment; `same_boundary` would lose the
+changed principal axis, and splitting the pair would lose its relationship.
+The v1 binding also identifies a single principal. Therefore no v1 continuity
+profile is fabricated from these observations.
+
+Before runtime consumption, review a versioned contract that preserves
+authenticated principal identity separately from session selection, names the
+principal transition, and explains when a reviewed mandate authorizes combining
+usage across those principals. Missing identity mapping, mandate binding,
+mediation or accounting evidence must remain unresolved. Tests must distinguish
+a changed principal with the same session from a fresh session with the same
+principal and retain the trust/expiry/source gates. Artifact evolution follows
+`STABILITY.md`; adding a string to the transition vocabulary alone is insufficient.
+This gate is separate from accountable acceptance of the historical observations.
+
 ## Remaining work
 
 | Capture family | Current disposition | Required next evidence or modeling decision |
 |---|---|---|
 | AgentCore revision matrix | Archival profile remains unreviewed; separate accepted historical-evidence profile expires 2026-11-08 | Establish the campaign's mandate/principal/boundary join before claiming a mandate reset; separately review comparability and amendment treatment |
 | AgentCore configuration diagnostic | Source evidence and independent replay tests | Preserve the configuration comparison without treating it as a same-mandate state transition |
-| AgentCore principal change | Captured control | Represent principal identity and boundary selection explicitly; do not relabel a principal change as a fresh session |
+| AgentCore principal change | Unreviewed repository-only observations preserve principal order, shared session aliases, and per-principal totals; current runtime rejects this artifact | Review a versioned principal-aware consumer and cross-principal mandate/accounting semantics before runtime exposure; source acceptance and binding remain separate |
 | AgentCore completed retransmission | Two unreviewed completed-prefix controls projected; full mixed-amount trace stays in pinned sources | Accountable review must consider the clock limitation and partial projection; full-trace consumption needs per-call amounts, and mandate-binding evidence remains absent |
 | Managed Agents continuation | Three captured cells | Resolve the absent local mandate/principal binding record; distinguish an applied cap reduction from a refused update and an unchanged live agent version |
 | AgentCore deployment change | Authoring refusal | A dataplane comparison with fixed policy and history selection is still unavailable |
