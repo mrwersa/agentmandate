@@ -22,11 +22,21 @@ not whether the model is likely to choose a particular path.
 
 Alpha. Apache-2.0.
 
-## See it in thirty seconds
+## Run the example
+
+The examples live in this repository. Clone it and install into a virtual
+environment (Python 3.10 or newer):
 
 ```bash
-pip install "agentmandate[yaml]"
+git clone https://github.com/mrwersa/agentmandate.git
+cd agentmandate
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[yaml]"
 ```
+
+For use in your own project, install `agentmandate[yaml]` from PyPI instead;
+the examples below assume you are in the repository root.
 
 A payment-dispute agent has one reviewed mandate. Refunds are capped at 500 GBP
 per case, every refund needs human approval, and the mandate may move 500 GBP in
@@ -83,11 +93,10 @@ a widening change needs named review before release
 
 Exit code 1. A pull request shows what somebody typed. It does not show what
 the agent can now do, because reachability composes and text does not. Adding a
-read tool, relaxing an enum in a schema, or removing one precondition can each
+read tool or removing a required scope can each
 open a path that did not exist, and none of them look like a permission change.
 
-Same reason `git diff` never replaced type checking. The question is not what
-changed, it is what the change makes possible.
+Review the configuration change together with the reachable behavior it enables.
 
 ## Put it in CI
 
@@ -113,37 +122,24 @@ the action's: [docs/ci.md](docs/ci.md).
 agent from Python source to a gate decision. Seven checks, one exit code,
 offline.
 
-## Where it fits, and what already exists
+## Adopt it in one repository
 
-This is design-time analysis, not runtime enforcement. It runs in CI against a
-manifest and does not sit in the request path. The agent's model proposes a tool
-call; the surrounding runtime supplies the tools and state. The deployment's
-identity, authorisation, and application components still control whether the
-real-world effect occurs.
+1. Start with one agent and one bounded task. Write a manifest, or generate a
+   skeleton with `scan` and review every `REVIEW` field.
+2. Run `lint` for individual control gaps and `reach` for combinations of calls
+   that exceed a limit. Inspect the counterexample and the search depth.
+3. Commit the reviewed manifest. Use `diff` against the previous reviewed
+   version and `drift` against source in each pull request.
+4. Add `verify` when you have recorded calls with the fields your controls
+   require. It checks those observations against the declaration.
 
-| Tool | What it does | Relationship |
-|---|---|---|
-| [Policy in Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html) | Evaluates all applicable Cedar policies for each gateway tool invocation, with default-deny, forbid-wins, and analysis that flags always-allow and always-deny policies | Enforces each invocation. Its documented analysis is policy-level, not a model of a sequence of permitted calls |
-| [AgentWard](https://github.com/agentward-ai/agentward) | Runtime proxy enforcing policy per call, diffs two policy files | Enforces. Diffs declared text rather than reachable authority |
-| [AgentShield (affaan-m)](https://github.com/affaan-m/agentshield) | Scans agent configuration and MCP servers, drift gate over findings | Scans. Drift is over finding counts, not effective-authority direction; it is distinct from the aiconnai project with the same name |
-| [AgentGuard](https://github.com/WhitzardAgent/AgentGuard) | Attribute-based access control for tool calls | Enforces |
-| [OPA](https://www.openpolicyagent.org/docs), [Cedar](https://docs.cedarpolicy.com/) | Decide one authorisation at a time | Enforces |
+A clean bounded search is evidence about the declared model. Runtime policy,
+identity, approvals, and accounting still need enforcement in the deployment.
+AgentMandate runs offline; it does not intercept requests.
 
-Use those to enforce. AgentMandate is the offline half: it analyses sequences
-of individually permitted calls and compares *effective authority*—what the
-agent can actually reach—across releases.
-
-**If you already run AgentCore Policy**, the gap is specific. The policy engine
-answers "may this principal invoke this tool now" by evaluating all applicable
-policies, and its documented analysis catches policy-level problems such as an
-unconditional allow. It does not model whether four separately permitted calls
-compose into a 1,000 GBP breach or whether a release widened what the agent can
-reach. AgentMandate is vendor-neutral and runs in CI before deployment, so it
-complements the gateway rather than duplicating it.
-
-The closest prior art in a neighbouring domain is [IAM Access Analyzer](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-concepts.html), which derives reachable access from policy by automated reasoning rather than waiting for a log event. This is that idea pointed at agent tool graphs.
-
-The `lint` command deliberately overlaps the scanners above. A tool that reported only compound findings would need one of them running alongside it to be usable at all.
+The [documentation map](docs/README.md) routes you to the relevant guide.
+The dated [landscape survey](docs/agentic-ai-landscape.md) explains the broader
+relationship to policy engines, scanners, and evaluation tools.
 
 ## Starting from an existing agent
 
@@ -212,8 +208,8 @@ $ mandate drift mandate.yaml --source src/agent
       so the analysis is defending authority nobody has.
 ```
 
-The second finding is the one worth having. The manifest still parses, `reach`
-still runs, and the ceiling counts against nothing.
+The argument finding exposes a stale control: the manifest still parses, but
+its value argument no longer matches the implementation.
 
 A tool list the read cannot enumerate, such as `tools=load_tools()`, is itself
 a finding. Reporting no drift from evidence that could not see the whole list
@@ -255,7 +251,8 @@ tools:
     requires_approval: true
 ```
 
-Asking for full preconditions and postconditions would be more expressive and would not get written. This is the minimum that makes compound analysis possible.
+These annotations describe the bounded abstraction used by the search. They
+do not model arbitrary preconditions, postconditions, or tool implementations.
 
 A **cumulative constraint** makes a decision depend on qualifying earlier
 actions. Its **limit** is the configured bound; its consumed state is what the
@@ -285,90 +282,37 @@ all.
 | `mandate obligations` | Derives reviewable test obligations from reachable authority, and renders reviewed ones as an [AgentVerity](https://github.com/mrwersa/agentverity) decision suite |
 | `mandate scenarios` | Exports reachable breach paths with blank environment, agent-input, and expected-control fields for human review and execution by an external evaluation harness |
 
-Every analysis command takes `--json` and exits non-zero on a finding, so they
-drop into CI unchanged. `scan` and `ir export` write artifacts to standard
+Analysis commands support `--json` and return non-zero when findings or
+unresolved required evidence need attention. `scan` and `ir export` write artifacts to standard
 output and are not gates. Exit codes and CI wiring: [docs/ci.md](docs/ci.md).
 
-### Canonical authority artifacts
+### When you need evidence attachments
 
-Export reviewed intent once, validate the artifact at a boundary, then analyze
-that exact snapshot:
+Start with the ordinary manifest workflow above. Attachments are useful when
+source code or manifest fields cannot establish a specific boundary:
 
-```bash
-mandate ir export mandate.yaml > authority-ir.json
-mandate ir validate authority-ir.json
-mandate reach --ir authority-ir.json --json > authority-result.json
-```
+| Need | Guide |
+|---|---|
+| Exchange a canonical reviewed authority snapshot | [Authority IR](docs/authority-ir.md) |
+| Resolve a dynamically supplied tool list | [Dynamic inventory](docs/dynamic-inventory.md) |
+| Narrow a tool's effect using a reviewed input domain | [Conditional authority](docs/conditions-delegation.md) |
+| Relate a tool to an ordered delegation chain | [Delegation](docs/delegation-v2.md) |
+| Compare managed policy decisions with reviewed intent | [Managed Cedar](docs/cedar-import.md) |
+| Establish a finite number of produced resources | [Producer boundaries](docs/bounded-producers.md) |
+| Check whether consumed state survives a session or policy change | [Refund walkthrough](examples/continuity-refund/README.md) |
+| Keep principal changes separate from session changes | [Principal observations](docs/principal-continuity.md) |
 
-`ir validate` proves only that the snapshot is structurally valid. It does not
-turn contested, heuristic, or unknown evidence into policy. `reach --ir`
-applies the stricter manifest-v1 analysis profile and refuses anything except
-exact, accepted reviewed facts from supported adapters. Its `--json` output is
-a canonical, hashed result envelope containing the search boundary, ordered
-counterexamples, and provenance graph. There is deliberately no `import`
-command: parsing evidence is not accepting authority. The format and hash
-boundaries are specified in [docs/authority-ir.md](docs/authority-ir.md).
+Each guide distinguishes structural validation from evidence eligible for
+analysis. Parsing an artifact does not accept its claims. Continuity remains
+experimental; principal observations currently leave mandate continuity
+unresolved even when their evidence is eligible.
 
-Reviewed finite-producer evidence can replace an `unbounded: true` transition
-with an evidence-backed concurrent maximum for one exact deployment, output,
-and partition. Validate the boundary structurally, then pass every named source
-byte, the explicit selection, and the review date to `reach`:
+For example, the [GBP 1,000 refund mandate](examples/continuity-refund/manifest.json)
+that has already spent GBP 600 should
+retain that consumption after reconnecting. The synthetic walkthrough compares
+a denied second GBP 600 refund with a reset that admits GBP 1,200 in total.
 
-```bash
-mandate producers validate reviewed-boundary.json
-mandate reach mandate.yaml \
-  --producer-boundary reviewed-boundary.json \
-  --producer-source evidence/catalogue.json=catalogue.json \
-  --producer-source evidence/outcomes.json=outcomes.json \
-  --producer-source evidence/adapter.py=adapter.py \
-  --producer-selection '{"source":"evidence/adapter.py","binding":"mint_token","producer":"reviewed.provider","producer_version":"1.0","partition_argument":"tenant","partition_binding":"reviewed-tenant","output_scope":"token"}' \
-  --producer-as-of 2026-09-03 --json
-```
-
-The result is the canonical `agentmandate.producers/v1` envelope. Unreviewed,
-expired, incomplete, conflicting, mismatched, or unverifiable evidence remains
-visible as a finding and leaves the stronger manifest authority unchanged.
-Producer inputs currently refuse Authority IR, SARIF, Mermaid, conditional,
-and delegation composition before output. The boundary describes analyzed
-authority; it is not runtime quota enforcement. See
-[the bounded-producer contract](docs/bounded-producers.md).
-
-Authority continuity is a separate lifecycle question: did consumed state stay
-attached to the same mandate across a session, handoff, or policy revision?
-The runnable example uses a common customer-support control: one mandate may
-refund at most GBP 1,000. It refunds GBP 600, reconnects in a fresh provider
-session, and attempts another GBP 600. The safe result denies the second
-refund because the first remains consumed. A reset would allow GBP 1,200 under
-one mandate even though each session looks locally compliant.
-
-![A reviewed binding carries GBP 600 of consumed refund authority into a fresh session; resetting it would let one GBP 1,000 mandate complete GBP 1,200](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/continuity-refund.svg)
-
-Run the deterministic synthetic example:
-
-```bash
-mandate continuity reconcile examples/continuity-refund/manifest.json \
-  --continuity-provider examples/continuity-refund/provider.json \
-  --continuity-source examples/continuity-refund/provider-control.json=examples/continuity-refund/provider-control.json \
-  --continuity-binding examples/continuity-refund/binding.json \
-  --continuity-binding-source examples/continuity-refund/binding-verification.json=examples/continuity-refund/binding-verification.json \
-  --continuity-binding-source examples/continuity-refund/policy.json=examples/continuity-refund/policy.json \
-  --continuity-as-of 2026-09-06T12:00:00Z --json
-```
-
-The canonical `agentmandate.continuity/v1` result reports state continuity,
-authority change, admission, comparability, issuer amendment, and a
-three-valued `safe_continuation` verdict for each transition. A session
-identifier is never treated as a mandate. Violated or unresolved continuity
-exits 1 after complete output; malformed, incomplete, or unsupported composed
-inputs exit 2 with empty standard output. See the
-[example walkthrough](examples/continuity-refund/README.md) and
-[authority-continuity contract](docs/authority-continuity.md).
-
-`verify` is what keeps the rest honest. A manifest nobody checks is a wish, and
-the declaration drifts from the implementation the moment somebody ships a
-connector change. For a spending tool, each trace record must carry the scope,
-value, currency, approval state, and executing principal. Missing or malformed
-control evidence does not pass as an empty value.
+![A reviewed binding preserves consumed refund authority across a fresh session; the reset counterfactual overshoots the mandate](https://raw.githubusercontent.com/mrwersa/agentmandate/main/docs/assets/continuity-refund.svg)
 
 ## From authority to evaluation
 

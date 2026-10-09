@@ -22,13 +22,15 @@ identifiers. Scope names are types, not instances: use `case`, never
 
 Findings echo tool names, scope names, and amounts from the manifest, and a
 `reach` counterexample spells out a working sequence of calls that breaches a
-limit. That output is a description of a real weakness in a real system. Store
-CI logs and JSON reports under the same controls as vulnerability scan results.
+limit within the declared model and search bound. Whether that path is possible
+in a deployment depends on the accuracy of the manifest and its abstraction.
+Store CI logs and JSON reports under the same controls as vulnerability scan results.
 
 `verify` reads recorded tool calls. Those records may carry real scope
 identifiers and real amounts from production runs, so the input file deserves
-the same handling as the traces it came from. Nothing from the trace is written
-back into a report except the tool name, the line number, and the violation.
+the same handling as the traces it came from. Violation messages can include
+observed scope identifiers and amounts. Reports and diagnostics therefore need
+the same access controls and redaction review as the inputs.
 
 MCP catalogues passed to `scan` are untrusted input. AgentMandate quotes names
 as YAML scalars and collapses descriptions to one comment line so catalogue

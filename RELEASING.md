@@ -4,16 +4,11 @@ Releases are cut by merging a pull request. Nothing is typed by hand at
 release time, because the last manually cut release shipped a wheel whose
 `__version__` was one version behind.
 
-AgentMandate publishes from a GitHub Release through PyPI Trusted Publishing.
+The release workflow creates the GitHub Release and publishes through PyPI
+Trusted Publishing.
 No long-lived PyPI token is stored in GitHub.
 
 ## When to cut one
-
-Documented because the history says it was not. This project let an API fix
-sit unreleased for four days, and the sibling project let seventeen merged
-pull requests pile up and then published four minor versions inside
-twenty-eight hours. Both are the same missing rule rather than two different
-mistakes.
 
 Cut a release when any of these is true:
 
@@ -95,8 +90,7 @@ Confirm afterwards that the version appears on PyPI and that
 
 ## The Marketplace listing is not automated, and cannot be
 
-The action is listed on the GitHub Marketplace so people find it by searching
-rather than by already knowing this repository exists. Listing a release is a
+Marketplace metadata helps users discover the action. Listing a release is a
 checkbox on the release form in the web UI, and there is no API for it. The
 release workflow creates releases through the API, so it will never tick that
 box.
@@ -152,15 +146,14 @@ If the PyPI upload is what failed, re-run the failed job from the Actions
 page. The artefacts are already built and attached, and the publish step
 uploads those exact files.
 
-## Publishing from the GitHub UI
+## Recovery uses the release workflow
 
-Creating a release by hand still publishes, which is the path to use for a
-re-run after an infrastructure failure. Tag it `v<version>`, matching
-`agentmandate/__init__.py` exactly.
+Re-run the failed workflow or job after correcting the infrastructure problem.
+Do not create tags, GitHub Releases, or PyPI uploads by hand. The workflow owns
+the version, validated artifacts, and publication sequence.
 
-Note that a release created by the workflow's own token does not trigger
-another workflow run. That is why tagging and publishing live in the same
-workflow file rather than in two files that chain.
+A release created by the workflow's token does not trigger another workflow
+run; tagging and publishing therefore live in the same workflow.
 
 ## One-time PyPI setup
 

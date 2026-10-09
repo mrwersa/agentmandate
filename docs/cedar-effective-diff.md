@@ -82,7 +82,7 @@ bytes, then validates the closed managed profile. It requires:
   analyzed;
 - exact, accepted mapping evidence with reviewer and expiry, evaluated against
   a caller-supplied `date`; expiry is inclusive (`as_of <= expires`). This
-  extends the [authority IR evidence-state rule](authority-ir.md#evidence-and-review-state)
+  extends the [authority IR evidence-state rule](authority-ir.md#version-1-record-model)
   with the same date comparison already used by reviewed condition and
   inventory evidence;
 - an evaluation date on or after the capture date, so later evidence cannot be

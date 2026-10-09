@@ -2,8 +2,13 @@
 
 Status: **review complete; public CLI exposure approved**. The initial review
 was performed against merged commit `fff91d0` on 3 September 2026 and closed
-after its six exit conditions were met. The evidence records and Python types
-remain private; the validate-then-consume CLI and versioned result are public.
+after its six exit conditions were met. The artifact formats accepted by the
+validate-then-consume CLI and its versioned result are public contracts;
+their Python record types remain private.
+
+This is the closing record for that review, not a current evidence-acceptance
+register. Later capture projections and scoped human acceptance are recorded
+in [continuity evidence consolidation](continuity-evidence-consolidation.md).
 
 A provider session is not a mandate. A session identifier, policy revision,
 or provider budget can identify observed enforcement state, but only an
@@ -60,7 +65,7 @@ These are scoped observations, not universal provider claims. Overshoot is an
 admission outcome rather than a vulnerability verdict, and completed-event
 telemetry does not prove reservation of in-flight work.
 
-## Safe-continuation contract implemented privately
+## Safe-continuation implementation reviewed at Gate 4
 
 The private result no longer uses three-axis equality as shorthand for all
 continuity claims. Each outcome carries `comparability`, `issuer_amendment`,
@@ -87,9 +92,9 @@ boundary” no longer establishes derivation integrity without an eligible
 same-mandate binding. `platform_verified` mediation can establish isolation and
 complete mediation; an exclusive adapter remains conditional.
 
-This completes the semantic prerequisite, not a public exit code. The explicit
-synthetic fixture now reaches `satisfied`, but no serialization contract
-exposes the new fields yet.
+This private implementation completed the semantic prerequisite. The closing
+review also approved the serialization and CLI contracts described below,
+which expose these fields without exposing their Python types.
 
 ## Accepted-fixture requirement satisfied synthetically
 
@@ -161,9 +166,9 @@ mandate continuity reconcile MANIFEST \
 ```
 
 Validation proves structure only. Reconciliation rereads and validates
-the provider-specific profile, require exactly the source locators it declares,
-pair an optional binding by explicit identity rather than argument position,
-and require mandate bytes when a binding claims their digest. The command must
+the provider-specific profile, requires exactly the source locators it declares,
+pairs an optional binding by explicit identity rather than argument position,
+and requires mandate bytes when a binding claims their digest. The command must
 not accept a raw session identifier as evidence that two observations belong
 to one mandate.
 
@@ -198,7 +203,7 @@ eight named combinations before manifest analysis or access to supplied source
 bytes. It also rejects unknown future composition names rather than silently
 ignoring them.
 
-## Exit conditions for reconsidering exposure
+## Completed exit conditions for public exposure
 
 1. **Complete privately:** define and implement the per-transition
    comparability and safe-continuation contract, including stable, tightening,

@@ -7,10 +7,13 @@ meaning. Structural validation proves graph or artifact integrity only;
 manifest-mode analysis separately establishes whether the evidence is eligible
 to narrow authority.
 
-The condition and context records below are exposed through `mandate
-conditions validate` and manifest-mode `reach` and `drift`. The original
-grant-v1 examples are retained as design history, not as the current delegation
-contract. Real Authorizer evidence invalidated that shape; the implemented
+The condition and context records below are exposed through
+`mandate conditions validate` and manifest-mode `reach` and `drift`. Use
+[conditional trust semantics](#gate-3-conditional-trust-semantics) for the
+current eligibility rules and the [CLI review](conditional-authority-gate-4-review.md)
+for command syntax. The original grant-v1 and structured-principal examples
+are retained as design history, not accepted manifest syntax. Real Authorizer
+evidence invalidated the original delegation shape; the implemented
 [delegation-chain contract](delegation-v2.md) now preserves ordered actors,
 absolute validity, and separately reviewed deployment mappings.
 
@@ -36,16 +39,17 @@ typed vocabulary instead.
 
 ## Design centre
 
-A condition or delegation may **narrow** what an analysis reports as
-reachable, and may explain a path, but must never widen it. An unevaluable
-condition resolves conservatively (strongest declared effect); an absent,
-unknown, or contested delegation value is a finding, never permission.
+An eligible condition may **narrow** a tool's effect before reachability
+analysis. Delegation analysis separately checks whether the tool's authority
+and each hop fit the reviewed chain; it does not grant new manifest authority.
+An unevaluable condition retains the strongest declared effect. An absent,
+unknown, or contested delegation value produces a finding, never permission.
 
 This mirrors the existing rule that absent control evidence fails closed, and
 extends it: uncertainty about *when* authority applies resolves to the most
 protective reading already in the document.
 
-## Condition v1 and superseded grant-v1 records
+## Current condition-v1 records
 
 The condition-v1 surface narrows this initiative explicitly to **conditional
 effects**: whether a call's effect class depends on its arguments or dispatch
@@ -76,7 +80,7 @@ mandate:
     "classifier": "pg-statement-classifier",
     "classifier_version": "1.3.0",
     "dialect": "postgresql-16",
-    "classes": ["select-only", "dml", "ddl"]
+    "classes": ["ddl", "dml", "select-only"]
   },
   "source": {
     "kind": "argument-capture",
@@ -94,39 +98,55 @@ mandate:
 }
 ```
 
-`completeness: representative` means the capture shows what production sends,
-not everything that could be sent; narrowing within it is a reviewed judgement
-recorded here, and `complete` would claim the domain itself is enumerated.
+This illustrative record uses a placeholder digest and cannot be consumed as
+written. `completeness: representative` records observed inputs without proving
+the whole permitted domain. It never permits effect narrowing, even with
+accepted review. A `complete` context must enumerate the reviewed domain, and
+the current consumer narrows only when its entire class set equals the
+condition's single class. The mixed classes above therefore cannot narrow
+`run_query` to `read`.
 Classifier identity and version are mandatory operands — two classifier
 versions may disagree, so a condition without one is malformed. Digest
 verification, strict reading, and expiry follow the dynamic-inventory rules.
 
 ### Conditions
 
-```yaml
-tools:
-  - name: run_query
-    principal: service
-    requires: [database_connection]
-    conditions:
-      - predicate: statement_class
-        arg: sql
-        class: select-only       # dialect-pinned classifier, reviewed
-        effect: read             # when classified so, this call is a read
-        evidence:
-          confidence: exact
-          review: accepted
-          reviewer: platform-data
-    effect: irreversible         # conservative default when no condition holds
+The condition is a standalone JSON attachment. Manifest v1 keeps the default
+`effect: irreversible`; a nested `tools.conditions` field has no conditional
+authority semantics.
+This schema example names illustrative reviewer metadata, not a review decision:
+
+```json
+{
+  "condition_version": 1,
+  "id": "conditions/aws-postgres/select-only",
+  "target": {
+    "source": "src/postgres-server/server.py",
+    "binding": "run_query",
+    "tool": "run_query"
+  },
+  "predicate": "statement_class",
+  "arg": "sql",
+  "class": "select-only",
+  "effect": "read",
+  "context": "contexts/aws-postgres/select-only",
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "platform-data",
+    "expires": "2026-11-23"
+  }
+}
 ```
 
-Intended semantics:
+Current semantics:
 
 - Gate 1 defines exactly two predicates, each with its operand source in the
   context record: `statement_class` (a pinned classifier classifies a string
   argument into a closed class set) and `dispatch_target` (the reviewed
   hidden-tool catalogue names the operations a dispatch tool may reach, so
-  known dispatch targets narrow while unknown ones stay at the default).
+  a complete single-class dispatch domain may narrow, while mixed or unknown
+  domains stay at the default).
   Regex argument matching is deliberately excluded: a pattern cannot prove a
   statement is read-only (prefix matches admit multi-statement strings), and
   arbitrary patterns would reintroduce the expression language this contract
@@ -138,8 +158,9 @@ Intended semantics:
   the reviewed domain; narrowing applies only within it. Outside an eligible
   context, every conditioned tool stays at its default effect and drift
   reports the unresolved boundary.
-- A condition maps only to a *weaker* declared effect class than the tool's
-  default. Widening through conditions is structurally impossible.
+- An applied condition must select a strictly weaker effect class than the
+  tool's default. The consumer retains the default and reports an unresolved
+  finding if the selected effect is equal or stronger.
 - Conditions carry explicit evidence fields (`confidence` and `review`);
   accepted or contested evidence also requires a paired reviewer and expiry,
   as shown above. An unevaluable, unaccepted,
@@ -148,157 +169,19 @@ Intended semantics:
 - Approval requirements stay attached to the tool, not the condition: a gated
   tool remains gated on every branch.
 
-### Grants
-
-> **Superseded candidate:** the real chain demonstrated that this private v1
-> shape cannot preserve ordered actors, token-resolution validity, or partial
-> authority surfaces. [Delegation record revision](delegation-v2.md) defines
-> the replacement and its fail-closed migration gates. Its reader now lives
-> only in `scripts/migrate_delegation_evidence.py` for repository replay; the
-> installed runtime consumes delegation-chain v1 instead.
-
-A delegation is verifiable only against a reviewed grant artifact — the same
-separation that keeps inventory captures outside the mandate:
-
-```json
-{
-  "grant_version": 1,
-  "id": "grants/sentry-2026-11.json",
-  "grantor": "authorization-server:sentry",
-  "subject": "user:ada",
-  "actor": "spiffe://bank/agents/dispute-resolver",
-  "audience": "sentry",
-  "surface": {
-    "scopes": ["project:read", "issue:write"],
-    "tools": ["find_projects", "update_issue"],
-    "effects": ["read", "write"]
-  },
-  "issued": "2026-08-01",
-  "expires": "2026-11-23",
-  "evidence": {
-    "confidence": "exact",
-    "review": "accepted",
-    "reviewer": "security-platform",
-    "expires": "2026-10-01"
-  }
-}
-```
-
-`surface` is the complete authority the subject conferred: scopes, named
-tools, and permitted effect classes. The effect set is the sole source of
-truth for irreversible authority; there is no second boolean that can disagree.
-Attenuation is the mechanical comparison of each delegated tool's effective
-surface (its declared effect, approval state, and required scopes from the
-manifest) against this object; any excess is `delegation.widens`. The grant's
-own digest and review state travel with it, so `lint` receives referenced
-grant bytes explicitly, verifies them, and never resolves a locator itself.
-
-### Delegations
-
-Delegation vocabulary separates three roles OAuth token exchange already
-distinguishes ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693.html#section-1.1)):
-the **subject** whose authority is spent, the **actor** that spends it, and
-the **grantor** that issued the grant.
-
-```yaml
-tools:
-  - name: find_projects
-    principal:
-      kind: delegated_user
-      subject: user:ada             # whose authority is spent
-      actor: spiffe://bank/agents/dispute-resolver   # what spends it
-      grant: grants/sentry-2026-11.json   # reviewed granted surface, verified bytes
-      audience: sentry
-      expires: 2026-11-23           # grant expiry, mirrors the artifact
-    evidence:
-      confidence: exact
-      review: accepted
-      reviewer: security-platform
-      expires: 2026-10-01           # review expiry, distinct from grant expiry
-```
-
-Intended semantics:
-
-- `principal` gains structured kinds while remaining readable as today's
-  two-value form for ordinary manifests. Kinds: `delegated_user` (an actor
-  spending a named subject's authority under a grant), `agent_delegate`
-  later (one agent acting for another, preserving prior actors separately),
-  and `fixed_user_credential` for the Sentry shape — an operator-supplied
-  credential carrying a user's authority with *no recorded grant*. A fixed
-  credential is not proof of delegation: without evidence establishing grant
-  semantics, impersonation and credential sharing look identical, so it is
-  modelled honestly as unproven rather than upgraded into a chain.
-- The manifest carries only the grant reference; the surface lives in the
-  verified grant artifact. Attenuation is the mechanical comparison described
-  above, reported as `delegation.widens`. A dangling or unverifiable grant
-  reference is a finding, not a widening claim and not silent service
-  treatment.
-- Grant expiry and review expiry are independent dates, both evaluated
-  against caller-supplied dates — never a clock.
-- `reach` cites the hop: a counterexample through a delegated tool names the
-  subject, grant, and expiry in its provenance support, so "who allowed
-  this" has a mechanical answer.
-
-### Intersecting principals
-
-> **Historical record:** principal v1 was never consumed by a public CLI and
-> now lives only in `scripts/replay_principal_v1.py`. Delegation attachment v2
-> replaces its delegated-user path, but does not represent fixed-user
-> credentials or principal intersections. Their fixtures and pinned IR digests
-> remain replayable without implying current runtime support.
-
-AWS-style intersections (cloud credentials meeting a database role) are
-recorded as a second structured kind, `intersecting`, listing the principals
-that jointly bound the call:
-
-```yaml
-    principal:
-      kind: intersecting
-      principals: [aws-role:arn:..., pg-role:refund_rw]
-```
-
-Analysis treats each listed principal as an independent fail-closed
-constraint; neither alone describes the boundary. An intersection is not a
-delegation chain and does not participate in attenuation.
-
-## Trust rules
-
-Conditions and delegations carry their evidence fields explicitly. Beyond
-that:
-
-1. Only `exact` + `accepted` conditions inside an eligible context
-   participate in narrowing; anything else leaves the conservative default in
-   force.
-2. Unknown or malformed delegation records are reader-level rejections,
-   following the strict-reader pattern. Records that parse but fail trust —
-   contested, expired, missing grant, selector mismatch — keep the tool in
-   analysis at full service-principal treatment (existing finding included)
-   and add their specific finding. A tool is never omitted from analysis:
-   dropping it would manufacture a false-clean result.
-3. `fixed_user_credential` tools remain findings
-   (`identity.service-principal`, plus `credential.unproven-delegation`)
-   until evidence establishes actual grant semantics.
-4. Evidence accountability follows the dynamic-inventory rule:
-   `unreviewed` evidence names neither reviewer nor expiry; `accepted` or
-   `contested` evidence requires both. Partial accountability is a reader
-   rejection, not a warning.
-5. Profiles remain separate: the manifest analysis profile extends with a
-   schema-version bump and migration fixtures; inventory profiles never gain
-   authority-bearing conditions.
-
-## Evidence anchors
+## Evidence anchors and resulting contract changes
 
 | Fixture | Conditional case | Identity case |
 |---|---|---|
 | AgentKit MCP (evidence graph) | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
 | GitHub MCP (evidence graph) | no conditioned tools; must stay byte-identical under conservative defaults | caller/service only; unaffected |
-| AWS PostgreSQL MCP (evidence graph) | `run_query` narrows to `read` on classified SELECT-only SQL | `connect_to_database` spends an `intersecting` principal (not a delegation) |
-| Sentry MCP (evidence graph) | `execute_sentry_tool` narrows on dispatch target for known names inside a reviewed context | tools spend a `fixed_user_credential`; delegation semantics are unproven |
+| AWS PostgreSQL MCP (evidence graph) | motivates SELECT-only effect narrowing; the complete narrowing control is synthetic | motivates an `intersecting` principal, retained as historical evidence rather than a runtime attachment |
+| Sentry MCP (evidence graph) | motivates dispatch-dependent effects; a partial catalogue does not justify narrowing | motivates a `fixed_user_credential`; delegation semantics are unproven and the historical shape is not a runtime attachment |
 | Authorizer token exchange (implementation evidence) | no conditioned tools | four actor-bearing hops prove delegation; timestamps, ordered history, and partial scope-only surfaces do not fit the provisional records |
 | dispute-resolver (example, not evidence) | no conditioned tools; must stay byte-identical under conservative defaults | unaffected |
 
-All four committed **evidence graphs** must stay byte-identical under
-conservative defaults. Gate acceptance additionally requires: a SELECT-only
+The four original **evidence graphs** retain byte-identical results under
+conservative defaults. The original gate required: a SELECT-only
 `run_query` profile inside an eligible context produces no irreversible
 gating on that tool; and any counterexample through a credentialed tool cites
 its principal record. The Authorizer fixture proves a genuine OAuth
@@ -307,12 +190,18 @@ attenuation. It also demonstrates that the provisional shape is insufficient:
 five-minute validity cannot be encoded as dates, one actor cannot retain
 ordered history, and OAuth scopes do not establish required tool/effect
 mappings. The synthetic condition-context and grant fixtures continue to pin
-schema transport only. Delegation analysis must not consume either shape until
-the record contract represents these unknowns without inventing deployment
-policy; [issue #92](https://github.com/mrwersa/agentmandate/issues/92) records
-that gate.
+schema transport only. [Issue #92](https://github.com/mrwersa/agentmandate/issues/92)
+required a contract that preserved these unknowns without inventing deployment
+policy. The implemented chain contract cleared that representation gate;
+the real Authorizer record still yields unresolved validity and tool/effect
+findings. A non-synthetic widening claim remains blocked on an operational mapping.
 
 ## Gate 2b projection profiles
+
+This section records the initial projection gate. Tool-condition v1 remains a
+runtime input. Tool-principal v1 is historical and replayed only by
+`scripts/replay_principal_v1.py`; the public delegation path uses attachment v2
+and chain v1.
 
 Two private version-1 JSON artifacts preserve the tool-side declarations
 without changing manifest v1. A tool condition records one target
@@ -340,7 +229,7 @@ profile.
 
 ## Gate 3 conditional trust semantics
 
-The private consumer serializes and strictly rereads every condition and
+The current consumer serializes and strictly rereads every condition and
 context, reruns the closed condition IR profile, and requires a caller-supplied
 evaluation date. It never reads the wall clock. Narrowing occurs only when all
 of these statements hold:
@@ -406,6 +295,150 @@ findings.
 4. **Public exposure:** condition and delegation CLI presentation schemas were
    approved by their [condition](conditional-authority-gate-4-review.md) and
    [delegation](delegation-gate-4-review.md) closing reviews.
+
+## Historical delegation and principal-v1 proposal
+
+The following grant, inline delegation, intersection, and trust-rule sections
+record the original proposal. They are not current CLI or manifest syntax.
+Their replacement is the [delegation-chain contract](delegation-v2.md).
+
+### Grants
+
+> **Superseded candidate:** the real chain demonstrated that this private v1
+> shape cannot preserve ordered actors, token-resolution validity, or partial
+> authority surfaces. [Delegation record revision](delegation-v2.md) defines
+> the replacement and its fail-closed migration gates. Its reader now lives
+> only in `scripts/migrate_delegation_evidence.py` for repository replay; the
+> installed runtime consumes delegation-chain v1 instead.
+
+The proposal made delegation verifiable only against a reviewed grant artifact — the same
+separation that keeps inventory captures outside the mandate:
+
+```json
+{
+  "grant_version": 1,
+  "id": "grants/sentry-2026-11.json",
+  "grantor": "authorization-server:sentry",
+  "subject": "user:ada",
+  "actor": "spiffe://bank/agents/dispute-resolver",
+  "audience": "sentry",
+  "surface": {
+    "scopes": ["project:read", "issue:write"],
+    "tools": ["find_projects", "update_issue"],
+    "effects": ["read", "write"]
+  },
+  "issued": "2026-08-01",
+  "expires": "2026-11-23",
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "security-platform",
+    "expires": "2026-10-01"
+  }
+}
+```
+
+`surface` is the complete authority the subject conferred: scopes, named
+tools, and permitted effect classes. The effect set is the sole source of
+truth for irreversible authority; there is no second boolean that can disagree.
+Attenuation is the mechanical comparison of each delegated tool's effective
+surface (its declared effect, approval state, and required scopes from the
+manifest) against this object; any excess is `delegation.widens`. The grant's
+own digest and review state travel with it, so `lint` receives referenced
+grant bytes explicitly, verifies them, and never resolves a locator itself.
+
+### Proposed inline delegations
+
+Delegation vocabulary separates three roles OAuth token exchange already
+distinguishes ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693.html#section-1.1)):
+the **subject** whose authority is spent, the **actor** that spends it, and
+the **grantor** that issued the grant.
+
+```yaml
+tools:
+  - name: find_projects
+    principal:
+      kind: delegated_user
+      subject: user:ada             # whose authority is spent
+      actor: spiffe://bank/agents/dispute-resolver   # what spends it
+      grant: grants/sentry-2026-11.json   # reviewed granted surface, verified bytes
+      audience: sentry
+      expires: 2026-11-23           # grant expiry, mirrors the artifact
+    evidence:
+      confidence: exact
+      review: accepted
+      reviewer: security-platform
+      expires: 2026-10-01           # review expiry, distinct from grant expiry
+```
+
+Intended semantics:
+
+- `principal` gains structured kinds while remaining readable as today's
+  two-value form for ordinary manifests. Kinds: `delegated_user` (an actor
+  spending a named subject's authority under a grant), `agent_delegate`
+  later (one agent acting for another, preserving prior actors separately),
+  and `fixed_user_credential` for the Sentry shape — an operator-supplied
+  credential carrying a user's authority with *no recorded grant*. A fixed
+  credential is not proof of delegation: without evidence establishing grant
+  semantics, impersonation and credential sharing look identical, so it is
+  modelled honestly as unproven rather than upgraded into a chain.
+- The manifest carries only the grant reference; the surface lives in the
+  verified grant artifact. Attenuation is the mechanical comparison described
+  above, reported as `delegation.widens`. A dangling or unverifiable grant
+  reference is a finding, not a widening claim and not silent service
+  treatment.
+- Grant expiry and review expiry are independent dates, both evaluated
+  against caller-supplied dates — never a clock.
+- `reach` cites the hop: a counterexample through a delegated tool names the
+  subject, grant, and expiry in its provenance support, so "who allowed
+  this" has a mechanical answer.
+
+### Intersecting principals
+
+> **Historical record:** principal v1 was never consumed by a public CLI and
+> now lives only in `scripts/replay_principal_v1.py`. Delegation attachment v2
+> replaces its delegated-user path, but does not represent fixed-user
+> credentials or principal intersections. Their fixtures and pinned IR digests
+> remain replayable without implying current runtime support.
+
+AWS-style intersections (cloud credentials meeting a database role) are
+recorded as a second structured kind, `intersecting`, listing the principals
+that jointly bound the call:
+
+```yaml
+    principal:
+      kind: intersecting
+      principals: [aws-role:arn:..., pg-role:refund_rw]
+```
+
+The proposed analysis treated each listed principal as an independent fail-closed
+constraint; neither alone describes the boundary. An intersection is not a
+delegation chain and does not participate in attenuation.
+
+### Original trust rules
+
+Conditions and delegations carry their evidence fields explicitly. Beyond
+that:
+
+1. Only `exact` + `accepted` conditions inside an eligible context
+   participate in narrowing; anything else leaves the conservative default in
+   force.
+2. Unknown or malformed delegation records are reader-level rejections,
+   following the strict-reader pattern. Records that parse but fail trust —
+   contested, expired, missing grant, selector mismatch — keep the tool in
+   analysis at full service-principal treatment (existing finding included)
+   and add their specific finding. A tool is never omitted from analysis:
+   dropping it would manufacture a false-clean result.
+3. `fixed_user_credential` tools remain findings
+   (`identity.service-principal`, plus `credential.unproven-delegation`)
+   until evidence establishes actual grant semantics.
+4. Evidence accountability follows the dynamic-inventory rule:
+   `unreviewed` evidence names neither reviewer nor expiry; `accepted` or
+   `contested` evidence requires both. Partial accountability is a reader
+   rejection, not a warning.
+5. Profiles remain separate: the manifest analysis profile extends with a
+   schema-version bump and migration fixtures; inventory profiles never gain
+   authority-bearing conditions.
 
 ## Non-goals
 

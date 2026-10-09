@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.18.0 - 2026-10-09
+
+### Added
+
+- Principal/session observation profiles through `mandate continuity validate`
+  and `reconcile`, with a separate `agentmandate.principal-continuity/v1`
+  result. Calls retain principal and session aliases, native outcomes,
+  completion status, and source references. Reports show completed amounts
+  per principal and trial without inferring shared-mandate consumption.
+- Exact-source, review, and expiry checks for observation eligibility. Mandate
+  identity, state continuity, admission, and safe continuation stay unresolved;
+  reconciliation exits 1 and retains full manifest Authority. Binding inputs
+  and unsupported composition are refused. Existing continuity formats and
+  the rejection of repository-only archival observations are unchanged.
+- A runnable synthetic example and a separate unreviewed projection of the
+  historical principal-change pairs. No historical evidence is accepted by
+  this release. Authentication, ordering, and source-pointer meaning remain
+  reviewed claims; digest equality does not authenticate a provider run.
+
+### Changed
+
+- Documentation now leads with a reproducible checkout and ordinary adoption
+  workflow, routes advanced use cases to their guides, and separates current
+  condition/delegation formats from historical proposals. Corrected manifest,
+  trace, diagnostic privacy, and release-workflow guidance.
+
 ## 0.17.1 - 2026-10-09
 
 ### Fixed

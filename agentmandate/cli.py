@@ -49,6 +49,11 @@ from ._managed_cedar import (
     analyse_managed_cedar,
     compare_managed_cedar,
 )
+from ._principal_continuity import (
+    PrincipalContinuity,
+    analyse_principal_continuity,
+    render_principal_continuity,
+)
 from ._producer import (
     ProducerAnalysis,
     ProducerBoundary,
@@ -724,7 +729,7 @@ def _run_producers(args: argparse.Namespace) -> int:
 
 def _continuity_artifact(
     text: str,
-) -> ContinuityBinding | AgentCoreContinuity | AnthropicContinuity:
+) -> ContinuityBinding | AgentCoreContinuity | AnthropicContinuity | PrincipalContinuity:
     try:
         raw = json.loads(text)
     except (json.JSONDecodeError, TypeError, ValueError) as exc:
@@ -735,6 +740,7 @@ def _continuity_artifact(
         "continuity_binding_version": ContinuityBinding,
         "agentcore_continuity_version": AgentCoreContinuity,
         "anthropic_continuity_version": AnthropicContinuity,
+        "principal_continuity_version": PrincipalContinuity,
     }
     matches = [reader for field, reader in readers.items() if field in raw]
     if len(matches) != 1:
@@ -834,6 +840,7 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 ContinuityBinding: "continuity binding",
                 AgentCoreContinuity: "AgentCore continuity profile",
                 AnthropicContinuity: "Anthropic continuity profile",
+                PrincipalContinuity: "principal continuity profile",
             }
             print(f"valid {labels[type(artifact)]} v{artifact.version}")
             return EXIT_OK
@@ -859,6 +866,23 @@ def _run_continuity(args: argparse.Namespace) -> int:
         provider = _continuity_artifact(_read_text(args.continuity_provider))
         if isinstance(provider, ContinuityBinding):
             raise ContinuityFormatError("--continuity-provider requires a provider profile")
+        if isinstance(provider, PrincipalContinuity):
+            if args.continuity_binding is not None:
+                raise ContinuityFormatError("principal continuity does not support binding input")
+            source_bytes = _continuity_sources(
+                provider_paths, provider.sources, "--continuity-source"
+            )
+            manifest_bytes = Path(args.manifest).read_bytes()
+            manifest = loads(manifest_bytes.decode("utf-8"), source=args.manifest)
+            result = analyse_principal_continuity(
+                manifest, provider, source_bytes, as_of=as_of,
+                mandate_bytes=manifest_bytes, depth=args.depth,
+            )
+            if args.json:
+                print(json.dumps(result, sort_keys=True, separators=(",", ":")))
+            else:
+                print(render_principal_continuity(result))
+            return EXIT_FINDING
         binding = None
         if args.continuity_binding is not None:
             candidate = _continuity_artifact(_read_text(args.continuity_binding))

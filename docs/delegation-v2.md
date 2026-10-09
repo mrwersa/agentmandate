@@ -1,12 +1,17 @@
 # Delegation record revision
 
-Status: **public CLI and v1 attachment contract; Python records private**. This
+Status: **public CLI; chain v1 and tool attachment v2; Python records private**. This
 is the post-evidence contract for issue
 [#92](https://github.com/mrwersa/agentmandate/issues/92). It replaces the
 synthetic grant-v1 shape. `mandate delegations validate` checks structure;
 manifest-mode `mandate reach` separately re-validates the closed Authority IR
 profiles, captured bytes, reviewed domains, expiry, and hop attenuation before
 using the attachment. Compatibility follows `STABILITY.md`.
+
+The independent version fields are `delegation_version: 1` for a chain and
+`principal_version: 2` for its tool attachment. Neither changes manifest v1.
+For command syntax and expected outcomes, use the
+[CLI review](delegation-gate-4-review.md#closing-verdict).
 
 ## Evidence-driven changes
 
@@ -25,6 +30,10 @@ The grant-v1 and Authorizer converters are retained in the repository-only
 `scripts/migrate_delegation_evidence.py` replay tool, not the installed runtime.
 
 ## Version 1 chain record
+
+This shortened schema example illustrates accepted metadata; it does not grant
+acceptance to the captured Authorizer evidence. The canonical migration retains
+the capture's review state and unresolved validity/tool/effect boundaries.
 
 ```json
 {
@@ -88,7 +97,7 @@ The grant-v1 and Authorizer converters are retained in the repository-only
 }
 ```
 
-The gate-2 migration fixture will contain all four hops; one is shown here to
+The canonical migration fixture contains all four hops; one is shown here to
 keep the example readable. Each subsequent complete `actors` list must equal
 the new current actor followed by the prior hop's complete list. Actors are
 stored current-first because that is the nested `act` claim order. Hop IDs are
@@ -189,9 +198,11 @@ The delegated principal stops copying claims that can disagree with the chain:
 The referenced hop is the sole source of subject, actor history, audience, and
 validity. The attachment's reviewed per-dimension domains establish whether
 manifest scope, tool, and effect names are comparable with the hop; spelling
-alone never crosses a domain. A dangling chain or hop is a trust failure. `fixed_user_credential`
-and `intersecting` retain their existing meanings when principal v2 migrates;
-neither is promoted into a delegation.
+alone never crosses a domain. A dangling chain or hop is a trust failure.
+Attachment v2 supports only `delegated_user`. The earlier
+`fixed_user_credential` and `intersecting` shapes remain in repository-only
+principal-v1 replay fixtures; the current CLI does not consume them. Neither
+is promoted into a delegation.
 
 ## Trust and migration gates
 

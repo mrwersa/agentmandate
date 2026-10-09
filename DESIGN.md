@@ -5,15 +5,18 @@
 An AI agent is more than its language model. The surrounding runtime supplies
 instructions, tools, memory, credentials, and execution. Its authority is not
 written down in one place: it is spread across tool schemas, framework
-configuration, workload identity, policy, and a prompt that asks nicely. Nobody
-can answer "what can this agent do" by reading any one of those, and nobody can
-answer "what changed" by reading a pull request, because reachability composes
-and text does not.
+configuration, workload identity, and policy. Reviewing those inputs separately
+can miss the authority created by combining them. A prompt can influence which
+calls the model requests, but it does not enforce their authorization.
 
-Many agent scanners check one tool at a time. That finds the tool with no
-approval gate, which is worth finding. It cannot find the case where every tool
-passes and a sequence of them does not, because that defect does not live in
-any one tool.
+AgentMandate records reviewed tool authority and searches permitted call
+sequences. For example, opening more cases can make repeated refunds exceed a
+total limit while every individual refund stays within its per-case ceiling.
+Single-tool checks and compound analysis answer different questions.
+
+For manifest syntax, use the [manifest reference](docs/manifest.md). This page
+explains the model, its search and comparison rules, and the evidence behind
+its limits.
 
 ## The authority model
 
@@ -50,21 +53,22 @@ tool schema does not carry:
 |---|---|
 | `effect` | read, write, or irreversible. Reversibility is what decides where a gate belongs, and it cannot be inferred from a name |
 | `value_arg` | which argument spends money. Without it there is nothing to accumulate |
-| `scope_key` | what a ceiling is measured against. A ceiling with no scope is not a bound |
+| `scope_key` | which resource binding partitions a tool's cumulative ceiling |
 
-Full preconditions and postconditions would be more expressive. They would also
-not get written, and an unwritten annotation buys nothing. This is the smallest
-set that supports the analysis.
+These fields require human review. General preconditions and postconditions
+would express more behavior, but would also require a richer annotation and
+evaluation contract than the current tool provides.
 
-### `unbounded` is the whole game
+### Repeated scope production
 
-A per-scope ceiling is only a bound when the scope itself is bounded. A tool
-marked `unbounded` can be called repeatedly to mint fresh bindings, so a
-£500-per-case ceiling becomes £500 times as many cases as the agent cares to
-open.
+A per-scope ceiling bounds each binding; it does not by itself bound the total
+across bindings. A producer marked `unbounded` can repeatedly create fresh
+bindings. Two cases can therefore permit two £500 refunds despite each case's
+£500 ceiling. Search depth still limits the number of calls explored.
 
-That is the defect the package exists to find, and it is invisible tool by
-tool. Both halves look correct in isolation. Only the composition is wrong.
+The composition breaches a mandate that separately limits the total to less
+than £1,000. Without that declared total, these calls are not a cumulative-value
+breach of the manifest.
 
 Some deployments enforce a smaller finite producer cardinality. That fact is
 not manifest intent and cannot be inferred from a quota document or tool
@@ -76,16 +80,15 @@ reachability; it is not a runtime reservation or enforcement mechanism.
 
 ## The search
 
-Breadth-first over states, where a state is the bindings held and the value
-already spent per (tool, scope, binding).
+The search is breadth-first over states containing held bindings, value already
+spent per (tool, scope, binding), and counts for declared effect budgets.
 
-Breadth-first rather than depth-first for one reason: the shortest
-counterexample is the most useful one. A four-call sequence gets fixed and a
-forty-call sequence gets argued about.
+Breadth-first search produces a shortest call sequence witnessing each reported
+breach. Short counterexamples are easier to reproduce and review.
 
-States are canonicalised so the walk memoises, and a transition that changes
-nothing is not enqueued. Without that, any manifest with a read-only tool
-produces an infinite frontier.
+Equivalent states are canonicalised and visited once. A transition that changes
+no tracked state is not enqueued. This avoids repeatedly exploring read-only
+calls that add no bindings or budget consumption.
 
 The search is bounded by `limits.depth`. Results are a lower bound: no breach at
 depth 8 is not proof that none exists at depth 20, and the report says so when
@@ -113,10 +116,14 @@ does not make reachability more precise.
 both, rather than comparing their text. The two come apart routinely, which is
 the entire argument for the command:
 
-- Adding a read-only tool changes no declared authority and can make a money
-  ceiling unenforceable. This is the shipped example.
-- Renaming a tool changes every line of the config diff and no authority.
-- Relaxing one enum in a schema is one character and can open a scope.
+- Adding a read-only producer can make a cumulative breach reachable. This is
+  the shipped example.
+- Reformatting a manifest changes its text without changing its authority.
+- Removing a prerequisite can make an existing irreversible tool reachable.
+
+Tool names are comparison identities. A rename is reported as a removal and
+an addition; the current diff does not infer that two differently named tools
+are equivalent. General input-schema constraints are outside manifest v1.
 
 Effective authority is summarised as reachable tools, effect-on-scope pairs,
 ungated irreversible effects, service-principal tools, maximum extractable
@@ -134,48 +141,34 @@ default unless the caller supplies `--depth`. Reducing a manifest's default
 depth is itself widening because it weakens future analysis. Manifests naming
 different agents are not comparable.
 
-## Why `verify` ships in the first version
-
-A declaration nobody checks is a wish. The implementation drifts from the
-manifest the moment somebody ships a connector change, and every finding this
-tool produces is worthless if the manifest stopped describing the agent six
-weeks ago.
+## Checking observed calls
 
 `verify` replays recorded calls and reports what the mandate does not permit.
-It is the cheapest available answer to "why should I believe your manifest",
-and without it the rest would be a YAML linter with opinions.
+It helps detect a mismatch between reviewed intent and observed execution.
+`drift` separately compares the manifest with the selected source inventory.
+Neither proves that the supplied inventory or trace contains every deployed
+path; each result retains its input-completeness boundary.
 
 Conformance is fail closed. A record cannot establish a ceiling without its
 scope, finite value, and currency, or establish identity use without the
 executing principal. Missing evidence is a violation. Malformed evidence is a
 usage error.
 
-## Deliberate overlap
+## Relationship to runtime enforcement
 
-`lint` covers ground that AgentWard, AgentShield, AgentGuard, and Policy in
-Amazon Bedrock AgentCore already cover.
-That is on purpose. A tool that reported only compound findings would need one
-of those running alongside it to be usable at all, and the first thing anyone
-does with a new analysis tool is run it on its own.
+`lint` checks individual controls, `reach` searches their composition, and
+`diff` compares the authority of two reviewed manifests. These are offline
+analysis steps. The application's policy decision and enforcement points still
+decide whether a real request executes.
 
-The overlap is the floor. The contribution is `reach` and the diff built on it.
-
-Policy in AgentCore is worth naming precisely, because it is the strongest
-reason an AWS team would ask why this exists. It evaluates all applicable
-Cedar policies for every gateway tool invocation with default-deny and
-forbid-wins semantics. Its documented automated analysis flags policy-level
-problems such as policies that always allow or always deny. That is real
-analysis, but it does not model a sequence of individually permitted calls.
-
-Cedar has no notion of a call sequence. "May this principal invoke
-`issue_refund` now" is a different question from "do four individually
-permitted calls compose into a 1,000 GBP breach", and no per-decision engine
-answers the second by construction. Neither does any of them answer whether a
-release widened reachable authority, because that needs two manifests and a
-reachability computation over both.
-
-So the split is enforcement against offline analysis, and per-decision against
-compound. Running both is the intended shape.
+Request authorization and cumulative accounting need separate treatment.
+Ordinary Cedar decisions evaluate a request against policy. The captured
+AgentCore temporal policies also query accumulated history within a selected
+provider boundary. That stateful behavior does not by itself bind the history
+to a reviewed mandate or provide a release-to-release reachability comparison.
+The [continuity evidence](docs/continuity-evidence-consolidation.md) records
+the tested boundaries and unresolved joins. Use the dated
+[landscape survey](docs/agentic-ai-landscape.md) for product comparisons.
 
 The same boundary applies to multi-agent systems. A supervisor choosing a
 worker is behaviour. The identity and tools delegated to that worker are
@@ -186,25 +179,8 @@ changing that manifest meaning.
 
 ## Counting effects, not only value
 
-Two real graphs now say the same thing about the cumulative model, and it took
-the second one to make it concrete.
-
-`Limits` carried `total`, a `Money` ceiling, and `depth`. Every cumulative
-question the search could ask was therefore a question about currency. On the
-Coinbase AgentKit graph that was the right axis, because the authority being
-compounded was money. On the GitHub MCP graph there is no currency anywhere,
-and `reach` answered "no reachable breach" on an agent that can write a
-workflow, run it with repository secrets, and delete the run logs.
-
-That answer was true. It was also empty, and the distinction matters: the
-approval and irreversibility axis works fine on that graph. Drop the two
-conservative `requires_approval` flags and `lint` immediately reports
-`effect.ungated-irreversible` on `actions_run_trigger` and `delete_file`. What
-the model could not say is **how many times**. Not a missing voice, a missing
-count.
-
-**The decision.** `Limits` gains `effects`, a reviewed maximum number of calls
-per effect class in one run:
+`limits.effects` declares a maximum number of calls per effect class in the
+modeled run:
 
 ```yaml
 limits:
@@ -212,43 +188,26 @@ limits:
     irreversible: 3
 ```
 
-Declared only. A manifest that names no effect budget behaves exactly as
-before, because inventing a ceiling is the same mistake as inventing a
-reversibility label, and this model already refuses that one.
+Only declared budgets are checked. Each call in a budgeted class increments
+its count, including a call that produces no scope and spends no money. This
+allows the search to represent repeated irreversible actions as distinct states.
+The count is shared across tools in that effect class; it is not a timed rate
+limit or a weighted cost model.
 
-**The part that needed a search change.** An effect count has to be state, and
-that is not a detail. The walk skips a tool that neither mints a scope nor
-spends against a ceiling, on the correct reasoning that exploring it again
-reaches no state the walk cannot already hit. An irreversible tool with no
-scope, `delete_file` being exactly that, therefore never extended a path. The
-search could not represent deleting twice, so no budget over it could ever have
-been exceeded. Counting calls without making the count part of the state would
-have shipped a limit that silently never fires.
-
-So a call whose effect class carries a declared budget now progresses the walk,
-the same way spending against a ceiling does. The budget makes the repetition
-visible, and without a declared budget nothing changes.
-
-**Why a count per effect class rather than per tool.** A per-tool count is a
-rate limit, and rate limits belong at the tool. What a reviewer wants to bound
-is the blast radius of a class of action, "at most three irreversible things in
-one run", independent of which tools reach it. It also composes with the
-existing model: effect classes are already declared, already linted, and
-already the vocabulary a reviewer reasons in.
-
-**What this is not.** Not a general budget language. The accumulation rule is
-one call, one increment, chosen because it is the only rule that needs no
-further declarations to interpret. Confidentiality and data flow stay a
-separate model rather than being disguised as a numeric budget, which is the
-same boundary `total` already respects.
+**Historical motivation.** Before effect budgets shipped, the GitHub MCP graph
+could express approval requirements and the write-to-workflow chain, but could
+not bound its repetition without inventing money. The
+[captured graph](docs/evidence/github-mcp-server/README.md) preserves that
+earlier limitation. Effect budgets addressed the call-count gap; the graph's
+conditional effects and argument-dependent scope production remain separate
+modeling questions.
 
 ## What was left out, and why
 
 **Data-flow reachability.** Finding that a read tool feeds an exfiltration path
-needs taint labels on arguments and returns. The manifest does not carry them,
-and inventing them would mean asking for annotations nobody would write. Left
-out rather than approximated, because a taint analysis with guessed labels
-produces confident false positives, which is worse than no analysis.
+needs labels on arguments and returns. The manifest does not carry them.
+The roadmap requires a real path and evidence that reviewers can supply useful
+labels before introducing this model.
 
 **Enforcement.** No proxy, no runtime interception. That is a large maintenance
 surface, it is well covered by others, and mixing analysis with enforcement
@@ -258,11 +217,8 @@ makes both harder to reason about.
 question from whether it *may*. This measures permitted authority. The
 behavioural question needs the agent in the loop and belongs in a testing tool.
 
-**Inferring the fields that matter.** `mandate scan` reads an MCP catalogue and
-writes the skeleton, which removes the typing. It cannot remove the thinking,
-because the three fields the model needs are exactly the ones a tool schema
-omits. It guesses conservatively, defaults anything that is not clearly a read
-to `irreversible`, and marks every guess `REVIEW`. Extract then annotate, never
-extract and trust. Inferring reversibility from a description with a model was
-considered and rejected: a confident wrong answer about whether an action can be
-undone is worse than no answer.
+**Automatic authority annotation.** `mandate scan` reads an MCP catalogue or
+Python declarations and writes a skeleton. It proposes effects and scope/value
+fields conservatively and marks guesses `REVIEW`. A reviewer must establish
+reversibility, principals, approvals, and intended limits before relying on the
+manifest. Source extraction does not supply that acceptance.

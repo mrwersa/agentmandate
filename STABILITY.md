@@ -9,8 +9,8 @@ statement, not a waiver for silent breakage.
 - Patch releases preserve the public Python API and command-line contracts.
 - Breaking Python or CLI changes require a new minor release and migration
   notes in `CHANGELOG.md`.
-- The manifest carries an explicit `version`. A build rejects a schema version
-  it does not understand rather than guessing.
+- The manifest supports an explicit `version`, defaulting to `1` when omitted.
+  A build rejects a schema version it does not understand rather than guessing.
 - Exit codes are part of the contract: `0` clean, `1` finding, `2` usage, I/O,
   malformed manifest/IR, or unsupported IR semantics. CI depends on these, so
   they will not move in a patch.
@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.17.0
+agentmandate~=0.18.0
 ```
 
 ## Versioned authority artifacts
@@ -58,8 +58,10 @@ versions separate compatibility from package releases:
 
 Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
-command behavior requires a package minor release and migration notes. These
-standalone artifact rules are stricter than the additive guarantee for existing
+the documented command contract requires a package minor release and migration
+notes. Corrections that restore existing documented behavior may be patch
+releases. These standalone artifact rules are stricter than the additive
+guarantee for existing
 `--json` command output.
 
 `mandate ir validate` guarantees structural validity only. Eligibility for
@@ -109,6 +111,15 @@ after complete output. Malformed or incomplete inputs exit 2 with empty stdout.
 IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar
 composition are refused before any input is read. The Python records remain
 private.
+
+Principal/session observations use the separate strict
+`principal_continuity_version: 1` profile and
+`agentmandate.principal-continuity/v1` result schema through the same continuity
+commands. They preserve ordered calls and per-principal totals, with source,
+review, and expiry checks. Mandate identity and continuity remain unresolved;
+reconciliation always exits 1. Single-principal bindings are refused on this
+path. The archival `principal_observations_version` input remains unsupported.
+See the [profile contract](docs/principal-continuity.md).
 
 ## What is most likely to change
 

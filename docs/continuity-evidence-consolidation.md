@@ -7,8 +7,9 @@ acceptance and the remaining capture families are still open.
 The completed-request retransmission capture now also has an **unreviewed**
 completed-prefix projection. It preserves repeated execution in the existing
 scalar profile; it does not extend the acceptance of the six revision arms.
-The principal-change capture has a separate **unreviewed, repository-only**
-observation record. It is not a runtime continuity profile.
+The principal-change capture has an **unreviewed, repository-only** archival
+record and a separate **unreviewed runtime profile**. The new consumer preserves
+principal/session observations while leaving mandate continuity unresolved.
 
 The subsequent [clock audit](capture-clock-audit.md) locates six negative UTC
 intervals across six inspected AgentCore event files, including four in the
@@ -30,9 +31,11 @@ and evidence requirements are explicit; no new profile claims are inferred.
 
 The September AgentCore continuation matrix now has its own canonical
 [`agentcore-continuation-v1.json`](../tests/fixtures/agentcore-continuation-v1.json).
-It uses the existing private AgentCore profile format, with six controls and
+It uses the existing AgentCore profile format (whose Python records remain
+private), with six controls and
 ten trials per control. `v1` names the artifact schema, not a replacement of
-the historical capture. No runtime contract or package release is needed.
+the historical capture. That continuation projection did not require a runtime
+contract change or package release; the later principal consumer does.
 
 `project_agentcore_continuation` in
 [`scripts/migrate_continuity_evidence.py`](../scripts/migrate_continuity_evidence.py)
@@ -217,15 +220,29 @@ changed principal axis, and splitting the pair would lose its relationship.
 The v1 binding also identifies a single principal. Therefore no v1 continuity
 profile is fabricated from these observations.
 
-Before runtime consumption, review a versioned contract that preserves
-authenticated principal identity separately from session selection, names the
-principal transition, and explains when a reviewed mandate authorizes combining
-usage across those principals. Missing identity mapping, mandate binding,
-mediation or accounting evidence must remain unresolved. Tests must distinguish
-a changed principal with the same session from a fresh session with the same
-principal and retain the trust/expiry/source gates. Artifact evolution follows
-`STABILITY.md`; adding a string to the transition vocabulary alone is insufficient.
-This gate is separate from accountable acceptance of the historical observations.
+The first consumer now uses the separate
+[`principal_continuity_version: 1` contract](principal-continuity.md).
+[`agentcore-principal-continuity-v1.json`](../tests/fixtures/agentcore-principal-continuity-v1.json)
+projects all 20 paired trials, retaining native outcomes, per-call amounts,
+principal/session aliases, and references to each original call. The same
+repository script reproduces both artifacts. Its verification of native
+processed-response payloads supports the completion classification; it does
+not infer completion merely from an authorization decision.
+
+The four independent single-request controls remain in the pinned sources and
+archival record; the runtime profile contains paired trials only. Raw clock
+fields also remain there. Its `attested_program_order` label carries the
+original procedure's claim, not a reconstructed monotonic check. Review remains
+`unreviewed`, authentication remains an attestation, and reconciliation exits 1.
+The new format never imports the archival cross-principal sum.
+
+This completes the observation consumer only. A later shared-mandate consumer
+still needs a reviewed authorization contract covering identity mappings,
+intent, binding, mediation, and limits. Missing evidence remains unresolved,
+and no principal change by itself establishes reset or overshoot. Tests keep
+principal changes distinct from session changes, with trust/source/expiry
+checks independent of the always-unresolved mandate verdict. Issue #214 stays
+open; historical-evidence acceptance and shared-mandate approval remain separate.
 
 ## Remaining work
 
@@ -233,7 +250,7 @@ This gate is separate from accountable acceptance of the historical observations
 |---|---|---|
 | AgentCore revision matrix | Archival profile remains unreviewed; separate accepted historical-evidence profile expires 2026-11-08 | Establish the campaign's mandate/principal/boundary join before claiming a mandate reset; separately review comparability and amendment treatment |
 | AgentCore configuration diagnostic | Source evidence and independent replay tests | Preserve the configuration comparison without treating it as a same-mandate state transition |
-| AgentCore principal change | Unreviewed repository-only observations preserve principal order, shared session aliases, and per-principal totals; current runtime rejects this artifact | Review a versioned principal-aware consumer and cross-principal mandate/accounting semantics before runtime exposure; source acceptance and binding remain separate |
+| AgentCore principal change | Separate unreviewed runtime profile preserves all 20 pairs; archival format remains rejected; observation consumer leaves mandate continuity unresolved | Review cross-principal mandate/accounting authorization; source acceptance and binding remain separate |
 | AgentCore completed retransmission | Two unreviewed completed-prefix controls projected; full mixed-amount trace stays in pinned sources | Accountable review must consider the clock limitation and partial projection; full-trace consumption needs per-call amounts, and mandate-binding evidence remains absent |
 | Managed Agents continuation | Three captured cells | Resolve the absent local mandate/principal binding record; distinguish an applied cap reduction from a refused update and an unchanged live agent version |
 | AgentCore deployment change | Authoring refusal | A dataplane comparison with fixed policy and history selection is still unavailable |

@@ -1,7 +1,8 @@
 # Running it in CI
 
-The gate is a handful of commands and a set of flags. This is what to wire
-where, and which decisions were deliberate.
+Start with a reviewed manifest. Run `lint` and `reach` on every pull request;
+add a baseline for `diff` and source for `drift` when those inputs are available.
+Begin with `fail-on: never` to review findings before enabling blocking checks.
 
 ## The action
 
@@ -70,11 +71,17 @@ default branch, so a change that widens authority stops and gets a named
 reviewer:
 
 ```yaml
+- uses: actions/checkout@v4
 - name: Authority diff
   run: |
+    git fetch origin main
     git show origin/main:mandate.yaml > /tmp/released.yaml
     mandate diff /tmp/released.yaml mandate.yaml
 ```
+
+This assumes AgentMandate is installed in the job and `main` is your default
+branch. The fetched manifest must exist and be the baseline you intend to
+review; change the branch or use a reviewed release ref when appropriate.
 
 ## Pinning the analyzed authority artifact
 
