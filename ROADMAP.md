@@ -52,8 +52,8 @@ model initiatives completed together. The present frontier is:
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
-| **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change observations now preserve the principal×session boundary in a repository-only artifact that the current runtime rejects. Archival records and historical migrations remain unreviewed and byte-exact |
-| **Ready next** | Binding approval is deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md). Locate contemporaneous mandate/principal/deployment and mediation evidence; changed-revision comparability/amendment claims also need a reviewed consumer extension. No mandate identity, safe-continuation, or deployment approval is established |
+| **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change pairs also have a separate unreviewed runtime profile; the archival observation format remains rejected. The new consumer reports observations while mandate continuity stays unresolved. Archival records and historical migrations remain unreviewed and byte-exact |
+| **Ready next** | Review shared-mandate accounting semantics for [#214](https://github.com/mrwersa/agentmandate/issues/214); binding approval is deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md). Locate contemporaneous mandate/principal/deployment and mediation evidence; changed-revision comparability/amendment claims also need a reviewed consumer extension. No mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
@@ -63,45 +63,28 @@ sequences a reviewed mandate permits. Authority continuity asks whether consumed
 state remains attached to that mandate across a named lifecycle transition.
 Neither result substitutes for the other.
 
-The delivered continuity surface now has a
-[counterfactual evidence plan](docs/continuity-evidence-plan.md). Its next
-provider captures vary session, process, policy revision, principal,
-deployment, retry, and concurrency one factor at a time so results can
-identify the state-owning boundary rather than merely add more allow/deny
-examples. Session, process, revision, principal, retry, and
-synchronized-concurrency controls are now captured, including the reviewed
-tightening campaign. Deployment is blocked by the provider's mandatory Gateway
-resource binding. This evidence work continues after the completed pre-1.0
-consolidation audit without changing the public contract.
+The next implementation boundary is a shared-mandate accounting contract for
+principal changes ([#214](https://github.com/mrwersa/agentmandate/issues/214)).
+The first [principal-aware consumer](docs/principal-continuity.md) now preserves
+principal and session relations independently, reports per-principal completed
+amounts, and checks observation eligibility. It deliberately leaves mandate
+identity, state continuity, admission, and safe continuation unresolved. The
+historical principal profile remains unreviewed; its archival record remains
+byte-exact and outside the runtime format.
 
-The first reconciliation fix retains a reviewed AgentCore reset observation
-when recovery succeeds and a later request is refused. Regression controls
-exercise a tightened limit, require separate predecessor and successor allows,
-and retain unresolved results when review or binding evidence is missing.
-Historical migrations stay byte-exact and unreviewed. The separate
-[AgentCore continuation profile](docs/continuity-evidence-consolidation.md)
-now projects all six revision arms without inventing a same-mandate binding or
-byte-identical recovery observation. The maintainer accepted its six historical
-observations at the pinned review base through 8 November 2026; mandate-binding
-acceptance and the remaining capture families are still open.
-The completed-request retransmission projection preserves two 400-unit executions
-per trial even when the JSON-RPC ID is reused. Its scalar profile covers only
-the completed prefix; full-trace consumption, including the denied 300-unit
-probe, remains a separate modeling decision. Review and mandate-binding gaps
-remain unresolved. Principal-change observations now retain principal order,
-shared session aliases and per-principal totals separately from runtime profiles.
-The next contract decision ([#214](https://github.com/mrwersa/agentmandate/issues/214))
-is a versioned principal-aware consumer with explicit
-cross-principal mandate/accounting semantics; the current v1 profile cannot
-represent that boundary faithfully. The
-[consumer gate](docs/continuity-evidence-consolidation.md#principal-and-session-observations)
-does not grant historical-evidence acceptance or a shared-mandate binding.
-The Managed Agents continuation capture has no local mandate/principal binding
-record to populate the existing profile's binding digest.
+Before a later consumer can resolve shared accounting, it needs reviewed
+identity mappings, mandate intent, binding, mediation, and limits. Neither the
+new implementation nor historical-observation acceptance supplies that decision.
+The [consolidation record](docs/continuity-evidence-consolidation.md) owns the
+capture-by-capture status and limitations; the [evidence plan](docs/continuity-evidence-plan.md)
+owns requirements for further captures. Managed Agents continuation still lacks
+a local mandate/principal binding, and deployment continuity remains blocked by
+the provider's mandatory Gateway resource binding.
 
 ## Near-term adoption: workflow publication review
 
-Planned 9 October 2026. The first adoption target is one workflow with a human
+**Deferred — no active workplace implementation.** Originally planned on
+9 October 2026, the first adoption target is one workflow with a human
 approval gate and a consequential write, compared with its previous published
 revision. This brings inventory reconciliation and a narrow part of
 policy-versus-agent drift forward without waiting for policy export or fleet
@@ -255,7 +238,7 @@ commercial layer may add hosted fleet views, enterprise RBAC, managed
 connectors, retention, and support. The public format must remain usable
 without that layer.
 
-Three boundaries remain firm:
+Four boundaries remain firm:
 
 - no general LLM firewall or prompt-injection classifier
 - no bundled behavioral judge, scenario runner, or benchmark

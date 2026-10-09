@@ -1,0 +1,114 @@
+{
+  "principal_continuity_version": 1,
+  "provider": "synthetic",
+  "boundary": "synthetic-refund-boundary",
+  "measurement": {
+    "tool": "refund",
+    "dimension": "value",
+    "unit": "GBP"
+  },
+  "principals": [
+    {
+      "alias": "a",
+      "authentication": "Synthetic identity attestation for demonstration only.",
+      "sources": [
+        "observations"
+      ]
+    },
+    {
+      "alias": "b",
+      "authentication": "Synthetic identity attestation for demonstration only.",
+      "sources": [
+        "observations"
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "id": "same-principal-same-session",
+      "ordering": "attested_program_order",
+      "calls": [
+        {
+          "principal": "a",
+          "session": "s1",
+          "amount": 600,
+          "completion": "completed",
+          "native_outcome": "allow",
+          "source": "observations",
+          "pointer": "/trials/0/calls/0"
+        },
+        {
+          "principal": "a",
+          "session": "s1",
+          "amount": 600,
+          "completion": "not_completed",
+          "native_outcome": "deny",
+          "source": "observations",
+          "pointer": "/trials/0/calls/1"
+        }
+      ]
+    },
+    {
+      "id": "changed-principal-same-session",
+      "ordering": "attested_program_order",
+      "calls": [
+        {
+          "principal": "a",
+          "session": "s2",
+          "amount": 600,
+          "completion": "completed",
+          "native_outcome": "allow",
+          "source": "observations",
+          "pointer": "/trials/1/calls/0"
+        },
+        {
+          "principal": "b",
+          "session": "s2",
+          "amount": 600,
+          "completion": "completed",
+          "native_outcome": "allow",
+          "source": "observations",
+          "pointer": "/trials/1/calls/1"
+        }
+      ]
+    },
+    {
+      "id": "same-principal-fresh-session",
+      "ordering": "attested_program_order",
+      "calls": [
+        {
+          "principal": "a",
+          "session": "s3",
+          "amount": 600,
+          "completion": "completed",
+          "native_outcome": "allow",
+          "source": "observations",
+          "pointer": "/trials/2/calls/0"
+        },
+        {
+          "principal": "a",
+          "session": "s4",
+          "amount": 600,
+          "completion": "completed",
+          "native_outcome": "allow",
+          "source": "observations",
+          "pointer": "/trials/2/calls/1"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "observations",
+      "kind": "synthetic",
+      "locator": "observations.json",
+      "content_sha256": "38220aff87992547f3db78c2b8be3614c45c4a990ffc8709ed478ae8ea2b694c"
+    }
+  ],
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "synthetic-example-only",
+    "expires": "2026-11-08"
+  }
+}

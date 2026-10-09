@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from agentmandate._continuity import ContinuityFormatError
+from agentmandate._principal_continuity import PrincipalContinuity
 from scripts.migrate_continuity_evidence import (
     _captured,
     _migration_evidence,
@@ -19,6 +20,7 @@ from scripts.migrate_continuity_evidence import (
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "docs/evidence/agentcore-refund-policy/"
 FIXTURE = ROOT / "tests/fixtures/agentcore-principal-observations-v1.json"
+RUNTIME_FIXTURE = ROOT / "tests/fixtures/agentcore-principal-continuity-v1.json"
 PINS = {
     "principal-continuity-index.json": (
         "81972ff6288675709e202cf1d4c39b980c076837c689080b787ef01ce871fbb4"
@@ -298,6 +300,61 @@ def canonical_json(observations: dict[str, Any]) -> str:
     return json.dumps(observations, sort_keys=True, separators=(",", ":")) + "\n"
 
 
+def project_principal_profile(contents: dict[str, bytes]) -> PrincipalContinuity:
+    """Project paired observations without accepting them or joining mandate intent."""
+    observations = project_principal_observations(contents)
+    source_ids = {s["locator"]: s["id"] for s in observations["sources"]}
+    event_source = source_ids[observations["events_locator"]]
+    body = {
+        "principal_continuity_version": 1,
+        "provider": "aws-agentcore",
+        "boundary": observations["recorded_gateway"],
+        "measurement": {
+            "tool": "PrincipalTarget___process_refund",
+            "dimension": "value",
+            "unit": "GBP",
+        },
+        "principals": [
+            {
+                "alias": alias,
+                "authentication": (
+                    "Captured AWS_IAM attestation: distinct STS identities checked before trials; "
+                    "raw identifiers not retained or independently verified here."
+                ),
+                "sources": [
+                    event_source,
+                    source_ids[BASE + "principal-continuity-deployment.json"],
+                ],
+            }
+            for alias in observations["principal_identity_claim"]["aliases"]
+        ],
+        "trials": [
+            {
+                "id": trial["id"],
+                "ordering": "attested_program_order",
+                "calls": [
+                    {
+                        "principal": call["principal_alias"],
+                        "session": trial["session_alias"],
+                        "amount": call["request_amount"],
+                        "completion": "completed"
+                        if call["outcome"] == "allow"
+                        else "not_completed",
+                        "native_outcome": call["outcome"],
+                        "source": event_source,
+                        "pointer": f"{trial['source_pointer']}/calls/{index}",
+                    }
+                    for index, call in enumerate(trial["calls"])
+                ],
+            }
+            for trial in observations["trials"]
+        ],
+        "sources": observations["sources"],
+        "evidence": observations["evidence"],
+    }
+    return PrincipalContinuity.from_json(canonical_json(body))
+
+
 def verify_fixture() -> None:
     contents = {BASE + name: (ROOT / BASE / name).read_bytes() for name in PINS}
     projected = canonical_json(project_principal_observations(contents))
@@ -305,8 +362,10 @@ def verify_fixture() -> None:
         raise ContinuityFormatError(
             "principal projection no longer reproduces canonical observations"
         )
+    if project_principal_profile(contents).to_json() != RUNTIME_FIXTURE.read_text(encoding="utf-8"):
+        raise ContinuityFormatError("principal projection no longer reproduces runtime profile")
 
 
 if __name__ == "__main__":
     verify_fixture()
-    print("principal observations: canonical fixture matches pinned sources; no continuity verdict")
+    print("principal observations and profile match pinned sources; mandate continuity unresolved")

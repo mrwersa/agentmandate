@@ -214,4 +214,64 @@ def test_principal_fixture_replays_through_repository_script():
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert "no continuity verdict" in result.stdout
+    assert "mandate continuity unresolved" in result.stdout
+
+
+def test_runtime_projection_preserves_native_calls_without_accepting_observations():
+    profile = projection.project_principal_profile(_contents())
+    assert profile.to_json() == projection.RUNTIME_FIXTURE.read_text()
+    assert profile.evidence.review == "unreviewed"
+    assert profile.evidence.reviewer is profile.evidence.expires is None
+    assert len(profile.body["trials"]) == 20
+    events = json.loads(_contents()[BASE + "principal-continuity-events.json"])
+    for trial in profile.body["trials"]:
+        assert trial["ordering"] == "attested_program_order"
+        for call in trial["calls"]:
+            _, _, trial_index, _, call_index = call["pointer"].split("/")
+            native = events["trials"][int(trial_index)]["calls"][int(call_index)]
+            assert call["principal"] == native["principal_alias"]
+            assert call["native_outcome"] == native["outcome"]
+            assert call["amount"] == native["request"]["params"]["arguments"]["amount"]
+            assert call["completion"] == (
+                "completed" if native["outcome"] == "allow" else "not_completed"
+            )
+
+
+def test_runtime_fixture_verifier_detects_drift(tmp_path, monkeypatch):
+    path = tmp_path / "profile.json"
+    path.write_text(projection.RUNTIME_FIXTURE.read_text() + " ")
+    monkeypatch.setattr(projection, "RUNTIME_FIXTURE", path)
+    with pytest.raises(ContinuityFormatError, match="runtime profile"):
+        projection.verify_fixture()
+
+
+def test_historical_runtime_profile_reconciles_without_acceptance_or_shared_mandate(capsys):
+    args = [
+        "continuity",
+        "reconcile",
+        str(ROOT / "examples/continuity-refund/manifest.json"),
+        "--continuity-provider",
+        str(projection.RUNTIME_FIXTURE),
+        "--continuity-as-of",
+        "2026-10-09T12:00:00Z",
+        "--json",
+    ]
+    for source in json.loads(projection.RUNTIME_FIXTURE.read_text())["sources"]:
+        locator = source["locator"]
+        args.extend(["--continuity-source", f"{locator}={ROOT / locator}"])
+    assert main(args) == 1
+    captured = capsys.readouterr()
+    assert not captured.err
+    result = json.loads(captured.out)
+    assert result["observations_eligible"] is False
+    assert len(result["trials"]) == 20
+    assert {finding["code"] for finding in result["findings"]} == {
+        "continuity.evidence-untrusted",
+        "continuity.shared-mandate-unresolved",
+    }
+    assert all(trial["safe_continuation"] == "unresolved" for trial in result["trials"])
+    changed = [trial for trial in result["trials"] if trial["id"].startswith("changed-")]
+    assert len(changed) == 10
+    assert all(
+        trial["observed_completed_by_principal"] == {"a": 600, "b": 600} for trial in changed
+    )
