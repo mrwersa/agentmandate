@@ -912,7 +912,10 @@ def _run_continuity(args: argparse.Namespace) -> int:
         if args.continuity_binding is not None:
             candidate = _continuity_artifact(_read_text(args.continuity_binding))
             if not isinstance(candidate, ContinuityBinding):
-                raise ContinuityFormatError("--continuity-binding requires a binding artifact")
+                raise ContinuityFormatError(
+                    "this provider profile requires a continuity binding; "
+                    "principal accounting bindings require a principal profile"
+                )
             binding = candidate
         provider_sources = _continuity_sources(
             provider_paths, provider.sources, "--continuity-source"

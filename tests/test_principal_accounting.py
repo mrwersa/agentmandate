@@ -72,7 +72,7 @@ def test_reviewed_accounting_reports_breach_without_claiming_reset_or_safety():
     changed = trials["changed-principal-same-session"]
     assert changed["observed_completed_by_principal"] == {"a": 600, "b": 600}
     assert changed["accounting"]["observed_completed"] == 1200
-    assert changed["accounting"]["budget"] == "exceeded"
+    assert changed["accounting"]["budget"] == "exceeded_by_observed_calls"
     assert trials["same-principal-fresh-session"]["accounting"]["observed_completed"] == 1200
     same = trials["same-principal-same-session"]
     assert same["accounting"]["observed_completed"] == 600
@@ -99,7 +99,7 @@ def test_inclusive_limit_and_zero_amounts(amount):
     accounting = result["trials"][0]["accounting"]
     assert accounting["observed_completed"] == amount * 2
     assert accounting["budget"] == (
-        "exceeded" if amount == 501 else "not_exceeded_by_observed_calls"
+        "exceeded_by_observed_calls" if amount == 501 else "not_exceeded_by_observed_calls"
     )
 
 
@@ -356,6 +356,17 @@ def test_cli_malformed_binding_and_missing_sources_are_usage_failures(tmp_path, 
     del args[9:11]
     assert main(args) == 2
     assert capsys.readouterr().out == ""
+
+
+def test_cli_explains_accounting_binding_and_provider_type_mismatch(capsys):
+    assert main([
+        *_args(), "--continuity-provider",
+        str(ROOT / "examples/continuity-refund/provider.json"), "--json",
+    ]) == 2
+    output = capsys.readouterr()
+    assert output.out == ""
+    assert "this provider profile requires a continuity binding" in output.err
+    assert "principal accounting bindings require a principal profile" in output.err
 
 
 def test_cli_tampered_binding_source_is_finding_with_complete_output(tmp_path, capsys):

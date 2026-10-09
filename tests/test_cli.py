@@ -784,7 +784,7 @@ def test_continuity_reconcile_rejects_bad_pairing_and_artifact_roles(capsys):
                 "--continuity-binding-source",
                 "placeholder=missing",
             ],
-            "requires a binding artifact",
+            "this provider profile requires a continuity binding",
         ),
     ]
     for command, message in cases:

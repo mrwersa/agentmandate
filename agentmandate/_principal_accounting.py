@@ -228,7 +228,10 @@ def analyse_principal_accounting(
             accounting.update(
                 status="reviewed", account=mapped_trials[trial["id"]]["account"],
                 observed_completed=amount, limit=limit,
-                budget="exceeded" if amount > limit else "not_exceeded_by_observed_calls",
+                budget=(
+                    "exceeded_by_observed_calls" if amount > limit
+                    else "not_exceeded_by_observed_calls"
+                ),
             )
             trial["mandate_identity"] = "bound_by_review"
             if amount > limit:

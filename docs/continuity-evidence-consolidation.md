@@ -241,8 +241,7 @@ separate binding authorization for identity mappings, shared intent, mediation,
 execution uniqueness, and the manifest monetary limit. No such binding has been
 accepted for this historical profile. It therefore keeps its observation-only
 result; no principal change by itself establishes a reset or mandate overshoot.
-Issue #214 stays open for independent contract review and the remaining evidence
-boundary. Historical-evidence acceptance and shared-mandate approval remain
+Issue #214 stays open for the remaining historical evidence boundary. Historical-evidence acceptance and shared-mandate approval remain
 separate.
 
 ## Remaining work

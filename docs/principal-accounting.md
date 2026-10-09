@@ -109,7 +109,7 @@ binding digest, the complete binding, `binding_eligible`, and per-trial
 
 With eligible observations, a current binding, matching joins, and known
 completion for every call in the trial, accounting reports the shared completed
-amount and limit. `budget: exceeded` means this observed subset alone exceeds
+amount and limit. `budget: exceeded_by_observed_calls` means this observed subset alone exceeds
 the limit. `not_exceeded_by_observed_calls` says nothing about missing earlier
 spend, reservations, other tools, future admissions, or safe continuation.
 It is not a compliance verdict. Equality is within an inclusive limit.
