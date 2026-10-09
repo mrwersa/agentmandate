@@ -61,6 +61,15 @@ tightening campaign. Deployment is blocked by the provider's mandatory Gateway
 resource binding. This evidence work continues after the completed pre-1.0
 consolidation audit without changing the public contract.
 
+The first reconciliation fix retains a reviewed AgentCore reset observation
+when recovery succeeds and a later request is refused. Regression controls
+exercise a tightened limit, require separate predecessor and successor allows,
+and retain unresolved results when review or binding evidence is missing.
+Historical migrations stay byte-exact and unreviewed. Consolidating the newer
+captures into reviewed provider profiles remains the next evidence step;
+the Managed Agents continuation capture has no local mandate/principal binding
+record to populate the existing profile's binding digest.
+
 ## Near-term adoption: workflow publication review
 
 Planned 9 October 2026. The first adoption target is one workflow with a human
