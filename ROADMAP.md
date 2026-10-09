@@ -45,9 +45,9 @@ model initiatives completed together. The present frontier is:
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
-| **Active consolidation** | [Continuity profiles](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile; the archival profile and historical migrations remain unreviewed and byte-exact |
+| **Active consolidation** | [Continuity profiles](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Two completed-retransmission prefixes now have an unreviewed projection; the mixed-amount denied probe remains in pinned sources, and a captured clock inconsistency is explicit. Archival profiles and historical migrations remain unreviewed and byte-exact |
 | **Ready next** | Binding approval is deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md). Locate contemporaneous mandate/principal/deployment and mediation evidence; changed-revision comparability/amendment claims also need a reviewed consumer extension. No mandate identity, safe-continuation, or deployment approval is established |
-| **Planned adoption pilot** | Review one workflow before publication through an external adapter, with inventory reconciliation, authority diff, and explicit unsupported semantics. The [pilot below](#near-term-adoption-workflow-publication-review) starts report-only and does not yet supply a new evidence graph or clear a model gate |
+| **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
@@ -77,6 +77,12 @@ now projects all six revision arms without inventing a same-mandate binding or
 byte-identical recovery observation. The maintainer accepted its six historical
 observations at the pinned review base through 8 November 2026; mandate-binding
 acceptance and the remaining capture families are still open.
+The completed-request retransmission projection preserves two 400-unit executions
+per trial even when the JSON-RPC ID is reused. Its scalar profile covers only
+the completed prefix; full-trace consumption, including the denied 300-unit
+probe, remains a separate modeling decision. Review and mandate-binding gaps
+remain unresolved. The next consolidation candidate is the principal-change
+control, retaining its distinct principal×session boundary.
 The Managed Agents continuation capture has no local mandate/principal binding
 record to populate the existing profile's binding digest.
 
@@ -89,6 +95,10 @@ policy-versus-agent drift forward without waiting for policy export or fleet
 governance. Consolidating the captured continuity controls remains the next
 evidence task. No application source or new operational fixture has yet been
 reviewed for this pilot.
+
+Deferred at the maintainer's request on 9 October 2026. The plan below is retained
+for a possible restart; its 23 October readiness checkpoint is inactive while
+the pilot is deferred. No workplace workflow has been selected or reviewed.
 
 ### First increment and decision point
 

@@ -4,6 +4,10 @@ Status: first profile projected and its six historical observations accepted
 by **mrwersa** on 9 October 2026, expiring 8 November 2026. Mandate-binding
 acceptance and the remaining capture families are still open.
 
+The completed-request retransmission capture now also has an **unreviewed**
+completed-prefix projection. It preserves repeated execution in the existing
+scalar profile; it does not extend the acceptance of the six revision arms.
+
 The [acceptance record](continuation-evidence-acceptance.md) contains the human
 decision, exact reason and conditions, and pinned review materials. A separate
 [accepted profile](continuity-reviews/agentcore-continuation-2026-10-09.json)
@@ -81,6 +85,67 @@ reviewer and expiry for the pinned historical observations; the joins required
 for mandate continuity remain absent. A fixture refresh must not transfer that
 acceptance to changed evidence.
 
+## Completed-request retransmission projection
+
+[`agentcore-retransmission-v1.json`](../tests/fixtures/agentcore-retransmission-v1.json)
+contains two controls, `same-id-completed-prefix` and
+`fresh-id-completed-prefix`, with ten trials each. In each trial, two admitted
+400-unit requests returned distinct execution markers. The same-ID arm reused
+the first request bytes; the fresh-ID arm changed only the JSON-RPC identifier.
+Both prefixes therefore retain 800 units of observed completed execution. They
+are not deduplicated into 400, multiplied by the ten repetitions, or inflated to
+1,100 by counting the denied final 300-unit probe as completed work.
+
+**This is a partial projection of the capture.** The v1 AgentCore profile has
+one `request_amount` per control. Encoding the full Allow–Allow–Deny sequence
+with amount 400 would invent a denied 400-unit call; the actual denied probe
+was 300. The profile consequently contains only the completed Allow–Allow
+prefix, with its scope in each control ID. The full mixed-amount trace and the
+independent 500-Allow/1,000-Deny controls remain in the pinned source records.
+The projection checks all 62 native requests/responses before producing the
+two prefix controls. A future full-trace consumer would need an explicitly
+reviewed per-call-amount contract; this projection does not supply it.
+
+`project_agentcore_retransmission` in the existing migration script pins the
+contract, events, deployment, and summary. It checks request-byte digests,
+JSON-RPC request/response joins, native outcomes, processed amounts, distinct
+execution markers, same-ID byte equality, fresh-ID differences, the fresh probe
+identifier, trial identities, and summary counts. The normal migration replay
+also reproduces this fixture. These checks verify consistency of the committed
+sanitized records, not the authenticity of the original live execution.
+
+**Clock limitation:** the second call in `same_id`, trial 6, records start
+`2026-09-11T19:32:38.917842Z` and finish
+`2026-09-11T19:32:38.765727Z`, despite a positive recorded duration of
+516.247859 ms. The original bytes remain unchanged. The projection does not
+repair the clocks or treat them as independent proof of response ordering;
+`intervals_overlap` stays unknown. Completed-response sequencing and the
+250 ms delay are claims of the captured procedure and contract. The cause of
+the wall-clock inconsistency is not established here.
+
+The profile has `confidence: exact`, `review: unreviewed`, unknown
+`same_mandate`, and unestablished mediation. Its Gateway placeholder identifies
+the capture, not a verified mandate/principal binding. The source explicitly
+says that the Gateway did not inspect the experiment's mandate. The recorded
+fixed session/revision boundary supports `same_boundary`; it does not prove
+mandate identity. The MCP version was not captured and is not inferred from a
+different campaign.
+
+The existing CLI validates the profile, then reconciliation exits 1. State,
+admission, authority change, and safe continuation stay unresolved while its
+evidence is unreviewed. A synthetic acceptance used only in tests makes the
+stable numeric threshold and within-bound completed total eligible; state,
+binding derivation, mediation, and safe continuation remain unresolved. The
+800-unit value is derived from observed completed calls, not a provider ledger
+snapshot; consumed, remaining, reserved, and in-flight quantities were unavailable.
+
+The denied probe remains corroborating source evidence for repeated temporal
+accumulation. The prefix profile alone cannot establish that accumulation or
+represent the full refusal trace. No timeout, lost response, pending
+reservation, automatic retry, or application idempotency key was tested.
+No human acceptance is recorded for these new observations, and the older
+signed binding or September revision-matrix acceptance must not be reused.
+
 ## Remaining work
 
 | Capture family | Current disposition | Required next evidence or modeling decision |
@@ -88,7 +153,7 @@ acceptance to changed evidence.
 | AgentCore revision matrix | Archival profile remains unreviewed; separate accepted historical-evidence profile expires 2026-11-08 | Establish the campaign's mandate/principal/boundary join before claiming a mandate reset; separately review comparability and amendment treatment |
 | AgentCore configuration diagnostic | Source evidence and independent replay tests | Preserve the configuration comparison without treating it as a same-mandate state transition |
 | AgentCore principal change | Captured control | Represent principal identity and boundary selection explicitly; do not relabel a principal change as a fresh session |
-| AgentCore completed retransmission | Captured control | Preserve completed execution and repeated accumulation; do not generalise to ambiguous timeouts, pending reservations, or idempotency |
+| AgentCore completed retransmission | Two unreviewed completed-prefix controls projected; full mixed-amount trace stays in pinned sources | Accountable review must consider the clock limitation and partial projection; full-trace consumption needs per-call amounts, and mandate-binding evidence remains absent |
 | Managed Agents continuation | Three captured cells | Resolve the absent local mandate/principal binding record; distinguish an applied cap reduction from a refused update and an unchanged live agent version |
 | AgentCore deployment change | Authoring refusal | A dataplane comparison with fixed policy and history selection is still unavailable |
 

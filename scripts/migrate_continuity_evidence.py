@@ -7,6 +7,7 @@ owns strict artifact readers, IR projection, and reconciliation only.
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -737,6 +738,180 @@ def project_agentcore_continuation(contents: dict[str, bytes]) -> AgentCoreConti
     return AgentCoreContinuity.from_json(profile.to_json())
 
 
+def _retransmission_call(call: dict[str, Any], amount: int, outcome: str) -> str | None:
+    """Check the native request/result, including its distinct execution marker."""
+    request = call["request"]
+    response = call["response"]
+    if (
+        json.loads(call["request_bytes"]) != request
+        or hashlib.sha256(call["request_bytes"].encode()).hexdigest() != call["request_sha256"]
+        or request != {
+            "id": request["id"], "jsonrpc": "2.0", "method": "tools/call",
+            "params": {"arguments": {"amount": amount}, "name": "RetryTarget___process_refund"},
+        }
+        or response["id"] != request["id"]
+        or response["jsonrpc"] != "2.0"
+        or call["http_status"] != 200
+        or call["outcome"] != outcome
+        or not isinstance(call["duration_ms"], (int, float)) or call["duration_ms"] <= 0
+    ):
+        raise ContinuityFormatError("retransmission projection request/response identity differs")
+    if outcome == "allow":
+        result = response.get("result", {})
+        content = result.get("content", [])
+        if (
+            "error" in response or result.get("isError") is not False
+            or len(content) != 1 or content[0].get("type") != "text"
+            or not isinstance(call["execution_alias"], str)
+            or not call["execution_alias"]
+            or json.loads(content[0]["text"]) != {
+                "processed": True, "amount": amount, "execution_marker": call["execution_alias"],
+            }
+        ):
+            raise ContinuityFormatError("retransmission projection native execution differs")
+    elif (
+        "result" in response or response.get("error", {}).get("code") != -32002
+        or "Policy evaluation denied" not in response["error"].get("message", "")
+        or call["execution_alias"] is not None
+    ):
+        raise ContinuityFormatError("retransmission projection native denial differs")
+    return call["execution_alias"]
+
+
+def _retransmission_trials(events: dict[str, Any], summary: dict[str, Any]) -> None:
+    trials = events["trials"]
+    identities = [(trial["arm"], trial["index"]) for trial in trials]
+    expected = {(arm, index) for arm in ("same_id", "fresh_id") for index in range(1, 11)}
+    if (
+        len(identities) != 20 or set(identities) != expected
+        or [trial["arm"] for trial in trials] != events["trial_order"]
+        or len({trial["session_alias"] for trial in trials}) != 20
+    ):
+        raise ContinuityFormatError("retransmission projection trial identities differ")
+    markers = []
+    for trial in trials:
+        calls = trial["calls"]
+        if len(calls) != 3 or trial["retry_delay_ms"] != 250:
+            raise ContinuityFormatError("retransmission projection trial shape differs")
+        for call, amount, outcome in zip(
+            calls, (400, 400, 300), ("allow", "allow", "deny"), strict=True
+        ):
+            marker = _retransmission_call(call, amount, outcome)
+            if marker is not None:
+                markers.append(marker)
+        first, retry, probe = calls
+        same_id = trial["arm"] == "same_id"
+        if (
+            (first["request_bytes"] == retry["request_bytes"]) != same_id
+            or (first["request"]["id"] == retry["request"]["id"]) != same_id
+            or probe["request"]["id"] in {first["request"]["id"], retry["request"]["id"]}
+        ):
+            raise ContinuityFormatError("retransmission projection identifier relation differs")
+    if len(set(markers)) != 40:
+        raise ContinuityFormatError("retransmission projection execution markers are not distinct")
+    controls = events["controls"]
+    if len(controls) != 2:
+        raise ContinuityFormatError("retransmission projection single-request controls differ")
+    for control, amount, outcome in zip(controls, (500, 1000), ("allow", "deny"), strict=True):
+        if control["amount"] != amount or control["outcome"] != outcome:
+            raise ContinuityFormatError("retransmission projection single-request controls differ")
+        _retransmission_call(control["call"], amount, outcome)
+    if (
+        summary["retry_continuity_summary_version"] != 1
+        or summary["trials_per_arm"] != 10 or summary["managed_requests"] != 62
+        or summary["trial_allowed_target_executions"] != len(markers)
+        or summary["same_id"] != {
+            "allow_allow_deny": 10, "byte_identical_retransmissions": 10,
+            "distinct_second_executions": 10,
+        }
+        or summary["fresh_id"] != {
+            "allow_allow_deny": 10, "identifier_only_changes": 10,
+            "distinct_second_executions": 10,
+        }
+    ):
+        raise ContinuityFormatError("retransmission projection summary differs from events")
+
+
+def project_agentcore_retransmission(contents: dict[str, bytes]) -> AgentCoreContinuity:
+    """Project only the completed 400+400 prefixes of the pinned retransmission trials.
+
+    The full 400/400/300 allow/allow/deny trace is verified first. The scalar v1
+    profile cannot encode the different-sized denied probe: retaining its deny
+    beside request_amount=400 would invent a call. Sources retain the full trace.
+    """
+    base = "docs/evidence/agentcore-refund-policy/"
+    pins = {
+        "retry-continuity-contract.json":
+            "557ddb3e336d8465ee456f9e3ba84772c8afe6fbb47c60b2483bfe6e5055259d",
+        "retry-continuity-events.json":
+            "f64f681b0ae35550fcb101483f07b9bb1d1f9cd091cef164b8790dea514ebdc3",
+        "retry-continuity-deployment.json":
+            "ae4f241a17218c665374a18028e28b3e37a24c609e09f5585e1a7d64b267035f",
+        "retry-continuity-summary.json":
+            "e34d9374c879ed350a86609b987f481798b72152ef61f8c0cb51105c8792a617",
+    }
+    sources = _migration_sources(
+        contents,
+        {base + name: name.removesuffix(".json") for name in pins},
+        {base + name: digest for name, digest in pins.items()},
+    )
+    events = _captured(contents, base + "retry-continuity-events.json")
+    contract = _captured(contents, base + "retry-continuity-contract.json")
+    deployment = _captured(contents, base + "retry-continuity-deployment.json")
+    summary = _captured(contents, base + "retry-continuity-summary.json")
+    if (
+        events["retry_continuity_events_version"] != 1
+        or contract["retry_continuity_contract_version"] != 1
+        or deployment["retry_continuity_deployment_version"] != 1
+        or deployment["gateway"]["policy_engine_mode"] != "ENFORCE"
+        or deployment["gateway"]["status"] != "READY"
+        or deployment["gateway"]["protocol"] != "MCP"
+        or len(deployment["policies"]) != 2
+        or any(p["status"] != "ACTIVE" or p["enforcement_mode"] != "ACTIVE"
+               for p in deployment["policies"])
+        or events["gateway"] != "<reviewed-retry-continuity-gateway>"
+        or events["mandate_sha256"] !=
+            "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326"
+        or events["mandate_binding"] != "external experiment invariant; Gateway did not inspect it"
+        or events["provider_state"] != {
+            "configured_limit": 1000, "consumed": "unavailable", "remaining": "unavailable",
+            "reserved": "unavailable", "in_flight": "unavailable", "completed": "unavailable",
+        }
+        or events["retry_contract"] != {
+            "completed_response_before_retransmission": True, "fixed_retry_delay_ms": 250.0,
+            "json_rpc_id_role": "correlation identifier candidate",
+            "provider_data_plane_idempotency_token": "not documented",
+            "sdk_retries": 0, "transport_retries": 0,
+        }
+        or contract["experiment"] != {
+            "completed_response_before_retransmission": True, "fixed_delay_ms": 250,
+            "sdk_retries": 0, "transport_retries": 0, "ambiguous_timeout_simulated": False,
+            "interceptor_retry_tested": False, "application_idempotency_key_tested": False,
+        }
+    ):
+        raise ContinuityFormatError("retransmission projection configuration or scope differs")
+    _retransmission_trials(events, summary)
+    controls = tuple(
+        AgentCoreControl(
+            id=f"{arm}-completed-prefix", transition="same_boundary", trials=10,
+            request_amount=400, provider_limits=(1000,), outcomes=("allow", "allow"),
+            same_mandate=None, revision_changed=False, boundary_changed=False,
+            # One captured wall-clock interval runs backwards. Sequentiality
+            # is a recorded procedure claim, not an interval proof.
+            intervals_overlap=None, mediation="unestablished",
+            sources=tuple(source.id for source in sources),
+        )
+        for arm in ("fresh-id", "same-id")
+    )
+    profile = AgentCoreContinuity(
+        version=1, adapter_name="agentmandate.agentcore-continuity", adapter_version=1,
+        provider="aws-agentcore", binding=events["gateway"],
+        protocol="MCP (version not captured)", controls=controls, sources=sources,
+        evidence=_migration_evidence(),
+    )
+    return AgentCoreContinuity.from_json(profile.to_json())
+
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
 
@@ -790,6 +965,12 @@ def _migration_cases() -> tuple[
                 agentcore + "continuation-summary.json",
             ),
             "agentcore-continuation-v1.json",
+        ),
+        (
+            project_agentcore_retransmission,
+            tuple(agentcore + f"retry-continuity-{name}.json"
+                  for name in ("contract", "events", "deployment", "summary")),
+            "agentcore-retransmission-v1.json",
         ),
     )
 
