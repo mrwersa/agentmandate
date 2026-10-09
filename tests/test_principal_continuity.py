@@ -178,6 +178,23 @@ def test_cli_validates_then_returns_complete_unresolved_json_and_text(capsys):
 
 
 @pytest.mark.parametrize(
+    ("fixture", "as_of"),
+    [
+        ("eligible", "2026-10-09T12:00:00Z"),
+        ("expired", "2026-11-09T00:00:00Z"),
+    ],
+)
+def test_cli_preserves_released_v1_result_bytes(fixture, as_of, capsys):
+    args = _args()
+    args[-1] = as_of
+    assert main([*args, "--json"]) == 1
+    output = capsys.readouterr()
+    assert not output.err
+    expected = ROOT / "tests/fixtures" / f"principal-continuity-result-v1-{fixture}.json"
+    assert output.out.encode("utf-8") == expected.read_bytes()
+
+
+@pytest.mark.parametrize(
     "options",
     [
         ["--continuity-binding", "missing.json", "--continuity-binding-source", "x=missing.json"],

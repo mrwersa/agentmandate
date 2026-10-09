@@ -437,6 +437,17 @@ more than one framework and authority domain; and security plus trace-retention
 guidance has external review. Policy export and fleet features may remain
 preview after 1.0 if their contracts have not earned stability.
 
+The principal observation surface added in `0.18.0` extends the compatibility
+inventory with `principal_continuity_version: 1` and
+`agentmandate.principal-continuity/v1`; it does not complete another initiative.
+Its [compatibility fixtures](docs/principal-continuity.md#compatibility-fixtures)
+pin the initial input and result contracts, including expiry. These are v1
+baselines, not evidence of a migration from an earlier principal result schema.
+Any later format change needs an explicit compatibility decision and affected
+before/after fixtures. The historical pre-1.0 audit remains a record of its
+original baseline; neither this addition nor internal code review supplies the
+required external security and trace-retention review.
+
 ### Pre-1.0 consolidation and repository history
 
 AgentMandate already has public PyPI distributions and GitHub release tags. A
