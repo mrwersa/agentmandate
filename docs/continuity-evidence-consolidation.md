@@ -10,6 +10,12 @@ decision, exact reason and conditions, and pinned review materials. A separate
 records that decision's reviewer and expiry. Deployment-owner acceptance of a
 mandate binding remains separate and pending.
 
+The [binding gap audit](continuation-binding-gap-audit.md) records the
+maintainer's decision to defer that approval. It distinguishes missing
+September evidence from the current consumer's inability to establish
+comparability or amendment treatment for changed revisions. The next owner
+and evidence requirements are explicit; no new profile claims are inferred.
+
 The September AgentCore continuation matrix now has its own canonical
 [`agentcore-continuation-v1.json`](../tests/fixtures/agentcore-continuation-v1.json).
 It uses the existing private AgentCore profile format, with six controls and

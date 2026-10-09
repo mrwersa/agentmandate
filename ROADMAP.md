@@ -32,6 +32,11 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
+**Review checkpoint — 6 November 2026, mrwersa:** renew or let lapse the
+[six accepted historical AgentCore observations](docs/continuation-evidence-acceptance.md).
+Their current acceptance expires 8 November inclusive UTC and is ineligible
+from 9 November. Work on mandate binding does not extend this expiry.
+
 The time horizons below describe dependency order and product direction. They
 are not the clearest view of current delivery because several foundation and
 model initiatives completed together. The present frontier is:
@@ -41,7 +46,7 @@ model initiatives completed together. The present frontier is:
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
 | **Active consolidation** | [Continuity profiles](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile; the archival profile and historical migrations remain unreviewed and byte-exact |
-| **Ready next** | Establish the separate deployment-owner and mandate-binding evidence identified in the [acceptance record](docs/continuation-evidence-acceptance.md) before expanding the remaining control families; mandate identity, safe continuation, and deployment approval remain unresolved |
+| **Ready next** | Binding approval is deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md). Locate contemporaneous mandate/principal/deployment and mediation evidence; changed-revision comparability/amendment claims also need a reviewed consumer extension. No mandate identity, safe-continuation, or deployment approval is established |
 | **Planned adoption pilot** | Review one workflow before publication through an external adapter, with inventory reconciliation, authority diff, and explicit unsupported semantics. The [pilot below](#near-term-adoption-workflow-publication-review) starts report-only and does not yet supply a new evidence graph or clear a model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
