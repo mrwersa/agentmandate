@@ -88,6 +88,26 @@ attestations. The missing monotonic endpoints and backwards UTC delta are
 [disclosed in the consolidation record](continuity-evidence-consolidation.md#principal-and-session-observations).
 No new acceptance, binding, or live capture is implied by this projection.
 
+## Compatibility fixtures
+
+This surface adds two contracts to the pre-1.0 compatibility inventory:
+
+| Contract | Committed baseline and check |
+|---|---|
+| `principal_continuity_version: 1` input | The synthetic example round-trips through the strict reader; the separate historical profile is reproduced from pinned sources by `scripts/project_principal_observations.py` |
+| `agentmandate.principal-continuity/v1` output | [Eligible](../tests/fixtures/principal-continuity-result-v1-eligible.json) and [expired](../tests/fixtures/principal-continuity-result-v1-expired.json) synthetic results pin complete CLI JSON output; `tests/test_principal_continuity.py` compares emitted bytes with these fixed files |
+
+Both result fixtures retain unresolved mandate verdicts and full manifest
+Authority. The expired fixture changes observation eligibility, not the
+observed amounts. The test reads committed expectations rather than generating
+them from the current analyzer during the assertion.
+
+These are initial v1 compatibility baselines. There is no earlier principal
+result version to migrate; the archival observation format is not such a
+predecessor. Future changes need explicit versioning and reviewed before/after
+fixtures, rather than silently regenerating the expectations. This covers the
+new surface without declaring the repository-wide 1.0 audit complete.
+
 ## Result and failure behavior
 
 JSON output uses the separate `agentmandate.principal-continuity/v1` schema.
