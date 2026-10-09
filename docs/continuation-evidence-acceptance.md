@@ -176,3 +176,14 @@ The maintainer supplied the following conditions verbatim:
 
 The source of acceptance is this explicit human decision, not the preparation
 of the packet, its earlier merge, an automated check, or an agent's code review.
+
+Authorship confirmation, recorded 9 October 2026: in response to the request
+to confirm the two quoted paragraphs, the maintainer explicitly replied:
+
+> Yes—those are my words, and they record my acceptance, subject to the stated scope, conditions, and expiry.
+
+This follow-up confirms authorship of the recorded reason and conditions. It
+does not renew or broaden the acceptance: the pinned materials, six-observation
+scope, exclusions, and 8 November 2026 inclusive UTC expiry remain unchanged.
+The accepted profile remains byte-identical, and mandate-binding approval
+remains deferred.
