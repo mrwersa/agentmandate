@@ -60,8 +60,8 @@ Future presentation metadata may be additive only if it is explicitly outside
 the canonical envelope. Adding support for a new format version or changing
 the documented command contract requires a package minor release and migration
 notes. Corrections that restore existing documented behavior may be patch
-releases. These
-standalone artifact rules are stricter than the additive guarantee for existing
+releases. These standalone artifact rules are stricter than the additive
+guarantee for existing
 `--json` command output.
 
 `mandate ir validate` guarantees structural validity only. Eligibility for

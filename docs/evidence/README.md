@@ -1,9 +1,10 @@
 # Authority Evidence
 
-Each directory here records a real authority graph: what an upstream system
-published, what AgentMandate inferred, what review corrected, and what the
-result changed or left unresolved. These packages challenge the model; they are
-not endorsements or deployment-ready policies.
+This directory holds real authority graphs, provider and protocol captures,
+and separately labelled synthetic probes. Graph packages record what an
+upstream system published, what AgentMandate inferred, what review corrected,
+and what remains unresolved. They challenge the model; they are not
+endorsements or deployment-ready policies.
 
 Protocol implementation captures are labeled separately. For example,
 `authorizer-delegation/` proves the shape of issued delegation chains but has no
@@ -17,9 +18,25 @@ review never turns observation into intent silently.
 
 Continuity's evidence-specific converters live outside the installed package.
 Run `python scripts/migrate_continuity_evidence.py` from the repository root to
-regenerate all three canonical continuity profiles from their digest-pinned
+regenerate the canonical continuity profiles from their digest-pinned
 AgentCore and Anthropic sources and compare them byte for byte. The command
 proves replay and source identity; it does not promote their review state.
+
+For the current status of each capture family, read
+[continuity consolidation](../continuity-evidence-consolidation.md). Dated
+capture READMEs describe what was available at capture time. Statements there
+about missing public consumers, finite producers, or delegation should not be
+read as the current package feature list; use [Stability](../../STABILITY.md).
+The upstream README copies are retained byte-for-byte, including upstream links
+that may not resolve inside this repository.
+
+Two additional offline tools preserve distinct boundaries:
+
+- `python scripts/project_principal_observations.py` reproduces both the archival
+  principal observations and the separate unreviewed runtime profile. It does
+  not accept those observations or authorize shared-mandate accounting.
+- `python scripts/audit_capture_clocks.py` replays the six-file clock audit;
+  see its [scope and limitations](../capture-clock-audit.md).
 
 The IAM producer evidence converter is likewise repository-only. Run
 `python scripts/migrate_producer_evidence.py` to regenerate the canonical IAM

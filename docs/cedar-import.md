@@ -6,6 +6,24 @@ read-only Cedar experiment. No command accepts a Cedar bundle as reviewed
 manifest authority; the explicit managed-oracle commands verify one closed
 profile for alignment and effective diff.
 
+For current command syntax and results, use the
+[managed comparison contract](cedar-effective-diff.md) and its
+[closing CLI review](cedar-effective-diff-gate-5-review.md). This page also
+retains the original import design and the evidence gates that led to those
+commands. Candidate shapes and future authority-consumption rules below are
+not additional supported inputs.
+
+The delivered boundary is:
+
+| Input | Current consumer | Effect on manifest reachability |
+|---|---|---|
+| Local Cedar bundle | Repository-only replay and standalone IR projection | None; rejected by `reach --ir` |
+| Managed AgentCore oracle | `mandate cedar validate`, `align`, and `diff` | Reports mapped decision alignment or change beside unchanged manifest Authority |
+
+The managed profile registers `maps_to_tool`, `enforces_for`, and
+`decides_request`. This does not make the original local bundle an authority
+import or establish a complete request domain from representative decisions.
+
 ## Why Cedar is first
 
 Cedar is a useful first policy language because its authorization inputs are
@@ -47,7 +65,7 @@ decision. Cedar itself describes validation as separate from authorization and
 the schema as a contract with the application
 ([policy validation](https://docs.cedarpolicy.com/policies/validation.html)).
 
-## Candidate capture bundle
+## Original capture design and implemented fixtures
 
 A repository fixture is a directory with a canonical `bundle.json` index and
 digest-pinned files. The index records:
@@ -100,7 +118,7 @@ Contributors can reproduce that optional check with `npm ci --ignore-scripts`
 and `npm run capture`. CI may later add the same recapture as a non-core job;
 the offline gate never trusts a fresh network response.
 
-## Reviewed deployment mapping
+## Original deployment-mapping design
 
 Cedar actions are application authorization concepts, not tool names. Entity
 IDs are application identifiers, not AgentMandate bindings. A separate mapping
@@ -139,15 +157,16 @@ corpus may demonstrate decisions while remaining `representative`. Only a
 finite or otherwise mechanically proven `complete` domain may establish that a
 tool is always denied or that no `forbid` can override an observed permit.
 
-## Projection and unknowns
+## Local projection and original preservation requirements
 
 The initial Cedar IR profile remains separate from the analyzable manifest-v1
-profile. Gate 3 registers `contains_policy` and `decides_request`, preserves
+profile. Gate 3 registered `contains_policy` and `decides_request`, preserving
 the policy-set source, observed policy identifiers, requests, decisions, native
-diagnostics, validation state, and implementation identity, and rejects the
-profile at the `reach --ir` manifest boundary. `maps_to_tool` remains
-unregistered until an operational fixture earns its endpoint and support
-rules.
+diagnostics, validation state, and implementation identity, and rejecting the
+profile at the `reach --ir` manifest boundary. At that gate, `maps_to_tool`
+remained unregistered until an operational fixture earned its endpoint and
+support rules. Gate 5 subsequently registered it for the separate managed
+profile, as recorded in the delivery summary above.
 
 The current native output exposes only policy identifiers that determine a
 decision or report an error. The projection therefore marks policy inventory
@@ -158,7 +177,10 @@ complete list. The clearly synthetic
 control covers schema-checked allow and deny transport without claiming a
 deployment mapping or authority eligibility.
 
-The importer records, rather than interprets away:
+The original design required an importer to retain, rather than interpret away,
+the following semantics. The implemented local reader preserves source bytes
+and native diagnostics; it does not parse all these constructs into semantic
+records or implement a general expression-level loss report:
 
 - static policies, templates, template links, slots, and annotations;
 - `permit` and `forbid` effects;
@@ -177,14 +199,20 @@ Annotations are preserved but never treated as enforcement because Cedar says
 they do not affect evaluation
 ([policy syntax](https://docs.cedarpolicy.com/policies/syntax-policy.html)).
 
-Unsupported expressions or extensions produce explicit loss records tied to
-their JSON location. Missing schema, entities, requests, diagnostics, or
-deployment mapping produces an unresolved finding. Unknown is not converted to
-false, an empty set, or default deny. A skipped-on-error policy is not silently
-dropped: its diagnostic remains load-bearing because skipping a broken
-`forbid` may change effective authority.
+The proposed expression importer would produce explicit loss records for
+unsupported expressions or extensions, tied to their JSON location. Missing
+schema, entities, requests, diagnostics, or deployment mapping would remain
+unresolved. This is a requirement for future semantic consumption, not a
+claim that the current bundle reader interprets expressions. Unknown must not
+be converted to false, an empty set, or default deny. A skipped-on-error policy's
+diagnostic must remain visible because skipping a broken `forbid` may change
+effective authority.
 
-## Decision-to-authority rules
+## Original gate on future decision-to-authority consumption
+
+These rules constrain any future integration with compound reachability.
+The delivered managed consumer reports alignment and revision differences;
+it leaves manifest Authority unchanged.
 
 The native Cedar decision is the oracle for the captured concrete request; the
 Python adapter does not reimplement Cedar expression evaluation.
@@ -239,7 +267,7 @@ reimplementing Cedar. The
 [recorded exposure review](cedar-effective-diff-gate-5-review.md) reproduces the
 trust and exit-code matrix against the merged CLI tree.
 
-The proposed [effective-diff contract](cedar-effective-diff.md) subdivides gate
+The implemented [effective-diff contract](cedar-effective-diff.md) subdivides gate
 5 and keeps local Cedar-WASM decisions separate from managed AgentCore
 enforcement. Its private managed-oracle reader and canonical gate-4 migration
 record now project through a standalone, semantically validated IR profile.

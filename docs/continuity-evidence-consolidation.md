@@ -31,7 +31,8 @@ and evidence requirements are explicit; no new profile claims are inferred.
 
 The September AgentCore continuation matrix now has its own canonical
 [`agentcore-continuation-v1.json`](../tests/fixtures/agentcore-continuation-v1.json).
-It uses the existing private AgentCore profile format, with six controls and
+It uses the existing AgentCore profile format (whose Python records remain
+private), with six controls and
 ten trials per control. `v1` names the artifact schema, not a replacement of
 the historical capture. That continuation projection did not require a runtime
 contract change or package release; the later principal consumer does.

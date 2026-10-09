@@ -3,7 +3,8 @@
 `mandate verify` is what keeps a manifest honest. A declaration nobody checks
 drifts from the implementation the moment somebody ships a connector change.
 
-Until now it needed a bespoke JSON Lines file. Teams have traces.
+Use `--otel` to read an OTLP JSON export instead of converting it to the
+[neutral JSON Lines format](manifest.md#observed-calls-for-verify).
 
 ```console
 $ mandate verify mandate.yaml --otel trace.json \
@@ -30,7 +31,7 @@ OpenTelemetry's GenAI semantic conventions describe what a tool call **was**:
 |---|---|---|
 | `gen_ai.operation.name` | `execute_tool` marks the span | yes |
 | `gen_ai.tool.name` | which tool ran | yes |
-| `startTimeUnixNano` | call order | yes |
+| `startTimeUnixNano` | recorded sort order, not independent causal-order proof | yes |
 
 Both attributes are required on a tool-execution span by the convention, and
 both are required here. A span carrying only a name is not treated as an
@@ -68,15 +69,19 @@ That is the correct outcome rather than an inconvenience. The trace genuinely
 does not establish that the approval held, so reporting a pass would be a
 claim the evidence never supported.
 
-## Each trace is a separate run
-
-An OTLP export can contain many traces. A cumulative limit bounds **one run**,
-so replaying a whole export as a single sequence would accumulate one run's
-spending against another's and report a breach neither run committed.
+## Trace grouping and execution identity
 
 Spans are partitioned by `traceId` and each trace is verified independently.
-Duplicate detection is scoped the same way, because the same tool call id in
-two runs is two calls.
+This is an input grouping convention: use it only when a trace covers the
+complete run whose limits you want to check. A trace ID does not establish
+mandate identity or authorize a fresh budget. If one mandate spans several
+traces, prepare a complete authoritative call record for that mandate instead.
+
+Duplicate detection also uses the trace boundary. Repeated
+`gen_ai.tool.call.id` values within a trace are treated as instrumentation of
+one execution. That convention is unsuitable if a retry reuses the ID but
+executes again. Preserve distinct execution identities or use the neutral
+call format; the replay cannot recover an execution that the importer deduplicated.
 
 ## What is excluded, and what is carried
 
@@ -107,9 +112,11 @@ VIOLATION  errored_effect   issue_refund   line 2
 ```
 
 Its value is not accumulated either, because whether it was spent is exactly
-what the evidence fails to establish. To exclude it properly, record whether
-the effect committed as an application attribute, or replay an authoritative
-effect log rather than a trace.
+what the evidence fails to establish. Retain authoritative evidence of whether
+the effect committed. The current OTel adapter has no `committed` mapping;
+adding an application attribute alone does not resolve `errored_effect`.
+Use the authoritative effect log to prepare a reviewed neutral call record
+when it establishes the outcome. Keep ambiguous outcomes unresolved.
 
 ## The counts are part of the result
 
@@ -129,9 +136,10 @@ results. An absent field stays absent rather than becoming `null`.
 
 ## Ordering
 
-Spans are sorted by start time, because cumulative ceilings accumulate in the
-order calls happened rather than the order a collector wrote them. Ties keep
-document order.
+Spans are sorted by recorded start time; ties keep document order. This is a
+deterministic replay order, not proof of causal order or completed settlement.
+Overlapping calls and inconsistent clocks require separate evidence before
+the replay can be interpreted as the actual execution sequence.
 
 ## Scope
 
@@ -158,6 +166,15 @@ sees the warnings that explain a suspiciously clean report:
     "total_spans": 5, "tool_calls": 3, "observations": 3,
     "traces": 1, "errored": 0, "duplicates": 0, "unmapped": []
   },
-  "conformance": { "observed": 3, "conformant": false, "violations": [] }
+  "conformance": {
+    "observed": 3,
+    "conformant": false,
+    "violations": [{
+      "kind": "ceiling_exceeded",
+      "tool": "issue_refund",
+      "line": 3,
+      "message": "cumulative 750 against scope 'case-4471' exceeds the declared ceiling 500"
+    }]
+  }
 }
 ```

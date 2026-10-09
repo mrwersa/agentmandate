@@ -1,7 +1,7 @@
 # Manifest reference
 
-A mandate manifest declares what an agent is permitted to do. Every command in
-AgentMandate reads one.
+A mandate manifest declares what an agent is permitted to do. The core analysis
+commands read it; artifact validators and source scanning have separate inputs.
 
 YAML is the documented format because a manifest is a hand-authored file that
 lives beside CI configuration. JSON is accepted too, and reading JSON needs no
@@ -35,6 +35,11 @@ limits:
 |---|---|
 | `total` | The most value one run may spend across every tool. This is what `reach` searches for a way to exceed |
 | `depth` | How many calls deep the search goes. Defaults to 8 |
+| `effects` | Optional non-negative integer call limits by effect class (`read`, `write`, `irreversible`). An omitted class has no count limit |
+
+For example, `effects: {irreversible: 3}` asks `reach` to find a sequence with
+more than three irreversible calls. A zero limit allows no calls of that class
+within the declared policy; it does not disable the tool in the deployment.
 
 Depth is a real bound, not a formality. No breach at depth 8 is not proof that
 none exists at depth 20, and the report says when the search truncated. Raising
@@ -76,21 +81,23 @@ spending, so the manifest rejects either on its own.
 Write `case`, never `case-4471`. The analysis reasons about "a case", so a
 manifest that names real identifiers is both wrong and a data-handling problem.
 
-### `unbounded` is the field that matters
+### Repeated scope production
 
-A per-scope ceiling is only a bound when the scope itself is bounded. If the
-agent can mint cases at will, a £500-per-case ceiling permits £500 multiplied
-by however many cases it opens.
+A per-scope ceiling continues to bound each binding. If the agent can produce
+fresh cases repeatedly, a £500-per-case ceiling permits spending against each
+case separately; it does not itself bound the aggregate across cases.
 
 ```yaml
   - name: search_cases
     effect: read
     produces: case
-    unbounded: true     # every ceiling scoped to `case` is now advisory
+    unbounded: true     # repeated calls can produce fresh case bindings
 ```
 
-That is the composition `reach` exists to find. Both halves pass an individual
-review.
+`reach` can find a sequence that exceeds a separately declared `limits.total`
+while respecting every per-case ceiling. Exploration remains bounded by
+`limits.depth`. Without a declared total, repetition alone is not a
+cumulative-value breach of the manifest.
 
 ## `roles`
 

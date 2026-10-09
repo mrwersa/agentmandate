@@ -40,9 +40,10 @@ test obligations for dispute-resolver
 3 obligation(s) need a reviewed decision before a suite can be generated
 ```
 
-Obligations follow **reachability**, not declaration. A tool nobody can get to
-needs no test, and listing it would pad the review with work that protects
-nothing.
+Obligations follow **bounded reachability**, not declaration alone. A tool
+unreached at the configured search depth produces no obligation in this
+result. That does not prove it is unreachable at a greater depth or through
+an unmodeled deployment path, and it does not replace other testing needs.
 
 | Kind | Raised when |
 |---|---|
@@ -52,6 +53,32 @@ nothing.
 | `value-bearing` | A call that spends money, with its ceiling named |
 
 ## Review
+
+Save the generated skeleton before editing it (exit 1 is expected while rows
+are unreviewed):
+
+```bash
+mandate obligations examples/dispute-resolver.yaml --json > reviewed.json
+```
+
+Keep the generated schema, agent, identifiers, and authority fields. Fill in
+`decision` and `cases` on each obligation; for example, an edited row can be:
+
+```json
+{
+  "id": "irreversible:issue_refund",
+  "kind": "irreversible",
+  "subject": "issue_refund",
+  "reason": "an irreversible effect is reachable",
+  "decision": "refund_approved",
+  "cases": ["A customer disputes a duplicate charge of 40 GBP and asks for a refund."]
+}
+```
+
+This is one row inside the generated `obligations` array, not a replacement
+for the whole file. Review every row before generating a suite. Use the same
+manifest for the generation command below, replacing `mandate.yaml` with your
+actual path.
 
 Both `decision` and `cases` are blank on purpose. The command exits non-zero
 until every row maps the authority fact to an application decision and carries

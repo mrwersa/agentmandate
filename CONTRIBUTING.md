@@ -10,7 +10,14 @@ AgentMandate uses a pull-request-only workflow for `main`.
    git switch -c feature/short-description
    ```
 
-2. Keep the change focused and add tests for behavioural changes.
+2. Install in a virtual environment, then keep changes focused and add tests
+   for behavioral changes:
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   python -m pip install -e ".[dev]"
+   ```
 
 3. Run the local quality gate:
 
@@ -31,6 +38,20 @@ after CI passes and all review conversations are resolved.
 
 Maintainers should follow [RELEASING.md](RELEASING.md) when publishing a
 version.
+
+## Writing documentation
+
+Lead with the task a reader can complete, then show the inputs, a runnable
+command, the expected result, and what to do with a finding. State whether a
+snippet runs from a checkout or an installed package. Keep current contracts
+separate from dated proposals and decision records. Define specialist terms
+where first used, and link to one contract instead of copying its rules into
+several guides.
+
+Preserve captured files, digest-pinned documents, historical review decisions,
+and quoted human acceptance. Put current guidance around those records rather
+than silently rewriting their history. The [documentation map](docs/README.md)
+is the entry point for new guides.
 
 ## Useful first contributions
 
@@ -96,7 +117,7 @@ python scripts/evidence_summary.py --check
 any legacy correction lacks a canonical class assigned before the study. Do
 not make it pass by reclassifying old prose after seeing the aggregate counts.
 
-It fails when a README cites a SHA-256 that no longer matches the committed
+`evidence_lint.py` fails when a README cites a SHA-256 that no longer matches the committed
 file, or when the cited file is missing. The machine-checked form is
 `\`<file>\`, SHA-256 \`<digest>\`` and must reference an artifact committed
 in the same directory. Pins on external artifacts (upstream archives, pinned

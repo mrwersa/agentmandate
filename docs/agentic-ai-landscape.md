@@ -204,13 +204,17 @@ failures as evidence—not to bundle a model judge.
 
 ## Representative capability matrix
 
+This matrix records the survey baseline, not the current release. In particular,
+the AgentMandate row predates the delivered delegation attachment. Consult
+[Stability](../STABILITY.md) for current supported surfaces.
+
 `Yes` means the cited product explicitly supplies the capability. `Partial`
 means narrower or deployment-specific coverage. `—` means no supported claim
 was found; it does not prove absence.
 
 | System/category | Stage | Deploys as | Policy model | Agent/delegated identity | Multi-step authority | Data flow | Enforces | Evidence/audit | Open |
 |---|---|---|---|---|---|---|---|---|---|
-| AgentMandate today | Design, CI, replay | Local CLI/action | Authority manifest | Caller/service; no delegation | **Yes** | No | No | JSON, SARIF, graphs, trace replay | Apache-2.0 |
+| AgentMandate at survey baseline | Design, CI, replay | Local CLI/action | Authority manifest | Caller/service; no delegation | **Yes** | No | No | JSON, SARIF, graphs, trace replay | Apache-2.0 |
 | OPA/Rego | Runtime, CI | PDP/sidecar/library | General rules over JSON | Input-defined | No native sequence model | Input-defined | Via PEP | Decision logs, OTel | Yes |
 | Cedar/Verified Permissions | Runtime, design | Library/service | PARC ABAC/RBAC | Principal/context | No native sequence model | No | Via PEP | Diagnostics/service logs | Language/spec yes |
 | OpenFGA | Runtime, design | ReBAC service | Typed relationship graph | Strong relationship model | Authorization graph, not action history | No | Via PEP | Checks/logs | Yes |

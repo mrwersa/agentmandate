@@ -8,6 +8,10 @@ smallest common analysis contract selected by the reviewed
 [Anthropic](evidence/anthropic-managed-budget/README.md) evidence. It does not
 change manifest version 1, Authority IR, or ordinary reachability.
 
+For principal changes, use the separately versioned
+[principal observation profile](principal-continuity.md). It preserves the
+principal and session axes without resolving shared-mandate accounting.
+
 ## Question and invariant
 
 The first consumer answers one narrow question:
@@ -216,6 +220,7 @@ The initial transition vocabulary is closed:
 - `limit_revision`
 - `delegation_handoff`
 - `concurrent_dispatch`
+- `same_boundary`
 
 Before and after state records preserve the provider's available values rather
 than pretending every provider exposes a ledger:

@@ -113,9 +113,9 @@ produces an `unresolved` finding.
 
 Expiry deliberately makes eligibility time-dependent: a previously clean run
 can become an `unresolved` finding solely because its review expired. The
-reconciler therefore receives an injectable `as_of` date. A future CLI may
-default that value once from the current UTC date, but machine output must
-record the effective date so the result is reproducible. Tests use a frozen
+reconciler therefore requires an explicit `as_of` date. The public CLI requires
+`--inventory-as-of` and records the effective date in machine output; it never
+defaults to the current date. Tests use a frozen
 date, and expiry fixtures must sit clearly before or after it rather than
 depending on the day the suite runs. The declaration's hashed body contains
 the review expiry, never a generated current timestamp.
@@ -196,5 +196,6 @@ not verify captured bytes or make the membership eligible for drift.
    its JavaScript binding is outside the current Python source collector; the
    CLI does not manufacture a selected binding from the declaration itself.
 
-The initiative is complete only when `drift` can prove one declared dynamic
-boundary complete and explain why every ineligible variant cannot be proved.
+The closing review established a complete declared AgentKit boundary and named
+the reasons each ineligible variant remains unresolved. That completed the
+initial delivery gate; it did not establish completeness for other deployments.

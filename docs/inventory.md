@@ -1,8 +1,11 @@
 # Starting from agent code
 
 `mandate scan --source` reads the tools an agent declares in Python and writes
-a manifest skeleton. It is for the case where there is no MCP catalogue to
-scan, which is most agents.
+a manifest skeleton. Use it when the tool declarations are in Python source;
+use catalogue-mode `scan` when you already have an MCP `tools/list` response.
+
+The example below runs from a repository checkout with AgentMandate installed.
+Review the generated `REVIEW` markers before treating the manifest as intent.
 
 ```console
 $ mandate scan --source examples/refund_agent.py --agent refunds > mandate.yaml
@@ -12,7 +15,8 @@ $ mandate lint mandate.yaml
 ## Nothing is imported
 
 The read is static. Your agent is not executed, its framework does not need to
-be installed, and its imports are not resolved.
+be installed, and no imported module is loaded. Import statements are read as
+text to resolve names and aliases within the scanned source.
 
 That matters for where this is meant to run. A review happens on a branch, in
 CI, in a checkout whose dependencies are not installed and whose side effects
@@ -20,8 +24,8 @@ must not happen. A tool that had to import the agent to describe it could not
 run there, and importing a module to find out what it is permitted to do has
 the obvious problem that the import already did it.
 
-The cost is that a tool assembled at runtime is invisible. That is reported
-rather than hidden. See [What it says it cannot see](#what-it-says-it-cannot-see).
+Runtime-built tool lists cannot be enumerated by this reader. Their unresolved
+bindings are reported; see [What it says it cannot see](#what-it-says-it-cannot-see).
 The [dynamic inventory declaration contract](dynamic-inventory.md) defines how
 reviewed captures may discharge that uncertainty. `mandate inventory validate`
 checks structure only; `mandate drift` separately verifies the captured bytes,
@@ -42,9 +46,11 @@ Matching is on the trailing name of the decorator, not on the import path, so
 `@tool`, `@tools.tool`, and `@mcp.tool()` are all recognised and an aliased
 import still works. `async def` is read the same as `def`.
 
-Bindings are read from any call taking `tools=[...]` and from `.bind_tools([...])`,
-which covers `Agent(...)`, `create_react_agent(...)`, `LlmAgent(...)`, and the
-rest without naming each one.
+Bindings are selected automatically from recognized constructors taking
+`tools=[...]`, such as `Agent(...)`, `create_react_agent(...)`, and
+`LlmAgent(...)`, and from `.bind_tools([...])`. Other callees become candidates
+that require explicit selection with `--binding`; see
+[call-site selection](#only-agent-shaped-call-sites-count).
 
 ## One manifest describes one agent
 
@@ -92,17 +98,14 @@ smaller graph than the real one.
 
 ## Only agent-shaped call sites count
 
-A `tools=` keyword on any function used to decide the inventory, so an
-unrelated `render_panel(tools=[...])` could rewrite what the agent was said to
-hold. Now the callee has to be a constructor this knows by name: `Agent`,
+Automatic selection uses an explicit constructor list, including `Agent`,
 `create_react_agent`, `AgentExecutor`, `ToolNode`, `bind_tools`, `LlmAgent`,
 `SequentialAgent`, `AssistantAgent`, `ChatAgent`, `Crew`, `Swarm`,
-`AgentWorkflow`, `ReActAgent`, and the rest of the same shape.
+`AgentWorkflow`, and `ReActAgent`. The full list is `AGENT_CONSTRUCTORS` in
+[`agentmandate/inventory.py`](../agentmandate/inventory.py).
 
-A word test came first and was too loose. `workflow_graph(tools=[...])` and
-`team_dashboard(tools=[...])` both matched it. An unlisted callee is not
-dropped, it becomes a candidate `--binding` selects, so the cost of the list
-being incomplete is one flag rather than a wrong manifest:
+This avoids mistaking helpers such as `render_panel(tools=[...])` for agents.
+An unlisted callee becomes a candidate that `--binding` can select:
 
 ```yaml
 # REVIEW: app/ui.py:12 passes `tools=` to render_panel, which does not look
@@ -231,6 +234,8 @@ $ mandate reach mandate.yaml
 $ mandate obligations mandate.yaml
 ```
 
-`reach` is the point of having the manifest. Until the ceilings, the produced
-scopes, and the `unbounded` flags are filled in, it has no cumulative limit to
-search against and will report nothing, which is not the same as safe.
+Before relying on `reach`, review effects, approvals, scope production, and
+any intended value or effect-count limits. Without a declared cumulative limit,
+the search cannot report a breach of that limit. It can still report an
+ungated irreversible path. A clean result is bounded by the reviewed model
+and search depth.
