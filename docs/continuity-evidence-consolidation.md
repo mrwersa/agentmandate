@@ -10,6 +10,12 @@ scalar profile; it does not extend the acceptance of the six revision arms.
 The principal-change capture has a separate **unreviewed, repository-only**
 observation record. It is not a runtime continuity profile.
 
+The subsequent [clock audit](capture-clock-audit.md) locates six negative UTC
+intervals across six inspected AgentCore event files, including four in the
+continuation matrix with retained positive monotonic endpoint differences.
+It preserves historical bytes and review metadata, distinguishes missing
+endpoints from backwards UTC, and sets a timing-retention gate for future capture.
+
 The [acceptance record](continuation-evidence-acceptance.md) contains the human
 decision, exact reason and conditions, and pinned review materials. A separate
 [accepted profile](continuity-reviews/agentcore-continuation-2026-10-09.json)

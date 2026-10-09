@@ -104,6 +104,40 @@ Record absence explicitly. A provider that exposes no consumed or reserved
 state supports a weaker claim than one with a state snapshot; the adapter must
 not fill that gap from the final allow/deny sequence.
 
+### Timing retention gate
+
+The [clock audit](capture-clock-audit.md) found six negative UTC intervals in
+six inspected event files, including four with retained positive monotonic
+differences. Future campaigns must pass this gate before live collection:
+
+1. Commit and review the actual request driver and sanitizer together. Record
+   Python/OS versions, clock API and `get_clock_info` metadata, and a non-secret
+   alias for each clock domain. Different hosts, boots or unestablished domains
+   must not share an elapsed-time calculation merely because counters look alike.
+2. Retain integer monotonic start/end endpoints and UTC start/end values in the
+   sanitized artifact. Mark what each sample surrounds: request initiation,
+   complete response-body receipt, and next request initiation. Record the
+   order of clock reads; do not claim UTC and monotonic samples are simultaneous.
+   Derive durations from retained monotonic endpoints, never from wall time.
+3. Reproduce per-call durations and required cross-call order/delay from the
+   committed sanitized artifact. Keep declared sequencing separate from measured
+   ordering; a positive duration cannot prove that two calls did not overlap.
+   If origins need sanitizing, subtract one common offset per domain from every
+   endpoint, preserving all differences. Never reset each call independently.
+4. Exercise the driver/sanitizer pair offline with an injected backwards UTC
+   jump and advancing monotonic time. Preserve the negative UTC delta while
+   replaying correct elapsed time. Missing endpoints, reversed monotonic
+   intervals, mismatched domains, and unsupported overlap must prevent a clean
+   timing result. Include a case with positive individual durations but a second
+   call starting before the first finishes. Retain endpoints through round-trip
+   serialization and hash the exact sanitized bytes used by the replay.
+
+This is a prerequisite for the next campaign, not a claim that a new harness
+has already passed. A failed timing result must not erase the original call or
+its native decision. Record the failure and limit any timing-dependent claim.
+Collect scoped clock-adjustment diagnostics when available; absence stays
+explicit and does not justify diagnosing NTP or a particular host mechanism.
+
 ## Results enabled later
 
 This bundle permits several stronger—but still bounded—analyses:

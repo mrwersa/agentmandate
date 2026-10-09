@@ -1,0 +1,123 @@
+{
+  "audit_version": 1,
+  "files": [
+    {
+      "calls_with_monotonic_endpoints": 72,
+      "calls_with_utc": 72,
+      "calls_without_monotonic_endpoints": 0,
+      "content_sha256": "e9140cb8a0b7e677cb42a7562cc1bcec334fad1257306671a4b47f0abaa4ff3f",
+      "locator": "docs/evidence/agentcore-refund-policy/continuation-diagnostic-events.json",
+      "negative_monotonic_intervals": 0,
+      "utc_regressions": []
+    },
+    {
+      "calls_with_monotonic_endpoints": 228,
+      "calls_with_utc": 228,
+      "calls_without_monotonic_endpoints": 0,
+      "content_sha256": "b8f366492f156fa9e1854feea01d458e0e21caf528f85d7d03a38d56bc775ba6",
+      "locator": "docs/evidence/agentcore-refund-policy/continuation-events.json",
+      "negative_monotonic_intervals": 0,
+      "utc_regressions": [
+        {
+          "finished_utc": "2026-09-11T16:42:42.797814Z",
+          "monotonic_elapsed_ns": 423058251,
+          "outcome": "stale_session",
+          "pointer": "/trials/2/predecessor_after_call",
+          "recorded_duration_ms": null,
+          "started_utc": "2026-09-11T16:42:42.985599Z",
+          "wall_delta_us": -187785
+        },
+        {
+          "finished_utc": "2026-09-11T16:44:17.895294Z",
+          "monotonic_elapsed_ns": 492848454,
+          "outcome": "deny",
+          "pointer": "/trials/8/recovery_after_call",
+          "recorded_duration_ms": null,
+          "started_utc": "2026-09-11T16:44:18.012737Z",
+          "wall_delta_us": -117443
+        },
+        {
+          "finished_utc": "2026-09-11T16:44:49.326579Z",
+          "monotonic_elapsed_ns": 375589518,
+          "outcome": "stale_session",
+          "pointer": "/trials/10/predecessor_after_call",
+          "recorded_duration_ms": null,
+          "started_utc": "2026-09-11T16:44:49.561224Z",
+          "wall_delta_us": -234645
+        },
+        {
+          "finished_utc": "2026-09-11T16:46:55.861434Z",
+          "monotonic_elapsed_ns": 526498144,
+          "outcome": "allow",
+          "pointer": "/trials/17/recovery_call",
+          "recorded_duration_ms": null,
+          "started_utc": "2026-09-11T16:46:55.945409Z",
+          "wall_delta_us": -83975
+        }
+      ]
+    },
+    {
+      "calls_with_monotonic_endpoints": 0,
+      "calls_with_utc": 44,
+      "calls_without_monotonic_endpoints": 44,
+      "content_sha256": "07a203e38d15bae630fa6029591c899633a06a3ec9c654856903fc5f527ca09d",
+      "locator": "docs/evidence/agentcore-refund-policy/principal-continuity-events.json",
+      "negative_monotonic_intervals": 0,
+      "utc_regressions": [
+        {
+          "finished_utc": "2026-09-11T15:07:28.230135Z",
+          "monotonic_elapsed_ns": null,
+          "outcome": "deny",
+          "pointer": "/trials/12/calls/1",
+          "recorded_duration_ms": 450.186783,
+          "started_utc": "2026-09-11T15:07:28.358015Z",
+          "wall_delta_us": -127880
+        }
+      ]
+    },
+    {
+      "calls_with_monotonic_endpoints": 0,
+      "calls_with_utc": 62,
+      "calls_without_monotonic_endpoints": 62,
+      "content_sha256": "f64f681b0ae35550fcb101483f07b9bb1d1f9cd091cef164b8790dea514ebdc3",
+      "locator": "docs/evidence/agentcore-refund-policy/retry-continuity-events.json",
+      "negative_monotonic_intervals": 0,
+      "utc_regressions": [
+        {
+          "finished_utc": "2026-09-11T19:32:38.765727Z",
+          "monotonic_elapsed_ns": null,
+          "outcome": "allow",
+          "pointer": "/trials/10/calls/1",
+          "recorded_duration_ms": 516.247859,
+          "started_utc": "2026-09-11T19:32:38.917842Z",
+          "wall_delta_us": -152115
+        }
+      ]
+    },
+    {
+      "calls_with_monotonic_endpoints": 0,
+      "calls_with_utc": 100,
+      "calls_without_monotonic_endpoints": 100,
+      "content_sha256": "9a053341e71574e6f7a1e655266835ff555e88d8e55f299a1225f4fb9675444a",
+      "locator": "docs/evidence/agentcore-refund-policy/temporal-transition-events.json",
+      "negative_monotonic_intervals": 0,
+      "utc_regressions": []
+    },
+    {
+      "calls_with_monotonic_endpoints": 0,
+      "calls_with_utc": 4,
+      "calls_without_monotonic_endpoints": 4,
+      "content_sha256": "d867df688815be43daa3f66fafc2a55af08896f3ac76fb2ecdb1ab65cad80cce",
+      "locator": "docs/evidence/agentcore-refund-policy/temporal-transition-metadata-events.json",
+      "negative_monotonic_intervals": 0,
+      "utc_regressions": []
+    }
+  ],
+  "scope": "six pinned AgentCore event files; not a whole-corpus timing certification",
+  "totals": {
+    "calls": 510,
+    "negative_monotonic_intervals": 0,
+    "retained_monotonic_pairs": 300,
+    "utc_regressions": 6
+  }
+}
