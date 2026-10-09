@@ -104,6 +104,14 @@ monetary ceilings, effect budgets, classification labels, or residency rules.
    completeness boundary and results. Otherwise keep them advisory or stop the
    pilot with the reason recorded.
 
+If pilot work competes with the maintainer's fixed research-submission deadline,
+defer the pilot and record a new checkpoint. The pilot is not a dependency of
+that submission and must not expand its evidence commitments. At the readiness
+review, update the delivery snapshot with the decision and next owner/action.
+Once the pilot is completed or stopped, replace this detailed plan with a short
+outcome and a link to its issue or decision record, preserving the evidence and
+any unresolved model gates there.
+
 The first report covers declared authority, not successful workflow completion.
 A tool-set projection loses step order, branches, approval pauses, retries,
 parallelism, and compensation. Label reachability through that projection as an
