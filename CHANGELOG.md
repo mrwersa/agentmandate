@@ -6,6 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.20.0 - 2026-10-10
+
+### Added
+
+- Optional `--continuity-review` and repeatable `--continuity-review-source`
+  inputs for AgentCore continuity reconciliation. The strict
+  `revision_review_version: 1` artifact pins the manifest, provider profile,
+  predecessor binding, policy bytes, and scoped comparison/issuer records.
+- Independent review and expiry checks for comparability and issuer treatment,
+  plus input, policy, control, and timing joins. Numeric widening cannot pass
+  as equivalent or tightening. Approved amendments must retain consumed and
+  in-flight state and precede or coincide with the captured transition.
+- A separate `agentmandate.revision-review/v1` result retains the complete
+  unchanged continuity baseline and reports claims within their reviewed scope.
+  Global safe continuation stays unresolved, with exit 1; a retaining-state
+  amendment never waives an observed reset. Synthetic examples and fixed
+  eligible/expired result baselines cover the new contracts.
+
+### Compatibility
+
+- Commands without revision-review input retain existing results and exits.
+  No migration or historical evidence acceptance is implied. Principal and
+  Anthropic profiles, reset-forgiving amendments, and general policy equivalence
+  are outside this attachment's scope. Python records remain private.
+
 ## 0.19.0 - 2026-10-10
 
 ### Added

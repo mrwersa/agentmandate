@@ -1,0 +1,8 @@
+{
+  "boundary": "refund-policy-session",
+  "currency": "GBP",
+  "dimension": "tool_argument.process_refund.amount",
+  "limit": 700,
+  "unit": "integer",
+  "revision_note": "synthetic tightened revision"
+}

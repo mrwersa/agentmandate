@@ -192,6 +192,11 @@ continuation safety remains unresolved. Accounting can report observed spend
 above a mandate limit; an amount below it is not permission to deploy or
 continue. Keep these results separate from a clean continuity gate.
 
+`--continuity-review` with `--continuity-review-source` selects the separate
+[revision-review envelope](revision-review.md). It retains the original
+continuity baseline and always exits 1: eligible scoped comparison and issuer
+treatment are not a global safe-continuation gate.
+
 Managed Cedar evidence also separates structural validation from trusted
 consumption. Source roots are explicit; the command reads exactly the locators
 declared by each oracle and refuses paths that escape the root:

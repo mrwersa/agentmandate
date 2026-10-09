@@ -355,7 +355,10 @@ verdict requires an eligible same-mandate join, established comparability,
 complete required alignments, preserved state, no overshoot, and stable or
 tightened authority, unless a reviewed issuer amendment explicitly governs the
 transition. Changed boundaries remain unresolved because the current provider
-records carry no reviewed comparison or amendment treatment. The aggregate
+records carry no reviewed comparison or amendment treatment. The optional
+[revision review attachment](revision-review.md) can report scoped comparison
+and retaining-state issuer claims in a separate envelope. It preserves this
+baseline and does not establish global continuation safety. The aggregate
 private `clean` property consumes this explicit verdict rather than re-deriving
 it from three labels.
 

@@ -1,0 +1,40 @@
+{
+  "notice": "Synthetic controls only, not a live provider capture.",
+  "controls": [
+    {
+      "id": "equivalent-reset",
+      "outcomes": [
+        "allow",
+        "stale_session",
+        "allow"
+      ],
+      "limits": [
+        1000,
+        1000
+      ]
+    },
+    {
+      "id": "tightening-reset",
+      "outcomes": [
+        "allow",
+        "stale_session",
+        "allow"
+      ],
+      "limits": [
+        1000,
+        700
+      ]
+    },
+    {
+      "id": "retaining-amendment",
+      "outcomes": [
+        "allow",
+        "deny"
+      ],
+      "limits": [
+        1000,
+        1000
+      ]
+    }
+  ]
+}

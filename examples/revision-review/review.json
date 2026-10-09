@@ -1,0 +1,146 @@
+{
+  "revision_review_version": 1,
+  "id": "synthetic-revision-review",
+  "manifest_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "provider_sha256": "55135e07310f91c49dce41b2c6b228d5bd5c519b8ed5a4647df81e76721021e5",
+  "binding_sha256": "3a32180ee78891d4e8831a761e74bbbba35758838346ede00a63a2b09490e21b",
+  "sources": [
+    {
+      "id": "before",
+      "kind": "synthetic",
+      "locator": "examples/continuity-refund/policy.json",
+      "content_sha256": "fe3e5a1b620da2f9b8d7a6e85ee0e8b383c42e952410dd2fa4acc39f505cdbf6"
+    },
+    {
+      "id": "equivalent",
+      "kind": "synthetic",
+      "locator": "examples/revision-review/policy-equivalent.json",
+      "content_sha256": "9b33307e5560017ef1635d12e83cebdec8b8441024062cb1b86c1a5afd4fed46"
+    },
+    {
+      "id": "tightened",
+      "kind": "synthetic",
+      "locator": "examples/revision-review/policy-tightened.json",
+      "content_sha256": "09fff34f72bd21dc064f2dfe9cc74571f29e93a00d22478b5664760c04e57f33"
+    },
+    {
+      "id": "review-record",
+      "kind": "synthetic",
+      "locator": "examples/revision-review/review-record.json",
+      "content_sha256": "6652418a54fd2d3765cf1cc37c0a564aeebc19fe7e4a7354d87ecfa00c16d8b3"
+    }
+  ],
+  "controls": [
+    {
+      "id": "equivalent-reset",
+      "transition_at": "2026-10-09T12:00:00Z",
+      "policies": {
+        "before": "before",
+        "after": "equivalent"
+      },
+      "association": "These synthetic policies describe the predecessor and successor in the named controls under the existing synthetic refund binding. This is not independent verification of a successor binding.",
+      "comparison": {
+        "relation": "equivalent",
+        "scope": "Captured synthetic process_refund integer-amount requests under the scalar cumulative contract; no general policy equivalence claim.",
+        "sources": [
+          "review-record"
+        ],
+        "evidence": {
+          "confidence": "exact",
+          "review": "accepted",
+          "reviewer": "synthetic-example-only",
+          "expires": "2026-11-08"
+        }
+      },
+      "amendment": {
+        "status": "none",
+        "issuer": "synthetic-mandate-issuer",
+        "decision_at": null,
+        "state_treatment": "retain_consumed_and_in_flight",
+        "sources": [
+          "review-record"
+        ],
+        "evidence": {
+          "confidence": "exact",
+          "review": "accepted",
+          "reviewer": "synthetic-example-only",
+          "expires": "2026-11-08"
+        }
+      }
+    },
+    {
+      "id": "tightening-reset",
+      "transition_at": "2026-10-09T12:00:00Z",
+      "policies": {
+        "before": "before",
+        "after": "tightened"
+      },
+      "association": "These synthetic policies describe the predecessor and successor in the named controls under the existing synthetic refund binding. This is not independent verification of a successor binding.",
+      "comparison": {
+        "relation": "tightens",
+        "scope": "Captured synthetic process_refund integer-amount requests under the scalar cumulative contract; no general policy equivalence claim.",
+        "sources": [
+          "review-record"
+        ],
+        "evidence": {
+          "confidence": "exact",
+          "review": "accepted",
+          "reviewer": "synthetic-example-only",
+          "expires": "2026-11-08"
+        }
+      },
+      "amendment": {
+        "status": "none",
+        "issuer": "synthetic-mandate-issuer",
+        "decision_at": null,
+        "state_treatment": "retain_consumed_and_in_flight",
+        "sources": [
+          "review-record"
+        ],
+        "evidence": {
+          "confidence": "exact",
+          "review": "accepted",
+          "reviewer": "synthetic-example-only",
+          "expires": "2026-11-08"
+        }
+      }
+    },
+    {
+      "id": "retaining-amendment",
+      "transition_at": "2026-10-09T12:00:00Z",
+      "policies": {
+        "before": "before",
+        "after": "equivalent"
+      },
+      "association": "These synthetic policies describe the predecessor and successor in the named controls under the existing synthetic refund binding. This is not independent verification of a successor binding.",
+      "comparison": {
+        "relation": "equivalent",
+        "scope": "Captured synthetic process_refund integer-amount requests under the scalar cumulative contract; no general policy equivalence claim.",
+        "sources": [
+          "review-record"
+        ],
+        "evidence": {
+          "confidence": "exact",
+          "review": "accepted",
+          "reviewer": "synthetic-example-only",
+          "expires": "2026-11-08"
+        }
+      },
+      "amendment": {
+        "status": "approved",
+        "issuer": "synthetic-mandate-issuer",
+        "decision_at": "2026-10-09T11:00:00Z",
+        "state_treatment": "retain_consumed_and_in_flight",
+        "sources": [
+          "review-record"
+        ],
+        "evidence": {
+          "confidence": "exact",
+          "review": "accepted",
+          "reviewer": "synthetic-example-only",
+          "expires": "2026-11-08"
+        }
+      }
+    }
+  ]
+}

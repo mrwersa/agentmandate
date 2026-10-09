@@ -19,6 +19,7 @@ guarantee.
 | Inspect cross-session consumed state | [Refund example](../examples/continuity-refund/README.md) |
 | Compare principal and session observations | [Principal continuity](principal-continuity.md) |
 | Account for shared spend under reviewed mandate intent | [Principal accounting](principal-accounting.md) |
+| Review policy revisions and issuer treatment | [Revision review](revision-review.md) |
 | Contribute a fix or evidence graph | [Contributing](../CONTRIBUTING.md) |
 
 Most users need the first four guides. The attachment contracts below address
