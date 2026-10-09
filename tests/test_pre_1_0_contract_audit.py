@@ -48,7 +48,8 @@ def test_audit_pins_every_evidence_converter_during_relocation() -> None:
 
 def test_reviewed_baseline_pins_release_and_replay_tools() -> None:
     source = AUDIT.read_text(encoding="utf-8")
-    assert f"released as `{agentmandate.__version__}`" in source
+    # This audit records the historical baseline, not each subsequent release.
+    assert "released as `0.17.0`" in source
 
     replay_tools = (
         "scripts/migrate_continuity_evidence.py",

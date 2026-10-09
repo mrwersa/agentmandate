@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.17.1 - 2026-10-09
+
+### Fixed
+
+- Continuity reconciliation retains a reviewed AgentCore state-reset finding
+  when successful recovery is followed by a refusal. A single allowed request
+  no longer establishes a reset by itself. Evidence acceptance, binding, and
+  mediation requirements still apply; policy tightening and completed-usage
+  overshoot remain separate from state continuity.
+
 ## 0.17.0 - 2026-09-11
 
 ### Added

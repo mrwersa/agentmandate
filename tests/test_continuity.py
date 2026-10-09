@@ -530,6 +530,68 @@ def test_anthropic_reconciliation_keeps_reset_widening_and_overshoot_separate():
     assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
 
 
+@pytest.mark.parametrize(
+    ("decisions", "request_amount", "expected_state"),
+    [
+        (("allow", "stale_session", "allow"), 600, "reset"),
+        (("allow", "stale_session", "allow", "deny"), 600, "reset"),
+        (("allow", "allow", "deny"), 600, "reset"),
+        (("allow",), 600, "unresolved"),
+        (("allow", "stale_session", "deny"), 600, "unresolved"),
+        (("stale_session", "allow", "deny"), 600, "unresolved"),
+        (("allow", "allow", "stale_session", "deny"), 300, "unresolved"),
+    ],
+)
+def test_reviewed_recovery_requires_successor_allow_but_not_a_final_allow(
+    decisions, request_amount, expected_state
+):
+    # Synthetic variations of a bound control exercise interpretation only;
+    # the historical captures and their unreviewed status stay unchanged.
+    provider = _reviewed(migrate_agentcore_continuity(_agentcore_contents()))
+    original = next(item for item in provider.controls if item.id == "binding-revision")
+    control = replace(
+        original, outcomes=decisions, request_amount=request_amount, provider_limits=(1000, 700)
+    )
+    result = _agentcore_analysis(provider=replace(provider, controls=(control,)))
+    outcome = result.outcomes[0]
+
+    assert outcome.state == expected_state
+    assert outcome.authority_change == "tightens"
+    completed = request_amount * decisions.count("allow")
+    assert outcome.completed_values == (completed,)
+    assert outcome.admission == ("overshot" if completed > 700 else "within_bound")
+    assert ("continuity.state-reset" in {item.code for item in result.findings}) == (
+        expected_state == "reset"
+    )
+    assert outcome.safe_continuation == "unresolved"
+    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+    assert ContinuityResult.from_json(result.to_result().to_json()) == result.to_result()
+
+
+@pytest.mark.parametrize("gap", ["binding", "same_mandate", "boundary", "mediation", "review"])
+def test_recovery_followed_by_denial_does_not_bypass_evidence_gaps(gap):
+    provider = _reviewed(migrate_agentcore_continuity(_agentcore_contents()))
+    original = next(item for item in provider.controls if item.id == "binding-revision")
+    control = replace(original, outcomes=("allow", "stale_session", "allow", "deny"))
+    changes = {}
+    if gap == "binding":
+        changes["binding"] = None
+    elif gap == "same_mandate":
+        control = replace(control, same_mandate=None)
+    elif gap == "boundary":
+        control = replace(control, boundary_changed=None)
+    elif gap == "mediation":
+        control = replace(control, mediation="unestablished")
+    else:
+        provider = replace(provider, evidence=ContinuityEvidence("exact", "unreviewed", None, None))
+    result = _agentcore_analysis(provider=replace(provider, controls=(control,)), **changes)
+
+    assert result.outcomes[0].state == "unresolved"
+    assert result.outcomes[0].safe_continuation == "unresolved"
+    assert "continuity.state-reset" not in {item.code for item in result.findings}
+    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+
+
 def test_unreviewed_or_tampered_profiles_fail_closed_with_full_authority():
     path = AGENTCORE / "mandate.yaml"
     mandate = load(path)
