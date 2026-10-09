@@ -41,6 +41,7 @@ model initiatives completed together. The present frontier is:
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
 | **Ready next** | Reconcile the completed provider controls into one reviewed continuity evidence boundary |
+| **Planned adoption pilot** | Review one workflow before publication through an external adapter, with inventory reconciliation, authority diff, and explicit unsupported semantics. The [pilot below](#near-term-adoption-workflow-publication-review) starts report-only and does not yet supply a new evidence graph or clear a model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
 
@@ -59,6 +60,126 @@ synchronized-concurrency controls are now captured, including the reviewed
 tightening campaign. Deployment is blocked by the provider's mandatory Gateway
 resource binding. This evidence work continues after the completed pre-1.0
 consolidation audit without changing the public contract.
+
+## Near-term adoption: workflow publication review
+
+Planned 9 October 2026. The first adoption target is one workflow with a human
+approval gate and a consequential write, compared with its previous published
+revision. This brings inventory reconciliation and a narrow part of
+policy-versus-agent drift forward without waiting for policy export or fleet
+governance. Consolidating the captured continuity controls remains the next
+evidence task. No application source or new operational fixture has yet been
+reviewed for this pilot.
+
+### First increment and decision point
+
+Use an application-owned adapter against a pinned library release. Keep workflow
+syntax, product permissions, storage access, and deployment selectors in that
+adapter. Begin with reviewed effects and approval requirements. Do not invent
+monetary ceilings, effect budgets, classification labels, or residency rules.
+
+1. Record one workflow identifier, baseline and candidate revisions, deployment
+   selection, and a responsible reviewer in the private pilot record before
+   implementation. No workflow has been selected yet. Open an issue before a
+   large extractor, as required by `CONTRIBUTING.md`.
+2. Capture the exact bound tool inventory, qualified names, alias resolution,
+   and the source of approval declarations. Reuse the dynamic-inventory trust
+   contract where its target and selection semantics fit. Existing source
+   `--binding` support selects an agent, not a workflow execution model. A YAML
+   workflow is not automatically consumable by the current Python collector or
+   `drift` CLI. Report unsupported joins rather than manufacturing source code
+   to make those checks pass.
+3. Reconcile the reviewed manifest with that inventory in the first report,
+   alongside lint and effective-authority diff. Use the existing drift consumer
+   where supported and identify adapter-only reconciliation otherwise. Missing,
+   partial, conflicting, or stale inventory prevents a clean overall review.
+4. Exercise controlled tool addition, approval removal, authority reduction,
+   unchanged semantics, and incomplete inventory. Record actionable findings,
+   false positives, reviewer decisions, and annotation effort. Retain the exact
+   inputs needed to reproduce each result.
+5. Review pilot readiness on **23 October 2026**. If the workflow or reviewer is
+   still unavailable, record the blocker and a new review date. This is a
+   decision checkpoint, not an automatic deadline to make findings blocking.
+   Promote only individually validated checks after the reviewer accepts their
+   completeness boundary and results. Otherwise keep them advisory or stop the
+   pilot with the reason recorded.
+
+The first report covers declared authority, not successful workflow completion.
+A tool-set projection loses step order, branches, approval pauses, retries,
+parallelism, and compensation. Label reachability through that projection as an
+over-approximation only when inventory completeness and the retained semantics
+justify that claim. Unsupported steps stay visible and cannot silently disappear
+behind a clean workflow verdict. A future execution-aware profile needs a
+counterexample where this abstraction materially changes a result.
+
+### Evidence priorities after the first report
+
+**Call-bound approval comes before new entitlement predicates.** Capture which
+principal approved which qualified operation, target, reviewed arguments,
+validity, and operation identity. Compare that record with the call the executor
+can admit. A frozen argument tuple is a candidate fixed binding for the
+resource-relationship gate, not proof that the gate is cleared. An alternative
+tool needs an authored same-effect relation and evidence that it actually
+escapes the intended approval. Establish whether the reproduced distortion is
+an approval-binding gap, a relationship gap, or both before extending the model.
+The fixed-binding prerequisite in issue #106 remains open.
+
+**Reuse conditional evidence without assuming general predicates already work.**
+The current closed predicates classify statement and dispatch effects. They do
+not decide arbitrary access entitlement. New operand sources must establish the
+principal, resource, evaluation context, completeness, and review lifetime, as
+well as the predicate's meaning. Residency checks must say whether they concern
+execution, storage, or data transfer. Classification-flow claims require an
+explicit data-flow model and retain the existing evidence gate. Unknown controls
+retain conservative possible authority and an unresolved finding, not a pruned
+path that makes the report look safer.
+
+**Continuity requires a mandate join, not a thread convention.** A mandate may
+span threads, workflow runs, and approval records, and a thread may contain more
+than one mandate. A new thread does not itself authorise fresh capacity. Reuse
+digest-pinned bindings and the three-valued continuity contract, while checking
+whether a new provider profile or consumer is required. An open `boundary_kind`
+string alone cannot make a new runtime's records analysable. Missing gates or
+accounting evidence remain unresolved, never a zero balance. Define when pending
+work reserves capacity and how late settlement crosses a handover. Design the
+safe export boundary early, but defer runtime verification until those records
+exist. Do not add database access to the library.
+
+**Retry evidence concerns operation identity and accounting.** The completed
+retransmission capture shows repeated execution and accumulation after a known
+response. It does not establish ambiguous-timeout behaviour or a defect in a
+different engine. Before adding retry semantics, capture the retry/redrive
+boundary, operation-key scope, retention, payload binding, duplicate execution,
+and settlement rules. Unknown deduplication retains possible repeated effects.
+A Boolean idempotency flag cannot justify collapsing attempts into one effect.
+Duplicate settlement of one operation and execution of two distinct operations
+are different cases. This remains an evidence-led extension, not a new retry
+transition already supported by the continuity consumer.
+
+### Admission and upstream scope
+
+The pilot supplies candidate evidence for workflow projection, approval binding,
+conditional operands, and policy-versus-agent drift. It does not yet unblock
+resource relationships, deployment continuity, quantity relations, or data flow.
+An application-owned accounting boundary could test deployment continuity only
+if the experiment holds policy, principal, mandate, and accounting selection
+fixed while changing deployment. Another application using the same provider is
+not automatically an independent enforcement implementation.
+
+Upstream reusable contracts and releasable evidence rather than application
+nouns. Employer permission and a reviewed sanitisation boundary are prerequisites
+for releasing workplace material. A graph counts as real evidence only when it
+meets `CONTRIBUTING.md`, including the published, version-pinned source boundary.
+An unreleasable example or synthetic reproduction must keep that status. A second
+independent use case can test generality, but does not replace a reproduced
+distortion and explicit semantics.
+
+This roadmap update changes no package contract and needs no release. Future
+public behaviour and artifact changes follow `STABILITY.md` independently. Do
+not preassign a package release or treat a new closed-vocabulary member as
+automatically compatible. The pilot adds no new prerequisite for 1.0. Runtime
+enforcement and the decision to publish remain with the application, which may
+eventually consume validated analysis checks as part of its existing CI gate.
 
 ## Outcomes and boundaries
 
