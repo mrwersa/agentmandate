@@ -122,7 +122,10 @@ identifier, trial identities, and summary counts. The normal migration replay
 also reproduces this fixture. These checks verify consistency of the committed
 sanitized records, not the authenticity of the original live execution.
 
-**Clock limitation:** the second call in `same_id`, trial 6, records start
+**Clock limitation:** the second call in `same_id`, trial label 6, is located at
+`/trials/10/calls/1` in `retry-continuity-events.json`: zero-based trial-array
+index 10 (the eleventh pair in shuffled order), call index 1 (the second call).
+The trial label is per arm, not the shuffled array index. This call records start
 `2026-09-11T19:32:38.917842Z` and finish
 `2026-09-11T19:32:38.765727Z`, despite a positive recorded duration of
 516.247859 ms. The original bytes remain unchanged. The projection does not
