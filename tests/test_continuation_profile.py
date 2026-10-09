@@ -21,6 +21,7 @@ from agentmandate.reach import analyse
 ROOT = projections.ROOT
 BASE = "docs/evidence/agentcore-refund-policy/"
 FIXTURE = ROOT / "tests/fixtures/agentcore-continuation-v1.json"
+ACCEPTED = ROOT / "docs/continuity-reviews/agentcore-continuation-2026-10-09.json"
 MANIFEST = ROOT / "examples/continuity-refund/manifest.json"
 
 
@@ -166,3 +167,81 @@ def test_continuation_profile_works_through_existing_cli(capsys):
     result = ContinuityResult.from_json(output.out)
     assert len(result.outcomes) == 6
     assert {item.safe_continuation for item in result.outcomes} == {"unresolved"}
+
+
+def test_human_acceptance_only_changes_metadata_of_the_pinned_archival_profile():
+    assert hashlib.sha256(FIXTURE.read_bytes()).hexdigest() == (
+        "b22f056132e838aadaa7b5191b28f4a5c2fcc1ec8508d332c3d5f1f1df35c254"
+    )
+    archival = AgentCoreContinuity.from_json(FIXTURE.read_text())
+    accepted = AgentCoreContinuity.from_json(ACCEPTED.read_text())
+    assert accepted.to_json() == ACCEPTED.read_text()
+    assert accepted == replace(
+        archival, evidence=ContinuityEvidence("exact", "accepted", "mrwersa", "2026-11-08")
+    )
+    assert archival.evidence == ContinuityEvidence("exact", "unreviewed", None, None)
+    accepted.verify_sources(_contents())
+
+
+@pytest.mark.parametrize(
+    ("as_of", "tampered", "eligible"),
+    [
+        ("2026-10-09T12:53:28+00:00", False, True),
+        ("2026-11-08T23:59:59+00:00", False, True),
+        ("2026-11-09T00:00:00+00:00", False, False),
+        ("2026-10-09T12:53:28+00:00", True, False),
+    ],
+)
+def test_accepted_observations_preserve_binding_gaps_expiry_and_source_checks(
+    as_of, tampered, eligible
+):
+    profile = AgentCoreContinuity.from_json(ACCEPTED.read_text())
+    contents = _contents()
+    if tampered:
+        contents[BASE + "continuation-events.json"] += b" "
+    mandate = load(MANIFEST)
+    result = analyse_continuity(
+        mandate, profile, contents, as_of=datetime.fromisoformat(as_of)
+    )
+    assert result.authority == analyse(mandate)
+    assert not result.clean
+    assert len(result.outcomes) == 6
+    for outcome in result.outcomes:
+        assert outcome.state == "unresolved"
+        assert outcome.admission == "unresolved"
+        assert outcome.comparability == "unresolved"
+        assert outcome.issuer_amendment == "unresolved"
+        assert outcome.safe_continuation == "unresolved"
+        assert outcome.completed_values == (
+            (600,) if outcome.transition == "byte-identical-statement" else (1200,)
+        )
+        expected = "tightens" if outcome.transition == "tightening-to-700" else "stable"
+        assert outcome.authority_change == (expected if eligible else "unresolved")
+    codes = {finding.code for finding in result.findings}
+    assert "continuity.state-reset" not in codes
+    if tampered:
+        assert "continuity.source-untrusted" in codes
+    elif not eligible:
+        assert "continuity.evidence-untrusted" in codes
+    else:
+        assert "continuity.evidence-untrusted" not in codes
+        assert "continuity.source-untrusted" not in codes
+    assert ContinuityResult.from_json(result.to_result().to_json()) == result.to_result()
+
+
+def test_accepted_profile_cli_still_exits_with_unresolved_continuity(capsys):
+    assert main(["continuity", "validate", str(ACCEPTED)]) == EXIT_OK
+    capsys.readouterr()
+    args = [
+        "continuity", "reconcile", str(MANIFEST),
+        "--continuity-provider", str(ACCEPTED),
+        "--continuity-as-of", "2026-10-09T12:53:28Z", "--json",
+    ]
+    for locator in _contents():
+        args.extend(["--continuity-source", f"{locator}={ROOT / locator}"])
+    assert main(args) == EXIT_FINDING
+    output = capsys.readouterr()
+    assert output.err == ""
+    result = ContinuityResult.from_json(output.out)
+    assert {item.safe_continuation for item in result.outcomes} == {"unresolved"}
+    assert {item.authority_change for item in result.outcomes} == {"stable", "tightens"}
