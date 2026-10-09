@@ -37,6 +37,13 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 Their current acceptance expires 8 November inclusive UTC and is ineligible
 from 9 November. Work on mandate binding does not extend this expiry.
 
+**Before further live capture:** the [clock audit](docs/capture-clock-audit.md)
+found six negative UTC intervals in 510 inspected calls. Four retain positive
+monotonic endpoint differences; older principal/retransmission records do not
+retain endpoints. The next driver/sanitizer must pass the
+[timing-retention gate](docs/continuity-evidence-plan.md#timing-retention-gate).
+The cause of the UTC regressions remains unestablished.
+
 The time horizons below describe dependency order and product direction. They
 are not the clearest view of current delivery because several foundation and
 model initiatives completed together. The present frontier is:
