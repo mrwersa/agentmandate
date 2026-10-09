@@ -3,6 +3,11 @@
 Status: first profile projection implemented, 9 October 2026. Evidence
 acceptance and the remaining capture families are still open.
 
+The [acceptance packet](continuation-evidence-acceptance.md) assigns the human
+evidence decision to maintainer **mrwersa**, pins its review materials, and
+separates that decision from deployment-owner acceptance of a mandate binding.
+The evidence decision and expiry remain pending.
+
 The September AgentCore continuation matrix now has its own canonical
 [`agentcore-continuation-v1.json`](../tests/fixtures/agentcore-continuation-v1.json).
 It uses the existing private AgentCore profile format, with six controls and
