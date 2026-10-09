@@ -1844,6 +1844,8 @@ def _agentcore_axes(
     same_mandate = control.same_mandate is True and binding_ready
     outcomes = control.outcomes
     allowed = outcomes.count("allow")
+    # Without a stale-session marker, reviewed ordering places the predecessor
+    # first and recovery observations after it.
     recovery_start = outcomes.index("stale_session") + 1 if "stale_session" in outcomes else 1
 
     missing_required_binding = control.same_mandate is True and not binding_ready
@@ -1856,7 +1858,7 @@ def _agentcore_axes(
         and same_mandate
         and outcomes[0] == "allow"
         # A later refusal does not undo the observed recovery admission.
-        # Predecessor successes cannot stand in for a recovery admission.
+        # An explicit stale-session marker excludes earlier predecessor successes.
         and "allow" in outcomes[recovery_start:]
     ):
         state = "reset"

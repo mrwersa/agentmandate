@@ -577,6 +577,166 @@ def migrate_anthropic_continuity(contents: dict[str, bytes]) -> AnthropicContinu
     return AnthropicContinuity.from_json(migrated.to_json())
 
 
+def _continuation_decisions(trial: dict[str, Any], amount: int) -> tuple[str, ...]:
+    names = ["before_call", "predecessor_after_call"]
+    if trial["arm"] != "byte_identical_statement":
+        names.extend(("recovery_call", "recovery_after_call"))
+    elif "recovery_call" in trial or "recovery_after_call" in trial:
+        raise ContinuityFormatError("continuation projection unexpected byte-identical recovery")
+    calls = [trial[name] for name in names]
+    decisions = []
+    for call in calls:
+        response = call["response"]
+        if "error" not in response and response.get("result", {}).get("isError") is False:
+            outcome = "allow"
+        else:
+            outcome = {-32005: "stale_session", -32002: "deny"}.get(
+                response.get("error", {}).get("code")
+            )
+        if (
+            outcome is None
+            or call["derived_outcome"] != outcome
+            or call["http_status"] != 200
+            or call["request"]["params"]["arguments"] != {"amount": amount}
+        ):
+            raise ContinuityFormatError("continuation projection native decision differs")
+        decisions.append(outcome)
+    if (
+        calls[0]["session_alias"] != calls[1]["session_alias"]
+        or (
+            len(calls) == 4
+            and not calls[2]["session_alias"] == calls[3]["session_alias"]
+            != calls[0]["session_alias"]
+        )
+        or any(
+            left["finished_monotonic_ns"] > right["started_monotonic_ns"]
+            for left, right in zip(calls[:-1], calls[1:], strict=True)
+        )
+    ):
+        raise ContinuityFormatError("continuation projection session or ordering differs")
+    return tuple(decisions)
+
+
+def project_agentcore_continuation(contents: dict[str, bytes]) -> AgentCoreContinuity:
+    """Project the pinned September matrix separately from historical migrations.
+
+    This is an archival projection, not an evidence acceptance or a signed
+    mandate binding. Byte-identical trials contain no recovery observation.
+    """
+    base = "docs/evidence/agentcore-refund-policy/"
+    pins = {
+        "continuation-protocol.json": (
+            "0f7b530daac148fe745bda47f26228f5a96bd0db93d830661335b8b7add51591"
+        ),
+        "continuation-events.json": (
+            "b8f366492f156fa9e1854feea01d458e0e21caf528f85d7d03a38d56bc775ba6"
+        ),
+        "continuation-deployment.json": (
+            "d9bca41ce79eaae746f76f5da312b5b488ab6aca6c94eab5b2dd47b619f76c98"
+        ),
+        "continuation-summary.json": (
+            "b8884532eba05cf2481e771af9b89e4bc7073a40239eadae05ed06774e7ecc1d"
+        ),
+    }
+    sources = _migration_sources(
+        contents,
+        {base + name: name.removesuffix(".json") for name in pins},
+        {base + name: digest for name, digest in pins.items()},
+    )
+    protocol = _captured(contents, base + "continuation-protocol.json")
+    events = _captured(contents, base + "continuation-events.json")
+    deployment = _captured(contents, base + "continuation-deployment.json")
+    summary = _captured(contents, base + "continuation-summary.json")
+    if (
+        events["mandate_sha256"] != protocol["mandate"]["sha256"]
+        or summary["mandate_sha256"] != events["mandate_sha256"]
+        or events["mcp_protocol"] != protocol["mcp_protocol"]
+        or events["candidate"] != summary["candidate"]
+        or events["candidate"] != "single_permit"
+        or events["validation_mode"] != summary["validation_mode"]
+        or events["validation_mode"] != "FAIL_ON_ANY_FINDINGS"
+        or deployment["deployment"]["gateway"]["policy_engine_mode"] != "ENFORCE"
+        or deployment["stopped"] is not None
+        or summary["stopped"] is not None
+        or deployment["cleanup_complete"] is not True
+    ):
+        raise ContinuityFormatError("continuation projection source join or configuration differs")
+    trials = events["trials"]
+    if (
+        {trial["arm"] for trial in trials} != set(protocol["arms"])
+        or set(summary["arms"]) != set(protocol["arms"])
+    ):
+        raise ContinuityFormatError("continuation projection arms differ")
+    controls = []
+    for arm in sorted(protocol["arms"]):
+        selected = [trial for trial in trials if trial["arm"] == arm]
+        count = protocol["trials_per_arm"]
+        if len(selected) != count or sorted(trial["trial"] for trial in selected) != list(
+            range(count)
+        ):
+            raise ContinuityFormatError("continuation projection trial identities differ")
+        expected = ("allow", "stale_session")
+        if arm != "byte_identical_statement":
+            expected += ("allow", "deny")
+        for trial in selected:
+            update = trial["update"]
+            if (
+                not trial["conforming"]
+                or trial["nonconforming_reasons"]
+                or update["before"]["revision_alias"] == update["after"]["revision_alias"]
+                or update["after"]["status"] != "ACTIVE"
+                or update["submitted"]["validation_mode"] != events["validation_mode"]
+                or _continuation_decisions(trial, protocol["request_amount"]) != expected
+            ):
+                raise ContinuityFormatError("continuation projection trial control differs")
+        counts = {
+            "trials": count,
+            "nonconforming": 0,
+            "revision_changed": count,
+            "predecessor_after_update": {"stale_session": count},
+            "maximum_elapsed_seconds": max(t["elapsed_monotonic_seconds"] for t in selected),
+        }
+        if arm != "byte_identical_statement":
+            counts["successor_sequence"] = {"allow-deny": count}
+        tightening = arm == "tightening_to_700"
+        if tightening:
+            counts["discrimination"] = {
+                "carry_refuses_first_successor_call": 0,
+                "reset_admits_first_successor_call": count,
+            }
+        if summary["arms"][arm] != counts:
+            raise ContinuityFormatError("continuation projection summary differs from events")
+        controls.append(
+            AgentCoreControl(
+                id=arm.replace("_", "-"),
+                transition="limit_revision" if tightening else "configuration_revision",
+                trials=count,
+                request_amount=protocol["request_amount"],
+                provider_limits=(protocol["base_threshold"], protocol["tightened_threshold"])
+                if tightening else (protocol["base_threshold"],),
+                outcomes=expected,
+                same_mandate=None,
+                revision_changed=True,
+                boundary_changed=True,
+                intervals_overlap=False,
+                mediation="unestablished",
+                sources=tuple(source.id for source in sources),
+            )
+        )
+    profile = AgentCoreContinuity(
+        version=1,
+        adapter_name="agentmandate.agentcore-continuity",
+        adapter_version=1,
+        provider="aws-agentcore",
+        binding=protocol["gateway_placeholder"],
+        protocol="MCP " + protocol["mcp_protocol"],
+        controls=tuple(controls),
+        sources=sources,
+        evidence=_migration_evidence(),
+    )
+    return AgentCoreContinuity.from_json(profile.to_json())
+
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
 
@@ -620,6 +780,16 @@ def _migration_cases() -> tuple[
                 anthropic + "multiagent-confirmation.json",
             ),
             "anthropic-continuity-v1.json",
+        ),
+        (
+            project_agentcore_continuation,
+            (
+                agentcore + "continuation-protocol.json",
+                agentcore + "continuation-events.json",
+                agentcore + "continuation-deployment.json",
+                agentcore + "continuation-summary.json",
+            ),
+            "agentcore-continuation-v1.json",
         ),
     )
 

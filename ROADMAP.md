@@ -40,7 +40,8 @@ model initiatives completed together. The present frontier is:
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
-| **Ready next** | Reconcile the completed provider controls into one reviewed continuity evidence boundary |
+| **Active consolidation** | [Project the completed captures into continuity profiles](docs/continuity-evidence-consolidation.md): the AgentCore revision matrix now has a separate canonical, unreviewed profile; historical migrations remain byte-exact |
+| **Ready next** | Establish the remaining binding and review evidence, and represent the diagnostic, principal, retransmission, and Managed Agents controls without dropping their distinct boundaries |
 | **Planned adoption pilot** | Review one workflow before publication through an external adapter, with inventory reconciliation, authority diff, and explicit unsupported semantics. The [pilot below](#near-term-adoption-workflow-publication-review) starts report-only and does not yet supply a new evidence graph or clear a model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
@@ -65,8 +66,11 @@ The first reconciliation fix retains a reviewed AgentCore reset observation
 when recovery succeeds and a later request is refused. Regression controls
 exercise a tightened limit, require separate predecessor and successor allows,
 and retain unresolved results when review or binding evidence is missing.
-Historical migrations stay byte-exact and unreviewed. Consolidating the newer
-captures into reviewed provider profiles remains the next evidence step;
+Historical migrations stay byte-exact and unreviewed. The separate
+[AgentCore continuation profile](docs/continuity-evidence-consolidation.md)
+now projects all six revision arms without inventing a same-mandate binding or
+byte-identical recovery observation. Accountable acceptance and the remaining
+capture families are still open;
 the Managed Agents continuation capture has no local mandate/principal binding
 record to populate the existing profile's binding digest.
 
