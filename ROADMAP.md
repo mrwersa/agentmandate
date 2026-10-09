@@ -52,8 +52,9 @@ model initiatives completed together. The present frontier is:
 |---|---|
 | **Delivered** | Real-graph evidence base, Authority IR, dynamic inventory, conditional authority, delegation analysis, the Cedar decision/alignment path, finite producer cardinality, the [authority-continuity CLI](docs/authority-continuity-gate-4-review.md), and the [reviewed pre-1.0 baseline](docs/pre-1.0-consolidation-audit.md) |
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
-| **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change pairs also have a separate unreviewed runtime profile; the archival observation format remains rejected. The new consumer reports observations while mandate continuity stays unresolved. Archival records and historical migrations remain unreviewed and byte-exact |
-| **Ready next** | Review shared-mandate accounting semantics for [#214](https://github.com/mrwersa/agentmandate/issues/214); binding approval is deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md). Locate contemporaneous mandate/principal/deployment and mediation evidence; changed-revision comparability/amendment claims also need a reviewed consumer extension. No mandate identity, safe-continuation, or deployment approval is established |
+| **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change pairs also have a separate unreviewed runtime profile; the archival observation format remains rejected. The observation consumer leaves mandate continuity unresolved; optional reviewed accounting is implemented for synthetic bound trials, with historical binding still deferred. Archival records and historical migrations remain unreviewed and byte-exact |
+| **Implementation review** | [Reviewed principal accounting](docs/principal-accounting.md) for [#214](https://github.com/mrwersa/agentmandate/issues/214): independently reviewed bindings, exact manifest/profile joins, identity and execution mappings, per-trial observed budget comparisons, and failure/compatibility fixtures. External PR review is pending; this supplies no historical acceptance or binding approval |
+| **Ready next** | After accounting review, define the changed-revision comparability and issuer-amendment consumer extension. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
@@ -63,18 +64,23 @@ sequences a reviewed mandate permits. Authority continuity asks whether consumed
 state remains attached to that mandate across a named lifecycle transition.
 Neither result substitutes for the other.
 
-The next implementation boundary is a shared-mandate accounting contract for
-principal changes ([#214](https://github.com/mrwersa/agentmandate/issues/214)).
-The first [principal-aware consumer](docs/principal-continuity.md) now preserves
-principal and session relations independently, reports per-principal completed
-amounts, and checks observation eligibility. It deliberately leaves mandate
-identity, state continuity, admission, and safe continuation unresolved. The
-historical principal profile remains unreviewed; its archival record remains
-byte-exact and outside the runtime format.
+The [principal observation consumer](docs/principal-continuity.md) preserves
+principal and session relations independently and reports per-principal amounts.
+The new [accounting binding](docs/principal-accounting.md) adds the bounded
+shared-mandate slice of [#214](https://github.com/mrwersa/agentmandate/issues/214):
+a reviewed profile/manifest join, principal mappings, shared intent, mediation,
+distinct execution references, and a matching monetary limit can authorize a
+shared observed total within each independent trial. It reports an observed
+budget breach without claiming a state reset or safe continuation. The unbound
+result remains unchanged; old single-principal bindings are not reused.
 
-Before a later consumer can resolve shared accounting, it needs reviewed
-identity mappings, mandate intent, binding, mediation, and limits. Neither the
-new implementation nor historical-observation acceptance supplies that decision.
+Implementation and synthetic tests do not supply accountable approval for the
+historical capture. Its principal profile remains unreviewed and unbound, and
+its archival record remains byte-exact. Issue #214 stays open for independent
+contract review and the remaining evidence boundary. No additional initiative
+is counted complete by this extension. Next implementation work should address
+explicit revision comparability and issuer-amendment evidence, separately from
+observed accounting and without treating stable names as stable counter state.
 The [consolidation record](docs/continuity-evidence-consolidation.md) owns the
 capture-by-capture status and limitations; the [evidence plan](docs/continuity-evidence-plan.md)
 owns requirements for further captures. Managed Agents continuation still lacks
@@ -443,6 +449,11 @@ inventory with `principal_continuity_version: 1` and
 Its [compatibility fixtures](docs/principal-continuity.md#compatibility-fixtures)
 pin the initial input and result contracts, including expiry. These are v1
 baselines, not evidence of a migration from an earlier principal result schema.
+The opt-in accounting surface also adds `principal_accounting_binding_version: 1`
+and `agentmandate.principal-accounting/v1`, with separate
+[eligible/expired baselines](docs/principal-accounting.md#compatibility-and-remaining-work).
+The observation v1 fixtures are retained unchanged. These additions do not
+complete the repository-wide compatibility audit.
 Any later format change needs an explicit compatibility decision and affected
 before/after fixtures. The historical pre-1.0 audit remains a record of its
 original baseline; neither this addition nor internal code review supplies the

@@ -10,7 +10,9 @@ change manifest version 1, Authority IR, or ordinary reachability.
 
 For principal changes, use the separately versioned
 [principal observation profile](principal-continuity.md). It preserves the
-principal and session axes without resolving shared-mandate accounting.
+principal and session axes. Optional [reviewed shared accounting](principal-accounting.md)
+can compare observed completed spend against one mandate budget; it leaves
+state continuity and safe continuation unresolved.
 
 ## Question and invariant
 

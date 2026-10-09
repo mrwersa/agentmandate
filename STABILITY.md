@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.18.0
+agentmandate~=0.19.0
 ```
 
 ## Versioned authority artifacts
@@ -116,10 +116,20 @@ Principal/session observations use the separate strict
 `principal_continuity_version: 1` profile and
 `agentmandate.principal-continuity/v1` result schema through the same continuity
 commands. They preserve ordered calls and per-principal totals, with source,
-review, and expiry checks. Mandate identity and continuity remain unresolved;
-reconciliation always exits 1. Single-principal bindings are refused on this
-path. The archival `principal_observations_version` input remains unsupported.
+review, and expiry checks. Without an accounting binding, mandate identity and
+continuity remain unresolved; reconciliation always exits 1. Single-principal
+bindings are refused on this path. The archival `principal_observations_version`
+input remains unsupported.
 See the [profile contract](docs/principal-continuity.md).
+
+The optional `principal_accounting_binding_version: 1` artifact selects the
+separate `agentmandate.principal-accounting/v1` result. It authorizes per-trial
+shared monetary totals only with eligible observations, independent binding
+review, exact sources and joins, and known completion. An observed budget breach
+does not establish reset or resolve continuation safety; this path always exits 1.
+Existing unbound v1 output is unchanged. Both new contracts have initial
+[compatibility fixtures](docs/principal-accounting.md#compatibility-and-remaining-work);
+these are baselines, not migrations or completion of the whole 1.0 audit.
 
 ## What is most likely to change
 

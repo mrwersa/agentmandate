@@ -236,13 +236,14 @@ original procedure's claim, not a reconstructed monotonic check. Review remains
 `unreviewed`, authentication remains an attestation, and reconciliation exits 1.
 The new format never imports the archival cross-principal sum.
 
-This completes the observation consumer only. A later shared-mandate consumer
-still needs a reviewed authorization contract covering identity mappings,
-intent, binding, mediation, and limits. Missing evidence remains unresolved,
-and no principal change by itself establishes reset or overshoot. Tests keep
-principal changes distinct from session changes, with trust/source/expiry
-checks independent of the always-unresolved mandate verdict. Issue #214 stays
-open; historical-evidence acceptance and shared-mandate approval remain separate.
+The optional [reviewed accounting consumer](principal-accounting.md) now checks
+separate binding authorization for identity mappings, shared intent, mediation,
+execution uniqueness, and the manifest monetary limit. No such binding has been
+accepted for this historical profile. It therefore keeps its observation-only
+result; no principal change by itself establishes a reset or mandate overshoot.
+Issue #214 stays open for independent contract review and the remaining evidence
+boundary. Historical-evidence acceptance and shared-mandate approval remain
+separate.
 
 ## Remaining work
 

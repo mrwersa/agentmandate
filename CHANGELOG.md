@@ -6,6 +6,34 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.19.0 - 2026-10-09
+
+### Added
+
+- Opt-in reviewed principal accounting through `continuity validate` and
+  `reconcile --continuity-binding`. The new
+  `principal_accounting_binding_version: 1` artifact joins a pinned principal
+  profile to exact manifest bytes, authenticated-subject mappings, per-trial
+  shared intent, mediation, execution references, and the manifest monetary
+  limit. Observation review and binding review remain independent.
+- Separate `agentmandate.principal-accounting/v1` output reports shared observed
+  completed amounts and budget breaches only when the evidence and joins are
+  eligible. Unknown completion withholds the affected trial; global gaps
+  withhold all shared totals. Trials are never summed together. State continuity,
+  admission, and safe continuation remain unresolved, with exit 1 and full
+  manifest Authority retained.
+- A runnable synthetic binding, fixed eligible/expired result baselines, and
+  checks for mismatched joins, duplicate executions, source tampering, review
+  expiry, and unsupported composition. No historical evidence is accepted or
+  bound by this release.
+
+### Compatibility
+
+- Existing principal observation input and unbound v1 result bytes are unchanged.
+  The new result is selected only by a principal accounting binding; old
+  single-principal bindings remain refused on this path. No migration is
+  required for existing commands. Python records remain private.
+
 ## 0.18.0 - 2026-10-09
 
 ### Added

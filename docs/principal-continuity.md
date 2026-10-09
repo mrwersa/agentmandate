@@ -4,9 +4,10 @@ Use this experimental profile when a capture changes the authenticated caller,
 the provider session, or both. It keeps those boundaries separate: two identities
 using the same session do not automatically spend the same mandate.
 
-This is the first consumer slice of [#214](https://github.com/mrwersa/agentmandate/issues/214).
-It can validate observations and report completed amounts **per principal, per
-trial**. Shared-mandate accounting and a binding that authorizes it remain open.
+This is the observation surface of [#214](https://github.com/mrwersa/agentmandate/issues/214).
+It validates observations and reports completed amounts **per principal, per
+trial**. A separate [reviewed accounting binding](principal-accounting.md) can
+authorize a shared total; the commands below supply no such binding.
 The existing [continuity profiles](authority-continuity.md) are unchanged.
 
 ## Try it
@@ -34,8 +35,8 @@ whole stated UTC date. Eligibility records a human review of the observations;
 it does not authenticate the identities, source execution, or reviewer.
 
 Even with eligible observations, `mandate_identity`, `state`, `admission`, and
-`safe_continuation` remain `unresolved`. There is no shared-mandate binding
-consumer in this format. A principal change alone cannot establish a reset or
+`safe_continuation` remain `unresolved` in this unbound result.
+A principal change alone cannot establish a reset or
 overshoot, and the result never adds amounts across principals or trials.
 
 ## Profile contract
@@ -126,11 +127,12 @@ cross-principal total, provider-limit comparison, or authority narrowing occurs.
 Valid reconciliation always exits 1 with complete output because mandate
 continuity is unresolved. Source digest mismatches are findings and make the
 observations ineligible. Missing or extra source locators, malformed input,
-unreadable files, binding input, and unsupported composition exit 2 with empty
-stdout. Both JSON and text output preserve the manifest analysis.
+unreadable files, unsupported binding types, and unsupported composition exit 2
+with empty stdout. Both JSON and text output preserve the manifest analysis.
 
 The archival `principal_observations_version` format remains repository-only
 and is still rejected. This profile does not change the review state of any
-historical capture. An eventual shared-mandate consumer needs a separately
-reviewed contract for identity mappings, intent, binding, mediation, limits,
-and the scope of authorized accounting before it can resolve these verdicts.
+historical capture. Supplying a
+[principal accounting binding](principal-accounting.md) selects a separate
+result schema. It checks identity mappings, shared intent, mediation, limits,
+and execution references before accounting, without resolving continuation safety.

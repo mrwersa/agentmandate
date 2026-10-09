@@ -1,0 +1,125 @@
+{
+  "principal_accounting_binding_version": 1,
+  "id": "synthetic-accounting-only",
+  "manifest_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "profile_sha256": "9dee36d7942d4ac203fd98f376b8798c43723af060833016c8455241a9c89db4",
+  "provider": "synthetic",
+  "boundary": "synthetic-refund-boundary",
+  "measurement": {
+    "profile_tool": "refund",
+    "manifest_tool": "process_refund",
+    "value_arg": "amount",
+    "dimension": "value",
+    "unit": "GBP"
+  },
+  "limit": {
+    "amount": 1000,
+    "unit": "GBP",
+    "comparison": "inclusive",
+    "scope": "per_trial_run"
+  },
+  "intent": {
+    "kind": "shared_mandate_per_trial",
+    "statement": "Each trial is one independent mandate run. All its calls share its GBP 1000 inclusive budget across principal and session changes.",
+    "sources": [
+      "review"
+    ]
+  },
+  "mediation": {
+    "kind": "complete",
+    "sources": [
+      "review"
+    ]
+  },
+  "principals": [
+    {
+      "alias": "a",
+      "subject": "synthetic-subject-a",
+      "manifest_principal": "caller",
+      "sources": [
+        "review"
+      ]
+    },
+    {
+      "alias": "b",
+      "subject": "synthetic-subject-b",
+      "manifest_principal": "caller",
+      "sources": [
+        "review"
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "id": "changed-principal-same-session",
+      "account": "synthetic-run-0",
+      "sources": [
+        "review"
+      ],
+      "executions": [
+        {
+          "source": "observations",
+          "pointer": "/trials/1/calls/0",
+          "id": "trial-0-attempt-0"
+        },
+        {
+          "source": "observations",
+          "pointer": "/trials/1/calls/1",
+          "id": "trial-0-attempt-1"
+        }
+      ]
+    },
+    {
+      "id": "same-principal-fresh-session",
+      "account": "synthetic-run-1",
+      "sources": [
+        "review"
+      ],
+      "executions": [
+        {
+          "source": "observations",
+          "pointer": "/trials/2/calls/0",
+          "id": "trial-1-attempt-0"
+        },
+        {
+          "source": "observations",
+          "pointer": "/trials/2/calls/1",
+          "id": "trial-1-attempt-1"
+        }
+      ]
+    },
+    {
+      "id": "same-principal-same-session",
+      "account": "synthetic-run-2",
+      "sources": [
+        "review"
+      ],
+      "executions": [
+        {
+          "source": "observations",
+          "pointer": "/trials/0/calls/0",
+          "id": "trial-2-attempt-0"
+        },
+        {
+          "source": "observations",
+          "pointer": "/trials/0/calls/1",
+          "id": "trial-2-attempt-1"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "review",
+      "kind": "synthetic-review",
+      "locator": "accounting-review.json",
+      "content_sha256": "3738eea4c4632b280d512a8da2d0b19a7f74f7d00b432263b98844db9f7f5fd3"
+    }
+  ],
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "synthetic-example-only",
+    "expires": "2026-11-08"
+  }
+}
