@@ -301,6 +301,7 @@ source code or manifest fields cannot establish a specific boundary:
 | Establish a finite number of produced resources | [Producer boundaries](docs/bounded-producers.md) |
 | Check whether consumed state survives a session or policy change | [Refund walkthrough](examples/continuity-refund/README.md) |
 | Keep principal changes separate from session changes | [Principal observations](docs/principal-continuity.md) |
+| Compare shared spend with a mandate budget under a reviewed binding | [Principal accounting](docs/principal-accounting.md) |
 
 Each guide distinguishes structural validation from evidence eligible for
 analysis. Parsing an artifact does not accept its claims. Continuity remains

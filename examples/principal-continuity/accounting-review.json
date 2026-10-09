@@ -1,0 +1,12 @@
+{
+  "kind": "synthetic-accounting-review",
+  "notice": "Illustration only. This is not a real acceptance or deployment binding.",
+  "intent": "Each trial is one independent mandate run. All its calls share its GBP 1000 inclusive budget across principal and session changes.",
+  "identities": {
+    "a": "synthetic-subject-a",
+    "b": "synthetic-subject-b"
+  },
+  "tool": "Observed refund maps to process_refund, amount in whole GBP, with caller authority.",
+  "mediation": "Every listed call is associated with the synthetic-refund-boundary and this mandate intent. There are no hidden configuration changes in these synthetic trials.",
+  "executions": "Every listed occurrence is distinct, including refused attempts; aliases are unique across trials. The observations are synthetic, not provider executions."
+}

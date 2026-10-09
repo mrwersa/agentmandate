@@ -186,6 +186,12 @@ incomplete artifacts and mappings exit 2 with empty stdout. IR, SARIF,
 Mermaid, OTel, condition, delegation, producer, and Cedar composition is
 refused before any input is read.
 
+The separate [principal observation](principal-continuity.md) and
+[reviewed accounting](principal-accounting.md) results always exit 1 because
+continuation safety remains unresolved. Accounting can report observed spend
+above a mandate limit; an amount below it is not permission to deploy or
+continue. Keep these results separate from a clean continuity gate.
+
 Managed Cedar evidence also separates structural validation from trusted
 consumption. Source roots are explicit; the command reads exactly the locators
 declared by each oracle and refuses paths that escape the root:
