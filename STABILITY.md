@@ -20,10 +20,19 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.22.0
+agentmandate~=0.23.0
 ```
 
 ## Versioned authority artifacts
+
+`mandate remediate` exposes the public `agentmandate.remediation/v1` JSON
+presentation with rechecked, unapplied manifest-v1 repair candidates. Its
+Python implementation is private. The command retains baseline Authority and
+lint findings and keeps their exit code even when candidates exist. Candidate
+reachability is scoped to the same depth; enumeration completeness is a
+separate field. Results are not authority inputs. The
+[guide and initial fixtures](docs/remediation.md) describe this new surface;
+existing CLI output and root Python exports are unchanged.
 
 The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
 `mandate producers`, `mandate continuity`, `mandate cedar`, and reviewed

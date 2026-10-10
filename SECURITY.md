@@ -26,6 +26,11 @@ limit within the declared model and search bound. Whether that path is possible
 in a deployment depends on the accuracy of the manifest and its abstraction.
 Store CI logs and JSON reports under the same controls as vulnerability scan results.
 
+`remediate` retains the original counterexample and includes complete candidate
+manifests in JSON, including declared identity, roles and monetary bounds.
+These unapplied suggestions need the same access controls as the input manifest;
+their presence does not approve a change or deployment.
+
 `verify` reads recorded tool calls. Those records may carry real scope
 identifiers and real amounts from production runs, so the input file deserves
 the same handling as the traces it came from. Violation messages can include

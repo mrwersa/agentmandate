@@ -11,6 +11,12 @@ requires an exhaustive result for the declared model, additionally require
 not clean results. The [search bounds guide](search-performance.md) explains
 the measured costs and the resource limits a CI wrapper must enforce.
 
+Use [repair candidates](remediation.md) to investigate a breached manifest.
+`mandate remediate` reports the original breach and still exits 1 when a
+candidate is found. It never edits the policy or turns a failing baseline into
+a passing CI result. Exit 0 also requires baseline lint to have no errors;
+candidate reachability and remaining lint are reported separately.
+
 ## The action
 
 ```yaml

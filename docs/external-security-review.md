@@ -1,10 +1,11 @@
 # External security and trace-retention review
 
-Status: **scope prepared; reviewer and review date unassigned**. This is a
+Status: **commissioning deferred at the maintainer's request on 10 October
+2026; reviewer and review date unassigned**. This is a
 brief for the remaining external-review gate, not evidence that the gate has
 passed. Maintainer and agent implementation reviews do not replace it.
 
-The maintainer needs to nominate an independent reviewer with experience in
+When commissioning resumes, nominate an independent reviewer with experience in
 authorization tooling and untrusted evidence parsing, agree a pinned commit
 and scope, and record the completed review. No review has been commissioned
 or performed by preparing this document.
@@ -18,6 +19,7 @@ Review the boundaries that could cause a user to trust an unsupported result:
 | Untrusted local input | Can a catalogue, schema, name, description, path, or attachment inject output, invoke code, read an unintended file, or cause misleading partial output? | [Catalogue import](catalogue-import.md), [source inventory](inventory.md), CLI and strict artifact readers |
 | Observations versus intent | Can unreviewed, heuristic, expired, incomplete, or tampered evidence narrow authority or clear an unresolved gate? | [Authority IR](authority-ir.md), [dynamic inventory](dynamic-inventory.md), attachment eligibility tests |
 | Manifest and search | Do defaults, scopes, principals, approvals, numeric bounds, shortest paths, and truncation communicate the actual model? | [Design](../DESIGN.md), [search bounds](search-performance.md), [manifest](manifest.md) |
+| Repair candidates | Can a suggestion erase baseline findings, silently drop unsupported inputs, or imply global safety from a capped search? | [Repair guide](remediation.md), result and exhaustive-edit tests |
 | State and identity | Can attestations suppress independent authority findings, conflate principals/sessions/mandates, or imply live freshness and safe continuation? | [Continuity](authority-continuity.md), [principal accounting](principal-accounting.md), [scalar handover](scalar-handover.md) |
 | Trace and report retention | Which identifiers and amounts can inputs, diagnostics, SARIF, JSON, and CI summaries expose, and does guidance cover their handling? | [Security policy](../SECURITY.md), [trace guide](traces.md), [CI guide](ci.md) |
 | Packaging and integrations | Do bare installation, optional YAML, static source scanning, wheel contents, and the GitHub Action preserve these boundaries? | [Releasing](../RELEASING.md), `.github/workflows`, package and no-dependency CI jobs |

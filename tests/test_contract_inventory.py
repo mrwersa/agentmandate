@@ -20,6 +20,27 @@ def test_current_inventory_matches_all_pinned_surfaces():
     assert audit.snapshot() == json.loads(audit.BASELINE.read_text())
 
 
+def test_remediation_addition_preserves_every_previous_contract_and_fixture():
+    path = ROOT / "tests/fixtures/current-contract-inventory-v0.22.json"
+    previous = json.loads(path.read_text())
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) - set(previous["cli"]) == {"mandate remediate"}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate":
+            selector = next(a for a in present["arguments"] if a["dest"] == "command")
+            selector["choices"].remove("remediate")
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_remediation.py",
+    }
+    for path, markers in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
 def test_coverage_inventory_names_every_presentation_and_real_replay_test():
     coverage = json.loads(audit.COVERAGE.read_text())
     schemas = {schema for row in audit.artifact_markers().values() for schema in row["schemas"]}

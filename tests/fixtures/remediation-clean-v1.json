@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "remediate",
+    "probes/search/pure-read.json",
+    "--json"
+  ],
+  "exit": 0,
+  "result": {
+    "baseline": {
+      "breaches": [],
+      "depth": 8,
+      "effects": [],
+      "max_extractable": null,
+      "reachable_tools": [
+        "read"
+      ],
+      "service_principal_tools": [],
+      "truncated": false,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [],
+    "input": {
+      "manifest_sha256": "f8063a3a9cfbc844cac5f0fc8783334c8eea291c97e8b2f6b726135a56c8b1e4"
+    },
+    "keep_tools": [],
+    "schema": "agentmandate.remediation/v1",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 0,
+      "candidates_found": 0,
+      "combinations_examined": 0,
+      "combinations_total": 0,
+      "depth": 8,
+      "enumeration_complete": null,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128
+    },
+    "status": "no_reachable_breach_within_bound"
+  }
+}

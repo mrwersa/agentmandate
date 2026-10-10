@@ -12,18 +12,23 @@ locations; exit 2 means the inventory or its files could not be read. This is
 repository maintenance tooling, not a mandate-analysis command or a deployment
 approval.
 
-This inventory was prepared against `0c43066`, the merged `0.22.0` contract
-baseline, on 10 October 2026. It supplements the
+The original inventory was prepared against `0c43066`, the merged `0.22.0`
+contract baseline, on 10 October 2026, and is retained as
+[a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.22.json).
+The current candidate adds the repair command and its initial v1 fixtures;
+tests compare every earlier declaration and fixture digest against that
+snapshot. Review of the repair addition is pending. The inventory supplements the
 [historical 0.17.0 audit](pre-1.0-consolidation-audit.md), whose bytes and
 decision remain unchanged. **The maintainer supplied an out-of-band execution
-review of #230 on 10 October 2026.** This is not a GitHub approval.
+review of #230 on 10 October 2026.** That review covers the original inventory,
+not subsequent additions. This is not a GitHub approval.
 It does not supply the [external security review](external-security-review.md).
 
 ## What is pinned
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)
 records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 29 CLI command paths
+methods/properties and constant values. It also records all 30 CLI command paths
 (including intermediate groups), arguments, defaults, choices and mutually
 exclusive groups. The package release number is
 excluded from comparison; `__version__` remains an exported name.
@@ -52,6 +57,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Principal observations and accounting | [Observations](principal-continuity.md), [accounting](principal-accounting.md); `test_principal_continuity.py`, `test_principal_accounting.py` |
 | Revision and scalar cutover | [Revision review](revision-review.md), [handover](scalar-handover.md); `test_revision_review.py`, `test_scalar_handover.py` |
 | Obligations, scenarios and decision suites | [Obligations](test-obligations.md), [evaluation](evaluation-loop.md); `test_obligations.py`, `test_scenarios.py` |
+| Repair candidates | [Remediation](remediation.md); `test_remediation.py` |
 | Trace verification and SARIF | [Traces](traces.md), [CI](ci.md); `test_verify.py`, `test_otel.py`, `test_findings.py` |
 | Historical readers, projections and acceptance | [Historical audit](pre-1.0-consolidation-audit.md), [acceptance](continuation-evidence-acceptance.md); converter, replay and acceptance tests named in the coverage index |
 
@@ -111,6 +117,7 @@ Follow the [evidence preservation rule](../CONTRIBUTING.md#contributing-a-real-a
 review the separate mandate, and exclude raw skeletons from any future
 corpus-wide clean-manifest gate. Do not repair historical proposals to clear CI.
 
-No runtime schema, Python export, command, result enum or package version is
-changed by this inventory. Its replay tests do not accept evidence, renew an
-expiry, establish a deployment mapping, or complete external security review.
+The inventory tool changes no runtime behavior. Deliberate runtime additions
+are recorded in their own release and contract guides. Its replay tests do not
+accept evidence, renew an expiry, establish a deployment mapping, or complete
+external security review.

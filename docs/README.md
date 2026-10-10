@@ -15,6 +15,7 @@ guarantee.
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
+| Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
 | Check recorded calls against a mandate | [Trace verification](traces.md) |
 | Turn reachable authority into tests | [Evaluation loop](evaluation-loop.md) |
 | Inspect cross-session consumed state | [Refund example](../examples/continuity-refund/README.md) |
@@ -35,6 +36,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Protocol catalogue imports](catalogue-import.md): extract local JSON into
   review-marked skeletons or unreviewed inventory/IR, keeping adapter gaps explicit.
 - [CI integration](ci.md): exit codes, GitHub Actions, SARIF, and rollout.
+- [Repair candidates](remediation.md): rank rechecked tool removals and approval
+  changes while keeping named tools reachable and search limits visible.
 - [Runtime trace verification](traces.md): replay JSON Lines or OpenTelemetry
   evidence against a mandate.
 - [Test obligations](test-obligations.md) and the
@@ -53,7 +56,8 @@ specific evidence gaps and have additional review and source-byte requirements.
   the complete public export list is `agentmandate.__all__`. Private attachment
   types are consumed through the CLI, not a supported Python API.
 - [External security review scope](external-security-review.md): the prepared
-  reviewer brief and required closing record; reviewer nomination is still open.
+  reviewer brief and required closing record; commissioning is deferred at the
+  maintainer's request and the 1.0 gate remains open.
 - [Roadmap](../ROADMAP.md): delivered, active, evidence-blocked, and later work.
 - [Pre-1.0 consolidation audit](pre-1.0-consolidation-audit.md): public contracts,
   private compatibility paths, fixture coverage, and the completed baseline
