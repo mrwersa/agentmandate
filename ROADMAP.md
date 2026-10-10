@@ -32,6 +32,37 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
+### Measured planning progress — 10 October 2026
+
+The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
+all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
+These are planning estimates, not percentages of engineering effort, runtime
+protection, or elapsed time. A delivered initiative can retain explicitly scoped
+operational limitations. Recompute with `python scripts/roadmap_progress.py`.
+The ledger records the reason and evidence for each status.
+
+| Phase | Points / initiatives | Completion |
+|---|---:|---:|
+| Authority foundation | 4 / 4 | 100% |
+| Model real authority | 3.5 / 6 | 58.33% |
+| Policy control-plane preview | 1.5 / 5 | 30% |
+| Fleet governance | 0 / 5 | 0% |
+| Advanced authority | 0 / 4 | 0% |
+| **Overall** | **9 / 24** | **37.5%** |
+
+The first three planning phases score **60%** (9 / 15). They are broader than
+the release criteria and are not a list of mandatory pre-1.0 features. This
+explicit calculation replaces earlier informal progress estimates; changes in
+that estimate alone do not indicate delivered or removed functionality.
+
+**1.0 gates: four of five satisfied.** Compatibility, schema fixtures, search
+bounds, and real-graph diversity are delivered. External security and
+trace-retention review remains deferred. Calling the prepared review brief
+“half a gate” gives 4.5 / 5, or 90% planning preparedness; it does not mean the
+external review has passed. Further agent review cannot close that gate.
+
+### Delivery decisions and current frontier
+
 **Pre-1.0 scope decision — 10 October 2026:** freeze additional continuity
 contracts and prioritize completion of the 1.0 gates. The delivered
 experimental surfaces remain supported; corrections, review, evidence
@@ -90,8 +121,9 @@ model initiatives completed together. The present frontier is:
 | **Delivered model check** | [Maximum-headroom argument](docs/headroom-abstraction.md) and exact search arithmetic merged in #234 after a fresh author review, 120 additional exact-Fraction probes and green CI. The 879-case exhaustive amount-choice study remains a finite check, not external security review or another initiative completed |
 | **Merged monetary repair slice** | [Repair candidates](docs/remediation.md): explicitly supplied lower ceilings combine with approval/removal edits, keep the original limits, and recheck the full graph. The refund example retains search plus a normal £100 refund at a £125 ceiling within depth eight, with a breach at depth ten disclosed. Opt-in v2 and before/after fixtures preserve v1. Merged in #235 after a fresh author review, 80 additional exhaustive-domain checks, 154 targeted tests and green CI; automatic selection and required-business-scenario preservation remain open |
 | **Merged required-path slice** | [Required workflows](docs/required-workflows.md), [#236](https://github.com/mrwersa/agentmandate/issues/236): caller-authored ordered paths join the exact baseline manifest and screen repairs for scope order, approvals, per-binding spend and declared budgets. Synthetic refund paths reject zero ceilings and missing approval without replacing baseline Authority. Opt-in v3 preserves v1/v2. Merged in #237 after fresh author review, 20,000 additional integer-reference path checks, 124 focused tests and green CI; model conformance does not establish business success, authenticated review or live resource lineage |
-| **Prepared named-review slice** | [Change review](docs/change-review.md), [#238](https://github.com/mrwersa/agentmandate/issues/238): a separate CI gate recomputes the unchanged diff and checks exact input/comparison joins, named decision evidence, target-policy disposition and inclusive expiry. Synthetic release-decision fixtures retain widening and breach findings even when recorded acceptance is eligible. Authenticated approval and deployment-policy verification remain integration responsibilities; this is not external security review or another completed 1.0 gate |
-| **Ready next** | Review the named-acceptance slice and its trust boundary, then select a concrete application policy mapping with native decision fixtures before implementing an exporter. Representative A2A/OpenAPI application mappings and deployment decision evidence remain separate from synthetic examples |
+| **Merged named-review slice** | [Change review](docs/change-review.md), [#238](https://github.com/mrwersa/agentmandate/issues/238): a separate CI gate recomputes the unchanged diff and checks exact input/comparison joins, named decision evidence, target-policy disposition and inclusive expiry. Synthetic release-decision fixtures retain widening and breach findings even when recorded acceptance is eligible. Merged in [#239](https://github.com/mrwersa/agentmandate/pull/239) after fresh author review and green CI; author review is not independent human approval. Authenticated approval and deployment-policy verification remain integration responsibilities; this is not external security review or another completed 1.0 gate |
+| **Active integration** | [GitHub Action review gate](docs/ci.md#review-decisions-from-a-protected-git-ref), [#240](https://github.com/mrwersa/agentmandate/issues/240): read decision/evidence from one caller-selected Git commit, retain widening findings, and resolve only their review blocker. Protection and human authentication remain caller responsibilities; preparation does not change the initiative ledger. |
+| **Ready next** | Review the Action integration and its pinned-ref boundary, then select a concrete application policy mapping with native decision fixtures before implementing an exporter. Representative A2A/OpenAPI application mappings and deployment decision evidence remain separate from synthetic examples |
 | **Deferred external review** | Independent security/trace-retention review deferred at the maintainer's request on 10 October 2026. The [prepared scope](docs/external-security-review.md) remains available and the 1.0 gate remains open; implementation and agent self-review cannot satisfy it |
 | **Deferred continuity extensions** | Operational policy/state/fencing evidence and a versioned settlement/retry contract are prerequisites for extending the scalar cutover model to later execution or a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |

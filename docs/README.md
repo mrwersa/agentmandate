@@ -37,7 +37,7 @@ specific evidence gaps and have additional review and source-byte requirements.
   without importing agent code.
 - [Protocol catalogue imports](catalogue-import.md): extract local JSON into
   review-marked skeletons or unreviewed inventory/IR, keeping adapter gaps explicit.
-- [CI integration](ci.md): exit codes, GitHub Actions, SARIF, and rollout.
+- [CI integration](ci.md): exit codes, GitHub Actions, pinned-ref review decisions, SARIF, and rollout.
 - [Repair candidates](remediation.md): rank rechecked tool removals, approval changes
   and explicitly supplied lower ceilings while keeping named tools reachable and search limits visible.
 - [Required workflows](required-workflows.md): screen repairs against caller-authored

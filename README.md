@@ -101,7 +101,7 @@ Review the configuration change together with the reachable behavior it enables.
 ## Put it in CI
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.8.0
+- uses: mrwersa/agentmandate@v0.26.1
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -114,8 +114,9 @@ start. The counterexample renders in the job summary as a graph, and
 annotates the diff. `fail-on: never` reports without blocking, which is how to
 turn this on over an existing repository without stopping everyone on day one.
 
-Details, including why uploading the SARIF is deliberately your step and not
-the action's: [docs/ci.md](docs/ci.md).
+The [CI guide](docs/ci.md) covers SARIF uploads and named review decisions from
+a protected Git ref. Recorded acceptance retains widening findings; reachable
+breaches still block the gate.
 
 **See the whole thing working:**
 [agent-release-gate](https://github.com/mrwersa/agent-release-gate) takes one

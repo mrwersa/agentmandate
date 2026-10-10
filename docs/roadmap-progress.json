@@ -1,0 +1,180 @@
+{
+  "as_of": "2026-10-10",
+  "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
+  "phases": [
+    {
+      "id": "foundation",
+      "title": "0–3 months: authority foundation",
+      "initiatives": [
+        {
+          "title": "Two additional real graphs",
+          "status": "delivered",
+          "evidence": "docs/evidence-metric-review.md",
+          "reason": "The reassessed diversity gate is met; scanner precision remains separate."
+        },
+        {
+          "title": "Canonical authority IR with provenance",
+          "status": "delivered",
+          "evidence": "docs/authority-ir-gate-4-review.md",
+          "reason": "Round-trip, provenance, eligibility and CLI gates are delivered."
+        },
+        {
+          "title": "Dynamic inventory declarations",
+          "status": "delivered",
+          "evidence": "docs/dynamic-inventory-gate-4-review.md",
+          "reason": "Complete and partial provider boundaries remain distinct."
+        },
+        {
+          "title": "Evidence import and alignment: MCP, A2A, OpenAPI, Cedar, Rego",
+          "status": "delivered",
+          "evidence": "docs/catalogue-import.md",
+          "reason": "Scoped foundation measure covers the three inventory formats and Cedar alignment; Rego and accountable application mappings remain open."
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "title": "3–6 months: model real authority",
+      "initiatives": [
+        {
+          "title": "Conditional authority",
+          "status": "delivered",
+          "evidence": "docs/conditional-authority-gate-4-review.md",
+          "reason": "Closed predicates and unresolved-value handling are delivered."
+        },
+        {
+          "title": "Delegation chains and attenuation",
+          "status": "delivered",
+          "evidence": "docs/delegation-gate-4-review.md",
+          "reason": "Ordered identity and attenuation checks are delivered; operational mappings remain scoped."
+        },
+        {
+          "title": "Mandate/session alignment and authority continuity",
+          "status": "delivered",
+          "evidence": "docs/authority-continuity-gate-4-review.md",
+          "reason": "Scoped evidence contract and consumer are delivered; operational continuation is unresolved."
+        },
+        {
+          "title": "Resource relationships and provenance",
+          "status": "blocked",
+          "evidence": "docs/resource-relationship-audit.md",
+          "reason": "No fixed-binding operational counterexample clears the evidence gate."
+        },
+        {
+          "title": "Bounded producers and quantities",
+          "status": "partial",
+          "evidence": "docs/bounded-producer-gate-4-review.md",
+          "reason": "Finite cardinality is delivered; quantity relations lack a reviewed input domain."
+        },
+        {
+          "title": "Reviewed data-flow labels",
+          "status": "blocked",
+          "evidence": "ROADMAP.md",
+          "reason": "A real exfiltration path and annotation study are still required."
+        }
+      ]
+    },
+    {
+      "id": "policy",
+      "title": "6–12 months: policy control-plane preview",
+      "initiatives": [
+        {
+          "title": "Policy validation and effective diff",
+          "status": "partial",
+          "evidence": "docs/cedar-effective-diff-gate-5-review.md",
+          "reason": "Cedar comparisons are delivered; the broader transition and Rego measure remains open."
+        },
+        {
+          "title": "Cedar and Rego exporters",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Concrete target mappings, pinned native validators and decision fixtures are prerequisites."
+        },
+        {
+          "title": "Policy-versus-agent drift",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "The complete deployment inventory, gateway, policy and accrued-state joins are not delivered."
+        },
+        {
+          "title": "Explainable counterfactual remediation",
+          "status": "partial",
+          "evidence": "docs/remediation.md",
+          "reason": "Removal, approval, caller-supplied ceilings and required paths are delivered; broader repair families remain open."
+        },
+        {
+          "title": "Named-review CI workflow",
+          "status": "partial",
+          "evidence": "docs/change-review.md",
+          "reason": "Record eligibility is delivered; authenticated organizational integration and deployment evidence remain open."
+        }
+      ]
+    },
+    {
+      "id": "fleet",
+      "title": "12–18 months: fleet governance",
+      "initiatives": [
+        {
+          "title": "Federated agent and tool inventory",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "No cross-repository inventory index is delivered."
+        },
+        {
+          "title": "Decision and OTel reconciliation",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Trace conversion is a prerequisite, not joined deployment-decision reconciliation."
+        },
+        {
+          "title": "Signed evidence bundles",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "No reviewed key-rotation threat model and external consumer are delivered."
+        },
+        {
+          "title": "Ownership and time-bounded exceptions",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Change-review expiry alone does not deliver portable fleet exception routing."
+        },
+        {
+          "title": "Control evidence mappings",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Domain review and public mapping methodology remain required."
+        }
+      ]
+    },
+    {
+      "id": "advanced",
+      "title": "18–24 months: advanced authority",
+      "initiatives": [
+        {
+          "title": "Cross-agent and cross-session reachability",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Bounded continuity observations do not deliver arbitrary cross-agent search."
+        },
+        {
+          "title": "Temporal, revocable, and transferable capabilities",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Scoped handover checks do not deliver the broader event model."
+        },
+        {
+          "title": "Least-authority synthesis",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "Repair candidates and required paths are prerequisites, not complete Pareto synthesis."
+        },
+        {
+          "title": "Extension interfaces",
+          "status": "not_started",
+          "evidence": "ROADMAP.md",
+          "reason": "External conformance interfaces and plugin security model remain open."
+        }
+      ]
+    }
+  ]
+}
