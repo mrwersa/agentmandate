@@ -58,6 +58,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Pre-1.0 consolidation audit](pre-1.0-consolidation-audit.md): public contracts,
   private compatibility paths, fixture coverage, and the completed baseline
   alongside its historical initial findings.
+- [Current compatibility inventory](current-contract-inventory.md): check Python,
+  CLI and version declarations against pinned fixture bytes and replay coverage.
 
 ## Reviewed evidence attachments
 
