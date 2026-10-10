@@ -1,0 +1,9 @@
+{
+  "scalar_policy_version": 1,
+  "tool": "process_refund",
+  "value_arg": "amount",
+  "unit": "GBP",
+  "limit": 900,
+  "accounting": "completed_plus_reserved",
+  "comparison": "inclusive"
+}

@@ -197,6 +197,28 @@ continue. Keep these results separate from a clean continuity gate.
 continuity baseline and always exits 1: eligible scoped comparison and issuer
 treatment are not a global safe-continuation gate.
 
+The separate [scalar handover](scalar-handover.md) gate checks conformance to
+a closed monetary model at cutover. Supply both reviewed bindings in the
+artifact and map every declared source:
+
+```yaml
+- run: mandate continuity validate handover.json
+- run: >-
+    mandate continuity handover mandate.json handover.json
+    --source evidence/before-policy.json=before-policy.json
+    --source evidence/after-policy.json=after-policy.json
+    --source evidence/review.json=review.json
+    --as-of 2026-10-10T00:00:00Z
+    --json
+```
+
+Exit 0 requires all scalar handover obligations and clean, untruncated manifest
+Authority. It establishes next-request inclusion in the declared model, not
+global provider safe continuation. Eligible violations and unresolved evidence
+exit 1 with complete output; malformed artifacts, locator errors, and I/O
+failures exit 2 with empty stdout. Use the [runnable example](../examples/scalar-handover/README.md)
+to check the positive and negative paths before adopting this narrower gate.
+
 Managed Cedar evidence also separates structural validation from trusted
 consumption. Source roots are explicit; the command reads exactly the locators
 declared by each oracle and refuses paths that escape the root:

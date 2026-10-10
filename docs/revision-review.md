@@ -123,6 +123,11 @@ and remaining evidence requirements are tracked in
 
 ## Compatibility
 
+The separate [scalar handover verifier](scalar-handover.md) can check two
+reviewed bindings, retained state, and complete next-request inclusion for a
+closed integer model at cutover. It does not upgrade this attachment's scoped
+comparisons or resolve its global continuation verdict.
+
 The example round-trips through the strict reader. Fixed
 [eligible](../tests/fixtures/revision-review-result-v1-eligible.json) and
 [expired](../tests/fixtures/revision-review-result-v1-expired.json) CLI results

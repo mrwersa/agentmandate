@@ -1,0 +1,7 @@
+{
+  "notice": "Synthetic example review, bindings and state only. No historical evidence is accepted.",
+  "mandate": "Both bindings select the same synthetic refund mandate and caller role.",
+  "model": "Both synthetic policies are the complete declared scalar admission model for this example. This does not verify live provider policies or signatures.",
+  "state": "One mandate run has completed 600 GBP and reserved 100 GBP for distinct pending operation pending-1. Consumption and that reservation carry to the successor.",
+  "fence": "The example attests that the predecessor is fenced before successor admission and that the successor is the exclusive path. No live coordinator is verified."
+}
