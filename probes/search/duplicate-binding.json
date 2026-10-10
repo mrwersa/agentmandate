@@ -1,0 +1,22 @@
+{
+  "agent": "synthetic-duplicate-binding",
+  "tools": [
+    {
+      "effect": "read",
+      "name": "first",
+      "produces": "scope"
+    },
+    {
+      "effect": "read",
+      "name": "second",
+      "produces": "scope"
+    },
+    {
+      "effect": "read",
+      "name": "read",
+      "requires": [
+        "scope"
+      ]
+    }
+  ]
+}

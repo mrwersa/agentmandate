@@ -1,0 +1,515 @@
+{
+  "agent": "synthetic-deep-chain",
+  "tools": [
+    {
+      "effect": "read",
+      "name": "step_00",
+      "produces": "scope_0",
+      "requires": []
+    },
+    {
+      "effect": "read",
+      "name": "step_01",
+      "produces": "scope_1",
+      "requires": [
+        "scope_0"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_02",
+      "produces": "scope_2",
+      "requires": [
+        "scope_1"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_03",
+      "produces": "scope_3",
+      "requires": [
+        "scope_2"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_04",
+      "produces": "scope_4",
+      "requires": [
+        "scope_3"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_05",
+      "produces": "scope_5",
+      "requires": [
+        "scope_4"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_06",
+      "produces": "scope_6",
+      "requires": [
+        "scope_5"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_07",
+      "produces": "scope_7",
+      "requires": [
+        "scope_6"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_08",
+      "produces": "scope_8",
+      "requires": [
+        "scope_7"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_09",
+      "produces": "scope_9",
+      "requires": [
+        "scope_8"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_10",
+      "produces": "scope_10",
+      "requires": [
+        "scope_9"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_11",
+      "produces": "scope_11",
+      "requires": [
+        "scope_10"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_12",
+      "produces": "scope_12",
+      "requires": [
+        "scope_11"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_13",
+      "produces": "scope_13",
+      "requires": [
+        "scope_12"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_14",
+      "produces": "scope_14",
+      "requires": [
+        "scope_13"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_15",
+      "produces": "scope_15",
+      "requires": [
+        "scope_14"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_16",
+      "produces": "scope_16",
+      "requires": [
+        "scope_15"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_17",
+      "produces": "scope_17",
+      "requires": [
+        "scope_16"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_18",
+      "produces": "scope_18",
+      "requires": [
+        "scope_17"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_19",
+      "produces": "scope_19",
+      "requires": [
+        "scope_18"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_20",
+      "produces": "scope_20",
+      "requires": [
+        "scope_19"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_21",
+      "produces": "scope_21",
+      "requires": [
+        "scope_20"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_22",
+      "produces": "scope_22",
+      "requires": [
+        "scope_21"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_23",
+      "produces": "scope_23",
+      "requires": [
+        "scope_22"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_24",
+      "produces": "scope_24",
+      "requires": [
+        "scope_23"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_25",
+      "produces": "scope_25",
+      "requires": [
+        "scope_24"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_26",
+      "produces": "scope_26",
+      "requires": [
+        "scope_25"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_27",
+      "produces": "scope_27",
+      "requires": [
+        "scope_26"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_28",
+      "produces": "scope_28",
+      "requires": [
+        "scope_27"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_29",
+      "produces": "scope_29",
+      "requires": [
+        "scope_28"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_30",
+      "produces": "scope_30",
+      "requires": [
+        "scope_29"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_31",
+      "produces": "scope_31",
+      "requires": [
+        "scope_30"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_32",
+      "produces": "scope_32",
+      "requires": [
+        "scope_31"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_33",
+      "produces": "scope_33",
+      "requires": [
+        "scope_32"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_34",
+      "produces": "scope_34",
+      "requires": [
+        "scope_33"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_35",
+      "produces": "scope_35",
+      "requires": [
+        "scope_34"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_36",
+      "produces": "scope_36",
+      "requires": [
+        "scope_35"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_37",
+      "produces": "scope_37",
+      "requires": [
+        "scope_36"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_38",
+      "produces": "scope_38",
+      "requires": [
+        "scope_37"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_39",
+      "produces": "scope_39",
+      "requires": [
+        "scope_38"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_40",
+      "produces": "scope_40",
+      "requires": [
+        "scope_39"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_41",
+      "produces": "scope_41",
+      "requires": [
+        "scope_40"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_42",
+      "produces": "scope_42",
+      "requires": [
+        "scope_41"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_43",
+      "produces": "scope_43",
+      "requires": [
+        "scope_42"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_44",
+      "produces": "scope_44",
+      "requires": [
+        "scope_43"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_45",
+      "produces": "scope_45",
+      "requires": [
+        "scope_44"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_46",
+      "produces": "scope_46",
+      "requires": [
+        "scope_45"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_47",
+      "produces": "scope_47",
+      "requires": [
+        "scope_46"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_48",
+      "produces": "scope_48",
+      "requires": [
+        "scope_47"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_49",
+      "produces": "scope_49",
+      "requires": [
+        "scope_48"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_50",
+      "produces": "scope_50",
+      "requires": [
+        "scope_49"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_51",
+      "produces": "scope_51",
+      "requires": [
+        "scope_50"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_52",
+      "produces": "scope_52",
+      "requires": [
+        "scope_51"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_53",
+      "produces": "scope_53",
+      "requires": [
+        "scope_52"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_54",
+      "produces": "scope_54",
+      "requires": [
+        "scope_53"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_55",
+      "produces": "scope_55",
+      "requires": [
+        "scope_54"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_56",
+      "produces": "scope_56",
+      "requires": [
+        "scope_55"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_57",
+      "produces": "scope_57",
+      "requires": [
+        "scope_56"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_58",
+      "produces": "scope_58",
+      "requires": [
+        "scope_57"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_59",
+      "produces": "scope_59",
+      "requires": [
+        "scope_58"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_60",
+      "produces": "scope_60",
+      "requires": [
+        "scope_59"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_61",
+      "produces": "scope_61",
+      "requires": [
+        "scope_60"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_62",
+      "produces": "scope_62",
+      "requires": [
+        "scope_61"
+      ]
+    },
+    {
+      "effect": "read",
+      "name": "step_63",
+      "produces": "scope_63",
+      "requires": [
+        "scope_62"
+      ]
+    }
+  ]
+}

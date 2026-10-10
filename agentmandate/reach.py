@@ -129,7 +129,7 @@ class _ReachTrace:
         return next((path for name, path in self.reachable_paths if name == tool), None)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class _State:
     """Bindings held and value already spent, canonicalised for memoisation."""
 
@@ -225,11 +225,30 @@ def _best_binding(tool: Tool, state: _State) -> tuple[int, Decimal] | None:
     return best
 
 
+@dataclass(frozen=True, slots=True, eq=False)
+class _SearchNode:
+    """Share path prefixes without storing a full tuple in every queue entry."""
+
+    state: _State
+    parent: _SearchNode | None = None
+    step: Step | None = None
+    depth: int = 0
+
+    def path(self) -> tuple[Step, ...]:
+        steps = []
+        node = self
+        while node.step is not None:
+            steps.append(node.step)
+            node = node.parent  # type: ignore[assignment]
+        return tuple(reversed(steps))
+
+
 def _analyse_with_trace(
     mandate: Mandate,
     depth: int | None = None,
     *,
     producer_caps: Mapping[str, int] | None = None,
+    _metrics: dict[str, int] | None = None,
 ) -> tuple[Authority, _ReachTrace]:
     """Walk the graph and retain shortest enabling paths for provenance.
 
@@ -254,15 +273,28 @@ def _analyse_with_trace(
 
     start = _State()
     seen: set[_State] = {start}
-    queue: deque[tuple[_State, tuple[Step, ...]]] = deque([(start, ())])
+    queue: deque[_SearchNode] = deque([_SearchNode(start)])
+    if _metrics is not None:
+        _metrics.update(
+            states_discovered=1, states_expanded=0, tool_checks=0,
+            generated_transitions=0, duplicate_transitions=0,
+            frontier_peak=1, depth_cutoffs=0,
+        )
 
     while queue:
-        state, path = queue.popleft()
-        if len(path) >= limit:
+        node = queue.popleft()
+        state = node.state
+        if node.depth >= limit:
             truncated = True
+            if _metrics is not None:
+                _metrics["depth_cutoffs"] += 1
             continue
+        if _metrics is not None:
+            _metrics["states_expanded"] += 1
 
         for tool in mandate.tools:
+            if _metrics is not None:
+                _metrics["tool_checks"] += 1
             if not _enabled(tool, state):
                 continue
             producer_cap = bounded_producers.get(tool.name)
@@ -296,9 +328,9 @@ def _analyse_with_trace(
                             kind="ungated_effect",
                             detail=(
                                 f"{tool.name} is irreversible and needs no approval, "
-                                f"reachable in {len(path) + 1} call(s)"
+                                f"reachable in {node.depth + 1} call(s)"
                             ),
-                            path=path + (Step(tool=tool.name),),
+                            path=node.path() + (Step(tool=tool.name),),
                         )
                     )
             if tool.principal == "service":
@@ -341,9 +373,8 @@ def _analyse_with_trace(
                 spent=step_spent,
                 currency=step_currency,
             )
-            next_path = path + (step,)
             if first_reach:
-                reachable_paths[tool.name] = next_path
+                reachable_paths[tool.name] = node.path() + (step,)
 
             if not progressed:
                 # A pure read that changes nothing. It is reachable, which is
@@ -351,9 +382,15 @@ def _analyse_with_trace(
                 # search without reaching a state the walk cannot already hit.
                 continue
 
+            if _metrics is not None:
+                _metrics["generated_transitions"] += 1
             if next_state in seen:
+                if _metrics is not None:
+                    _metrics["duplicate_transitions"] += 1
                 continue
             seen.add(next_state)
+            if _metrics is not None:
+                _metrics["states_discovered"] += 1
 
             running = next_state.total
             max_total = max(max_total, running)
@@ -370,7 +407,7 @@ def _analyse_with_trace(
                             f"cumulative value {running} {total_cap.currency} "
                             f"exceeds limit {total_cap.amount} {total_cap.currency}"
                         ),
-                        path=next_path,
+                        path=node.path() + (step,),
                     )
                 )
 
@@ -392,12 +429,14 @@ def _analyse_with_trace(
                                 f"{tool.effect} calls reach {made}, above the "
                                 f"declared budget of {cap} in one run"
                             ),
-                            path=next_path,
+                            path=node.path() + (step,),
                             subject=tool.effect,
                         )
                     )
 
-            queue.append((next_state, next_path))
+            queue.append(_SearchNode(next_state, node, step, node.depth + 1))
+            if _metrics is not None:
+                _metrics["frontier_peak"] = max(_metrics["frontier_peak"], len(queue))
 
     currency = total_cap.currency if total_cap else _sole_currency(mandate)
     authority = Authority(

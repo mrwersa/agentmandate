@@ -1,0 +1,35 @@
+{
+  "agent": "synthetic-wide-mint",
+  "tools": [
+    {
+      "effect": "read",
+      "name": "mint_0",
+      "produces": "scope_0",
+      "unbounded": true
+    },
+    {
+      "effect": "read",
+      "name": "mint_1",
+      "produces": "scope_1",
+      "unbounded": true
+    },
+    {
+      "effect": "read",
+      "name": "mint_2",
+      "produces": "scope_2",
+      "unbounded": true
+    },
+    {
+      "effect": "read",
+      "name": "mint_3",
+      "produces": "scope_3",
+      "unbounded": true
+    },
+    {
+      "effect": "read",
+      "name": "mint_4",
+      "produces": "scope_4",
+      "unbounded": true
+    }
+  ]
+}

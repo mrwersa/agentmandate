@@ -1,0 +1,402 @@
+{
+  "baseline_ref": "557f28460493cc8a3e589c6df568d5211bb6fc1e",
+  "baseline_source_sha256": "ef920d7c0b954d09635841b4bf5d6d4e053f2b40447e10da6be5955d16536bcb",
+  "cases": [
+    {
+      "authority_sha256": "5cb35c0332c7d952e681ee6da5ad2fb990d48f1da7cf4444a51979372fb9f21a",
+      "depth": 1,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "72377bcb3e6bf619ecfb6b3791bad291b560ebf13173508a16acc6176df85251",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "837b74db210b7808df99dd2286cad59c21beb5199c8e16d577b05c049f38cfa9",
+      "depth": 2,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "0410af6edc6e5701f0fb1b4ff48d1986598e54098b802697d4a1a6b1092efef3",
+      "depth": 4,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "48d7bbf560476fcb927fa434bc71dbc9056eeeae068cc338d3b25a3583147f31",
+      "depth": 8,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "8cf9322799d7f4f27d92d8f79c1ae97545c5395b3023a7aa9e28068a0729c86c",
+      "depth": 12,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "99b5c3ec7d519c3fdee17be9a15664e76a26a06dda2344709109dcfac6d9bb61",
+      "depth": 1,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "373afd003114b1176ab2c8df21e071571225324588b2ff5176f855b646555df8",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "1b9441896be3129ee663b7cc12e8c0147c767055db70ddd01b01e256cec89df0",
+      "depth": 2,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "f85f36e4ddabcd3a500ce6167c306764342d96363ce9bb704fef6ef255ea9fd9",
+      "depth": 4,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "7c1fda480f4733ed27642fd7d243ca5b4fca3f642eff30a877fdd80003d4c41d",
+      "depth": 8,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "a238f6242c2638f9491d75637936d915934b0d5424bbd7e106c455378f0faa17",
+      "depth": 12,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "fbdb02654b26cd87c391cb9bb0e003d1288c95337374e9a9db8354d97a8149bb",
+      "depth": 1,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "cec2eb955bd87496d65da707625ff63c1af5b3534d6e2bae29b88dd3a2ce7ea8",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "20aa5cf5de0e2d8953f302211562645776605ade761cd08e76656258dfedb3a5",
+      "depth": 2,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "f9e46c7fbc4dec28df56aa298ef9be0bf281cdc3e127d5f8d19fba2aee87ab6e",
+      "depth": 4,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "9c78ba89033bf551d3e8e101b13c975aa82de8c1647698515d1aae8a244c4aa1",
+      "depth": 8,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "811f275a71de9f64dc0a1a869c46d94f3a026f89f359480164aeef94d0b5e804",
+      "depth": 12,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "c9e39ecc9c28ec4a6bcfb516fd7a1dffdd87604da6c6c28ad72f4d4d01085815",
+      "depth": 1,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "a9641fa26e3c28a7463484546971a96f4ba6d6a129a0f9f751fcaf24bcdd4e00",
+      "depth": 2,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "d2476027c70a3f0d944d0af0fc4d2d1dbe12a87a4bd57f3b3fa7e0ff05d1edb2",
+      "depth": 4,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "ac75a803f1149300ba428f8d49e95a33ae9d6b339eec8698b6a9bf1c05d5946f",
+      "depth": 8,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "9c3e4649a68206380100838de80700e42f2c2f6b6273e9a178e2134f8009dcc6",
+      "depth": 12,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "3b54bcb6ef6e486f8fc6fa3820d41269e3ff8005bf6fda4141ec0ee951b0e84e",
+      "depth": 1,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "831eefdc7755dfae99547b663099ae010b00929052176694ce0eaa7b12b1e078",
+      "depth": 2,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "aefc98502b78b87b459f9864c2739ac00f69e935051f29013dd447625e0db15e",
+      "depth": 4,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "5a398b86be0d6a522f735bfb6d1e5e6db3f1eac1f2631b5119561e5f5bc799bf",
+      "depth": 8,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "085d2eaa3f6228cfe08ef95ffcf1ef6173c45b9485fa9965cd88be38fa474255",
+      "depth": 12,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "ce8bec6ec5e8cd735748d0572aca46ad0e5585e90bb79b5482075d39675bb295",
+      "depth": 12,
+      "input_sha256": "05d9e7ec17e97b284b256a779077e5dd8da51c404d685b70363b1006b0cbe337",
+      "kind": "synthetic-stress",
+      "name": "wide-mint",
+      "path": "probes/search/wide-mint.json",
+      "producer_caps": null,
+      "trace_sha256": "d70eaf7f750d9fe7c6413577af67e1f1663afeaa9f265bda7516400987b2f941",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "c3836c7654f83741c296beca04438d5093981ea481feafc4bf536312c6959553",
+      "depth": 64,
+      "input_sha256": "300999b8711dc4b82c3947acf900a5451ae83f93b3ee913738f9543767e7699c",
+      "kind": "synthetic-stress",
+      "name": "deep-chain",
+      "path": "probes/search/deep-chain.json",
+      "producer_caps": null,
+      "trace_sha256": "7d26ff9d0eb13bb016162a36a7c658acbbc2a41e20ca80115602dc863b0a38fc",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "e2e16287218cbe389a57d33936bee346dc4a3dfbdc6a72f948aac7d792993d00",
+      "depth": 8,
+      "input_sha256": "d91a3c2cbf886c198d2ac070634f7b21de8322fea64132cd70a8bb051112c91f",
+      "kind": "synthetic-stress",
+      "name": "duplicate-binding",
+      "path": "probes/search/duplicate-binding.json",
+      "producer_caps": null,
+      "trace_sha256": "c4a31643685ad6b431904d3286b2b74dbda36f1b4e32353916e0b373cbb089f0",
+      "truncated": false,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "1debff0194cfee1be71379f9a817c9555005ca8c95f1628cbeed0822fa84c179",
+      "depth": 8,
+      "input_sha256": "f8063a3a9cfbc844cac5f0fc8783334c8eea291c97e8b2f6b726135a56c8b1e4",
+      "kind": "synthetic-stress",
+      "name": "pure-read",
+      "path": "probes/search/pure-read.json",
+      "producer_caps": null,
+      "trace_sha256": "0e23f5498c1bd2ba750c91367339bf55f166f2e76f7bdeb5e4feb1c94078f333",
+      "truncated": false,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "25a17b17e21511e1e95959f19eff25ab8beb4cd9899ff35523d9955d7c57e01a",
+      "depth": 12,
+      "input_sha256": "05d9e7ec17e97b284b256a779077e5dd8da51c404d685b70363b1006b0cbe337",
+      "kind": "synthetic-stress",
+      "name": "wide-mint-capped",
+      "path": "probes/search/wide-mint.json",
+      "producer_caps": {
+        "mint_0": 2,
+        "mint_1": 2,
+        "mint_2": 2,
+        "mint_3": 2,
+        "mint_4": 2
+      },
+      "trace_sha256": "d70eaf7f750d9fe7c6413577af67e1f1663afeaa9f265bda7516400987b2f941",
+      "truncated": false,
+      "witness_lengths": []
+    }
+  ]
+}

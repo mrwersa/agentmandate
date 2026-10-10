@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.21.1 - 2026-10-10
+
+### Changed
+
+- Reduce reachability-search allocation by sharing frontier path prefixes and
+  storing private immutable states without per-instance dictionaries. Public
+  Authority results, shortest counterexamples, enabling paths, CLI flags, and
+  artifact schemas are unchanged.
+- Add repository-only work counters, a reproducible five-graph search study,
+  synthetic stress cases, and pinned pre-change Authority/provenance checks.
+  The search bounds guide explains depth cutoffs, conservative state-space
+  bounds, memory costs, and the absence of a hard time or memory ceiling.
+
 ## 0.21.0 - 2026-10-10
 
 ### Added

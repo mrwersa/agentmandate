@@ -95,6 +95,12 @@ depth 8 is not proof that none exists at depth 20, and the report says so when
 it truncated. Claiming otherwise would require a completeness argument this
 model does not support.
 
+The [search bounds and performance guide](docs/search-performance.md) derives
+conservative state-space and storage bounds, measures the five real graphs,
+and explains the difference between a call-depth bound and a process resource
+limit. The kernel retains private immutable states and shared path prefixes;
+shortest witnesses and public Authority output remain unchanged.
+
 ### Reachability is existential
 
 A reachable path means there is **some** permitted sequence and some consistent
