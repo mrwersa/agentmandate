@@ -16,6 +16,7 @@ guarantee.
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
+| Preserve required ordered calls during repair | [Required workflows](required-workflows.md) |
 | Check recorded calls against a mandate | [Trace verification](traces.md) |
 | Turn reachable authority into tests | [Evaluation loop](evaluation-loop.md) |
 | Inspect cross-session consumed state | [Refund example](../examples/continuity-refund/README.md) |
@@ -38,6 +39,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [CI integration](ci.md): exit codes, GitHub Actions, SARIF, and rollout.
 - [Repair candidates](remediation.md): rank rechecked tool removals, approval changes
   and explicitly supplied lower ceilings while keeping named tools reachable and search limits visible.
+- [Required workflows](required-workflows.md): screen repairs against caller-authored
+  ordered paths, without treating model conformance as business success.
 - [Runtime trace verification](traces.md): replay JSON Lines or OpenTelemetry
   evidence against a mandate.
 - [Test obligations](test-obligations.md) and the

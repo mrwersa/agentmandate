@@ -1,0 +1,27 @@
+{
+  "agent": "dispute-resolver",
+  "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9",
+  "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+  "reviewer": "synthetic-example-reviewer",
+  "schema": "agentmandate.required-workflows/v1",
+  "workflows": [
+    {
+      "name": "normal-refund",
+      "steps": [
+        {
+          "approved": false,
+          "principal": "caller",
+          "tool": "search_cases"
+        },
+        {
+          "approved": true,
+          "binding": 0,
+          "currency": "GBP",
+          "principal": "caller",
+          "tool": "issue_refund",
+          "value": "100"
+        }
+      ]
+    }
+  ]
+}

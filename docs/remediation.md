@@ -29,8 +29,9 @@ For machine-readable results:
 mandate remediate examples/dispute-resolver-v2.yaml --keep-tool issue_refund --json
 ```
 
-Without ceiling options, the result uses `agentmandate.remediation/v1`. Supplying
-`--ceiling` selects `agentmandate.remediation/v2`; see the [compatibility rules
+Without ceiling or workflow options, the result uses `agentmandate.remediation/v1`.
+Supplying `--ceiling` selects `agentmandate.remediation/v2`; supplying
+`--required-workflows` selects v3. See the [compatibility rules
 below](#compatibility-and-remaining-scope). `input.manifest_sha256` identifies the exact
 source bytes. `baseline` is the unchanged Authority result at the selected depth;
 `baseline_lint` keeps the separate single-manifest findings. Each candidate includes
@@ -80,8 +81,29 @@ the ungated-effect finding. The joint candidate clears both within four calls wh
 retaining both tools. Its [supplied normal
 trace](../examples/remediation/normal-refund.jsonl) replays conformantly after the
 edits; that check covers the recorded calls, not live execution, producer lineage, or
-business success. The search does not consume or automatically preserve positive
-scenarios.
+business success. The trace itself does not become a requirement; the explicit
+workflow input below supplies separate positive constraints.
+
+## Preserve a required ordered path
+
+`--keep-tool` preserves reachability. To require a normal £100 refund rather
+than merely a callable refund tool, supply a reviewed path explicitly:
+
+```bash
+mandate remediate examples/dispute-resolver-v2.yaml --ceiling issue_refund=0 --ceiling issue_refund=50 --ceiling issue_refund=125 --required-workflows examples/remediation/required-refund.json
+```
+
+The zero and £50 ceilings are screened out for breaking the supplied refund.
+Removing search or refund also fails that requirement. Passing candidates keep
+all supplied paths conformant within manifest v1 and still undergo the full
+bounded breach check. Rejection records name the workflow, step and failure;
+requirements never replace the original Authority result or its exit.
+
+This selects the opt-in v3 presentation. The [workflow guide](required-workflows.md)
+defines the strict source-bound format, cumulative and program-order checks,
+and the boundary between model conformance and business success. Requirements
+are authored intent, not observations inferred from a trace. The earlier
+synthetic trace remains a separate conformance illustration.
 
 ## Choose what the search may change
 
@@ -93,6 +115,7 @@ scenarios.
 | `--max-candidates` | 5 | Maximum ranked candidates returned |
 | `--keep-tool NAME` | None | Preserve this tool's reachability at the selected depth; repeat as needed |
 | `--ceiling TOOL=AMOUNT` | None | Include this strictly lower monetary ceiling; repeat for other tools or alternatives |
+| `--required-workflows FILE` | None | Preserve explicitly supplied ordered paths bound to the original manifest bytes |
 
 A kept tool must exist and be reachable in the baseline. Reachability does not establish
 that a required business scenario still succeeds. Check those scenarios separately
@@ -194,7 +217,7 @@ treating a candidate as a clean overall policy.
 
 ## Compatibility and remaining scope
 
-The CLI and v1/v2 JSON presentations are public; `_remediation` Python records are
+The CLI and v1/v2/v3 JSON presentations are public; `_remediation` Python records are
 private. Results are not accepted as authority inputs. The four initial [result
 fixtures](../tests/fixtures/remediation-kept-v1.json) cover breached, kept-tool,
 enumeration-limited, and clean runs; these are v1 baselines, not migrations from an
@@ -225,8 +248,9 @@ clean under an irrelevant irreversible budget, retaining its separate service-pr
 lint finding.
 
 Automatic ceiling selection, effect-budget repairs beyond removal, conditions,
-delegation changes, reviewed positive obligations, and business-scenario preservation
-remain outside this slice. Total and effect limits are properties the analyzer checks,
+delegation changes, application execution and business-scenario success remain outside
+this slice. Ordered positive paths are checked only within manifest v1. Total
+and effect limits are properties the analyzer checks,
 so making those declarations stricter is not a mechanism that stops calls. Even a zero
 monetary ceiling does not erase a budgeted effect. Evidence attachments, IR, runtime
 continuity, and source inventory are not composed with this command. Unsupported flags

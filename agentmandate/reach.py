@@ -278,22 +278,27 @@ def _analyse_with_trace(
     # and reserve enough carry digits for at most `limit` additions. Search
     # arithmetic must not inherit a caller's precision, exponent range or traps.
     amounts = [t.ceiling.amount for t in mandate.tools if t.ceiling and t.ceiling.amount]
-    width = (
-        max(a.adjusted() for a in amounts) - min(a.as_tuple().exponent for a in amounts) + 1
-        if amounts else 1
-    )
     try:
-        context = Context(
-            prec=max(28, width + limit.bit_length()), Emax=MAX_EMAX, Emin=MIN_EMIN,
-            rounding=ROUND_HALF_EVEN, clamp=0,
-            traps=[InvalidOperation, DivisionByZero, Overflow, Inexact],
-        )
-        with localcontext(context):
+        with localcontext(_arithmetic_context(amounts, limit)):
             return _walk(mandate, limit, producer_caps=producer_caps, _metrics=_metrics)
     except (DecimalException, ValueError) as exc:
         raise _SearchArithmeticError(
             "reachability amounts exceed supported exact decimal arithmetic"
         ) from exc
+
+
+def _arithmetic_context(amounts: list[Decimal], calls: int) -> Context:
+    """Exact accumulation for at most `calls` amounts; no caller-context inheritance."""
+    nonzero = [amount for amount in amounts if amount]
+    width = (
+        max(a.adjusted() for a in nonzero) - min(a.as_tuple().exponent for a in nonzero) + 1
+        if nonzero else 1
+    )
+    return Context(
+        prec=max(28, width + calls.bit_length()), Emax=MAX_EMAX, Emin=MIN_EMIN,
+        rounding=ROUND_HALF_EVEN, clamp=0,
+        traps=[InvalidOperation, DivisionByZero, Overflow, Inexact],
+    )
 
 
 def _walk(

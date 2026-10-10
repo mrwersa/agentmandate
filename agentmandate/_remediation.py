@@ -8,12 +8,14 @@ from itertools import chain, combinations, islice
 from math import comb
 from typing import Any
 
+from ._required_workflows import _Requirements
 from .lint import Finding, check
 from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Money
 from .reach import analyse
 
 REMEDIATION_SCHEMA = "agentmandate.remediation/v1"
 CEILING_REMEDIATION_SCHEMA = "agentmandate.remediation/v2"
+WORKFLOW_REMEDIATION_SCHEMA = "agentmandate.remediation/v3"
 _STRUCTURAL_RULES = {
     "scope.missing-producer",
     "ceiling.unbound-scope",
@@ -122,6 +124,7 @@ def plan(
     max_candidates: int = 5,
     keep_tools: tuple[str, ...] = (),
     ceiling_options: tuple[str, ...] = (),
+    required_workflows: _Requirements | None = None,
 ) -> dict[str, Any]:
     """Enumerate edits, recheck the full graph, and rank scoped candidates.
 
@@ -162,6 +165,17 @@ def plan(
         "status": "no_reachable_breach_within_bound",
         "candidates": [],
     }
+    if required_workflows is not None:
+        assessments = required_workflows.assess(mandate, baseline.depth)
+        invalid = next((row for row in assessments if row["failure"] is not None), None)
+        if invalid is not None:
+            failure = invalid["failure"]
+            raise ValueError(f"required workflow {invalid['name']!r} is invalid in the baseline: "
+                             f"step {failure['step']} {failure['rule']}: {failure['detail']}")
+        report["schema"] = WORKFLOW_REMEDIATION_SCHEMA
+        report["requirements"] = {**required_workflows.metadata(), "baseline": assessments}
+        report["requirement_rejections"] = []
+        report["search"]["required_workflow_rejections"] = 0
     if ceiling_edits:
         report["ceiling_options"] = [
             {"tool": edit.tool, "ceiling": _money(edit.ceiling)} for edit in ceiling_edits
@@ -196,31 +210,42 @@ def plan(
         lint = check(candidate)
         if _structural(lint):
             continue  # Losing a producer must not manufacture a clean graph.
+        assessments = []
+        if required_workflows is not None:
+            assessments = required_workflows.assess(candidate, baseline.depth)
+            if any(row["failure"] is not None for row in assessments):
+                search["required_workflow_rejections"] += 1
+                report["requirement_rejections"].append({
+                    "edits": [_edit_record(mandate, edit) for edit in edits],
+                    "stage": "required_workflow_screen", "assessments": assessments,
+                })
+                continue
         authority = analyse(candidate, depth=baseline.depth)
         search["candidates_analyzed"] += 1
         if authority.breaches or set(keep_tools) - authority.reachable_tools:
             continue
         removed = sorted(set(mandate.tool_names) - set(candidate.tool_names))
-        candidates.append(
-            {
-                "status": "no_reachable_breach_within_bound",
-                "edits": [_edit_record(mandate, edit) for edit in edits],
-                "impact": {
-                    "edit_count": len(edits),
-                    "lost_reachable_tools": sorted(
-                        baseline.reachable_tools - authority.reachable_tools
-                    ),
-                    "removed_role_members": {
-                        role: sorted(set(members) & set(removed))
-                        for role, members in mandate.roles.items()
-                        if set(members) & set(removed)
-                    },
+        record = {
+            "status": "no_reachable_breach_within_bound",
+            "edits": [_edit_record(mandate, edit) for edit in edits],
+            "impact": {
+                "edit_count": len(edits),
+                "lost_reachable_tools": sorted(
+                    baseline.reachable_tools - authority.reachable_tools
+                ),
+                "removed_role_members": {
+                    role: sorted(set(members) & set(removed))
+                    for role, members in mandate.roles.items()
+                    if set(members) & set(removed)
                 },
-                "authority": authority.as_dict(),
-                "lint": [asdict(f) for f in lint],
-                "manifest": _manifest(candidate),
-            }
-        )
+            },
+            "authority": authority.as_dict(),
+            "lint": [asdict(f) for f in lint],
+            "manifest": _manifest(candidate),
+        }
+        if required_workflows is not None:
+            record["required_workflows"] = assessments
+        candidates.append(record)
     effect_ranks = {tool.name: EFFECT_RANK[tool.effect] for tool in mandate.tools}
     candidates.sort(
         key=lambda c: (

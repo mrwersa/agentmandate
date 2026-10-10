@@ -1,0 +1,80 @@
+{
+  "argv": [
+    "remediate",
+    "examples/dispute-resolver-v2.yaml",
+    "--depth",
+    "2",
+    "--required-workflows",
+    "examples/remediation/required-refund.json",
+    "--json"
+  ],
+  "exit": 0,
+  "result": {
+    "baseline": {
+      "breaches": [],
+      "depth": 2,
+      "effects": [
+        [
+          "irreversible",
+          "case"
+        ],
+        [
+          "read",
+          "case"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "500",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "fetch_case",
+        "issue_refund",
+        "open_case",
+        "search_cases"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [],
+    "input": {
+      "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "keep_tools": [],
+    "requirement_rejections": [],
+    "requirements": {
+      "agent": "dispute-resolver",
+      "baseline": [
+        {
+          "failure": null,
+          "name": "normal-refund",
+          "status": "conformant_within_manifest_model",
+          "steps": 2
+        }
+      ],
+      "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9",
+      "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+      "reviewer": "synthetic-example-reviewer",
+      "schema": "agentmandate.required-workflows/v1",
+      "scope": "caller-supplied annotations; manifest-v1 model only, not business success",
+      "source_sha256": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1"
+    },
+    "schema": "agentmandate.remediation/v3",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 0,
+      "candidates_found": 0,
+      "combinations_examined": 0,
+      "combinations_total": 0,
+      "depth": 2,
+      "enumeration_complete": null,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128,
+      "required_workflow_rejections": 0
+    },
+    "status": "no_reachable_breach_within_bound"
+  }
+}

@@ -23,7 +23,9 @@ def test_current_inventory_matches_all_pinned_surfaces():
 def test_remediation_addition_preserves_every_previous_contract_and_fixture():
     path = ROOT / "tests/fixtures/current-contract-inventory-v0.22.json"
     previous = json.loads(path.read_text())
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.23.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) - set(previous["cli"]) == {"mandate remediate"}
     for path, command in previous["cli"].items():
@@ -228,7 +230,9 @@ def test_ceiling_remediation_addition_preserves_the_preceding_inventory():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.23.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.24.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) == set(previous["cli"])
     for path, command in previous["cli"].items():
@@ -245,6 +249,35 @@ def test_ceiling_remediation_addition_preserves_the_preceding_inventory():
                 "agentmandate.remediation/v2"
             )
             present["schemas"].remove("agentmandate.remediation/v2")
+        assert present == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_required_workflow_addition_preserves_every_prior_contract_and_fixture():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.24.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) == set(previous["cli"])
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate remediate":
+            added = [a for a in present["arguments"] if a["dest"] == "required_workflows"]
+            assert len(added) == 1 and added[0]["options"] == ["--required-workflows"]
+            present["arguments"].remove(added[0])
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_required_workflows.py",
+    }
+    for path, markers in previous["artifact_markers"].items():
+        present = copy.deepcopy(current["artifact_markers"][path])
+        if path == "_remediation.py":
+            assert present["constants"].pop("WORKFLOW_REMEDIATION_SCHEMA") == (
+                "agentmandate.remediation/v3"
+            )
+            present["schemas"].remove("agentmandate.remediation/v3")
         assert present == markers
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

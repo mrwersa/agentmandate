@@ -38,6 +38,19 @@ are offline synthetic checks, not evidence of a live deployment or business
 success. Trace conformance does not verify producer lineage or execution of
 the whole application, and remediation does not consume the trace.
 
+To preserve those calls during candidate generation, supply the separate
+[required path](required-joint.json):
+
+```bash
+mandate remediate examples/remediation/ungated-refund.json --keep-tool seed --keep-tool pay --ceiling pay=0 --ceiling pay=2 --required-workflows examples/remediation/required-joint.json
+```
+
+The zero ceiling is rejected. Approval plus a £2 ceiling retains both supplied
+£1 payments within the manifest model. The command still exits 1 for the
+original findings. The [workflow guide](../../docs/required-workflows.md) explains
+how to author source-bound requirements and read the scoped v3 result. These
+requirements are caller-authored intent, separate from the trace above.
+
 The candidate remains truncated: a third fresh item can exceed the run total
 at depth six. A lower tool ceiling and an approval requirement do not enforce
 the total at runtime. The source example and its total limit stay unchanged.

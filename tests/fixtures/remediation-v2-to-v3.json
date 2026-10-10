@@ -1,0 +1,13 @@
+{
+  "after": "tests/fixtures/remediation-workflow-compatibility-v3.json",
+  "before": "tests/fixtures/remediation-ceiling-kept-v2.json",
+  "preserved_fields": [
+    "scope",
+    "baseline",
+    "baseline_lint",
+    "input",
+    "keep_tools",
+    "ceiling_options"
+  ],
+  "selection": "supplying --required-workflows opts into v3; omitting it preserves v1/v2"
+}
