@@ -14,6 +14,12 @@ principal and session axes. Optional [reviewed shared accounting](principal-acco
 can compare observed completed spend against one mandate budget; it leaves
 state continuity and safe continuation unresolved.
 
+For two reviewed bindings and explicit cutover state, the separate
+[scalar handover verifier](scalar-handover.md) checks retained consumption,
+pending reservations, fencing, and next-request capacity in a closed monetary
+model. Its model-conformance result does not replace the provider continuity
+verdict below.
+
 ## Question and invariant
 
 The first consumer answers one narrow question:

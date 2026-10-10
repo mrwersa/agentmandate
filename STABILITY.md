@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.20.0
+agentmandate~=0.21.0
 ```
 
 ## Versioned authority artifacts
@@ -138,6 +138,17 @@ an explicit scope. It never promotes these scoped claims to global safe
 continuation and always exits 1. Existing commands without review input keep
 their result bytes and exit behavior. The [contract and initial fixtures](docs/revision-review.md)
 cover this new surface; no historical acceptance or binding is inferred.
+
+`mandate continuity handover` consumes the separate strict
+`scalar_handover_version: 1` artifact and closed `scalar_policy_version: 1`
+policy captures. Its `agentmandate.scalar-handover/v1` result proves only
+conformance to the declared scalar handover at cutover. Exit 0 also requires
+clean, untruncated manifest Authority; it does not establish global provider
+safe continuation. Eligible contradictions and unresolved evidence exit 1;
+malformed artifacts, locator errors, and I/O failures exit 2. Existing
+reconciliation results are unchanged. The [contract](docs/scalar-handover.md)
+and initial retained/reset/expired fixtures extend the compatibility inventory;
+they do not record a migration or complete the repository-wide audit.
 
 ## What is most likely to change
 

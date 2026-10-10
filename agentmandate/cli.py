@@ -67,6 +67,7 @@ from ._producer import (
     analyse_producers,
 )
 from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
+from ._scalar_handover import ScalarHandover, analyse_scalar_handover, render_scalar_handover
 from .diff import compare
 from .drift import compare as compare_drift
 from .findings import render_sarif, to_mermaid
@@ -350,6 +351,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate one continuity artifact without trusting its evidence",
     )
     continuity_validate.add_argument("artifact", help="path to one continuity artifact")
+    handover_parser = continuity_subparsers.add_parser(
+        "handover",
+        help="verify retained state for a declared scalar handover",
+    )
+    _add_manifest(handover_parser)
+    handover_parser.add_argument("artifact", help="path to one scalar handover")
+    handover_parser.add_argument("--source", action="append", metavar="LOCATOR=CAPTURE")
+    handover_parser.add_argument("--as-of", required=True, metavar="UTC_TIMESTAMP")
+    handover_parser.add_argument("--depth", type=_positive_int, default=None)
+    handover_parser.add_argument("--json", action="store_true")
     continuity_reconcile = continuity_subparsers.add_parser(
         "reconcile",
         help="reconcile reviewed lifecycle transitions with manifest authority",
@@ -742,7 +753,7 @@ def _continuity_artifact(
     text: str,
 ) -> (
     ContinuityBinding | AgentCoreContinuity | AnthropicContinuity
-    | PrincipalContinuity | PrincipalAccountingBinding | RevisionReview
+    | PrincipalContinuity | PrincipalAccountingBinding | RevisionReview | ScalarHandover
 ):
     try:
         raw = json.loads(text)
@@ -757,6 +768,7 @@ def _continuity_artifact(
         "principal_continuity_version": PrincipalContinuity,
         "principal_accounting_binding_version": PrincipalAccountingBinding,
         "revision_review_version": RevisionReview,
+        "scalar_handover_version": ScalarHandover,
     }
     matches = [reader for field, reader in readers.items() if field in raw]
     if len(matches) != 1:
@@ -766,14 +778,14 @@ def _continuity_artifact(
     return matches[0].from_json(text)
 
 
-def _continuity_timestamp(value: str) -> datetime:
+def _continuity_timestamp(value: str, *, flag: str = "--continuity-as-of") -> datetime:
     try:
         parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(
             tzinfo=timezone.utc
         )
     except ValueError as exc:
         raise ContinuityFormatError(
-            "--continuity-as-of must be YYYY-MM-DDTHH:MM:SSZ"
+            f"{flag} must be YYYY-MM-DDTHH:MM:SSZ"
         ) from exc
     return parsed
 
@@ -859,9 +871,31 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 PrincipalContinuity: "principal continuity profile",
                 PrincipalAccountingBinding: "principal accounting binding",
                 RevisionReview: "revision review",
+                ScalarHandover: "scalar handover",
             }
             print(f"valid {labels[type(artifact)]} v{artifact.version}")
             return EXIT_OK
+
+        if args.continuity_command == "handover":
+            handover = _continuity_artifact(_read_text(args.artifact))
+            if not isinstance(handover, ScalarHandover):
+                raise ContinuityFormatError("handover requires a scalar handover artifact")
+            paths = _continuity_source_paths(args.source, "--source")
+            contents = _continuity_sources(paths, handover.sources, "--source")
+            mandate_bytes = Path(args.manifest).read_bytes()
+            result = analyse_scalar_handover(
+                loads(mandate_bytes.decode("utf-8"), source=args.manifest),
+                handover,
+                contents,
+                as_of=_continuity_timestamp(args.as_of, flag="--as-of"),
+                mandate_bytes=mandate_bytes,
+                depth=args.depth,
+            )
+            if args.json:
+                print(json.dumps(result, sort_keys=True, separators=(",", ":")))
+            else:
+                print(render_scalar_handover(result))
+            return EXIT_OK if not result["findings"] else EXIT_FINDING
 
         composition = _continuity_composition(args)
         _refuse_continuity_composition(composition)
@@ -889,7 +923,10 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 "--continuity-review and --continuity-review-source must be supplied together"
             )
         provider = _continuity_artifact(_read_text(args.continuity_provider))
-        if isinstance(provider, (ContinuityBinding, PrincipalAccountingBinding, RevisionReview)):
+        if isinstance(
+            provider,
+            (ContinuityBinding, PrincipalAccountingBinding, RevisionReview, ScalarHandover),
+        ):
             raise ContinuityFormatError("--continuity-provider requires a provider profile")
         if args.continuity_review is not None and (
             not isinstance(provider, AgentCoreContinuity) or args.continuity_binding is None

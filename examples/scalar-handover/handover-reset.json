@@ -1,0 +1,168 @@
+{
+  "scalar_handover_version": 1,
+  "id": "synthetic-reset",
+  "manifest_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "cutover_at": "2026-10-10T00:00:00Z",
+  "bindings": {
+    "before": {
+      "adapter": {
+        "name": "agentmandate.continuity-binding",
+        "version": 1
+      },
+      "continuity_binding_version": 1,
+      "derivation": {
+        "algorithm": "sha256_uuid_v1",
+        "boundary_alias": "synthetic-before"
+      },
+      "enforcement": {
+        "binding": "synthetic-before",
+        "boundary_kind": "policy_session",
+        "policy_sha256": "8263fbcd4e0d919924367d41da6938373d6c58669c841ecc5b5afa400e2f5de3",
+        "provider": "synthetic"
+      },
+      "evidence": {
+        "confidence": "exact",
+        "review": "accepted",
+        "reviewer": "synthetic-example-only",
+        "expires": "2026-11-08"
+      },
+      "id": "synthetic-before-binding",
+      "mandate": {
+        "principal": "caller",
+        "sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326"
+      },
+      "mediation": {
+        "kind": "platform_verified"
+      },
+      "signature": {
+        "algorithm": "ed25519"
+      },
+      "sources": [
+        {
+          "id": "before-policy",
+          "kind": "synthetic-policy",
+          "locator": "examples/scalar-handover/before-policy.json",
+          "content_sha256": "8263fbcd4e0d919924367d41da6938373d6c58669c841ecc5b5afa400e2f5de3"
+        },
+        {
+          "id": "verification",
+          "kind": "synthetic-review",
+          "locator": "examples/scalar-handover/review.json",
+          "content_sha256": "abd9cf13d89c59a8ecaffae163cb36f6c21c862149a63ae7f72f5fab1dbe78a9"
+        }
+      ],
+      "validity": {
+        "expires_at": "2027-09-06T00:00:00Z",
+        "issued_at": "2026-09-06T00:00:00Z"
+      }
+    },
+    "after": {
+      "adapter": {
+        "name": "agentmandate.continuity-binding",
+        "version": 1
+      },
+      "continuity_binding_version": 1,
+      "derivation": {
+        "algorithm": "sha256_uuid_v1",
+        "boundary_alias": "synthetic-after"
+      },
+      "enforcement": {
+        "binding": "synthetic-after",
+        "boundary_kind": "policy_session",
+        "policy_sha256": "177c573c99257693109abaa6f4f6e91a94e7b035c07964e1b276ff3082fabcc9",
+        "provider": "synthetic"
+      },
+      "evidence": {
+        "confidence": "exact",
+        "review": "accepted",
+        "reviewer": "synthetic-example-only",
+        "expires": "2026-11-08"
+      },
+      "id": "synthetic-after-binding",
+      "mandate": {
+        "principal": "caller",
+        "sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326"
+      },
+      "mediation": {
+        "kind": "platform_verified"
+      },
+      "signature": {
+        "algorithm": "ed25519"
+      },
+      "sources": [
+        {
+          "id": "after-policy",
+          "kind": "synthetic-policy",
+          "locator": "examples/scalar-handover/after-policy.json",
+          "content_sha256": "177c573c99257693109abaa6f4f6e91a94e7b035c07964e1b276ff3082fabcc9"
+        },
+        {
+          "id": "verification",
+          "kind": "synthetic-review",
+          "locator": "examples/scalar-handover/review.json",
+          "content_sha256": "abd9cf13d89c59a8ecaffae163cb36f6c21c862149a63ae7f72f5fab1dbe78a9"
+        }
+      ],
+      "validity": {
+        "expires_at": "2027-09-06T00:00:00Z",
+        "issued_at": "2026-09-06T00:00:00Z"
+      }
+    }
+  },
+  "policies": {
+    "before": "before-policy",
+    "after": "after-policy"
+  },
+  "state": {
+    "completed_before": 600,
+    "completed_after": 0,
+    "pending_before": [
+      {
+        "id": "pending-1",
+        "amount": 100
+      }
+    ],
+    "pending_after": [
+      {
+        "id": "pending-1",
+        "amount": 100
+      }
+    ]
+  },
+  "fence": {
+    "predecessor_fenced": true,
+    "successor_exclusive": true
+  },
+  "attestation": {
+    "statement": "Synthetic cutover snapshot only; the reviewer attests the common accounting model, retained pending identities, shared mandate run, and exclusive succession described in review.json. This is not verification of live enforcement.",
+    "sources": [
+      "verification"
+    ]
+  },
+  "sources": [
+    {
+      "id": "before-policy",
+      "kind": "synthetic-policy",
+      "locator": "examples/scalar-handover/before-policy.json",
+      "content_sha256": "8263fbcd4e0d919924367d41da6938373d6c58669c841ecc5b5afa400e2f5de3"
+    },
+    {
+      "id": "after-policy",
+      "kind": "synthetic-policy",
+      "locator": "examples/scalar-handover/after-policy.json",
+      "content_sha256": "177c573c99257693109abaa6f4f6e91a94e7b035c07964e1b276ff3082fabcc9"
+    },
+    {
+      "id": "verification",
+      "kind": "synthetic-review",
+      "locator": "examples/scalar-handover/review.json",
+      "content_sha256": "abd9cf13d89c59a8ecaffae163cb36f6c21c862149a63ae7f72f5fab1dbe78a9"
+    }
+  ],
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "synthetic-example-only",
+    "expires": "2026-11-08"
+  }
+}

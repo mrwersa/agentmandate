@@ -55,7 +55,8 @@ model initiatives completed together. The present frontier is:
 | **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change pairs also have a separate unreviewed runtime profile; the archival observation format remains rejected. The observation consumer leaves mandate continuity unresolved; optional reviewed accounting is implemented for synthetic bound trials, with historical binding still deferred. Archival records and historical migrations remain unreviewed and byte-exact |
 | **Implemented extension** | [Reviewed principal accounting](docs/principal-accounting.md) for [#214](https://github.com/mrwersa/agentmandate/issues/214): independently reviewed bindings, exact manifest/profile joins, identity and execution mappings, per-trial observed budget comparisons, and failure/compatibility fixtures. The maintainer supplied an out-of-band execution review on 10 October; this is not a GitHub approval or historical binding acceptance |
 | **Implemented extension** | [Scoped revision review](docs/revision-review.md), [#222](https://github.com/mrwersa/agentmandate/issues/222): exact input and policy joins, independent comparison/issuer evidence, retention-only amendments, and fixed result baselines. The maintainer supplied an out-of-band adversarial execution review on 10 October; this is not a GitHub approval or historical evidence acceptance. Global safe continuation and historical binding approval remain unresolved |
-| **Ready next** | Establish successor binding, state-transfer, and sufficient comparison-domain evidence before extending scoped revision claims to a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
+| **Implemented extension** | [Scalar handover verifier](docs/scalar-handover.md), [#224](https://github.com/mrwersa/agentmandate/issues/224): two reviewed binding joins, exact closed policy bytes, retained completed/pending state, fencing, and complete next-request integer-domain inclusion at cutover. Synthetic retained/reset/expired baselines pin the new contracts. The maintainer supplied an out-of-band adversarial execution review on 10 October; this is not a GitHub approval. Model conformance does not establish snapshot freshness, global provider continuation, or historical acceptance |
+| **Ready next** | Establish operational policy/state/fencing evidence and a versioned settlement/retry contract before extending the scalar cutover model to later execution or a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
@@ -84,8 +85,13 @@ is counted complete by this extension. The new
 comparison and issuer-treatment claims beside the unchanged continuity baseline.
 Its scope stays explicit: retaining-state approval cannot waive a reset, and
 finite comparison evidence does not establish global safe continuation.
-Successor binding verification and sufficient state/domain evidence remain
-necessary before a later consumer can resolve that verdict.
+The [scalar handover verifier](docs/scalar-handover.md) checks two independently
+reviewed bindings and retained completed/pending state, then computes complete
+next-request inclusion in a closed integer model at cutover. Its clean result
+means conformance to that declared model; it does not authenticate live state
+transfer, verify signatures, or resolve global provider safe continuation.
+Operational policy/state/fencing evidence and later settlement/retry semantics
+remain open. This extension completes no additional initiative.
 The [consolidation record](docs/continuity-evidence-consolidation.md) owns the
 capture-by-capture status and limitations; the [evidence plan](docs/continuity-evidence-plan.md)
 owns requirements for further captures. Managed Agents continuation still lacks
@@ -462,6 +468,11 @@ complete the repository-wide compatibility audit. The optional
 `revision_review_version: 1` attachment and `agentmandate.revision-review/v1`
 envelope add [separate initial baselines](docs/revision-review.md#compatibility),
 including comparison with the unchanged nested continuity result.
+The separate `scalar_handover_version: 1`, `scalar_policy_version: 1`, and
+`agentmandate.scalar-handover/v1` contracts also have
+[initial retained/reset/expired baselines](docs/scalar-handover.md#compatibility).
+They extend the inventory without supplying a migration or completing another
+initiative.
 Any later format change needs an explicit compatibility decision and affected
 before/after fixtures. The historical pre-1.0 audit remains a record of its
 original baseline; neither this addition nor internal code review supplies the

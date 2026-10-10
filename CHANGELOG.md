@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.21.0 - 2026-10-10
+
+### Added
+
+- `mandate continuity handover` verifies a declared scalar cutover using two
+  independently reviewed continuity bindings, exact closed policy captures,
+  completed spend, pending reservation identities, and fencing evidence.
+- Complete next-request integer-domain inclusion for the declared monetary
+  model, with the smallest successor-only amount when admission widens.
+  Lost completed spend or changed pending reservations violate the handover
+  even when tightening hides any increase in available capacity. Unknown or
+  ineligible premises withhold the numeric proof.
+- Strict `scalar_handover_version: 1` and `scalar_policy_version: 1` inputs,
+  a separate `agentmandate.scalar-handover/v1` result, runnable synthetic
+  tightening/reset/lost-reservation examples, and fixed retained/reset/expired
+  result baselines. Complete manifest Authority remains independent.
+
+### Compatibility
+
+- Existing reconciliation and revision-review contracts are unchanged.
+  Exit 0 means declared handover conformance and clean, untruncated manifest
+  Authority, not global provider safe continuation or deployment approval.
+  Settlement, retry replay, live coordination, and signature verification are
+  outside this cutover model. No historical evidence is accepted or bound;
+  private Python records are not added to the public API.
+
 ## 0.20.0 - 2026-10-10
 
 ### Added

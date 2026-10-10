@@ -20,6 +20,7 @@ guarantee.
 | Compare principal and session observations | [Principal continuity](principal-continuity.md) |
 | Account for shared spend under reviewed mandate intent | [Principal accounting](principal-accounting.md) |
 | Review policy revisions and issuer treatment | [Revision review](revision-review.md) |
+| Verify scalar state and capacity at cutover | [Scalar handover walkthrough](../examples/scalar-handover/README.md) |
 | Contribute a fix or evidence graph | [Contributing](../CONTRIBUTING.md) |
 
 Most users need the first four guides. The attachment contracts below address
@@ -64,6 +65,8 @@ change an analysis result:
 - [Finite producer cardinality](bounded-producers.md)
 - [Authority continuity](authority-continuity.md) and the separate
   [principal/session observation contract](principal-continuity.md)
+- [Scalar handover](scalar-handover.md): retained state and full next-request
+  integer-domain inclusion within a declared cutover model
 
 Authority continuity remains experimental and its Python records remain
 private. Its public CLI asks whether consumed state remains attached to one
