@@ -1,0 +1,23 @@
+{
+  "openapi": "3.1.1",
+  "info": {"title": "Synthetic refund API", "version": "example"},
+  "servers": [{"url": "https://example.invalid"}],
+  "security": [{"service_account": []}],
+  "paths": {
+    "/cases": {"get": {"operationId": "search_cases", "responses": {"200": {"description": "Cases"}}}},
+    "/cases/{case_id}/refunds": {"$ref": "#/components/pathItems/refund"}
+  },
+  "components": {
+    "pathItems": {
+      "refund": {
+        "parameters": [{"name": "case_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "post": {
+          "operationId": "issue_refund",
+          "requestBody": {"content": {"application/json": {"schema": {"type": "object", "properties": {"amount": {"type": "integer", "maximum": 500}}}}}},
+          "responses": {"200": {"description": "Refund"}}
+        }
+      }
+    },
+    "securitySchemes": {"service_account": {"type": "http", "scheme": "bearer"}}
+  }
+}

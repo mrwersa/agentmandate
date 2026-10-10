@@ -186,6 +186,13 @@ not supply is marked:
 Unrecognised verbs are proposed as `irreversible`, because under-calling an
 effect is the more expensive mistake.
 
+Use `scan --format mcp|openapi|a2a` for strict local JSON imports. OpenAPI
+operations remain adapter candidates; an A2A card requires one explicit
+`--dispatch-tool` and its advertised skills are not separate callable tools.
+`inventory import` can also write an unreviewed declaration or its inventory IR.
+The [catalogue import guide](docs/catalogue-import.md) has runnable examples
+and explains the review needed before either output can inform a gate.
+
 ## Keeping the manifest honest
 
 A manifest is a reviewed claim about one mandate. Two things quietly falsify
@@ -266,12 +273,12 @@ all.
 
 | Command | What it does |
 |---|---|
-| `mandate scan` | Derives a manifest skeleton from agent source (`--source`) or an MCP `tools/list` catalogue, with a `REVIEW` marker on every guess |
+| `mandate scan` | Derives a review-marked manifest skeleton from source or a local MCP/OpenAPI/A2A catalogue |
 | `mandate drift` | Compares the declared mandate against the agent's source and fails when the two have separated |
 | `mandate lint` | Single-manifest control checks: separation of duties, ungated irreversible effects, service-account principals, ceilings scoped to nothing |
 | `mandate reach` | Bounded search over a manifest or reviewed `--ir` snapshot for a legal call sequence that breaches a limit, reported as a counterexample |
 | `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
-| `mandate inventory` | Structurally validates a dynamic-inventory declaration without accepting its membership as authority |
+| `mandate inventory` | Imports local protocol catalogues as unreviewed declarations/IR, or validates declaration structure |
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |
 | `mandate delegations` | Structurally validates a delegation attachment or chain without accepting it as authority |
 | `mandate producers` | Structurally validates a finite-producer boundary without accepting its sources as authority |
@@ -283,7 +290,8 @@ all.
 | `mandate scenarios` | Exports reachable breach paths with blank environment, agent-input, and expected-control fields for human review and execution by an external evaluation harness |
 
 Analysis commands support `--json` and return non-zero when findings or
-unresolved required evidence need attention. `scan` and `ir export` write artifacts to standard
+unresolved required evidence need attention. `scan`, `inventory import`, and
+`ir export` write artifacts to standard
 output and are not gates. Exit codes and CI wiring: [docs/ci.md](docs/ci.md).
 
 ### When you need evidence attachments

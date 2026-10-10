@@ -32,10 +32,15 @@ the same handling as the traces it came from. Violation messages can include
 observed scope identifiers and amounts. Reports and diagnostics therefore need
 the same access controls and redaction review as the inputs.
 
-MCP catalogues passed to `scan` are untrusted input. AgentMandate quotes names
-as YAML scalars and collapses descriptions to one comment line so catalogue
-text cannot add manifest fields. The generated file still requires human
+MCP, OpenAPI, and A2A JSON passed to `scan` or `inventory import` is untrusted input.
+AgentMandate quotes names as YAML scalars and collapses descriptions to one
+comment line so catalogue text cannot add manifest fields. The generated file still requires human
 review because quoting prevents injection, not incorrect annotations.
+Imports read only explicitly supplied local files. URLs stay inert and external
+OpenAPI Path Item references are refused. Imported declarations and IR retain
+names, selection, and source digests; review their disclosure before storing or
+sharing them. Parsing does not authenticate providers, validate signatures, or
+accept deployment membership. See [the import boundaries](docs/catalogue-import.md).
 
 ## What this tool is not
 

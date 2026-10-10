@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "agent": "synthetic-refunds",
+  "limits": {"total": {"amount": 500, "currency": "GBP"}, "depth": 8},
+  "tools": [
+    {"name": "search_cases", "effect": "read", "produces": "case", "unbounded": true},
+    {
+      "name": "issue_refund", "effect": "irreversible", "requires": ["case"],
+      "value_arg": "amount", "scope_key": "case",
+      "ceiling": {"amount": 500, "currency": "GBP"}, "requires_approval": true
+    }
+  ]
+}

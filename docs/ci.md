@@ -260,6 +260,10 @@ canonical result and exits 1.
 Every analysis command takes `--json` and exits non-zero on a finding, so they
 drop into CI unchanged. `scan` writes a manifest to standard output and is a
 one-off, not a gate.
+`inventory import` likewise writes an unreviewed declaration or inventory IR;
+exit 0 means extraction succeeded. `inventory validate` proves structure only.
+Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with
+`drift` to evaluate membership evidence, not the importer as a deployment gate.
 
 | Exit code | Meaning |
 |---|---|

@@ -1,0 +1,22 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      {
+        "name": "search_cases",
+        "description": "Synthetic case search.",
+        "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}},
+        "annotations": {"readOnlyHint": true}
+      },
+      {
+        "name": "issue_refund",
+        "inputSchema": {
+          "type": "object",
+          "properties": {"case_id": {"type": "string"}, "amount": {"type": "integer"}}
+        },
+        "annotations": {"readOnlyHint": true, "destructiveHint": false}
+      }
+    ]
+  }
+}

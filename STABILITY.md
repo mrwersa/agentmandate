@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.21.0
+agentmandate~=0.22.0
 ```
 
 ## Versioned authority artifacts
@@ -72,6 +72,13 @@ The same boundary applies to `mandate inventory validate`: it proves only that
 a declaration is structurally valid. `mandate drift` separately checks its
 target, reviewed selection, supplied capture digest, completeness, confidence,
 review, and expiry against an explicit evaluation date.
+
+`mandate inventory import` writes a draft declaration or the existing inventory
+IR profile. It never marks evidence accepted or membership complete. The
+explicit protocol readers in `mandate scan --format` write review-marked
+skeletons. The original MCP reader and public Python scan signatures are
+unchanged when the format flag is omitted. Protocol mappings and their pinned
+v1 baselines are documented in [the import guide](docs/catalogue-import.md).
 
 `mandate conditions validate` likewise proves structure only. Manifest-mode
 `reach` and `drift` separately check profile semantics, reviewed context,

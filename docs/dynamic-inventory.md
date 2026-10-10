@@ -6,6 +6,10 @@ against canonical AgentKit and Sentry fixtures. The closing review is recorded
 in [`dynamic-inventory-gate-4-review.md`](dynamic-inventory-gate-4-review.md).
 Parsing never makes an inventory trustworthy.
 
+To derive a draft from local MCP/OpenAPI/A2A JSON, use
+[`mandate inventory import`](catalogue-import.md). Its output remains
+unreviewed and non-complete; the eligibility rules in this contract still apply.
+
 ## Problem boundary
 
 Static source reading can prove that `Agent(tools=[search, refund])` contains

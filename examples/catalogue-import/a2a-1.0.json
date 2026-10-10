@@ -1,0 +1,16 @@
+{
+  "name": "Synthetic refund assistant",
+  "description": "An opaque example agent; no service is deployed.",
+  "supportedInterfaces": [
+    {"url": "https://example.invalid/a2a", "protocolBinding": "JSONRPC", "protocolVersion": "1.0"},
+    {"url": "https://example.invalid/a2a/http", "protocolBinding": "HTTP+JSON", "protocolVersion": "1.0"}
+  ],
+  "version": "example",
+  "capabilities": {"extendedAgentCard": true},
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {"id": "search", "name": "Search cases", "description": "Find cases.", "tags": ["cases"]},
+    {"id": "refund", "name": "Issue refunds", "description": "Request a refund.", "tags": ["refunds"]}
+  ]
+}
