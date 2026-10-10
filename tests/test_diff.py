@@ -1,6 +1,9 @@
+import json
+
 import pytest
 
-from agentmandate import compare, loads
+from agentmandate import Mandate, compare, loads
+from agentmandate.cli import main
 from agentmandate.diff import NARROWING, NEUTRAL, WIDENING
 
 V1 = """
@@ -481,3 +484,115 @@ def test_declaring_a_workload_identity_is_narrowing():
     change = only(compare(loads(NO_MONEY), loads(identified)).changes, "workload identity")[0]
     assert change.direction == NARROWING
     assert change.detail == "declared spiffe://bank/agents/a"
+
+
+def budget_mandate(budgets, *, effect="irreversible", depth=2):
+    return Mandate.parse({
+        "agent": "budget-regression", "limits": {"depth": depth, "effects": budgets},
+        "tools": [{"name": "act", "effect": effect, "requires_approval": True}],
+    })
+
+
+@pytest.mark.parametrize("effect", ["read", "write", "irreversible"])
+@pytest.mark.parametrize("previous,proposed,direction,detail", [
+    (3, 5, WIDENING, "3 -> 5 calls"),
+    (5, 3, NARROWING, "5 -> 3 calls"),
+    (None, 3, NARROWING, "added limit 3 calls"),
+    (3, None, WIDENING, "removed limit 3 calls"),
+    (0, None, WIDENING, "removed limit 0 calls"),
+    (None, 0, NARROWING, "added limit 0 calls"),
+    (0, 1, WIDENING, "0 -> 1 calls"),
+    (1, 0, NARROWING, "1 -> 0 calls"),
+    (3, 3, NEUTRAL, None),
+    (None, None, NEUTRAL, None),
+])
+def test_effect_allowance_changes_are_explicit_even_without_a_breach(
+    effect, previous, proposed, direction, detail,
+):
+    before = budget_mandate({} if previous is None else {effect: previous}, effect=effect)
+    after = budget_mandate({} if proposed is None else {effect: proposed}, effect=effect)
+    delta = compare(before, after)
+    allowance = only(delta.changes, "effect budget")
+    if detail is None:
+        assert not allowance and delta.direction == NEUTRAL
+    else:
+        assert [(c.direction, c.detail) for c in allowance] == [
+            (direction, f"{effect}: {detail}"),
+        ]
+        if direction == WIDENING:
+            assert delta.widened
+        if previous in {None, 3, 5} and proposed in {None, 3, 5}:
+            assert not delta.before.breaches and not delta.after.breaches
+            assert delta.direction == direction
+
+
+def test_removing_a_budget_is_widening_even_when_its_breach_disappears():
+    before = budget_mandate({"irreversible": 3}, depth=8)
+    after = budget_mandate({}, depth=8)
+    delta = compare(before, after)
+    assert {b.kind for b in delta.before.breaches} == {"effect_count"}
+    assert not delta.after.breaches
+    assert delta.direction == WIDENING
+    assert any(c.kind == "reachable breach" and c.direction == NARROWING
+               for c in delta.changes)
+    assert only(delta.changes, "effect budget")[0].direction == WIDENING
+
+
+def test_raising_a_budget_is_widening_when_both_releases_still_breach():
+    delta = compare(budget_mandate({"irreversible": 3}, depth=8),
+                    budget_mandate({"irreversible": 5}, depth=8))
+    assert {b.kind for b in delta.before.breaches} == {"effect_count"}
+    assert {b.kind for b in delta.after.breaches} == {"effect_count"}
+    assert not only(delta.changes, "reachable breach")
+    assert delta.direction == WIDENING
+
+
+def test_mixed_budget_changes_are_not_net_summed_or_hidden_by_a_shared_breach_kind():
+    before = budget_mandate({"write": 6, "read": 4, "irreversible": 0})
+    after = budget_mandate({"write": 4, "read": 6})
+    delta = compare(before, after)
+    assert [(c.direction, c.detail) for c in only(delta.changes, "effect budget")] == [
+        (WIDENING, "irreversible: removed limit 0 calls"),
+        (WIDENING, "read: 4 -> 6 calls"),
+        (NARROWING, "write: 6 -> 4 calls"),
+    ]
+    assert delta.direction == WIDENING
+    assert before.limits.effects == {"write": 6, "read": 4, "irreversible": 0}
+    assert after.limits.effects == {"write": 4, "read": 6}
+
+
+def test_tighter_allowance_and_new_breach_remain_separate_review_signals():
+    delta = compare(budget_mandate({}), budget_mandate({"irreversible": 0}))
+    assert only(delta.changes, "effect budget")[0].direction == NARROWING
+    assert only(delta.changes, "reachable breach")[0].direction == WIDENING
+    assert delta.widened  # Existing conservative review policy is retained.
+
+
+@pytest.mark.parametrize("proposed", [5, None])
+@pytest.mark.parametrize("output", ["text", "json", "record"])
+def test_cli_blocks_budget_relaxation_and_names_the_changed_allowance(
+    proposed, output, tmp_path, capsys,
+):
+    paths = []
+    for name, cap in (("before", 3), ("after", proposed)):
+        path = tmp_path / f"{name}.json"
+        path.write_text(json.dumps({
+            "agent": "budget-cli", "limits": {
+                "depth": 8, "effects": {} if cap is None else {"irreversible": cap},
+            },
+            "tools": [{"name": "act", "effect": "irreversible", "requires_approval": True}],
+        }))
+        paths.append(str(path))
+    argv = ["diff", *paths] + ([] if output == "text" else [f"--{output}"])
+    assert main(argv) == 1
+    captured = capsys.readouterr()
+    assert not captured.err
+    if output == "json":
+        result = json.loads(captured.out)
+        assert set(result) == {"direction", "changes", "before", "after"}
+        assert result["direction"] == WIDENING
+        assert any(c["kind"] == "effect budget" and c["direction"] == WIDENING
+                   for c in result["changes"])
+    else:
+        assert "effect budget: irreversible:" in captured.out
+        assert "WIDENING" in captured.out

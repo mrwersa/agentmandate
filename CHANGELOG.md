@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.22.1 - 2026-10-10
+
+### Fixed
+
+- `diff` now compares each declared `limits.effects` call budget independently
+  of reachable breach findings. Raising or removing a budget reports widening,
+  including when removal makes an effect-count breach disappear. Adding or
+  reducing a budget reports a narrowing allowance change; zero remains a
+  declared limit. Changes across multiple effect classes are retained separately.
+  Existing breach diagnostics and the conservative combined review verdict
+  remain unchanged. Python signatures, CLI flags and JSON shape are unchanged.
+
 ## 0.22.0 - 2026-10-10
 
 ### Added
