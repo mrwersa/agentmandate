@@ -1,0 +1,2972 @@
+{
+  "artifact_markers": {
+    "_catalogue.py": {
+      "constants": {},
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "format_version",
+        "inventory_version",
+        "producer_version"
+      ]
+    },
+    "_cedar_mapping.py": {
+      "constants": {
+        "MAPPING_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "mapping_version"
+      ]
+    },
+    "_conditions.py": {
+      "constants": {
+        "CONDITION_ADAPTER_VERSION": 1,
+        "CONDITION_CONTEXT_VERSION": 1,
+        "TOOL_CONDITION_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "classifier_version",
+        "condition_version",
+        "context_version",
+        "producer_version"
+      ]
+    },
+    "_continuity.py": {
+      "constants": {
+        "AGENTCORE_CONTINUITY_VERSION": 1,
+        "ANTHROPIC_CONTINUITY_VERSION": 1,
+        "CONTINUITY_BINDING_VERSION": 1,
+        "CONTINUITY_IR_ADAPTER_VERSION": 1,
+        "CONTINUITY_RESULT_SCHEMA": "agentmandate.continuity/v1",
+        "CONTINUITY_RESULT_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.continuity/v1"
+      ],
+      "version_fields": [
+        "agentcore_continuity_version",
+        "anthropic_continuity_version",
+        "continuity_binding_version",
+        "result_version"
+      ]
+    },
+    "_delegation.py": {
+      "constants": {
+        "DELEGATION_ADAPTER_VERSION": 1,
+        "DELEGATION_ATTACHMENT_ADAPTER_VERSION": 1,
+        "DELEGATION_ATTACHMENT_VERSION": 2,
+        "DELEGATION_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "delegation_version",
+        "principal_version"
+      ]
+    },
+    "_inventory.py": {
+      "constants": {
+        "INVENTORY_ADAPTER_VERSION": 1,
+        "INVENTORY_CAPTURE_ADAPTER_VERSION": 1,
+        "INVENTORY_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "format_version",
+        "inventory_version",
+        "producer_version"
+      ]
+    },
+    "_ir.py": {
+      "constants": {
+        "IR_VERSION": 1,
+        "MANIFEST_ADAPTER_VERSION": 2,
+        "MANIFEST_DEFAULTS_ADAPTER_VERSION": 1,
+        "RESULT_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "adapter_version",
+        "format_version",
+        "ir_version",
+        "producer_version",
+        "result_version"
+      ]
+    },
+    "_managed_cedar.py": {
+      "constants": {
+        "MANAGED_ADAPTER_VERSION": 1,
+        "MANAGED_IR_ADAPTER_VERSION": 1,
+        "MANAGED_ORACLE_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": [
+        "managed_oracle_version",
+        "protocol_version"
+      ]
+    },
+    "_principal_accounting.py": {
+      "constants": {},
+      "inline_versions": {
+        "principal_accounting_binding_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.principal-accounting/v1"
+      ],
+      "version_fields": [
+        "principal_accounting_binding_version"
+      ]
+    },
+    "_principal_continuity.py": {
+      "constants": {},
+      "inline_versions": {
+        "principal_continuity_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.principal-continuity/v1"
+      ],
+      "version_fields": [
+        "principal_continuity_version"
+      ]
+    },
+    "_producer.py": {
+      "constants": {
+        "PRODUCER_BOUNDARY_ADAPTER_VERSION": 1,
+        "PRODUCER_BOUNDARY_VERSION": 1,
+        "PRODUCER_RESULT_SCHEMA": "agentmandate.producers/v1",
+        "PRODUCER_RESULT_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.producers/v1"
+      ],
+      "version_fields": [
+        "producer_boundary_version",
+        "producer_version",
+        "result_version"
+      ]
+    },
+    "_revision_review.py": {
+      "constants": {},
+      "inline_versions": {
+        "revision_review_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.revision-review/v1"
+      ],
+      "version_fields": [
+        "revision_review_version"
+      ]
+    },
+    "_scalar_handover.py": {
+      "constants": {},
+      "inline_versions": {
+        "scalar_handover_version": [
+          1
+        ],
+        "scalar_policy_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.scalar-handover/v1"
+      ],
+      "version_fields": [
+        "scalar_handover_version",
+        "scalar_policy_version"
+      ]
+    },
+    "cli.py": {
+      "constants": {},
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.cedar-alignment/v1",
+        "agentmandate.cedar-effective-diff/v1",
+        "agentmandate.conditions/v1",
+        "agentmandate.delegations/v1",
+        "agentmandate.verify/v1"
+      ],
+      "version_fields": [
+        "agentcore_continuity_version",
+        "anthropic_continuity_version",
+        "continuity_binding_version",
+        "principal_accounting_binding_version",
+        "principal_continuity_version",
+        "revision_review_version",
+        "scalar_handover_version"
+      ]
+    },
+    "findings.py": {
+      "constants": {
+        "SARIF_SCHEMA": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+        "SARIF_VERSION": "2.1.0"
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": []
+    },
+    "manifest.py": {
+      "constants": {
+        "SCHEMA_VERSION": 1
+      },
+      "inline_versions": {},
+      "schemas": [],
+      "version_fields": []
+    },
+    "obligations.py": {
+      "constants": {
+        "OBLIGATIONS_SCHEMA": "agentmandate.obligations/v1"
+      },
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.obligations/v1",
+        "agentverity.decision-suite/v1"
+      ],
+      "version_fields": []
+    },
+    "scenarios.py": {
+      "constants": {
+        "SCENARIOS_SCHEMA": "agentmandate.scenarios/v1"
+      },
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.scenarios/v1"
+      ],
+      "version_fields": []
+    }
+  },
+  "cli": {
+    "mandate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_VersionAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "version",
+          "nargs": 0,
+          "options": [
+            "--version"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "cedar",
+            "conditions",
+            "continuity",
+            "delegations",
+            "diff",
+            "drift",
+            "inventory",
+            "ir",
+            "lint",
+            "obligations",
+            "producers",
+            "reach",
+            "scan",
+            "scenarios",
+            "verify"
+          ],
+          "dest": "command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate cedar": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "align",
+            "diff",
+            "validate"
+          ],
+          "dest": "cedar_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate cedar align": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "oracle",
+          "nargs": null,
+          "options": [
+            "--oracle"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "source_root",
+          "nargs": null,
+          "options": [
+            "--source-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate cedar diff": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "baseline_oracle",
+          "nargs": null,
+          "options": [
+            "--baseline-oracle"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "baseline_root",
+          "nargs": null,
+          "options": [
+            "--baseline-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "candidate_oracle",
+          "nargs": null,
+          "options": [
+            "--candidate-oracle"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "candidate_root",
+          "nargs": null,
+          "options": [
+            "--candidate-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate cedar validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "oracle",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate conditions": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "validate"
+          ],
+          "dest": "conditions_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate conditions validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition",
+          "nargs": null,
+          "options": [
+            "--condition"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "context",
+          "nargs": null,
+          "options": [
+            "--context"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": [
+        {
+          "members": [
+            "condition",
+            "context"
+          ],
+          "required": true
+        }
+      ]
+    },
+    "mandate continuity": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "handover",
+            "reconcile",
+            "validate"
+          ],
+          "dest": "continuity_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate continuity handover": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "artifact",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "source",
+          "nargs": null,
+          "options": [
+            "--source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "_positive_int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate continuity reconcile": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_provider",
+          "nargs": null,
+          "options": [
+            "--continuity-provider"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_source",
+          "nargs": null,
+          "options": [
+            "--continuity-source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_binding",
+          "nargs": null,
+          "options": [
+            "--continuity-binding"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_review",
+          "nargs": null,
+          "options": [
+            "--continuity-review"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_review_source",
+          "nargs": null,
+          "options": [
+            "--continuity-review-source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_binding_source",
+          "nargs": null,
+          "options": [
+            "--continuity-binding-source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "continuity_as_of",
+          "nargs": null,
+          "options": [
+            "--continuity-as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "_positive_int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "cedar",
+          "nargs": 0,
+          "options": [
+            "--cedar"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "condition",
+          "nargs": 0,
+          "options": [
+            "--condition"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "delegation",
+          "nargs": 0,
+          "options": [
+            "--delegation"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "ir",
+          "nargs": 0,
+          "options": [
+            "--ir"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "graph",
+          "nargs": 0,
+          "options": [
+            "--graph"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "otel",
+          "nargs": 0,
+          "options": [
+            "--otel"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "producer",
+          "nargs": 0,
+          "options": [
+            "--producer"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "sarif",
+          "nargs": 0,
+          "options": [
+            "--sarif"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate continuity validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "artifact",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate delegations": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "validate"
+          ],
+          "dest": "delegations_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate delegations validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "attachment",
+          "nargs": null,
+          "options": [
+            "--attachment"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "chain",
+          "nargs": null,
+          "options": [
+            "--chain"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": [
+        {
+          "members": [
+            "attachment",
+            "chain"
+          ],
+          "required": true
+        }
+      ]
+    },
+    "mandate diff": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "before",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "after",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "_positive_int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "record",
+          "nargs": 0,
+          "options": [
+            "--record"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate drift": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "source",
+          "nargs": null,
+          "options": [
+            "--source"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "binding",
+          "nargs": null,
+          "options": [
+            "--binding"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "union_bindings",
+          "nargs": 0,
+          "options": [
+            "--union-bindings"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "inventory_declaration",
+          "nargs": null,
+          "options": [
+            "--inventory-declaration"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "inventory_capture",
+          "nargs": null,
+          "options": [
+            "--inventory-capture"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "inventory_selection",
+          "nargs": null,
+          "options": [
+            "--inventory-selection"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "inventory_as_of",
+          "nargs": null,
+          "options": [
+            "--inventory-as-of"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition",
+          "nargs": null,
+          "options": [
+            "--condition"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_context",
+          "nargs": null,
+          "options": [
+            "--condition-context"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_capture",
+          "nargs": null,
+          "options": [
+            "--condition-capture"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_as_of",
+          "nargs": null,
+          "options": [
+            "--condition-as-of"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate inventory": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "import",
+            "validate"
+          ],
+          "dest": "inventory_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate inventory import": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "catalogue",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": [
+            "mcp",
+            "a2a",
+            "openapi"
+          ],
+          "default": null,
+          "dest": "format",
+          "nargs": null,
+          "options": [
+            "--format"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "boundary",
+          "nargs": null,
+          "options": [
+            "--boundary"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "target_source",
+          "nargs": null,
+          "options": [
+            "--target-source"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "target_binding",
+          "nargs": null,
+          "options": [
+            "--target-binding"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "locator",
+          "nargs": null,
+          "options": [
+            "--locator"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "selection",
+          "nargs": null,
+          "options": [
+            "--selection"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "dispatch_tool",
+          "nargs": null,
+          "options": [
+            "--dispatch-tool"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "ir",
+          "nargs": 0,
+          "options": [
+            "--ir"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate inventory validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "declaration",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate ir": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "export",
+            "validate"
+          ],
+          "dest": "ir_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate ir export": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate ir validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "snapshot",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate lint": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate obligations": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "_positive_int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "suite",
+          "nargs": 0,
+          "options": [
+            "--suite"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "reviewed",
+          "nargs": null,
+          "options": [
+            "--reviewed"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate producers": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "validate"
+          ],
+          "dest": "producers_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate producers validate": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "boundary",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate reach": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": "?",
+          "options": [],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "ir_snapshot",
+          "nargs": null,
+          "options": [
+            "--ir"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "_positive_int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "sarif",
+          "nargs": 0,
+          "options": [
+            "--sarif"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "graph",
+          "nargs": 0,
+          "options": [
+            "--graph"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition",
+          "nargs": null,
+          "options": [
+            "--condition"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_context",
+          "nargs": null,
+          "options": [
+            "--condition-context"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_capture",
+          "nargs": null,
+          "options": [
+            "--condition-capture"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_as_of",
+          "nargs": null,
+          "options": [
+            "--condition-as-of"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_attachment",
+          "nargs": null,
+          "options": [
+            "--delegation-attachment"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_chain",
+          "nargs": null,
+          "options": [
+            "--delegation-chain"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_capture",
+          "nargs": null,
+          "options": [
+            "--delegation-capture"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_as_of",
+          "nargs": null,
+          "options": [
+            "--delegation-as-of"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_target_source",
+          "nargs": null,
+          "options": [
+            "--delegation-target-source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_target_binding",
+          "nargs": null,
+          "options": [
+            "--delegation-target-binding"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "producer_boundary",
+          "nargs": null,
+          "options": [
+            "--producer-boundary"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "producer_source",
+          "nargs": null,
+          "options": [
+            "--producer-source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "producer_selection",
+          "nargs": null,
+          "options": [
+            "--producer-selection"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "producer_as_of",
+          "nargs": null,
+          "options": [
+            "--producer-as-of"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": [
+        {
+          "members": [
+            "manifest",
+            "ir_snapshot"
+          ],
+          "required": true
+        }
+      ]
+    },
+    "mandate scan": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "catalogue",
+          "nargs": "?",
+          "options": [],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "source",
+          "nargs": null,
+          "options": [
+            "--source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": "unnamed-agent",
+          "dest": "agent",
+          "nargs": null,
+          "options": [
+            "--agent"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": [
+            "mcp",
+            "a2a",
+            "openapi"
+          ],
+          "default": null,
+          "dest": "format",
+          "nargs": null,
+          "options": [
+            "--format"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "dispatch_tool",
+          "nargs": null,
+          "options": [
+            "--dispatch-tool"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "binding",
+          "nargs": null,
+          "options": [
+            "--binding"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "union_bindings",
+          "nargs": 0,
+          "options": [
+            "--union-bindings"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": [
+        {
+          "members": [
+            "catalogue",
+            "source"
+          ],
+          "required": true
+        }
+      ]
+    },
+    "mandate scenarios": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "_positive_int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "reviewed",
+          "nargs": null,
+          "options": [
+            "--reviewed"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "output",
+          "nargs": null,
+          "options": [
+            "--output"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate verify": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "manifest",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "traces",
+          "nargs": null,
+          "options": [
+            "--traces"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "otel",
+          "nargs": null,
+          "options": [
+            "--otel"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "mapping",
+          "nargs": null,
+          "options": [
+            "--map"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "lenient_tool_spans",
+          "nargs": 0,
+          "options": [
+            "--lenient-tool-spans"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "emit",
+          "nargs": null,
+          "options": [
+            "--emit"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": [
+        {
+          "members": [
+            "traces",
+            "otel"
+          ],
+          "required": true
+        }
+      ]
+    }
+  },
+  "coverage_sha256": "e2a3a9acf950d50df8f33fa9cdc0da9fb1c9868091f1b2a441e2393647b7ed24",
+  "fixture_sha256": {
+    "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
+    "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
+    "docs/evidence/agentcore-refund-policy/managed-oracle-v1.json": "0dbe5ea25cab0dbf362eddaa8215c1ae7dcc8f73acfcd5b492a64e10866f6d46",
+    "docs/evidence/agentcore-refund-policy/mandate.yaml": "401289117ed27255b734e64ef378fd43f65befba62cc55b51ce40a5dfbdd2c85",
+    "docs/evidence/agentcore-refund-policy/mapping.json": "d6175d9abf08eeac8143ef5141b45ba9d37dc3dd45c25e0e3f2b39ec9f6e7d74",
+    "docs/evidence/agentkit/mandate.yaml": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+    "docs/evidence/aws-iam-access-keys/mandate.yaml": "a9605c51c8153a51354e31f3f3e9fc15812e966143a4db250c5716f9cedfd940",
+    "docs/evidence/aws-iam-access-keys/scan-skeleton.yaml": "d3c11b0f433bca29c82a6a39418fffabf0d4654f2298cf5cf1350ee277f685e3",
+    "docs/evidence/aws-postgres-mcp/mandate.yaml": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+    "docs/evidence/aws-postgres-mcp/scan-skeleton.yaml": "059b191cd3a271ec4849590eab86e7c9fbf3d39a6eb42c00eb47da80921371e3",
+    "docs/evidence/cedar-document-cloud/bundle.json": "592699ddc1c20cadf8a1914d18f815bbd49363bbacbe97a1b9a78f458e5860e7",
+    "docs/evidence/github-mcp-server/mandate.yaml": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+    "docs/evidence/initiative-mcp/mandate.yaml": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+    "docs/evidence/initiative-mcp/scan-skeleton.yaml": "f4eb496ecb6a3301fbcf8cdf8bf1d156c3bd89f95ace4582c23c2f281127d803",
+    "docs/evidence/sentry-mcp/mandate.yaml": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+    "docs/evidence/sentry-mcp/scan-skeleton.yaml": "95d4ee414513a7c037432e00b45470af9d17e7ca1f934b2c33cb17d574965bf6",
+    "docs/pre-1.0-consolidation-audit.md": "f55e1d04949e4a1dbb772e7126f12319299332824820798644ad1d7fb8ce02aa",
+    "examples/catalogue-import/a2a-1.0.json": "3a4b5a24c0fe5f76a00abc1d783919e7e67bdb01a0701cb29cd321b6c3de236e",
+    "examples/catalogue-import/a2a.json": "c03a965e329d57d506cc14c8f52101c5e3e13e79dc96bc789e93d7da17abcaeb",
+    "examples/catalogue-import/manifest.json": "87623182f9c331df0818ed1adb485ede581934994235a3885c404dff7f8b7c18",
+    "examples/catalogue-import/mcp.json": "8a7504f6ae19ee4ea13e7a3253e0c05b1ee8d842b6ccad0dd6401dd717b84207",
+    "examples/catalogue-import/openapi.json": "c9bd11f2b9305454d9e334fd698c11bb7729b271a2bc386721d04fd4fee492c5",
+    "examples/observed-calls.jsonl": "d4769b576e6a2e15d4d657db875b17db0e0de9b5c0129d07718e72d69ab30930",
+    "examples/otel-trace.json": "82e6f24ecbb6df50bb5cdc68652d18ad6865084c38c59c3b11d5aed75d9a3013",
+    "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
+    "examples/principal-continuity/accounting-review.json": "3738eea4c4632b280d512a8da2d0b19a7f74f7d00b432263b98844db9f7f5fd3",
+    "examples/principal-continuity/profile.json": "c90bbed8fdd8beb0e720b10ba0f7a2925f7d6248444646e608d71ce82e19bd47",
+    "examples/reviewed-obligations.json": "cb91e47a05ded04e40f74e52f7379bbbf6c7b0e2be06bf218e158eff4f872066",
+    "examples/revision-review/provider.json": "6e52d0c8b4677e743903a5025df9ae721a41c737d0993d55b33d25219dd667bc",
+    "examples/revision-review/review.json": "106d843fab2785661018c5672b51454cb604810d62801f9cd6a75bc9450c7573",
+    "examples/scalar-handover/after-policy.json": "177c573c99257693109abaa6f4f6e91a94e7b035c07964e1b276ff3082fabcc9",
+    "examples/scalar-handover/before-policy.json": "8263fbcd4e0d919924367d41da6938373d6c58669c841ecc5b5afa400e2f5de3",
+    "examples/scalar-handover/handover-lost-reservation.json": "b2a19007b951391bf2dc05ba9f1aeca59cc9717a4dac3289535c51caefa017df",
+    "examples/scalar-handover/handover-reset.json": "ed91e99deb022c9d9712a6e5e29af420da18062edfbabdb47deecb3465ac6fa1",
+    "examples/scalar-handover/handover.json": "e891878cc03fa486182e593d317e5dacba1d62884aeca1dedb3716bc4d73b4de",
+    "tests/fixtures/agentcore-continuation-v1.json": "b22f056132e838aadaa7b5191b28f4a5c2fcc1ec8508d332c3d5f1f1df35c254",
+    "tests/fixtures/agentcore-continuity-v1.json": "35b4f6e6a2fbe6996a05562cc91cf6b83da2442fae92a77f07006934c2d6de8f",
+    "tests/fixtures/agentcore-principal-continuity-v1.json": "d84ca855f1096fd956d6a8389844e084d1df4fde38ac55a32c1c1522333d2b5a",
+    "tests/fixtures/agentcore-principal-observations-v1.json": "96581d736210889d3da916522d622a91151c0302563a5d9a61e521f04d6794a1",
+    "tests/fixtures/agentcore-retransmission-v1.json": "0cedc6ae7716dafb5fa8d69aff8a25028741298f845508e7df80975bc1ef5c88",
+    "tests/fixtures/anthropic-continuity-v1.json": "39485b0ef4f892d1ebf9e2e607977993f0d0ba87f7f8fafab56ec2e6967c366b",
+    "tests/fixtures/authority-ir-invalid/duplicate-entity-id.json": "a03c8db9f2315a81471b1609a65095c5dd8b04f8a952f1fc3f04072e647afb3a",
+    "tests/fixtures/authority-ir-invalid/edge-invalid-relation.json": "fc4b0146a3cc9d8e836dfe892340f18bf3a48115e9087dc8c9549c291ac8b427",
+    "tests/fixtures/authority-ir-invalid/edge-support-type.json": "c92ff97f32864a5881bfa8e3dce11c0b0c9edae5e9816cb07aa693765197f8ba",
+    "tests/fixtures/authority-ir-invalid/entity-extra-field.json": "5e27aed82981eebc9f8cc8af9abe7807ea5eaeb0733782c85571c05ede7c0ff4",
+    "tests/fixtures/authority-ir-invalid/evidence-extra-field.json": "ed46ac4bee48a3dacff2aac8eeb1b249cee50703e62bcf87a2e9c5cf95bdf579",
+    "tests/fixtures/authority-ir-invalid/fact-invalid-evidence.json": "be1985850351e5767049171ca59f1a448d44dbbe58cd818deacdaa4ebafef99b",
+    "tests/fixtures/authority-ir-invalid/malformed.json": "9b4aacc7933574db0570443dbad07eead9a0a9475a01df57b8f2772699495790",
+    "tests/fixtures/authority-ir-invalid/snapshot-table-type.json": "cb770670ec435c9de0d3039d28c35851bc820db877c19cf3b5df384cf77bb7dd",
+    "tests/fixtures/authority-ir-invalid/source-missing-field.json": "be47a956edeade28083e47c8ec66d470af3af5ebc4655cc5a36414f3ecd260bd",
+    "tests/fixtures/authority-ir-result-v1-breached.json": "22cd5985b929f1186d3a5a56d3f49acc6fe77c5e2a24af5e876230343713ec12",
+    "tests/fixtures/authority-ir-result-v1-clean.json": "5f38f6e1d42564f626a2598e373a8e3dada0398cba0702ea56e9328fd6e1c39a",
+    "tests/fixtures/authority-ir-result-v1-truncated.json": "1d07edf670c34b0e6ddbc0d72b84069d7a39e488384659c747d1878e00d4cfcb",
+    "tests/fixtures/authority-ir-v1.json": "035852c0a653878208a7893e6a6f6ee707130757945dc6c593a64b7f63df53be",
+    "tests/fixtures/catalogue-import/a2a-1.0-inventory-ir-v1.json": "2b6740abca61519603165e407dd6fd2bf1f5a7489abc765da62811ff12e9f3f1",
+    "tests/fixtures/catalogue-import/a2a-1.0-inventory-v1.json": "897e01e772a532721e19aa0db6636c2b8d0659bc91c7bc54059dcb1fba165ae1",
+    "tests/fixtures/catalogue-import/a2a-1.0-skeleton.yaml": "928554a27445466488b7c6e1f2bd4a5b27e1b777751191e87c44260bfd03bdf6",
+    "tests/fixtures/catalogue-import/a2a-inventory-ir-v1.json": "fc688d991c96e291ecc6e2d0750a081e495c6bef1d7b155ee354524a0ad28bc6",
+    "tests/fixtures/catalogue-import/a2a-inventory-v1.json": "1b66844f18e71635294491ec4e549407bb2b59116f11599481c8ca89ce792e76",
+    "tests/fixtures/catalogue-import/a2a-skeleton.yaml": "e4c2f6be244a46d682f57f47507857cb41e757dc3309e90c9dbdbadaf9e759a6",
+    "tests/fixtures/catalogue-import/mcp-inventory-ir-v1.json": "cd7eac02c1d671b3cbddbfc64fa90371f234c5e6faccdf7648ad89cbf078d279",
+    "tests/fixtures/catalogue-import/mcp-inventory-v1.json": "f2adc28eefa63698743ba18e1096384af1ef5de0488fdf1a5cc60e69c4c9359e",
+    "tests/fixtures/catalogue-import/mcp-skeleton.yaml": "08642211f303311db942d2e75b986f2a2a8b774399cda4d4f06de07df3658f57",
+    "tests/fixtures/catalogue-import/openapi-inventory-ir-v1.json": "8df3bd2862c3111642849a3335c90cb23b466c92aed329e277df861eb37bcea3",
+    "tests/fixtures/catalogue-import/openapi-inventory-v1.json": "2de79e615ff0eb9bca6f7c48fcce436cddcbb236b8e10b1240999d5ff2e94334",
+    "tests/fixtures/catalogue-import/openapi-skeleton.yaml": "58695901aae75c003d22ae0fffb4f36edfb4553fb2cb99d7f631c6922c9eebd2",
+    "tests/fixtures/cedar-effective-diff-v1.json": "2feba94ef5d9a5e83eb895f65db9346e8659bf8997d35b4ec7b113e922725809",
+    "tests/fixtures/condition-context-select-only-complete-v1.json": "a023b9e5e345ddd0f86208bebf75c5dc63abbaa7f54be9bf03986e94bc391044",
+    "tests/fixtures/condition-context-select-v1.json": "c9fa5e310223aede3be07d01b874ddf14625b6d9097c78633573eb3dbe2ed48a",
+    "tests/fixtures/condition-dispatch-v1.json": "97cb6fbc90e2450b21a5597e231ec66adff4d99c958456bc7b1a3c355e457a38",
+    "tests/fixtures/condition-statement-v1.json": "ead16b9e005173e90b1598c79b4b81e178c53897d39b7a41657f606dee3bae77",
+    "tests/fixtures/conditional-drift-result-v1.json": "65deae7b37b834cdcf9952ef90fe490a432572c81a7f3f59e7f4365e5110aa9d",
+    "tests/fixtures/conditional-mandate-v1.yaml": "43f5b68149af32238b08ac4038a080eeb131fb8a03d477bf719f4e75fbed15e7",
+    "tests/fixtures/conditional-reach-result-v1.json": "acbc8f04681da47aad0bc22bbf366545b9c34898b01cc8cd85146873a9a20970",
+    "tests/fixtures/continuity-accepted-synthetic/binding-verification.json": "8bf6cadc7d062b4576208003677941f1225b32bbdc096d8fc083a7c3e5b0301c",
+    "tests/fixtures/continuity-accepted-synthetic/binding.json": "88f3fc85a7bdc9a88a745262697c937c71955b45f024b55f4622da4daf930c4b",
+    "tests/fixtures/continuity-accepted-synthetic/manifest.json": "747e2da10df0fd010501a3e0294f93d027dfd4ce3eb5e399e24ee440f8ad8b2e",
+    "tests/fixtures/continuity-accepted-synthetic/policy.json": "08aecd4aa26fb21e4abbd625cd85c027ad39dcd4b7bebcf535b2e09b7d4d87e7",
+    "tests/fixtures/continuity-accepted-synthetic/provider-control.json": "1a0ff2cb3a7ff75d86ca28831bbd0a44135bc3bbd74c99e2112bc76df4a28bdc",
+    "tests/fixtures/continuity-accepted-synthetic/provider.json": "634885f26de9611d2b57acd09f71f912850841492dd85fb5e588f553e2b5d394",
+    "tests/fixtures/continuity-binding-v1.json": "a8ee3fda3f338f7d04b7db3aa47fe5e5107b1996edd6e9013d714f5e24a460f3",
+    "tests/fixtures/continuity-result-v1-overshot.json": "4716fa91bc7bbd9d1bb37da6dbd8b60016a6c37844aca86607dd72e2024e809d",
+    "tests/fixtures/continuity-result-v1-reset.json": "edeb1c402e7ec4411122186126d8192fcaa6b6d5412a38d9fcaf60e4192fd741",
+    "tests/fixtures/continuity-result-v1-satisfied.json": "3286a3668155c48b42075cd3ee7937309efb37426d0680559114af1441f9bd31",
+    "tests/fixtures/continuity-result-v1-tightened.json": "5b99a28ae64a1f948a85c4b79a9cb64285bd4880366b8e18ed63af24c6012022",
+    "tests/fixtures/continuity-result-v1-truncated.json": "f90e0d2be0b9d0c8cbd0aa164ba5d90bd6aee11fc4ab22f875f3a197d2a1235d",
+    "tests/fixtures/continuity-result-v1-unresolved.json": "72efffaa73a4a12c688a6e69eb26c188412f61f5f2682b12274b2ce3c5b41353",
+    "tests/fixtures/continuity-result-v1-untrusted.json": "a77a35b0c0618f5396731367d3839b1db867fa911d9d17d3c71fdb0d5b7d0a9b",
+    "tests/fixtures/continuity-result-v1-widened.json": "46766b1cd039c3f98649a17c4e7dd9f2657f13658ebd4e9c7f7b0c96fd6f75ea",
+    "tests/fixtures/delegation-attachment-v2.json": "41990995ed030df2e11c7f28eceb621bcb1fce55955b783b1f16366c6b1f7766",
+    "tests/fixtures/delegation-chain-authorizer-v1.json": "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764",
+    "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",
+    "tests/fixtures/delegation-grant-capture.json": "bf7d49763d54ac0dc2add5d5dc84d24e12a56f5bcd6470dc9b12f22e6936fcd5",
+    "tests/fixtures/delegation-grant-v1.json": "34b61cc3f8b618e365743d210869a821dd56b013323ac6cdbe895264f9df9a55",
+    "tests/fixtures/dynamic-inventory-agentkit-v1.json": "09b587e8880ca05d7ed85dc1d3b05881bb338772e9245d746dfd65b5b05df450",
+    "tests/fixtures/dynamic-inventory-sentry-v1.json": "9b19e47e23871e96069c7526b0adb5315aa5a8d40cd358719b9b0d2db46c4799",
+    "tests/fixtures/legacy-json-results.json": "8c23d75c15934f7cc652810c59dc90602524cc8a893852c226e1500d23b76407",
+    "tests/fixtures/manifest-v1-all-defaults.yaml": "5f31d7b5cecef0eeaaa072d1cbb65e1d59b1523788a1bb029afd43a2414cd1a2",
+    "tests/fixtures/manifest-v1-shorthand-defaults.yaml": "c263a0176a7856bea813d129f5aad097665fdb32e18a7c90b92ec73a957ea607",
+    "tests/fixtures/principal-accounting-result-v1-eligible.json": "c5b684ca5c2e8d27275ccc609e15c9562b180e4bf0f0c9d1deae1da4cee55140",
+    "tests/fixtures/principal-accounting-result-v1-expired.json": "64ab2372df251321683e59c789ee85c969e6bd9700631921cc322aad2cd27c59",
+    "tests/fixtures/principal-continuity-result-v1-eligible.json": "a9aa179b1a6225b3797b4ea1bd8b453f24512e4ed9c402bd8e34d4b3532e910d",
+    "tests/fixtures/principal-continuity-result-v1-expired.json": "f13ec90c9d2250137b27b038cb5c86219b7c78dc1521fe5f857a02b14e79e9ee",
+    "tests/fixtures/principal-delegated-user-v1.json": "698817379d9761ea8a705305471bdf6c7bd3c809108155b678a20038a02c1548",
+    "tests/fixtures/principal-fixed-user-v1.json": "c2537cb8d22188b8fc9a0ede1511a7b367bb2c412cf23f1b32859ccb776e0b52",
+    "tests/fixtures/principal-intersecting-v1.json": "3417eaaa39ff8bd1b028e6d599aa6f7194795da79a0dda70896c7e7b1649cca8",
+    "tests/fixtures/producer-accepted-synthetic/boundary.json": "f9569af2f80788f07960086e32805057b18e8df2a5ccde8fec9a7b076aefc5b4",
+    "tests/fixtures/producer-accepted-synthetic/catalogue.json": "3babbbfe9aeff2e40d1c4d154131403d1cfb2bd4b197c36ea45e268e3d9ea975",
+    "tests/fixtures/producer-accepted-synthetic/manifest.json": "fe620998fc753aff223f5b3140231bd7114bc989f6b969520306952a8d86f014",
+    "tests/fixtures/producer-accepted-synthetic/outcomes.json": "a9b00aa32fc10933f7160c478cbb1fbdc0d5c8c83f1306742d6f6f29ca5b2362",
+    "tests/fixtures/producer-accepted-synthetic/selection.json": "3c5e25bd42a4b7757833c230875c69699b9774ec6e8b4f0d1f6ee5d71c9309a1",
+    "tests/fixtures/producer-boundary-iam-v1.json": "41e4e5b848a16ed22a07ef9c184432e479f09c0f21d9d9305860dce7a4b3753e",
+    "tests/fixtures/producer-reach-result-v1.json": "55eb0271797dc3149886ff448ccf8e7fede4b14d0913f0205d6a65b956c66e34",
+    "tests/fixtures/producer-result-v1-bounded.json": "b147ba85cc7e677d6c10e4217fde3c8316ea5631763657bdb52e5b031b3583bc",
+    "tests/fixtures/producer-result-v1-breached.json": "f0e28215c5bf87bda3155257cfdbb471be574fbcf6af87da797040e8c356baf1",
+    "tests/fixtures/producer-result-v1-clean.json": "995ca859631daee3d94abf435afeabbf5e8538897b7bf8b3ddba3c7e99083bee",
+    "tests/fixtures/producer-result-v1-truncated.json": "96ef67aeb7465f046c006efc0ba0d58f5471bb8857fccae6d853a2a5862c661e",
+    "tests/fixtures/producer-result-v1-unresolved.json": "7e075b183182d667cfdc197bca3f0732f296f12fdb6617a001c2d48ff3d659a9",
+    "tests/fixtures/revision-review-result-v1-eligible.json": "35cb0da391051b7ae081d8f8c573a120ddc343878c30d15cbedaf6e0ef317868",
+    "tests/fixtures/revision-review-result-v1-expired.json": "42b75bd4f30a6cc58683783a520efc36c2154255c381a5e9963dd951a95b3ec3",
+    "tests/fixtures/scalar-handover-result-v1-expired.json": "193ec81ee05e6b148239a4810e3604475683d58e74d1227bc0987646ec7e43aa",
+    "tests/fixtures/scalar-handover-result-v1-reset.json": "b1ca416557e588e9363f4423bcfd9cda0b152a2d9868177089768c6f77db2cb6",
+    "tests/fixtures/scalar-handover-result-v1-retained.json": "ccb1483624824bdca6144d99652eec2fb498fc4eb0bce076861bd1e934ab0d81"
+  },
+  "public_python": {
+    "Authority": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "as_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict'"
+        }
+      },
+      "signature": "(reachable_tools: 'frozenset[str]' = frozenset(), effects: 'frozenset[tuple[str, str]]' = frozenset(), ungated_irreversible: 'frozenset[str]' = frozenset(), service_principal_tools: 'frozenset[str]' = frozenset(), max_extractable: 'Money | None' = None, breaches: 'tuple[Breach, ...]' = (), depth: 'int' = 0, truncated: 'bool' = False) -> None"
+    },
+    "Binding": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "empty": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        }
+      },
+      "signature": "(label: 'str', where: 'str', module: 'str', callee: 'str', references: 'tuple[Reference, ...]', unresolved: 'tuple[str, ...]', listed: 'bool', recognised: 'bool') -> None"
+    },
+    "Breach": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(kind: 'str', detail: 'str', path: 'tuple[Step, ...]', subject: 'str | None' = None) -> None"
+    },
+    "Change": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(direction: 'str', kind: 'str', detail: 'str') -> None"
+    },
+    "Conformance": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "as_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict'"
+        },
+        "conformant": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        },
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(observed: 'int', violations: 'tuple[Violation, ...]') -> None"
+    },
+    "Declaration": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "confirmed": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        },
+        "name": {
+          "kind": "property",
+          "signature": "(self) -> 'str'"
+        },
+        "qualified": {
+          "kind": "property",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(proposal: 'Proposal', symbol: 'str', module: 'str', origin: 'str | None', arguments: 'tuple[str, ...]' = ()) -> None"
+    },
+    "Delta": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "as_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict'"
+        },
+        "direction": {
+          "kind": "property",
+          "signature": "(self) -> 'str'"
+        },
+        "record": {
+          "kind": "function",
+          "signature": "(self, before_label: 'str' = 'before', after_label: 'str' = 'after') -> 'str'"
+        },
+        "render": {
+          "kind": "function",
+          "signature": "(self, before_label: 'str' = 'before', after_label: 'str' = 'after') -> 'str'"
+        },
+        "widened": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        }
+      },
+      "signature": "(before: 'Authority', after: 'Authority', changes: 'tuple[Change, ...]', after_agent: 'str' = 'agent') -> None"
+    },
+    "Drift": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "as_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict'"
+        },
+        "clean": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        },
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(agent: 'str', declared: 'tuple[str, ...]', discovered: 'tuple[str, ...]', findings: 'tuple[DriftFinding, ...]', source: 'str' = '', inventory_as_of: 'str | None' = None) -> None"
+    },
+    "DriftFinding": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(kind: 'str', tool: 'str', message: 'str') -> None"
+    },
+    "Finding": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(rule: 'str', severity: 'str', subject: 'str', message: 'str') -> None"
+    },
+    "Inventory": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "candidates": {
+          "kind": "property",
+          "signature": "(self) -> 'list[Binding]'"
+        }
+      },
+      "signature": "(proposals: 'list[Proposal]' = <factory>, declarations: 'list[Declaration]' = <factory>, selected: 'Binding | None' = None, bindings: 'list[Binding]' = <factory>, unbound: 'list[str]' = <factory>, undeclared: 'list[str]' = <factory>, ambiguous: 'list[str]' = <factory>, unconfirmed: 'list[str]' = <factory>, unreadable: 'list[str]' = <factory>, unresolved: 'list[str]' = <factory>, united: 'bool' = False, files_read: 'int' = 0) -> None"
+    },
+    "InventoryError": {
+      "bases": [
+        "ValueError"
+      ],
+      "kind": "class",
+      "members": {},
+      "signature": null
+    },
+    "Limits": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "parse": {
+          "kind": "classmethod",
+          "signature": "(raw: 'Any') -> 'Limits'"
+        }
+      },
+      "signature": "(total: 'Money | None' = None, depth: 'int' = 8, effects: 'Mapping[str, int]' = <factory>) -> None"
+    },
+    "Mandate": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "parse": {
+          "kind": "classmethod",
+          "signature": "(raw: 'Any', source: 'str | None' = None) -> 'Mandate'"
+        },
+        "tool": {
+          "kind": "function",
+          "signature": "(self, name: 'str') -> 'Tool | None'"
+        },
+        "tool_names": {
+          "kind": "property",
+          "signature": "(self) -> 'tuple[str, ...]'"
+        }
+      },
+      "signature": "(agent: 'str', tools: 'tuple[Tool, ...]', identity: 'str | None' = None, limits: 'Limits' = <factory>, roles: 'dict[str, tuple[str, ...]]' = <factory>, source: 'str | None' = None) -> None"
+    },
+    "ManifestError": {
+      "bases": [
+        "ValueError"
+      ],
+      "kind": "class",
+      "members": {},
+      "signature": null
+    },
+    "Money": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "parse": {
+          "kind": "classmethod",
+          "signature": "(raw: 'Any', where: 'str') -> 'Money'"
+        }
+      },
+      "signature": "(amount: 'Decimal', currency: 'str') -> None"
+    },
+    "OBLIGATIONS_SCHEMA": {
+      "kind": "constant",
+      "value": "agentmandate.obligations/v1"
+    },
+    "Obligation": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "from_dict": {
+          "kind": "classmethod",
+          "signature": "(value: 'Any') -> 'Obligation'"
+        },
+        "identifier": {
+          "kind": "property",
+          "signature": "(self) -> 'str'"
+        },
+        "reviewed": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        },
+        "to_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict[str, Any]'"
+        }
+      },
+      "signature": "(kind: 'str', subject: 'str', reason: 'str', decision: 'str' = '', cases: 'tuple[str, ...]' = ()) -> None"
+    },
+    "ObligationSet": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "decisions": {
+          "kind": "property",
+          "signature": "(self) -> 'tuple[str, ...]'"
+        },
+        "from_dict": {
+          "kind": "classmethod",
+          "signature": "(value: 'Any') -> 'ObligationSet'"
+        },
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        },
+        "to_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict[str, Any]'"
+        },
+        "unreviewed": {
+          "kind": "property",
+          "signature": "(self) -> 'tuple[str, ...]'"
+        }
+      },
+      "signature": "(agent: 'str', obligations: 'tuple[Obligation, ...]') -> None"
+    },
+    "Observation": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "parse": {
+          "kind": "classmethod",
+          "signature": "(raw: 'dict', line: 'int') -> 'Observation'"
+        }
+      },
+      "signature": "(tool: 'str', scope: 'str | None' = None, value: 'Decimal | None' = None, approved: 'bool' = False, principal: 'str | None' = None, currency: 'str | None' = None, errored: 'bool' = False, line: 'int' = 0) -> None"
+    },
+    "Proposal": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {},
+      "signature": "(name: 'str', effect: 'str', guessed_effect: 'bool', scope: 'str | None' = None, value_arg: 'str | None' = None, description: 'str' = '') -> None"
+    },
+    "SCENARIOS_SCHEMA": {
+      "kind": "constant",
+      "value": "agentmandate.scenarios/v1"
+    },
+    "Scenario": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "from_breach": {
+          "kind": "classmethod",
+          "signature": "(breach: 'Breach') -> 'Scenario'"
+        },
+        "from_dict": {
+          "kind": "classmethod",
+          "signature": "(value: 'Any') -> 'Scenario'"
+        },
+        "identifier": {
+          "kind": "property",
+          "signature": "(self) -> 'str'"
+        },
+        "reviewed": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        },
+        "to_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict[str, Any]'"
+        }
+      },
+      "signature": "(kind: 'str', detail: 'str', path: 'tuple[ScenarioStep, ...]', environment: 'tuple[str, ...]' = (), agent_input: 'str' = '', expected_control: 'str' = '') -> None"
+    },
+    "ScenarioSet": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "from_dict": {
+          "kind": "classmethod",
+          "signature": "(value: 'Any') -> 'ScenarioSet'"
+        },
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        },
+        "to_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict[str, Any]'"
+        },
+        "unreviewed": {
+          "kind": "property",
+          "signature": "(self) -> 'tuple[str, ...]'"
+        }
+      },
+      "signature": "(agent: 'str', depth: 'int', truncated: 'bool', scenarios: 'tuple[Scenario, ...]') -> None"
+    },
+    "ScenarioStep": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "from_dict": {
+          "kind": "classmethod",
+          "signature": "(value: 'Any') -> 'ScenarioStep'"
+        },
+        "from_step": {
+          "kind": "classmethod",
+          "signature": "(step: 'Step') -> 'ScenarioStep'"
+        },
+        "to_dict": {
+          "kind": "function",
+          "signature": "(self) -> 'dict[str, str]'"
+        }
+      },
+      "signature": "(tool: 'str', binding: 'str | None' = None, spent: 'str | None' = None, currency: 'str | None' = None) -> None"
+    },
+    "Step": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(tool: 'str', binding: 'str | None' = None, spent: 'Decimal | None' = None, currency: 'str | None' = None) -> None"
+    },
+    "Tool": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "parse": {
+          "kind": "classmethod",
+          "signature": "(raw: 'Any', index: 'int') -> 'Tool'"
+        },
+        "spends_value": {
+          "kind": "property",
+          "signature": "(self) -> 'bool'"
+        }
+      },
+      "signature": "(name: 'str', effect: 'str', principal: 'str' = 'caller', requires: 'tuple[str, ...]' = (), produces: 'str | None' = None, unbounded: 'bool' = False, value_arg: 'str | None' = None, ceiling: 'Money | None' = None, scope_key: 'str | None' = None, requires_approval: 'bool' = False) -> None"
+    },
+    "Violation": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "render": {
+          "kind": "function",
+          "signature": "(self) -> 'str'"
+        }
+      },
+      "signature": "(kind: 'str', observation: 'Observation', message: 'str') -> None"
+    },
+    "__version__": {
+      "kind": "release-version"
+    },
+    "analyse": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate', depth: 'int | None' = None) -> 'Authority'"
+    },
+    "check": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate') -> 'list[Finding]'"
+    },
+    "collect": {
+      "kind": "function",
+      "signature": "(root: 'str | Path', *, binding: 'str | None' = None, union: 'bool' = False) -> 'Inventory'"
+    },
+    "compare": {
+      "kind": "function",
+      "signature": "(before: 'Mandate', after: 'Mandate', depth: 'int | None' = None) -> 'Delta'"
+    },
+    "compare_source": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate', root: 'str | Path', *, binding: 'str | None' = None, union: 'bool' = False) -> 'Drift'"
+    },
+    "derive": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate', depth: 'int | None' = None) -> 'ObligationSet'"
+    },
+    "derive_scenarios": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate', depth: 'int | None' = None) -> 'ScenarioSet'"
+    },
+    "load": {
+      "kind": "function",
+      "signature": "(path: 'str | Path') -> 'Mandate'"
+    },
+    "load_obligations": {
+      "kind": "function",
+      "signature": "(path: 'str | Path') -> 'ObligationSet'"
+    },
+    "load_scenarios": {
+      "kind": "function",
+      "signature": "(path: 'str | Path') -> 'ScenarioSet'"
+    },
+    "loads": {
+      "kind": "function",
+      "signature": "(text: 'str', source: 'str | None' = None) -> 'Mandate'"
+    },
+    "propose": {
+      "kind": "function",
+      "signature": "(catalogue: 'Any') -> 'list[Proposal]'"
+    },
+    "reconcile": {
+      "kind": "function",
+      "signature": "(current: 'ObligationSet', reviewed: 'ObligationSet') -> 'ObligationSet'"
+    },
+    "reconcile_scenarios": {
+      "kind": "function",
+      "signature": "(current: 'ScenarioSet', reviewed: 'ScenarioSet') -> 'ScenarioSet'"
+    },
+    "render": {
+      "kind": "function",
+      "signature": "(proposals: 'list[Proposal]', agent: 'str', notes: 'list[str] | None' = None, origin: 'str' = 'tool catalogue') -> 'str'"
+    },
+    "replay": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate', observations: 'list[Observation]') -> 'Conformance'"
+    },
+    "replay_file": {
+      "kind": "function",
+      "signature": "(mandate: 'Mandate', path: 'str | Path') -> 'Conformance'"
+    },
+    "save_obligations": {
+      "kind": "function",
+      "signature": "(obligations: 'ObligationSet', path: 'str | Path') -> 'None'"
+    },
+    "save_scenarios": {
+      "kind": "function",
+      "signature": "(scenarios: 'ScenarioSet', path: 'str | Path') -> 'None'"
+    },
+    "scan_file": {
+      "kind": "function",
+      "signature": "(path: 'str | Path', agent: 'str') -> 'str'"
+    },
+    "scan_source": {
+      "kind": "function",
+      "signature": "(root: 'str | Path', agent: 'str', *, binding: 'str | None' = None, union: 'bool' = False) -> 'str'"
+    },
+    "to_decision_suite": {
+      "kind": "function",
+      "signature": "(obligations: 'ObligationSet', *, critical: 'bool' = True) -> 'dict[str, Any]'"
+    }
+  }
+}

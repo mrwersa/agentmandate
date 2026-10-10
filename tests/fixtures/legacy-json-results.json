@@ -1,0 +1,186 @@
+[
+  {
+    "argv": [
+      "lint",
+      "examples/dispute-resolver.yaml",
+      "--json"
+    ],
+    "exit": 0,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4"
+    },
+    "name": "lint-reviewed",
+    "stderr": "",
+    "stdout": "{\n  \"findings\": []\n}\n"
+  },
+  {
+    "argv": [
+      "reach",
+      "examples/dispute-resolver-v2.yaml",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver-v2.yaml": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "name": "reach-breached",
+    "stderr": "",
+    "stdout": "{\n  \"breaches\": [\n    {\n      \"detail\": \"cumulative value 1000 GBP exceeds limit 500 GBP\",\n      \"kind\": \"cumulative_value\",\n      \"path\": [\n        \"open_case(case#1)\",\n        \"search_cases(case#2)\",\n        \"issue_refund(case#1, 500 GBP)\",\n        \"issue_refund(case#2, 500 GBP)\"\n      ]\n    }\n  ],\n  \"depth\": 8,\n  \"effects\": [\n    [\n      \"irreversible\",\n      \"case\"\n    ],\n    [\n      \"read\",\n      \"case\"\n    ]\n  ],\n  \"max_extractable\": {\n    \"amount\": \"2000\",\n    \"currency\": \"GBP\"\n  },\n  \"reachable_tools\": [\n    \"fetch_case\",\n    \"issue_refund\",\n    \"open_case\",\n    \"search_cases\"\n  ],\n  \"service_principal_tools\": [],\n  \"truncated\": true,\n  \"ungated_irreversible\": []\n}\n"
+  },
+  {
+    "argv": [
+      "reach",
+      "probes/search/pure-read.json",
+      "--json"
+    ],
+    "exit": 0,
+    "inputs": {
+      "probes/search/pure-read.json": "f8063a3a9cfbc844cac5f0fc8783334c8eea291c97e8b2f6b726135a56c8b1e4"
+    },
+    "name": "reach-clean",
+    "stderr": "",
+    "stdout": "{\n  \"breaches\": [],\n  \"depth\": 8,\n  \"effects\": [],\n  \"max_extractable\": null,\n  \"reachable_tools\": [\n    \"read\"\n  ],\n  \"service_principal_tools\": [],\n  \"truncated\": false,\n  \"ungated_irreversible\": []\n}\n"
+  },
+  {
+    "argv": [
+      "diff",
+      "examples/dispute-resolver.yaml",
+      "examples/dispute-resolver-v2.yaml",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver-v2.yaml": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9",
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4"
+    },
+    "name": "diff-widened",
+    "stderr": "",
+    "stdout": "{\n  \"after\": {\n    \"breaches\": [\n      {\n        \"detail\": \"cumulative value 1000 GBP exceeds limit 500 GBP\",\n        \"kind\": \"cumulative_value\",\n        \"path\": [\n          \"open_case(case#1)\",\n          \"search_cases(case#2)\",\n          \"issue_refund(case#1, 500 GBP)\",\n          \"issue_refund(case#2, 500 GBP)\"\n        ]\n      }\n    ],\n    \"depth\": 8,\n    \"effects\": [\n      [\n        \"irreversible\",\n        \"case\"\n      ],\n      [\n        \"read\",\n        \"case\"\n      ]\n    ],\n    \"max_extractable\": {\n      \"amount\": \"2000\",\n      \"currency\": \"GBP\"\n    },\n    \"reachable_tools\": [\n      \"fetch_case\",\n      \"issue_refund\",\n      \"open_case\",\n      \"search_cases\"\n    ],\n    \"service_principal_tools\": [],\n    \"truncated\": true,\n    \"ungated_irreversible\": []\n  },\n  \"before\": {\n    \"breaches\": [],\n    \"depth\": 8,\n    \"effects\": [\n      [\n        \"irreversible\",\n        \"case\"\n      ],\n      [\n        \"read\",\n        \"case\"\n      ]\n    ],\n    \"max_extractable\": {\n      \"amount\": \"500\",\n      \"currency\": \"GBP\"\n    },\n    \"reachable_tools\": [\n      \"fetch_case\",\n      \"issue_refund\",\n      \"open_case\"\n    ],\n    \"service_principal_tools\": [],\n    \"truncated\": false,\n    \"ungated_irreversible\": []\n  },\n  \"changes\": [\n    {\n      \"detail\": \"gained search_cases\",\n      \"direction\": \"widening\",\n      \"kind\": \"tool\"\n    },\n    {\n      \"detail\": \"500 -> 2000 GBP\",\n      \"direction\": \"widening\",\n      \"kind\": \"extractable value\"\n    },\n    {\n      \"detail\": \"gained cumulative_value\",\n      \"direction\": \"widening\",\n      \"kind\": \"reachable breach\"\n    }\n  ],\n  \"direction\": \"widening\"\n}\n"
+  },
+  {
+    "argv": [
+      "verify",
+      "examples/dispute-resolver.yaml",
+      "--traces",
+      "examples/observed-calls.jsonl",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4",
+      "examples/observed-calls.jsonl": "d4769b576e6a2e15d4d657db875b17db0e0de9b5c0129d07718e72d69ab30930"
+    },
+    "name": "verify-recorded",
+    "stderr": "",
+    "stdout": "{\n  \"conformant\": false,\n  \"observed\": 4,\n  \"violations\": [\n    {\n      \"kind\": \"ceiling_exceeded\",\n      \"line\": 3,\n      \"message\": \"cumulative 750 against scope 'case-4471' exceeds the declared ceiling 500\",\n      \"tool\": \"issue_refund\"\n    },\n    {\n      \"kind\": \"undeclared_tool\",\n      \"line\": 4,\n      \"message\": \"the run called a tool the mandate does not declare, so the declaration no longer describes the agent\",\n      \"tool\": \"export_case_bundle\"\n    },\n    {\n      \"kind\": \"total_exceeded\",\n      \"line\": 0,\n      \"message\": \"the run spent 750 against a declared total limit of 500\",\n      \"tool\": \"<run>\"\n    }\n  ]\n}\n"
+  },
+  {
+    "argv": [
+      "verify",
+      "examples/dispute-resolver.yaml",
+      "--otel",
+      "examples/otel-trace.json",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4",
+      "examples/otel-trace.json": "82e6f24ecbb6df50bb5cdc68652d18ad6865084c38c59c3b11d5aed75d9a3013"
+    },
+    "name": "verify-otel",
+    "stderr": "",
+    "stdout": "{\n  \"conformance\": {\n    \"conformant\": false,\n    \"observed\": 3,\n    \"violations\": [\n      {\n        \"kind\": \"missing_principal\",\n        \"line\": 1,\n        \"message\": \"the record does not identify which principal executed the call\",\n        \"tool\": \"open_case\"\n      },\n      {\n        \"kind\": \"missing_principal\",\n        \"line\": 2,\n        \"message\": \"the record does not identify which principal executed the call\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_approval\",\n        \"line\": 2,\n        \"message\": \"the mandate requires approval for this call and the record shows none\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_scope\",\n        \"line\": 2,\n        \"message\": \"the record omits the 'case' scope used by the ceiling\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_value\",\n        \"line\": 2,\n        \"message\": \"the record omits the declared value argument 'amount'\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_currency\",\n        \"line\": 2,\n        \"message\": \"the record omits the currency, so its value cannot be compared with the declared ceiling\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_principal\",\n        \"line\": 3,\n        \"message\": \"the record does not identify which principal executed the call\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_approval\",\n        \"line\": 3,\n        \"message\": \"the mandate requires approval for this call and the record shows none\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_scope\",\n        \"line\": 3,\n        \"message\": \"the record omits the 'case' scope used by the ceiling\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_value\",\n        \"line\": 3,\n        \"message\": \"the record omits the declared value argument 'amount'\",\n        \"tool\": \"issue_refund\"\n      },\n      {\n        \"kind\": \"missing_currency\",\n        \"line\": 3,\n        \"message\": \"the record omits the currency, so its value cannot be compared with the declared ceiling\",\n        \"tool\": \"issue_refund\"\n      }\n    ]\n  },\n  \"conversion\": {\n    \"duplicates\": 0,\n    \"errored\": 0,\n    \"observations\": 3,\n    \"tool_calls\": 3,\n    \"total_spans\": 5,\n    \"traces\": 1,\n    \"unmapped\": [\n      \"scope\",\n      \"value\",\n      \"currency\",\n      \"principal\",\n      \"approved\"\n    ]\n  },\n  \"schema\": \"agentmandate.verify/v1\"\n}\n"
+  },
+  {
+    "argv": [
+      "drift",
+      "examples/dispute-resolver.yaml",
+      "--source",
+      "examples/refund_agent.py",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4",
+      "examples/refund_agent.py": "21a305160360a4503b4be29e9893d11fca926f4d8c73612a5ccec1c4dab95503"
+    },
+    "name": "drift-source",
+    "stderr": "",
+    "stdout": "{\n  \"agent\": \"dispute-resolver\",\n  \"declared\": [\n    \"fetch_case\",\n    \"issue_refund\",\n    \"open_case\"\n  ],\n  \"discovered\": [\n    \"close_case\",\n    \"issue_refund\",\n    \"open_case\",\n    \"search_cases\"\n  ],\n  \"clean\": false,\n  \"source\": \"refund_agent.py:47 (agent)\",\n  \"findings\": [\n    {\n      \"kind\": \"undeclared\",\n      \"tool\": \"close_case\",\n      \"subject\": \"close_case\",\n      \"message\": \"the agent is given this tool and the mandate does not declare it, so every reach and diff run so far analysed a smaller graph than the real one\"\n    },\n    {\n      \"kind\": \"undeclared\",\n      \"tool\": \"search_cases\",\n      \"subject\": \"search_cases\",\n      \"message\": \"the agent is given this tool and the mandate does not declare it, so every reach and diff run so far analysed a smaller graph than the real one\"\n    },\n    {\n      \"kind\": \"removed\",\n      \"tool\": \"fetch_case\",\n      \"subject\": \"fetch_case\",\n      \"message\": \"the mandate declares this tool and the agent is not given it in source, so the analysis is defending authority nobody has. A gate that reports breaches nobody can reach gets switched off.\"\n    }\n  ]\n}\n"
+  },
+  {
+    "argv": [
+      "obligations",
+      "examples/dispute-resolver.yaml",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4"
+    },
+    "name": "obligations",
+    "stderr": "",
+    "stdout": "{\n  \"agent\": \"dispute-resolver\",\n  \"obligations\": [\n    {\n      \"cases\": [],\n      \"decision\": \"\",\n      \"id\": \"irreversible:issue_refund\",\n      \"kind\": \"irreversible\",\n      \"reason\": \"an irreversible effect is reachable, so some reviewed case should exercise the decision that leads to it\",\n      \"subject\": \"issue_refund\"\n    },\n    {\n      \"cases\": [],\n      \"decision\": \"\",\n      \"id\": \"approval-required:issue_refund\",\n      \"kind\": \"approval-required\",\n      \"reason\": \"an approval gate is reachable, and a gate no test reaches has never been shown to hold\",\n      \"subject\": \"issue_refund\"\n    },\n    {\n      \"cases\": [],\n      \"decision\": \"\",\n      \"id\": \"value-bearing:issue_refund\",\n      \"kind\": \"value-bearing\",\n      \"reason\": \"this call spends value up to 500 GBP, so the decision that authorises it deserves reviewed cases\",\n      \"subject\": \"issue_refund\"\n    }\n  ],\n  \"schema\": \"agentmandate.obligations/v1\"\n}\n"
+  },
+  {
+    "argv": [
+      "obligations",
+      "examples/dispute-resolver.yaml",
+      "--reviewed",
+      "examples/reviewed-obligations.json",
+      "--suite",
+      "--json"
+    ],
+    "exit": 0,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4",
+      "examples/reviewed-obligations.json": "cb91e47a05ded04e40f74e52f7379bbbf6c7b0e2be06bf218e158eff4f872066"
+    },
+    "name": "decision-suite",
+    "stderr": "",
+    "stdout": "{\n  \"schema\": \"agentverity.decision-suite/v1\",\n  \"contract\": {\n    \"allowed\": [\n      \"refund_approved\"\n    ],\n    \"required\": [\n      \"refund_approved\"\n    ],\n    \"critical\": [\n      \"refund_approved\"\n    ]\n  },\n  \"cases\": [\n    {\n      \"input\": \"A customer disputes a duplicate charge of 40 GBP and asks for a refund.\",\n      \"expected\": \"refund_approved\"\n    },\n    {\n      \"input\": \"A supervisor is asked to approve a 480 GBP goodwill refund.\",\n      \"expected\": \"refund_approved\"\n    },\n    {\n      \"input\": \"A merchant chargeback for 120 GBP needs a refund decision.\",\n      \"expected\": \"refund_approved\"\n    }\n  ]\n}\n"
+  },
+  {
+    "argv": [
+      "obligations",
+      "examples/dispute-resolver.yaml",
+      "--suite",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver.yaml": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4"
+    },
+    "name": "unreviewed-suite-refused",
+    "stderr": "error: these obligations are not fully reviewed yet: irreversible:issue_refund, approval-required:issue_refund, value-bearing:issue_refund. Each needs the decision your agent returns and at least one probe that reaches it. A suite generated from placeholders would run and measure nothing.\n",
+    "stdout": ""
+  },
+  {
+    "argv": [
+      "scenarios",
+      "examples/dispute-resolver-v2.yaml",
+      "--json"
+    ],
+    "exit": 1,
+    "inputs": {
+      "examples/dispute-resolver-v2.yaml": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "name": "scenarios",
+    "stderr": "",
+    "stdout": "{\n  \"agent\": \"dispute-resolver\",\n  \"depth\": 8,\n  \"scenarios\": [\n    {\n      \"agent_input\": \"\",\n      \"detail\": \"cumulative value 1000 GBP exceeds limit 500 GBP\",\n      \"environment\": [],\n      \"expected_control\": \"\",\n      \"id\": \"cumulative_value:open_case>search_cases>issue_refund>issue_refund:02e19b4bb976\",\n      \"kind\": \"cumulative_value\",\n      \"path\": [\n        {\n          \"binding\": \"case#1\",\n          \"tool\": \"open_case\"\n        },\n        {\n          \"binding\": \"case#2\",\n          \"tool\": \"search_cases\"\n        },\n        {\n          \"binding\": \"case#1\",\n          \"currency\": \"GBP\",\n          \"spent\": \"500\",\n          \"tool\": \"issue_refund\"\n        },\n        {\n          \"binding\": \"case#2\",\n          \"currency\": \"GBP\",\n          \"spent\": \"500\",\n          \"tool\": \"issue_refund\"\n        }\n      ]\n    }\n  ],\n  \"schema\": \"agentmandate.scenarios/v1\",\n  \"truncated\": true\n}\n"
+  },
+  {
+    "argv": [
+      "reach",
+      "tests/fixtures/authority-ir-invalid/malformed.json",
+      "--json"
+    ],
+    "exit": 2,
+    "inputs": {
+      "tests/fixtures/authority-ir-invalid/malformed.json": "9b4aacc7933574db0570443dbad07eead9a0a9475a01df57b8f2772699495790"
+    },
+    "name": "malformed",
+    "stderr": "error: manifest: invalid JSON: Expecting value: line 2 column 1 (char 28)\n",
+    "stdout": ""
+  }
+]

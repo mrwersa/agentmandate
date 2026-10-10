@@ -1,0 +1,424 @@
+[
+  {
+    "doc": "docs/manifest.md",
+    "fixtures": [
+      "tests/fixtures/manifest-v1-all-defaults.yaml",
+      "tests/fixtures/manifest-v1-shorthand-defaults.yaml"
+    ],
+    "id": "manifest",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_manifest.py",
+      "tests/test_ir_compatibility.py"
+    ]
+  },
+  {
+    "doc": "docs/authority-ir.md",
+    "fixtures": [
+      "tests/fixtures/authority-ir-invalid/duplicate-entity-id.json",
+      "tests/fixtures/authority-ir-invalid/edge-invalid-relation.json",
+      "tests/fixtures/authority-ir-invalid/edge-support-type.json",
+      "tests/fixtures/authority-ir-invalid/entity-extra-field.json",
+      "tests/fixtures/authority-ir-invalid/evidence-extra-field.json",
+      "tests/fixtures/authority-ir-invalid/fact-invalid-evidence.json",
+      "tests/fixtures/authority-ir-invalid/malformed.json",
+      "tests/fixtures/authority-ir-invalid/snapshot-table-type.json",
+      "tests/fixtures/authority-ir-invalid/source-missing-field.json",
+      "tests/fixtures/authority-ir-v1.json"
+    ],
+    "id": "authority-ir-and-adapters",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_ir_compatibility.py",
+      "tests/test_ir_validation.py",
+      "tests/test_ir_profile.py"
+    ]
+  },
+  {
+    "doc": "docs/authority-ir.md",
+    "fixtures": [
+      "tests/fixtures/authority-ir-result-v1-breached.json",
+      "tests/fixtures/authority-ir-result-v1-clean.json",
+      "tests/fixtures/authority-ir-result-v1-truncated.json"
+    ],
+    "id": "authority-ir-result",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_ir_result.py"
+    ]
+  },
+  {
+    "doc": "docs/dynamic-inventory.md",
+    "fixtures": [
+      "tests/fixtures/dynamic-inventory-agentkit-v1.json",
+      "tests/fixtures/dynamic-inventory-sentry-v1.json"
+    ],
+    "id": "dynamic-inventory",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_dynamic_inventory.py"
+    ]
+  },
+  {
+    "doc": "docs/conditions-delegation.md",
+    "fixtures": [
+      "tests/fixtures/condition-context-select-only-complete-v1.json",
+      "tests/fixtures/condition-context-select-v1.json",
+      "tests/fixtures/condition-dispatch-v1.json",
+      "tests/fixtures/condition-statement-v1.json",
+      "tests/fixtures/conditional-drift-result-v1.json",
+      "tests/fixtures/conditional-mandate-v1.yaml",
+      "tests/fixtures/conditional-reach-result-v1.json"
+    ],
+    "id": "conditions",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.conditions/v1"
+    ],
+    "tests": [
+      "tests/test_conditions.py"
+    ]
+  },
+  {
+    "doc": "docs/delegation-v2.md",
+    "fixtures": [
+      "tests/fixtures/delegation-attachment-v2.json",
+      "tests/fixtures/delegation-chain-authorizer-v1.json",
+      "tests/fixtures/delegation-chain-migrated-v1.json",
+      "tests/fixtures/delegation-grant-capture.json",
+      "tests/fixtures/delegation-grant-v1.json"
+    ],
+    "id": "delegation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.delegations/v1"
+    ],
+    "tests": [
+      "tests/test_delegation.py"
+    ]
+  },
+  {
+    "doc": "docs/cedar-import.md",
+    "fixtures": [
+      "docs/evidence/agentcore-refund-policy/controls-result.json",
+      "docs/evidence/agentcore-refund-policy/managed-oracle-v1.json",
+      "docs/evidence/agentcore-refund-policy/mapping.json",
+      "tests/fixtures/cedar-effective-diff-v1.json"
+    ],
+    "id": "managed-cedar-and-mapping",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.cedar-alignment/v1",
+      "agentmandate.cedar-effective-diff/v1"
+    ],
+    "tests": [
+      "tests/test_managed_cedar.py",
+      "tests/test_cedar.py"
+    ]
+  },
+  {
+    "doc": "docs/bounded-producers.md",
+    "fixtures": [
+      "tests/fixtures/producer-accepted-synthetic/boundary.json",
+      "tests/fixtures/producer-accepted-synthetic/catalogue.json",
+      "tests/fixtures/producer-accepted-synthetic/manifest.json",
+      "tests/fixtures/producer-accepted-synthetic/outcomes.json",
+      "tests/fixtures/producer-accepted-synthetic/selection.json",
+      "tests/fixtures/producer-boundary-iam-v1.json",
+      "tests/fixtures/producer-reach-result-v1.json",
+      "tests/fixtures/producer-result-v1-bounded.json",
+      "tests/fixtures/producer-result-v1-breached.json",
+      "tests/fixtures/producer-result-v1-clean.json",
+      "tests/fixtures/producer-result-v1-truncated.json",
+      "tests/fixtures/producer-result-v1-unresolved.json"
+    ],
+    "id": "producer",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.producers/v1"
+    ],
+    "tests": [
+      "tests/test_producer.py"
+    ]
+  },
+  {
+    "doc": "docs/authority-continuity.md",
+    "fixtures": [
+      "tests/fixtures/agentcore-continuity-v1.json",
+      "tests/fixtures/anthropic-continuity-v1.json",
+      "tests/fixtures/continuity-accepted-synthetic/binding-verification.json",
+      "tests/fixtures/continuity-accepted-synthetic/binding.json",
+      "tests/fixtures/continuity-accepted-synthetic/manifest.json",
+      "tests/fixtures/continuity-accepted-synthetic/policy.json",
+      "tests/fixtures/continuity-accepted-synthetic/provider-control.json",
+      "tests/fixtures/continuity-accepted-synthetic/provider.json",
+      "tests/fixtures/continuity-binding-v1.json",
+      "tests/fixtures/continuity-result-v1-overshot.json",
+      "tests/fixtures/continuity-result-v1-reset.json",
+      "tests/fixtures/continuity-result-v1-satisfied.json",
+      "tests/fixtures/continuity-result-v1-tightened.json",
+      "tests/fixtures/continuity-result-v1-truncated.json",
+      "tests/fixtures/continuity-result-v1-unresolved.json",
+      "tests/fixtures/continuity-result-v1-untrusted.json",
+      "tests/fixtures/continuity-result-v1-widened.json"
+    ],
+    "id": "continuity",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.continuity/v1"
+    ],
+    "tests": [
+      "tests/test_continuity.py"
+    ]
+  },
+  {
+    "doc": "docs/principal-continuity.md",
+    "fixtures": [
+      "examples/principal-continuity/profile.json",
+      "tests/fixtures/agentcore-principal-continuity-v1.json",
+      "tests/fixtures/principal-continuity-result-v1-eligible.json",
+      "tests/fixtures/principal-continuity-result-v1-expired.json"
+    ],
+    "id": "principal-continuity",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.principal-continuity/v1"
+    ],
+    "tests": [
+      "tests/test_principal_continuity.py"
+    ]
+  },
+  {
+    "doc": "docs/principal-accounting.md",
+    "fixtures": [
+      "examples/principal-continuity/accounting-binding.json",
+      "examples/principal-continuity/accounting-review.json",
+      "tests/fixtures/principal-accounting-result-v1-eligible.json",
+      "tests/fixtures/principal-accounting-result-v1-expired.json"
+    ],
+    "id": "principal-accounting",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.principal-accounting/v1"
+    ],
+    "tests": [
+      "tests/test_principal_accounting.py"
+    ]
+  },
+  {
+    "doc": "docs/revision-review.md",
+    "fixtures": [
+      "examples/revision-review/provider.json",
+      "examples/revision-review/review.json",
+      "tests/fixtures/revision-review-result-v1-eligible.json",
+      "tests/fixtures/revision-review-result-v1-expired.json"
+    ],
+    "id": "revision-review",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.revision-review/v1"
+    ],
+    "tests": [
+      "tests/test_revision_review.py"
+    ]
+  },
+  {
+    "doc": "docs/scalar-handover.md",
+    "fixtures": [
+      "examples/scalar-handover/after-policy.json",
+      "examples/scalar-handover/before-policy.json",
+      "examples/scalar-handover/handover-lost-reservation.json",
+      "examples/scalar-handover/handover-reset.json",
+      "examples/scalar-handover/handover.json",
+      "tests/fixtures/scalar-handover-result-v1-expired.json",
+      "tests/fixtures/scalar-handover-result-v1-reset.json",
+      "tests/fixtures/scalar-handover-result-v1-retained.json"
+    ],
+    "id": "scalar-handover-and-policy",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.scalar-handover/v1"
+    ],
+    "tests": [
+      "tests/test_scalar_handover.py"
+    ]
+  },
+  {
+    "doc": "docs/test-obligations.md",
+    "fixtures": [
+      "examples/reviewed-obligations.json"
+    ],
+    "id": "obligations-and-decision-suite",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.obligations/v1",
+      "agentverity.decision-suite/v1"
+    ],
+    "tests": [
+      "tests/test_obligations.py"
+    ]
+  },
+  {
+    "doc": "docs/evaluation-loop.md",
+    "fixtures": [
+      "tests/fixtures/legacy-json-results.json"
+    ],
+    "id": "scenarios",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.scenarios/v1"
+    ],
+    "tests": [
+      "tests/test_scenarios.py",
+      "tests/test_contract_inventory.py"
+    ]
+  },
+  {
+    "doc": "docs/traces.md",
+    "fixtures": [
+      "examples/observed-calls.jsonl",
+      "examples/otel-trace.json",
+      "tests/fixtures/legacy-json-results.json"
+    ],
+    "id": "trace-verification-and-sarif",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.verify/v1"
+    ],
+    "tests": [
+      "tests/test_verify.py",
+      "tests/test_otel.py",
+      "tests/test_findings.py"
+    ]
+  },
+  {
+    "doc": "docs/catalogue-import.md",
+    "fixtures": [
+      "examples/catalogue-import/a2a-1.0.json",
+      "examples/catalogue-import/a2a.json",
+      "examples/catalogue-import/manifest.json",
+      "examples/catalogue-import/mcp.json",
+      "examples/catalogue-import/openapi.json",
+      "tests/fixtures/catalogue-import/a2a-1.0-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/a2a-1.0-inventory-v1.json",
+      "tests/fixtures/catalogue-import/a2a-1.0-skeleton.yaml",
+      "tests/fixtures/catalogue-import/a2a-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/a2a-inventory-v1.json",
+      "tests/fixtures/catalogue-import/a2a-skeleton.yaml",
+      "tests/fixtures/catalogue-import/mcp-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/mcp-inventory-v1.json",
+      "tests/fixtures/catalogue-import/mcp-skeleton.yaml",
+      "tests/fixtures/catalogue-import/openapi-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/openapi-inventory-v1.json",
+      "tests/fixtures/catalogue-import/openapi-skeleton.yaml"
+    ],
+    "id": "protocol-catalogue-baselines",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_catalogue_import.py"
+    ]
+  },
+  {
+    "doc": "docs/ci.md",
+    "fixtures": [
+      "tests/fixtures/legacy-json-results.json"
+    ],
+    "id": "legacy-json",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_contract_inventory.py"
+    ]
+  },
+  {
+    "doc": "CONTRIBUTING.md",
+    "fixtures": [
+      "docs/evidence/agentcore-refund-policy/mandate.yaml",
+      "docs/evidence/agentkit/mandate.yaml",
+      "docs/evidence/aws-iam-access-keys/mandate.yaml",
+      "docs/evidence/aws-iam-access-keys/scan-skeleton.yaml",
+      "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "docs/evidence/aws-postgres-mcp/scan-skeleton.yaml",
+      "docs/evidence/github-mcp-server/mandate.yaml",
+      "docs/evidence/initiative-mcp/mandate.yaml",
+      "docs/evidence/initiative-mcp/scan-skeleton.yaml",
+      "docs/evidence/sentry-mcp/mandate.yaml",
+      "docs/evidence/sentry-mcp/scan-skeleton.yaml"
+    ],
+    "id": "archival-scanner-proposals",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_contract_inventory.py"
+    ]
+  },
+  {
+    "doc": "docs/pre-1.0-consolidation-audit.md",
+    "fixtures": [
+      "tests/fixtures/principal-delegated-user-v1.json",
+      "tests/fixtures/principal-fixed-user-v1.json",
+      "tests/fixtures/principal-intersecting-v1.json"
+    ],
+    "id": "historical-principal-v1",
+    "kind": "historical_replay",
+    "schemas": [],
+    "tests": [
+      "tests/test_conditions.py"
+    ]
+  },
+  {
+    "doc": "docs/pre-1.0-consolidation-audit.md",
+    "fixtures": [
+      "docs/evidence/cedar-document-cloud/bundle.json"
+    ],
+    "id": "historical-cedar-bundle-v1",
+    "kind": "historical_replay",
+    "schemas": [],
+    "tests": [
+      "tests/test_cedar.py"
+    ]
+  },
+  {
+    "doc": "docs/pre-1.0-consolidation-audit.md",
+    "fixtures": [
+      "tests/fixtures/agentcore-continuation-v1.json",
+      "tests/fixtures/agentcore-continuity-v1.json",
+      "tests/fixtures/agentcore-principal-observations-v1.json",
+      "tests/fixtures/agentcore-retransmission-v1.json",
+      "tests/fixtures/anthropic-continuity-v1.json",
+      "tests/fixtures/delegation-chain-authorizer-v1.json",
+      "tests/fixtures/delegation-chain-migrated-v1.json",
+      "tests/fixtures/producer-boundary-iam-v1.json"
+    ],
+    "id": "evidence-converters",
+    "kind": "historical_replay",
+    "schemas": [],
+    "tests": [
+      "tests/test_continuation_profile.py",
+      "tests/test_retransmission_profile.py",
+      "tests/test_principal_observations.py",
+      "tests/test_producer.py",
+      "tests/test_delegation.py",
+      "tests/test_continuity.py"
+    ]
+  },
+  {
+    "doc": "docs/continuation-evidence-acceptance.md",
+    "fixtures": [
+      "docs/continuity-reviews/agentcore-continuation-2026-10-09.json",
+      "docs/pre-1.0-consolidation-audit.md"
+    ],
+    "id": "historical-audit-and-acceptance",
+    "kind": "historical_replay",
+    "schemas": [],
+    "tests": [
+      "tests/test_pre_1_0_contract_audit.py",
+      "tests/test_continuation_evidence.py"
+    ]
+  }
+]

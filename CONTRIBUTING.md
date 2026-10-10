@@ -39,6 +39,11 @@ after CI passes and all review conversations are resolved.
 Maintainers should follow [RELEASING.md](RELEASING.md) when publishing a
 version.
 
+Before changing a public contract, run `python scripts/audit_contracts.py` from
+the checkout and follow the [compatibility review workflow](docs/current-contract-inventory.md).
+A changed inventory requires a compatibility decision; regenerating it alone
+does not establish that the change is safe.
+
 ## Writing documentation
 
 Lead with the task a reader can complete, then show the inputs, a runnable
