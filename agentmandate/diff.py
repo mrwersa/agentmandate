@@ -13,6 +13,7 @@ advisory board actually wants.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from .manifest import EFFECT_RANK, Mandate, Money, Tool
@@ -192,6 +193,29 @@ def _money_quantity_change(
             f"{before.amount} -> {after.amount} {after.currency}",
         )
     ]
+
+
+def _effect_budget_changes(
+    before: Mapping[str, int], after: Mapping[str, int]
+) -> list[Change]:
+    """Compare declared call allowances independently of breach witnesses."""
+    changes: list[Change] = []
+    for effect in sorted(set(before) | set(after)):
+        previous = before.get(effect)
+        proposed = after.get(effect)
+        if previous == proposed:
+            continue
+        if previous is None:
+            direction = NARROWING
+            detail = f"added limit {proposed} calls"
+        elif proposed is None:
+            direction = WIDENING
+            detail = f"removed limit {previous} calls"
+        else:
+            direction = WIDENING if proposed > previous else NARROWING
+            detail = f"{previous} -> {proposed} calls"
+        changes.append(Change(direction, "effect budget", f"{effect}: {detail}"))
+    return changes
 
 
 def _optional_value_change(
@@ -384,6 +408,7 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
     changes.extend(
         _money_change("run limit", before.limits.total, after.limits.total)
     )
+    changes.extend(_effect_budget_changes(before.limits.effects, after.limits.effects))
 
     before_breaches = frozenset(b.kind for b in lhs.breaches)
     after_breaches = frozenset(b.kind for b in rhs.breaches)

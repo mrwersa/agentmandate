@@ -4,6 +4,12 @@ Start with a reviewed manifest. Run `lint` and `reach` on every pull request;
 add a baseline for `diff` and source for `drift` when those inputs are available.
 Begin with `fail-on: never` to review findings before enabling blocking checks.
 
+`diff` compares declared call budgets as well as reachable authority. Raising
+or removing a `limits.effects` entry is widening even when no new breach appears
+or removing the limit makes its breach disappear. Inspect the allowance change
+and breach diagnostics separately; a tighter allowance can expose a new breach
+that still requires review under the existing combined verdict.
+
 Choose a search depth and keep `truncated` visible in reachability JSON.
 `reach` exits 1 for a breach; truncation alone can still exit 0. If the gate
 requires an exhaustive result for the declared model, additionally require

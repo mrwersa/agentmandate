@@ -142,8 +142,15 @@ value, and reachable breach kinds. A gain in any of those is widening.
 
 The diff also compares the contract of every tool reachable in both releases.
 Removing a precondition or approval, raising or removing a ceiling, increasing
-an effect class, enabling unbounded scope minting, or raising the run limit is
-widening even when the set of reachable tool names does not change. Amounts in
+an effect class, enabling unbounded scope minting, raising the run limit, or
+raising/removing an effect-count budget is widening even when reachable tools
+and breach witnesses do not change. Adding/reducing an effect budget narrows
+that declared allowance; zero is a limit and an absent class is unbounded.
+These limit changes are reported separately from gains or losses of breach
+diagnostics. Removing a budget can remove its diagnostic without narrowing
+the allowance. Conversely, a tighter limit can expose a new breach; the
+existing combined verdict still requires review for any newly reachable breach
+as well as any widening allowance change. Amounts in
 different currencies are not ordered. A currency change is sent for review
 rather than being called narrower because its numeral is smaller.
 

@@ -40,6 +40,13 @@ continuity contract needs an externally motivated counterexample and a scope
 decision rather than becoming the default next implementation task. This is
 a feature-scope freeze, not a claim that operational continuation is solved.
 
+**Release-gate fix awaiting review — 10 October 2026:** overall feedback exposed
+that `diff` omitted declared effect-count budgets: a 3→5 increase was neutral,
+and removing a budget could look narrower when its breach disappeared. The
+prepared correction compares every class independently, retains breach
+diagnostics, and adds Python/CLI regressions. This correctness fix takes
+priority over further feature work and completes no roadmap initiative.
+
 **Review checkpoint — 6 November 2026, mrwersa:** renew or let lapse the
 [six accepted historical AgentCore observations](docs/continuation-evidence-acceptance.md).
 Their current acceptance expires 8 November inclusive UTC and is ineligible
