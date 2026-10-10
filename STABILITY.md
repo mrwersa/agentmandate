@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.19.0
+agentmandate~=0.20.0
 ```
 
 ## Versioned authority artifacts
@@ -130,6 +130,14 @@ does not establish reset or resolve continuation safety; this path always exits 
 Existing unbound v1 output is unchanged. Both new contracts have initial
 [compatibility fixtures](docs/principal-accounting.md#compatibility-and-remaining-work);
 these are baselines, not migrations or completion of the whole 1.0 audit.
+
+The opt-in `revision_review_version: 1` attachment selects
+`agentmandate.revision-review/v1`. It nests the unchanged continuity baseline
+and reports separately reviewed comparison and issuer-treatment claims within
+an explicit scope. It never promotes these scoped claims to global safe
+continuation and always exits 1. Existing commands without review input keep
+their result bytes and exit behavior. The [contract and initial fixtures](docs/revision-review.md)
+cover this new surface; no historical acceptance or binding is inferred.
 
 ## What is most likely to change
 

@@ -66,6 +66,7 @@ from ._producer import (
     ProducerSelection,
     analyse_producers,
 )
+from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
 from .diff import compare
 from .drift import compare as compare_drift
 from .findings import render_sarif, to_mermaid
@@ -365,6 +366,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="captured bytes for one provider source locator; repeatable",
     )
     continuity_reconcile.add_argument("--continuity-binding", metavar="BINDING")
+    continuity_reconcile.add_argument("--continuity-review", metavar="REVISION_REVIEW")
+    continuity_reconcile.add_argument(
+        "--continuity-review-source", action="append", default=None, metavar="LOCATOR=CAPTURE",
+        help="captured bytes for one revision-review source locator; repeatable",
+    )
     continuity_reconcile.add_argument(
         "--continuity-binding-source",
         action="append",
@@ -736,7 +742,7 @@ def _continuity_artifact(
     text: str,
 ) -> (
     ContinuityBinding | AgentCoreContinuity | AnthropicContinuity
-    | PrincipalContinuity | PrincipalAccountingBinding
+    | PrincipalContinuity | PrincipalAccountingBinding | RevisionReview
 ):
     try:
         raw = json.loads(text)
@@ -750,6 +756,7 @@ def _continuity_artifact(
         "anthropic_continuity_version": AnthropicContinuity,
         "principal_continuity_version": PrincipalContinuity,
         "principal_accounting_binding_version": PrincipalAccountingBinding,
+        "revision_review_version": RevisionReview,
     }
     matches = [reader for field, reader in readers.items() if field in raw]
     if len(matches) != 1:
@@ -851,6 +858,7 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 AnthropicContinuity: "Anthropic continuity profile",
                 PrincipalContinuity: "principal continuity profile",
                 PrincipalAccountingBinding: "principal accounting binding",
+                RevisionReview: "revision review",
             }
             print(f"valid {labels[type(artifact)]} v{artifact.version}")
             return EXIT_OK
@@ -873,9 +881,20 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 "--continuity-binding-source is required with --continuity-binding"
             )
 
+        review_paths = _continuity_source_paths(
+            args.continuity_review_source, "--continuity-review-source"
+        )
+        if (args.continuity_review is not None) != bool(review_paths):
+            raise ContinuityFormatError(
+                "--continuity-review and --continuity-review-source must be supplied together"
+            )
         provider = _continuity_artifact(_read_text(args.continuity_provider))
-        if isinstance(provider, (ContinuityBinding, PrincipalAccountingBinding)):
+        if isinstance(provider, (ContinuityBinding, PrincipalAccountingBinding, RevisionReview)):
             raise ContinuityFormatError("--continuity-provider requires a provider profile")
+        if args.continuity_review is not None and (
+            not isinstance(provider, AgentCoreContinuity) or args.continuity_binding is None
+        ):
+            raise ContinuityFormatError("revision review requires an AgentCore profile and binding")
         if isinstance(provider, PrincipalContinuity):
             accounting_binding = None
             accounting_sources = {}
@@ -930,6 +949,24 @@ def _run_continuity(args: argparse.Namespace) -> int:
         manifest_path = Path(args.manifest)
         mandate_bytes = manifest_path.read_bytes()
         mandate = loads(mandate_bytes.decode("utf-8"), source=str(manifest_path))
+        if args.continuity_review is not None:
+            review = _continuity_artifact(_read_text(args.continuity_review))
+            if not isinstance(review, RevisionReview):
+                raise ContinuityFormatError(
+                    "--continuity-review requires a revision review artifact"
+                )
+            review_sources = _continuity_sources(
+                review_paths, review.sources, "--continuity-review-source"
+            )
+            result = analyse_revision_review(
+                mandate, provider, provider_sources, binding, binding_sources,
+                review, review_sources, as_of=as_of, mandate_bytes=mandate_bytes, depth=args.depth,
+            )
+            if args.json:
+                print(json.dumps(result, sort_keys=True, separators=(",", ":")))
+            else:
+                print(render_revision_review(result))
+            return EXIT_FINDING
         analysis = analyse_continuity(
             mandate,
             provider,

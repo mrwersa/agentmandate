@@ -1,0 +1,94 @@
+{
+  "agentcore_continuity_version": 1,
+  "adapter": {
+    "name": "agentmandate.agentcore-continuity",
+    "version": 1
+  },
+  "provider": "aws-agentcore",
+  "binding": "refund-policy-session",
+  "protocol": "synthetic-revision-review/1",
+  "sources": [
+    {
+      "id": "observations",
+      "kind": "synthetic",
+      "locator": "examples/revision-review/observations.json",
+      "content_sha256": "6e727e6fc9e680d3e05f809cb43827dea32f0fe06d05fb67a013c467c8c475a8"
+    }
+  ],
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "synthetic-example-only",
+    "expires": "2026-11-08"
+  },
+  "controls": [
+    {
+      "id": "equivalent-reset",
+      "transition": "configuration_revision",
+      "trials": 1,
+      "request_amount": 600,
+      "provider_limits": [
+        1000,
+        1000
+      ],
+      "outcomes": [
+        "allow",
+        "stale_session",
+        "allow"
+      ],
+      "same_mandate": true,
+      "revision_changed": true,
+      "boundary_changed": true,
+      "intervals_overlap": false,
+      "mediation": "platform_verified",
+      "sources": [
+        "observations"
+      ]
+    },
+    {
+      "id": "tightening-reset",
+      "transition": "limit_revision",
+      "trials": 1,
+      "request_amount": 600,
+      "provider_limits": [
+        1000,
+        700
+      ],
+      "outcomes": [
+        "allow",
+        "stale_session",
+        "allow"
+      ],
+      "same_mandate": true,
+      "revision_changed": true,
+      "boundary_changed": true,
+      "intervals_overlap": false,
+      "mediation": "platform_verified",
+      "sources": [
+        "observations"
+      ]
+    },
+    {
+      "id": "retaining-amendment",
+      "transition": "configuration_revision",
+      "trials": 1,
+      "request_amount": 600,
+      "provider_limits": [
+        1000,
+        1000
+      ],
+      "outcomes": [
+        "allow",
+        "deny"
+      ],
+      "same_mandate": true,
+      "revision_changed": true,
+      "boundary_changed": false,
+      "intervals_overlap": false,
+      "mediation": "platform_verified",
+      "sources": [
+        "observations"
+      ]
+    }
+  ]
+}

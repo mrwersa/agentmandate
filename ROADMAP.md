@@ -54,7 +54,8 @@ model initiatives completed together. The present frontier is:
 | **Active** | Authority-continuity evidence: the [principal-change control](docs/evidence/agentcore-refund-policy/README.md#principal-change-continuity-control) locates tested history at the principal×session boundary; [completed retransmission](docs/evidence/agentcore-refund-policy/README.md#completed-request-retransmission-control) executes and accumulates again despite an identical JSON-RPC ID; and the [continuation revision matrix](docs/evidence/agentcore-refund-policy/README.md#continuation-revision-matrix) shows a tightened revision restoring capacity that carried predecessor consumption would refuse |
 | **Active consolidation** | [Continuity profiles and observations](docs/continuity-evidence-consolidation.md): **mrwersa** accepted the six pinned historical AgentCore observations through 2026-11-08 in a separate accepted profile. Retransmission prefixes remain unreviewed with partial-trace and clock limits explicit. Principal-change pairs also have a separate unreviewed runtime profile; the archival observation format remains rejected. The observation consumer leaves mandate continuity unresolved; optional reviewed accounting is implemented for synthetic bound trials, with historical binding still deferred. Archival records and historical migrations remain unreviewed and byte-exact |
 | **Implemented extension** | [Reviewed principal accounting](docs/principal-accounting.md) for [#214](https://github.com/mrwersa/agentmandate/issues/214): independently reviewed bindings, exact manifest/profile joins, identity and execution mappings, per-trial observed budget comparisons, and failure/compatibility fixtures. The maintainer supplied an out-of-band execution review on 10 October; this is not a GitHub approval or historical binding acceptance |
-| **Ready next** | Define the changed-revision comparability and issuer-amendment consumer extension. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
+| **Implemented extension** | [Scoped revision review](docs/revision-review.md), [#222](https://github.com/mrwersa/agentmandate/issues/222): exact input and policy joins, independent comparison/issuer evidence, retention-only amendments, and fixed result baselines. The maintainer supplied an out-of-band adversarial execution review on 10 October; this is not a GitHub approval or historical evidence acceptance. Global safe continuation and historical binding approval remain unresolved |
+| **Ready next** | Establish successor binding, state-transfer, and sufficient comparison-domain evidence before extending scoped revision claims to a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
@@ -76,10 +77,15 @@ result remains unchanged; old single-principal bindings are not reused.
 
 Implementation and synthetic tests do not supply accountable approval for the
 historical capture. Its principal profile remains unreviewed and unbound, and
-its archival record remains byte-exact. Issue #214 stays open for the remaining historical evidence boundary. No additional initiative
-is counted complete by this extension. Next implementation work should address
-explicit revision comparability and issuer-amendment evidence, separately from
-observed accounting and without treating stable names as stable counter state.
+its archival record remains byte-exact. Issue #214 stays open for the remaining
+historical evidence boundary. No additional initiative
+is counted complete by this extension. The new
+[revision review attachment](docs/revision-review.md) reports separately reviewed
+comparison and issuer-treatment claims beside the unchanged continuity baseline.
+Its scope stays explicit: retaining-state approval cannot waive a reset, and
+finite comparison evidence does not establish global safe continuation.
+Successor binding verification and sufficient state/domain evidence remain
+necessary before a later consumer can resolve that verdict.
 The [consolidation record](docs/continuity-evidence-consolidation.md) owns the
 capture-by-capture status and limitations; the [evidence plan](docs/continuity-evidence-plan.md)
 owns requirements for further captures. Managed Agents continuation still lacks
@@ -452,7 +458,10 @@ The opt-in accounting surface also adds `principal_accounting_binding_version: 1
 and `agentmandate.principal-accounting/v1`, with separate
 [eligible/expired baselines](docs/principal-accounting.md#compatibility-and-remaining-work).
 The observation v1 fixtures are retained unchanged. These additions do not
-complete the repository-wide compatibility audit.
+complete the repository-wide compatibility audit. The optional
+`revision_review_version: 1` attachment and `agentmandate.revision-review/v1`
+envelope add [separate initial baselines](docs/revision-review.md#compatibility),
+including comparison with the unchanged nested continuity result.
 Any later format change needs an explicit compatibility decision and affected
 before/after fixtures. The historical pre-1.0 audit remains a record of its
 original baseline; neither this addition nor internal code review supplies the

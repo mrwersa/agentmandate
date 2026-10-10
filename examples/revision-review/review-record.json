@@ -1,0 +1,7 @@
+{
+  "notice": "Synthetic review and issuer decision only, not an acceptance of historical evidence.",
+  "comparison": "Same scalar cumulative refund contract and reviewed request domain for each control; equivalent retains 1000, tightening lowers it to 700. No claim of general policy-language equivalence.",
+  "association": "These synthetic policies describe the predecessor and successor in the named controls under the existing synthetic refund binding. This is not independent verification of a successor binding.",
+  "issuer": "synthetic-mandate-issuer",
+  "decision": "The retaining-amendment control is approved before transition, with all consumed and in-flight state retained. Other controls have no issuer amendment."
+}
