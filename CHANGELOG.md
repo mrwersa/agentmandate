@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.23.1 - 2026-10-10
+
+### Fixed
+
+- Reachability now sizes an isolated Decimal context from monetary ceilings
+  and search depth, preserving exact headroom and accumulation independently
+  of the caller's context. A ceiling just above a run limit no longer rounds
+  down and hides a breach; small addends, sum carries and extreme exponents
+  are retained. Decimal representation exhaustion reports a usage error
+  without partial output. Public signatures, flags and result shapes are unchanged.
+
+### Documentation
+
+- A prefix argument states when greedy headroom spending preserves the bounded
+  monetary maximum and shortest breach length. An independent exhaustive
+  amount/binding reference search checks 879 synthetic cases, with scope limits,
+  a reproducible report and a mutation check. These are model checks, not provider
+  observations or external security review.
+
 ## 0.23.0 - 2026-10-10
 
 ### Added

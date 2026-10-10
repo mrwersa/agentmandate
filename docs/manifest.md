@@ -76,6 +76,13 @@ tools:
 argument bounds nothing, and a value argument with no ceiling is unbounded
 spending, so the manifest rejects either on its own.
 
+Use quoted amount strings when decimal precision matters, such as
+`amount: "1.0000000000000000000000000001"`. JSON and YAML readers may round
+unquoted fractional numbers before validation. The search preserves parsed
+decimal values using exact arithmetic; its
+[maximum-headroom argument](headroom-abstraction.md) explains why it fills
+ceilings instead of trying every possible amount.
+
 ### Scopes are types, not instances
 
 Write `case`, never `case-4471`. The analysis reasons about "a case", so a

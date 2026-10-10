@@ -47,6 +47,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 ## Understand the model
 
 - [Design](../DESIGN.md): the authority model, search boundary, and non-goals.
+- [Maximum-headroom argument](headroom-abstraction.md): why greedy fills preserve
+  bounded monetary results, exact arithmetic, and independent amount-choice checks.
 - [Search bounds and performance](search-performance.md): depth semantics,
   worst-case growth, reproducible measurements, and CI resource limits.
 - [Authority IR](authority-ir.md): canonical provenance and the reviewed

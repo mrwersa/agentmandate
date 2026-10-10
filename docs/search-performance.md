@@ -41,6 +41,10 @@ Every visited state has an enabling sequence of at most `D` calls, so:
 S <= 1 + T + T² + ... + Tᴰ
 ```
 
+The [maximum-headroom argument](headroom-abstraction.md) explains when that
+single monetary choice preserves the bounded maximum and breach result. It
+does not equate the greedy and exhaustive searches' state sets or truncation.
+
 This bounds distinct discovered states, including the start and cutoff states.
 It is a worst-case ceiling, not an estimate of practical work. Canonicalization,
 disabled tools, repeated states, and producer caps usually make it much looser
@@ -127,9 +131,15 @@ serialization are excluded. Allocation peaks are not RSS or a memory ceiling.
 Timed kernel order alternates; measurements are observations on this machine,
 not CI performance thresholds or guarantees for another workload.
 
-The measured results and practical guidance below belong to this report;
-performance changes or corpus changes require rerunning it. Output matching
-checks behavior, not operational truth of the reviewed graph annotations.
+The measured results and practical guidance below belong to the report's pinned
+kernels; performance changes or corpus changes require rerunning the study.
+The later exact-arithmetic wrapper is covered by semantic replay and a fresh
+study recorded in [the arithmetic follow-up](search-arithmetic-results.json).
+It retains all 30 Authority/provenance fingerprints and the same 20/25 real-graph
+truncation count, with three timing samples per kernel. Small workloads still
+have mixed timing and allocation changes; the earlier table remains a historical
+measurement of its pinned kernels. Output matching checks behavior, not
+operational truth of the reviewed graph annotations.
 
 ## Recorded measurements
 

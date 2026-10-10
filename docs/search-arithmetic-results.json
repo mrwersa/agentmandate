@@ -1,0 +1,1353 @@
+{
+  "baseline_ref": "557f28460493cc8a3e589c6df568d5211bb6fc1e",
+  "baseline_source_sha256": "ef920d7c0b954d09635841b4bf5d6d4e053f2b40447e10da6be5955d16536bcb",
+  "baselines_sha256": "6896cc30c7f3e6c5296fd11ae42fccc4facf6312352e07907c25ab1b91684232",
+  "cases": [
+    {
+      "authority_sha256": "5cb35c0332c7d952e681ee6da5ad2fb990d48f1da7cf4444a51979372fb9f21a",
+      "depth": 1,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 129526,
+          "elapsed_ns_samples": [
+            155554,
+            129526,
+            88641
+          ],
+          "peak_traced_bytes": 12389
+        },
+        "current": {
+          "elapsed_ns_median": 265731,
+          "elapsed_ns_samples": [
+            265731,
+            278840,
+            120730
+          ],
+          "peak_traced_bytes": 13013
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 6,
+        "duplicate_transitions": 0,
+        "frontier_peak": 6,
+        "generated_transitions": 6,
+        "states_discovered": 7,
+        "states_expanded": 1,
+        "tool_checks": 20
+      },
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 21,
+      "tool_count": 20,
+      "trace_sha256": "72377bcb3e6bf619ecfb6b3791bad291b560ebf13173508a16acc6176df85251",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "837b74db210b7808df99dd2286cad59c21beb5199c8e16d577b05c049f38cfa9",
+      "depth": 2,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 476237,
+          "elapsed_ns_samples": [
+            448799,
+            476237,
+            749539
+          ],
+          "peak_traced_bytes": 28689
+        },
+        "current": {
+          "elapsed_ns_median": 495408,
+          "elapsed_ns_samples": [
+            495408,
+            590942,
+            478623
+          ],
+          "peak_traced_bytes": 28050
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 23,
+        "duplicate_transitions": 16,
+        "frontier_peak": 23,
+        "generated_transitions": 45,
+        "states_discovered": 30,
+        "states_expanded": 7,
+        "tool_checks": 140
+      },
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 421,
+      "tool_count": 20,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "0410af6edc6e5701f0fb1b4ff48d1986598e54098b802697d4a1a6b1092efef3",
+      "depth": 4,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 6368721,
+          "elapsed_ns_samples": [
+            6368721,
+            6260265,
+            6370990
+          ],
+          "peak_traced_bytes": 170794
+        },
+        "current": {
+          "elapsed_ns_median": 6566751,
+          "elapsed_ns_samples": [
+            6600483,
+            6193507,
+            6566751
+          ],
+          "peak_traced_bytes": 158490
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 163,
+        "duplicate_transitions": 413,
+        "frontier_peak": 163,
+        "generated_transitions": 672,
+        "states_discovered": 260,
+        "states_expanded": 97,
+        "tool_checks": 1940
+      },
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 168421,
+      "tool_count": 20,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "48d7bbf560476fcb927fa434bc71dbc9056eeeae068cc338d3b25a3583147f31",
+      "depth": 8,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 195827911,
+          "elapsed_ns_samples": [
+            220149593,
+            195827911,
+            193009393
+          ],
+          "peak_traced_bytes": 3136134
+        },
+        "current": {
+          "elapsed_ns_median": 187473674,
+          "elapsed_ns_samples": [
+            181555981,
+            187473674,
+            189409584
+          ],
+          "peak_traced_bytes": 2754870
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 2045,
+        "duplicate_transitions": 13654,
+        "frontier_peak": 2045,
+        "generated_transitions": 18190,
+        "states_discovered": 4537,
+        "states_expanded": 2492,
+        "tool_checks": 49840
+      },
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 26947368421,
+      "tool_count": 20,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "8cf9322799d7f4f27d92d8f79c1ae97545c5395b3023a7aa9e28068a0729c86c",
+      "depth": 12,
+      "input_sha256": "b5ab0b8cc10d09eccbda4e322a2afe41307726cdb197a3010883d4676c4a0290",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 1995320476,
+          "elapsed_ns_samples": [
+            2087273493,
+            1837600454,
+            1995320476
+          ],
+          "peak_traced_bytes": 23050118
+        },
+        "current": {
+          "elapsed_ns_median": 1854346594,
+          "elapsed_ns_samples": [
+            1981712140,
+            1854346594,
+            1796821360
+          ],
+          "peak_traced_bytes": 21378014
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 10983,
+        "duplicate_transitions": 120961,
+        "frontier_peak": 10983,
+        "generated_transitions": 152432,
+        "states_discovered": 31472,
+        "states_expanded": 20489,
+        "tool_checks": 409780
+      },
+      "name": "agentkit",
+      "path": "docs/evidence/agentkit/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 4311578947368421,
+      "tool_count": 20,
+      "trace_sha256": "403f10de72c92b4a111746c8a48d816f6eea2542e61e392cef3ddf18cc67236b",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "99b5c3ec7d519c3fdee17be9a15664e76a26a06dda2344709109dcfac6d9bb61",
+      "depth": 1,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 107130,
+          "elapsed_ns_samples": [
+            112007,
+            107130,
+            98356
+          ],
+          "peak_traced_bytes": 13286
+        },
+        "current": {
+          "elapsed_ns_median": 125715,
+          "elapsed_ns_samples": [
+            154664,
+            125715,
+            115436
+          ],
+          "peak_traced_bytes": 14014
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 2,
+        "states_discovered": 2,
+        "states_expanded": 1,
+        "tool_checks": 23
+      },
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 2,
+      "tool_count": 23,
+      "trace_sha256": "373afd003114b1176ab2c8df21e071571225324588b2ff5176f855b646555df8",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "1b9441896be3129ee663b7cc12e8c0147c767055db70ddd01b01e256cec89df0",
+      "depth": 2,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 147744,
+          "elapsed_ns_samples": [
+            179539,
+            147744,
+            130338
+          ],
+          "peak_traced_bytes": 14313
+        },
+        "current": {
+          "elapsed_ns_median": 180890,
+          "elapsed_ns_samples": [
+            180890,
+            166510,
+            188652
+          ],
+          "peak_traced_bytes": 14993
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 2,
+        "frontier_peak": 1,
+        "generated_transitions": 4,
+        "states_discovered": 3,
+        "states_expanded": 2,
+        "tool_checks": 46
+      },
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 3,
+      "tool_count": 23,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "f85f36e4ddabcd3a500ce6167c306764342d96363ce9bb704fef6ef255ea9fd9",
+      "depth": 4,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 247154,
+          "elapsed_ns_samples": [
+            278562,
+            247154,
+            242620
+          ],
+          "peak_traced_bytes": 15919
+        },
+        "current": {
+          "elapsed_ns_median": 263442,
+          "elapsed_ns_samples": [
+            267440,
+            263442,
+            259171
+          ],
+          "peak_traced_bytes": 16503
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 4,
+        "frontier_peak": 1,
+        "generated_transitions": 8,
+        "states_discovered": 5,
+        "states_expanded": 4,
+        "tool_checks": 92
+      },
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 5,
+      "tool_count": 23,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "7c1fda480f4733ed27642fd7d243ca5b4fca3f642eff30a877fdd80003d4c41d",
+      "depth": 8,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 450311,
+          "elapsed_ns_samples": [
+            389028,
+            450311,
+            485021
+          ],
+          "peak_traced_bytes": 18787
+        },
+        "current": {
+          "elapsed_ns_median": 439728,
+          "elapsed_ns_samples": [
+            420672,
+            463496,
+            439728
+          ],
+          "peak_traced_bytes": 18499
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 8,
+        "frontier_peak": 1,
+        "generated_transitions": 16,
+        "states_discovered": 9,
+        "states_expanded": 8,
+        "tool_checks": 184
+      },
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 9,
+      "tool_count": 23,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "a238f6242c2638f9491d75637936d915934b0d5424bbd7e106c455378f0faa17",
+      "depth": 12,
+      "input_sha256": "e168a10a670952670227e40bf0e4cfa50bbf4ca6c55f9492851d43a9b7f83747",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 615363,
+          "elapsed_ns_samples": [
+            622989,
+            615363,
+            593476
+          ],
+          "peak_traced_bytes": 22146
+        },
+        "current": {
+          "elapsed_ns_median": 588280,
+          "elapsed_ns_samples": [
+            582025,
+            638951,
+            588280
+          ],
+          "peak_traced_bytes": 20498
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 12,
+        "frontier_peak": 1,
+        "generated_transitions": 24,
+        "states_discovered": 13,
+        "states_expanded": 12,
+        "tool_checks": 276
+      },
+      "name": "github-mcp-server",
+      "path": "docs/evidence/github-mcp-server/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 13,
+      "tool_count": 23,
+      "trace_sha256": "fe8bd0d0a9020248651eb76250522441233502ddcabef3398e7118582fa8ce8c",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "fbdb02654b26cd87c391cb9bb0e003d1288c95337374e9a9db8354d97a8149bb",
+      "depth": 1,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 70245,
+          "elapsed_ns_samples": [
+            91825,
+            70245,
+            67040
+          ],
+          "peak_traced_bytes": 7436
+        },
+        "current": {
+          "elapsed_ns_median": 86277,
+          "elapsed_ns_samples": [
+            96987,
+            86277,
+            79245
+          ],
+          "peak_traced_bytes": 8196
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 2,
+        "states_discovered": 2,
+        "states_expanded": 1,
+        "tool_checks": 7
+      },
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 4,
+      "tool_count": 7,
+      "trace_sha256": "cec2eb955bd87496d65da707625ff63c1af5b3534d6e2bae29b88dd3a2ce7ea8",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "20aa5cf5de0e2d8953f302211562645776605ade761cd08e76656258dfedb3a5",
+      "depth": 2,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 149868,
+          "elapsed_ns_samples": [
+            103480,
+            149868,
+            168689
+          ],
+          "peak_traced_bytes": 8660
+        },
+        "current": {
+          "elapsed_ns_median": 170884,
+          "elapsed_ns_samples": [
+            128567,
+            194269,
+            170884
+          ],
+          "peak_traced_bytes": 9444
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 3,
+        "states_discovered": 3,
+        "states_expanded": 2,
+        "tool_checks": 14
+      },
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 9,
+      "tool_count": 7,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "f9e46c7fbc4dec28df56aa298ef9be0bf281cdc3e127d5f8d19fba2aee87ab6e",
+      "depth": 4,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 159843,
+          "elapsed_ns_samples": [
+            159843,
+            149625,
+            250249
+          ],
+          "peak_traced_bytes": 10586
+        },
+        "current": {
+          "elapsed_ns_median": 231802,
+          "elapsed_ns_samples": [
+            231802,
+            273044,
+            177606
+          ],
+          "peak_traced_bytes": 11202
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 5,
+        "states_discovered": 5,
+        "states_expanded": 4,
+        "tool_checks": 28
+      },
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 25,
+      "tool_count": 7,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "9c78ba89033bf551d3e8e101b13c975aa82de8c1647698515d1aae8a244c4aa1",
+      "depth": 8,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 226988,
+          "elapsed_ns_samples": [
+            265404,
+            226988,
+            208539
+          ],
+          "peak_traced_bytes": 13122
+        },
+        "current": {
+          "elapsed_ns_median": 247771,
+          "elapsed_ns_samples": [
+            247771,
+            271273,
+            228357
+          ],
+          "peak_traced_bytes": 12946
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 9,
+        "states_discovered": 9,
+        "states_expanded": 8,
+        "tool_checks": 56
+      },
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 81,
+      "tool_count": 7,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "811f275a71de9f64dc0a1a869c46d94f3a026f89f359480164aeef94d0b5e804",
+      "depth": 12,
+      "input_sha256": "5b569b4fcc3dc2dce740f3a0333980b0ab4a7a33e81998f2aa49774c5b69a527",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 281350,
+          "elapsed_ns_samples": [
+            281350,
+            276328,
+            290789
+          ],
+          "peak_traced_bytes": 16234
+        },
+        "current": {
+          "elapsed_ns_median": 280751,
+          "elapsed_ns_samples": [
+            333586,
+            280751,
+            274466
+          ],
+          "peak_traced_bytes": 14738
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 13,
+        "states_discovered": 13,
+        "states_expanded": 12,
+        "tool_checks": 84
+      },
+      "name": "aws-postgres-mcp",
+      "path": "docs/evidence/aws-postgres-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 169,
+      "tool_count": 7,
+      "trace_sha256": "dfb9ddae5019ff46fa0eb0d432cd2e6eab30a4c6590b0c40769a39994d0c6c70",
+      "truncated": true,
+      "witness_lengths": [
+        3
+      ]
+    },
+    {
+      "authority_sha256": "c9e39ecc9c28ec4a6bcfb516fd7a1dffdd87604da6c6c28ad72f4d4d01085815",
+      "depth": 1,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 58709,
+          "elapsed_ns_samples": [
+            63003,
+            58709,
+            57137
+          ],
+          "peak_traced_bytes": 8424
+        },
+        "current": {
+          "elapsed_ns_median": 75336,
+          "elapsed_ns_samples": [
+            73370,
+            80798,
+            75336
+          ],
+          "peak_traced_bytes": 9184
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 1,
+        "states_discovered": 2,
+        "states_expanded": 1,
+        "tool_checks": 8
+      },
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 2,
+      "tool_count": 8,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "a9641fa26e3c28a7463484546971a96f4ba6d6a129a0f9f751fcaf24bcdd4e00",
+      "depth": 2,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 88983,
+          "elapsed_ns_samples": [
+            88983,
+            81506,
+            94472
+          ],
+          "peak_traced_bytes": 9134
+        },
+        "current": {
+          "elapsed_ns_median": 105928,
+          "elapsed_ns_samples": [
+            126878,
+            95156,
+            105928
+          ],
+          "peak_traced_bytes": 9974
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 2,
+        "states_discovered": 3,
+        "states_expanded": 2,
+        "tool_checks": 16
+      },
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 3,
+      "tool_count": 8,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "d2476027c70a3f0d944d0af0fc4d2d1dbe12a87a4bd57f3b3fa7e0ff05d1edb2",
+      "depth": 4,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 109685,
+          "elapsed_ns_samples": [
+            118851,
+            107156,
+            109685
+          ],
+          "peak_traced_bytes": 10614
+        },
+        "current": {
+          "elapsed_ns_median": 129877,
+          "elapsed_ns_samples": [
+            126074,
+            140111,
+            129877
+          ],
+          "peak_traced_bytes": 11334
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 4,
+        "states_discovered": 5,
+        "states_expanded": 4,
+        "tool_checks": 32
+      },
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 5,
+      "tool_count": 8,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "ac75a803f1149300ba428f8d49e95a33ae9d6b339eec8698b6a9bf1c05d5946f",
+      "depth": 8,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 203934,
+          "elapsed_ns_samples": [
+            191912,
+            204308,
+            203934
+          ],
+          "peak_traced_bytes": 12910
+        },
+        "current": {
+          "elapsed_ns_median": 205957,
+          "elapsed_ns_samples": [
+            217154,
+            205957,
+            199952
+          ],
+          "peak_traced_bytes": 13126
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 8,
+        "states_discovered": 9,
+        "states_expanded": 8,
+        "tool_checks": 64
+      },
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 9,
+      "tool_count": 8,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "9c3e4649a68206380100838de80700e42f2c2f6b6273e9a178e2134f8009dcc6",
+      "depth": 12,
+      "input_sha256": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 264238,
+          "elapsed_ns_samples": [
+            264238,
+            258732,
+            314348
+          ],
+          "peak_traced_bytes": 15566
+        },
+        "current": {
+          "elapsed_ns_median": 274746,
+          "elapsed_ns_samples": [
+            274746,
+            287244,
+            273431
+          ],
+          "peak_traced_bytes": 14918
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 12,
+        "states_discovered": 13,
+        "states_expanded": 12,
+        "tool_checks": 96
+      },
+      "name": "sentry-mcp",
+      "path": "docs/evidence/sentry-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 13,
+      "tool_count": 8,
+      "trace_sha256": "f29cc30b10747da0f308fc340e5a9b1a79fd9856b692527b42f5847ffdd138ec",
+      "truncated": true,
+      "witness_lengths": [
+        2
+      ]
+    },
+    {
+      "authority_sha256": "3b54bcb6ef6e486f8fc6fa3820d41269e3ff8005bf6fda4141ec0ee951b0e84e",
+      "depth": 1,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 101635,
+          "elapsed_ns_samples": [
+            108605,
+            101635,
+            95319
+          ],
+          "peak_traced_bytes": 13649
+        },
+        "current": {
+          "elapsed_ns_median": 126377,
+          "elapsed_ns_samples": [
+            121546,
+            126377,
+            162149
+          ],
+          "peak_traced_bytes": 14377
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 0,
+        "states_discovered": 1,
+        "states_expanded": 1,
+        "tool_checks": 25
+      },
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 1,
+      "tool_count": 25,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "831eefdc7755dfae99547b663099ae010b00929052176694ce0eaa7b12b1e078",
+      "depth": 2,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 103442,
+          "elapsed_ns_samples": [
+            86737,
+            103442,
+            103743
+          ],
+          "peak_traced_bytes": 13649
+        },
+        "current": {
+          "elapsed_ns_median": 128563,
+          "elapsed_ns_samples": [
+            105308,
+            128563,
+            129340
+          ],
+          "peak_traced_bytes": 14377
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 0,
+        "states_discovered": 1,
+        "states_expanded": 1,
+        "tool_checks": 25
+      },
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 1,
+      "tool_count": 25,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "aefc98502b78b87b459f9864c2739ac00f69e935051f29013dd447625e0db15e",
+      "depth": 4,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 97068,
+          "elapsed_ns_samples": [
+            97068,
+            82499,
+            114055
+          ],
+          "peak_traced_bytes": 13649
+        },
+        "current": {
+          "elapsed_ns_median": 115185,
+          "elapsed_ns_samples": [
+            115185,
+            119375,
+            100580
+          ],
+          "peak_traced_bytes": 14377
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 0,
+        "states_discovered": 1,
+        "states_expanded": 1,
+        "tool_checks": 25
+      },
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 1,
+      "tool_count": 25,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "5a398b86be0d6a522f735bfb6d1e5e6db3f1eac1f2631b5119561e5f5bc799bf",
+      "depth": 8,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 105690,
+          "elapsed_ns_samples": [
+            105690,
+            102569,
+            127390
+          ],
+          "peak_traced_bytes": 13649
+        },
+        "current": {
+          "elapsed_ns_median": 127405,
+          "elapsed_ns_samples": [
+            127405,
+            125459,
+            150255
+          ],
+          "peak_traced_bytes": 14377
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 0,
+        "states_discovered": 1,
+        "states_expanded": 1,
+        "tool_checks": 25
+      },
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 1,
+      "tool_count": 25,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "085d2eaa3f6228cfe08ef95ffcf1ef6173c45b9485fa9965cd88be38fa474255",
+      "depth": 12,
+      "input_sha256": "a9763661d91143574e1aeb7dea30844f3e05597c7c76df3d597084269d690d08",
+      "kind": "real-graph",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 102228,
+          "elapsed_ns_samples": [
+            111931,
+            100239,
+            102228
+          ],
+          "peak_traced_bytes": 13649
+        },
+        "current": {
+          "elapsed_ns_median": 124582,
+          "elapsed_ns_samples": [
+            118479,
+            124582,
+            166432
+          ],
+          "peak_traced_bytes": 14377
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 0,
+        "states_discovered": 1,
+        "states_expanded": 1,
+        "tool_checks": 25
+      },
+      "name": "initiative-mcp",
+      "path": "docs/evidence/initiative-mcp/mandate.yaml",
+      "producer_caps": null,
+      "state_bound": 1,
+      "tool_count": 25,
+      "trace_sha256": "86a66015e4586c270ca4dc5febad47ebe37ea9da319254158eada4afcb4b9332",
+      "truncated": false,
+      "witness_lengths": [
+        1
+      ]
+    },
+    {
+      "authority_sha256": "ce8bec6ec5e8cd735748d0572aca46ad0e5585e90bb79b5482075d39675bb295",
+      "depth": 12,
+      "input_sha256": "05d9e7ec17e97b284b256a779077e5dd8da51c404d685b70363b1006b0cbe337",
+      "kind": "synthetic-stress",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 163868765,
+          "elapsed_ns_samples": [
+            233624485,
+            163868765,
+            122113897
+          ],
+          "peak_traced_bytes": 4470021
+        },
+        "current": {
+          "elapsed_ns_median": 118162618,
+          "elapsed_ns_samples": [
+            200416289,
+            118162618,
+            117949692
+          ],
+          "peak_traced_bytes": 3841941
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1820,
+        "duplicate_transitions": 15653,
+        "frontier_peak": 1820,
+        "generated_transitions": 21840,
+        "states_discovered": 6188,
+        "states_expanded": 4368,
+        "tool_checks": 21840
+      },
+      "name": "wide-mint",
+      "path": "probes/search/wide-mint.json",
+      "producer_caps": null,
+      "state_bound": 371293,
+      "tool_count": 5,
+      "trace_sha256": "d70eaf7f750d9fe7c6413577af67e1f1663afeaa9f265bda7516400987b2f941",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "c3836c7654f83741c296beca04438d5093981ea481feafc4bf536312c6959553",
+      "depth": 64,
+      "input_sha256": "300999b8711dc4b82c3947acf900a5451ae83f93b3ee913738f9543767e7699c",
+      "kind": "synthetic-stress",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 9458912,
+          "elapsed_ns_samples": [
+            9458912,
+            9136120,
+            10078312
+          ],
+          "peak_traced_bytes": 205918
+        },
+        "current": {
+          "elapsed_ns_median": 9044181,
+          "elapsed_ns_samples": [
+            8793828,
+            9044181,
+            9047013
+          ],
+          "peak_traced_bytes": 205142
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 1,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 64,
+        "states_discovered": 65,
+        "states_expanded": 64,
+        "tool_checks": 4096
+      },
+      "name": "deep-chain",
+      "path": "probes/search/deep-chain.json",
+      "producer_caps": null,
+      "state_bound": 40027434866178518564854897879510972754366719258885533122995091712249622117076531414770048258930707952565463355232321,
+      "tool_count": 64,
+      "trace_sha256": "7d26ff9d0eb13bb016162a36a7c658acbbc2a41e20ca80115602dc863b0a38fc",
+      "truncated": true,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "e2e16287218cbe389a57d33936bee346dc4a3dfbdc6a72f948aac7d792993d00",
+      "depth": 8,
+      "input_sha256": "d91a3c2cbf886c198d2ac070634f7b21de8322fea64132cd70a8bb051112c91f",
+      "kind": "synthetic-stress",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 77047,
+          "elapsed_ns_samples": [
+            77047,
+            73772,
+            77852
+          ],
+          "peak_traced_bytes": 5552
+        },
+        "current": {
+          "elapsed_ns_median": 97747,
+          "elapsed_ns_samples": [
+            103191,
+            97747,
+            93674
+          ],
+          "peak_traced_bytes": 6256
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 1,
+        "frontier_peak": 1,
+        "generated_transitions": 2,
+        "states_discovered": 2,
+        "states_expanded": 2,
+        "tool_checks": 6
+      },
+      "name": "duplicate-binding",
+      "path": "probes/search/duplicate-binding.json",
+      "producer_caps": null,
+      "state_bound": 9,
+      "tool_count": 3,
+      "trace_sha256": "c4a31643685ad6b431904d3286b2b74dbda36f1b4e32353916e0b373cbb089f0",
+      "truncated": false,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "1debff0194cfee1be71379f9a817c9555005ca8c95f1628cbeed0822fa84c179",
+      "depth": 8,
+      "input_sha256": "f8063a3a9cfbc844cac5f0fc8783334c8eea291c97e8b2f6b726135a56c8b1e4",
+      "kind": "synthetic-stress",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 41056,
+          "elapsed_ns_samples": [
+            44327,
+            41056,
+            39126
+          ],
+          "peak_traced_bytes": 4224
+        },
+        "current": {
+          "elapsed_ns_median": 56378,
+          "elapsed_ns_samples": [
+            57595,
+            56378,
+            56095
+          ],
+          "peak_traced_bytes": 4952
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 0,
+        "frontier_peak": 1,
+        "generated_transitions": 0,
+        "states_discovered": 1,
+        "states_expanded": 1,
+        "tool_checks": 1
+      },
+      "name": "pure-read",
+      "path": "probes/search/pure-read.json",
+      "producer_caps": null,
+      "state_bound": 1,
+      "tool_count": 1,
+      "trace_sha256": "0e23f5498c1bd2ba750c91367339bf55f166f2e76f7bdeb5e4feb1c94078f333",
+      "truncated": false,
+      "witness_lengths": []
+    },
+    {
+      "authority_sha256": "25a17b17e21511e1e95959f19eff25ab8beb4cd9899ff35523d9955d7c57e01a",
+      "depth": 12,
+      "input_sha256": "05d9e7ec17e97b284b256a779077e5dd8da51c404d685b70363b1006b0cbe337",
+      "kind": "synthetic-stress",
+      "measurements": {
+        "baseline": {
+          "elapsed_ns_median": 5266854,
+          "elapsed_ns_samples": [
+            5266854,
+            5408982,
+            5045621
+          ],
+          "peak_traced_bytes": 125064
+        },
+        "current": {
+          "elapsed_ns_median": 5307233,
+          "elapsed_ns_samples": [
+            5307233,
+            5578387,
+            4947025
+          ],
+          "peak_traced_bytes": 112452
+        }
+      },
+      "metrics": {
+        "depth_cutoffs": 0,
+        "duplicate_transitions": 568,
+        "frontier_peak": 56,
+        "generated_transitions": 810,
+        "states_discovered": 243,
+        "states_expanded": 243,
+        "tool_checks": 1215
+      },
+      "name": "wide-mint-capped",
+      "path": "probes/search/wide-mint.json",
+      "producer_caps": {
+        "mint_0": 2,
+        "mint_1": 2,
+        "mint_2": 2,
+        "mint_3": 2,
+        "mint_4": 2
+      },
+      "state_bound": 371293,
+      "tool_count": 5,
+      "trace_sha256": "d70eaf7f750d9fe7c6413577af67e1f1663afeaa9f265bda7516400987b2f941",
+      "truncated": false,
+      "witness_lengths": []
+    }
+  ],
+  "environment": {
+    "gc_enabled": true,
+    "gc_thresholds": [
+      700,
+      10,
+      10
+    ],
+    "implementation": "CPython",
+    "memory_measure": "tracemalloc peak during kernel only; excludes input loading",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "repeat": 3,
+    "timing_clock": "perf_counter_ns"
+  },
+  "harness_sha256": "bea31a3eb2a8816eb5c442688fc7da8fc1d55f182c93050c1c261f6d2e720bab",
+  "package_version": "0.23.1",
+  "real_graph_runs": 25,
+  "real_graph_truncated_runs": 20,
+  "recorded_at": "2026-10-10T20:32:19.480598+00:00",
+  "source_sha256": "c60e9315f7433db4c71a1492f76741c304b18f993a2fcbad3f7da7b0e1ef8fc0"
+}
