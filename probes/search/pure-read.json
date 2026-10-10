@@ -1,0 +1,9 @@
+{
+  "agent": "synthetic-pure-read",
+  "tools": [
+    {
+      "effect": "read",
+      "name": "read"
+    }
+  ]
+}

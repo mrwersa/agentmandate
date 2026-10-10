@@ -294,6 +294,7 @@ source code or manifest fields cannot establish a specific boundary:
 | Need | Guide |
 |---|---|
 | Exchange a canonical reviewed authority snapshot | [Authority IR](docs/authority-ir.md) |
+| Understand search depth, memory costs, and truncation | [Search bounds](docs/search-performance.md) |
 | Resolve a dynamically supplied tool list | [Dynamic inventory](docs/dynamic-inventory.md) |
 | Narrow a tool's effect using a reviewed input domain | [Conditional authority](docs/conditions-delegation.md) |
 | Relate a tool to an ordered delegation chain | [Delegation](docs/delegation-v2.md) |

@@ -32,6 +32,14 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
+**Pre-1.0 scope decision — 10 October 2026:** freeze additional continuity
+contracts and prioritize completion of the 1.0 gates. The delivered
+experimental surfaces remain supported; corrections, review, evidence
+consolidation, and explicit acceptance renewal remain in scope. A new
+continuity contract needs an externally motivated counterexample and a scope
+decision rather than becoming the default next implementation task. This is
+a feature-scope freeze, not a claim that operational continuation is solved.
+
 **Review checkpoint — 6 November 2026, mrwersa:** renew or let lapse the
 [six accepted historical AgentCore observations](docs/continuation-evidence-acceptance.md).
 Their current acceptance expires 8 November inclusive UTC and is ineligible
@@ -56,7 +64,9 @@ model initiatives completed together. The present frontier is:
 | **Implemented extension** | [Reviewed principal accounting](docs/principal-accounting.md) for [#214](https://github.com/mrwersa/agentmandate/issues/214): independently reviewed bindings, exact manifest/profile joins, identity and execution mappings, per-trial observed budget comparisons, and failure/compatibility fixtures. The maintainer supplied an out-of-band execution review on 10 October; this is not a GitHub approval or historical binding acceptance |
 | **Implemented extension** | [Scoped revision review](docs/revision-review.md), [#222](https://github.com/mrwersa/agentmandate/issues/222): exact input and policy joins, independent comparison/issuer evidence, retention-only amendments, and fixed result baselines. The maintainer supplied an out-of-band adversarial execution review on 10 October; this is not a GitHub approval or historical evidence acceptance. Global safe continuation and historical binding approval remain unresolved |
 | **Implemented extension** | [Scalar handover verifier](docs/scalar-handover.md), [#224](https://github.com/mrwersa/agentmandate/issues/224): two reviewed binding joins, exact closed policy bytes, retained completed/pending state, fencing, and complete next-request integer-domain inclusion at cutover. Synthetic retained/reset/expired baselines pin the new contracts. The maintainer supplied an out-of-band adversarial execution review on 10 October; this is not a GitHub approval. Model conformance does not establish snapshot freshness, global provider continuation, or historical acceptance |
-| **Ready next** | Establish operational policy/state/fencing evidence and a versioned settlement/retry contract before extending the scalar cutover model to later execution or a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
+| **Reviewed; search gate complete** | [Search bounds and performance](docs/search-performance.md), [#226](https://github.com/mrwersa/agentmandate/issues/226): conservative state/time/storage bounds, lower-allocation private search storage, 30 pinned pre-change Authority/provenance cases, and a reproducible five-real-graph study. The maintainer supplied an out-of-band differential execution review of #227 on 10 October: 48 baseline/candidate runs had identical JSON and exit codes. This closes the documented-search criterion; it is not a GitHub approval or external security review |
+| **Ready next** | Take the missing MCP/A2A/OpenAPI inventory-import slice using existing IR/inventory boundaries and representative pinned catalogue/API fixtures. Keep compatibility-audit coverage current and identify an independent security/trace-retention reviewer; that external gate cannot be supplied by this implementation or an agent's self-review |
+| **Deferred continuity extensions** | Operational policy/state/fencing evidence and a versioned settlement/retry contract are prerequisites for extending the scalar cutover model to later execution or a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
 | **Evidence-blocked** | The [deployment-continuity control](docs/evidence/agentcore-refund-policy/README.md#deployment-continuity-authoring-refusal) cannot hold policy and history selection fixed across Gateway identities; resource relationships still lack a fixed-binding counterexample; reviewed data flow still lacks a real exfiltration path and annotation study; quantity relations still lack a reviewed operational input domain |
 | **Later** | Policy export, policy-versus-agent drift, fleet reconciliation, and advanced cross-agent or cross-session reachability |
@@ -453,6 +463,14 @@ and worst-case behavior are documented; at least four independent graphs cover
 more than one framework and authority domain; and security plus trace-retention
 guidance has external review. Policy export and fleet features may remain
 preview after 1.0 if their contracts have not earned stability.
+
+The [search implementation and study](docs/search-performance.md) now provide
+the bounds, storage characterization, measured truncation frequency, and
+reproduction tooling for the search criterion. The maintainer's out-of-band
+differential execution review of #227 closes that criterion; it is not another
+phase initiative or a substitute for external
+security and trace-retention review. No new public contract is added by the
+private search instrumentation or the repository's benchmark report.
 
 The principal observation surface added in `0.18.0` extends the compatibility
 inventory with `principal_continuity_version: 1` and
