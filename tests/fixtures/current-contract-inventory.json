@@ -2535,7 +2535,7 @@
     "tests/fixtures/producer-result-v1-clean.json": "995ca859631daee3d94abf435afeabbf5e8538897b7bf8b3ddba3c7e99083bee",
     "tests/fixtures/producer-result-v1-truncated.json": "96ef67aeb7465f046c006efc0ba0d58f5471bb8857fccae6d853a2a5862c661e",
     "tests/fixtures/producer-result-v1-unresolved.json": "7e075b183182d667cfdc197bca3f0732f296f12fdb6617a001c2d48ff3d659a9",
-    "tests/fixtures/remediation-breached-v1.json": "35fb7b8d2db48436e00746490bd70eced4fd0eaf966f7ac6acb4f15e49aff97b",
+    "tests/fixtures/remediation-breached-v1.json": "78408e338bf934aa8c7e835e3fcbb0fafde40bb5fe9546886244fd6f77c7d0d4",
     "tests/fixtures/remediation-clean-v1.json": "cea189b344ee99d9ee7acc89195a070873a88ce070ab1ffe38bf30f9a95c93cd",
     "tests/fixtures/remediation-kept-v1.json": "2ad8b5ead0174aa9cc32191882e0ce1e47cc1a016f0a3bd293da8f6c79d234e4",
     "tests/fixtures/remediation-limited-v1.json": "5f9acaa80b80e302b7cf1d0d718aabda8d335e6685ee4a37f6afbd3feac49145",

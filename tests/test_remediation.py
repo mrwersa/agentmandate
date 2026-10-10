@@ -115,6 +115,49 @@ def test_keep_tools_checks_reachability_after_edits_not_just_tool_membership():
     )
 
 
+@pytest.mark.parametrize("producer_effect,refund_effect", [
+    ("read", "write"), ("read", "irreversible"), ("write", "irreversible"),
+])
+def test_tied_removals_prefer_losing_the_weaker_effect(producer_effect, refund_effect):
+    source = load(ROOT / "examples/dispute-resolver-v2.yaml")
+    source = replace(source, tools=tuple(
+        replace(t, effect=producer_effect, requires_approval=True) if t.name == "search_cases"
+        else replace(t, effect=refund_effect) if t.name == "issue_refund" else t
+        for t in source.tools
+    ))
+    result = plan(source, max_edits=1, max_candidates=100)
+    assert [c["edits"] for c in result["candidates"]] == [
+        [{"tool": "search_cases", "kind": "remove_tool"}],
+        [{"tool": "issue_refund", "kind": "remove_tool"}],
+    ]
+    assert [c["impact"]["lost_reachable_tools"] for c in result["candidates"]] == [
+        ["search_cases"], ["issue_refund"],
+    ]
+    assert not result["candidates"][0]["authority"]["truncated"]
+    assert all(not c["authority"]["breaches"] for c in result["candidates"])
+
+
+def test_kept_consumer_cannot_be_stranded_behind_a_declared_producer_cycle():
+    source = Mandate.parse({
+        "agent": "producer-cycle",
+        "tools": [
+            {"name": "seed", "effect": "read", "produces": "item"},
+            {"name": "loop", "effect": "read", "requires": ["item"], "produces": "item"},
+            {"name": "delete", "effect": "irreversible", "requires": ["item"]},
+        ],
+    })
+    unkept = plan(source, max_edits=1, max_candidates=100)
+    stranded = next(c for c in unkept["candidates"] if c["edits"] == [
+        {"tool": "seed", "kind": "remove_tool"},
+    ])
+    assert "delete" in {t["name"] for t in stranded["manifest"]["tools"]}
+    assert "delete" not in stranded["authority"]["reachable_tools"]
+    kept = plan(source, keep_tools=("delete",), max_edits=1, max_candidates=100)
+    assert kept["candidates"]
+    assert all("delete" in c["authority"]["reachable_tools"] for c in kept["candidates"])
+    assert kept["candidates"][0]["edits"] == [{"tool": "delete", "kind": "require_approval"}]
+
+
 @pytest.mark.parametrize("field", ["max_edits", "max_evaluations", "max_candidates"])
 @pytest.mark.parametrize("bad", [0, -1, True, 1.5, "2"])
 def test_invalid_search_options_fail_before_analysis(field, bad):
@@ -173,7 +216,9 @@ def test_enumeration_and_reachability_cutoffs_are_separate():
     result = plan(source, max_candidates=1)
     assert result["search"]["enumeration_complete"]
     assert result["search"]["candidates_found"] > len(result["candidates"]) == 1
-    assert result["candidates"][0]["authority"]["truncated"]
+    assert not result["candidates"][0]["authority"]["truncated"]
+    full = plan(source, max_candidates=100)
+    assert any(c["authority"]["truncated"] for c in full["candidates"])
     shallow = plan(source, depth=1)
     assert shallow["baseline"]["depth"] == 1 and shallow["baseline"]["truncated"]
     assert shallow["status"] == "no_reachable_breach_within_bound"

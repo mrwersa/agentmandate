@@ -8,7 +8,7 @@ from math import comb
 from typing import Any
 
 from .lint import Finding, check
-from .manifest import IRREVERSIBLE, Mandate, Money
+from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Money
 from .reach import analyse
 
 REMEDIATION_SCHEMA = "agentmandate.remediation/v1"
@@ -169,10 +169,15 @@ def plan(
                 "manifest": _manifest(candidate),
             }
         )
+    effect_ranks = {tool.name: EFFECT_RANK[tool.effect] for tool in mandate.tools}
     candidates.sort(
         key=lambda c: (
             c["impact"]["edit_count"],
             len(c["impact"]["lost_reachable_tools"]),
+            tuple(sorted(
+                (effect_ranks[name] for name in c["impact"]["lost_reachable_tools"]),
+                reverse=True,
+            )),
             sum(e["kind"] == "remove_tool" for e in c["edits"]),
             tuple((e["tool"], e["kind"]) for e in c["edits"]),
         )

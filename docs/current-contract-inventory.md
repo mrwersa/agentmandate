@@ -15,9 +15,12 @@ approval.
 The original inventory was prepared against `0c43066`, the merged `0.22.0`
 contract baseline, on 10 October 2026, and is retained as
 [a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.22.json).
-The current candidate adds the repair command and its initial v1 fixtures;
+The current inventory adds the repair command and its initial v1 fixtures;
 tests compare every earlier declaration and fixture digest against that
-snapshot. Review of the repair addition is pending. The inventory supplements the
+snapshot. The maintainer supplied a partial out-of-band execution review of
+#232 covering the example and structural screening. Author checks cover the
+remaining preservation, cutoff, approval and ranking paths. Neither review is
+an independent security review. The inventory supplements the
 [historical 0.17.0 audit](pre-1.0-consolidation-audit.md), whose bytes and
 decision remain unchanged. **The maintainer supplied an out-of-band execution
 review of #230 on 10 October 2026.** That review covers the original inventory,

@@ -12,7 +12,9 @@ All notable changes to this project are documented here. The format follows
 
 - `mandate remediate` enumerates bounded combinations of tool removals and
   approval requirements, rechecks the full remaining manifest, and ranks
-  candidates by edit count and lost reachable tools. `--keep-tool` preserves
+  candidates by edit count, lost reachable tools and their effect classes,
+  preferring loss of reads over writes over irreversible capabilities on ties.
+  `--keep-tool` preserves
   named reachability; source files and manifest limits remain unchanged.
 - Public `agentmandate.remediation/v1` results retain baseline Authority and
   lint, exact source digest, candidate manifests and remaining lint, removed

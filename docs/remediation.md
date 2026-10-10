@@ -2,8 +2,8 @@
 
 Use `mandate remediate` after `reach` finds a breach in a reviewed manifest.
 The command explores tool removals and approval requirements, rechecks the
-whole remaining graph, and ranks candidates by edit count and lost reachable
-tools. It leaves the source file unchanged.
+whole remaining graph, and ranks candidates by edit count, lost reachable
+tools and their effect classes. It leaves the source file unchanged.
 
 ## Try the refund example
 
@@ -57,13 +57,19 @@ scenarios separately before choosing a candidate.
 Supported edits are `remove_tool` and `require_approval`; the latter applies
 only to currently ungated irreversible tools. Combinations enumerate increasing
 edit counts, then tool names and edit kinds. Candidates rank by fewer edits,
-fewer lost reachable tools, fewer removals, then the same lexical tie-break.
-This is a declared ranking, not a business-impact score. Candidates can include
-redundant combinations; the output does not claim globally minimal repairs.
+fewer lost reachable tools, then the effect classes of those lost tools: prefer
+losing reads over writes over irreversible capabilities. For multiple losses,
+compare the strongest lost effect first, then the next strongest. Fewer removals
+and the same lexical tie-break follow. This heuristic does not establish business
+priority; use `--keep-tool` to preserve named capabilities and check required
+scenarios separately. Candidates can include redundant combinations; the output
+does not claim globally minimal repairs.
 
 Conflicting edits on one tool, empty tool lists, and dangling scope requirements
-are rejected. Removing a producer alone cannot make its consumers appear
-repaired merely because they became unreachable. A reviewed removal of the
+are rejected. Removing the only declared producer of a required scope is
+rejected while its consumers remain declared. A producer cycle can retain
+declarations yet leave consumers unreachable; those losses are reported, and
+`--keep-tool` rejects candidates that strand a kept consumer. Removing the
 producer and all affected consumers may be a valid combination. Inputs with
 missing producers, unbound monetary ceilings, or mixed currencies report
 `input_requires_review` and produce no candidates.

@@ -40,12 +40,14 @@ continuity contract needs an externally motivated counterexample and a scope
 decision rather than becoming the default next implementation task. This is
 a feature-scope freeze, not a claim that operational continuation is solved.
 
-**Release-gate fix awaiting review — 10 October 2026:** overall feedback exposed
+**Release-gate fix merged — 10 October 2026:** overall feedback exposed
 that `diff` omitted declared effect-count budgets: a 3→5 increase was neutral,
 and removing a budget could look narrower when its breach disappeared. The
-prepared correction compares every class independently, retains breach
-diagnostics, and adds Python/CLI regressions. This correctness fix takes
-priority over further feature work and completes no roadmap initiative.
+correction in [#233](https://github.com/mrwersa/agentmandate/pull/233) compares
+every class independently, retains breach diagnostics, and adds Python/CLI
+regressions. This correctness fix takes
+priority over further feature work and completes no roadmap initiative. Author
+self-review and all 14 CI checks passed before merge.
 
 **Review checkpoint — 6 November 2026, mrwersa:** renew or let lapse the
 [six accepted historical AgentCore observations](docs/continuation-evidence-acceptance.md).
@@ -74,8 +76,8 @@ model initiatives completed together. The present frontier is:
 | **Reviewed; search gate complete** | [Search bounds and performance](docs/search-performance.md), [#226](https://github.com/mrwersa/agentmandate/issues/226): conservative state/time/storage bounds, lower-allocation private search storage, 30 pinned pre-change Authority/provenance cases, and a reproducible five-real-graph study. The maintainer supplied an out-of-band differential execution review of #227 on 10 October: 48 baseline/candidate runs had identical JSON and exit codes. This closes the documented-search criterion; it is not a GitHub approval or external security review |
 | **Reviewed implementation** | [MCP/A2A/OpenAPI catalogue imports](docs/catalogue-import.md), [#228](https://github.com/mrwersa/agentmandate/issues/228): local JSON readers, review-marked skeletons, unreviewed dynamic-inventory declarations and existing IR profiles, pinned synthetic baselines, and historical MCP compatibility checks. The maintainer supplied an out-of-band review and re-check of #229; the missing-producer lint rule detected over-guessed requirements in four preserved raw evidence skeletons, with unchanged findings on reviewed manifests in that comparison. Raw skeletons remain archival proposals, including expected lint errors. This is not a GitHub approval or external security review. A2A exposes one explicit application dispatch candidate, not one tool per skill; deployment completeness and policy decisions are not inferred |
 | **Reviewed inventory** | [Current compatibility inventory](docs/current-contract-inventory.md): Python signatures, nested CLI arguments, version markers, fixture digests and twelve legacy-output runs supplement the unchanged historical 0.17.0 audit. Raw scanner proposals retain their expected lint errors. The maintainer supplied an out-of-band execution review of #230 on 10 October; this is not a GitHub approval or external security review and does not complete another phase initiative |
-| **Implemented; awaiting review** | [Repair candidates](docs/remediation.md), [#231](https://github.com/mrwersa/agentmandate/issues/231): bounded tool-removal and approval combinations, full-graph rechecks, reachable-tool preservation, ranked impact, source digests and v1 baselines. This is the first counterfactual-remediation slice; budget, condition, delegation and business-scenario repairs remain open. It does not complete the whole initiative or any 1.0 gate |
-| **Ready next** | Review the repair command's cutoffs and failure cases, then use a concrete required scenario to decide the next repair family. Representative A2A/OpenAPI application mappings and decision evidence remain separate from synthetic importer tests |
+| **Reviewed first slice** | [Repair candidates](docs/remediation.md), [#231](https://github.com/mrwersa/agentmandate/issues/231): bounded tool-removal and approval combinations, full-graph rechecks, reachable-tool preservation, effect-aware ranking, source digests and v1 baselines. The maintainer supplied a partial out-of-band execution review of #232 on 10 October covering the example and structural screening; author self-review covers preservation, cutoffs, approval edits and the requested ranking update. This is not a GitHub approval or external security review. Budget, condition, delegation and business-scenario repairs remain open; this slice does not complete the whole initiative or any 1.0 gate |
+| **Ready next** | Document and independently check the maximum-headroom search abstraction, then use a concrete required scenario to decide the next repair family. Representative A2A/OpenAPI application mappings and decision evidence remain separate from synthetic importer tests |
 | **Deferred external review** | Independent security/trace-retention review deferred at the maintainer's request on 10 October 2026. The [prepared scope](docs/external-security-review.md) remains available and the 1.0 gate remains open; implementation and agent self-review cannot satisfy it |
 | **Deferred continuity extensions** | Operational policy/state/fencing evidence and a versioned settlement/retry contract are prerequisites for extending the scalar cutover model to later execution or a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |
@@ -483,10 +485,11 @@ this is not a GitHub approval. Initial v1 baselines remain distinct from actual
 historical conversions. This addition does not change the phase ledger or
 replace external security and trace-retention review.
 
-The repair-command candidate adds one CLI path and one initial presentation
+The repair command adds one CLI path and one initial presentation
 family. Its inventory update preserves the previous snapshot and checks that
 every earlier declaration and fixture digest is unchanged. This is new surface
-requiring review, not completion of another compatibility or external-review gate.
+covered by partial out-of-band review and author checks, not completion of
+another compatibility or external-review gate.
 
 The [search implementation and study](docs/search-performance.md) now provide
 the bounds, storage characterization, measured truncation frequency, and
