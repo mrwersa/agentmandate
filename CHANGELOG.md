@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.26.1 - 2026-10-10
+
+### Added
+
+- Optional GitHub Action review inputs read a decision and its source files from
+  one pinned, caller-selected Git commit. Eligible recorded acceptance resolves
+  only the widening-review blocker; raw widening detail and counts remain in
+  the report, and lint, reachability, drift and replay failures still block.
+  Ref protection, reviewer authentication and deployment approval remain outside
+  the Action. Missing, malformed, mismatched, rejected or expired review evidence
+  fails closed. Existing checks are unchanged when review inputs are omitted.
+- A repository planning ledger and calculation script account for all 24 roadmap
+  initiatives with explicit partial-delivery credit. It separates phase estimates
+  from the four satisfied 1.0 gates and deferred external security review.
+
 ## 0.26.0 - 2026-10-10
 
 ### Added

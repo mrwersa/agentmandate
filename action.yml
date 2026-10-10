@@ -33,6 +33,25 @@ inputs:
       An OTLP JSON export. When set, `verify` replays it against the manifest.
     required: false
     default: ""
+  review-ref:
+    description: >-
+      Caller-selected protected Git ref containing review materials. Resolve it
+      locally before invoking the action. Its protection/authentication is the
+      caller's responsibility; the action pins one commit, not reviewer identity.
+    required: false
+    default: ""
+  review-decision:
+    description: Relative regular-file path to the decision in review-ref, never the working tree.
+    required: false
+    default: ""
+  review-sources:
+    description: Newline-separated LOCATOR=GIT_PATH mappings in that same pinned review commit.
+    required: false
+    default: ""
+  review-as-of:
+    description: Explicit YYYY-MM-DD UTC date supplied by the trusted workflow, not the decision.
+    required: false
+    default: ""
   map:
     description: >-
       Newline-separated `field=attribute` pairs for `verify`, for example
@@ -110,6 +129,10 @@ runs:
         INPUT_MANIFEST: ${{ inputs.manifest }}
         INPUT_SOURCE: ${{ inputs.source }}
         INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_REVIEW_REF: ${{ inputs.review-ref }}
+        INPUT_REVIEW_DECISION: ${{ inputs.review-decision }}
+        INPUT_REVIEW_SOURCES: ${{ inputs.review-sources }}
+        INPUT_REVIEW_AS_OF: ${{ inputs.review-as-of }}
         INPUT_TRACES: ${{ inputs.traces }}
         INPUT_MAP: ${{ inputs.map }}
         INPUT_DEPTH: ${{ inputs.depth }}

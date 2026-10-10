@@ -27,9 +27,13 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+from tempfile import TemporaryDirectory
+
+from agentmandate._change_review import render as render_review
 
 STEP_SUMMARY = os.environ.get("GITHUB_STEP_SUMMARY")
 STEP_OUTPUT = os.environ.get("GITHUB_OUTPUT")
@@ -110,6 +114,106 @@ def by_severity(payload: object) -> tuple[int, int]:
     return blocking, len(findings) - blocking
 
 
+def _git(*args: str) -> bytes:
+    result = subprocess.run(
+        ["git", "--no-replace-objects", *args],
+        cwd=WORKSPACE,
+        capture_output=True,
+    )
+    if result.returncode:
+        raise ValueError(
+            "cannot read configured review ref: "
+            + result.stderr.decode("utf-8", errors="replace").strip()
+        )
+    return result.stdout
+
+
+def _review_blob(commit: str, path: str) -> bytes:
+    normalized = PurePosixPath(path)
+    if (
+        not path
+        or normalized.is_absolute()
+        or normalized.as_posix() != path
+        or ".." in normalized.parts
+        or "\\" in path
+        or any(c in path for c in "\r\n\x00")
+    ):
+        raise ValueError("review paths must be canonical relative Git paths")
+    entries = _git("--literal-pathspecs", "ls-tree", "-z", commit, "--", path).split(b"\0")
+    entries = [entry for entry in entries if entry]
+    if len(entries) != 1:
+        raise ValueError(f"review ref has no regular file at {path!r}")
+    metadata, name = entries[0].split(b"\t", 1)
+    mode, kind, oid = metadata.split()
+    if name != path.encode() or kind != b"blob" or mode not in (b"100644", b"100755"):
+        raise ValueError(f"review ref path {path!r} is not a regular file")
+    return _git("cat-file", "blob", oid.decode("ascii"))
+
+
+def _review_check(baseline: str, manifest: str, depth: str) -> dict:
+    try:
+        ref = os.environ.get("INPUT_REVIEW_REF", "").strip()
+        decision = os.environ.get("INPUT_REVIEW_DECISION", "").strip()
+        as_of = os.environ.get("INPUT_REVIEW_AS_OF", "").strip()
+        if not baseline or not ref or not decision or not as_of:
+            raise ValueError("review needs baseline, review-ref, review-decision and review-as-of")
+        commit = _git("rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}")
+        commit = commit.decode("ascii").strip()
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+            raise ValueError("review ref did not resolve to a commit digest")
+        mappings = {}
+        for line in os.environ.get("INPUT_REVIEW_SOURCES", "").splitlines():
+            if not line.strip():
+                continue
+            locator, separator, path = line.strip().partition("=")
+            if not separator or not locator or not path or locator in mappings:
+                raise ValueError("review-sources needs unique LOCATOR=GIT_PATH mappings")
+            mappings[locator] = path
+        with TemporaryDirectory(prefix="agentmandate-review-", dir=ARTEFACTS) as temporary:
+            directory = Path(temporary)
+            record = directory / "decision.json"
+            record.write_bytes(_review_blob(commit, decision))
+            args = [
+                "review",
+                baseline,
+                manifest,
+                "--depth",
+                depth,
+                "--decision",
+                str(record),
+                "--as-of",
+                as_of,
+            ]
+            for index, (locator, path) in enumerate(mappings.items()):
+                capture = directory / f"source-{index}"
+                capture.write_bytes(_review_blob(commit, path))
+                args.extend(["--source", f"{locator}={capture}"])
+            code, result = run_json(args)
+        detail = (
+            render_review(result)
+            if isinstance(result, dict) and "schema" in result
+            else str(result)
+        )
+        return {
+            "name": "review",
+            "ok": code == 0,
+            "findings": max(int(code != 0), count(result, "findings")),
+            "exit": code,
+            "detail": detail,
+            "result": result,
+            "selection": {"ref": ref, "commit": commit, "decision": decision, "sources": mappings},
+        }
+    except (OSError, ValueError, UnicodeError) as exc:
+        return {
+            "name": "review",
+            "ok": False,
+            "findings": 1,
+            "exit": 2,
+            "detail": str(exc),
+            "result": {"error": str(exc)},
+        }
+
+
 def main() -> int:
     manifest = os.environ["INPUT_MANIFEST"]
     depth = os.environ.get("INPUT_DEPTH", "8")
@@ -151,6 +255,30 @@ def main() -> int:
         detail_for(check, args)
         checks.append(check)
 
+    review_configured = any(
+        os.environ.get(f"INPUT_REVIEW_{name}", "").strip()
+        for name in ("REF", "DECISION", "SOURCES", "AS_OF")
+    )
+    if review_configured:
+        review = _review_check(baseline, manifest, depth)
+        checks.append(review)
+        diff = next((c for c in checks if c["name"] == "diff"), None)
+        result = review["result"]
+        if review["ok"] and diff is not None and not diff["ok"]:
+            if (
+                result.get("status") == "eligible_recorded_acceptance"
+                and result.get("gate_satisfied") is True
+                and result.get("comparison") == delta
+            ):
+                # Retain raw diff failure/count. Only its review blocker is resolved.
+                diff["blocking_findings"] = 0
+                diff["blocks_gate"] = False
+                diff["accepted_widenings"] = diff["findings"]
+            else:
+                review["ok"] = False
+                review["findings"] += 1
+                review["detail"] += "\nAction diff and review comparison do not match."
+
     traces = os.environ.get("INPUT_TRACES", "").strip()
     if traces:
         args = ["verify", manifest, "--otel", traces]
@@ -167,9 +295,9 @@ def main() -> int:
         detail_for(check, args)
         checks.append(check)
 
-    total = sum(check["findings"] for check in checks)
+    total = sum(check.get("blocking_findings", check["findings"]) for check in checks)
     advisory_total = sum(check.get("notes", 0) for check in checks)
-    verdict = "clean" if all(check["ok"] for check in checks) else "findings"
+    verdict = "findings" if any(c.get("blocks_gate", not c["ok"]) for c in checks) else "clean"
 
     report_path = ARTEFACTS / "agentmandate-report.json"
     report_path.write_text(
@@ -205,11 +333,14 @@ def main() -> int:
     emit("report", str(report_path))
 
     print(
-        f"{len(checks)} check(s), {total} finding(s), "
-        f"{advisory_total} note(s), verdict {verdict}"
+        f"{len(checks)} check(s), {total} finding(s), {advisory_total} note(s), verdict {verdict}"
     )
     for check in checks:
-        mark = "PASS" if check["ok"] else "FAIL"
+        mark = (
+            "RECORDED ACCEPTANCE"
+            if check.get("accepted_widenings")
+            else ("PASS" if check["ok"] else "FAIL")
+        )
         trailer = f"  ({check['notes']} note(s))" if check.get("notes") else ""
         print(f"  {mark}  {check['name']}{trailer}")
 
@@ -221,11 +352,14 @@ def main() -> int:
     return 1
 
 
-def summary(
-    checks: list[dict], verdict: str, total: int, advisory: int, graph: str
-) -> str:
+def summary(checks: list[dict], verdict: str, total: int, advisory: int, graph: str) -> str:
     """Build the job summary, with the graph GitHub renders inline."""
+    accepted = sum(c.get("accepted_widenings", 0) for c in checks)
     head = "No finding" if verdict == "clean" else f"{total} finding(s)"
+    if accepted:
+        head = (
+            f"{total} blocking finding(s); {accepted} widening change(s) with recorded acceptance"
+        )
     if advisory:
         head += f", {advisory} note(s)"
     lines = [
@@ -241,22 +375,37 @@ def summary(
         "reach": "Can permitted calls combine into a breach?",
         "drift": "Does the manifest still describe the code?",
         "diff": "Did this change widen reachable authority?",
+        "review": "Is the recorded acceptance eligible for this exact diff?",
         "verify": "Did the recorded run stay inside the mandate?",
     }
     for check in checks:
         # A check that passed while raising something advisory is neither a
         # tick nor a cross. Showing it as a tick is what let a real warning
         # disappear from this table.
-        mark = "❌" if not check["ok"] else ("⚠️" if check.get("notes") else "✅")
-        lines.append(
-            f"| {mark} | `{check['name']}` | {questions.get(check['name'], '')} |"
+        mark = (
+            "📝"
+            if check.get("accepted_widenings")
+            else ("❌" if not check["ok"] else ("⚠️" if check.get("notes") else "✅"))
         )
+        lines.append(f"| {mark} | `{check['name']}` | {questions.get(check['name'], '')} |")
 
     failing = [check for check in checks if not check["ok"]]
     if failing:
         lines += ["", "### What was found", ""]
         for check in failing:
             lines += [f"**`{check['name']}`**", "", "```", check["detail"], "```", ""]
+
+    reviewed = [c for c in checks if c["name"] == "review" and c["ok"]]
+    for check in reviewed:
+        lines += [
+            "",
+            "### Recorded review (not deployment approval)",
+            "",
+            "```",
+            check["detail"],
+            "```",
+            "",
+        ]
 
     noted = [c for c in checks if c["ok"] and c.get("notes")]
     if noted:

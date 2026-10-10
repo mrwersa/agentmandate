@@ -26,7 +26,7 @@ candidate reachability and remaining lint are reported separately.
 ## The action
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.8.0
+- uses: mrwersa/agentmandate@v0.26.1
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -123,6 +123,69 @@ within the comparison bound. It does not clear the proposed manifest's breach:
 `diff` still exits 1 for widening, and `reach` still exits 1 for that breach.
 Run `lint` and `reach` independently. Do not replace a failing reach gate with
 a successful review-record gate or treat pinned policy notes as live enforcement.
+
+## Review decisions from a protected Git ref
+
+The Action can combine the review-record gate with its existing checks. Supply
+`baseline`, `review-ref`, `review-decision`, `review-sources`, and `review-as-of`.
+The ref must already be available locally. The Action resolves it once, reads
+regular-file Git blobs at that commit, and records the selected commit in its
+JSON report. It never uses decision or evidence files from the candidate's
+working tree, follows symlinks, or fetches a ref itself.
+
+For a repository with a separately protected `authority-reviews` branch:
+
+```yaml
+- uses: actions/checkout@v4
+- name: Capture baseline and review ref
+  shell: bash
+  run: |
+    git fetch origin main
+    git show origin/main:mandate.json > "$RUNNER_TEMP/released.json"
+    git fetch origin authority-reviews:refs/remotes/origin/authority-reviews
+    echo "REVIEW_AS_OF=$(date -u +%F)" >> "$GITHUB_ENV"
+- uses: mrwersa/agentmandate@v0.26.1
+  with:
+    manifest: mandate.json
+    baseline: ${{ runner.temp }}/released.json
+    depth: '8'
+    review-ref: refs/remotes/origin/authority-reviews
+    review-decision: reviews/release.json
+    review-sources: |
+      decision-note=reviews/release-note.txt
+      policy-note=reviews/policy-note.txt
+    review-as-of: ${{ env.REVIEW_AS_OF }}
+```
+
+This is a template: use your default branch, reviewed baseline and decision
+paths. The record must join the exact manifest bytes, comparison and depth.
+Supply exactly the evidence locators declared in that record; omit
+`policy-note` when the record declares policy applicability without that source.
+See the [change-review example](../examples/change-review/README.md) for the
+record fields. A missing ref/file, incomplete input configuration, malformed
+record, source mismatch, rejection, deferred decision, or ineligible date blocks
+the default gate. Expiry is inclusive UTC; the next day fails.
+
+The caller must protect the workflow and review ref, authenticate and authorize
+the human reviewer, and choose the evaluation date through the trusted workflow.
+A ref name or commit digest is not proof of those properties. A candidate that
+can choose `review-ref`, modify the gate's executable code, or publish the
+selected review materials can still approve itself. Keep those controls outside
+candidate-controlled execution. This feature is a local pinned-material reader,
+not enforcement of GitHub branch rules or deployment authorization.
+
+When acceptance is eligible and its recomputed comparison matches the Action's
+diff, the report preserves `diff.ok: false`, the raw widening count and detail.
+It additionally records `blocks_gate: false`, `blocking_findings: 0`, and
+`accepted_widenings`. The summary shows the widening with recorded acceptance
+and includes the review scope. The overall `findings` output counts blocking
+findings; `clean` means no remaining blockers, not that no authority widened.
+
+Acceptance cannot clear lint, reachability, source drift or trace-conformance
+failures. A reachable breach still fails even when its widening was accepted.
+The standalone `mandate diff` exit code is unchanged. `fail-on: never` remains
+an explicit report-only choice and can succeed with an overall findings verdict.
+With no review inputs, the Action retains its previous checks and gate behavior.
 
 ## Pinning the analyzed authority artifact
 

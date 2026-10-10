@@ -45,7 +45,7 @@ It does not supply the [external security review](external-security-review.md).
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)
 records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 30 CLI command paths
+methods/properties and constant values. It also records all 31 CLI command paths
 (including intermediate groups), arguments, defaults, choices and mutually
 exclusive groups. The package release number is
 excluded from comparison; `__version__` remains an exported name.
