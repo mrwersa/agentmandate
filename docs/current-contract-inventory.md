@@ -41,11 +41,16 @@ review of #230 on 10 October 2026.** That review covers the original inventory,
 not subsequent additions. This is not a GitHub approval.
 It does not supply the [external security review](external-security-review.md).
 
+The [Cedar export preview](cedar-export.md) adds one command and initial mapping/result
+baselines. The prior named-review inventory is retained; existing managed Cedar
+commands and every earlier fixture remain unchanged. This is a v1 baseline,
+not a migration from an earlier exporter.
+
 ## What is pinned
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)
 records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 31 CLI command paths
+methods/properties and constant values. It also records all 32 CLI command paths
 (including intermediate groups), arguments, defaults, choices and mutually
 exclusive groups. The package release number is
 excluded from comparison; `__version__` remains an exported name.

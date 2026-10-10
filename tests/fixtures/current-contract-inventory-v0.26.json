@@ -10,25 +10,6 @@
         "producer_version"
       ]
     },
-    "_cedar_export.py": {
-      "constants": {
-        "EXPORT_SCHEMA": "agentmandate.cedar-export/v1",
-        "EXPORT_VERSION": 1
-      },
-      "inline_versions": {
-        "cedar_export_version": [
-          1
-        ]
-      },
-      "schemas": [
-        "agentmandate.cedar-export/v1"
-      ],
-      "version_fields": [
-        "cedar_export_version",
-        "language_version",
-        "sdk_version"
-      ]
-    },
     "_cedar_mapping.py": {
       "constants": {
         "MAPPING_VERSION": 1
@@ -379,7 +360,6 @@
           "choices": [
             "align",
             "diff",
-            "export",
             "validate"
           ],
           "dest": "cedar_command",
@@ -547,82 +527,6 @@
             "--as-of"
           ],
           "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "json",
-          "nargs": 0,
-          "options": [
-            "--json"
-          ],
-          "required": false,
-          "type": null
-        }
-      ],
-      "exclusive_groups": []
-    },
-    "mandate cedar export": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "manifest",
-          "nargs": null,
-          "options": [],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "mapping",
-          "nargs": null,
-          "options": [
-            "--mapping"
-          ],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "output_dir",
-          "nargs": null,
-          "options": [
-            "--output-dir"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "allow_partial",
-          "nargs": 0,
-          "options": [
-            "--allow-partial"
-          ],
-          "required": false,
           "type": null
         },
         {
@@ -2659,7 +2563,7 @@
       ]
     }
   },
-  "coverage_sha256": "4a498898b689922e6a4f561bc8488264f093048ad65e6da1d24bdcd20b870e7b",
+  "coverage_sha256": "7148a2adcd99841c4d28317421e73e851b3957103c723e57ce9e44af7bd549c3",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2683,14 +2587,6 @@
     "examples/catalogue-import/manifest.json": "87623182f9c331df0818ed1adb485ede581934994235a3885c404dff7f8b7c18",
     "examples/catalogue-import/mcp.json": "8a7504f6ae19ee4ea13e7a3253e0c05b1ee8d842b6ccad0dd6401dd717b84207",
     "examples/catalogue-import/openapi.json": "c9bd11f2b9305454d9e334fd698c11bb7729b271a2bc386721d04fd4fee492c5",
-    "examples/cedar-export/generated/entities.json": "9637b3b169e3fc755412eb90d5f7005b4eb746945b7e2a2a731a3f9f42e437dc",
-    "examples/cedar-export/generated/export.json": "918d5e29dda5fda1bb707e985689c9d0035fa04f3edcb4ee2a01906a1c60b578",
-    "examples/cedar-export/generated/policies.cedar": "928c25c5aca0839d7f11e7df7b6cf107d63b30c44edcf06bd33e141094bfbd89",
-    "examples/cedar-export/generated/schema.json": "f92d050e07b7963f23748bac7877f0db0e453a41586f572ffee2c9e94a8fc74f",
-    "examples/cedar-export/generated/tests.json": "e61692b212fe6b6a29edd20940545474715a63b1e4bf8139c1646e6c8f73f21e",
-    "examples/cedar-export/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
-    "examples/cedar-export/mapping.json": "0d61b18a9252b444d55527c3e3dbbf813618a4bf47af7c4a6e1bdc2d0e45cbeb",
-    "examples/cedar-export/package-lock.json": "18d89d6485956ce5161f2e5b6ed318d90600c0a111c7c497a138f50a7a023c3f",
     "examples/change-review/accepted.json": "2b642c1df42fc58dc57166e1845682215a79e22ac8111ec67ca647aa2afee389",
     "examples/change-review/after.json": "f5464650e9be795d9b5e51b0710778c036361af195bfa27567b601a226de2994",
     "examples/change-review/before.json": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",

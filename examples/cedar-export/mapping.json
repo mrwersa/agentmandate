@@ -1,0 +1,13 @@
+{
+  "cedar_export_version": 1,
+  "agent": "release-agent",
+  "identity": "release-operator",
+  "namespace": "ReleaseGate",
+  "principals": {
+    "caller": [{"type": "User", "id": "release-operator"}],
+    "service": [{"type": "Workload", "id": "build-reader"}]
+  },
+  "resource": {"type": "Repository", "id": "release-tools"},
+  "actions": {"read_release": "ReadRelease", "publish_release": "PublishRelease", "read_build_status": "ReadBuildStatus"},
+  "approval_context": "approved"
+}

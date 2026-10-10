@@ -1,0 +1,374 @@
+[
+  {
+    "expected": "allow",
+    "name": "publish_release:allowed-0",
+    "request": {
+      "action": {
+        "id": "PublishRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "publish_release:approval-false",
+    "request": {
+      "action": {
+        "id": "PublishRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": false
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "publish_release:approval-missing",
+    "request": {
+      "action": {
+        "id": "PublishRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {},
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "publish_release:unmapped-principal",
+    "request": {
+      "action": {
+        "id": "PublishRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "__agentmandate_unmapped__",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "publish_release:other-resource",
+    "request": {
+      "action": {
+        "id": "PublishRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "__agentmandate_unmapped__",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "publish_release:other-class-service",
+    "request": {
+      "action": {
+        "id": "PublishRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "build-reader",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "allow",
+    "name": "read_build_status:allowed-0",
+    "request": {
+      "action": {
+        "id": "ReadBuildStatus",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "build-reader",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "allow",
+    "name": "read_build_status:approval-false",
+    "request": {
+      "action": {
+        "id": "ReadBuildStatus",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": false
+      },
+      "principal": {
+        "id": "build-reader",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "allow",
+    "name": "read_build_status:approval-missing",
+    "request": {
+      "action": {
+        "id": "ReadBuildStatus",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {},
+      "principal": {
+        "id": "build-reader",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "read_build_status:unmapped-principal",
+    "request": {
+      "action": {
+        "id": "ReadBuildStatus",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "__agentmandate_unmapped__",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "read_build_status:other-resource",
+    "request": {
+      "action": {
+        "id": "ReadBuildStatus",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "build-reader",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "__agentmandate_unmapped__",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "read_build_status:other-class-caller",
+    "request": {
+      "action": {
+        "id": "ReadBuildStatus",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "allow",
+    "name": "read_release:allowed-0",
+    "request": {
+      "action": {
+        "id": "ReadRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "allow",
+    "name": "read_release:approval-false",
+    "request": {
+      "action": {
+        "id": "ReadRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": false
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "allow",
+    "name": "read_release:approval-missing",
+    "request": {
+      "action": {
+        "id": "ReadRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {},
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "read_release:unmapped-principal",
+    "request": {
+      "action": {
+        "id": "ReadRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "__agentmandate_unmapped__",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "read_release:other-resource",
+    "request": {
+      "action": {
+        "id": "ReadRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "release-operator",
+        "type": "ReleaseGate::User"
+      },
+      "resource": {
+        "id": "__agentmandate_unmapped__",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  },
+  {
+    "expected": "deny",
+    "name": "read_release:other-class-service",
+    "request": {
+      "action": {
+        "id": "ReadRelease",
+        "type": "ReleaseGate::Action"
+      },
+      "context": {
+        "approved": true
+      },
+      "principal": {
+        "id": "build-reader",
+        "type": "ReleaseGate::Workload"
+      },
+      "resource": {
+        "id": "release-tools",
+        "type": "ReleaseGate::Repository"
+      }
+    }
+  }
+]

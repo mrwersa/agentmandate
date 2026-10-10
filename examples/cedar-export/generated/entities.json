@@ -1,0 +1,26 @@
+[
+  {
+    "attrs": {},
+    "parents": [],
+    "uid": {
+      "id": "release-tools",
+      "type": "ReleaseGate::Repository"
+    }
+  },
+  {
+    "attrs": {},
+    "parents": [],
+    "uid": {
+      "id": "release-operator",
+      "type": "ReleaseGate::User"
+    }
+  },
+  {
+    "attrs": {},
+    "parents": [],
+    "uid": {
+      "id": "build-reader",
+      "type": "ReleaseGate::Workload"
+    }
+  }
+]

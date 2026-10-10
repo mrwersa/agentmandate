@@ -13,6 +13,8 @@ from typing import Any
 
 from . import __version__
 from ._catalogue import import_inventory, read_catalogue
+from ._cedar_export import export as export_cedar
+from ._cedar_export import render as render_cedar_export
 from ._change_review import evaluate as evaluate_change_review
 from ._change_review import render as render_change_review
 from ._conditions import (
@@ -511,6 +513,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicit evaluation date for reviewed mapping evidence",
     )
     cedar_align.add_argument("--json", action="store_true", help="machine-readable output")
+    cedar_export = cedar_subparsers.add_parser(
+        "export", help="compile mapped stateless permissions and report semantic losses"
+    )
+    _add_manifest(cedar_export)
+    cedar_export.add_argument("--mapping", required=True, help="explicit application mapping JSON")
+    cedar_export.add_argument(
+        "--output-dir", help="write a new policy/schema/test bundle directory"
+    )
+    cedar_export.add_argument(
+        "--allow-partial", action="store_true",
+        help="emit a partial candidate; losses still exit 1",
+    )
+    cedar_export.add_argument("--json", action="store_true", help="machine-readable export report")
     cedar_diff = cedar_subparsers.add_parser(
         "diff",
         help="compare exact managed requests across two policy revisions",
@@ -1334,7 +1349,30 @@ def _render_managed_diff(result: ManagedDiff) -> str:
     return "\n".join(lines)
 
 
+def _run_cedar_export(args: argparse.Namespace) -> int:
+    from ._cedar_export_files import write_bundle
+
+    try:
+        result = export_cedar(
+            Path(args.manifest).read_bytes(), Path(args.mapping).read_bytes(),
+            allow_partial=args.allow_partial,
+        )
+        if args.output_dir and result["policies"] is not None:
+            write_bundle(result, Path(args.output_dir))
+        output = (
+            json.dumps(result, indent=2, sort_keys=True) + "\n"
+            if args.json else render_cedar_export(result)
+        )
+    except (ValueError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_FINDING if result["losses"] else EXIT_OK
+
+
 def _run_cedar(args: argparse.Namespace) -> int:
+    if args.cedar_command == "export":
+        return _run_cedar_export(args)
     try:
         if args.cedar_command == "validate":
             oracle = ManagedOracle.from_json(_read_text(args.oracle))

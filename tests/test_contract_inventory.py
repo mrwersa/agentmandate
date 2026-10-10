@@ -289,7 +289,9 @@ def test_named_review_addition_preserves_all_previous_contracts_and_fixtures():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.25.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.26.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) - set(previous["cli"]) == {"mandate review"}
     for path, command in previous["cli"].items():
@@ -303,5 +305,27 @@ def test_named_review_addition_preserves_all_previous_contracts_and_fixtures():
     }
     for path, markers in previous["artifact_markers"].items():
         assert current["artifact_markers"][path] == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_cedar_export_preserves_all_previous_contracts_and_fixtures():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.26.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) - set(previous["cli"]) == {"mandate cedar export"}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate cedar":
+            selector = next(a for a in present["arguments"] if a["dest"] == "cedar_command")
+            selector["choices"].remove("export")
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_cedar_export.py"
+    }
+    for path, marker in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == marker
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

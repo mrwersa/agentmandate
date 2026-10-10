@@ -13,6 +13,10 @@ retains the original import design and the evidence gates that led to those
 commands. Candidate shapes and future authority-consumption rules below are
 not additional supported inputs.
 
+The separate [Cedar exporter](cedar-export.md) compiles an explicit stateless
+subset of a manifest; it does not consume these import bundles or change
+managed-oracle analysis.
+
 The delivered boundary is:
 
 | Input | Current consumer | Effect on manifest reachability |

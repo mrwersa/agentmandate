@@ -497,16 +497,7 @@
     ]
   },
   {
-    "id": "named-change-review-v1",
-    "kind": "baseline",
-    "schemas": [
-      "agentmandate.change-review/v1",
-      "agentmandate.review/v1"
-    ],
     "doc": "docs/change-review.md",
-    "tests": [
-      "tests/test_change_review.py"
-    ],
     "fixtures": [
       "examples/change-review/before.json",
       "examples/change-review/after.json",
@@ -518,6 +509,36 @@
       "tests/fixtures/change-review-missing-v1.json",
       "tests/fixtures/change-review-neutral-v1.json",
       "tests/fixtures/change-review-deferred-v1.json"
+    ],
+    "id": "named-change-review-v1",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.change-review/v1",
+      "agentmandate.review/v1"
+    ],
+    "tests": [
+      "tests/test_change_review.py"
+    ]
+  },
+  {
+    "doc": "docs/cedar-export.md",
+    "fixtures": [
+      "examples/cedar-export/manifest.json",
+      "examples/cedar-export/mapping.json",
+      "examples/cedar-export/generated/export.json",
+      "examples/cedar-export/generated/schema.json",
+      "examples/cedar-export/generated/policies.cedar",
+      "examples/cedar-export/generated/entities.json",
+      "examples/cedar-export/generated/tests.json",
+      "examples/cedar-export/package-lock.json"
+    ],
+    "id": "cedar-export",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.cedar-export/v1"
+    ],
+    "tests": [
+      "tests/test_cedar_export.py"
     ]
   }
 ]
