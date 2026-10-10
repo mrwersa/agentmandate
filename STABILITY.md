@@ -79,6 +79,9 @@ explicit protocol readers in `mandate scan --format` write review-marked
 skeletons. The original MCP reader and public Python scan signatures are
 unchanged when the format flag is omitted. Protocol mappings and their pinned
 v1 baselines are documented in [the import guide](docs/catalogue-import.md).
+The same minor release adds the `scope.missing-producer` lint error. Previously
+clean manifests with a dangling requirement now exit 1; reachability semantics
+and the lint JSON shape are unchanged.
 
 `mandate conditions validate` likewise proves structure only. Manifest-mode
 `reach` and `drift` separately check profile semantics, reviewed context,

@@ -22,11 +22,21 @@ All notable changes to this project are documented here. The format follows
 - Runnable synthetic imports, pinned skeleton/declaration/IR baselines,
   and adversarial trust, input, mode, and authority-separation checks.
 
+### Fixed
+
+- `lint` now reports `scope.missing-producer` as an error for a tool requiring
+  a scope that no declared tool produces. Such a tool is unreachable in the
+  model; a clean reach result does not assess it. This protects hand-authored
+  manifests and scan skeletons. Strict protocol skeletons name the affected
+  tool beside its inferred requirement and distinguish proposed effects from
+  name-based guesses.
+
 ### Compatibility
 
 - Omitting `scan --format` retains the original MCP reader and output. Public
-  Python scan signatures, inventory/IR schemas, and existing analysis results
-  are unchanged. New readers require JSON; no service, URL, or application
+  Python scan signatures, inventory/IR schemas, and reachability results are
+  unchanged. Lint returns exit 1 for missing scope producers that previously
+  passed. New readers require JSON; no service, URL, or application
   code is invoked. Imported membership remains non-complete and unreviewed.
   OpenAPI and A2A adapter mappings are heuristic pending accountable review.
 - Non-scalar JSON Schema type declarations no longer raise a Python type

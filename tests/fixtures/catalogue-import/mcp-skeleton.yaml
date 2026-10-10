@@ -33,20 +33,18 @@ tools:
     principal: caller
 
   - name: "issue_refund"
-    # REVIEW: effect guessed from the name. read | write | irreversible
+    # REVIEW: effect is a proposal. read | write | irreversible
     effect: irreversible
     # REVIEW: does this spend the caller's authority or a service account?
     principal: caller
+    # REVIEW: No tool in this skeleton produces 'case', so 'issue_refund' is
+    #         unreachable in the declared model. A clean reach result does
+    #         not assess this tool. Confirm the inferred requirement denotes
+    #         a scope binding; declare a genuine producer or remove the
+    #         requirement if it is only a caller-supplied argument.
     requires: ["case"]
     # REVIEW: amount looks like a value argument. A ceiling needs scope_key too.
     # value_arg: "amount"
     # scope_key: "case"
     # ceiling: { amount: 0, currency: GBP }
     requires_approval: true
-
-# REVIEW: no tool was detected as producing a scope, so every
-# `requires` above is currently unreachable. Mark whichever tool
-# mints each scope with `produces:`, and set `unbounded: true`
-# where the agent can obtain them at will. That flag is what
-# decides whether a per-scope ceiling means anything.
-# Scopes referenced: case

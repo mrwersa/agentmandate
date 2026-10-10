@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from agentmandate import analyse, collect, load, loads, propose, render, scan_file
+from agentmandate import analyse, check, collect, load, loads, propose, render, scan_file
 from agentmandate._catalogue import import_inventory, read_catalogue
 from agentmandate._inventory import _validate_inventory_profile, reconcile
 from agentmandate._ir import AuthorityIR, _analyse_ir, _from_mandate
@@ -144,6 +144,61 @@ def test_reviewed_example_has_identical_direct_and_ir_authority():
     assert result.authority == analyse(manifest)
     assert result.authority.breaches
     assert result.authority.breaches[0].path[-1].tool == "issue_refund"
+
+
+@pytest.mark.parametrize("format", ["mcp", "openapi"])
+@pytest.mark.parametrize("json_output", [False, True])
+def test_imported_dangling_scope_cannot_pass_lint_but_reach_stays_independent(
+    format,
+    json_output,
+    tmp_path,
+    capsys,
+):
+    assert (
+        main(
+            [
+                "scan",
+                str(EXAMPLE / f"{format}.json"),
+                "--format",
+                format,
+                "--agent",
+                "refunds",
+            ]
+        )
+        == EXIT_OK
+    )
+    skeleton = capsys.readouterr().out
+    assert "No tool in this skeleton produces 'case'" in skeleton
+    assert "'issue_refund' is unreachable in the declared model" in " ".join(
+        skeleton.replace("#", "").split()
+    )
+    assert "effect is a proposal" in skeleton
+    assert all(
+        line.startswith("    #")
+        for line in skeleton.splitlines()
+        if "unreachable in the declared model" in line or "not assess this tool" in line
+    )
+    path = tmp_path / "skeleton.yaml"
+    path.write_text(skeleton)
+    args = ["lint", str(path), *(["--json"] if json_output else [])]
+    assert main(args) == EXIT_FINDING
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    if json_output:
+        finding = json.loads(captured.out)["findings"][0]
+        assert finding["rule"] == "scope.missing-producer"
+        assert finding["severity"] == "error" and finding["subject"] == "issue_refund"
+    else:
+        assert "scope.missing-producer" in captured.out and "issue_refund" in captured.out
+    assert main(["reach", str(path), "--json"]) == EXIT_OK
+    authority = json.loads(capsys.readouterr().out)
+    assert authority["reachable_tools"] == ["search_cases"]
+    assert authority["breaches"] == []
+    corrected = skeleton.replace(
+        '  - name: "search_cases"', '  - name: "search_cases"\n    produces: case'
+    )
+    assert check(loads(corrected)) == []
+    assert analyse(loads(corrected)).reachable_tools == frozenset({"search_cases", "issue_refund"})
 
 
 def test_imported_draft_leaves_cli_drift_unresolved(tmp_path, capsys):

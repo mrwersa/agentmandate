@@ -38,8 +38,21 @@ origin or establish that their description is true.
 Before running analysis, confirm the tools available to **one agent** and
 review effects, principals, scope production, value arguments, ceilings,
 approvals, and mandate-wide limits. See the [manifest reference](manifest.md).
-An unedited skeleton is loadable but does not establish reviewed intent:
-missing producers or limits can make its reachability result uninformative.
+An unedited skeleton is loadable but does not establish reviewed intent.
+Run `lint` before interpreting `reach`: a required scope with no producer is
+an error, because its consumer is unreachable in the declared graph.
+
+For the OpenAPI example above, `mandate lint api-mandate.yaml` exits 1 with
+`scope.missing-producer` for `issue_refund`: it requires `case`, but no tool
+produces `case`. The per-tool REVIEW comment names this consequence. A clean
+`reach` result still describes the reachable portion of the model; it does not
+assess the excluded refund tool.
+
+Confirm whether the inferred ID argument actually represents a scope binding.
+Declare a genuine producer if one exists, or remove the inferred requirement
+if it is only a caller-supplied dispatch/input argument. Do not invent a producer
+to silence lint. Missing mandate limits and cyclic prerequisites also need
+review; this static check detects missing producers, not every unreachable tool.
 
 The [annotated synthetic manifest](../examples/catalogue-import/manifest.json)
 shows the additional work. It declares a case-producing search and a £500

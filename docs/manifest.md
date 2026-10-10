@@ -81,6 +81,13 @@ spending, so the manifest rejects either on its own.
 Write `case`, never `case-4471`. The analysis reasons about "a case", so a
 manifest that names real identifiers is both wrong and a data-handling problem.
 
+Every required scope needs a producer in the manifest. If none exists, `lint`
+reports `scope.missing-producer` as an error and exits 1. The requiring tool
+cannot be reached from the model's empty initial bindings, so a clean `reach`
+result does not assess it. Confirm the scope requirement and declare a genuine
+producer, or remove an unsupported requirement. Producer existence alone does
+not prove reachability: cyclic prerequisites can still prevent a call.
+
 ### Repeated scope production
 
 A per-scope ceiling continues to bound each binding. If the agent can produce

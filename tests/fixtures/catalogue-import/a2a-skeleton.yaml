@@ -39,7 +39,7 @@ limits:
 tools:
   # Dispatch to A2A agent Synthetic refund assistant
   - name: "ask_refund_agent"
-    # REVIEW: effect guessed from the name. read | write | irreversible
+    # REVIEW: effect is a proposal. read | write | irreversible
     effect: irreversible
     # REVIEW: does this spend the caller's authority or a service account?
     principal: caller
