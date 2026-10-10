@@ -85,6 +85,14 @@ that the successor is the exclusive admission path. Digest equality, strings,
 and Boolean attestations cannot independently prove these operational facts.
 The verifier does not verify binding signatures or a live coordinator.
 
+This verifier is stateless: it never imports a snapshot into enforcement or
+changes successor consumption. A fresh artifact ID does not prove snapshot
+freshness, make an import replay-safe, or establish a unique successor across
+independent invocations. Two individually conforming records can both pass;
+the verifier cannot detect a live stale-state overwrite from these records
+alone. Digest pinning identifies reviewed bytes, not the latest live state.
+Those runtime properties remain part of the operational evidence boundary.
+
 ## Result and gate
 
 `agentmandate.scalar-handover/v1` includes the canonical handover and digest,
