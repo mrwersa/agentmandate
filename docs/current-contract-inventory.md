@@ -17,13 +17,18 @@ contract baseline, on 10 October 2026, and is retained as
 [a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.22.json).
 The current inventory adds the repair command, its v1 fixtures, and an opt-in
 ceiling domain with v2 fixtures and a v1-to-v2 compatibility case. Required
-ordered paths add a separate input contract, v3 results and a v2-to-v3 case. The
+ordered paths add a separate input contract, v3 results and a v2-to-v3 case.
+The separate named-review gate adds initial input/result v1 baselines without
+changing ordinary diff output. The
 [preceding repair inventory](../tests/fixtures/current-contract-inventory-v0.23.json)
 is also retained, together with the
 [ceiling-repair inventory](../tests/fixtures/current-contract-inventory-v0.24.json).
+The [required-path inventory](../tests/fixtures/current-contract-inventory-v0.25.json)
+is retained too.
 Tests preserve every earlier fixture digest and declaration,
 apart from explicitly added repair options, presentation markers and the
-required-workflow input. Historical transition checks compare fixed inventories;
+required-workflow input and the separate named-review gate. Historical transition
+checks compare fixed inventories;
 the latest extension is checked against the actual package. CLI replay tests
 exercise all three repair result versions. The maintainer supplied a partial
 out-of-band execution review of
@@ -71,6 +76,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Revision and scalar cutover | [Revision review](revision-review.md), [handover](scalar-handover.md); `test_revision_review.py`, `test_scalar_handover.py` |
 | Obligations, scenarios and decision suites | [Obligations](test-obligations.md), [evaluation](evaluation-loop.md); `test_obligations.py`, `test_scenarios.py` |
 | Repair candidates | [Remediation](remediation.md); `test_remediation.py`, `test_ceiling_remediation.py`, `test_required_workflows.py` |
+| Named acceptance of changes | [Change review](change-review.md); `test_change_review.py` |
 | Trace verification and SARIF | [Traces](traces.md), [CI](ci.md); `test_verify.py`, `test_otel.py`, `test_findings.py` |
 | Historical readers, projections and acceptance | [Historical audit](pre-1.0-consolidation-audit.md), [acceptance](continuation-evidence-acceptance.md); converter, replay and acceptance tests named in the coverage index |
 

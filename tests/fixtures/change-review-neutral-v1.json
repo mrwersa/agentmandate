@@ -1,0 +1,81 @@
+{
+  "argv": [
+    "review",
+    "examples/change-review/before.json",
+    "examples/change-review/before.json",
+    "--as-of",
+    "2026-10-10",
+    "--json"
+  ],
+  "exit": 0,
+  "result": {
+    "as_of": "2026-10-10",
+    "comparison": {
+      "after": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_extractable": {
+          "amount": "5",
+          "currency": "GBP"
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_extractable": {
+          "amount": "5",
+          "currency": "GBP"
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "changes": [],
+      "direction": "neutral"
+    },
+    "findings": [],
+    "gate_satisfied": true,
+    "inputs": {
+      "after_sha256": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
+      "agent": "synthetic-release",
+      "before_sha256": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
+      "comparison_sha256": "dba65761cf379a90a6d8cf68617b92b7e1181c3618ef5d277c1e1e1f3fb02cbe",
+      "depth": 4
+    },
+    "review": null,
+    "schema": "agentmandate.review/v1",
+    "scope": "recorded acceptance of a bounded diff; not reviewer authentication or deployment approval",
+    "status": "review_not_required_within_bound"
+  }
+}

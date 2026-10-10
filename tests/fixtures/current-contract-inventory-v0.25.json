@@ -20,18 +20,6 @@
         "mapping_version"
       ]
     },
-    "_change_review.py": {
-      "constants": {
-        "CHANGE_REVIEW_SCHEMA": "agentmandate.change-review/v1",
-        "REVIEW_RESULT_SCHEMA": "agentmandate.review/v1"
-      },
-      "inline_versions": {},
-      "schemas": [
-        "agentmandate.change-review/v1",
-        "agentmandate.review/v1"
-      ],
-      "version_fields": []
-    },
     "_conditions.py": {
       "constants": {
         "CONDITION_ADAPTER_VERSION": 1,
@@ -329,7 +317,6 @@
             "producers",
             "reach",
             "remediate",
-            "review",
             "scan",
             "scenarios",
             "verify"
@@ -2168,104 +2155,6 @@
       ],
       "exclusive_groups": []
     },
-    "mandate review": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "before",
-          "nargs": null,
-          "options": [],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "after",
-          "nargs": null,
-          "options": [],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "decision",
-          "nargs": null,
-          "options": [
-            "--decision"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_AppendAction",
-          "choices": null,
-          "default": [],
-          "dest": "source",
-          "nargs": null,
-          "options": [
-            "--source"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "as_of",
-          "nargs": null,
-          "options": [
-            "--as-of"
-          ],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "depth",
-          "nargs": null,
-          "options": [
-            "--depth"
-          ],
-          "required": false,
-          "type": "_positive_int"
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "json",
-          "nargs": 0,
-          "options": [
-            "--json"
-          ],
-          "required": false,
-          "type": null
-        }
-      ],
-      "exclusive_groups": []
-    },
     "mandate scan": {
       "arguments": [
         {
@@ -2563,7 +2452,7 @@
       ]
     }
   },
-  "coverage_sha256": "7148a2adcd99841c4d28317421e73e851b3957103c723e57ce9e44af7bd549c3",
+  "coverage_sha256": "4257b1030c4c1f1e107a1c30d8e4bd484c1587dc78f9907cb95f170d2091e5d1",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2587,11 +2476,6 @@
     "examples/catalogue-import/manifest.json": "87623182f9c331df0818ed1adb485ede581934994235a3885c404dff7f8b7c18",
     "examples/catalogue-import/mcp.json": "8a7504f6ae19ee4ea13e7a3253e0c05b1ee8d842b6ccad0dd6401dd717b84207",
     "examples/catalogue-import/openapi.json": "c9bd11f2b9305454d9e334fd698c11bb7729b271a2bc386721d04fd4fee492c5",
-    "examples/change-review/accepted.json": "2b642c1df42fc58dc57166e1845682215a79e22ac8111ec67ca647aa2afee389",
-    "examples/change-review/after.json": "f5464650e9be795d9b5e51b0710778c036361af195bfa27567b601a226de2994",
-    "examples/change-review/before.json": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
-    "examples/change-review/decision-note.txt": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f",
-    "examples/change-review/deferred.json": "68fa98d2e5816d9768aceb313b3357a35b7680f65f500af8f68871ef2e99a8bd",
     "examples/observed-calls.jsonl": "d4769b576e6a2e15d4d657db875b17db0e0de9b5c0129d07718e72d69ab30930",
     "examples/otel-trace.json": "82e6f24ecbb6df50bb5cdc68652d18ad6865084c38c59c3b11d5aed75d9a3013",
     "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
@@ -2641,11 +2525,6 @@
     "tests/fixtures/catalogue-import/openapi-inventory-v1.json": "2de79e615ff0eb9bca6f7c48fcce436cddcbb236b8e10b1240999d5ff2e94334",
     "tests/fixtures/catalogue-import/openapi-skeleton.yaml": "58695901aae75c003d22ae0fffb4f36edfb4553fb2cb99d7f631c6922c9eebd2",
     "tests/fixtures/cedar-effective-diff-v1.json": "2feba94ef5d9a5e83eb895f65db9346e8659bf8997d35b4ec7b113e922725809",
-    "tests/fixtures/change-review-accepted-v1.json": "315b22fd83ccdb9a101f99d856ee6b6d3a3f0fc89f3d0b5791c1dda7748c4fa0",
-    "tests/fixtures/change-review-deferred-v1.json": "70f13076d5e79a19452a58ef8431ec6a8e49d83a3c2f2ddc0063cdcfcb8e8d71",
-    "tests/fixtures/change-review-expired-v1.json": "d59ca909129be28817c69f26376a9d511813a302b8b82e90b01cac316c551578",
-    "tests/fixtures/change-review-missing-v1.json": "9e18cf280800841199fca4a9970be1e7e67c4e1754363d79272d1e6885130f47",
-    "tests/fixtures/change-review-neutral-v1.json": "3bbe3f8942e180874d4f79f71a20cce560cbd8ac2c658583a2c2b8d489ab2230",
     "tests/fixtures/condition-context-select-only-complete-v1.json": "a023b9e5e345ddd0f86208bebf75c5dc63abbaa7f54be9bf03986e94bc391044",
     "tests/fixtures/condition-context-select-v1.json": "c9fa5e310223aede3be07d01b874ddf14625b6d9097c78633573eb3dbe2ed48a",
     "tests/fixtures/condition-dispatch-v1.json": "97cb6fbc90e2450b21a5597e231ec66adff4d99c958456bc7b1a3c355e457a38",
@@ -2671,7 +2550,6 @@
     "tests/fixtures/current-contract-inventory-v0.22.json": "f5aeb1b9a6b0a46aebe6b71eaf394f4f2b05c948adc10b96bc995737ef2d58ef",
     "tests/fixtures/current-contract-inventory-v0.23.json": "5e5639fe183ad4e691534bb394c1883eb65a2b7359d3762543f0484ae90dc3a5",
     "tests/fixtures/current-contract-inventory-v0.24.json": "2a6c77208f4d70975cf66947810f7a85e58f8394de1e40ab1f0371907a975b17",
-    "tests/fixtures/current-contract-inventory-v0.25.json": "8b391868b044b78f37c1a84a822c479ff873c52b400b82189b40266217f1b543",
     "tests/fixtures/delegation-attachment-v2.json": "41990995ed030df2e11c7f28eceb621bcb1fce55955b783b1f16366c6b1f7766",
     "tests/fixtures/delegation-chain-authorizer-v1.json": "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764",
     "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",

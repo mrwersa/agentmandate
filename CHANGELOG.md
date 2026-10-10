@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.26.0 - 2026-10-10
+
+### Added
+
+- `mandate review BEFORE AFTER --as-of YYYY-MM-DD` recomputes the ordinary
+  authority diff and checks a separate named, time-bounded acceptance record.
+  An eligible record must join the exact manifests, comparison and depth;
+  carry owner, reviewer and reason; supply every pinned decision/policy source;
+  and have an accepted decision with resolved policy disposition and dates.
+- `--decision FILE` and repeatable `--source LOCATOR=CAPTURE` select the public
+  `agentmandate.change-review/v1` input. The separate `agentmandate.review/v1`
+  result retains the unchanged diff, source checks and scoped eligibility.
+  Missing/stale/tampered/unaccepted records exit 1; malformed inputs, incomplete
+  mappings and I/O errors exit 2 with no partial stdout. Nonwidening without a
+  record needs no acceptance within the comparison bound.
+- Synthetic accepted, deferred, expired, missing and neutral examples, initial
+  result baselines, and CI trust guidance. Exact evidence bytes do not verify
+  reviewer identity, organizational approval or actual policy enforcement.
+
+### Compatibility
+
+- Existing `diff`, `reach`, remediation outputs, root Python exports and earlier
+  inventory/fixture bytes are unchanged. A successful review gate does not clear
+  a reachable breach, approve deployment or establish runtime continuity. The
+  library does not author decisions, fetch evidence or renew acceptance.
+
 ## 0.25.0 - 2026-10-10
 
 ### Added

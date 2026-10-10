@@ -1,0 +1,113 @@
+{
+  "argv": [
+    "review",
+    "examples/change-review/before.json",
+    "examples/change-review/after.json",
+    "--as-of",
+    "2026-10-10",
+    "--json"
+  ],
+  "exit": 1,
+  "result": {
+    "as_of": "2026-10-10",
+    "comparison": {
+      "after": {
+        "breaches": [
+          {
+            "detail": "cumulative value 10 GBP exceeds limit 5 GBP",
+            "kind": "cumulative_value",
+            "path": [
+              "seed(item#1)",
+              "seed(item#2)",
+              "pay(item#1, 5 GBP)",
+              "pay(item#2, 5 GBP)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_extractable": {
+          "amount": "10",
+          "currency": "GBP"
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_extractable": {
+          "amount": "5",
+          "currency": "GBP"
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "seed: can now mint fresh bindings",
+          "direction": "widening",
+          "kind": "scope minting"
+        },
+        {
+          "detail": "5 -> 10 GBP",
+          "direction": "widening",
+          "kind": "extractable value"
+        },
+        {
+          "detail": "gained cumulative_value",
+          "direction": "widening",
+          "kind": "reachable breach"
+        }
+      ],
+      "direction": "widening"
+    },
+    "findings": [
+      {
+        "detail": "widening needs a scoped, evidenced acceptance",
+        "rule": "review.decision-missing"
+      }
+    ],
+    "gate_satisfied": false,
+    "inputs": {
+      "after_sha256": "f5464650e9be795d9b5e51b0710778c036361af195bfa27567b601a226de2994",
+      "agent": "synthetic-release",
+      "before_sha256": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
+      "comparison_sha256": "3086fc12d65e3be588afddae4f335e413f97fb33ad710ccc146be98221ed8e01",
+      "depth": 4
+    },
+    "review": null,
+    "schema": "agentmandate.review/v1",
+    "scope": "recorded acceptance of a bounded diff; not reviewer authentication or deployment approval",
+    "status": "recorded_acceptance_unresolved"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "after_sha256": "f5464650e9be795d9b5e51b0710778c036361af195bfa27567b601a226de2994",
+  "agent": "synthetic-release",
+  "before_sha256": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
+  "comparison_sha256": "3086fc12d65e3be588afddae4f335e413f97fb33ad710ccc146be98221ed8e01",
+  "decision": "defer",
+  "depth": 4,
+  "evidence": [
+    {
+      "locator": "review-note",
+      "purpose": "decision",
+      "sha256": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f"
+    }
+  ],
+  "expires": "2026-11-08",
+  "owner": "synthetic-owner",
+  "reason": "Accept this bounded authority expansion for the synthetic example.",
+  "reviewed_at": "2026-10-10",
+  "reviewer": "synthetic-reviewer",
+  "schema": "agentmandate.change-review/v1",
+  "scope": "all_widening_changes_in_pinned_comparison",
+  "target_policy": {
+    "reason": "No deployed policy in this example.",
+    "status": "not_applicable"
+  }
+}

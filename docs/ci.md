@@ -102,6 +102,28 @@ This assumes AgentMandate is installed in the job and `main` is your default
 branch. The fetched manifest must exist and be the baseline you intend to
 review; change the branch or use a reviewed release ref when appropriate.
 
+## Named review records
+
+`mandate review` adds a separate gate for recorded acceptance of the exact
+bounded diff. It requires named ownership, pinned decision evidence, policy
+disposition and an explicit evaluation date:
+
+```bash
+mandate review released.json proposed.json --decision reviewed-change.json --source decision-note=reviewed-note.txt --as-of 2026-10-10 --json
+```
+
+In CI, replace that demonstration date with today's UTC date supplied by the
+trusted workflow. Authenticate and authorize the human review outside the
+library, and load decisions and their sources from protected review materials.
+Candidate-authored files cannot approve themselves. The [review guide](change-review.md)
+defines the format, trust requirements and expiry behavior.
+
+Exit 0 means the recorded acceptance is eligible, or no widening needs review
+within the comparison bound. It does not clear the proposed manifest's breach:
+`diff` still exits 1 for widening, and `reach` still exits 1 for that breach.
+Run `lint` and `reach` independently. Do not replace a failing reach gate with
+a successful review-record gate or treat pinned policy notes as live enforcement.
+
 ## Pinning the analyzed authority artifact
 
 When separate jobs review and analyze a mandate, pass the canonical snapshot
