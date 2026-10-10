@@ -15,7 +15,8 @@ approval.
 This inventory was prepared against `0c43066`, the merged `0.22.0` contract
 baseline, on 10 October 2026. It supplements the
 [historical 0.17.0 audit](pre-1.0-consolidation-audit.md), whose bytes and
-decision remain unchanged. **Independent review of this addition is pending.**
+decision remain unchanged. **The maintainer supplied an out-of-band execution
+review of #230 on 10 October 2026.** This is not a GitHub approval.
 It does not supply the [external security review](external-security-review.md).
 
 ## What is pinned
@@ -62,6 +63,10 @@ exit status and input digests. Some outputs have a schema marker and others
 predate versioned envelopes; both are public contracts. These runs supplement
 the existing attachment and IR result fixtures. They are a fixed regression
 corpus, not exhaustive coverage of every command combination.
+
+The fixture's JSON root is an array of twelve case objects, each with `name`,
+`argv`, `exit`, `stdout`, `stderr` and `inputs`; inspect `argv` for the exact
+command rather than looking for top-level command keys.
 
 ## Review a change
 
