@@ -229,7 +229,7 @@ def build_parser() -> argparse.ArgumentParser:
     lint_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     remediation_parser = subparsers.add_parser(
-        "remediate", help="rank rechecked tool-removal and approval candidates",
+        "remediate", help="rank rechecked removal, approval and ceiling candidates",
     )
     _add_manifest(remediation_parser)
     remediation_parser.add_argument(
@@ -251,6 +251,10 @@ def build_parser() -> argparse.ArgumentParser:
     remediation_parser.add_argument(
         "--keep-tool", action="append", default=[],
         help="preserve this tool's reachability; repeat for more tools",
+    )
+    remediation_parser.add_argument(
+        "--ceiling", action="append", default=[], metavar="TOOL=AMOUNT",
+        help="include this lower monetary ceiling in the edit domain; repeat for alternatives",
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
@@ -744,6 +748,7 @@ def _run_remediation(args: argparse.Namespace) -> int:
             mandate, depth=args.depth, max_edits=args.max_edits,
             max_evaluations=args.max_evaluations, max_candidates=args.max_candidates,
             keep_tools=tuple(args.keep_tool),
+            ceiling_options=tuple(args.ceiling),
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -752,6 +757,9 @@ def _run_remediation(args: argparse.Namespace) -> int:
     baseline = result["baseline"]
     lines = [f"STATUS {result['status']}", f"SCOPE {result['scope']}",
              f"BASELINE depth={baseline['depth']} truncated={baseline['truncated']}"]
+    lines.extend(f"CEILING OPTION {option['tool']}: "
+                 f"{option['ceiling']['amount']} {option['ceiling']['currency']}"
+                 for option in result.get("ceiling_options", []))
     lines.extend(
         f"BREACH {b['kind']}: {b['detail']}\n       {' -> '.join(b['path'])}"
         for b in baseline["breaches"]
@@ -759,7 +767,12 @@ def _run_remediation(args: argparse.Namespace) -> int:
     lines.extend(f"LINT {f['severity']} {f['rule']}: {f['message']}"
                  for f in result["baseline_lint"])
     for index, candidate in enumerate(result["candidates"], 1):
-        edits = ", ".join(f"{e['kind']} {e['tool']}" for e in candidate["edits"])
+        edits = ", ".join(
+            f"{e['kind']} {e['tool']}" + (
+                f" {e['before']['amount']} -> {e['after']['amount']} {e['after']['currency']}"
+                if e["kind"] == "tighten_ceiling" else ""
+            ) for e in candidate["edits"]
+        )
         lines.append(
             f"CANDIDATE {index} {candidate['status']}: {edits}\n"
             f"          lost reachable tools={candidate['impact']['lost_reachable_tools']} "

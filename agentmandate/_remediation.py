@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
+from decimal import Decimal
 from itertools import chain, combinations, islice
 from math import comb
 from typing import Any
@@ -12,6 +13,7 @@ from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Money
 from .reach import analyse
 
 REMEDIATION_SCHEMA = "agentmandate.remediation/v1"
+CEILING_REMEDIATION_SCHEMA = "agentmandate.remediation/v2"
 _STRUCTURAL_RULES = {
     "scope.missing-producer",
     "ceiling.unbound-scope",
@@ -43,14 +45,43 @@ def _manifest(mandate: Mandate) -> dict:
     }
 
 
-def _changed(mandate: Mandate, edits: tuple[tuple[str, str], ...]) -> Mandate | None:
-    names = [name for name, _ in edits]
-    if len(set(names)) != len(names):
-        return None  # Removing and gating the same tool is not two meaningful edits.
-    removed = {name for name, kind in edits if kind == "remove_tool"}
-    gated = {name for name, kind in edits if kind == "require_approval"}
+@dataclass(frozen=True)
+class _Edit:
+    tool: str
+    kind: str
+    ceiling: Money | None = None
+
+
+def _ceiling_domain(mandate: Mandate, options: tuple[str, ...]) -> tuple[_Edit, ...]:
+    if any(not isinstance(option, str) for option in options):
+        raise ValueError("ceiling options must use TOOL=AMOUNT")
+    domain = {}
+    for option in sorted(options):
+        name, separator, amount = option.rpartition("=")
+        if not separator or not name or not amount:
+            raise ValueError("ceiling options must use TOOL=AMOUNT")
+        tool = mandate.tool(name)
+        if tool is None or tool.ceiling is None:
+            raise ValueError(f"ceiling option {name!r} must name a declared spending tool")
+        ceiling = Money.parse({"amount": amount, "currency": tool.ceiling.currency},
+                              f"ceiling option {name!r}")
+        if ceiling.amount >= tool.ceiling.amount:
+            raise ValueError(f"ceiling option {name!r} must be strictly below its current ceiling")
+        # Numeric duplicates choose the first lexical spelling, independent of flag order.
+        domain.setdefault((name, ceiling.amount), _Edit(name, "tighten_ceiling", ceiling))
+    return tuple(domain[key] for key in sorted(domain))
+
+
+def _changed(mandate: Mandate, edits: tuple[_Edit, ...]) -> Mandate | None:
+    keys = [(edit.tool, edit.kind) for edit in edits]
+    removed = {edit.tool for edit in edits if edit.kind == "remove_tool"}
+    gated = {edit.tool for edit in edits if edit.kind == "require_approval"}
+    tightened = {edit.tool: edit.ceiling for edit in edits if edit.kind == "tighten_ceiling"}
+    if len(set(keys)) != len(keys) or removed & (gated | set(tightened)):
+        return None  # One ceiling choice per tool; removal cannot accompany another edit.
     tools = tuple(
-        replace(tool, requires_approval=True) if tool.name in gated else tool
+        replace(tool, requires_approval=tool.requires_approval or tool.name in gated,
+                ceiling=tightened.get(tool.name, tool.ceiling))
         for tool in mandate.tools
         if tool.name not in removed
     )
@@ -61,6 +92,21 @@ def _changed(mandate: Mandate, edits: tuple[tuple[str, str], ...]) -> Mandate | 
         for role, members in mandate.roles.items()
     }
     return replace(mandate, tools=tools, roles=roles)
+
+
+def _edit_record(mandate: Mandate, edit: _Edit) -> dict:
+    record = {"tool": edit.tool, "kind": edit.kind}
+    if edit.kind == "tighten_ceiling":
+        record["before"] = _money(mandate.tool(edit.tool).ceiling)
+        record["after"] = _money(edit.ceiling)
+    return record
+
+
+def _retained_value(candidate: dict) -> Decimal:
+    value = candidate["authority"]["max_extractable"]
+    # Copying the sign is exact under any caller context and keeps large
+    # exponents compact. Negating with '-' would round to that context.
+    return Decimal(0) if value is None else Decimal(value["amount"]).copy_negate()
 
 
 def _structural(findings: list[Finding]) -> bool:
@@ -75,6 +121,7 @@ def plan(
     max_evaluations: int = 128,
     max_candidates: int = 5,
     keep_tools: tuple[str, ...] = (),
+    ceiling_options: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Enumerate edits, recheck the full graph, and rank scoped candidates.
 
@@ -90,12 +137,13 @@ def plan(
             raise ValueError(f"{name} must be a positive whole number")
     if any(not isinstance(name, str) or name not in mandate.tool_names for name in keep_tools):
         raise ValueError("keep_tools must name declared tools")
+    ceiling_edits = _ceiling_domain(mandate, ceiling_options)
     baseline = analyse(mandate, depth=depth)
     if set(keep_tools) - baseline.reachable_tools:
         raise ValueError("kept tools must be reachable in the baseline at the selected depth")
     findings = check(mandate)
     report = {
-        "schema": REMEDIATION_SCHEMA,
+        "schema": CEILING_REMEDIATION_SCHEMA if ceiling_edits else REMEDIATION_SCHEMA,
         "scope": "manifest-v1 reachability only; candidates require human selection",
         "baseline": baseline.as_dict(),
         "baseline_lint": [asdict(f) for f in findings],
@@ -114,13 +162,17 @@ def plan(
         "status": "no_reachable_breach_within_bound",
         "candidates": [],
     }
+    if ceiling_edits:
+        report["ceiling_options"] = [
+            {"tool": edit.tool, "ceiling": _money(edit.ceiling)} for edit in ceiling_edits
+        ]
     if _structural(findings):
         report["status"] = "input_requires_review"
         return report
     if not baseline.breaches:
         return report
     actions = tuple(
-        (tool.name, kind)
+        _Edit(tool.name, kind)
         for tool in sorted(mandate.tools, key=lambda t: t.name)
         for kind in (
             (["remove_tool"] if tool.name not in keep_tools else [])
@@ -130,7 +182,7 @@ def plan(
                 else []
             )
         )
-    )
+    ) + ceiling_edits
     sizes = range(1, min(max_edits, len(actions)) + 1)
     search = report["search"]
     search["combinations_total"] = sum(comb(len(actions), size) for size in sizes)
@@ -152,7 +204,7 @@ def plan(
         candidates.append(
             {
                 "status": "no_reachable_breach_within_bound",
-                "edits": [{"tool": name, "kind": kind} for name, kind in edits],
+                "edits": [_edit_record(mandate, edit) for edit in edits],
                 "impact": {
                     "edit_count": len(edits),
                     "lost_reachable_tools": sorted(
@@ -179,7 +231,9 @@ def plan(
                 reverse=True,
             )),
             sum(e["kind"] == "remove_tool" for e in c["edits"]),
-            tuple((e["tool"], e["kind"]) for e in c["edits"]),
+            _retained_value(c) if ceiling_edits else Decimal(0),
+            tuple((e["tool"], e["kind"], e.get("after", {}).get("amount", ""))
+                  for e in c["edits"]),
         )
     )
     search["candidates_found"] = len(candidates)

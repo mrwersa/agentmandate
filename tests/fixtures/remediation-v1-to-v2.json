@@ -1,0 +1,13 @@
+{
+  "added_edit_kind": "tighten_ceiling",
+  "after": "tests/fixtures/remediation-ceiling-kept-v2.json",
+  "before": "tests/fixtures/remediation-kept-v1.json",
+  "preserved_fields": [
+    "scope",
+    "baseline",
+    "baseline_lint",
+    "input",
+    "keep_tools"
+  ],
+  "selection": "supplying --ceiling opts into v2; omitting it keeps v1"
+}

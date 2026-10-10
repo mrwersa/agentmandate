@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from agentmandate import Limits, Mandate, analyse, load
-from agentmandate._remediation import _changed, plan
+from agentmandate._remediation import _changed, _Edit, plan
 from agentmandate.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,8 +98,12 @@ def test_removing_the_only_producer_is_not_a_clean_repair():
         c["edits"] != [{"tool": "lookup", "kind": "remove_tool"}] for c in result["candidates"]
     )
     assert result["search"]["candidates_analyzed"] < result["search"]["combinations_examined"]
-    assert _changed(manifest(), (("delete", "remove_tool"), ("delete", "require_approval"))) is None
-    assert _changed(manifest(), tuple((n, "remove_tool") for n in manifest().tool_names)) is None
+    assert _changed(manifest(), (
+        _Edit("delete", "remove_tool"), _Edit("delete", "require_approval"),
+    )) is None
+    assert _changed(manifest(), tuple(
+        _Edit(n, "remove_tool") for n in manifest().tool_names
+    )) is None
 
 
 def test_keep_tools_checks_reachability_after_edits_not_just_tool_membership():

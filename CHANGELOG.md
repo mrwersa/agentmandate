@@ -6,6 +6,35 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.24.0 - 2026-10-10
+
+### Added
+
+- `mandate remediate --ceiling TOOL=AMOUNT` includes explicitly supplied,
+  strictly lower monetary ceilings in the bounded edit search. Candidates
+  retain the tool currency and unchanged run/effect limits. Approval and
+  ceiling tightening can combine on one tool; conflicting alternatives and
+  removal plus another edit are rejected before analysis.
+- Ceiling candidates receive the same full-graph, structural-lint and kept-tool
+  rechecks as existing repairs. With ceiling options, ranking prefers more rechecked reachable monetary
+  value after edit count, capability loss and removals. Exact Decimal
+  comparison preserves caller settings and keeps large exponents compact.
+- A practical refund example retains search and refund at depth eight while
+  disclosing the deeper breach. A synthetic joint repair includes a normal
+  trace that remains conformant; no business-scenario preservation is inferred.
+
+### Compatibility
+
+- Supplying `--ceiling` selects `agentmandate.remediation/v2`, with the explicit
+  ceiling domain and before/after money records for `tighten_ceiling` edits.
+  V1 consumers must handle v2 before adding the flag. Without it, existing
+  v1 bytes and exit codes are unchanged. A before/after compatibility case,
+  v2 baselines and the preceding inventory pin preserved contracts.
+- Original findings still exit 1, even with candidates. No automatic amount
+  selection, limit relaxation, source mutation, runtime enforcement or
+  continuation-contract change is included. Root Python exports and public
+  signatures are unchanged; the remediation implementation remains private.
+
 ## 0.23.1 - 2026-10-10
 
 ### Fixed

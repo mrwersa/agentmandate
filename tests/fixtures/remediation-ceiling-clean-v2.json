@@ -1,0 +1,70 @@
+{
+  "argv": [
+    "remediate",
+    "examples/dispute-resolver-v2.yaml",
+    "--depth",
+    "2",
+    "--ceiling",
+    "issue_refund=125",
+    "--json"
+  ],
+  "exit": 0,
+  "result": {
+    "baseline": {
+      "breaches": [],
+      "depth": 2,
+      "effects": [
+        [
+          "irreversible",
+          "case"
+        ],
+        [
+          "read",
+          "case"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "500",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "fetch_case",
+        "issue_refund",
+        "open_case",
+        "search_cases"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [],
+    "ceiling_options": [
+      {
+        "ceiling": {
+          "amount": "125",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      }
+    ],
+    "input": {
+      "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "keep_tools": [],
+    "schema": "agentmandate.remediation/v2",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 0,
+      "candidates_found": 0,
+      "combinations_examined": 0,
+      "combinations_total": 0,
+      "depth": 2,
+      "enumeration_complete": null,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128
+    },
+    "status": "no_reachable_breach_within_bound"
+  }
+}

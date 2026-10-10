@@ -36,8 +36,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Protocol catalogue imports](catalogue-import.md): extract local JSON into
   review-marked skeletons or unreviewed inventory/IR, keeping adapter gaps explicit.
 - [CI integration](ci.md): exit codes, GitHub Actions, SARIF, and rollout.
-- [Repair candidates](remediation.md): rank rechecked tool removals and approval
-  changes while keeping named tools reachable and search limits visible.
+- [Repair candidates](remediation.md): rank rechecked tool removals, approval changes
+  and explicitly supplied lower ceilings while keeping named tools reachable and search limits visible.
 - [Runtime trace verification](traces.md): replay JSON Lines or OpenTelemetry
   evidence against a mandate.
 - [Test obligations](test-obligations.md) and the
