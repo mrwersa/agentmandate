@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.24.0
+agentmandate~=0.25.0
 ```
 
 ## Versioned authority artifacts
@@ -37,6 +37,15 @@ an authority input; the v1-to-v2 compatibility case pins preserved fields and
 existing edit semantics. The
 [guide and initial fixtures](docs/remediation.md) describe this new surface;
 existing CLI output and root Python exports are unchanged.
+
+Supplying `--required-workflows` opts into `agentmandate.remediation/v3`, with
+or without ceiling options. The separate strict
+`agentmandate.required-workflows/v1` input joins caller-authored positive paths
+to the exact baseline manifest. V3 reports scoped baseline/candidate path
+conformance and screened edits; it preserves baseline Authority and its exit.
+Omitting the flag keeps v1/v2 bytes. The [workflow contract](docs/required-workflows.md)
+and before/after compatibility case cover these additions; the Python records
+are private. Annotations do not authenticate a reviewer or prove business success.
 
 The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
 `mandate producers`, `mandate continuity`, `mandate cedar`, and reviewed

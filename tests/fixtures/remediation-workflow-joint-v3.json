@@ -1,0 +1,301 @@
+{
+  "argv": [
+    "remediate",
+    "examples/remediation/ungated-refund.json",
+    "--keep-tool",
+    "seed",
+    "--keep-tool",
+    "pay",
+    "--ceiling",
+    "pay=0",
+    "--ceiling",
+    "pay=2",
+    "--required-workflows",
+    "examples/remediation/required-joint.json",
+    "--json"
+  ],
+  "exit": 1,
+  "result": {
+    "baseline": {
+      "breaches": [
+        {
+          "detail": "pay is irreversible and needs no approval, reachable in 2 call(s)",
+          "kind": "ungated_effect",
+          "path": [
+            "seed(item#1)",
+            "pay"
+          ]
+        },
+        {
+          "detail": "cumulative value 10 GBP exceeds limit 5 GBP",
+          "kind": "cumulative_value",
+          "path": [
+            "seed(item#1)",
+            "seed(item#2)",
+            "pay(item#1, 5 GBP)",
+            "pay(item#2, 5 GBP)"
+          ]
+        }
+      ],
+      "depth": 4,
+      "effects": [
+        [
+          "irreversible",
+          "item"
+        ],
+        [
+          "read",
+          "item"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "10",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "pay",
+        "seed"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": [
+        "pay"
+      ]
+    },
+    "baseline_lint": [
+      {
+        "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+        "rule": "effect.ungated-irreversible",
+        "severity": "error",
+        "subject": "pay"
+      }
+    ],
+    "candidates": [
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 4,
+          "effects": [
+            [
+              "irreversible",
+              "item"
+            ],
+            [
+              "read",
+              "item"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "4",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "pay",
+            "seed"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "require_approval",
+            "tool": "pay"
+          },
+          {
+            "after": {
+              "amount": "2",
+              "currency": "GBP"
+            },
+            "before": {
+              "amount": "5",
+              "currency": "GBP"
+            },
+            "kind": "tighten_ceiling",
+            "tool": "pay"
+          }
+        ],
+        "impact": {
+          "edit_count": 2,
+          "lost_reachable_tools": [],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "ceiling-repair",
+          "identity": "synthetic-caller",
+          "limits": {
+            "depth": 4,
+            "effects": {},
+            "total": {
+              "amount": "5",
+              "currency": "GBP"
+            }
+          },
+          "roles": {
+            "operator": [
+              "seed",
+              "pay"
+            ]
+          },
+          "tools": [
+            {
+              "effect": "read",
+              "name": "seed",
+              "principal": "caller",
+              "produces": "item",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": true
+            },
+            {
+              "ceiling": {
+                "amount": "2",
+                "currency": "GBP"
+              },
+              "effect": "irreversible",
+              "name": "pay",
+              "principal": "caller",
+              "requires": [
+                "item"
+              ],
+              "requires_approval": true,
+              "scope_key": "item",
+              "unbounded": false,
+              "value_arg": "amount"
+            }
+          ],
+          "version": 1
+        },
+        "required_workflows": [
+          {
+            "failure": null,
+            "name": "normal-refund",
+            "status": "conformant_within_manifest_model",
+            "steps": 3
+          }
+        ],
+        "status": "no_reachable_breach_within_bound"
+      }
+    ],
+    "ceiling_options": [
+      {
+        "ceiling": {
+          "amount": "0",
+          "currency": "GBP"
+        },
+        "tool": "pay"
+      },
+      {
+        "ceiling": {
+          "amount": "2",
+          "currency": "GBP"
+        },
+        "tool": "pay"
+      }
+    ],
+    "input": {
+      "manifest_sha256": "c5c9f6599945454c78d37138bbeb1f4e9332f0552fc525a9f9deecba06775b5a"
+    },
+    "keep_tools": [
+      "pay",
+      "seed"
+    ],
+    "requirement_rejections": [
+      {
+        "assessments": [
+          {
+            "failure": {
+              "detail": "cumulative value exceeds the per-binding ceiling",
+              "rule": "workflow.ceiling-exceeded",
+              "step": 2
+            },
+            "name": "normal-refund",
+            "status": "not_conformant_within_manifest_model",
+            "steps": 3
+          }
+        ],
+        "edits": [
+          {
+            "after": {
+              "amount": "0",
+              "currency": "GBP"
+            },
+            "before": {
+              "amount": "5",
+              "currency": "GBP"
+            },
+            "kind": "tighten_ceiling",
+            "tool": "pay"
+          }
+        ],
+        "stage": "required_workflow_screen"
+      },
+      {
+        "assessments": [
+          {
+            "failure": {
+              "detail": "cumulative value exceeds the per-binding ceiling",
+              "rule": "workflow.ceiling-exceeded",
+              "step": 2
+            },
+            "name": "normal-refund",
+            "status": "not_conformant_within_manifest_model",
+            "steps": 3
+          }
+        ],
+        "edits": [
+          {
+            "kind": "require_approval",
+            "tool": "pay"
+          },
+          {
+            "after": {
+              "amount": "0",
+              "currency": "GBP"
+            },
+            "before": {
+              "amount": "5",
+              "currency": "GBP"
+            },
+            "kind": "tighten_ceiling",
+            "tool": "pay"
+          }
+        ],
+        "stage": "required_workflow_screen"
+      }
+    ],
+    "requirements": {
+      "agent": "ceiling-repair",
+      "baseline": [
+        {
+          "failure": null,
+          "name": "normal-refund",
+          "status": "conformant_within_manifest_model",
+          "steps": 3
+        }
+      ],
+      "manifest_sha256": "c5c9f6599945454c78d37138bbeb1f4e9332f0552fc525a9f9deecba06775b5a",
+      "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+      "reviewer": "synthetic-example-reviewer",
+      "schema": "agentmandate.required-workflows/v1",
+      "scope": "caller-supplied annotations; manifest-v1 model only, not business success",
+      "source_sha256": "c8d21db3df6b37e4f69a3f4e5476dc9befe198ffdf3f482bd2122bc459b7c1fe"
+    },
+    "schema": "agentmandate.remediation/v3",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 3,
+      "candidates_found": 1,
+      "combinations_examined": 6,
+      "combinations_total": 6,
+      "depth": 4,
+      "enumeration_complete": true,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128,
+      "required_workflow_rejections": 2
+    },
+    "status": "candidates_found"
+  }
+}

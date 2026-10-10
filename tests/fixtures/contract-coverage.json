@@ -442,7 +442,8 @@
     "doc": "docs/current-contract-inventory.md",
     "fixtures": [
       "tests/fixtures/current-contract-inventory-v0.22.json",
-      "tests/fixtures/current-contract-inventory-v0.23.json"
+      "tests/fixtures/current-contract-inventory-v0.23.json",
+      "tests/fixtures/current-contract-inventory-v0.24.json"
     ],
     "id": "previous-contract-inventory",
     "kind": "historical_replay",
@@ -470,6 +471,28 @@
     ],
     "tests": [
       "tests/test_ceiling_remediation.py"
+    ]
+  },
+  {
+    "doc": "docs/required-workflows.md",
+    "fixtures": [
+      "examples/remediation/required-refund.json",
+      "examples/remediation/required-joint.json",
+      "tests/fixtures/remediation-workflow-monetary-v3.json",
+      "tests/fixtures/remediation-workflow-joint-v3.json",
+      "tests/fixtures/remediation-workflow-limited-v3.json",
+      "tests/fixtures/remediation-workflow-clean-v3.json",
+      "tests/fixtures/remediation-workflow-compatibility-v3.json",
+      "tests/fixtures/remediation-v2-to-v3.json"
+    ],
+    "id": "required-workflows-and-remediation-v3",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.required-workflows/v1",
+      "agentmandate.remediation/v3"
+    ],
+    "tests": [
+      "tests/test_required_workflows.py"
     ]
   }
 ]

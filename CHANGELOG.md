@@ -6,6 +6,37 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.25.0 - 2026-10-10
+
+### Added
+
+- `mandate remediate --required-workflows FILE` screens repair candidates against
+  caller-authored ordered paths pinned to the original manifest bytes. Checks
+  cover scope production, selected monetary bindings, principals, explicit
+  approval, per-tool/per-binding cumulative spend, currency and total/effect
+  budgets. All supplied paths must conform and fit the selected depth.
+- Public `agentmandate.required-workflows/v1` inputs select the opt-in
+  `agentmandate.remediation/v3` presentation. Baseline/candidate assessments carry
+  `conformant_within_manifest_model`; screened repairs report named path failures
+  and a separate rejection count. An invalid baseline requirement exits 2 with
+  empty stdout; valid requirements retain original findings and exit behavior.
+- Synthetic normal-refund and joint approval/ceiling examples show why tool
+  reachability alone is insufficient. Requirements reject zero/insufficient
+  ceilings and approval edits incompatible with the supplied calls.
+
+### Compatibility
+
+- Commands without workflow input retain exact v1/v2 bytes and exits. Consumers
+  must support v3 before adding the flag. Before/after and result baselines pin
+  preserved fields and surviving candidate semantics; all earlier inventories
+  and fixture bytes remain unchanged. Root Python exports and signatures are
+  unchanged; workflow Python records are private.
+- Exact-context sizing is shared with the path checker; search semantics and
+  Authority output are unchanged. Reviewer/reason fields are caller annotations,
+  not authenticated acceptance. No application execution, trace-as-intent
+  inference, business-success proof, source mutation, historical acceptance
+  change or new continuity contract is included.
+
 ## 0.24.0 - 2026-10-10
 
 ### Added

@@ -1,0 +1,35 @@
+{
+  "agent": "ceiling-repair",
+  "manifest_sha256": "c5c9f6599945454c78d37138bbeb1f4e9332f0552fc525a9f9deecba06775b5a",
+  "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+  "reviewer": "synthetic-example-reviewer",
+  "schema": "agentmandate.required-workflows/v1",
+  "workflows": [
+    {
+      "name": "normal-refund",
+      "steps": [
+        {
+          "approved": false,
+          "principal": "caller",
+          "tool": "seed"
+        },
+        {
+          "approved": true,
+          "binding": 0,
+          "currency": "GBP",
+          "principal": "caller",
+          "tool": "pay",
+          "value": "1"
+        },
+        {
+          "approved": true,
+          "binding": 0,
+          "currency": "GBP",
+          "principal": "caller",
+          "tool": "pay",
+          "value": "1"
+        }
+      ]
+    }
+  ]
+}

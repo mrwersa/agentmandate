@@ -161,24 +161,12 @@
     "_remediation.py": {
       "constants": {
         "CEILING_REMEDIATION_SCHEMA": "agentmandate.remediation/v2",
-        "REMEDIATION_SCHEMA": "agentmandate.remediation/v1",
-        "WORKFLOW_REMEDIATION_SCHEMA": "agentmandate.remediation/v3"
+        "REMEDIATION_SCHEMA": "agentmandate.remediation/v1"
       },
       "inline_versions": {},
       "schemas": [
         "agentmandate.remediation/v1",
-        "agentmandate.remediation/v2",
-        "agentmandate.remediation/v3"
-      ],
-      "version_fields": []
-    },
-    "_required_workflows.py": {
-      "constants": {
-        "REQUIRED_WORKFLOWS_SCHEMA": "agentmandate.required-workflows/v1"
-      },
-      "inline_versions": {},
-      "schemas": [
-        "agentmandate.required-workflows/v1"
+        "agentmandate.remediation/v2"
       ],
       "version_fields": []
     },
@@ -2129,18 +2117,6 @@
           "type": null
         },
         {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "required_workflows",
-          "nargs": null,
-          "options": [
-            "--required-workflows"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
           "action": "_StoreTrueAction",
           "choices": null,
           "default": false,
@@ -2452,7 +2428,7 @@
       ]
     }
   },
-  "coverage_sha256": "4257b1030c4c1f1e107a1c30d8e4bd484c1587dc78f9907cb95f170d2091e5d1",
+  "coverage_sha256": "9dcd727948589e49f903974889f37a5005ef5e98c40455cf044d8de28d687890",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2482,8 +2458,6 @@
     "examples/principal-continuity/accounting-review.json": "3738eea4c4632b280d512a8da2d0b19a7f74f7d00b432263b98844db9f7f5fd3",
     "examples/principal-continuity/profile.json": "c90bbed8fdd8beb0e720b10ba0f7a2925f7d6248444646e608d71ce82e19bd47",
     "examples/remediation/normal-refund.jsonl": "8a73ddd978320fe751dabb5c13ccb9f09a2be379c5554ce471163fda1f198a98",
-    "examples/remediation/required-joint.json": "c8d21db3df6b37e4f69a3f4e5476dc9befe198ffdf3f482bd2122bc459b7c1fe",
-    "examples/remediation/required-refund.json": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1",
     "examples/remediation/ungated-refund.json": "c5c9f6599945454c78d37138bbeb1f4e9332f0552fc525a9f9deecba06775b5a",
     "examples/reviewed-obligations.json": "cb91e47a05ded04e40f74e52f7379bbbf6c7b0e2be06bf218e158eff4f872066",
     "examples/revision-review/provider.json": "6e52d0c8b4677e743903a5025df9ae721a41c737d0993d55b33d25219dd667bc",
@@ -2549,7 +2523,6 @@
     "tests/fixtures/continuity-result-v1-widened.json": "46766b1cd039c3f98649a17c4e7dd9f2657f13658ebd4e9c7f7b0c96fd6f75ea",
     "tests/fixtures/current-contract-inventory-v0.22.json": "f5aeb1b9a6b0a46aebe6b71eaf394f4f2b05c948adc10b96bc995737ef2d58ef",
     "tests/fixtures/current-contract-inventory-v0.23.json": "5e5639fe183ad4e691534bb394c1883eb65a2b7359d3762543f0484ae90dc3a5",
-    "tests/fixtures/current-contract-inventory-v0.24.json": "2a6c77208f4d70975cf66947810f7a85e58f8394de1e40ab1f0371907a975b17",
     "tests/fixtures/delegation-attachment-v2.json": "41990995ed030df2e11c7f28eceb621bcb1fce55955b783b1f16366c6b1f7766",
     "tests/fixtures/delegation-chain-authorizer-v1.json": "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764",
     "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",
@@ -2588,12 +2561,6 @@
     "tests/fixtures/remediation-kept-v1.json": "2ad8b5ead0174aa9cc32191882e0ce1e47cc1a016f0a3bd293da8f6c79d234e4",
     "tests/fixtures/remediation-limited-v1.json": "5f9acaa80b80e302b7cf1d0d718aabda8d335e6685ee4a37f6afbd3feac49145",
     "tests/fixtures/remediation-v1-to-v2.json": "99954ac2b1fd38a1ef62d4d7d1467eab20363309f79016828e7bbebec4521a30",
-    "tests/fixtures/remediation-v2-to-v3.json": "36b1bc72ede8e7bf8aabf0f2ec18d1ad45be93f64e6dcfd77add6a66ef4c0451",
-    "tests/fixtures/remediation-workflow-clean-v3.json": "bf636522054b412275f0e382901233f7f5c56e198e9e78b5c8fe1a008635d0c4",
-    "tests/fixtures/remediation-workflow-compatibility-v3.json": "06ad050d856722041e4c2147aac99a043324e53811af44396bf37ece2f8c955b",
-    "tests/fixtures/remediation-workflow-joint-v3.json": "b4dcad91bf86acc0cba275a2ad386f01db42dff84f761fcb7684e2e9c7a4225d",
-    "tests/fixtures/remediation-workflow-limited-v3.json": "39a37b02555b4eac2b71011d3136e827ac92866501e3c4c513c33a214b5ec6cb",
-    "tests/fixtures/remediation-workflow-monetary-v3.json": "76acb05fdda214842b2c214e1e42dee7d2753823b8c2805224a925fb0cd14825",
     "tests/fixtures/revision-review-result-v1-eligible.json": "35cb0da391051b7ae081d8f8c573a120ddc343878c30d15cbedaf6e0ef317868",
     "tests/fixtures/revision-review-result-v1-expired.json": "42b75bd4f30a6cc58683783a520efc36c2154255c381a5e9963dd951a95b3ec3",
     "tests/fixtures/scalar-handover-result-v1-expired.json": "193ec81ee05e6b148239a4810e3604475683d58e74d1227bc0987646ec7e43aa",

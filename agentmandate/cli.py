@@ -68,6 +68,7 @@ from ._producer import (
     analyse_producers,
 )
 from ._remediation import plan as plan_remediation
+from ._required_workflows import _Requirements
 from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
 from ._scalar_handover import ScalarHandover, analyse_scalar_handover, render_scalar_handover
 from .diff import compare
@@ -255,6 +256,10 @@ def build_parser() -> argparse.ArgumentParser:
     remediation_parser.add_argument(
         "--ceiling", action="append", default=[], metavar="TOOL=AMOUNT",
         help="include this lower monetary ceiling in the edit domain; repeat for alternatives",
+    )
+    remediation_parser.add_argument(
+        "--required-workflows", metavar="FILE",
+        help="preserve caller-authored ordered paths bound to this manifest's exact bytes",
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
@@ -744,11 +749,18 @@ def _run_remediation(args: argparse.Namespace) -> int:
     try:
         content = Path(args.manifest).read_bytes()
         mandate = loads(content.decode("utf-8"), source=args.manifest)
+        requirements = None
+        if args.required_workflows is not None:
+            requirements = _Requirements.load(
+                Path(args.required_workflows).read_bytes(), mandate,
+                hashlib.sha256(content).hexdigest(),
+            )
         result = plan_remediation(
             mandate, depth=args.depth, max_edits=args.max_edits,
             max_evaluations=args.max_evaluations, max_candidates=args.max_candidates,
             keep_tools=tuple(args.keep_tool),
             ceiling_options=tuple(args.ceiling),
+            required_workflows=requirements,
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -760,6 +772,10 @@ def _run_remediation(args: argparse.Namespace) -> int:
     lines.extend(f"CEILING OPTION {option['tool']}: "
                  f"{option['ceiling']['amount']} {option['ceiling']['currency']}"
                  for option in result.get("ceiling_options", []))
+    if "requirements" in result:
+        lines.append(f"REQUIREMENTS {result['requirements']['scope']}")
+        lines.extend(f"REQUIRED {row['name']}: {row['status']} steps={row['steps']}"
+                     for row in result["requirements"]["baseline"])
     lines.extend(
         f"BREACH {b['kind']}: {b['detail']}\n       {' -> '.join(b['path'])}"
         for b in baseline["breaches"]
@@ -780,6 +796,12 @@ def _run_remediation(args: argparse.Namespace) -> int:
             f"          remaining lint={candidate['lint']} "
             f"removed role members={candidate['impact']['removed_role_members']}"
         )
+        lines.extend(f"          REQUIRED {row['name']}: {row['status']}"
+                     for row in candidate.get("required_workflows", []))
+    for rejected in result.get("requirement_rejections", []):
+        lines.extend(f"REJECTED {row['name']}: {row['failure']['rule']} "
+                     f"at step {row['failure']['step']} edits={rejected['edits']}"
+                     for row in rejected["assessments"] if row["failure"] is not None)
     search = result["search"]
     lines.append(
         f"SEARCH examined={search['combinations_examined']}/{search['combinations_total']} "
