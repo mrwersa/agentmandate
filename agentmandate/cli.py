@@ -13,6 +13,8 @@ from typing import Any
 
 from . import __version__
 from ._catalogue import import_inventory, read_catalogue
+from ._change_review import evaluate as evaluate_change_review
+from ._change_review import render as render_change_review
 from ._conditions import (
     ConditionalAnalysis,
     ConditionContext,
@@ -262,6 +264,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="preserve caller-authored ordered paths bound to this manifest's exact bytes",
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
+
+    review_parser = subparsers.add_parser(
+        "review", help="check scoped, time-bounded acceptance of an authority change",
+    )
+    review_parser.add_argument("before", help="baseline manifest path")
+    review_parser.add_argument("after", help="proposed manifest path")
+    review_parser.add_argument("--decision", help="caller-supplied named review record")
+    review_parser.add_argument("--source", action="append", default=[], metavar="LOCATOR=CAPTURE")
+    review_parser.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    review_parser.add_argument("--depth", type=_positive_int, default=None)
+    review_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     reach_parser = subparsers.add_parser(
         "reach",
@@ -743,6 +756,27 @@ def _emit(payload: dict, as_json: bool, text: str) -> None:
 
 def _read_text(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
+
+
+def _run_change_review(args: argparse.Namespace) -> int:
+    try:
+        sources = {}
+        for mapping in args.source:
+            locator, separator, path = mapping.partition("=")
+            if not separator or not locator or not path or locator in sources:
+                raise ValueError("--source needs unique LOCATOR=CAPTURE mappings")
+            sources[locator] = Path(path).read_bytes()
+        report = evaluate_change_review(
+            Path(args.before).read_bytes(), Path(args.after).read_bytes(),
+            as_of=args.as_of, depth=args.depth,
+            decision=None if args.decision is None else Path(args.decision).read_bytes(),
+            sources=sources,
+        )
+    except (OSError, ValueError, UnicodeError, RecursionError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    _emit(report, args.json, render_change_review(report))
+    return EXIT_OK if report["gate_satisfied"] else EXIT_FINDING
 
 
 def _run_remediation(args: argparse.Namespace) -> int:
@@ -1785,6 +1819,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "review":
+        return _run_change_review(args)
 
     if args.command == "remediate":
         return _run_remediation(args)

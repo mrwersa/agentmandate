@@ -1,0 +1,32 @@
+{
+  "agent": "synthetic-release",
+  "limits": {
+    "depth": 4,
+    "total": {
+      "amount": "5",
+      "currency": "GBP"
+    }
+  },
+  "tools": [
+    {
+      "effect": "read",
+      "name": "seed",
+      "produces": "item",
+      "unbounded": true
+    },
+    {
+      "ceiling": {
+        "amount": "5",
+        "currency": "GBP"
+      },
+      "effect": "irreversible",
+      "name": "pay",
+      "requires": [
+        "item"
+      ],
+      "requires_approval": true,
+      "scope_key": "item",
+      "value_arg": "amount"
+    }
+  ]
+}

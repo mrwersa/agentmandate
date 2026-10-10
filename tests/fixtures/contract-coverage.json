@@ -443,7 +443,8 @@
     "fixtures": [
       "tests/fixtures/current-contract-inventory-v0.22.json",
       "tests/fixtures/current-contract-inventory-v0.23.json",
-      "tests/fixtures/current-contract-inventory-v0.24.json"
+      "tests/fixtures/current-contract-inventory-v0.24.json",
+      "tests/fixtures/current-contract-inventory-v0.25.json"
     ],
     "id": "previous-contract-inventory",
     "kind": "historical_replay",
@@ -493,6 +494,30 @@
     ],
     "tests": [
       "tests/test_required_workflows.py"
+    ]
+  },
+  {
+    "id": "named-change-review-v1",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.change-review/v1",
+      "agentmandate.review/v1"
+    ],
+    "doc": "docs/change-review.md",
+    "tests": [
+      "tests/test_change_review.py"
+    ],
+    "fixtures": [
+      "examples/change-review/before.json",
+      "examples/change-review/after.json",
+      "examples/change-review/accepted.json",
+      "examples/change-review/deferred.json",
+      "examples/change-review/decision-note.txt",
+      "tests/fixtures/change-review-accepted-v1.json",
+      "tests/fixtures/change-review-expired-v1.json",
+      "tests/fixtures/change-review-missing-v1.json",
+      "tests/fixtures/change-review-neutral-v1.json",
+      "tests/fixtures/change-review-deferred-v1.json"
     ]
   }
 ]

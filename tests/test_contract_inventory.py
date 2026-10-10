@@ -258,7 +258,9 @@ def test_required_workflow_addition_preserves_every_prior_contract_and_fixture()
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.24.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.25.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) == set(previous["cli"])
     for path, command in previous["cli"].items():
@@ -279,5 +281,27 @@ def test_required_workflow_addition_preserves_every_prior_contract_and_fixture()
             )
             present["schemas"].remove("agentmandate.remediation/v3")
         assert present == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_named_review_addition_preserves_all_previous_contracts_and_fixtures():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.25.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) - set(previous["cli"]) == {"mandate review"}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate":
+            selector = next(a for a in present["arguments"] if a["dest"] == "command")
+            selector["choices"].remove("review")
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_change_review.py",
+    }
+    for path, markers in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == markers
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

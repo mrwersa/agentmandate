@@ -20,10 +20,17 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.25.0
+agentmandate~=0.26.0
 ```
 
 ## Versioned authority artifacts
+
+`mandate review` uses the separate public `agentmandate.change-review/v1` input
+and `agentmandate.review/v1` result contracts. It checks eligibility of recorded
+acceptance against the exact bounded diff; it does not change `diff` or `reach`
+findings and exits. [V1 baselines and trust requirements](docs/change-review.md)
+cover the new gate. These are initial baselines, not a migration from an earlier
+review-result schema; the Python helpers remain private.
 
 `mandate remediate` exposes the public `agentmandate.remediation/v1` JSON
 presentation with rechecked, unapplied manifest-v1 repair candidates. Its

@@ -15,6 +15,7 @@ guarantee.
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
+| Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
 | Preserve required ordered calls during repair | [Required workflows](required-workflows.md) |
 | Check recorded calls against a mandate | [Trace verification](traces.md) |
