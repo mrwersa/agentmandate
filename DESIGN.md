@@ -90,6 +90,15 @@ Equivalent states are canonicalised and visited once. A transition that changes
 no tracked state is not enqueued. This avoids repeatedly exploring read-only
 calls that add no bindings or budget consumption.
 
+Monetary transitions spend all available headroom on an interchangeable binding.
+Within manifest v1, spending cannot change tool enablement, and ceilings are
+cumulative and independent per tool/binding. Greedy fills therefore preserve
+the bounded maximum and shortest cumulative-breach length; the
+[prefix argument and independent amount-choice checks](docs/headroom-abstraction.md)
+state the assumptions and counterexample outside them. Search arithmetic uses
+an isolated, sufficiently precise Decimal context rather than the caller's
+precision. These properties do not extend to arbitrary request constraints.
+
 The search is bounded by `limits.depth`. Results are a lower bound: no breach at
 depth 8 is not proof that none exists at depth 20, and the report says so when
 it truncated. Claiming otherwise would require a completeness argument this

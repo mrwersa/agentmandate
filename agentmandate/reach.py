@@ -28,9 +28,25 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Mapping
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import (
+    MAX_EMAX,
+    MIN_EMIN,
+    ROUND_HALF_EVEN,
+    Context,
+    Decimal,
+    DecimalException,
+    DivisionByZero,
+    Inexact,
+    InvalidOperation,
+    Overflow,
+    localcontext,
+)
 
 from .manifest import IRREVERSIBLE, Mandate, Money, Tool
+
+
+class _SearchArithmeticError(ValueError):
+    """Exact search arithmetic exceeded the Decimal representation's limits."""
 
 
 # A single call in a counterexample path.
@@ -258,6 +274,36 @@ def _analyse_with_trace(
     limit = depth if depth is not None else mandate.limits.depth
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
         raise ValueError("depth must be a positive integer")
+    # One call adds at most one ceiling. Align every nonzero ceiling's digits
+    # and reserve enough carry digits for at most `limit` additions. Search
+    # arithmetic must not inherit a caller's precision, exponent range or traps.
+    amounts = [t.ceiling.amount for t in mandate.tools if t.ceiling and t.ceiling.amount]
+    width = (
+        max(a.adjusted() for a in amounts) - min(a.as_tuple().exponent for a in amounts) + 1
+        if amounts else 1
+    )
+    try:
+        context = Context(
+            prec=max(28, width + limit.bit_length()), Emax=MAX_EMAX, Emin=MIN_EMIN,
+            rounding=ROUND_HALF_EVEN, clamp=0,
+            traps=[InvalidOperation, DivisionByZero, Overflow, Inexact],
+        )
+        with localcontext(context):
+            return _walk(mandate, limit, producer_caps=producer_caps, _metrics=_metrics)
+    except (DecimalException, ValueError) as exc:
+        raise _SearchArithmeticError(
+            "reachability amounts exceed supported exact decimal arithmetic"
+        ) from exc
+
+
+def _walk(
+    mandate: Mandate,
+    limit: int,
+    *,
+    producer_caps: Mapping[str, int] | None,
+    _metrics: dict[str, int] | None,
+) -> tuple[Authority, _ReachTrace]:
+    """Search under the isolated exact arithmetic context selected by the entrypoint."""
     total_cap = mandate.limits.total
     effect_caps = mandate.limits.effects
     bounded_producers = producer_caps or {}

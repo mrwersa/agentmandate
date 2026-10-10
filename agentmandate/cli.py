@@ -83,7 +83,7 @@ from .obligations import (
     to_decision_suite,
 )
 from .otel import MAPPABLE, TraceError, load_trace, parse_mapping
-from .reach import analyse
+from .reach import _SearchArithmeticError, analyse
 from .scan import render, scan_file, scan_source
 from .scenarios import (
     derive_scenarios,
@@ -1740,6 +1740,14 @@ def _dynamic_inventory(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    try:
+        return _main(argv)
+    except _SearchArithmeticError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+
+
+def _main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 

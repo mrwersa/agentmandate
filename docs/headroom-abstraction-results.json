@@ -1,0 +1,18 @@
+{
+  "cases": 879,
+  "excluded": [
+    "concrete state identity",
+    "truncation equivalence",
+    "provider execution",
+    "arbitrary request constraints",
+    "amount-dependent enablement"
+  ],
+  "failures": [],
+  "inputs_sha256": "7087ca1fd87d33a4cbda4e3cc87de7607982c6afe85313782390d075efde51f9",
+  "kernel_sha256": "c60e9315f7433db4c71a1492f76741c304b18f993a2fcbad3f7da7b0e1ef8fc0",
+  "positive_amount_choices": 14454,
+  "reference_sha256": "de9f621059fb44cf3202ce5d55bb3629e3b1ca7b3dbb0452137f606d0c7927f9",
+  "reference_states": 15404,
+  "reference_transitions": 27403,
+  "scope": "synthetic manifest-v1 checks; exhaustive integer amounts and binding choices"
+}
