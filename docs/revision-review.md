@@ -38,6 +38,11 @@ Only retaining-state amendments are supported. Forgiving consumption, resetting
 a budget, issuing a new mandate, or increasing its authority requires another
 contract. A configuration update alone supplies none of these decisions.
 
+The single supported treatment is deliberate. Supporting another legitimate
+treatment, such as closing the mandate on revision, requires a new artifact
+version and an explicit result-compatibility decision with before/after fixtures.
+It must not be added as another enum value under `revision_review_version: 1`.
+
 ## Artifact contract
 
 `revision_review_version: 1` is strict: unknown fields and versions are refused.
