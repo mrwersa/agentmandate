@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from ._catalogue import import_inventory, read_catalogue
 from ._conditions import (
     ConditionalAnalysis,
     ConditionContext,
@@ -82,7 +83,7 @@ from .obligations import (
 )
 from .otel import MAPPABLE, TraceError, load_trace, parse_mapping
 from .reach import analyse
-from .scan import scan_file, scan_source
+from .scan import render, scan_file, scan_source
 from .scenarios import (
     derive_scenarios,
     load_scenarios,
@@ -281,7 +282,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     inventory_parser = subparsers.add_parser(
         "inventory",
-        help="structurally validate reviewed dynamic-inventory declarations",
+        help="import local catalogues or validate dynamic-inventory declarations",
     )
     inventory_subparsers = inventory_parser.add_subparsers(
         dest="inventory_command", required=True
@@ -291,6 +292,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate declaration structure without accepting it as authority",
     )
     inventory_validate.add_argument("declaration", help="path to a declaration")
+    inventory_import = inventory_subparsers.add_parser(
+        "import", help="derive an unreviewed inventory declaration from local JSON",
+    )
+    inventory_import.add_argument("catalogue", help="local catalogue JSON; URLs are not fetched")
+    inventory_import.add_argument("--format", required=True, choices=("mcp", "a2a", "openapi"))
+    inventory_import.add_argument("--boundary", required=True, help="reviewer-chosen boundary ID")
+    inventory_import.add_argument(
+        "--target-source", required=True, help="relative Python source path",
+    )
+    inventory_import.add_argument(
+        "--target-binding", required=True, help="one selected source binding",
+    )
+    inventory_import.add_argument(
+        "--locator", required=True, help="repository-relative capture path",
+    )
+    inventory_import.add_argument(
+        "--selection", required=True, metavar="JSON", help="explicit deployment selection object",
+    )
+    inventory_import.add_argument("--dispatch-tool", help="application tool wrapping an A2A agent")
+    inventory_import.add_argument(
+        "--ir", action="store_true", help="emit the existing inventory IR profile",
+    )
 
     conditions_parser = subparsers.add_parser(
         "conditions",
@@ -617,6 +640,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--agent", default="unnamed-agent", help="agent name to write into the skeleton"
     )
     scan_parser.add_argument(
+        "--format", choices=("mcp", "a2a", "openapi"),
+        help="strict local protocol reader; omission preserves the original MCP skeleton reader",
+    )
+    scan_parser.add_argument("--dispatch-tool", help="application tool wrapping an A2A agent")
+    scan_parser.add_argument(
         "--binding",
         help=(
             "with --source, the tool list to take the inventory from, when the "
@@ -700,11 +728,21 @@ def _run_ir(args: argparse.Namespace) -> int:
 
 def _run_inventory(args: argparse.Namespace) -> int:
     try:
-        declaration = DynamicInventory.from_json(_read_text(args.declaration))
-    except (InventoryFormatError, OSError, UnicodeError) as exc:
+        if args.inventory_command == "import":
+            declaration = import_inventory(
+                Path(args.catalogue).read_bytes(), args.format,
+                boundary=args.boundary, target_source=args.target_source,
+                target_binding=args.target_binding, locator=args.locator,
+                selection=json.loads(args.selection), dispatch_tool=args.dispatch_tool,
+            )
+            output = declaration.to_ir().to_json() if args.ir else declaration.to_json()
+        else:
+            declaration = DynamicInventory.from_json(_read_text(args.declaration))
+            output = f"valid dynamic inventory v{declaration.inventory_version}\n"
+    except (ValueError, OSError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
-    print(f"valid dynamic inventory v{declaration.inventory_version}")
+    sys.stdout.write(output)
     return EXIT_OK
 
 
@@ -1659,6 +1697,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "scan":
         try:
             if args.source is not None:
+                if args.format is not None or args.dispatch_tool is not None:
+                    raise ValueError(
+                        "--format and --dispatch-tool apply to a catalogue, not --source"
+                    )
                 print(
                     scan_source(
                         args.source,
@@ -1674,8 +1716,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "--binding and --union-bindings apply to --source. An "
                         "MCP catalogue holds one tool list already."
                     )
-                print(scan_file(args.catalogue, args.agent), end="")
-        except (OSError, ValueError) as exc:
+                if args.format is not None:
+                    catalogue = read_catalogue(
+                        Path(args.catalogue).read_bytes(), args.format,
+                        dispatch_tool=args.dispatch_tool,
+                    )
+                    output = render(
+                        list(catalogue.proposals), args.agent, list(catalogue.notes),
+                        origin="protocol catalogue",
+                    )
+                else:
+                    if args.dispatch_tool is not None:
+                        raise ValueError("--dispatch-tool requires --format a2a")
+                    output = scan_file(args.catalogue, args.agent)
+                print(output, end="")
+        except (OSError, ValueError, UnicodeError, RecursionError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return EXIT_USAGE
         return EXIT_OK

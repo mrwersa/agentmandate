@@ -79,8 +79,25 @@ def check(mandate: Mandate) -> list[Finding]:
     """Run every single-manifest rule and return findings, worst first."""
     findings: list[Finding] = []
     findings.extend(_separation_of_duties(mandate))
+    produced = {tool.produces for tool in mandate.tools if tool.produces is not None}
 
     for tool in mandate.tools:
+        missing = sorted(set(tool.requires) - produced)
+        if missing:
+            findings.append(
+                Finding(
+                    rule="scope.missing-producer",
+                    severity=ERROR,
+                    subject=tool.name,
+                    message=(
+                        f"requires {', '.join(repr(scope) for scope in missing)}, but no tool "
+                        "produces those scopes. This tool is unreachable in the declared model; "
+                        "a clean reach result does not assess it. Confirm the requirements "
+                        "denote scope bindings, then declare genuine producers or remove "
+                        "unsupported requirements"
+                    ),
+                )
+            )
         if tool.effect == IRREVERSIBLE and not tool.requires_approval:
             findings.append(
                 Finding(

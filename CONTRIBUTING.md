@@ -92,6 +92,11 @@ policy from implementation, upgrade heuristic evidence through review, or
 describe a correction-free skeleton as precise without recording what a human
 checked. Silence may mean the scanner missed uncertainty.
 
+Raw `scan-skeleton.yaml` files preserve scanner proposals and may intentionally
+fail `mandate lint`. Correct the separate reviewed manifest; do not edit the
+skeleton to clear findings. Any corpus-wide manifest lint gate must exclude
+raw skeletons rather than repair them.
+
 Capture code must state whether it imports or executes the subject, touches the
 network, or contacts live infrastructure. Prefer pinned dependencies,
 side-effect-free discovery, placeholder credentials, and byte-verifiable

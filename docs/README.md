@@ -13,6 +13,7 @@ guarantee.
 |---|---|
 | Run a complete example | [README quickstart](../README.md#run-the-example) |
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
+| Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
 | Check recorded calls against a mandate | [Trace verification](traces.md) |
 | Turn reachable authority into tests | [Evaluation loop](evaluation-loop.md) |
@@ -31,6 +32,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Manifest reference](manifest.md): declare one reviewed mandate.
 - [Source and catalogue scanning](inventory.md): derive a manifest skeleton
   without importing agent code.
+- [Protocol catalogue imports](catalogue-import.md): extract local JSON into
+  review-marked skeletons or unreviewed inventory/IR, keeping adapter gaps explicit.
 - [CI integration](ci.md): exit codes, GitHub Actions, SARIF, and rollout.
 - [Runtime trace verification](traces.md): replay JSON Lines or OpenTelemetry
   evidence against a mandate.
@@ -49,6 +52,8 @@ specific evidence gaps and have additional review and source-byte requirements.
   Python callers can use `load`, `analyse`, and `compare` from `agentmandate`;
   the complete public export list is `agentmandate.__all__`. Private attachment
   types are consumed through the CLI, not a supported Python API.
+- [External security review scope](external-security-review.md): the prepared
+  reviewer brief and required closing record; reviewer nomination is still open.
 - [Roadmap](../ROADMAP.md): delivered, active, evidence-blocked, and later work.
 - [Pre-1.0 consolidation audit](pre-1.0-consolidation-audit.md): public contracts,
   private compatibility paths, fixture coverage, and the completed baseline

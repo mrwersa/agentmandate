@@ -3,6 +3,9 @@
 `mandate scan --source` reads the tools an agent declares in Python and writes
 a manifest skeleton. Use it when the tool declarations are in Python source;
 use catalogue-mode `scan` when you already have an MCP `tools/list` response.
+For strict MCP result/JSON-RPC reading, OpenAPI operations, or A2A Agent Cards,
+see [the catalogue import guide](catalogue-import.md). It also shows how to
+create an unreviewed dynamic-inventory draft and its existing IR profile.
 
 The example below runs from a repository checkout with AgentMandate installed.
 Review the generated `REVIEW` markers before treating the manifest as intent.

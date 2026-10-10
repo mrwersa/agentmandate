@@ -6,6 +6,42 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.22.0 - 2026-10-10
+
+### Added
+
+- Local JSON catalogue readers for MCP tools/list results and JSON-RPC
+  responses, OpenAPI 3.0/3.1 path operations, and A2A legacy 0.3.0 and
+  interface-based 1.0 Agent Cards.
+  `scan --format` writes a review-marked skeleton; `inventory import` writes
+  an unreviewed dynamic-inventory v1 draft or its existing IR profile.
+- Explicit MCP pagination limits, refusal of duplicate or malformed
+  membership, document-local OpenAPI Path Item resolution with cycle and
+  ambiguous-merge refusal, and an application-supplied A2A dispatch-tool name.
+  A2A skills are not translated into independent callable tools.
+- Runnable synthetic imports, pinned skeleton/declaration/IR baselines,
+  and adversarial trust, input, mode, and authority-separation checks.
+
+### Fixed
+
+- `lint` now reports `scope.missing-producer` as an error for a tool requiring
+  a scope that no declared tool produces. Such a tool is unreachable in the
+  model; a clean reach result does not assess it. This protects hand-authored
+  manifests and scan skeletons. Strict protocol skeletons name the affected
+  tool beside its inferred requirement and distinguish proposed effects from
+  name-based guesses.
+
+### Compatibility
+
+- Omitting `scan --format` retains the original MCP reader and output. Public
+  Python scan signatures, inventory/IR schemas, and reachability results are
+  unchanged. Lint returns exit 1 for missing scope producers that previously
+  passed. New readers require JSON; no service, URL, or application
+  code is invoked. Imported membership remains non-complete and unreviewed.
+  OpenAPI and A2A adapter mappings are heuristic pending accountable review.
+- Non-scalar JSON Schema type declarations no longer raise a Python type
+  error during value-hint extraction; they supply no scalar value hint.
+
 ## 0.21.1 - 2026-10-10
 
 ### Changed
