@@ -1,0 +1,97 @@
+{
+  "argv": [
+    "remediate",
+    "examples/dispute-resolver-v2.yaml",
+    "--keep-tool",
+    "issue_refund",
+    "--keep-tool",
+    "search_cases",
+    "--ceiling",
+    "issue_refund=100",
+    "--ceiling",
+    "issue_refund=125",
+    "--max-evaluations",
+    "1",
+    "--json"
+  ],
+  "exit": 1,
+  "result": {
+    "baseline": {
+      "breaches": [
+        {
+          "detail": "cumulative value 1000 GBP exceeds limit 500 GBP",
+          "kind": "cumulative_value",
+          "path": [
+            "open_case(case#1)",
+            "search_cases(case#2)",
+            "issue_refund(case#1, 500 GBP)",
+            "issue_refund(case#2, 500 GBP)"
+          ]
+        }
+      ],
+      "depth": 8,
+      "effects": [
+        [
+          "irreversible",
+          "case"
+        ],
+        [
+          "read",
+          "case"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "2000",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "fetch_case",
+        "issue_refund",
+        "open_case",
+        "search_cases"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [],
+    "ceiling_options": [
+      {
+        "ceiling": {
+          "amount": "100",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "125",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      }
+    ],
+    "input": {
+      "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "keep_tools": [
+      "issue_refund",
+      "search_cases"
+    ],
+    "schema": "agentmandate.remediation/v2",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 1,
+      "candidates_found": 0,
+      "combinations_examined": 1,
+      "combinations_total": 10,
+      "depth": 8,
+      "enumeration_complete": false,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 1
+    },
+    "status": "no_candidate_found_within_limits"
+  }
+}

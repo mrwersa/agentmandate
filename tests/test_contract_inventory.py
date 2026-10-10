@@ -222,3 +222,29 @@ def test_script_entrypoint_checks_without_writing(monkeypatch, capsys):
     assert error.value.code == 0
     assert "inventory matches" in capsys.readouterr().out
     assert audit.BASELINE.read_bytes() == before
+
+
+def test_ceiling_remediation_addition_preserves_the_preceding_inventory():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.23.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) == set(previous["cli"])
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate remediate":
+            added = [a for a in present["arguments"] if a["dest"] == "ceiling"]
+            assert len(added) == 1 and added[0]["options"] == ["--ceiling"]
+            present["arguments"].remove(added[0])
+        assert present == command
+    for path, markers in previous["artifact_markers"].items():
+        present = copy.deepcopy(current["artifact_markers"][path])
+        if path == "_remediation.py":
+            assert present["constants"].pop("CEILING_REMEDIATION_SCHEMA") == (
+                "agentmandate.remediation/v2"
+            )
+            present["schemas"].remove("agentmandate.remediation/v2")
+        assert present == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest

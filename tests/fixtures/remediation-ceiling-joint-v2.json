@@ -1,0 +1,200 @@
+{
+  "argv": [
+    "remediate",
+    "examples/remediation/ungated-refund.json",
+    "--keep-tool",
+    "seed",
+    "--keep-tool",
+    "pay",
+    "--ceiling",
+    "pay=2",
+    "--json"
+  ],
+  "exit": 1,
+  "result": {
+    "baseline": {
+      "breaches": [
+        {
+          "detail": "pay is irreversible and needs no approval, reachable in 2 call(s)",
+          "kind": "ungated_effect",
+          "path": [
+            "seed(item#1)",
+            "pay"
+          ]
+        },
+        {
+          "detail": "cumulative value 10 GBP exceeds limit 5 GBP",
+          "kind": "cumulative_value",
+          "path": [
+            "seed(item#1)",
+            "seed(item#2)",
+            "pay(item#1, 5 GBP)",
+            "pay(item#2, 5 GBP)"
+          ]
+        }
+      ],
+      "depth": 4,
+      "effects": [
+        [
+          "irreversible",
+          "item"
+        ],
+        [
+          "read",
+          "item"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "10",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "pay",
+        "seed"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": [
+        "pay"
+      ]
+    },
+    "baseline_lint": [
+      {
+        "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+        "rule": "effect.ungated-irreversible",
+        "severity": "error",
+        "subject": "pay"
+      }
+    ],
+    "candidates": [
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 4,
+          "effects": [
+            [
+              "irreversible",
+              "item"
+            ],
+            [
+              "read",
+              "item"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "4",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "pay",
+            "seed"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "require_approval",
+            "tool": "pay"
+          },
+          {
+            "after": {
+              "amount": "2",
+              "currency": "GBP"
+            },
+            "before": {
+              "amount": "5",
+              "currency": "GBP"
+            },
+            "kind": "tighten_ceiling",
+            "tool": "pay"
+          }
+        ],
+        "impact": {
+          "edit_count": 2,
+          "lost_reachable_tools": [],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "ceiling-repair",
+          "identity": "synthetic-caller",
+          "limits": {
+            "depth": 4,
+            "effects": {},
+            "total": {
+              "amount": "5",
+              "currency": "GBP"
+            }
+          },
+          "roles": {
+            "operator": [
+              "seed",
+              "pay"
+            ]
+          },
+          "tools": [
+            {
+              "effect": "read",
+              "name": "seed",
+              "principal": "caller",
+              "produces": "item",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": true
+            },
+            {
+              "ceiling": {
+                "amount": "2",
+                "currency": "GBP"
+              },
+              "effect": "irreversible",
+              "name": "pay",
+              "principal": "caller",
+              "requires": [
+                "item"
+              ],
+              "requires_approval": true,
+              "scope_key": "item",
+              "unbounded": false,
+              "value_arg": "amount"
+            }
+          ],
+          "version": 1
+        },
+        "status": "no_reachable_breach_within_bound"
+      }
+    ],
+    "ceiling_options": [
+      {
+        "ceiling": {
+          "amount": "2",
+          "currency": "GBP"
+        },
+        "tool": "pay"
+      }
+    ],
+    "input": {
+      "manifest_sha256": "c5c9f6599945454c78d37138bbeb1f4e9332f0552fc525a9f9deecba06775b5a"
+    },
+    "keep_tools": [
+      "pay",
+      "seed"
+    ],
+    "schema": "agentmandate.remediation/v2",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 3,
+      "candidates_found": 1,
+      "combinations_examined": 3,
+      "combinations_total": 3,
+      "depth": 4,
+      "enumeration_complete": true,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128
+    },
+    "status": "candidates_found"
+  }
+}

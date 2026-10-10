@@ -15,9 +15,11 @@ approval.
 The original inventory was prepared against `0c43066`, the merged `0.22.0`
 contract baseline, on 10 October 2026, and is retained as
 [a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.22.json).
-The current inventory adds the repair command and its initial v1 fixtures;
-tests compare every earlier declaration and fixture digest against that
-snapshot. The maintainer supplied a partial out-of-band execution review of
+The current inventory adds the repair command, its v1 fixtures, and an opt-in
+ceiling domain with v2 fixtures and a v1-to-v2 compatibility case. The
+[preceding repair inventory](../tests/fixtures/current-contract-inventory-v0.23.json)
+is also retained. Tests preserve every earlier fixture digest and declaration,
+apart from the explicitly added `--ceiling` option and v2 presentation marker. The maintainer supplied a partial out-of-band execution review of
 #232 covering the example and structural screening. Author checks cover the
 remaining preservation, cutoff, approval and ranking paths. Neither review is
 an independent security review. The inventory supplements the
@@ -45,7 +47,8 @@ malformed-input, expiry and trust tests remain necessary.
 The [coverage index](../tests/fixtures/contract-coverage.json) links each family
 to its contract guide, existing fixtures and executable tests. Its contents and
 the referenced fixture bytes are pinned by digest. Initial result fixtures are
-baselines, not migrations from earlier versions. Historical converters preserve
+baselines, not migrations from earlier versions. The repair v1-to-v2 case is
+separately labeled and pins preserved fields across the opt-in format change. Historical converters preserve
 the source-to-canonical link and remain separate from runtime readers.
 
 | Family | Contract and replay checks |
@@ -60,7 +63,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Principal observations and accounting | [Observations](principal-continuity.md), [accounting](principal-accounting.md); `test_principal_continuity.py`, `test_principal_accounting.py` |
 | Revision and scalar cutover | [Revision review](revision-review.md), [handover](scalar-handover.md); `test_revision_review.py`, `test_scalar_handover.py` |
 | Obligations, scenarios and decision suites | [Obligations](test-obligations.md), [evaluation](evaluation-loop.md); `test_obligations.py`, `test_scenarios.py` |
-| Repair candidates | [Remediation](remediation.md); `test_remediation.py` |
+| Repair candidates | [Remediation](remediation.md); `test_remediation.py`, `test_ceiling_remediation.py` |
 | Trace verification and SARIF | [Traces](traces.md), [CI](ci.md); `test_verify.py`, `test_otel.py`, `test_findings.py` |
 | Historical readers, projections and acceptance | [Historical audit](pre-1.0-consolidation-audit.md), [acceptance](continuation-evidence-acceptance.md); converter, replay and acceptance tests named in the coverage index |
 

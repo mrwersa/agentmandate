@@ -1,0 +1,3 @@
+{"tool": "seed", "principal": "caller"}
+{"tool": "pay", "principal": "caller", "scope": "synthetic-item", "value": "1", "currency": "GBP", "approved": true}
+{"tool": "pay", "principal": "caller", "scope": "synthetic-item", "value": "1", "currency": "GBP", "approved": true}

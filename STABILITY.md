@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.23.0
+agentmandate~=0.24.0
 ```
 
 ## Versioned authority artifacts
@@ -30,7 +30,11 @@ presentation with rechecked, unapplied manifest-v1 repair candidates. Its
 Python implementation is private. The command retains baseline Authority and
 lint findings and keeps their exit code even when candidates exist. Candidate
 reachability is scoped to the same depth; enumeration completeness is a
-separate field. Results are not authority inputs. The
+separate field. Results are not authority inputs. Supplying `--ceiling` opts into `agentmandate.remediation/v2`, which adds a
+caller-supplied monetary edit domain and `tighten_ceiling` records with explicit
+before/after amounts. Omitting the flag preserves v1 bytes. Neither output is
+an authority input; the v1-to-v2 compatibility case pins preserved fields and
+existing edit semantics. The
 [guide and initial fixtures](docs/remediation.md) describe this new surface;
 existing CLI output and root Python exports are unchanged.
 

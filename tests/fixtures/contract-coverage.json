@@ -441,7 +441,8 @@
   {
     "doc": "docs/current-contract-inventory.md",
     "fixtures": [
-      "tests/fixtures/current-contract-inventory-v0.22.json"
+      "tests/fixtures/current-contract-inventory-v0.22.json",
+      "tests/fixtures/current-contract-inventory-v0.23.json"
     ],
     "id": "previous-contract-inventory",
     "kind": "historical_replay",
@@ -449,6 +450,26 @@
     "tests": [
       "tests/test_contract_inventory.py",
       "tests/test_pre_1_0_contract_audit.py"
+    ]
+  },
+  {
+    "doc": "docs/remediation.md",
+    "fixtures": [
+      "examples/remediation/ungated-refund.json",
+      "examples/remediation/normal-refund.jsonl",
+      "tests/fixtures/remediation-ceiling-kept-v2.json",
+      "tests/fixtures/remediation-ceiling-joint-v2.json",
+      "tests/fixtures/remediation-ceiling-limited-v2.json",
+      "tests/fixtures/remediation-ceiling-clean-v2.json",
+      "tests/fixtures/remediation-v1-to-v2.json"
+    ],
+    "id": "remediation-v2",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v2"
+    ],
+    "tests": [
+      "tests/test_ceiling_remediation.py"
     ]
   }
 ]

@@ -1,0 +1,46 @@
+{
+  "agent": "ceiling-repair",
+  "identity": "synthetic-caller",
+  "limits": {
+    "depth": 4,
+    "effects": {},
+    "total": {
+      "amount": "5",
+      "currency": "GBP"
+    }
+  },
+  "roles": {
+    "operator": [
+      "seed",
+      "pay"
+    ]
+  },
+  "tools": [
+    {
+      "effect": "read",
+      "name": "seed",
+      "principal": "caller",
+      "produces": "item",
+      "requires": [],
+      "requires_approval": false,
+      "unbounded": true
+    },
+    {
+      "ceiling": {
+        "amount": "5",
+        "currency": "GBP"
+      },
+      "effect": "irreversible",
+      "name": "pay",
+      "principal": "caller",
+      "requires": [
+        "item"
+      ],
+      "requires_approval": false,
+      "scope_key": "item",
+      "unbounded": false,
+      "value_arg": "amount"
+    }
+  ],
+  "version": 1
+}
