@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
 
 import agentmandate
-from agentmandate.cli import build_parser
 
 AUDIT = Path(__file__).resolve().parents[1] / "docs" / "pre-1.0-consolidation-audit.md"
 ROOT = AUDIT.parents[1]
@@ -17,14 +17,18 @@ def test_audit_lists_every_public_python_name() -> None:
     assert not missing, f"pre-1.0 audit omits public Python names: {', '.join(missing)}"
 
 
-def test_audit_lists_every_top_level_cli_command() -> None:
+def test_historical_audit_lists_baseline_top_level_cli_commands() -> None:
     source = AUDIT.read_text(encoding="utf-8")
+    # The fixed historical audit cannot acquire every new command. Current
+    # declarations are checked separately against the live contract inventory.
+    path = ROOT / "tests/fixtures/current-contract-inventory-v0.22.json"
+    baseline = json.loads(path.read_text())
     commands = {
-        name for action in build_parser()._subparsers._group_actions for name in action.choices
+        path.split()[1] for path in baseline["cli"] if len(path.split()) == 2
     }
     missing = sorted(name for name in commands if f"`{name}`" not in source)
 
-    assert not missing, f"pre-1.0 audit omits CLI commands: {', '.join(missing)}"
+    assert not missing, f"historical audit omits baseline CLI commands: {', '.join(missing)}"
 
 
 def test_audit_pins_every_evidence_converter_during_relocation() -> None:

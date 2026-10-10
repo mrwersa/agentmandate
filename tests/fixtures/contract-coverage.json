@@ -420,5 +420,35 @@
       "tests/test_pre_1_0_contract_audit.py",
       "tests/test_continuation_evidence.py"
     ]
+  },
+  {
+    "doc": "docs/remediation.md",
+    "fixtures": [
+      "tests/fixtures/remediation-breached-v1.json",
+      "tests/fixtures/remediation-kept-v1.json",
+      "tests/fixtures/remediation-limited-v1.json",
+      "tests/fixtures/remediation-clean-v1.json"
+    ],
+    "id": "remediation-v1",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v1"
+    ],
+    "tests": [
+      "tests/test_remediation.py"
+    ]
+  },
+  {
+    "doc": "docs/current-contract-inventory.md",
+    "fixtures": [
+      "tests/fixtures/current-contract-inventory-v0.22.json"
+    ],
+    "id": "previous-contract-inventory",
+    "kind": "historical_replay",
+    "schemas": [],
+    "tests": [
+      "tests/test_contract_inventory.py",
+      "tests/test_pre_1_0_contract_audit.py"
+    ]
   }
 ]

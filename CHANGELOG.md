@@ -6,6 +6,30 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.23.0 - 2026-10-10
+
+### Added
+
+- `mandate remediate` enumerates bounded combinations of tool removals and
+  approval requirements, rechecks the full remaining manifest, and ranks
+  candidates by edit count, lost reachable tools and their effect classes,
+  preferring loss of reads over writes over irreversible capabilities on ties.
+  `--keep-tool` preserves
+  named reachability; source files and manifest limits remain unchanged.
+- Public `agentmandate.remediation/v1` results retain baseline Authority and
+  lint, exact source digest, candidate manifests and remaining lint, removed
+  role memberships, and separate enumeration/reachability cutoffs. Initial
+  fixtures and adversarial, exhaustive-oracle, and graph replay tests cover
+  the new surface.
+
+### Compatibility
+
+- Existing CLI outputs, root Python exports, manifest semantics, and evidence
+  contracts are unchanged. The new implementation remains private. Candidates
+  are human-review suggestions with no reachable breach at the selected depth,
+  not accepted intent or global safety. Original findings still exit 1.
+  Budget, condition, delegation, and business-scenario repairs are not inferred.
+
 ## 0.22.1 - 2026-10-10
 
 ### Fixed

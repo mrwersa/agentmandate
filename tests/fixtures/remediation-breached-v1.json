@@ -1,0 +1,489 @@
+{
+  "argv": [
+    "remediate",
+    "examples/dispute-resolver-v2.yaml",
+    "--json"
+  ],
+  "exit": 1,
+  "result": {
+    "baseline": {
+      "breaches": [
+        {
+          "detail": "cumulative value 1000 GBP exceeds limit 500 GBP",
+          "kind": "cumulative_value",
+          "path": [
+            "open_case(case#1)",
+            "search_cases(case#2)",
+            "issue_refund(case#1, 500 GBP)",
+            "issue_refund(case#2, 500 GBP)"
+          ]
+        }
+      ],
+      "depth": 8,
+      "effects": [
+        [
+          "irreversible",
+          "case"
+        ],
+        [
+          "read",
+          "case"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "2000",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "fetch_case",
+        "issue_refund",
+        "open_case",
+        "search_cases"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 8,
+          "effects": [
+            [
+              "irreversible",
+              "case"
+            ],
+            [
+              "read",
+              "case"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "500",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "fetch_case",
+            "issue_refund",
+            "open_case"
+          ],
+          "service_principal_tools": [],
+          "truncated": false,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "remove_tool",
+            "tool": "search_cases"
+          }
+        ],
+        "impact": {
+          "edit_count": 1,
+          "lost_reachable_tools": [
+            "search_cases"
+          ],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "dispute-resolver",
+          "identity": "spiffe://bank/agents/dispute-resolver",
+          "limits": {
+            "depth": 8,
+            "effects": {},
+            "total": {
+              "amount": "500",
+              "currency": "GBP"
+            }
+          },
+          "roles": {},
+          "tools": [
+            {
+              "effect": "read",
+              "name": "open_case",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": false
+            },
+            {
+              "effect": "read",
+              "name": "fetch_case",
+              "principal": "caller",
+              "requires": [
+                "case"
+              ],
+              "requires_approval": false,
+              "unbounded": false
+            },
+            {
+              "ceiling": {
+                "amount": "500",
+                "currency": "GBP"
+              },
+              "effect": "irreversible",
+              "name": "issue_refund",
+              "principal": "caller",
+              "requires": [
+                "case"
+              ],
+              "requires_approval": true,
+              "scope_key": "case",
+              "unbounded": false,
+              "value_arg": "amount"
+            }
+          ],
+          "version": 1
+        },
+        "status": "no_reachable_breach_within_bound"
+      },
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 8,
+          "effects": [
+            [
+              "read",
+              "case"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "0",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "fetch_case",
+            "open_case",
+            "search_cases"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "remove_tool",
+            "tool": "issue_refund"
+          }
+        ],
+        "impact": {
+          "edit_count": 1,
+          "lost_reachable_tools": [
+            "issue_refund"
+          ],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "dispute-resolver",
+          "identity": "spiffe://bank/agents/dispute-resolver",
+          "limits": {
+            "depth": 8,
+            "effects": {},
+            "total": {
+              "amount": "500",
+              "currency": "GBP"
+            }
+          },
+          "roles": {},
+          "tools": [
+            {
+              "effect": "read",
+              "name": "open_case",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": false
+            },
+            {
+              "effect": "read",
+              "name": "search_cases",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": true
+            },
+            {
+              "effect": "read",
+              "name": "fetch_case",
+              "principal": "caller",
+              "requires": [
+                "case"
+              ],
+              "requires_approval": false,
+              "unbounded": false
+            }
+          ],
+          "version": 1
+        },
+        "status": "no_reachable_breach_within_bound"
+      },
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 8,
+          "effects": [
+            [
+              "irreversible",
+              "case"
+            ],
+            [
+              "read",
+              "case"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "500",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "issue_refund",
+            "open_case"
+          ],
+          "service_principal_tools": [],
+          "truncated": false,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "remove_tool",
+            "tool": "fetch_case"
+          },
+          {
+            "kind": "remove_tool",
+            "tool": "search_cases"
+          }
+        ],
+        "impact": {
+          "edit_count": 2,
+          "lost_reachable_tools": [
+            "fetch_case",
+            "search_cases"
+          ],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "dispute-resolver",
+          "identity": "spiffe://bank/agents/dispute-resolver",
+          "limits": {
+            "depth": 8,
+            "effects": {},
+            "total": {
+              "amount": "500",
+              "currency": "GBP"
+            }
+          },
+          "roles": {},
+          "tools": [
+            {
+              "effect": "read",
+              "name": "open_case",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": false
+            },
+            {
+              "ceiling": {
+                "amount": "500",
+                "currency": "GBP"
+              },
+              "effect": "irreversible",
+              "name": "issue_refund",
+              "principal": "caller",
+              "requires": [
+                "case"
+              ],
+              "requires_approval": true,
+              "scope_key": "case",
+              "unbounded": false,
+              "value_arg": "amount"
+            }
+          ],
+          "version": 1
+        },
+        "status": "no_reachable_breach_within_bound"
+      },
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 8,
+          "effects": [
+            [
+              "read",
+              "case"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "0",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "open_case",
+            "search_cases"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "remove_tool",
+            "tool": "fetch_case"
+          },
+          {
+            "kind": "remove_tool",
+            "tool": "issue_refund"
+          }
+        ],
+        "impact": {
+          "edit_count": 2,
+          "lost_reachable_tools": [
+            "fetch_case",
+            "issue_refund"
+          ],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "dispute-resolver",
+          "identity": "spiffe://bank/agents/dispute-resolver",
+          "limits": {
+            "depth": 8,
+            "effects": {},
+            "total": {
+              "amount": "500",
+              "currency": "GBP"
+            }
+          },
+          "roles": {},
+          "tools": [
+            {
+              "effect": "read",
+              "name": "open_case",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": false
+            },
+            {
+              "effect": "read",
+              "name": "search_cases",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": true
+            }
+          ],
+          "version": 1
+        },
+        "status": "no_reachable_breach_within_bound"
+      },
+      {
+        "authority": {
+          "breaches": [],
+          "depth": 8,
+          "effects": [
+            [
+              "read",
+              "case"
+            ]
+          ],
+          "max_extractable": {
+            "amount": "0",
+            "currency": "GBP"
+          },
+          "reachable_tools": [
+            "fetch_case",
+            "search_cases"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": []
+        },
+        "edits": [
+          {
+            "kind": "remove_tool",
+            "tool": "issue_refund"
+          },
+          {
+            "kind": "remove_tool",
+            "tool": "open_case"
+          }
+        ],
+        "impact": {
+          "edit_count": 2,
+          "lost_reachable_tools": [
+            "issue_refund",
+            "open_case"
+          ],
+          "removed_role_members": {}
+        },
+        "lint": [],
+        "manifest": {
+          "agent": "dispute-resolver",
+          "identity": "spiffe://bank/agents/dispute-resolver",
+          "limits": {
+            "depth": 8,
+            "effects": {},
+            "total": {
+              "amount": "500",
+              "currency": "GBP"
+            }
+          },
+          "roles": {},
+          "tools": [
+            {
+              "effect": "read",
+              "name": "search_cases",
+              "principal": "caller",
+              "produces": "case",
+              "requires": [],
+              "requires_approval": false,
+              "unbounded": true
+            },
+            {
+              "effect": "read",
+              "name": "fetch_case",
+              "principal": "caller",
+              "requires": [
+                "case"
+              ],
+              "requires_approval": false,
+              "unbounded": false
+            }
+          ],
+          "version": 1
+        },
+        "status": "no_reachable_breach_within_bound"
+      }
+    ],
+    "input": {
+      "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "keep_tools": [],
+    "schema": "agentmandate.remediation/v1",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 9,
+      "candidates_found": 6,
+      "combinations_examined": 10,
+      "combinations_total": 10,
+      "depth": 8,
+      "enumeration_complete": true,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128
+    },
+    "status": "candidates_found"
+  }
+}

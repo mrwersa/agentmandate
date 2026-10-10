@@ -158,16 +158,6 @@
         "result_version"
       ]
     },
-    "_remediation.py": {
-      "constants": {
-        "REMEDIATION_SCHEMA": "agentmandate.remediation/v1"
-      },
-      "inline_versions": {},
-      "schemas": [
-        "agentmandate.remediation/v1"
-      ],
-      "version_fields": []
-    },
     "_revision_review.py": {
       "constants": {},
       "inline_versions": {
@@ -302,7 +292,6 @@
             "obligations",
             "producers",
             "reach",
-            "remediate",
             "scan",
             "scenarios",
             "verify"
@@ -2017,106 +2006,6 @@
         }
       ]
     },
-    "mandate remediate": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "manifest",
-          "nargs": null,
-          "options": [],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "depth",
-          "nargs": null,
-          "options": [
-            "--depth"
-          ],
-          "required": false,
-          "type": "_positive_int"
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": 2,
-          "dest": "max_edits",
-          "nargs": null,
-          "options": [
-            "--max-edits"
-          ],
-          "required": false,
-          "type": "_positive_int"
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": 128,
-          "dest": "max_evaluations",
-          "nargs": null,
-          "options": [
-            "--max-evaluations"
-          ],
-          "required": false,
-          "type": "_positive_int"
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": 5,
-          "dest": "max_candidates",
-          "nargs": null,
-          "options": [
-            "--max-candidates"
-          ],
-          "required": false,
-          "type": "_positive_int"
-        },
-        {
-          "action": "_AppendAction",
-          "choices": null,
-          "default": [],
-          "dest": "keep_tool",
-          "nargs": null,
-          "options": [
-            "--keep-tool"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "json",
-          "nargs": 0,
-          "options": [
-            "--json"
-          ],
-          "required": false,
-          "type": null
-        }
-      ],
-      "exclusive_groups": []
-    },
     "mandate scan": {
       "arguments": [
         {
@@ -2414,7 +2303,7 @@
       ]
     }
   },
-  "coverage_sha256": "038a997ee4756b7ebdbebd166b902aea586a004c614d17f3d6a9175a66608ed6",
+  "coverage_sha256": "e2a3a9acf950d50df8f33fa9cdc0da9fb1c9868091f1b2a441e2393647b7ed24",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2505,7 +2394,6 @@
     "tests/fixtures/continuity-result-v1-unresolved.json": "72efffaa73a4a12c688a6e69eb26c188412f61f5f2682b12274b2ce3c5b41353",
     "tests/fixtures/continuity-result-v1-untrusted.json": "a77a35b0c0618f5396731367d3839b1db867fa911d9d17d3c71fdb0d5b7d0a9b",
     "tests/fixtures/continuity-result-v1-widened.json": "46766b1cd039c3f98649a17c4e7dd9f2657f13658ebd4e9c7f7b0c96fd6f75ea",
-    "tests/fixtures/current-contract-inventory-v0.22.json": "f5aeb1b9a6b0a46aebe6b71eaf394f4f2b05c948adc10b96bc995737ef2d58ef",
     "tests/fixtures/delegation-attachment-v2.json": "41990995ed030df2e11c7f28eceb621bcb1fce55955b783b1f16366c6b1f7766",
     "tests/fixtures/delegation-chain-authorizer-v1.json": "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764",
     "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",
@@ -2535,10 +2423,6 @@
     "tests/fixtures/producer-result-v1-clean.json": "995ca859631daee3d94abf435afeabbf5e8538897b7bf8b3ddba3c7e99083bee",
     "tests/fixtures/producer-result-v1-truncated.json": "96ef67aeb7465f046c006efc0ba0d58f5471bb8857fccae6d853a2a5862c661e",
     "tests/fixtures/producer-result-v1-unresolved.json": "7e075b183182d667cfdc197bca3f0732f296f12fdb6617a001c2d48ff3d659a9",
-    "tests/fixtures/remediation-breached-v1.json": "78408e338bf934aa8c7e835e3fcbb0fafde40bb5fe9546886244fd6f77c7d0d4",
-    "tests/fixtures/remediation-clean-v1.json": "cea189b344ee99d9ee7acc89195a070873a88ce070ab1ffe38bf30f9a95c93cd",
-    "tests/fixtures/remediation-kept-v1.json": "2ad8b5ead0174aa9cc32191882e0ce1e47cc1a016f0a3bd293da8f6c79d234e4",
-    "tests/fixtures/remediation-limited-v1.json": "5f9acaa80b80e302b7cf1d0d718aabda8d335e6685ee4a37f6afbd3feac49145",
     "tests/fixtures/revision-review-result-v1-eligible.json": "35cb0da391051b7ae081d8f8c573a120ddc343878c30d15cbedaf6e0ef317868",
     "tests/fixtures/revision-review-result-v1-expired.json": "42b75bd4f30a6cc58683783a520efc36c2154255c381a5e9963dd951a95b3ec3",
     "tests/fixtures/scalar-handover-result-v1-expired.json": "193ec81ee05e6b148239a4810e3604475683d58e74d1227bc0987646ec7e43aa",

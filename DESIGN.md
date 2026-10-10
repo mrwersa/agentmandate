@@ -159,6 +159,16 @@ default unless the caller supplies `--depth`. Reducing a manifest's default
 depth is itself widening because it weakens future analysis. Manifests naming
 different agents are not comparable.
 
+## Reviewing repair candidates
+
+`remediate` searches a separate, bounded domain of tool removals and approval
+requirements over the same manifest model. It rechecks every returned candidate
+at the baseline depth, reports lost reachable tools and remaining lint, and
+retains the original findings. Edit-domain completeness and reachability
+truncation are separate. A candidate removes bounded reachable breaches; it
+does not prove business correctness or accept a new mandate. See the
+[repair guide](docs/remediation.md).
+
 ## Checking observed calls
 
 `verify` replays recorded calls and reports what the mandate does not permit.

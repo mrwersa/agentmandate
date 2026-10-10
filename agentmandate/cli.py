@@ -67,6 +67,7 @@ from ._producer import (
     ProducerSelection,
     analyse_producers,
 )
+from ._remediation import plan as plan_remediation
 from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
 from ._scalar_handover import ScalarHandover, analyse_scalar_handover, render_scalar_handover
 from .diff import compare
@@ -226,6 +227,32 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_manifest(lint_parser)
     lint_parser.add_argument("--json", action="store_true", help="machine-readable output")
+
+    remediation_parser = subparsers.add_parser(
+        "remediate", help="rank rechecked tool-removal and approval candidates",
+    )
+    _add_manifest(remediation_parser)
+    remediation_parser.add_argument(
+        "--depth", type=_positive_int, default=None,
+        help="use this reachability depth for baseline and every candidate",
+    )
+    remediation_parser.add_argument(
+        "--max-edits", type=_positive_int, default=2,
+        help="maximum edits per combination (default: 2)",
+    )
+    remediation_parser.add_argument(
+        "--max-evaluations", type=_positive_int, default=128,
+        help="maximum combinations examined, including rejected ones (default: 128)",
+    )
+    remediation_parser.add_argument(
+        "--max-candidates", type=_positive_int, default=5,
+        help="maximum ranked candidates returned (default: 5)",
+    )
+    remediation_parser.add_argument(
+        "--keep-tool", action="append", default=[],
+        help="preserve this tool's reachability; repeat for more tools",
+    )
+    remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     reach_parser = subparsers.add_parser(
         "reach",
@@ -707,6 +734,49 @@ def _emit(payload: dict, as_json: bool, text: str) -> None:
 
 def _read_text(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
+
+
+def _run_remediation(args: argparse.Namespace) -> int:
+    try:
+        content = Path(args.manifest).read_bytes()
+        mandate = loads(content.decode("utf-8"), source=args.manifest)
+        result = plan_remediation(
+            mandate, depth=args.depth, max_edits=args.max_edits,
+            max_evaluations=args.max_evaluations, max_candidates=args.max_candidates,
+            keep_tools=tuple(args.keep_tool),
+        )
+    except (OSError, ValueError, UnicodeError, RecursionError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    result["input"] = {"manifest_sha256": hashlib.sha256(content).hexdigest()}
+    baseline = result["baseline"]
+    lines = [f"STATUS {result['status']}", f"SCOPE {result['scope']}",
+             f"BASELINE depth={baseline['depth']} truncated={baseline['truncated']}"]
+    lines.extend(
+        f"BREACH {b['kind']}: {b['detail']}\n       {' -> '.join(b['path'])}"
+        for b in baseline["breaches"]
+    )
+    lines.extend(f"LINT {f['severity']} {f['rule']}: {f['message']}"
+                 for f in result["baseline_lint"])
+    for index, candidate in enumerate(result["candidates"], 1):
+        edits = ", ".join(f"{e['kind']} {e['tool']}" for e in candidate["edits"])
+        lines.append(
+            f"CANDIDATE {index} {candidate['status']}: {edits}\n"
+            f"          lost reachable tools={candidate['impact']['lost_reachable_tools']} "
+            f"truncated={candidate['authority']['truncated']}\n"
+            f"          remaining lint={candidate['lint']} "
+            f"removed role members={candidate['impact']['removed_role_members']}"
+        )
+    search = result["search"]
+    lines.append(
+        f"SEARCH examined={search['combinations_examined']}/{search['combinations_total']} "
+        f"analyzed={search['candidates_analyzed']} found={search['candidates_found']} "
+        f"enumeration_complete={search['enumeration_complete']}"
+    )
+    _emit(result, args.json, "\n".join(lines))
+    return EXIT_FINDING if baseline["breaches"] or any(
+        f["severity"] == ERROR for f in result["baseline_lint"]
+    ) else EXIT_OK
 
 
 def _run_ir(args: argparse.Namespace) -> int:
@@ -1672,6 +1742,9 @@ def _dynamic_inventory(
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "remediate":
+        return _run_remediation(args)
 
     if args.command == "ir":
         return _run_ir(args)
