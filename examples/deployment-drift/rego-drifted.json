@@ -1,0 +1,71 @@
+{
+  "deployment_version": 1,
+  "agent": "release-agent",
+  "identity": "release-operator",
+  "environment": "example-staging",
+  "observed_at": "2026-10-11",
+  "expires": "2026-11-08",
+  "export": {
+    "target": "rego",
+    "mapping": "examples/rego-export/mapping.json",
+    "receipt": "examples/rego-export/generated/export.json"
+  },
+  "inventory": {
+    "coverage": "complete",
+    "tools": [
+      "publish_release",
+      "read_build_status",
+      "read_release",
+      "delete_release"
+    ]
+  },
+  "gateway": {
+    "id": "release-gateway",
+    "coverage": "complete",
+    "routes": [
+      {
+        "tool": "publish_release",
+        "principals": [
+          "release-operator",
+          "unmapped-operator"
+        ],
+        "action": "PublishRelease",
+        "resource": "release-tools",
+        "approval_context": null,
+        "mediation": "bypassed",
+        "policy_revision": "different-policy"
+      },
+      {
+        "tool": "read_build_status",
+        "principals": [
+          "build-reader"
+        ],
+        "action": "ReadBuildStatus",
+        "resource": "release-tools",
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1"
+      },
+      {
+        "tool": "read_release",
+        "principals": [
+          "release-operator"
+        ],
+        "action": "ReadRelease",
+        "resource": "release-tools",
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1"
+      }
+    ]
+  },
+  "policy": {
+    "revision": "release-policy-r1",
+    "coverage": "complete",
+    "files": {
+      "policy.rego": "examples/rego-export/generated/policy.rego",
+      "schema.json": "examples/rego-export/generated/schema.json",
+      "unmanaged-allow.rego": "examples/deployment-drift/unmanaged-allow.rego"
+    }
+  }
+}

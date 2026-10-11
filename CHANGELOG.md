@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.29.0 - 2026-10-11
+
+### Added
+
+- `mandate deployment drift` checks bound-tool inventory, gateway mediation,
+  principal/action/resource/approval/revision joins and exact active policy bytes
+  against independently rebuilt Cedar or Rego exports.
+- Incomplete or stale snapshots retain unresolved absence checks. Additional
+  policy modules, uncompiled controls and receipt tampering remain findings;
+  deployment findings never change the separate manifest Authority result.
+- Runnable configuration examples, initial result baselines and a native OPA
+  regression demonstrating widening from an additional active module. No runtime
+  policy interpreter, network access or dependency is introduced.
+
 ## 0.28.0 - 2026-10-11
 
 ### Added
