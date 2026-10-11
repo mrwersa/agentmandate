@@ -122,9 +122,9 @@
         },
         {
           "title": "Decision and OTel reconciliation",
-          "status": "not_started",
-          "evidence": "ROADMAP.md",
-          "reason": "Trace conversion is a prerequisite, not joined deployment-decision reconciliation."
+          "status": "partial",
+          "evidence": "docs/deployment-reconciliation.md",
+          "reason": "Local native-shaped OPA/OTLP captures join exact deployment/request identifiers and compare the generated stateless subset, retaining baseline Authority and unsupported controls. Synthetic fixtures and native OPA checks do not establish authenticated enforcement. Cloud adapters, causal order and accrued-state joins remain open."
         },
         {
           "title": "Signed evidence bundles",

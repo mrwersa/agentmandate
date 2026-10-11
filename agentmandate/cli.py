@@ -45,6 +45,8 @@ from ._delegation import (
 )
 from ._deployment_drift import evaluate as evaluate_deployment_drift
 from ._deployment_drift import render as render_deployment_drift
+from ._deployment_reconcile import reconcile as reconcile_deployment
+from ._deployment_reconcile import render as render_deployment_reconciliation
 from ._fleet import inventory as fleet_inventory
 from ._fleet import render as render_fleet_inventory
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
@@ -524,6 +526,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     deployment_drift.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
     deployment_drift.add_argument("--json", action="store_true", help="machine-readable output")
+
+    deployment_reconcile = deployment_subparsers.add_parser(
+        "reconcile", help="join captured OPA decisions and OTLP tool attempts"
+    )
+    _add_manifest(deployment_reconcile)
+    for option in ("config", "root", "decisions", "otel", "mapping"):
+        deployment_reconcile.add_argument(f"--{option}", required=True)
+    deployment_reconcile.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    deployment_reconcile.add_argument("--json", action="store_true", help="machine-readable output")
 
     rego_parser = subparsers.add_parser(
         "rego", help="export mapped Rego policies with loss reporting"
@@ -1422,6 +1433,8 @@ def _run_fleet(args: argparse.Namespace) -> int:
 
 
 def _run_deployment_drift(args: argparse.Namespace) -> int:
+    if args.deployment_command == "reconcile":
+        return _run_deployment_reconciliation(args)
     try:
         report = evaluate_deployment_drift(
             Path(args.manifest).read_bytes(), Path(args.config).read_bytes(),
@@ -1436,6 +1449,23 @@ def _run_deployment_drift(args: argparse.Namespace) -> int:
     )
     sys.stdout.write(output)
     return EXIT_OK if report["configuration_consistent"] else EXIT_FINDING
+
+
+def _run_deployment_reconciliation(args: argparse.Namespace) -> int:
+    try:
+        report = reconcile_deployment(
+            Path(args.manifest).read_bytes(), Path(args.config).read_bytes(),
+            Path(args.decisions).read_bytes(), Path(args.otel).read_bytes(),
+            Path(args.mapping).read_bytes(), root=Path(args.root), as_of=args.as_of,
+        )
+    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.json else render_deployment_reconciliation(report)
+    )
+    return EXIT_FINDING if report["findings"] else EXIT_OK
 
 
 def _run_rego_export(args: argparse.Namespace) -> int:

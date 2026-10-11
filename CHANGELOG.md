@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.31.0 - 2026-10-11
+
+### Added
+
+- `mandate deployment reconcile` joins captured OPA decision logs and explicitly
+  mapped OTLP tool attempts to pinned manifest/configuration bytes, gateway,
+  bundle revision, run/invocation, principal, action, resource and approval.
+- Missing, ambiguous, stale, masked or contradictory observations remain
+  findings. A reported effect associated with a denial is separate from manifest
+  reachability; runtime ordering, accounting and continuity remain not assessed.
+- Payload-free result projections, synthetic aligned/denied-effect examples and
+  initial v1 baselines. Native OPA checks the generated-subset comparator; the
+  library adds no runtime policy engine, dependency or live collector.
+
 ## 0.30.0 - 2026-10-11
 
 ### Added

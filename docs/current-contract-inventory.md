@@ -56,13 +56,16 @@ existing source drift and both exporter families remain unchanged.
 [Fleet inventory](fleet-inventory.md) adds its query group and initial index/result
 baseline, starting from the fixed
 [deployment inventory](../tests/fixtures/current-contract-inventory-v0.29.json).
+Captured [decision/tool reconciliation](deployment-reconciliation.md) adds one
+command and its initial mapping/result baselines while preserving the
+[fleet inventory snapshot](../tests/fixtures/current-contract-inventory-v0.30.json).
 Earlier declarations and fixture bytes remain pinned unchanged.
 
 ## What is pinned
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)
 records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 38 CLI command paths
+methods/properties and constant values. It also records all 39 CLI command paths
 (including intermediate groups), arguments, defaults, choices and mutually
 exclusive groups. The package release number is
 excluded from comparison; `__version__` remains an exported name.
@@ -88,6 +91,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Conditions and delegation | [Conditions](conditions-delegation.md), [delegation](delegation-v2.md); `test_conditions.py`, `test_delegation.py` |
 | Deployment configuration drift | [Deployment drift](deployment-drift.md); `test_deployment_drift.py` |
 | Local fleet inventory | [Fleet inventory](fleet-inventory.md); `test_fleet.py` |
+| Captured decision/tool reconciliation | [Deployment reconciliation](deployment-reconciliation.md); `test_deployment_reconcile.py` |
 | Stateless Cedar and Rego exports | [Cedar export](cedar-export.md), [Rego export](rego-export.md); `test_cedar_export.py`, `test_rego_export.py` |
 | Managed Cedar and mapping | [Cedar](cedar-import.md); `test_managed_cedar.py`, `test_cedar.py` |
 | Producer bounds | [Producer contract](bounded-producers.md); `test_producer.py` |

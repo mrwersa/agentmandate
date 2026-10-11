@@ -387,7 +387,9 @@ def test_fleet_inventory_preserves_all_previous_contracts_and_fixtures():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.29.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.30.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) - set(previous["cli"]) == {
         "mandate fleet", "mandate fleet inventory"
@@ -399,6 +401,28 @@ def test_fleet_inventory_preserves_all_previous_contracts_and_fixtures():
             selector["choices"].remove("fleet")
         assert present == command
     assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {"_fleet.py"}
+    for path, markers in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_deployment_reconciliation_preserves_all_previous_contracts_and_fixtures():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.30.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) - set(previous["cli"]) == {"mandate deployment reconcile"}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate deployment":
+            selector = next(a for a in present["arguments"] if a["dest"] == "deployment_command")
+            selector["choices"].remove("reconcile")
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_deployment_reconcile.py"
+    }
     for path, markers in previous["artifact_markers"].items():
         assert current["artifact_markers"][path] == markers
     for path, digest in previous["fixture_sha256"].items():

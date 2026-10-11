@@ -1,0 +1,297 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "name": "tool-attempt",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "read_release"
+                  }
+                },
+                {
+                  "key": "app.authority.invocation_id",
+                  "value": {
+                    "stringValue": "synthetic-invocation-1"
+                  }
+                },
+                {
+                  "key": "app.authority.run_id",
+                  "value": {
+                    "stringValue": "synthetic-run"
+                  }
+                },
+                {
+                  "key": "app.authority.manifest_sha256",
+                  "value": {
+                    "stringValue": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19"
+                  }
+                },
+                {
+                  "key": "app.authority.configuration_sha256",
+                  "value": {
+                    "stringValue": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7"
+                  }
+                },
+                {
+                  "key": "app.authority.manifest_version",
+                  "value": {
+                    "intValue": "1"
+                  }
+                },
+                {
+                  "key": "app.authority.gateway",
+                  "value": {
+                    "stringValue": "release-gateway"
+                  }
+                },
+                {
+                  "key": "app.authority.decision_id",
+                  "value": {
+                    "stringValue": "synthetic-decision-1"
+                  }
+                },
+                {
+                  "key": "app.authority.policy_revision",
+                  "value": {
+                    "stringValue": "release-policy-r1"
+                  }
+                },
+                {
+                  "key": "app.authority.principal",
+                  "value": {
+                    "stringValue": "release-operator"
+                  }
+                },
+                {
+                  "key": "app.authority.action",
+                  "value": {
+                    "stringValue": "ReadRelease"
+                  }
+                },
+                {
+                  "key": "app.authority.resource",
+                  "value": {
+                    "stringValue": "release-tools"
+                  }
+                },
+                {
+                  "key": "app.authority.approved",
+                  "value": {
+                    "boolValue": false
+                  }
+                },
+                {
+                  "key": "app.authority.effect_applied",
+                  "value": {
+                    "boolValue": true
+                  }
+                }
+              ]
+            },
+            {
+              "name": "tool-attempt",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "publish_release"
+                  }
+                },
+                {
+                  "key": "app.authority.invocation_id",
+                  "value": {
+                    "stringValue": "synthetic-invocation-2"
+                  }
+                },
+                {
+                  "key": "app.authority.run_id",
+                  "value": {
+                    "stringValue": "synthetic-run"
+                  }
+                },
+                {
+                  "key": "app.authority.manifest_sha256",
+                  "value": {
+                    "stringValue": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19"
+                  }
+                },
+                {
+                  "key": "app.authority.configuration_sha256",
+                  "value": {
+                    "stringValue": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7"
+                  }
+                },
+                {
+                  "key": "app.authority.manifest_version",
+                  "value": {
+                    "intValue": "1"
+                  }
+                },
+                {
+                  "key": "app.authority.gateway",
+                  "value": {
+                    "stringValue": "release-gateway"
+                  }
+                },
+                {
+                  "key": "app.authority.decision_id",
+                  "value": {
+                    "stringValue": "synthetic-decision-2"
+                  }
+                },
+                {
+                  "key": "app.authority.policy_revision",
+                  "value": {
+                    "stringValue": "release-policy-r1"
+                  }
+                },
+                {
+                  "key": "app.authority.principal",
+                  "value": {
+                    "stringValue": "release-operator"
+                  }
+                },
+                {
+                  "key": "app.authority.action",
+                  "value": {
+                    "stringValue": "PublishRelease"
+                  }
+                },
+                {
+                  "key": "app.authority.resource",
+                  "value": {
+                    "stringValue": "release-tools"
+                  }
+                },
+                {
+                  "key": "app.authority.approved",
+                  "value": {
+                    "boolValue": false
+                  }
+                },
+                {
+                  "key": "app.authority.effect_applied",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ]
+            },
+            {
+              "name": "tool-attempt",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "publish_release"
+                  }
+                },
+                {
+                  "key": "app.authority.invocation_id",
+                  "value": {
+                    "stringValue": "synthetic-invocation-3"
+                  }
+                },
+                {
+                  "key": "app.authority.run_id",
+                  "value": {
+                    "stringValue": "synthetic-run"
+                  }
+                },
+                {
+                  "key": "app.authority.manifest_sha256",
+                  "value": {
+                    "stringValue": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19"
+                  }
+                },
+                {
+                  "key": "app.authority.configuration_sha256",
+                  "value": {
+                    "stringValue": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7"
+                  }
+                },
+                {
+                  "key": "app.authority.manifest_version",
+                  "value": {
+                    "intValue": "1"
+                  }
+                },
+                {
+                  "key": "app.authority.gateway",
+                  "value": {
+                    "stringValue": "release-gateway"
+                  }
+                },
+                {
+                  "key": "app.authority.decision_id",
+                  "value": {
+                    "stringValue": "synthetic-decision-3"
+                  }
+                },
+                {
+                  "key": "app.authority.policy_revision",
+                  "value": {
+                    "stringValue": "release-policy-r1"
+                  }
+                },
+                {
+                  "key": "app.authority.principal",
+                  "value": {
+                    "stringValue": "release-operator"
+                  }
+                },
+                {
+                  "key": "app.authority.action",
+                  "value": {
+                    "stringValue": "PublishRelease"
+                  }
+                },
+                {
+                  "key": "app.authority.resource",
+                  "value": {
+                    "stringValue": "release-tools"
+                  }
+                },
+                {
+                  "key": "app.authority.approved",
+                  "value": {
+                    "boolValue": true
+                  }
+                },
+                {
+                  "key": "app.authority.effect_applied",
+                  "value": {
+                    "boolValue": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

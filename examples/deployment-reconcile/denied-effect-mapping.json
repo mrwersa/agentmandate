@@ -1,0 +1,32 @@
+{
+  "reconcile_version": 1,
+  "bundle": "release-policy",
+  "input_key": "agentmandate",
+  "attributes": {
+    "decision_id": "app.authority.decision_id",
+    "invocation_id": "app.authority.invocation_id",
+    "run_id": "app.authority.run_id",
+    "manifest_sha256": "app.authority.manifest_sha256",
+    "configuration_sha256": "app.authority.configuration_sha256",
+    "manifest_version": "app.authority.manifest_version",
+    "gateway": "app.authority.gateway",
+    "policy_revision": "app.authority.policy_revision",
+    "principal": "app.authority.principal",
+    "action": "app.authority.action",
+    "resource": "app.authority.resource",
+    "approved": "app.authority.approved",
+    "effect_applied": "app.authority.effect_applied"
+  },
+  "coverage": {
+    "decisions": "complete",
+    "telemetry": "complete"
+  },
+  "observed_at": "2026-10-11",
+  "expires": "2026-11-08",
+  "pins": {
+    "manifest": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "configuration": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
+    "decisions": "3e90a88cfc7ae77a5fea39a004d610ec64b81489a520fa5a14dca4174057e53a",
+    "telemetry": "18fece4ff1395be84e0655a305926d14220b01d303f6d4fac7518724af0da1d0"
+  }
+}

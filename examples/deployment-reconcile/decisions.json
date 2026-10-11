@@ -1,0 +1,83 @@
+[
+  {
+    "decision_id": "synthetic-decision-1",
+    "path": "release_gate/allow",
+    "input": {
+      "principal": "release-operator",
+      "action": "ReadRelease",
+      "resource": "release-tools",
+      "context": {
+        "approved": false
+      },
+      "agentmandate": {
+        "invocation_id": "synthetic-invocation-1",
+        "run_id": "synthetic-run",
+        "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+        "configuration_sha256": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
+        "manifest_version": 1,
+        "gateway": "release-gateway"
+      }
+    },
+    "result": true,
+    "bundles": {
+      "release-policy": {
+        "revision": "release-policy-r1"
+      }
+    },
+    "timestamp": "2026-10-11T09:00:00Z"
+  },
+  {
+    "decision_id": "synthetic-decision-2",
+    "path": "release_gate/allow",
+    "input": {
+      "principal": "release-operator",
+      "action": "PublishRelease",
+      "resource": "release-tools",
+      "context": {
+        "approved": false
+      },
+      "agentmandate": {
+        "invocation_id": "synthetic-invocation-2",
+        "run_id": "synthetic-run",
+        "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+        "configuration_sha256": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
+        "manifest_version": 1,
+        "gateway": "release-gateway"
+      }
+    },
+    "result": false,
+    "bundles": {
+      "release-policy": {
+        "revision": "release-policy-r1"
+      }
+    },
+    "timestamp": "2026-10-11T09:00:00Z"
+  },
+  {
+    "decision_id": "synthetic-decision-3",
+    "path": "release_gate/allow",
+    "input": {
+      "principal": "release-operator",
+      "action": "PublishRelease",
+      "resource": "release-tools",
+      "context": {
+        "approved": true
+      },
+      "agentmandate": {
+        "invocation_id": "synthetic-invocation-3",
+        "run_id": "synthetic-run",
+        "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+        "configuration_sha256": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
+        "manifest_version": 1,
+        "gateway": "release-gateway"
+      }
+    },
+    "result": true,
+    "bundles": {
+      "release-policy": {
+        "revision": "release-policy-r1"
+      }
+    },
+    "timestamp": "2026-10-11T09:00:00Z"
+  }
+]
