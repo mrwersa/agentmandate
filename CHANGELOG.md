@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.28.0 - 2026-10-11
+
+### Added
+
+- `mandate rego export`: explicit principal/action/resource mappings, default-deny
+  Rego v1 policies, input schema, native request tests and a complete export bundle.
+- Machine-readable losses for unsupported sequence controls. Default refusal and
+  `--allow-partial` both exit 1 when constraints cannot be compiled; partial output
+  is a scoped candidate, not deployment approval.
+- Required checksum-pinned OPA validation and independent request decisions,
+  runnable release-tool example and practical export instructions.
+
+### Changed
+
+- Cedar and Rego share strict mapping primitives, stateful loss categories and
+  bundle staging. Existing Cedar policies, schemas, request tests and result
+  bytes are preserved. The core retains zero runtime dependencies.
+
 ## 0.27.0 - 2026-10-11
 
 ### Added

@@ -1,0 +1,250 @@
+{
+  "cases": [
+    {
+      "expected": "allow",
+      "name": "publish_release:allowed-0",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:approval-false",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": false
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:approval-missing",
+      "request": {
+        "action": "PublishRelease",
+        "context": {},
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:unmapped-principal",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "__agentmandate_unmapped__",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:other-resource",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "__agentmandate_unmapped__"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:unmapped-action",
+      "request": {
+        "action": "__agentmandate_unmapped__",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:other-class-service",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_build_status:allowed-0",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_build_status:approval-false",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": false
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_build_status:approval-missing",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {},
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:unmapped-principal",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "__agentmandate_unmapped__",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:other-resource",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "__agentmandate_unmapped__"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:unmapped-action",
+      "request": {
+        "action": "__agentmandate_unmapped__",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:other-class-caller",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_release:allowed-0",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_release:approval-false",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": false
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_release:approval-missing",
+      "request": {
+        "action": "ReadRelease",
+        "context": {},
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:unmapped-principal",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "__agentmandate_unmapped__",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:other-resource",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "__agentmandate_unmapped__"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:unmapped-action",
+      "request": {
+        "action": "__agentmandate_unmapped__",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:other-class-service",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    }
+  ]
+}

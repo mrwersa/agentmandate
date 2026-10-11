@@ -71,6 +71,9 @@ from ._producer import (
     ProducerSelection,
     analyse_producers,
 )
+from ._rego_export import export as export_rego
+from ._rego_export import render as render_rego_export
+from ._rego_export import write_bundle as write_rego_bundle
 from ._remediation import plan as plan_remediation
 from ._required_workflows import _Requirements
 from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
@@ -485,6 +488,22 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         continuity_reconcile.add_argument(option, action="store_true", help=argparse.SUPPRESS)
 
+    rego_parser = subparsers.add_parser(
+        "rego", help="export mapped Rego policies with loss reporting"
+    )
+    rego_subparsers = rego_parser.add_subparsers(dest="rego_command", required=True)
+    rego_export = rego_subparsers.add_parser(
+        "export", help="compile stateless per-request permissions"
+    )
+    _add_manifest(rego_export)
+    rego_export.add_argument("--mapping", required=True, help="explicit application mapping JSON")
+    rego_export.add_argument("--output-dir", help="new directory for the complete export bundle")
+    rego_export.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help="emit unsupported-loss candidates; still exits 1",
+    )
+    rego_export.add_argument("--json", action="store_true", help="machine-readable export report")
     cedar_parser = subparsers.add_parser(
         "cedar",
         help="validate or compare reviewed managed Cedar evidence",
@@ -1349,6 +1368,27 @@ def _render_managed_diff(result: ManagedDiff) -> str:
     return "\n".join(lines)
 
 
+def _run_rego_export(args: argparse.Namespace) -> int:
+    try:
+        result = export_rego(
+            Path(args.manifest).read_bytes(),
+            Path(args.mapping).read_bytes(),
+            allow_partial=args.allow_partial,
+        )
+        if args.output_dir and result["policy"] is not None:
+            write_rego_bundle(result, Path(args.output_dir))
+        output = (
+            json.dumps(result, indent=2, sort_keys=True) + "\n"
+            if args.json
+            else render_rego_export(result)
+        )
+    except (ValueError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(output)
+    return EXIT_FINDING if result["losses"] else EXIT_OK
+
+
 def _run_cedar_export(args: argparse.Namespace) -> int:
     from ._cedar_export_files import write_bundle
 
@@ -1882,6 +1922,8 @@ def _main(argv: Sequence[str] | None = None) -> int:
     if args.command == "continuity":
         return _run_continuity(args)
 
+    if args.command == "rego":
+        return _run_rego_export(args)
     if args.command == "cedar":
         return _run_cedar(args)
 

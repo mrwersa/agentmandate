@@ -1,0 +1,21 @@
+{
+  "rego_export_version": 1,
+  "agent": "release-agent",
+  "identity": "release-operator",
+  "package": "release_gate",
+  "principals": {
+    "caller": [
+      "release-operator"
+    ],
+    "service": [
+      "build-reader"
+    ]
+  },
+  "resource": "release-tools",
+  "actions": {
+    "read_release": "ReadRelease",
+    "publish_release": "PublishRelease",
+    "read_build_status": "ReadBuildStatus"
+  },
+  "approval_context": "approved"
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "action": {
+      "type": "string"
+    },
+    "context": {
+      "properties": {
+        "approved": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "principal": {
+      "type": "string"
+    },
+    "resource": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "principal",
+    "action",
+    "resource",
+    "context"
+  ],
+  "type": "object"
+}

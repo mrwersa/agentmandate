@@ -86,9 +86,9 @@
         },
         {
           "title": "Cedar and Rego exporters",
-          "status": "partial",
-          "evidence": "docs/cedar-export.md",
-          "reason": "The scoped Cedar compiler, native validation and decision tests are implemented; Rego and stateful enforcement remain open."
+          "status": "delivered",
+          "evidence": "docs/rego-export.md",
+          "reason": "Both scoped stateless exporters produce policies, schemas, native tests and explicit losses with target pins. Unsupported stateful controls are refused rather than approximated; deployment is outside this measure."
         },
         {
           "title": "Policy-versus-agent drift",

@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.27.0
+agentmandate~=0.28.0
 ```
 
 ## Versioned authority artifacts
@@ -222,3 +222,9 @@ results. It generates only explicitly mapped stateless permissions. Losses
 block export by default; `--allow-partial` emits a candidate and still exits 1.
 Native validation is separate from compilation. Existing managed Cedar
 commands and results are unchanged. See [the export guide](docs/cedar-export.md).
+
+`mandate rego export` adds the experimental `rego_export_version: 1` mapping
+and `agentmandate.rego-export/v1` result. It uses Rego v1 with a pinned native
+OPA runner, refuses stateful losses by default and keeps partial candidates at
+exit 1. This is an initial baseline, not a migration. Existing Cedar output
+and prior commands are unchanged. See [Rego export](docs/rego-export.md).

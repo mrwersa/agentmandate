@@ -540,5 +540,26 @@
     "tests": [
       "tests/test_cedar_export.py"
     ]
+  },
+  {
+    "doc": "docs/rego-export.md",
+    "fixtures": [
+      "examples/rego-export/manifest.json",
+      "examples/rego-export/mapping.json",
+      "examples/rego-export/opa-target.json",
+      "examples/rego-export/generated/policy.rego",
+      "examples/rego-export/generated/policy_test.rego",
+      "examples/rego-export/generated/schema.json",
+      "examples/rego-export/generated/tests.json",
+      "examples/rego-export/generated/export.json"
+    ],
+    "id": "rego-export",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.rego-export/v1"
+    ],
+    "tests": [
+      "tests/test_rego_export.py"
+    ]
   }
 ]
