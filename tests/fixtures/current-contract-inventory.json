@@ -117,6 +117,23 @@
         "deployment_version"
       ]
     },
+    "_fleet.py": {
+      "constants": {
+        "FLEET_VERSION": 1,
+        "RESULT_SCHEMA": "agentmandate.fleet-inventory/v1"
+      },
+      "inline_versions": {
+        "fleet_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.fleet-inventory/v1"
+      ],
+      "version_fields": [
+        "fleet_version"
+      ]
+    },
     "_inventory.py": {
       "constants": {
         "INVENTORY_ADAPTER_VERSION": 1,
@@ -378,6 +395,7 @@
             "deployment",
             "diff",
             "drift",
+            "fleet",
             "inventory",
             "ir",
             "lint",
@@ -1573,6 +1591,132 @@
           "nargs": null,
           "options": [
             "--condition-as-of"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate fleet": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_SubParsersAction",
+          "choices": [
+            "inventory"
+          ],
+          "dest": "fleet_command",
+          "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate fleet inventory": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "index",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "root",
+          "nargs": null,
+          "options": [
+            "--root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "owner",
+          "nargs": null,
+          "options": [
+            "--owner"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "environment",
+          "nargs": null,
+          "options": [
+            "--environment"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "tool",
+          "nargs": null,
+          "options": [
+            "--tool"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
           ],
           "required": false,
           "type": null
@@ -2901,7 +3045,7 @@
       ]
     }
   },
-  "coverage_sha256": "f6e05563fb411b843f582ff23327ebd66c59e5fc158292fcfe81446c3cfe2383",
+  "coverage_sha256": "11f9e191f5673c3f884e04ad54ca5a1e069e8cec53e9fadbe4c6034713f01294",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2943,6 +3087,12 @@
     "examples/deployment-drift/rego-aligned.json": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
     "examples/deployment-drift/rego-drifted.json": "23af1d412164c9632558586de124d8ef7b2698094f272f6d82253d6a0df0ad4d",
     "examples/deployment-drift/unmanaged-allow.rego": "7b9db08a7d774d6835d18258cc24857ea3312cf8d55c66ae32e6da3bdf7c604f",
+    "examples/fleet-inventory/billing-repo/authority-ir.json": "ada14f4bbcd833799f197a508a7cad5761ce2a7ce04a313d8c09eb6f0d294329",
+    "examples/fleet-inventory/billing-repo/manifest.json": "9d514bf22268baf892ea451d4134d98fc0fa7f8fc553afda215c892099795746",
+    "examples/fleet-inventory/findings.json": "a81567045d3bbd1a8db3f89f4762a9a1478c0ec6cbf9c86c4725d0f1194a8ea6",
+    "examples/fleet-inventory/index.json": "6cc7e7614f973259c55e367a268407d93b38f2260960933da9ccc5ba68fd19cf",
+    "examples/fleet-inventory/release-repo/authority-ir.json": "9b6e4ccedce66098f9d7d2f79a16e74d4ac28e44df2f7fbc087de31b6f501f76",
+    "examples/fleet-inventory/release-repo/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
     "examples/observed-calls.jsonl": "d4769b576e6a2e15d4d657db875b17db0e0de9b5c0129d07718e72d69ab30930",
     "examples/otel-trace.json": "82e6f24ecbb6df50bb5cdc68652d18ad6865084c38c59c3b11d5aed75d9a3013",
     "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
@@ -3040,6 +3190,7 @@
     "tests/fixtures/deployment-drift-rego-v1.json": "11f14e4b8ba2504ec6e0f0bb11291955d5bfcff023b54bb5cb58bd8cd03b876f",
     "tests/fixtures/dynamic-inventory-agentkit-v1.json": "09b587e8880ca05d7ed85dc1d3b05881bb338772e9245d746dfd65b5b05df450",
     "tests/fixtures/dynamic-inventory-sentry-v1.json": "9b19e47e23871e96069c7526b0adb5315aa5a8d40cd358719b9b0d2db46c4799",
+    "tests/fixtures/fleet-inventory-v1.json": "3563eb60f28fa86810ee4597e43c79fe00bac8b0d1968b80b92e5bd0487b325f",
     "tests/fixtures/legacy-json-results.json": "8c23d75c15934f7cc652810c59dc90602524cc8a893852c226e1500d23b76407",
     "tests/fixtures/manifest-v1-all-defaults.yaml": "5f31d7b5cecef0eeaaa072d1cbb65e1d59b1523788a1bb029afd43a2414cd1a2",
     "tests/fixtures/manifest-v1-shorthand-defaults.yaml": "c263a0176a7856bea813d129f5aad097665fdb32e18a7c90b92ec73a957ea607",

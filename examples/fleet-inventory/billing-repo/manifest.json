@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "agent": "billing-agent",
+  "identity": "billing-operator",
+  "tools": [
+    {
+      "name": "read_release",
+      "effect": "read"
+    },
+    {
+      "name": "issue_refund",
+      "effect": "irreversible",
+      "requires_approval": true
+    }
+  ]
+}

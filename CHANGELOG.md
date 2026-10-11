@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.30.0 - 2026-10-11
+
+### Added
+
+- `mandate fleet inventory` verifies pinned local manifest/Authority IR pairs
+  across repositories and queries declared tools, owners and environments.
+- Per-entry review expiry, unassigned ownership, incomplete membership,
+  ambiguous deployments and unavailable or mismatched artifacts remain distinct
+  findings. Display filters never suppress the whole-index gate.
+- Synthetic two-repository examples and initial fleet input/result baselines.
+  Entries stay separate; no shared budgets, live exposure, signatures or
+  cross-agent reachability are inferred.
+
 ## 0.29.0 - 2026-10-11
 
 ### Added

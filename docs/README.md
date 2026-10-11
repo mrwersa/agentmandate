@@ -15,6 +15,7 @@ guarantee.
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
 | Compare gateway configuration with an exported policy | [Deployment drift](deployment-drift.md) |
+| Find tools, owners and stale reviews across repositories | [Fleet inventory](fleet-inventory.md) |
 | Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
@@ -82,6 +83,7 @@ change an analysis result:
 - [Conditional authority](conditions-delegation.md)
 - [Delegation chains](delegation-v2.md)
 - [Deployment drift](deployment-drift.md): inventory, route and exact policy-file joins.
+- [Fleet inventory](fleet-inventory.md): local repository snapshots, ownership queries and review expiry.
 - [Cedar export](cedar-export.md) and [Rego export](rego-export.md): policies, schemas, native decision tests and explicit semantic loss.
 - [Managed Cedar evidence](cedar-import.md) and
   [effective policy revision comparison](cedar-effective-diff.md)
