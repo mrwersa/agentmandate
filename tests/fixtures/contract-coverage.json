@@ -581,5 +581,25 @@
     "tests": [
       "tests/test_deployment_drift.py"
     ]
+  },
+  {
+    "doc": "docs/fleet-inventory.md",
+    "fixtures": [
+      "examples/fleet-inventory/index.json",
+      "examples/fleet-inventory/findings.json",
+      "examples/fleet-inventory/release-repo/manifest.json",
+      "examples/fleet-inventory/release-repo/authority-ir.json",
+      "examples/fleet-inventory/billing-repo/manifest.json",
+      "examples/fleet-inventory/billing-repo/authority-ir.json",
+      "tests/fixtures/fleet-inventory-v1.json"
+    ],
+    "id": "fleet-inventory",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.fleet-inventory/v1"
+    ],
+    "tests": [
+      "tests/test_fleet.py"
+    ]
   }
 ]

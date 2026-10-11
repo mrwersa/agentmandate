@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.29.0
+agentmandate~=0.30.0
 ```
 
 ## Versioned authority artifacts
@@ -235,3 +235,12 @@ status means consistency of supplied configuration and exact policy bytes,
 not authenticated deployment enforcement. Initial Cedar/Rego baselines preserve
 separate manifest Authority. Existing source drift and exporter results remain
 unchanged. See [deployment drift](docs/deployment-drift.md).
+
+`mandate fleet inventory` adds the experimental `fleet_version: 1` index
+and `agentmandate.fleet-inventory/v1` result. It verifies exact local
+manifest/IR joins and retains whole-index findings under display filters.
+Initial v1 baselines cover repository/environment identity, declared tools,
+ownership and review windows; they are not historical migrations. Signatures,
+live exposure and cross-agent authority remain unverified. Earlier exports,
+deployment results and other contracts are unchanged. See
+[fleet inventory](docs/fleet-inventory.md).

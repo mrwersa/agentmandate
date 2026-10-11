@@ -116,9 +116,9 @@
       "initiatives": [
         {
           "title": "Federated agent and tool inventory",
-          "status": "not_started",
-          "evidence": "ROADMAP.md",
-          "reason": "No cross-repository inventory index is delivered."
+          "status": "partial",
+          "evidence": "docs/fleet-inventory.md",
+          "reason": "Local cross-repository manifest/IR indexing, owners, environments, review expiry and queries are implemented. Signed snapshots, authenticated membership and registry connectors remain open; declared tools are not live exposure."
         },
         {
           "title": "Decision and OTel reconciliation",

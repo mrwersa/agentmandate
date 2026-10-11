@@ -45,6 +45,8 @@ from ._delegation import (
 )
 from ._deployment_drift import evaluate as evaluate_deployment_drift
 from ._deployment_drift import render as render_deployment_drift
+from ._fleet import inventory as fleet_inventory
+from ._fleet import render as render_fleet_inventory
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
 from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
@@ -489,6 +491,22 @@ def build_parser() -> argparse.ArgumentParser:
         "--sarif",
     ):
         continuity_reconcile.add_argument(option, action="store_true", help=argparse.SUPPRESS)
+
+    fleet_parser = subparsers.add_parser(
+        "fleet", help="query local cross-repository agent and tool declarations"
+    )
+    fleet_subparsers = fleet_parser.add_subparsers(dest="fleet_command", required=True)
+    fleet_inventory_parser = fleet_subparsers.add_parser(
+        "inventory", help="verify pinned manifest/IR pairs and query owners, environments and tools"
+    )
+    fleet_inventory_parser.add_argument("index", help="fleet index JSON")
+    fleet_inventory_parser.add_argument("--root", required=True, help="local artifact directory")
+    fleet_inventory_parser.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    for field in ("owner", "environment", "tool"):
+        fleet_inventory_parser.add_argument(f"--{field}", help=f"select entries by exact {field}")
+    fleet_inventory_parser.add_argument(
+        "--json", action="store_true", help="machine-readable output"
+    )
 
     deployment_parser = subparsers.add_parser(
         "deployment", help="compare supplied gateway configuration with an exported policy"
@@ -1387,6 +1405,22 @@ def _render_managed_diff(result: ManagedDiff) -> str:
     return "\n".join(lines)
 
 
+def _run_fleet(args: argparse.Namespace) -> int:
+    try:
+        report = fleet_inventory(
+            Path(args.index).read_bytes(), root=Path(args.root), as_of=args.as_of,
+            owner=args.owner, environment=args.environment, tool=args.tool,
+        )
+    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.json else render_fleet_inventory(report)
+    )
+    return EXIT_FINDING if report["findings"] else EXIT_OK
+
+
 def _run_deployment_drift(args: argparse.Namespace) -> int:
     try:
         report = evaluate_deployment_drift(
@@ -1958,6 +1992,8 @@ def _main(argv: Sequence[str] | None = None) -> int:
     if args.command == "continuity":
         return _run_continuity(args)
 
+    if args.command == "fleet":
+        return _run_fleet(args)
     if args.command == "deployment":
         return _run_deployment_drift(args)
     if args.command == "rego":
