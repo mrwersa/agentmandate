@@ -561,5 +561,25 @@
     "tests": [
       "tests/test_rego_export.py"
     ]
+  },
+  {
+    "doc": "docs/deployment-drift.md",
+    "fixtures": [
+      "examples/deployment-drift/manifest.json",
+      "examples/deployment-drift/cedar-aligned.json",
+      "examples/deployment-drift/rego-aligned.json",
+      "examples/deployment-drift/rego-drifted.json",
+      "examples/deployment-drift/unmanaged-allow.rego",
+      "tests/fixtures/deployment-drift-cedar-v1.json",
+      "tests/fixtures/deployment-drift-rego-v1.json"
+    ],
+    "id": "deployment-drift",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.deployment-drift/v1"
+    ],
+    "tests": [
+      "tests/test_deployment_drift.py"
+    ]
   }
 ]

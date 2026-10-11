@@ -43,6 +43,8 @@ from ._delegation import (
     _timestamp,
     analyse_delegations,
 )
+from ._deployment_drift import evaluate as evaluate_deployment_drift
+from ._deployment_drift import render as render_deployment_drift
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
 from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
@@ -487,6 +489,23 @@ def build_parser() -> argparse.ArgumentParser:
         "--sarif",
     ):
         continuity_reconcile.add_argument(option, action="store_true", help=argparse.SUPPRESS)
+
+    deployment_parser = subparsers.add_parser(
+        "deployment", help="compare supplied gateway configuration with an exported policy"
+    )
+    deployment_subparsers = deployment_parser.add_subparsers(
+        dest="deployment_command", required=True
+    )
+    deployment_drift = deployment_subparsers.add_parser(
+        "drift", help="check exported policy, bound tools and gateway route mappings"
+    )
+    _add_manifest(deployment_drift)
+    deployment_drift.add_argument("--config", required=True, help="deployment configuration JSON")
+    deployment_drift.add_argument(
+        "--root", required=True, help="local deployment artifact directory"
+    )
+    deployment_drift.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    deployment_drift.add_argument("--json", action="store_true", help="machine-readable output")
 
     rego_parser = subparsers.add_parser(
         "rego", help="export mapped Rego policies with loss reporting"
@@ -1368,6 +1387,23 @@ def _render_managed_diff(result: ManagedDiff) -> str:
     return "\n".join(lines)
 
 
+def _run_deployment_drift(args: argparse.Namespace) -> int:
+    try:
+        report = evaluate_deployment_drift(
+            Path(args.manifest).read_bytes(), Path(args.config).read_bytes(),
+            root=Path(args.root), as_of=args.as_of,
+        )
+    except (ValueError, OSError, UnicodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    output = (
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.json else render_deployment_drift(report)
+    )
+    sys.stdout.write(output)
+    return EXIT_OK if report["configuration_consistent"] else EXIT_FINDING
+
+
 def _run_rego_export(args: argparse.Namespace) -> int:
     try:
         result = export_rego(
@@ -1922,6 +1958,8 @@ def _main(argv: Sequence[str] | None = None) -> int:
     if args.command == "continuity":
         return _run_continuity(args)
 
+    if args.command == "deployment":
+        return _run_deployment_drift(args)
     if args.command == "rego":
         return _run_rego_export(args)
     if args.command == "cedar":

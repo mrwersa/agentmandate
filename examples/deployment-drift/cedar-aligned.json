@@ -1,0 +1,95 @@
+{
+  "deployment_version": 1,
+  "agent": "release-agent",
+  "identity": "release-operator",
+  "environment": "example-staging",
+  "observed_at": "2026-10-11",
+  "expires": "2026-11-08",
+  "export": {
+    "target": "cedar",
+    "mapping": "examples/cedar-export/mapping.json",
+    "receipt": "examples/cedar-export/generated/export.json"
+  },
+  "inventory": {
+    "coverage": "complete",
+    "tools": [
+      "publish_release",
+      "read_build_status",
+      "read_release"
+    ]
+  },
+  "gateway": {
+    "id": "release-gateway",
+    "coverage": "complete",
+    "routes": [
+      {
+        "tool": "publish_release",
+        "principals": [
+          {
+            "type": "ReleaseGate::User",
+            "id": "release-operator"
+          }
+        ],
+        "action": {
+          "type": "ReleaseGate::Action",
+          "id": "PublishRelease"
+        },
+        "resource": {
+          "type": "ReleaseGate::Repository",
+          "id": "release-tools"
+        },
+        "approval_context": "approved",
+        "mediation": "required",
+        "policy_revision": "release-policy-r1"
+      },
+      {
+        "tool": "read_build_status",
+        "principals": [
+          {
+            "type": "ReleaseGate::Workload",
+            "id": "build-reader"
+          }
+        ],
+        "action": {
+          "type": "ReleaseGate::Action",
+          "id": "ReadBuildStatus"
+        },
+        "resource": {
+          "type": "ReleaseGate::Repository",
+          "id": "release-tools"
+        },
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1"
+      },
+      {
+        "tool": "read_release",
+        "principals": [
+          {
+            "type": "ReleaseGate::User",
+            "id": "release-operator"
+          }
+        ],
+        "action": {
+          "type": "ReleaseGate::Action",
+          "id": "ReadRelease"
+        },
+        "resource": {
+          "type": "ReleaseGate::Repository",
+          "id": "release-tools"
+        },
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1"
+      }
+    ]
+  },
+  "policy": {
+    "revision": "release-policy-r1",
+    "coverage": "complete",
+    "files": {
+      "policies.cedar": "examples/cedar-export/generated/policies.cedar",
+      "schema.json": "examples/cedar-export/generated/schema.json"
+    }
+  }
+}

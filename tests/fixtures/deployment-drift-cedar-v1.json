@@ -1,0 +1,193 @@
+{
+  "as_of": "2026-10-11",
+  "authority": {
+    "breaches": [],
+    "depth": 8,
+    "effects": [],
+    "max_extractable": null,
+    "reachable_tools": [
+      "publish_release",
+      "read_build_status",
+      "read_release"
+    ],
+    "service_principal_tools": [
+      "read_build_status"
+    ],
+    "truncated": false,
+    "ungated_irreversible": []
+  },
+  "configuration_consistent": true,
+  "environment": "example-staging",
+  "export": {
+    "losses": [],
+    "receipt_matches": true,
+    "status": "exported",
+    "target": "cedar"
+  },
+  "findings": [],
+  "gateway": "release-gateway",
+  "inputs": {
+    "configuration_sha256": "857bd4c4848b7b54292ff40ee49193fd86ded5b59d98efd0d27f9989975f2f69",
+    "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "materials": {
+      "examples/cedar-export/generated/export.json": "918d5e29dda5fda1bb707e985689c9d0035fa04f3edcb4ee2a01906a1c60b578",
+      "examples/cedar-export/generated/policies.cedar": "928c25c5aca0839d7f11e7df7b6cf107d63b30c44edcf06bd33e141094bfbd89",
+      "examples/cedar-export/generated/schema.json": "f92d050e07b7963f23748bac7877f0db0e453a41586f572ffee2c9e94a8fc74f",
+      "examples/cedar-export/mapping.json": "0d61b18a9252b444d55527c3e3dbbf813618a4bf47af7c4a6e1bdc2d0e45cbeb"
+    }
+  },
+  "native_validation": "not_run",
+  "policy": {
+    "artifacts": [
+      {
+        "artifact": "policies.cedar",
+        "expected_sha256": "928c25c5aca0839d7f11e7df7b6cf107d63b30c44edcf06bd33e141094bfbd89",
+        "observed_sha256": "928c25c5aca0839d7f11e7df7b6cf107d63b30c44edcf06bd33e141094bfbd89",
+        "status": "matches"
+      },
+      {
+        "artifact": "schema.json",
+        "expected_sha256": "f92d050e07b7963f23748bac7877f0db0e453a41586f572ffee2c9e94a8fc74f",
+        "observed_sha256": "f92d050e07b7963f23748bac7877f0db0e453a41586f572ffee2c9e94a8fc74f",
+        "status": "matches"
+      }
+    ],
+    "revision": "release-policy-r1"
+  },
+  "runtime_continuity": "not_assessed",
+  "schema": "agentmandate.deployment-drift/v1",
+  "scope": "supplied configuration and exact policy bytes; not authenticated live enforcement",
+  "snapshot_current": true,
+  "status": "consistent_with_declared_configuration",
+  "tools": [
+    {
+      "expected": {
+        "action": {
+          "id": "PublishRelease",
+          "type": "ReleaseGate::Action"
+        },
+        "approval_context": "approved",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          {
+            "id": "release-operator",
+            "type": "ReleaseGate::User"
+          }
+        ],
+        "resource": {
+          "id": "release-tools",
+          "type": "ReleaseGate::Repository"
+        }
+      },
+      "inventory_presence": "observed",
+      "observed": {
+        "action": {
+          "id": "PublishRelease",
+          "type": "ReleaseGate::Action"
+        },
+        "approval_context": "approved",
+        "mediation": "required",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          {
+            "id": "release-operator",
+            "type": "ReleaseGate::User"
+          }
+        ],
+        "resource": {
+          "id": "release-tools",
+          "type": "ReleaseGate::Repository"
+        },
+        "tool": "publish_release"
+      },
+      "route_presence": "observed",
+      "tool": "publish_release"
+    },
+    {
+      "expected": {
+        "action": {
+          "id": "ReadBuildStatus",
+          "type": "ReleaseGate::Action"
+        },
+        "approval_context": null,
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          {
+            "id": "build-reader",
+            "type": "ReleaseGate::Workload"
+          }
+        ],
+        "resource": {
+          "id": "release-tools",
+          "type": "ReleaseGate::Repository"
+        }
+      },
+      "inventory_presence": "observed",
+      "observed": {
+        "action": {
+          "id": "ReadBuildStatus",
+          "type": "ReleaseGate::Action"
+        },
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          {
+            "id": "build-reader",
+            "type": "ReleaseGate::Workload"
+          }
+        ],
+        "resource": {
+          "id": "release-tools",
+          "type": "ReleaseGate::Repository"
+        },
+        "tool": "read_build_status"
+      },
+      "route_presence": "observed",
+      "tool": "read_build_status"
+    },
+    {
+      "expected": {
+        "action": {
+          "id": "ReadRelease",
+          "type": "ReleaseGate::Action"
+        },
+        "approval_context": null,
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          {
+            "id": "release-operator",
+            "type": "ReleaseGate::User"
+          }
+        ],
+        "resource": {
+          "id": "release-tools",
+          "type": "ReleaseGate::Repository"
+        }
+      },
+      "inventory_presence": "observed",
+      "observed": {
+        "action": {
+          "id": "ReadRelease",
+          "type": "ReleaseGate::Action"
+        },
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          {
+            "id": "release-operator",
+            "type": "ReleaseGate::User"
+          }
+        ],
+        "resource": {
+          "id": "release-tools",
+          "type": "ReleaseGate::Repository"
+        },
+        "tool": "read_release"
+      },
+      "route_presence": "observed",
+      "tool": "read_release"
+    }
+  ]
+}

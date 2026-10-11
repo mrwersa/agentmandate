@@ -100,23 +100,6 @@
         "principal_version"
       ]
     },
-    "_deployment_drift.py": {
-      "constants": {
-        "DEPLOYMENT_VERSION": 1,
-        "RESULT_SCHEMA": "agentmandate.deployment-drift/v1"
-      },
-      "inline_versions": {
-        "deployment_version": [
-          1
-        ]
-      },
-      "schemas": [
-        "agentmandate.deployment-drift/v1"
-      ],
-      "version_fields": [
-        "deployment_version"
-      ]
-    },
     "_inventory.py": {
       "constants": {
         "INVENTORY_ADAPTER_VERSION": 1,
@@ -375,7 +358,6 @@
             "conditions",
             "continuity",
             "delegations",
-            "deployment",
             "diff",
             "drift",
             "inventory",
@@ -1231,108 +1213,6 @@
           "required": true
         }
       ]
-    },
-    "mandate deployment": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_SubParsersAction",
-          "choices": [
-            "drift"
-          ],
-          "dest": "deployment_command",
-          "required": true
-        }
-      ],
-      "exclusive_groups": []
-    },
-    "mandate deployment drift": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "manifest",
-          "nargs": null,
-          "options": [],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "config",
-          "nargs": null,
-          "options": [
-            "--config"
-          ],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "root",
-          "nargs": null,
-          "options": [
-            "--root"
-          ],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "as_of",
-          "nargs": null,
-          "options": [
-            "--as-of"
-          ],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "json",
-          "nargs": 0,
-          "options": [
-            "--json"
-          ],
-          "required": false,
-          "type": null
-        }
-      ],
-      "exclusive_groups": []
     },
     "mandate diff": {
       "arguments": [
@@ -2901,7 +2781,7 @@
       ]
     }
   },
-  "coverage_sha256": "f6e05563fb411b843f582ff23327ebd66c59e5fc158292fcfe81446c3cfe2383",
+  "coverage_sha256": "be42555c45dce8ffad2689e5cee65447f272946d4bba8a26d4028f8cbeec04b2",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2938,11 +2818,6 @@
     "examples/change-review/before.json": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
     "examples/change-review/decision-note.txt": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f",
     "examples/change-review/deferred.json": "68fa98d2e5816d9768aceb313b3357a35b7680f65f500af8f68871ef2e99a8bd",
-    "examples/deployment-drift/cedar-aligned.json": "857bd4c4848b7b54292ff40ee49193fd86ded5b59d98efd0d27f9989975f2f69",
-    "examples/deployment-drift/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
-    "examples/deployment-drift/rego-aligned.json": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
-    "examples/deployment-drift/rego-drifted.json": "23af1d412164c9632558586de124d8ef7b2698094f272f6d82253d6a0df0ad4d",
-    "examples/deployment-drift/unmanaged-allow.rego": "7b9db08a7d774d6835d18258cc24857ea3312cf8d55c66ae32e6da3bdf7c604f",
     "examples/observed-calls.jsonl": "d4769b576e6a2e15d4d657db875b17db0e0de9b5c0129d07718e72d69ab30930",
     "examples/otel-trace.json": "82e6f24ecbb6df50bb5cdc68652d18ad6865084c38c59c3b11d5aed75d9a3013",
     "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
@@ -3036,8 +2911,6 @@
     "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",
     "tests/fixtures/delegation-grant-capture.json": "bf7d49763d54ac0dc2add5d5dc84d24e12a56f5bcd6470dc9b12f22e6936fcd5",
     "tests/fixtures/delegation-grant-v1.json": "34b61cc3f8b618e365743d210869a821dd56b013323ac6cdbe895264f9df9a55",
-    "tests/fixtures/deployment-drift-cedar-v1.json": "59a0b3d6679828fc1dd7f3981d92de714caae45757f6f536ef651888b4bf3093",
-    "tests/fixtures/deployment-drift-rego-v1.json": "11f14e4b8ba2504ec6e0f0bb11291955d5bfcff023b54bb5cb58bd8cd03b876f",
     "tests/fixtures/dynamic-inventory-agentkit-v1.json": "09b587e8880ca05d7ed85dc1d3b05881bb338772e9245d746dfd65b5b05df450",
     "tests/fixtures/dynamic-inventory-sentry-v1.json": "9b19e47e23871e96069c7526b0adb5315aa5a8d40cd358719b9b0d2db46c4799",
     "tests/fixtures/legacy-json-results.json": "8c23d75c15934f7cc652810c59dc90602524cc8a893852c226e1500d23b76407",
