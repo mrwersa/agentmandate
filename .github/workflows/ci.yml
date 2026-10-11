@@ -161,6 +161,40 @@ jobs:
         working-directory: examples/cedar-export
         run: npm run check
 
+  rego-export:
+    name: Native Rego export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Install the checksum-pinned native OPA engine
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import urllib.request
+
+          target = json.loads(pathlib.Path("examples/rego-export/opa-target.json").read_text())
+          content = urllib.request.urlopen(target["url"], timeout=60).read()
+          assert hashlib.sha256(content).hexdigest() == target["sha256"]
+          executable = pathlib.Path(os.environ["RUNNER_TEMP"]) / "opa"
+          executable.write_bytes(content)
+          executable.chmod(0o755)
+          with open(os.environ["GITHUB_ENV"], "a") as environment:
+              environment.write(f"AGENTMANDATE_OPA={executable}\n")
+          PYTHON
+      - name: Validate policy and independent request decisions
+        env:
+          AGENTMANDATE_REQUIRE_OPA_NATIVE: "1"
+        run: python -m pytest tests/test_rego_export.py -q
+      - name: Check the committed generated bundle
+        run: python examples/rego-export/check.py --opa "$AGENTMANDATE_OPA"
+
   gate:
     name: CI gate
     runs-on: ubuntu-latest
@@ -171,6 +205,7 @@ jobs:
       - no-dependency-install
       - package
       - cedar-export
+      - rego-export
     # Runs even when a needed job fails, so the gate reports a real failure
     # instead of being skipped and leaving the required check pending forever.
     if: always()
@@ -183,6 +218,7 @@ jobs:
           NODEPS_RESULT: ${{ needs.no-dependency-install.result }}
           PACKAGE_RESULT: ${{ needs.package.result }}
           CEDAR_RESULT: ${{ needs.cedar-export.result }}
+          REGO_RESULT: ${{ needs.rego-export.result }}
         run: |
           echo "test:     ${TEST_RESULT}"
           echo "lint:     ${LINT_RESULT}"
@@ -190,13 +226,15 @@ jobs:
           echo "no-deps:  ${NODEPS_RESULT}"
           echo "package:  ${PACKAGE_RESULT}"
           echo "cedar:    ${CEDAR_RESULT}"
+          echo "rego:     ${REGO_RESULT}"
           for result in \
             "${TEST_RESULT}" \
             "${LINT_RESULT}" \
             "${COVERAGE_RESULT}" \
             "${NODEPS_RESULT}" \
             "${PACKAGE_RESULT}" \
-            "${CEDAR_RESULT}"; do
+            "${CEDAR_RESULT}" \
+            "${REGO_RESULT}"; do
             if [ "${result}" != "success" ]; then
               echo "::error::a required job did not succeed"
               exit 1

@@ -99,4 +99,5 @@ Exit 0 means a complete export of this supported stateless subset; exit 1 means
 semantic losses, including an explicitly requested partial candidate. Exit 2
 means malformed input, a mapping mismatch or I/O failure, with empty stdout.
 No runtime dependencies, credentials, network calls or cloud resources are
-required by the Python compiler. Rego export and stateful enforcement are open.
+required by the Python compiler. [Rego export](rego-export.md) provides the same scoped workflow for OPA. Stateful
+enforcement remains separate.

@@ -14,7 +14,7 @@ guarantee.
 | Run a complete example | [README quickstart](../README.md#run-the-example) |
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
-| Generate a scoped Cedar policy | [Cedar export](cedar-export.md) |
+| Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
@@ -80,7 +80,7 @@ change an analysis result:
 - [Dynamic inventory](dynamic-inventory.md)
 - [Conditional authority](conditions-delegation.md)
 - [Delegation chains](delegation-v2.md)
-- [Cedar export](cedar-export.md): policies, schema, native decision tests and explicit semantic loss.
+- [Cedar export](cedar-export.md) and [Rego export](rego-export.md): policies, schemas, native decision tests and explicit semantic loss.
 - [Managed Cedar evidence](cedar-import.md) and
   [effective policy revision comparison](cedar-effective-diff.md)
 - [Finite producer cardinality](bounded-producers.md)

@@ -6,6 +6,11 @@ import hashlib
 import json
 import re
 
+from ._policy_export import object_fields as _object
+from ._policy_export import pairs as _pairs
+from ._policy_export import stateful_losses
+from ._policy_export import string as _string
+from ._policy_export import unused as _unused
 from .manifest import loads
 
 EXPORT_VERSION = 1
@@ -33,37 +38,11 @@ _RESERVED = frozenset(
 )
 
 
-def _object(value, fields, where):
-    if not isinstance(value, dict) or set(value) != set(fields):
-        raise ValueError(f"{where} must contain exactly {', '.join(sorted(fields))}")
-    return value
-
-
-def _string(value):
-    if (
-        not isinstance(value, str)
-        or not value
-        or value != value.strip()
-        or any(ord(c) < 32 or ord(c) > 126 for c in value)
-    ):
-        raise ValueError("export mapping strings must be non-empty printable ASCII")
-    return value
-
-
 def _identifier(value):
     value = _string(value)
     if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", value) or value in _RESERVED:
         raise ValueError(f"invalid Cedar identifier: {value!r}")
     return value
-
-
-def _pairs(pairs):
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError(f"duplicate export mapping key: {key}")
-        result[key] = value
-    return result
 
 
 def _mapping(content, mandate):
@@ -128,50 +107,11 @@ def _literal(uid):
     return f"{uid['type']}::{json.dumps(uid['id'])}"
 
 
-def _unused(ids):
-    name = "__agentmandate_unmapped__"
-    while name in ids:
-        name += "_"
-    return name
-
-
 def export(manifest_content: bytes, mapping_content: bytes, *, allow_partial: bool = False):
     """Return deterministic policy, schema and executable request cases without running Cedar."""
     mandate = loads(manifest_content.decode("utf-8"))
     mapping = _mapping(mapping_content, mandate)
-    losses = []
-
-    def loss(code, subject, detail):
-        losses.append({"code": code, "subject": subject, "detail": detail})
-
-    if mandate.limits.total is not None:
-        loss(
-            "limits.total", mandate.agent, "Cedar requests do not retain cumulative monetary spend."
-        )
-    for effect in sorted(mandate.limits.effects):
-        loss("limits.effects", effect, "Cedar requests do not retain effect-call counts.")
-    if mandate.roles:
-        loss("roles", mandate.agent, "Role views and maker-checker analysis are not compiled.")
-    for tool in sorted(mandate.tools, key=lambda t: t.name):
-        if tool.requires:
-            loss(
-                "tool.requires",
-                tool.name,
-                "Produced-binding prerequisites require execution history.",
-            )
-        if tool.produces is not None:
-            loss(
-                "tool.produces",
-                tool.name,
-                "Binding production and cardinality require execution history.",
-            )
-        if tool.spends_value:
-            loss(
-                "tool.ceiling",
-                tool.name,
-                "A tool ceiling is cumulative per binding; "
-                "a per-call amount check is not equivalent.",
-            )
+    losses = stateful_losses(mandate, "Cedar")
     result = {
         "schema": EXPORT_SCHEMA,
         "target": {

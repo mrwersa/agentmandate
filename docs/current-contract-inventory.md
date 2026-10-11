@@ -45,12 +45,17 @@ The [Cedar export preview](cedar-export.md) adds one command and initial mapping
 baselines. The prior named-review inventory is retained; existing managed Cedar
 commands and every earlier fixture remain unchanged. This is a v1 baseline,
 not a migration from an earlier exporter.
+The [Rego export](rego-export.md) adds its separate command group and v1
+mapping/result baselines. The merged Cedar inventory is retained as
+[a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.27.json);
+all prior declarations and generated Cedar bytes remain unchanged.
+
 
 ## What is pinned
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)
 records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 32 CLI command paths
+methods/properties and constant values. It also records all 34 CLI command paths
 (including intermediate groups), arguments, defaults, choices and mutually
 exclusive groups. The package release number is
 excluded from comparison; `__version__` remains an exported name.
@@ -74,6 +79,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Authority IR results | [IR](authority-ir.md); `test_ir_result.py` |
 | Inventory and protocol imports | [Dynamic inventory](dynamic-inventory.md), [catalogue imports](catalogue-import.md); `test_dynamic_inventory.py`, `test_catalogue_import.py` |
 | Conditions and delegation | [Conditions](conditions-delegation.md), [delegation](delegation-v2.md); `test_conditions.py`, `test_delegation.py` |
+| Stateless Cedar and Rego exports | [Cedar export](cedar-export.md), [Rego export](rego-export.md); `test_cedar_export.py`, `test_rego_export.py` |
 | Managed Cedar and mapping | [Cedar](cedar-import.md); `test_managed_cedar.py`, `test_cedar.py` |
 | Producer bounds | [Producer contract](bounded-producers.md); `test_producer.py` |
 | Continuity profiles and results | [Continuity](authority-continuity.md); `test_continuity.py` |

@@ -1,0 +1,316 @@
+{
+  "input_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+      "action": {
+        "type": "string"
+      },
+      "context": {
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "principal": {
+        "type": "string"
+      },
+      "resource": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "principal",
+      "action",
+      "resource",
+      "context"
+    ],
+    "type": "object"
+  },
+  "inputs": {
+    "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "mapping_sha256": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3"
+  },
+  "losses": [],
+  "mapping": {
+    "actions": {
+      "publish_release": "PublishRelease",
+      "read_build_status": "ReadBuildStatus",
+      "read_release": "ReadRelease"
+    },
+    "agent": "release-agent",
+    "approval_context": "approved",
+    "identity": "release-operator",
+    "package": "release_gate",
+    "principals": {
+      "caller": [
+        "release-operator"
+      ],
+      "service": [
+        "build-reader"
+      ]
+    },
+    "rego_export_version": 1,
+    "resource": "release-tools"
+  },
+  "native_tests": "package release_gate\n\nimport rego.v1\n\ntest_generated_requests if {\n    count(data.cases) > 0\n    every test in data.cases {\n        expected := test.expected == \"allow\"\n        actual := allow with input as test.request\n        actual == expected\n    }\n}\n",
+  "native_validation": "not_run",
+  "policy": "package release_gate\n\nimport rego.v1\n\ndefault allow := false\n\nallow if {\n    is_object(input)\n    is_string(input.principal)\n    is_string(input.action)\n    is_string(input.resource)\n    is_object(input.context)\n    input.principal in {\"release-operator\"}\n    input.action == \"PublishRelease\"\n    input.resource == \"release-tools\"\n    input.context[\"approved\"] == true\n}\n\nallow if {\n    is_object(input)\n    is_string(input.principal)\n    is_string(input.action)\n    is_string(input.resource)\n    is_object(input.context)\n    input.principal in {\"build-reader\"}\n    input.action == \"ReadBuildStatus\"\n    input.resource == \"release-tools\"\n}\n\nallow if {\n    is_object(input)\n    is_string(input.principal)\n    is_string(input.action)\n    is_string(input.resource)\n    is_object(input.context)\n    input.principal in {\"release-operator\"}\n    input.action == \"ReadRelease\"\n    input.resource == \"release-tools\"\n}\n",
+  "schema": "agentmandate.rego-export/v1",
+  "scope": "mapped stateless per-request permissions; not deployment activation or state retention",
+  "status": "exported",
+  "target": {
+    "engine": "OPA",
+    "engine_version": "1.21.1",
+    "language_version": "v1"
+  },
+  "tests": [
+    {
+      "expected": "allow",
+      "name": "publish_release:allowed-0",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:approval-false",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": false
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:approval-missing",
+      "request": {
+        "action": "PublishRelease",
+        "context": {},
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:unmapped-principal",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "__agentmandate_unmapped__",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:other-resource",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "__agentmandate_unmapped__"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:unmapped-action",
+      "request": {
+        "action": "__agentmandate_unmapped__",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "publish_release:other-class-service",
+      "request": {
+        "action": "PublishRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_build_status:allowed-0",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_build_status:approval-false",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": false
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_build_status:approval-missing",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {},
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:unmapped-principal",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "__agentmandate_unmapped__",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:other-resource",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "__agentmandate_unmapped__"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:unmapped-action",
+      "request": {
+        "action": "__agentmandate_unmapped__",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_build_status:other-class-caller",
+      "request": {
+        "action": "ReadBuildStatus",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_release:allowed-0",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_release:approval-false",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": false
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "allow",
+      "name": "read_release:approval-missing",
+      "request": {
+        "action": "ReadRelease",
+        "context": {},
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:unmapped-principal",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "__agentmandate_unmapped__",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:other-resource",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "__agentmandate_unmapped__"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:unmapped-action",
+      "request": {
+        "action": "__agentmandate_unmapped__",
+        "context": {
+          "approved": true
+        },
+        "principal": "release-operator",
+        "resource": "release-tools"
+      }
+    },
+    {
+      "expected": "deny",
+      "name": "read_release:other-class-service",
+      "request": {
+        "action": "ReadRelease",
+        "context": {
+          "approved": true
+        },
+        "principal": "build-reader",
+        "resource": "release-tools"
+      }
+    }
+  ]
+}

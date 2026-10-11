@@ -286,6 +286,7 @@ all.
 | `mandate producers` | Structurally validates a finite-producer boundary without accepting its sources as authority |
 | `mandate continuity` | Structurally validates continuity evidence or reconciles whether consumed authority safely survives a named transition |
 | `mandate cedar` | Exports mapped stateless policies with loss reporting, or validates, aligns and compares managed policy evidence. [Cedar export](docs/cedar-export.md) |
+| `mandate rego` | Exports mapped stateless policies with explicit losses and native OPA tests. [Rego export](docs/rego-export.md) |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |
 | `mandate review` | Checks named, evidenced and time-bounded acceptance of a pinned authority diff; findings remain unchanged and deployment approval is separate. [Review-record guide](docs/change-review.md) |
 | `mandate verify` | Replays recorded tool calls against the manifest and fails closed when evidence required by a declared control is missing. Reads [OpenTelemetry traces](https://github.com/mrwersa/agentmandate/blob/main/docs/traces.md) with `--otel` |

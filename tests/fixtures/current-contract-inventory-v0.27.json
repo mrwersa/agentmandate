@@ -189,25 +189,6 @@
         "result_version"
       ]
     },
-    "_rego_export.py": {
-      "constants": {
-        "EXPORT_SCHEMA": "agentmandate.rego-export/v1",
-        "EXPORT_VERSION": 1
-      },
-      "inline_versions": {
-        "rego_export_version": [
-          1
-        ]
-      },
-      "schemas": [
-        "agentmandate.rego-export/v1"
-      ],
-      "version_fields": [
-        "engine_version",
-        "language_version",
-        "rego_export_version"
-      ]
-    },
     "_remediation.py": {
       "constants": {
         "CEILING_REMEDIATION_SCHEMA": "agentmandate.remediation/v2",
@@ -366,7 +347,6 @@
             "obligations",
             "producers",
             "reach",
-            "rego",
             "remediate",
             "review",
             "scan",
@@ -2160,108 +2140,6 @@
         }
       ]
     },
-    "mandate rego": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_SubParsersAction",
-          "choices": [
-            "export"
-          ],
-          "dest": "rego_command",
-          "required": true
-        }
-      ],
-      "exclusive_groups": []
-    },
-    "mandate rego export": {
-      "arguments": [
-        {
-          "action": "_HelpAction",
-          "choices": null,
-          "default": "==SUPPRESS==",
-          "dest": "help",
-          "nargs": 0,
-          "options": [
-            "-h",
-            "--help"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "manifest",
-          "nargs": null,
-          "options": [],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "mapping",
-          "nargs": null,
-          "options": [
-            "--mapping"
-          ],
-          "required": true,
-          "type": null
-        },
-        {
-          "action": "_StoreAction",
-          "choices": null,
-          "default": null,
-          "dest": "output_dir",
-          "nargs": null,
-          "options": [
-            "--output-dir"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "allow_partial",
-          "nargs": 0,
-          "options": [
-            "--allow-partial"
-          ],
-          "required": false,
-          "type": null
-        },
-        {
-          "action": "_StoreTrueAction",
-          "choices": null,
-          "default": false,
-          "dest": "json",
-          "nargs": 0,
-          "options": [
-            "--json"
-          ],
-          "required": false,
-          "type": null
-        }
-      ],
-      "exclusive_groups": []
-    },
     "mandate remediate": {
       "arguments": [
         {
@@ -2781,7 +2659,7 @@
       ]
     }
   },
-  "coverage_sha256": "be42555c45dce8ffad2689e5cee65447f272946d4bba8a26d4028f8cbeec04b2",
+  "coverage_sha256": "4a498898b689922e6a4f561bc8488264f093048ad65e6da1d24bdcd20b870e7b",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -2823,14 +2701,6 @@
     "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
     "examples/principal-continuity/accounting-review.json": "3738eea4c4632b280d512a8da2d0b19a7f74f7d00b432263b98844db9f7f5fd3",
     "examples/principal-continuity/profile.json": "c90bbed8fdd8beb0e720b10ba0f7a2925f7d6248444646e608d71ce82e19bd47",
-    "examples/rego-export/generated/export.json": "153b1accd1ad6063f235dd5822dd0833b6826e84d6e5dec321c203f65112b7e4",
-    "examples/rego-export/generated/policy.rego": "22d693620121dd90c460aa772f945ce885554324215a773ce9d3aeefd21ee4a4",
-    "examples/rego-export/generated/policy_test.rego": "10448f52ec749bb6acfb6e21dd066e39c7b5f71d261d119835562e4df244f5ef",
-    "examples/rego-export/generated/schema.json": "fadae571cbdb7a9046ae94317beb054ba1747aa9dc05f9540bda170053bff170",
-    "examples/rego-export/generated/tests.json": "d3b49669acada21d4c46a1adb360ce4c7aa5e44215634456736d97a2495ea2ea",
-    "examples/rego-export/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
-    "examples/rego-export/mapping.json": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3",
-    "examples/rego-export/opa-target.json": "4a9205cdd27169aeb4ee8ccae877345c4303ea8aeeb047f30a7f5df088d58b1d",
     "examples/remediation/normal-refund.jsonl": "8a73ddd978320fe751dabb5c13ccb9f09a2be379c5554ce471163fda1f198a98",
     "examples/remediation/required-joint.json": "c8d21db3df6b37e4f69a3f4e5476dc9befe198ffdf3f482bd2122bc459b7c1fe",
     "examples/remediation/required-refund.json": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1",
