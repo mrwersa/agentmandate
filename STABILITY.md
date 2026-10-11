@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.28.0
+agentmandate~=0.29.0
 ```
 
 ## Versioned authority artifacts
@@ -228,3 +228,10 @@ and `agentmandate.rego-export/v1` result. It uses Rego v1 with a pinned native
 OPA runner, refuses stateful losses by default and keeps partial candidates at
 exit 1. This is an initial baseline, not a migration. Existing Cedar output
 and prior commands are unchanged. See [Rego export](docs/rego-export.md).
+
+`mandate deployment drift` adds the experimental `deployment_version: 1`
+configuration input and `agentmandate.deployment-drift/v1` result. Its clean
+status means consistency of supplied configuration and exact policy bytes,
+not authenticated deployment enforcement. Initial Cedar/Rego baselines preserve
+separate manifest Authority. Existing source drift and exporter results remain
+unchanged. See [deployment drift](docs/deployment-drift.md).

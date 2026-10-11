@@ -367,3 +367,18 @@ Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with
 | `0` | Clean |
 | `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, or a non-conformant replay |
 | `2` | Usage or I/O error, malformed manifest/IR/attachment, unsupported composition, version, or analysis profile |
+
+## Check deployment configuration
+
+After exporting and natively validating a policy, compare the deployment
+adapter's configuration view with the same manifest and mapping:
+
+```bash
+mandate deployment drift mandate.json --config deployment.json --root deployment-artifacts --as-of 2026-10-11 --json
+```
+
+Exit 1 keeps partial or stale inventories, missing mediation, route mismatches
+and differing/additional active policy files visible. The [deployment guide](deployment-drift.md)
+defines the configuration fields and scope. A matching supplied configuration
+is not proof of live evaluation or state retention; source `drift`, manifest
+reachability and native policy tests remain separate checks.

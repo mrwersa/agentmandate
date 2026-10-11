@@ -28,7 +28,7 @@
           "title": "Evidence import and alignment: MCP, A2A, OpenAPI, Cedar, Rego",
           "status": "delivered",
           "evidence": "docs/catalogue-import.md",
-          "reason": "Scoped foundation measure covers the three inventory formats and Cedar alignment; Rego and accountable application mappings remain open."
+          "reason": "Scoped foundation measure covers the three inventory formats and Cedar alignment; Rego import/alignment and accountable application mappings remain open."
         }
       ]
     },
@@ -92,9 +92,9 @@
         },
         {
           "title": "Policy-versus-agent drift",
-          "status": "not_started",
-          "evidence": "ROADMAP.md",
-          "reason": "The complete deployment inventory, gateway, policy and accrued-state joins are not delivered."
+          "status": "partial",
+          "evidence": "docs/deployment-drift.md",
+          "reason": "Local exported-policy, bound-inventory and gateway-route configuration joins are delivered for Cedar/Rego, with exact file checks and conservative incomplete/expiry handling. Authenticated live decisions and accrued-state joins remain open."
         },
         {
           "title": "Explainable counterfactual remediation",

@@ -191,7 +191,7 @@ jobs:
       - name: Validate policy and independent request decisions
         env:
           AGENTMANDATE_REQUIRE_OPA_NATIVE: "1"
-        run: python -m pytest tests/test_rego_export.py -q
+        run: python -m pytest tests/test_rego_export.py tests/test_deployment_drift.py -q
       - name: Check the committed generated bundle
         run: python examples/rego-export/check.py --opa "$AGENTMANDATE_OPA"
 

@@ -1,0 +1,139 @@
+{
+  "as_of": "2026-10-11",
+  "authority": {
+    "breaches": [],
+    "depth": 8,
+    "effects": [],
+    "max_extractable": null,
+    "reachable_tools": [
+      "publish_release",
+      "read_build_status",
+      "read_release"
+    ],
+    "service_principal_tools": [
+      "read_build_status"
+    ],
+    "truncated": false,
+    "ungated_irreversible": []
+  },
+  "configuration_consistent": true,
+  "environment": "example-staging",
+  "export": {
+    "losses": [],
+    "receipt_matches": true,
+    "status": "exported",
+    "target": "rego"
+  },
+  "findings": [],
+  "gateway": "release-gateway",
+  "inputs": {
+    "configuration_sha256": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
+    "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "materials": {
+      "examples/rego-export/generated/export.json": "153b1accd1ad6063f235dd5822dd0833b6826e84d6e5dec321c203f65112b7e4",
+      "examples/rego-export/generated/policy.rego": "22d693620121dd90c460aa772f945ce885554324215a773ce9d3aeefd21ee4a4",
+      "examples/rego-export/generated/schema.json": "fadae571cbdb7a9046ae94317beb054ba1747aa9dc05f9540bda170053bff170",
+      "examples/rego-export/mapping.json": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3"
+    }
+  },
+  "native_validation": "not_run",
+  "policy": {
+    "artifacts": [
+      {
+        "artifact": "policy.rego",
+        "expected_sha256": "22d693620121dd90c460aa772f945ce885554324215a773ce9d3aeefd21ee4a4",
+        "observed_sha256": "22d693620121dd90c460aa772f945ce885554324215a773ce9d3aeefd21ee4a4",
+        "status": "matches"
+      },
+      {
+        "artifact": "schema.json",
+        "expected_sha256": "fadae571cbdb7a9046ae94317beb054ba1747aa9dc05f9540bda170053bff170",
+        "observed_sha256": "fadae571cbdb7a9046ae94317beb054ba1747aa9dc05f9540bda170053bff170",
+        "status": "matches"
+      }
+    ],
+    "revision": "release-policy-r1"
+  },
+  "runtime_continuity": "not_assessed",
+  "schema": "agentmandate.deployment-drift/v1",
+  "scope": "supplied configuration and exact policy bytes; not authenticated live enforcement",
+  "snapshot_current": true,
+  "status": "consistent_with_declared_configuration",
+  "tools": [
+    {
+      "expected": {
+        "action": "PublishRelease",
+        "approval_context": "approved",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          "release-operator"
+        ],
+        "resource": "release-tools"
+      },
+      "inventory_presence": "observed",
+      "observed": {
+        "action": "PublishRelease",
+        "approval_context": "approved",
+        "mediation": "required",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          "release-operator"
+        ],
+        "resource": "release-tools",
+        "tool": "publish_release"
+      },
+      "route_presence": "observed",
+      "tool": "publish_release"
+    },
+    {
+      "expected": {
+        "action": "ReadBuildStatus",
+        "approval_context": null,
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          "build-reader"
+        ],
+        "resource": "release-tools"
+      },
+      "inventory_presence": "observed",
+      "observed": {
+        "action": "ReadBuildStatus",
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          "build-reader"
+        ],
+        "resource": "release-tools",
+        "tool": "read_build_status"
+      },
+      "route_presence": "observed",
+      "tool": "read_build_status"
+    },
+    {
+      "expected": {
+        "action": "ReadRelease",
+        "approval_context": null,
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          "release-operator"
+        ],
+        "resource": "release-tools"
+      },
+      "inventory_presence": "observed",
+      "observed": {
+        "action": "ReadRelease",
+        "approval_context": null,
+        "mediation": "required",
+        "policy_revision": "release-policy-r1",
+        "principals": [
+          "release-operator"
+        ],
+        "resource": "release-tools",
+        "tool": "read_release"
+      },
+      "route_presence": "observed",
+      "tool": "read_release"
+    }
+  ]
+}
