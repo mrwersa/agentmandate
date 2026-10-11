@@ -601,5 +601,26 @@
     "tests": [
       "tests/test_fleet.py"
     ]
+  },
+  {
+    "doc": "docs/deployment-reconciliation.md",
+    "fixtures": [
+      "examples/deployment-reconcile/config.json",
+      "examples/deployment-reconcile/decisions.json",
+      "examples/deployment-reconcile/denied-effect-mapping.json",
+      "examples/deployment-reconcile/denied-effect-telemetry.json",
+      "examples/deployment-reconcile/manifest.json",
+      "examples/deployment-reconcile/mapping.json",
+      "examples/deployment-reconcile/telemetry.json",
+      "tests/fixtures/deployment-reconcile-v1.json"
+    ],
+    "id": "deployment-reconcile",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.deployment-reconcile/v1"
+    ],
+    "tests": [
+      "tests/test_deployment_reconcile.py"
+    ]
   }
 ]

@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.30.0
+agentmandate~=0.31.0
 ```
 
 ## Versioned authority artifacts
@@ -244,3 +244,12 @@ ownership and review windows; they are not historical migrations. Signatures,
 live exposure and cross-agent authority remain unverified. Earlier exports,
 deployment results and other contracts are unchanged. See
 [fleet inventory](docs/fleet-inventory.md).
+
+`mandate deployment reconcile` adds the experimental `reconcile_version: 1`
+mapping and `agentmandate.deployment-reconcile/v1` result. It joins captured
+OPA Boolean decisions to explicitly mapped OTLP tool attempts for generated
+Rego stateless exports. Initial aligned/denied-effect examples preserve separate
+deployment drift and manifest Authority; earlier results and inputs remain
+unchanged. Recorded joins do not authenticate live mediation or establish
+ordering, accounting or runtime continuity. See
+[deployment reconciliation](docs/deployment-reconciliation.md).
