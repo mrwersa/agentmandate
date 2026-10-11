@@ -1,0 +1,1 @@
+Synthetic review-delay decision: retain the overdue review finding; record a delay through 2026-10-18 while the owner schedules the replacement review. This is not a renewal or deployment approval.

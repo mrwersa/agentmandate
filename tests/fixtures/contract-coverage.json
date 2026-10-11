@@ -622,5 +622,24 @@
     "tests": [
       "tests/test_deployment_reconcile.py"
     ]
+  },
+  {
+    "doc": "docs/fleet-exceptions.md",
+    "fixtures": [
+      "examples/fleet-exceptions/decision-note.txt",
+      "examples/fleet-exceptions/exceptions.json",
+      "examples/fleet-exceptions/index.json",
+      "examples/fleet-exceptions/none.json",
+      "tests/fixtures/fleet-exceptions-v1.json",
+      "tests/fixtures/fleet-exceptions-expired-v1.json"
+    ],
+    "id": "fleet-exceptions",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.fleet-exceptions/v1"
+    ],
+    "tests": [
+      "tests/test_fleet_exceptions.py"
+    ]
   }
 ]

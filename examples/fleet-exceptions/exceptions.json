@@ -1,0 +1,23 @@
+{
+  "exceptions": [
+    {
+      "decision": "accept_review_delay",
+      "entry_id": "release/prod",
+      "evidence": {
+        "decision-note": {
+          "path": "examples/fleet-exceptions/decision-note.txt",
+          "sha256": "6045690cb2fdcfb4660568d3d421dc4893462fcf08595de55eab7f97f633bb7c"
+        }
+      },
+      "expires": "2026-10-18",
+      "finding_sha256": "f5037691a5e6830ad3fa3fce98ad9e44010ce3446ae9befca6a1fd2067def85f",
+      "id": "synthetic-review-delay",
+      "issued_at": "2026-10-11",
+      "owner": "release-security",
+      "reason": "Temporary delay while the owner schedules the replacement review.",
+      "reviewer": "synthetic-exception-reviewer"
+    }
+  ],
+  "exceptions_version": 1,
+  "fleet_index_sha256": "ea13823f5e396859e1892d8773dae390ce6a2d1c039990aaa2439658cd6374f0"
+}

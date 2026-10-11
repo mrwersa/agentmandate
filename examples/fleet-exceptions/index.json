@@ -1,0 +1,72 @@
+{
+  "coverage": "complete",
+  "entries": [
+    {
+      "environment": "prod",
+      "id": "release/prod",
+      "ir": {
+        "path": "examples/fleet-inventory/release-repo/authority-ir.json",
+        "sha256": "9b6e4ccedce66098f9d7d2f79a16e74d4ac28e44df2f7fbc087de31b6f501f76"
+      },
+      "manifest": {
+        "path": "examples/fleet-inventory/release-repo/manifest.json",
+        "sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19"
+      },
+      "owner": "release-security",
+      "repository": "release-repo",
+      "review": {
+        "expires": "2026-10-10",
+        "reviewed_at": "2026-10-01",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "revision": "synthetic-commit-1"
+    },
+    {
+      "environment": "staging",
+      "id": "release/staging",
+      "ir": {
+        "path": "examples/fleet-inventory/release-repo/authority-ir.json",
+        "sha256": "9b6e4ccedce66098f9d7d2f79a16e74d4ac28e44df2f7fbc087de31b6f501f76"
+      },
+      "manifest": {
+        "path": "examples/fleet-inventory/release-repo/manifest.json",
+        "sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19"
+      },
+      "owner": "release-security",
+      "repository": "release-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "revision": "synthetic-commit-1"
+    },
+    {
+      "environment": "prod",
+      "id": "billing/prod",
+      "ir": {
+        "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
+        "sha256": "ada14f4bbcd833799f197a508a7cad5761ce2a7ce04a313d8c09eb6f0d294329"
+      },
+      "manifest": {
+        "path": "examples/fleet-inventory/billing-repo/manifest.json",
+        "sha256": "9d514bf22268baf892ea451d4134d98fc0fa7f8fc553afda215c892099795746"
+      },
+      "owner": "billing-security",
+      "repository": "billing-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "revision": "synthetic-commit-1"
+    }
+  ],
+  "expires": "2026-11-08",
+  "fleet": "example-platform",
+  "fleet_version": 1,
+  "observed_at": "2026-10-11"
+}

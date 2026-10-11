@@ -17,6 +17,7 @@ guarantee.
 | Compare gateway configuration with an exported policy | [Deployment drift](deployment-drift.md) |
 | Join captured policy decisions to tool attempts | [Deployment reconciliation](deployment-reconciliation.md) |
 | Find tools, owners and stale reviews across repositories | [Fleet inventory](fleet-inventory.md) |
+| Record a named temporary delay to an overdue fleet review | [Fleet exceptions](fleet-exceptions.md) |
 | Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
@@ -86,6 +87,7 @@ change an analysis result:
 - [Deployment drift](deployment-drift.md): inventory, route and exact policy-file joins.
 - [Deployment reconciliation](deployment-reconciliation.md): captured OPA decisions and OTLP tool attempts.
 - [Fleet inventory](fleet-inventory.md): local repository snapshots, ownership queries and review expiry.
+- [Fleet exceptions](fleet-exceptions.md): named review-delay records and routing of unchanged findings.
 - [Cedar export](cedar-export.md) and [Rego export](rego-export.md): policies, schemas, native decision tests and explicit semantic loss.
 - [Managed Cedar evidence](cedar-import.md) and
   [effective policy revision comparison](cedar-effective-diff.md)
