@@ -227,6 +227,18 @@ def test_non_boolean_native_results_are_unresolved_not_coerced(result):
     assert "reconciliation.decision-untrusted" in codes(run(records=records))
 
 
+@pytest.mark.parametrize("context", [None, True, [], 0, "context"])
+def test_invalid_request_context_is_denied_without_requiring_a_native_engine(context):
+    records = data("decisions.json")
+    records[0]["input"]["context"] = context
+    records[0]["result"] = False
+    report = run(records=records)
+    assert report["decisions"][0]["expected_export_result"] is False
+    assert report["decisions"][0]["observed_result"] is False
+    assert report["attempts"][0]["join"] == "matched_within_captured_scope"
+    assert codes(report) == {"reconciliation.denied-effect-observed"}
+
+
 @pytest.mark.parametrize("change", ["id", "path", "correlation", "bundle", "run", "invocation"])
 def test_missing_native_joins_are_visible(change):
     records = data("decisions.json")
