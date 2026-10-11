@@ -1,0 +1,9 @@
+{
+  "agent": "release-agent",
+  "identity": "release-operator",
+  "tools": [
+    {"name": "read_release", "effect": "read"},
+    {"name": "publish_release", "effect": "irreversible", "requires_approval": true},
+    {"name": "read_build_status", "effect": "read", "principal": "service"}
+  ]
+}

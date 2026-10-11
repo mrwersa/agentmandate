@@ -136,6 +136,31 @@ jobs:
           PY
           mandate --help
 
+  cedar-export:
+    name: Native Cedar export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: examples/cedar-export/package-lock.json
+      - run: python -m pip install -e ".[dev]"
+      - name: Install the pinned native Cedar engine
+        working-directory: examples/cedar-export
+        run: npm ci --ignore-scripts
+      - name: Validate policies and independent request decisions
+        env:
+          AGENTMANDATE_REQUIRE_CEDAR_NATIVE: "1"
+        run: python -m pytest tests/test_cedar_export.py -q
+      - name: Check the committed generated bundle
+        working-directory: examples/cedar-export
+        run: npm run check
+
   gate:
     name: CI gate
     runs-on: ubuntu-latest
@@ -145,6 +170,7 @@ jobs:
       - coverage
       - no-dependency-install
       - package
+      - cedar-export
     # Runs even when a needed job fails, so the gate reports a real failure
     # instead of being skipped and leaving the required check pending forever.
     if: always()
@@ -156,18 +182,21 @@ jobs:
           COVERAGE_RESULT: ${{ needs.coverage.result }}
           NODEPS_RESULT: ${{ needs.no-dependency-install.result }}
           PACKAGE_RESULT: ${{ needs.package.result }}
+          CEDAR_RESULT: ${{ needs.cedar-export.result }}
         run: |
           echo "test:     ${TEST_RESULT}"
           echo "lint:     ${LINT_RESULT}"
           echo "coverage: ${COVERAGE_RESULT}"
           echo "no-deps:  ${NODEPS_RESULT}"
           echo "package:  ${PACKAGE_RESULT}"
+          echo "cedar:    ${CEDAR_RESULT}"
           for result in \
             "${TEST_RESULT}" \
             "${LINT_RESULT}" \
             "${COVERAGE_RESULT}" \
             "${NODEPS_RESULT}" \
-            "${PACKAGE_RESULT}"; do
+            "${PACKAGE_RESULT}" \
+            "${CEDAR_RESULT}"; do
             if [ "${result}" != "success" ]; then
               echo "::error::a required job did not succeed"
               exit 1

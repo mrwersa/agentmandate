@@ -1,0 +1,71 @@
+{
+  "ReleaseGate": {
+    "actions": {
+      "PublishRelease": {
+        "appliesTo": {
+          "context": {
+            "attributes": {
+              "approved": {
+                "required": false,
+                "type": "Boolean"
+              }
+            },
+            "type": "Record"
+          },
+          "principalTypes": [
+            "ReleaseGate::User",
+            "ReleaseGate::Workload"
+          ],
+          "resourceTypes": [
+            "ReleaseGate::Repository"
+          ]
+        }
+      },
+      "ReadBuildStatus": {
+        "appliesTo": {
+          "context": {
+            "attributes": {
+              "approved": {
+                "required": false,
+                "type": "Boolean"
+              }
+            },
+            "type": "Record"
+          },
+          "principalTypes": [
+            "ReleaseGate::User",
+            "ReleaseGate::Workload"
+          ],
+          "resourceTypes": [
+            "ReleaseGate::Repository"
+          ]
+        }
+      },
+      "ReadRelease": {
+        "appliesTo": {
+          "context": {
+            "attributes": {
+              "approved": {
+                "required": false,
+                "type": "Boolean"
+              }
+            },
+            "type": "Record"
+          },
+          "principalTypes": [
+            "ReleaseGate::User",
+            "ReleaseGate::Workload"
+          ],
+          "resourceTypes": [
+            "ReleaseGate::Repository"
+          ]
+        }
+      }
+    },
+    "entityTypes": {
+      "Repository": {},
+      "User": {},
+      "Workload": {}
+    }
+  }
+}

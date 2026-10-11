@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.27.0 - 2026-10-11
+
+### Added
+
+- `mandate cedar export` compiles explicit application mappings into Cedar
+  policies, a schema, entities and executable request tests. Exact principal
+  and resource checks and optional approval conditions form the supported
+  stateless subset. A new output directory receives the complete bundle;
+  existing files are preserved and failed staging leaves no partial bundle.
+- Cumulative monetary/effect budgets, produced-binding requirements, tool
+  ceilings and role views are reported as semantic losses. Export is refused
+  by default. `--allow-partial` emits a review candidate and still exits 1;
+  it never converts a cumulative ceiling into a per-request allowance.
+- A required native Cedar CI job validates the generated policies and compares
+  an independent 72-request matrix, plus principal-inheritance refusal, against
+  the pinned SDK. Python runtime dependencies remain empty. Compilation does
+  not authenticate application mappings or establish deployment activation.
+
 ## 0.26.1 - 2026-10-10
 
 ### Added

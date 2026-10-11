@@ -25,10 +25,10 @@ def test_score_accounts_for_every_roadmap_initiative():
         assert titles == [row["title"] for row in phase["initiatives"]]
     result = module.calculate(LEDGER)
     assert [p["initiatives"] for p in result["phases"]] == [4, 6, 5, 5, 4]
-    assert [p["percent"] for p in result["phases"]] == [100, 58.33, 30, 0, 0]
-    assert result["overall"] == {"points": 9.0, "initiatives": 24, "percent": 37.5}
-    assert result["first_three_phases"]["percent"] == 60
-    assert "37.5%" in roadmap and "58.33%" in roadmap
+    assert [p["percent"] for p in result["phases"]] == [100, 58.33, 40, 0, 0]
+    assert result["overall"] == {"points": 9.5, "initiatives": 24, "percent": 39.58}
+    assert result["first_three_phases"]["percent"] == 63.33
+    assert "39.58%" in roadmap and "58.33%" in roadmap
 
 
 @pytest.mark.parametrize("change", ["status", "reason", "evidence", "phase", "title", "empty"])
@@ -54,7 +54,7 @@ def test_malformed_ledger_cannot_produce_a_score(change):
 def test_calculation_cli_prints_the_same_total(monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["roadmap_progress"])
     assert module.main() == 0
-    assert json.loads(capsys.readouterr().out)["overall"]["percent"] == 37.5
+    assert json.loads(capsys.readouterr().out)["overall"]["percent"] == 39.58
 
 
 @pytest.mark.parametrize("content", [None, "{", '{"phases": []}'])

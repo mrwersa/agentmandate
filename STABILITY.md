@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.26.0
+agentmandate~=0.27.0
 ```
 
 ## Versioned authority artifacts
@@ -215,3 +215,10 @@ Three areas remain deliberately under-modelled:
 Integrating any of these into manifest authority may change the schema. The
 `version` field is how that will be handled; standalone artifact versions may
 instead evolve independently when the manifest meaning is unchanged.
+
+`mandate cedar export` is an experimental compiler with
+`cedar_export_version: 1` mapping input and `agentmandate.cedar-export/v1`
+results. It generates only explicitly mapped stateless permissions. Losses
+block export by default; `--allow-partial` emits a candidate and still exits 1.
+Native validation is separate from compilation. Existing managed Cedar
+commands and results are unchanged. See [the export guide](docs/cedar-export.md).
