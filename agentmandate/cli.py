@@ -2316,7 +2316,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
                 print(json.dumps(to_decision_suite(obligations), indent=2))
             except ValueError as exc:
                 print(f"error: {exc}", file=sys.stderr)
-                return EXIT_FINDING if obligations.obligations else EXIT_USAGE
+                return EXIT_FINDING if obligations.unreviewed else EXIT_USAGE
             return EXIT_OK
         _emit(obligations.to_dict(), args.json, obligations.render())
         return EXIT_FINDING if obligations.unreviewed else EXIT_OK

@@ -59,10 +59,14 @@ class Money:
     Decimal rather than float because these values are compared against
     ceilings and summed across a call sequence. Binary floating point would
     make a breach report arguable, and an arguable breach report is useless.
+    Currency codes normalize to uppercase for both construction and parsing.
     """
 
     amount: Decimal
     currency: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "currency", self.currency.upper())
 
     @classmethod
     def parse(cls, raw: Any, where: str) -> Money:
@@ -336,6 +340,10 @@ def loads(text: str, source: str | None = None) -> Mandate:
         try:
             raw = json.loads(text)
         except json.JSONDecodeError as exc:
+            # A quoted first key selects JSON. Never reinterpret malformed
+            # JSON numbers or tags using YAML's implicit scalar conversions.
+            if stripped[1:].lstrip().startswith('"'):
+                raise ManifestError(f"manifest: invalid JSON: {exc}") from exc
             json_error = exc  # A YAML flow mapping also starts with '{'.
         else:
             return Mandate.parse(raw, source=source)

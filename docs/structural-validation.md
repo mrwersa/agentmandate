@@ -45,7 +45,9 @@ produce analysis findings or use exit 1.
 
 Authority IR requires finite JSON fact values. `NaN`, `Infinity`, overflowing
 numbers such as `1e999`, and non-serializable programmatic values are refused.
-Canonical serialization cannot emit those values. This is a transport rule;
+Programmatic fact values must also survive a JSON round trip unchanged: mappings
+with non-string keys and tuples that would become lists are rejected during both
+validation and serialization. This is a transport rule;
 finite values still need the input profile and evidence checks before analysis.
 
 The [JSON baselines](../tests/fixtures/structural-validation-v1.json) replay

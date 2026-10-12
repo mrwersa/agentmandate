@@ -63,10 +63,13 @@ external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
 
-**Core review corrections — 12 October 2026:** the next implementation fixes
+**Core review corrections — 12 October 2026:** the correction slice fixes
 currency aggregation, diff scope parity, cross-agent obligation reviews and
 malformed-input handling. Structural validators gain scoped JSON output, and
-YAML flow mappings use the optional parser. These correct existing surfaces;
+YAML flow mappings with an unquoted first key use the optional parser; malformed
+JSON stays on its strict parser. Follow-up review also identified duplicate-probe
+exit codes, programmatic currency casing and IR round-trip coercions, all corrected
+in [#257](https://github.com/mrwersa/agentmandate/pull/257). These correct existing surfaces;
 they do not complete another initiative or move the 50% planning ledger.
 
 **Merged repair implementation — 12 October 2026:**

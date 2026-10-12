@@ -7,7 +7,10 @@ YAML is the documented format because a manifest is a hand-authored file that
 lives beside CI configuration. JSON is accepted too, with no dependency beyond
 the standard library. YAML flow mappings such as
 `{agent: a, tools: [{name: t, effect: read}]}` use the optional YAML reader,
-even though they begin with `{`.
+even though they begin with `{`. A `{`-leading mapping whose first key is
+double-quoted selects JSON: a JSON syntax error is rejected rather than retried
+as YAML. Use an unquoted first key for a YAML flow mapping. This keeps malformed
+JSON numbers and YAML tags from silently changing a JSON declaration.
 
 ```bash
 pip install "agentmandate[yaml]"   # YAML support

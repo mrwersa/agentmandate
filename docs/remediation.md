@@ -229,8 +229,12 @@ declared producer of a required scope is rejected while its consumers remain dec
 producer cycle can retain declarations yet leave consumers unreachable; those losses are
 reported, and `--keep-tool` rejects candidates that strand a kept consumer. Removing the
 producer and all affected consumers may be a valid combination. Inputs with missing
-producers, unbound monetary ceilings, or mixed currencies report `input_requires_review`
-and produce no candidates.
+producers or unbound monetary ceilings report `input_requires_review` and produce no
+candidates. Mixed currencies across any declared tool ceilings and the total limit
+are refused before the baseline analysis, even without a total limit: the API raises
+`ValueError`, and the CLI exits 2 without a report. It therefore does not return an
+`input_requires_review` report carrying the `ceiling.mixed-currency` lint finding.
+Run lint separately to inspect that finding; no exchange-rate model is inferred.
 
 ## Read both completeness limits
 

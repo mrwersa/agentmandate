@@ -1,11 +1,12 @@
 import builtins
 import json
 from dataclasses import replace
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
 
-from agentmandate import Mandate, ManifestError, analyse, compare, loads
+from agentmandate import Mandate, ManifestError, Money, analyse, compare, loads
 from agentmandate._conditions import (
     ConditionFormatError,
     ToolCondition,
@@ -55,6 +56,19 @@ def test_single_currency_analysis_keeps_real_breaches(currency):
     assert str(authority.max_extractable.amount) == '80'
     assert authority.max_extractable.currency == currency
     assert [b.kind for b in authority.breaches] == ['cumulative_value']
+
+
+def test_programmatic_currency_case_matches_parsed_money_across_consumers():
+    parsed = monetary(['GBP', 'GBP'], 'GBP')
+    constructed = replace(parsed, tools=(
+        parsed.tools[0],
+        replace(parsed.tools[1], ceiling=Money(Decimal(40), 'gbp')),
+        replace(parsed.tools[2], ceiling=Money(Decimal(40), 'Gbp')),
+    ), limits=replace(parsed.limits, total=Money(Decimal(50), 'gBP')))
+    assert constructed == parsed
+    assert analyse(constructed) == analyse(parsed)
+    assert compare(parsed, constructed).changes == ()
+    assert derive(constructed) == derive(parsed)
 
 
 @pytest.mark.parametrize('command', ['reach', 'diff', 'obligations', 'remediate'])
@@ -131,7 +145,11 @@ def test_ir_rejects_non_finite_json_including_overflowed_numbers(literal, tmp_pa
     assert not output.out and output.err.startswith('error: ')
 
 
-@pytest.mark.parametrize('value', [float('nan'), float('inf'), {'nested': float('-inf')}, {1, 2}])
+@pytest.mark.parametrize('value', [
+    float('nan'), float('inf'), {'nested': float('-inf')}, {1, 2},
+    {1: 'a'}, {'nested': [{None: 'a'}]}, {True: 'a', 'true': 'b'},
+    {'nested': (1, 2)},
+])
 def test_programmatic_ir_cannot_validate_or_emit_noncanonical_values(value):
     graph = _from_mandate(Mandate.parse({'agent': 'a', 'tools': [{'name': 't', 'effect': 'read'}]}))
     graph = replace(graph, facts=(replace(graph.facts[0], value=value), *graph.facts[1:]))
@@ -157,6 +175,42 @@ def test_empty_obligation_suite_is_a_usage_error_not_a_finding(tmp_path, capsys)
     assert main(['obligations', str(path), '--suite']) == 2
     output = capsys.readouterr()
     assert not output.out and 'no obligations' in output.err
+
+
+def test_obligation_suite_separates_missing_review_from_duplicate_probes(tmp_path, capsys):
+    path = tmp_path / 'pay.json'
+    path.write_text(json.dumps({'agent': 'a', 'tools': [
+        {'name': 'seed', 'effect': 'read', 'produces': 'case'},
+        {'name': 'pay', 'effect': 'irreversible', 'requires': ['case'],
+         'scope_key': 'case', 'value_arg': 'amount',
+         'ceiling': {'amount': 40, 'currency': 'GBP'}},
+    ]}))
+    assert main(['obligations', str(path), '--suite']) == 1
+    assert 'not fully reviewed' in capsys.readouterr().err
+    obligations = derive(loads(path.read_text()))
+    assert len(obligations.obligations) >= 2
+    reviewed = replace(obligations, obligations=tuple(
+        replace(item, decision='paid', cases=('probe-x',)) for item in obligations.obligations
+    ))
+    review = tmp_path / 'review.json'
+    review.write_text(json.dumps(reviewed.to_dict()))
+    assert main(['obligations', str(path), '--reviewed', str(review), '--suite']) == 2
+    output = capsys.readouterr()
+    assert not output.out and 'the same probe is reviewed twice: probe-x' in output.err
+
+
+@pytest.mark.parametrize('literal', ['0123', '1:20', '1_000', '!!int "7"'])
+@pytest.mark.parametrize('leading', ['{"agent"', '{ \n "agent"'])
+def test_malformed_json_numbers_never_fall_back_to_yaml(literal, leading, tmp_path, capsys):
+    text = leading + ':"a","tools":[{"name":"t","effect":"read"}],"limits":{"depth":' \
+        + literal + '}}'
+    with pytest.raises(ManifestError, match='invalid JSON'):
+        loads(text)
+    path = tmp_path / 'malformed.json'
+    path.write_text(text)
+    assert main(['reach', str(path), '--json']) == 2
+    output = capsys.readouterr()
+    assert not output.out and 'invalid JSON' in output.err
 
 
 def test_yaml_flow_mappings_and_json_have_identical_semantics():

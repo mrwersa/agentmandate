@@ -264,6 +264,13 @@ class Edge:
         }
 
 
+def _check_json_value(value: Any) -> None:
+    """Reject values whose JSON representation changes their structure."""
+    encoded = json.dumps(value, allow_nan=False)
+    if json.loads(encoded) != value:
+        raise ValueError("JSON serialization changes the fact value")
+
+
 @dataclass(frozen=True)
 class AuthorityIR:
     ir_version: int
@@ -285,6 +292,8 @@ class AuthorityIR:
 
     def to_json(self) -> str:
         """Return canonical JSON suitable for hashing and committed fixtures."""
+        for fact in self.facts:
+            _check_json_value(fact.value)
         return json.dumps(
             self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True,
             allow_nan=False,
@@ -320,7 +329,7 @@ class AuthorityIR:
                 )
         for index, fact in enumerate(self.facts):
             try:
-                json.dumps(fact.value, allow_nan=False)
+                _check_json_value(fact.value)
             except (TypeError, ValueError, RecursionError) as exc:
                 raise IRFormatError(
                     f"authority IR facts[{index}].value is not canonical JSON"
