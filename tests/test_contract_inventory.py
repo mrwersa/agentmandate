@@ -489,7 +489,9 @@ def test_structural_json_addition_preserves_every_existing_contract_and_fixture(
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.33.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.34.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) == set(previous["cli"])
     validators = {f"mandate {group} validate" for group in (
@@ -508,5 +510,27 @@ def test_structural_json_addition_preserves_every_existing_contract_and_fixture(
         if path == "cli.py":
             present["schemas"].remove("agentmandate.validation/v1")
         assert present == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_rego_comparison_preserves_every_existing_contract_and_fixture():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.34.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) - set(previous["cli"]) == {"mandate rego diff"}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate rego":
+            selector = next(a for a in present["arguments"] if a["dest"] == "rego_command")
+            selector["choices"].remove("diff")
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_rego_diff.py",
+    }
+    for path, markers in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == markers
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

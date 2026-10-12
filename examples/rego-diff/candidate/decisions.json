@@ -1,0 +1,83 @@
+[
+  {
+    "decision_id": "synthetic-candidate-decision-1",
+    "path": "release_gate/allow",
+    "input": {
+      "principal": "release-operator",
+      "action": "ReadRelease",
+      "resource": "release-tools",
+      "context": {
+        "approved": false
+      },
+      "agentmandate": {
+        "invocation_id": "synthetic-candidate-invocation-1",
+        "run_id": "synthetic-candidate-run",
+        "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+        "configuration_sha256": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
+        "manifest_version": 1,
+        "gateway": "release-gateway"
+      }
+    },
+    "result": true,
+    "bundles": {
+      "release-policy": {
+        "revision": "release-policy-r2"
+      }
+    },
+    "timestamp": "2026-10-12T09:00:00Z"
+  },
+  {
+    "decision_id": "synthetic-candidate-decision-2",
+    "path": "release_gate/allow",
+    "input": {
+      "principal": "release-operator",
+      "action": "PublishRelease",
+      "resource": "release-tools",
+      "context": {
+        "approved": false
+      },
+      "agentmandate": {
+        "invocation_id": "synthetic-candidate-invocation-2",
+        "run_id": "synthetic-candidate-run",
+        "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+        "configuration_sha256": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
+        "manifest_version": 1,
+        "gateway": "release-gateway"
+      }
+    },
+    "result": true,
+    "bundles": {
+      "release-policy": {
+        "revision": "release-policy-r2"
+      }
+    },
+    "timestamp": "2026-10-12T09:00:00Z"
+  },
+  {
+    "decision_id": "synthetic-candidate-decision-3",
+    "path": "release_gate/allow",
+    "input": {
+      "principal": "release-operator",
+      "action": "PublishRelease",
+      "resource": "release-tools",
+      "context": {
+        "approved": true
+      },
+      "agentmandate": {
+        "invocation_id": "synthetic-candidate-invocation-3",
+        "run_id": "synthetic-candidate-run",
+        "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+        "configuration_sha256": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
+        "manifest_version": 1,
+        "gateway": "release-gateway"
+      }
+    },
+    "result": true,
+    "bundles": {
+      "release-policy": {
+        "revision": "release-policy-r2"
+      }
+    },
+    "timestamp": "2026-10-12T09:00:00Z"
+  }
+]

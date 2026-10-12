@@ -12,6 +12,13 @@ locations; exit 2 means the inventory or its files could not be read. This is
 repository maintenance tooling, not a mandate-analysis command or a deployment
 approval.
 
+The latest inventory adds `mandate rego diff`, the capture-set input index and
+initial widening/unchanged/narrowing/expired v1 results. The
+[preceding structural-validator inventory](../tests/fixtures/current-contract-inventory-v0.34.json)
+is frozen. Compatibility tests permit only the new command and module markers,
+preserving all earlier Python signatures, command arguments and pinned bytes.
+These initial results are not a migration from an earlier Rego diff schema.
+
 The original inventory was prepared against `0c43066`, the merged `0.22.0`
 contract baseline, on 10 October 2026, and is retained as
 [a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.22.json).

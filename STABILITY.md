@@ -20,10 +20,19 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.34.0
+agentmandate~=0.35.0
 ```
 
 ## Versioned authority artifacts
+
+`mandate rego diff` adds an experimental `rego_capture_version: 1` capture-set
+index and `agentmandate.rego-effective-diff/v1` result. It reuses the unchanged
+deployment configuration and reconciliation contracts, comparing exact captured
+inputs across generated stateless revisions. Both reconciliations and the
+independent manifest authority diff remain visible. Initial widening, unchanged,
+narrowing and expired baselines pin the new result; earlier exports and reports
+are byte-preserved. These are v1 baselines, not a migration from a prior Rego
+comparison schema. See [Rego revision comparison](docs/rego-diff.md).
 
 All seven structural `validate` command groups accept `--json`, returning the
 opt-in `agentmandate.validation/v1` envelope. It records artifact kind, version,

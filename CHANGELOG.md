@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.35.0 - 2026-10-12
+
+### Added
+
+- `mandate rego diff` compares matched captured OPA requests across generated
+  stateless Rego revisions. The CI gate reports scoped Deny-to-Allow widening,
+  preserves both deployment reconciliation reports and the manifest authority
+  diff, and keeps unsupported controls and candidate breaches blocking.
+- Portable capture-set indexes reuse existing pinned deployment/OPA/OTLP
+  materials. Coverage, expiry, masking, duplicate requests, changed boundaries
+  and conflicting revision labels leave comparison unresolved. Native OPA
+  tests and a synthetic publication-approval example pin the new v1 contracts.
+- Request matching preserves exact decimal values, normalizing equivalent
+  number spellings without merging distinct decimals through float rounding.
+
 ## 0.34.0 - 2026-10-12
 
 ### Fixed

@@ -675,5 +675,21 @@
       "tests/test_structural_cli.py",
       "tests/test_analysis_boundaries.py"
     ]
+  },
+  {
+    "doc": "docs/rego-diff.md",
+    "fixtures": [
+      "examples/rego-diff/baseline.json",
+      "examples/rego-diff/candidate.json",
+      "tests/fixtures/rego-effective-diff-v1.json"
+    ],
+    "id": "rego-effective-diff",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.rego-effective-diff/v1"
+    ],
+    "tests": [
+      "tests/test_rego_diff.py"
+    ]
   }
 ]
