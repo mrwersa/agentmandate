@@ -1,0 +1,72 @@
+{
+  "argv": [
+    "remediate",
+    "examples/dispute-resolver.yaml",
+    "--pareto",
+    "--json"
+  ],
+  "exit": 0,
+  "result": {
+    "baseline": {
+      "breaches": [],
+      "depth": 8,
+      "effects": [
+        [
+          "irreversible",
+          "case"
+        ],
+        [
+          "read",
+          "case"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "500",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "fetch_case",
+        "issue_refund",
+        "open_case"
+      ],
+      "service_principal_tools": [],
+      "truncated": false,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [],
+    "ceiling_grids": [],
+    "frontier": {
+      "display_complete": true,
+      "enabled": true,
+      "non_dominated": null,
+      "objectives": {
+        "added_approval_tools": "set inclusion",
+        "edit_count": "minimize",
+        "lost_reachable_tools": "set inclusion",
+        "retained_ceilings": "maximize each declared tool ceiling"
+      },
+      "scope": "repair trade-offs among examined, rechecked candidates only",
+      "status": "not_computed",
+      "successful_candidates": 0
+    },
+    "input": {
+      "manifest_sha256": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4"
+    },
+    "keep_tools": [],
+    "schema": "agentmandate.remediation/v4",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 0,
+      "candidates_found": 0,
+      "combinations_examined": 0,
+      "combinations_total": 0,
+      "depth": 8,
+      "enumeration_complete": null,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 128
+    },
+    "status": "no_reachable_breach_within_bound"
+  }
+}

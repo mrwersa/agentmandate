@@ -1,0 +1,16 @@
+{
+  "after": "tests/fixtures/remediation-frontier-compatibility-v4.json",
+  "before": "tests/fixtures/remediation-workflow-monetary-v3.json",
+  "preserved_fields": [
+    "baseline",
+    "baseline_lint",
+    "input",
+    "scope",
+    "keep_tools",
+    "requirements",
+    "ceiling_options",
+    "requirement_rejections",
+    "search",
+    "status"
+  ]
+}

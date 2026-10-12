@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 11 October 2026
+### Measured planning progress — 12 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,16 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Next repair implementation — 12 October 2026:**
+[Finite ceiling grids and repair trade-offs](docs/remediation.md#explore-a-ceiling-range-and-compare-repair-trade-offs)
+expand the existing remediation slice. Caller-defined ranges generate exact
+choices; optional Pareto filtering compares edit cost, named tool losses,
+added approvals and retained per-tool ceilings after full rechecks and
+required-path screening. Enumeration, display and reachability bounds remain
+separate. This is a bounded repair frontier, not complete least-authority
+synthesis: the remediation initiative stays partial, advanced authority stays
+unstarted, and the ledger stays at 50%.
 
 **Pre-1.0 scope decision — 10 October 2026:** freeze additional continuity
 contracts and prioritize completion of the 1.0 gates. The delivered

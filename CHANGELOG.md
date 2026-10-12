@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.33.0 - 2026-10-12
+
+### Added
+
+- `mandate remediate --ceiling-grid TOOL=MIN:MAX:STEP` enumerates exact lower
+  ceilings from a finite caller-supplied range, with bounded expansion and full
+  disclosure of the generated choices. It combines with explicit ceiling edits
+  and required ordered paths.
+- `--pareto` reports non-dominated repair trade-offs among examined, rechecked
+  candidates using edit count, named capability losses, added approvals and
+  retained per-tool ceilings. Enumeration, display and reachability limits
+  remain separate; the original findings and exit code stay unchanged.
+- Opt-in remediation v4 baselines and a v3-to-v4 compatibility case. Existing
+  v1/v2/v3 outputs are preserved when both new flags are omitted. Repairs remain
+  unapplied and require human selection; global synthesis and business success
+  are outside this scope.
+
 ## 0.32.0 - 2026-10-11
 
 ### Added

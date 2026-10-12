@@ -1,0 +1,162 @@
+{
+  "argv": [
+    "remediate",
+    "examples/dispute-resolver-v2.yaml",
+    "--ceiling-grid",
+    "issue_refund=0:200:25",
+    "--pareto",
+    "--max-evaluations",
+    "1",
+    "--json"
+  ],
+  "exit": 1,
+  "result": {
+    "baseline": {
+      "breaches": [
+        {
+          "detail": "cumulative value 1000 GBP exceeds limit 500 GBP",
+          "kind": "cumulative_value",
+          "path": [
+            "open_case(case#1)",
+            "search_cases(case#2)",
+            "issue_refund(case#1, 500 GBP)",
+            "issue_refund(case#2, 500 GBP)"
+          ]
+        }
+      ],
+      "depth": 8,
+      "effects": [
+        [
+          "irreversible",
+          "case"
+        ],
+        [
+          "read",
+          "case"
+        ]
+      ],
+      "max_extractable": {
+        "amount": "2000",
+        "currency": "GBP"
+      },
+      "reachable_tools": [
+        "fetch_case",
+        "issue_refund",
+        "open_case",
+        "search_cases"
+      ],
+      "service_principal_tools": [],
+      "truncated": true,
+      "ungated_irreversible": []
+    },
+    "baseline_lint": [],
+    "candidates": [],
+    "ceiling_grids": [
+      {
+        "currency": "GBP",
+        "maximum": "200",
+        "minimum": "0",
+        "points_generated": 9,
+        "step": "25",
+        "tool": "issue_refund"
+      }
+    ],
+    "ceiling_options": [
+      {
+        "ceiling": {
+          "amount": "0",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "25",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "50",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "75",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "100",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "125",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "150",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "175",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      },
+      {
+        "ceiling": {
+          "amount": "200",
+          "currency": "GBP"
+        },
+        "tool": "issue_refund"
+      }
+    ],
+    "frontier": {
+      "display_complete": true,
+      "enabled": true,
+      "non_dominated": 0,
+      "objectives": {
+        "added_approval_tools": "set inclusion",
+        "edit_count": "minimize",
+        "lost_reachable_tools": "set inclusion",
+        "retained_ceilings": "maximize each declared tool ceiling"
+      },
+      "scope": "repair trade-offs among examined, rechecked candidates only",
+      "status": "computed",
+      "successful_candidates": 0
+    },
+    "input": {
+      "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
+    },
+    "keep_tools": [],
+    "schema": "agentmandate.remediation/v4",
+    "scope": "manifest-v1 reachability only; candidates require human selection",
+    "search": {
+      "candidates_analyzed": 1,
+      "candidates_found": 0,
+      "combinations_examined": 1,
+      "combinations_total": 91,
+      "depth": 8,
+      "enumeration_complete": false,
+      "max_candidates": 5,
+      "max_edits": 2,
+      "max_evaluations": 1
+    },
+    "status": "no_candidate_found_within_limits"
+  }
+}

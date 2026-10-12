@@ -641,5 +641,24 @@
     "tests": [
       "tests/test_fleet_exceptions.py"
     ]
+  },
+  {
+    "doc": "docs/remediation.md",
+    "fixtures": [
+      "tests/fixtures/remediation-frontier-refund-v4.json",
+      "tests/fixtures/remediation-frontier-limited-v4.json",
+      "tests/fixtures/remediation-frontier-required-v4.json",
+      "tests/fixtures/remediation-frontier-clean-v4.json",
+      "tests/fixtures/remediation-frontier-compatibility-v4.json",
+      "tests/fixtures/remediation-v3-to-v4.json"
+    ],
+    "id": "remediation-v4",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v4"
+    ],
+    "tests": [
+      "tests/test_remediation_frontier.py"
+    ]
   }
 ]

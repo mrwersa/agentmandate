@@ -54,3 +54,9 @@ requirements are caller-authored intent, separate from the trace above.
 The candidate remains truncated: a third fresh item can exceed the run total
 at depth six. A lower tool ceiling and an approval requirement do not enforce
 the total at runtime. The source example and its total limit stay unchanged.
+
+To explore amounts without listing each one, use
+`--ceiling-grid pay=0:4:1 --pareto` in place of the explicit ceiling flag.
+Add the same `--required-workflows` input to screen out zero or insufficient
+headroom. The [repair guide](../../docs/remediation.md#explore-a-ceiling-range-and-compare-repair-trade-offs)
+explains the finite domain and separate enumeration, display and depth limits.

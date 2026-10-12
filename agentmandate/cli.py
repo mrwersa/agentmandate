@@ -276,6 +276,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--required-workflows", metavar="FILE",
         help="preserve caller-authored ordered paths bound to this manifest's exact bytes",
     )
+    remediation_parser.add_argument(
+        "--ceiling-grid", action="append", default=[], metavar="TOOL=MIN:MAX:STEP",
+        help="enumerate exact lower ceilings in this finite range (512 total grid points)",
+    )
+    remediation_parser.add_argument(
+        "--pareto", action="store_true",
+        help="return non-dominated repair trade-offs among examined candidates",
+    )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     review_parser = subparsers.add_parser(
@@ -888,6 +896,7 @@ def _run_remediation(args: argparse.Namespace) -> int:
             keep_tools=tuple(args.keep_tool),
             ceiling_options=tuple(args.ceiling),
             required_workflows=requirements,
+            ceiling_grids=tuple(args.ceiling_grid), pareto=args.pareto,
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -899,6 +908,12 @@ def _run_remediation(args: argparse.Namespace) -> int:
     lines.extend(f"CEILING OPTION {option['tool']}: "
                  f"{option['ceiling']['amount']} {option['ceiling']['currency']}"
                  for option in result.get("ceiling_options", []))
+    if "frontier" in result:
+        frontier = result["frontier"]
+        count = frontier["non_dominated"] if frontier["status"] == "computed" else "n/a"
+        lines.append(f"FRONTIER enabled={frontier['enabled']} status={frontier['status']} "
+                     f"non_dominated={count} "
+                     f"display_complete={frontier['display_complete']}: {frontier['scope']}")
     if "requirements" in result:
         lines.append(f"REQUIREMENTS {result['requirements']['scope']}")
         lines.extend(f"REQUIRED {row['name']}: {row['status']} steps={row['steps']}"

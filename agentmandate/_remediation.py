@@ -16,6 +16,7 @@ from .reach import analyse
 REMEDIATION_SCHEMA = "agentmandate.remediation/v1"
 CEILING_REMEDIATION_SCHEMA = "agentmandate.remediation/v2"
 WORKFLOW_REMEDIATION_SCHEMA = "agentmandate.remediation/v3"
+FRONTIER_REMEDIATION_SCHEMA = "agentmandate.remediation/v4"
 _STRUCTURAL_RULES = {
     "scope.missing-producer",
     "ceiling.unbound-scope",
@@ -74,6 +75,85 @@ def _ceiling_domain(mandate: Mandate, options: tuple[str, ...]) -> tuple[_Edit, 
     return tuple(domain[key] for key in sorted(domain))
 
 
+def _grid_domain(mandate: Mandate, grids: tuple[str, ...]) -> tuple[tuple[str, ...], list]:
+    """Expand a finite reviewer-authored domain with exact scaled integers."""
+    options, records = [], []
+    for grid in sorted(grids):
+        name, separator, values = grid.rpartition("=")
+        parts = values.split(":")
+        if not separator or not name or len(parts) != 3:
+            raise ValueError("ceiling grids must use TOOL=MIN:MAX:STEP")
+        tool = mandate.tool(name)
+        if tool is None or tool.ceiling is None:
+            raise ValueError(f"ceiling grid {name!r} must name a declared spending tool")
+        if any(len(part) > 128 for part in parts):
+            raise ValueError("ceiling grid numbers are limited to 128 characters")
+        amounts = [Money.parse({"amount": part, "currency": tool.ceiling.currency},
+                               f"ceiling grid {name!r}").amount for part in parts]
+        tuples = [amount.as_tuple() for amount in amounts]
+        if any(len(t.digits) > 100 or abs(t.exponent) > 100 for t in tuples):
+            raise ValueError("ceiling grid numbers require at most 100 digits and exponent +/-100")
+        lower, upper, step = amounts
+        if step == 0 or lower > upper:
+            raise ValueError("ceiling grid requires MIN <= MAX and STEP > 0")
+        if upper >= tool.ceiling.amount:
+            raise ValueError(
+                f"ceiling grid {name!r} MAX must be strictly below its current ceiling"
+            )
+        exponent = min(t.exponent for t in tuples)
+        start, stop, stride = [
+            int("".join(map(str, t.digits))) * 10 ** (t.exponent - exponent) for t in tuples
+        ]
+        count = (stop - start) // stride + 1
+        if len(options) + count > 512:
+            raise ValueError(
+                "ceiling grids may generate at most 512 points in total before deduplication"
+            )
+        for index in range(count):
+            text = str(start + index * stride)
+            # Remove only fractional trailing zeros; do not round in caller context.
+            places = min(len(text) - len(text.rstrip("0")), max(0, -exponent))
+            digits = tuple(int(char) for char in text[:len(text) - places]) or (0,)
+            value = Decimal((0, digits, exponent + places))
+            options.append(f"{name}={value or '0'}")
+        records.append({"tool": name, "minimum": str(lower), "maximum": str(upper),
+                        "step": str(step), "currency": tool.ceiling.currency,
+                        "points_generated": count})
+    return tuple(options), records
+
+
+def _repair_cost(mandate: Mandate, candidate: dict) -> dict:
+    tools = {tool["name"]: tool for tool in candidate["manifest"]["tools"]}
+    return {
+        "edit_count": candidate["impact"]["edit_count"],
+        "lost_reachable_tools": candidate["impact"]["lost_reachable_tools"],
+        "added_approval_tools": sorted(e["tool"] for e in candidate["edits"]
+                                       if e["kind"] == "require_approval"),
+        "retained_ceilings": {
+            tool.name: tools[tool.name]["ceiling"] if tool.name in tools else
+            {"amount": "0", "currency": tool.ceiling.currency}
+            for tool in sorted(mandate.tools, key=lambda t: t.name) if tool.ceiling is not None
+        },
+    }
+
+
+def _dominates(left: dict, right: dict) -> bool:
+    """Compare repair costs, preserving named capabilities rather than counts."""
+    comparisons = [
+        (left["edit_count"] <= right["edit_count"], left["edit_count"] < right["edit_count"]),
+        (set(left["lost_reachable_tools"]) <= set(right["lost_reachable_tools"]),
+         set(left["lost_reachable_tools"]) < set(right["lost_reachable_tools"])),
+        (set(left["added_approval_tools"]) <= set(right["added_approval_tools"]),
+         set(left["added_approval_tools"]) < set(right["added_approval_tools"])),
+    ]
+    for name, value in left["retained_ceilings"].items():
+        a, b = Decimal(value["amount"]), Decimal(right["retained_ceilings"][name]["amount"])
+        comparisons.append((a >= b, a > b))
+    return all(no_worse for no_worse, _ in comparisons) and any(
+        better for _, better in comparisons
+    )
+
+
 def _changed(mandate: Mandate, edits: tuple[_Edit, ...]) -> Mandate | None:
     keys = [(edit.tool, edit.kind) for edit in edits]
     removed = {edit.tool for edit in edits if edit.kind == "remove_tool"}
@@ -125,6 +205,8 @@ def plan(
     keep_tools: tuple[str, ...] = (),
     ceiling_options: tuple[str, ...] = (),
     required_workflows: _Requirements | None = None,
+    ceiling_grids: tuple[str, ...] = (),
+    pareto: bool = False,
 ) -> dict[str, Any]:
     """Enumerate edits, recheck the full graph, and rank scoped candidates.
 
@@ -140,7 +222,12 @@ def plan(
             raise ValueError(f"{name} must be a positive whole number")
     if any(not isinstance(name, str) or name not in mandate.tool_names for name in keep_tools):
         raise ValueError("keep_tools must name declared tools")
-    ceiling_edits = _ceiling_domain(mandate, ceiling_options)
+    if type(pareto) is not bool:
+        raise ValueError("pareto must be a boolean")
+    if any(not isinstance(grid, str) for grid in ceiling_grids):
+        raise ValueError("ceiling grids must use TOOL=MIN:MAX:STEP")
+    grid_options, grids = _grid_domain(mandate, ceiling_grids)
+    ceiling_edits = _ceiling_domain(mandate, ceiling_options + grid_options)
     baseline = analyse(mandate, depth=depth)
     if set(keep_tools) - baseline.reachable_tools:
         raise ValueError("kept tools must be reachable in the baseline at the selected depth")
@@ -180,6 +267,18 @@ def plan(
         report["ceiling_options"] = [
             {"tool": edit.tool, "ceiling": _money(edit.ceiling)} for edit in ceiling_edits
         ]
+    if grids or pareto:
+        report["schema"] = FRONTIER_REMEDIATION_SCHEMA
+        report["ceiling_grids"] = grids
+        report["frontier"] = {
+            "enabled": pareto, "status": "not_computed" if pareto else "disabled",
+            "scope": "repair trade-offs among examined, rechecked candidates only",
+            "objectives": {"edit_count": "minimize", "lost_reachable_tools": "set inclusion",
+                           "added_approval_tools": "set inclusion",
+                           "retained_ceilings": "maximize each declared tool ceiling"},
+            "successful_candidates": 0, "non_dominated": None,
+            "display_complete": True,
+        }
     if _structural(findings):
         report["status"] = "input_requires_review"
         return report
@@ -263,6 +362,18 @@ def plan(
     )
     search["candidates_found"] = len(candidates)
     search["enumeration_complete"] = search["combinations_examined"] == search["combinations_total"]
+    if pareto:
+        for candidate in candidates:
+            candidate["repair_cost"] = _repair_cost(mandate, candidate)
+        candidates = [c for c in candidates if not any(
+            _dominates(other["repair_cost"], c["repair_cost"]) for other in candidates
+        )]
+        report["frontier"].update(
+            status="computed", successful_candidates=search["candidates_found"],
+            non_dominated=len(candidates),
+        )
+    if "frontier" in report:
+        report["frontier"]["display_complete"] = len(candidates) <= max_candidates
     report["candidates"] = candidates[:max_candidates]
     report["status"] = "candidates_found" if candidates else "no_candidate_found_within_limits"
     return report
