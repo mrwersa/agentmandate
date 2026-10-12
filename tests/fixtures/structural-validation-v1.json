@@ -1,0 +1,96 @@
+[
+  {
+    "argv": [
+      "ir",
+      "validate",
+      "tests/fixtures/authority-ir-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"authority-ir\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "inventory",
+      "validate",
+      "tests/fixtures/dynamic-inventory-agentkit-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"dynamic-inventory\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "conditions",
+      "validate",
+      "--condition",
+      "tests/fixtures/condition-statement-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"tool-condition\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "conditions",
+      "validate",
+      "--context",
+      "tests/fixtures/condition-context-select-only-complete-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"condition-context\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "delegations",
+      "validate",
+      "--attachment",
+      "tests/fixtures/delegation-attachment-v2.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"delegation-attachment\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 2\n}\n"
+  },
+  {
+    "argv": [
+      "delegations",
+      "validate",
+      "--chain",
+      "tests/fixtures/delegation-chain-authorizer-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"delegation-chain\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "producers",
+      "validate",
+      "tests/fixtures/producer-accepted-synthetic/boundary.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"producer-boundary\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "continuity",
+      "validate",
+      "tests/fixtures/agentcore-continuity-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"agentcore-continuity-profile\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  },
+  {
+    "argv": [
+      "cedar",
+      "validate",
+      "docs/evidence/agentcore-refund-policy/managed-oracle-v1.json",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"artifact\": \"managed-cedar-oracle\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+  }
+]

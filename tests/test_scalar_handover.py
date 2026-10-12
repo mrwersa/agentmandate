@@ -243,7 +243,8 @@ def test_policies_must_share_the_complete_tool_contract(changes):
 
 
 @pytest.mark.parametrize(
-    "change", ["total", "tool", "value_arg", "tool_currency", "total_currency", "multiple_tools"]
+    "change", ["total", "tool", "value_arg", "tool_currency", "total_currency", "multiple_tools",
+               "consistent_currency"]
 )
 def test_manifest_semantics_are_checked_after_matching_all_digests(change):
     raw = _raw()
@@ -259,11 +260,19 @@ def test_manifest_semantics_are_checked_after_matching_all_digests(change):
         manifest["tools"][1]["ceiling"]["currency"] = "USD"
     elif change == "total_currency":
         manifest["limits"]["total"]["currency"] = "USD"
+    elif change == "consistent_currency":
+        manifest["limits"]["total"]["currency"] = "USD"
+        manifest["tools"][1]["ceiling"]["currency"] = "USD"
     else:
         tool = copy.deepcopy(manifest["tools"][1])
         tool["name"] = "another_refund"
         manifest["tools"].append(tool)
-    result = _run(raw, manifest=_manifest_change(raw, manifest))
+    data = _manifest_change(raw, manifest)
+    if change in {"tool_currency", "total_currency"}:
+        with pytest.raises(ValueError, match="require one currency"):
+            _run(raw, manifest=data)
+        return
+    result = _run(raw, manifest=data)
     assert result["proof"]["verdict"] == "unresolved"
 
 

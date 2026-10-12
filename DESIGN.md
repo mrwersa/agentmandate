@@ -162,6 +162,16 @@ existing combined verdict still requires review for any newly reachable breach
 as well as any widening allowance change. Amounts in
 different currencies are not ordered. A currency change is sent for review
 rather than being called narrower because its numeral is smaller.
+Each analyzed manifest must itself use one declared monetary currency; scalar
+search refuses mixed currencies rather than summing them as one amount.
+
+Effect claims use required scopes, falling back to a produced scope only when
+there are no requirements, consistently with reach and IR. Adding a new
+effect/scope pair remains conservative widening even if a stronger effect was
+already reachable on that scope; the diff compares declared pairs rather than
+collapsing them into one maximum effect. Changing a monetary scope key also
+requires review as non-comparable, including when added with a ceiling. Neither
+rule supplies a mapping between old and new resource/accounting boundaries.
 
 Both releases are searched to the same depth, using the larger manifest
 default unless the caller supplies `--depth`. Reducing a manifest's default

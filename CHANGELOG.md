@@ -6,6 +6,34 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.34.0 - 2026-10-12
+
+### Fixed
+
+- Scalar reachability refuses mixed currencies across declared ceilings and the
+  total limit, instead of fabricating a converted maximum or breach. The same
+  refusal applies to diff and obligation derivation.
+- Diff effect scopes follow the same requires-or-produces rule as reach and IR.
+- Obligation review reconciliation refuses a different agent, even when stable
+  obligation identifiers coincide. Empty or malformed `--suite` requests exit 2,
+  not 1; genuinely unreviewed obligations still exit 1.
+- Authority IR rejects non-finite constants and overflowing JSON numbers;
+  programmatic facts cannot validate or serialize non-canonical values, including
+  mappings with non-string keys that would change on a JSON round trip.
+- Excessively nested input returns CLI exit 2 without a traceback, including
+  structural validators. Condition projections reject unexpected entity kinds.
+- YAML flow mappings work with the optional YAML dependency. Valid JSON retains
+  its dependency-free parser; a double-quoted first key keeps malformed JSON on
+  the JSON parser. Missing YAML support remains an actionable error.
+- Currency codes normalize to uppercase for programmatic `Money` construction
+  as well as file inputs, so casing alone cannot create mixed currencies.
+
+### Added
+
+- `--json` on all seven structural validation command groups, with a shared
+  scoped v1 result and unchanged human output. Valid structure does not establish
+  accepted evidence or deployment approval.
+
 ## 0.33.0 - 2026-10-12
 
 ### Added

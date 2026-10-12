@@ -316,9 +316,8 @@ def _tool_contract_changes(before: Tool, after: Tool) -> list[Change]:
 
 
 def _tool_effects(tool: Tool) -> set[str]:
-    scopes = set(tool.requires)
-    if tool.produces is not None:
-        scopes.add(tool.produces)
+    # Use the same consumed-scope fallback as reach and IR provenance.
+    scopes = tool.requires or ((tool.produces,) if tool.produces else ())
     return {f"{tool.effect} on {scope}" for scope in scopes}
 
 

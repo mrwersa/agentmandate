@@ -46,7 +46,7 @@ from .manifest import IRREVERSIBLE, Mandate, Money, Tool
 
 
 class _SearchArithmeticError(ValueError):
-    """Exact search arithmetic exceeded the Decimal representation's limits."""
+    """Scalar search cannot represent the declared monetary domain."""
 
 
 # A single call in a counterexample path.
@@ -274,6 +274,14 @@ def _analyse_with_trace(
     limit = depth if depth is not None else mandate.limits.depth
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
         raise ValueError("depth must be a positive integer")
+    currencies = {t.ceiling.currency for t in mandate.tools if t.ceiling is not None}
+    if mandate.limits.total is not None:
+        currencies.add(mandate.limits.total.currency)
+    if len(currencies) > 1:
+        raise _SearchArithmeticError(
+            "reachability cumulative amounts require one currency; "
+            "no exchange-rate or cross-currency accounting model is declared"
+        )
     # One call adds at most one ceiling. Align every nonzero ceiling's digits
     # and reserve enough carry digits for at most `limit` additions. Search
     # arithmetic must not inherit a caller's precision, exponent range or traps.

@@ -20,10 +20,19 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.33.0
+agentmandate~=0.34.0
 ```
 
 ## Versioned authority artifacts
+
+All seven structural `validate` command groups accept `--json`, returning the
+opt-in `agentmandate.validation/v1` envelope. It records artifact kind, version,
+structural validity and the explicit unassessed trust/deployment scope. Human
+output without the flag is unchanged. [Validation baselines](docs/structural-validation.md)
+cover every group; these are initial baselines, not a prior-schema migration.
+Malformed, non-finite or excessively nested input exits 2 without partial JSON.
+Scalar monetary reachability requires one currency across all declared ceilings
+and the total limit; the analyzer performs no conversion.
 
 `mandate review` uses the separate public `agentmandate.change-review/v1` input
 and `agentmandate.review/v1` result contracts. It checks eligibility of recorded

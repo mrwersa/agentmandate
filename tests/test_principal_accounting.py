@@ -216,7 +216,9 @@ def test_each_binding_join_gap_withholds_all_shared_totals(mutate):
     assert "continuity.accounting-binding-mismatch" in _codes(result)
 
 
-@pytest.mark.parametrize("mutation", ["no_total", "fractional_total", "currency", "tool_currency"])
+@pytest.mark.parametrize("mutation", [
+    "no_total", "fractional_total", "currency", "tool_currency", "consistent_currency",
+])
 def test_actual_manifest_contract_is_checked_not_only_binding_digest(mutation):
     manifest, binding = _raw("manifest"), _raw()
     if mutation == "no_total":
@@ -225,10 +227,18 @@ def test_actual_manifest_contract_is_checked_not_only_binding_digest(mutation):
         manifest["limits"]["total"]["amount"] = 1000.5
     elif mutation == "currency":
         manifest["limits"]["total"]["currency"] = "USD"
+    elif mutation == "consistent_currency":
+        manifest["limits"]["total"]["currency"] = "USD"
+        manifest["tools"][1]["ceiling"]["currency"] = "USD"
     else:
         manifest["tools"][1]["ceiling"]["currency"] = "USD"
     data = json.dumps(manifest).encode()
     binding["manifest_sha256"] = hashlib.sha256(data).hexdigest()
+    if mutation in {"currency", "tool_currency"}:
+        # A mixed manifest cannot supply a valid scalar Authority baseline.
+        with pytest.raises(ValueError, match="require one currency"):
+            _run(binding, manifest=data)
+        return
     _assert_withheld(_run(binding, manifest=data))
 
 

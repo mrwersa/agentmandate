@@ -21,6 +21,17 @@ flowchart LR
 
 ## Derive
 
+Reviewed obligations must name the same agent as the current manifest.
+Coincident identifiers such as `irreversible:pay` do not authorize importing
+another agent's decision mapping; reconciliation refuses that file with CLI
+exit 2. Matching reviews still carry decisions by stable obligation identifier
+and leave newly reachable obligations unreviewed.
+
+A read-only manifest with no consequential authority has no obligations and
+exits 0. Asking for `--suite` in that case exits 2: there is no meaningful suite
+to generate. Unreviewed consequential obligations continue to block generation
+with exit 1.
+
 ```console
 $ mandate obligations examples/dispute-resolver.yaml
 test obligations for dispute-resolver
