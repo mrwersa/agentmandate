@@ -134,9 +134,9 @@
         },
         {
           "title": "Ownership and time-bounded exceptions",
-          "status": "not_started",
-          "evidence": "ROADMAP.md",
-          "reason": "Change-review expiry alone does not deliver portable fleet exception routing."
+          "status": "partial",
+          "evidence": "docs/fleet-exceptions.md",
+          "reason": "Portable local review-delay records join exact index/finding bytes, owners, named decisions and pinned evidence with inclusive expiry. Findings are routed and retained; trust failures cannot be excepted. Broader exception families, authenticated organizational integration and independent privacy review remain open."
         },
         {
           "title": "Control evidence mappings",

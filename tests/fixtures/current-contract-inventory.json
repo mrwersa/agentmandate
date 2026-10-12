@@ -152,6 +152,23 @@
         "fleet_version"
       ]
     },
+    "_fleet_exceptions.py": {
+      "constants": {
+        "EXCEPTIONS_VERSION": 1,
+        "RESULT_SCHEMA": "agentmandate.fleet-exceptions/v1"
+      },
+      "inline_versions": {
+        "exceptions_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.fleet-exceptions/v1"
+      ],
+      "version_fields": [
+        "exceptions_version"
+      ]
+    },
     "_inventory.py": {
       "constants": {
         "INVENTORY_ADAPTER_VERSION": 1,
@@ -1747,10 +1764,87 @@
         {
           "action": "_SubParsersAction",
           "choices": [
+            "exceptions",
             "inventory"
           ],
           "dest": "fleet_command",
           "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate fleet exceptions": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "index",
+          "nargs": null,
+          "options": [],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "exceptions",
+          "nargs": null,
+          "options": [
+            "--exceptions"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "root",
+          "nargs": null,
+          "options": [
+            "--root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -3176,7 +3270,7 @@
       ]
     }
   },
-  "coverage_sha256": "98b7fc17f8032b9876709d3ee50b05a697cb95bf3654a924dfb178edf1e3055b",
+  "coverage_sha256": "e7f7eb8be49e5ee14159b3cc7be813efe33735503046933da42bd98c71c9cbc4",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3225,6 +3319,10 @@
     "examples/deployment-reconcile/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
     "examples/deployment-reconcile/mapping.json": "a08340730cf758aa1060d60a263733f2a5080f45bfc251d8dc8201c2dcfc4d34",
     "examples/deployment-reconcile/telemetry.json": "2fa71901442a38c8bfbfb863826638a6c4d66e734e744dac743db8f139d14edb",
+    "examples/fleet-exceptions/decision-note.txt": "6045690cb2fdcfb4660568d3d421dc4893462fcf08595de55eab7f97f633bb7c",
+    "examples/fleet-exceptions/exceptions.json": "0d49d91ed3efde09bdc0830a66a83e42bbdcf02ce0fdeab0dfbe87d4383b763b",
+    "examples/fleet-exceptions/index.json": "ea13823f5e396859e1892d8773dae390ce6a2d1c039990aaa2439658cd6374f0",
+    "examples/fleet-exceptions/none.json": "2f413c26665ecfe33e9d7122438d724fc95b6b4b049899f8e4d4693a6415380f",
     "examples/fleet-inventory/billing-repo/authority-ir.json": "ada14f4bbcd833799f197a508a7cad5761ce2a7ce04a313d8c09eb6f0d294329",
     "examples/fleet-inventory/billing-repo/manifest.json": "9d514bf22268baf892ea451d4134d98fc0fa7f8fc553afda215c892099795746",
     "examples/fleet-inventory/findings.json": "a81567045d3bbd1a8db3f89f4762a9a1478c0ec6cbf9c86c4725d0f1194a8ea6",
@@ -3329,6 +3427,8 @@
     "tests/fixtures/deployment-reconcile-v1.json": "f1855ba347862c39b67aba253135f878566c0724f481bf7ab90e5d1e11d6e204",
     "tests/fixtures/dynamic-inventory-agentkit-v1.json": "09b587e8880ca05d7ed85dc1d3b05881bb338772e9245d746dfd65b5b05df450",
     "tests/fixtures/dynamic-inventory-sentry-v1.json": "9b19e47e23871e96069c7526b0adb5315aa5a8d40cd358719b9b0d2db46c4799",
+    "tests/fixtures/fleet-exceptions-expired-v1.json": "2b54d383c70c8a4a243157245f50c6913ae2859cb5c1c3eaeabb0f588d923c3c",
+    "tests/fixtures/fleet-exceptions-v1.json": "bdac015cbacc88470c0a32c5dbded2468b45983cd472943e923a8c339791139f",
     "tests/fixtures/fleet-inventory-v1.json": "3563eb60f28fa86810ee4597e43c79fe00bac8b0d1968b80b92e5bd0487b325f",
     "tests/fixtures/legacy-json-results.json": "8c23d75c15934f7cc652810c59dc90602524cc8a893852c226e1500d23b76407",
     "tests/fixtures/manifest-v1-all-defaults.yaml": "5f31d7b5cecef0eeaaa072d1cbb65e1d59b1523788a1bb029afd43a2414cd1a2",

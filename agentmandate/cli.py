@@ -49,6 +49,8 @@ from ._deployment_reconcile import reconcile as reconcile_deployment
 from ._deployment_reconcile import render as render_deployment_reconciliation
 from ._fleet import inventory as fleet_inventory
 from ._fleet import render as render_fleet_inventory
+from ._fleet_exceptions import evaluate as evaluate_fleet_exceptions
+from ._fleet_exceptions import render as render_fleet_exceptions
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
 from ._inventory import reconcile as reconcile_inventory
 from ._ir import AuthorityIR, IRFormatError, _analyse_ir, _from_mandate, _to_mandate
@@ -509,6 +511,15 @@ def build_parser() -> argparse.ArgumentParser:
     fleet_inventory_parser.add_argument(
         "--json", action="store_true", help="machine-readable output"
     )
+
+    fleet_exceptions_parser = fleet_subparsers.add_parser(
+        "exceptions", help="check named temporary exceptions for overdue inventory reviews"
+    )
+    fleet_exceptions_parser.add_argument("index", help="fleet index JSON")
+    fleet_exceptions_parser.add_argument("--exceptions", required=True)
+    fleet_exceptions_parser.add_argument("--root", required=True)
+    fleet_exceptions_parser.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    fleet_exceptions_parser.add_argument("--json", action="store_true")
 
     deployment_parser = subparsers.add_parser(
         "deployment", help="compare supplied gateway configuration with an exported policy"
@@ -1417,6 +1428,8 @@ def _render_managed_diff(result: ManagedDiff) -> str:
 
 
 def _run_fleet(args: argparse.Namespace) -> int:
+    if args.fleet_command == "exceptions":
+        return _run_fleet_exceptions(args)
     try:
         report = fleet_inventory(
             Path(args.index).read_bytes(), root=Path(args.root), as_of=args.as_of,
@@ -1430,6 +1443,22 @@ def _run_fleet(args: argparse.Namespace) -> int:
         if args.json else render_fleet_inventory(report)
     )
     return EXIT_FINDING if report["findings"] else EXIT_OK
+
+
+def _run_fleet_exceptions(args: argparse.Namespace) -> int:
+    try:
+        report = evaluate_fleet_exceptions(
+            Path(args.index).read_bytes(), Path(args.exceptions).read_bytes(),
+            root=Path(args.root), as_of=args.as_of,
+        )
+    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.json else render_fleet_exceptions(report)
+    )
+    return EXIT_OK if report["gate_passed"] else EXIT_FINDING
 
 
 def _run_deployment_drift(args: argparse.Namespace) -> int:

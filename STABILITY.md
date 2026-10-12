@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.31.0
+agentmandate~=0.32.0
 ```
 
 ## Versioned authority artifacts
@@ -253,3 +253,12 @@ deployment drift and manifest Authority; earlier results and inputs remain
 unchanged. Recorded joins do not authenticate live mediation or establish
 ordering, accounting or runtime continuity. See
 [deployment reconciliation](docs/deployment-reconciliation.md).
+
+`mandate fleet exceptions` adds the experimental `exceptions_version: 1`
+record and `agentmandate.fleet-exceptions/v1` result. It checks named temporary
+acceptance of an overdue inventory review, joined to exact index/finding bytes
+and local evidence. Original findings and review expiry remain unchanged;
+other inventory trust failures cannot receive this exception. Initial eligible
+and expired fixtures are v1 baselines, not historical migrations. Review
+authentication and renewal are not performed. Earlier inventory, deployment
+and Authority contracts remain unchanged. See [fleet exceptions](docs/fleet-exceptions.md).

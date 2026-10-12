@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.32.0 - 2026-10-11
+
+### Added
+
+- `mandate fleet exceptions` checks named, evidence-backed temporary acceptance
+  of an overdue inventory review, with exact index/finding joins and inclusive
+  expiry. Every original finding remains visible and is routed to its owner.
+- Only overdue accepted reviews on eligible, current and complete declared
+  snapshots can receive this disposition. Other inventory trust failures remain
+  blockers; duplicate targets and changed evidence fail closed.
+- Portable v1 records/results and synthetic eligible/expired examples. The gate
+  does not authenticate reviewers, renew reviews, approve deployment or upload
+  evidence; evidence bodies are omitted from output.
+
 ## 0.31.0 - 2026-10-11
 
 ### Added
