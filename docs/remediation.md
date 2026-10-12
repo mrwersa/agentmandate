@@ -132,7 +132,9 @@ stays fixed. Candidate `repair_cost` exposes the comparison values. Equivalent
 cost vectors remain visible; the command does not arbitrarily discard them.
 
 The existing heuristic orders the remaining alternatives. `search.candidates_found`
-counts every successful recheck, while `frontier.non_dominated` counts the filtered
+counts every successful recheck. `frontier.successful_candidates` identifies that
+same input to filtering; `search.candidates_analyzed` separately counts all analyzed
+combinations, including those rejected by their recheck. `frontier.non_dominated` counts the filtered
 alternatives before display. `frontier.display_complete: false` means the
 display cap hid alternatives. `search.enumeration_complete: false` means a
 better candidate, including one dominating a displayed choice, may be unexamined.
@@ -332,7 +334,9 @@ source digest, kept-tool and supplied-path records, and adds `ceiling_grids`
 and `frontier`. Filtered candidates add `repair_cost`. The
 [v4 fixtures](../tests/fixtures/remediation-frontier-refund-v4.json) cover the
 refund frontier, capped enumeration, required paths and a clean baseline. A
-[v3-to-v4 case](../tests/fixtures/remediation-v3-to-v4.json) pins preserved fields;
+[v3-to-v4 case](../tests/fixtures/remediation-v3-to-v4.json) repeats the same v3
+command with only `--pareto` added and pins preserved fields, including the full
+search record and supplied ceiling domain;
 commands omitting both new flags retain all earlier result bytes and exit codes.
 
 Ceiling selection outside supplied finite domains, effect-budget repairs beyond removal, conditions,

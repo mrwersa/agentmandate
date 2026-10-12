@@ -1,5 +1,5 @@
 {
-  "after": "tests/fixtures/remediation-frontier-required-v4.json",
+  "after": "tests/fixtures/remediation-frontier-compatibility-v4.json",
   "before": "tests/fixtures/remediation-workflow-monetary-v3.json",
   "preserved_fields": [
     "baseline",
@@ -7,6 +7,10 @@
     "input",
     "scope",
     "keep_tools",
-    "requirements"
+    "requirements",
+    "ceiling_options",
+    "requirement_rejections",
+    "search",
+    "status"
   ]
 }

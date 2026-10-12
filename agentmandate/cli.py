@@ -910,8 +910,9 @@ def _run_remediation(args: argparse.Namespace) -> int:
                  for option in result.get("ceiling_options", []))
     if "frontier" in result:
         frontier = result["frontier"]
+        count = frontier["non_dominated"] if frontier["status"] == "computed" else "n/a"
         lines.append(f"FRONTIER enabled={frontier['enabled']} status={frontier['status']} "
-                     f"non_dominated={frontier['non_dominated']} "
+                     f"non_dominated={count} "
                      f"display_complete={frontier['display_complete']}: {frontier['scope']}")
     if "requirements" in result:
         lines.append(f"REQUIREMENTS {result['requirements']['scope']}")

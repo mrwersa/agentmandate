@@ -110,8 +110,12 @@ def _grid_domain(mandate: Mandate, grids: tuple[str, ...]) -> tuple[tuple[str, .
                 "ceiling grids may generate at most 512 points in total before deduplication"
             )
         for index in range(count):
-            digits = tuple(int(char) for char in str(start + index * stride))
-            options.append(f"{name}={Decimal((0, digits, exponent))}")
+            text = str(start + index * stride)
+            # Remove only fractional trailing zeros; do not round in caller context.
+            places = min(len(text) - len(text.rstrip("0")), max(0, -exponent))
+            digits = tuple(int(char) for char in text[:len(text) - places]) or (0,)
+            value = Decimal((0, digits, exponent + places))
+            options.append(f"{name}={value or '0'}")
         records.append({"tool": name, "minimum": str(lower), "maximum": str(upper),
                         "step": str(step), "currency": tool.ceiling.currency,
                         "points_generated": count})
@@ -272,7 +276,7 @@ def plan(
             "objectives": {"edit_count": "minimize", "lost_reachable_tools": "set inclusion",
                            "added_approval_tools": "set inclusion",
                            "retained_ceilings": "maximize each declared tool ceiling"},
-            "candidates_considered": 0, "non_dominated": None,
+            "successful_candidates": 0, "non_dominated": None,
             "display_complete": True,
         }
     if _structural(findings):
@@ -365,7 +369,7 @@ def plan(
             _dominates(other["repair_cost"], c["repair_cost"]) for other in candidates
         )]
         report["frontier"].update(
-            status="computed", candidates_considered=search["candidates_found"],
+            status="computed", successful_candidates=search["candidates_found"],
             non_dominated=len(candidates),
         )
     if "frontier" in report:

@@ -649,6 +649,7 @@
       "tests/fixtures/remediation-frontier-limited-v4.json",
       "tests/fixtures/remediation-frontier-required-v4.json",
       "tests/fixtures/remediation-frontier-clean-v4.json",
+      "tests/fixtures/remediation-frontier-compatibility-v4.json",
       "tests/fixtures/remediation-v3-to-v4.json"
     ],
     "id": "remediation-v4",

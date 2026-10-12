@@ -46,7 +46,7 @@ def test_refund_grid_finds_two_incomparable_repairs_without_changing_intent():
     assert result['baseline'] == analyse(source).as_dict()
     assert result['search']['candidates_found'] == 33
     assert result['search']['enumeration_complete']
-    assert result['frontier']['candidates_considered'] == 33
+    assert result['frontier']['successful_candidates'] == 33
     assert result['frontier']['non_dominated'] == 2
     assert result['frontier']['display_complete']
     assert [signature(c) for c in result['candidates']] == [
@@ -73,6 +73,7 @@ def test_exact_grid_ignores_decimal_context_and_does_not_invent_an_endpoint():
     assert [Fraction(o['ceiling']['amount']) for o in result['ceiling_options']] == [
         Fraction(1, 10), Fraction(2, 10), Fraction(3, 10),
     ]
+    assert [o['ceiling']['amount'] for o in result['ceiling_options']] == ['0.1', '0.2', '0.3']
     assert result['ceiling_grids'][0]['points_generated'] == 3
     assert Fraction(result['candidates'][0]['edits'][0]['after']['amount']) == Fraction(3, 10)
 
@@ -201,7 +202,7 @@ def test_cutoffs_disclose_three_independent_limits():
     assert complete['candidates'][0]['authority']['truncated']
     limited = plan(source, max_evaluations=1, **args)
     assert not limited['search']['enumeration_complete']
-    assert limited['frontier']['candidates_considered'] == 0
+    assert limited['frontier']['successful_candidates'] == 0
     assert limited['frontier']['non_dominated'] == 0
     assert limited['frontier']['display_complete']
     grid_only = plan(source, ceiling_grids=args['ceiling_grids'], max_candidates=1)
@@ -273,7 +274,7 @@ def test_cli_invalid_grids_are_usage_errors(grid, capsys):
     assert not output.out and output.err.startswith('error: ')
 
 
-@pytest.mark.parametrize('fixture', ['refund', 'limited', 'required', 'clean'])
+@pytest.mark.parametrize('fixture', ['refund', 'limited', 'required', 'clean', 'compatibility'])
 def test_v4_cli_fixtures_and_source_integrity(fixture, monkeypatch, capsys):
     monkeypatch.chdir(ROOT)
     case = json.loads((ROOT / f'tests/fixtures/remediation-frontier-{fixture}-v4.json').read_text())
@@ -291,5 +292,21 @@ def test_v3_to_v4_case_preserves_baseline_and_required_path_conformance():
     assert before['exit'] == after['exit'] == 1
     assert before['result']['schema'] == 'agentmandate.remediation/v3'
     assert after['result']['schema'] == 'agentmandate.remediation/v4'
+    assert after['argv'] == before['argv'] + ['--pareto']
     for field in case['preserved_fields']:
         assert before['result'][field] == after['result'][field]
+
+
+@pytest.mark.parametrize('extra', [[], ['--pareto']])
+def test_uncomputed_frontier_text_uses_not_applicable(extra, capsys):
+    manifest = 'examples/dispute-resolver.yaml' if extra else 'examples/dispute-resolver-v2.yaml'
+    main(['remediate', str(ROOT / manifest), '--ceiling-grid', 'issue_refund=0:200:25', *extra])
+    output = capsys.readouterr()
+    assert 'non_dominated=n/a' in output.out and 'non_dominated=None' not in output.out
+
+
+def test_zero_and_fractional_grid_spelling_is_normalized_without_changing_explicit_options():
+    result = plan(model(), ceiling_grids=('pay=0.00:0.20:0.10',), ceiling_options=('pay=0.30',))
+    assert [o['ceiling']['amount'] for o in result['ceiling_options']] == [
+        '0', '0.1', '0.2', '0.30',
+    ]

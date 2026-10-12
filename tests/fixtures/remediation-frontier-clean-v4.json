@@ -37,7 +37,6 @@
     "candidates": [],
     "ceiling_grids": [],
     "frontier": {
-      "candidates_considered": 0,
       "display_complete": true,
       "enabled": true,
       "non_dominated": null,
@@ -48,7 +47,8 @@
         "retained_ceilings": "maximize each declared tool ceiling"
       },
       "scope": "repair trade-offs among examined, rechecked candidates only",
-      "status": "not_computed"
+      "status": "not_computed",
+      "successful_candidates": 0
     },
     "input": {
       "manifest_sha256": "979cbcbd152ca90275545d8335cddfa2b7d183efdfd2a3397af678e9d15591e4"

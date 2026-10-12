@@ -354,7 +354,6 @@
       }
     ],
     "frontier": {
-      "candidates_considered": 33,
       "display_complete": true,
       "enabled": true,
       "non_dominated": 2,
@@ -365,7 +364,8 @@
         "retained_ceilings": "maximize each declared tool ceiling"
       },
       "scope": "repair trade-offs among examined, rechecked candidates only",
-      "status": "computed"
+      "status": "computed",
+      "successful_candidates": 33
     },
     "input": {
       "manifest_sha256": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9"
