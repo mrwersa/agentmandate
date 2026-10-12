@@ -357,6 +357,10 @@ canonical result and exits 1.
 Every analysis command takes `--json` and exits non-zero on a finding, so they
 drop into CI unchanged. `scan` writes a manifest to standard output and is a
 one-off, not a gate.
+All seven structural `validate` command groups also accept `--json`, returning
+the shared [validation result](structural-validation.md). Their exit 0 means
+structure is valid, with evidence trust and deployment approval unassessed;
+malformed or excessively nested inputs exit 2 without partial output.
 `inventory import` likewise writes an unreviewed declaration or inventory IR;
 exit 0 means extraction succeeded. `inventory validate` proves structure only.
 Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with

@@ -255,13 +255,18 @@ def reconcile(current: ObligationSet, reviewed: ObligationSet) -> ObligationSet:
     generate a suite for authority the agent no longer has, which is the exact
     drift this package exists to catch.
 
-    Matching is by stable identifier, so:
+    Matching requires the same agent and uses stable identifiers, so:
 
     - an obligation that still exists keeps its reviewed decision and cases
     - an obligation the manifest no longer reaches is dropped
     - a newly reachable obligation appears unreviewed, and blocks generation
       until somebody looks at it
     """
+    if current.agent != reviewed.agent:
+        raise ValueError(
+            f"cannot reconcile obligations for different agents: "
+            f"{current.agent!r} and {reviewed.agent!r}"
+        )
     mapped = {o.identifier: o for o in reviewed.obligations}
     return ObligationSet(
         agent=current.agent,

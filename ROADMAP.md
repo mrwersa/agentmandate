@@ -63,7 +63,13 @@ external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
 
-**Next repair implementation — 12 October 2026:**
+**Core review corrections — 12 October 2026:** the next implementation fixes
+currency aggregation, diff scope parity, cross-agent obligation reviews and
+malformed-input handling. Structural validators gain scoped JSON output, and
+YAML flow mappings use the optional parser. These correct existing surfaces;
+they do not complete another initiative or move the 50% planning ledger.
+
+**Merged repair implementation — 12 October 2026:**
 [Finite ceiling grids and repair trade-offs](docs/remediation.md#explore-a-ceiling-range-and-compare-repair-trade-offs)
 expand the existing remediation slice. Caller-defined ranges generate exact
 choices; optional Pareto filtering compares edit cost, named tool losses,
@@ -71,7 +77,10 @@ added approvals and retained per-tool ceilings after full rechecks and
 required-path screening. Enumeration, display and reachability bounds remain
 separate. This is a bounded repair frontier, not complete least-authority
 synthesis: the remediation initiative stays partial, advanced authority stays
-unstarted, and the ledger stays at 50%.
+unstarted, and the ledger stays at 50%. Merged as #255 after the maintainer
+supplied an out-of-band review with independent grid and frontier fuzzing;
+all four presentation/compatibility refinements were applied. That review is
+not a GitHub approval or an external security review.
 
 **Pre-1.0 scope decision — 10 October 2026:** freeze additional continuity
 contracts and prioritize completion of the 1.0 gates. The delivered

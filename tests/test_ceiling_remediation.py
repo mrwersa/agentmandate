@@ -359,14 +359,12 @@ def test_two_spending_tools_need_joint_ceilings_without_relaxing_the_total():
     assert Mandate.parse(candidate['manifest']).limits == source.limits
 
 
-def test_mixed_currency_input_retains_its_structural_error_and_generates_no_repairs():
+def test_mixed_currency_input_cannot_generate_an_analyzed_repair_baseline():
     source = model()
     source = replace(source, tools=tuple(replace(t, ceiling=replace(t.ceiling, currency='USD'))
                                          if t.name == 'pay' else t for t in source.tools))
-    result = plan(source, ceiling_options=('pay=2',))
-    assert result['status'] == 'input_requires_review' and not result['candidates']
-    assert result['ceiling_options'][0]['ceiling']['currency'] == 'USD'
-    assert any(f['rule'] == 'ceiling.mixed-currency' for f in result['baseline_lint'])
+    with pytest.raises(ValueError, match='require one currency'):
+        plan(source, ceiling_options=('pay=2',))
 
 
 def test_candidate_arithmetic_exhaustion_leaves_no_partial_cli_report(tmp_path, capsys):

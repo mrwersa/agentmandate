@@ -1004,7 +1004,7 @@ def _validate_condition_profile(graph: AuthorityIR) -> None:
         kind: sum(entity.kind == kind for entity in graph.entities)
         for kind in {"tool", "condition", "context", "effect"}
     }
-    if counts != {"tool": 1, "condition": 1, "context": 1, "effect": 1}:
+    if len(graph.entities) != 4 or counts != {"tool": 1, "condition": 1, "context": 1, "effect": 1}:
         raise ConditionFormatError("condition IR profile has unsupported entities")
     predicates = {
         entity.id: {

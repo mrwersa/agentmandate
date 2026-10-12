@@ -69,6 +69,13 @@ v4 output and a v3-to-v4 compatibility case, preserving the fixed
 [fleet-exception inventory](../tests/fixtures/current-contract-inventory-v0.32.json).
 Commands without the new flags retain all earlier output bytes and exits.
 
+The [structural validation result](structural-validation.md) adds `--json`
+to all seven validator groups with initial scoped v1 baselines. It preserves
+the fixed [remediation inventory](../tests/fixtures/current-contract-inventory-v0.33.json)
+and every earlier fixture digest. Corrections to mixed-currency analysis,
+effect-scope claims, unrelated review joins and malformed input are intentional
+bug fixes; preserving historical fixture bytes does not preserve those defects.
+
 ## What is pinned
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)

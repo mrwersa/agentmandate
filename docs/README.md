@@ -20,6 +20,7 @@ guarantee.
 | Record a named temporary delay to an overdue fleet review | [Fleet exceptions](fleet-exceptions.md) |
 | Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
+| Check artifact structure before evidence analysis | [Structural validation](structural-validation.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
 | Preserve required ordered calls during repair | [Required workflows](required-workflows.md) |

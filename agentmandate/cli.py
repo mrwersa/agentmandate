@@ -349,6 +349,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate snapshot structure without accepting it as authority",
     )
     ir_validate.add_argument("snapshot", help="path to an Authority IR snapshot")
+    ir_validate.add_argument("--json", action="store_true",
+                            help="machine-readable structural result")
 
     inventory_parser = subparsers.add_parser(
         "inventory",
@@ -362,6 +364,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate declaration structure without accepting it as authority",
     )
     inventory_validate.add_argument("declaration", help="path to a declaration")
+    inventory_validate.add_argument("--json", action="store_true")
     inventory_import = inventory_subparsers.add_parser(
         "import", help="derive an unreviewed inventory declaration from local JSON",
     )
@@ -403,6 +406,7 @@ def build_parser() -> argparse.ArgumentParser:
     conditions_input.add_argument(
         "--context", help="path to one condition-context artifact"
     )
+    conditions_validate.add_argument("--json", action="store_true")
 
     delegations_parser = subparsers.add_parser(
         "delegations",
@@ -418,6 +422,7 @@ def build_parser() -> argparse.ArgumentParser:
     delegations_input = delegations_validate.add_mutually_exclusive_group(required=True)
     delegations_input.add_argument("--attachment", help="path to one attachment artifact")
     delegations_input.add_argument("--chain", help="path to one delegation-chain artifact")
+    delegations_validate.add_argument("--json", action="store_true")
 
     producers_parser = subparsers.add_parser(
         "producers",
@@ -431,6 +436,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate a boundary structurally without trusting its sources",
     )
     producers_validate.add_argument("boundary", help="path to one producer boundary")
+    producers_validate.add_argument("--json", action="store_true")
 
     continuity_parser = subparsers.add_parser(
         "continuity",
@@ -444,6 +450,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate one continuity artifact without trusting its evidence",
     )
     continuity_validate.add_argument("artifact", help="path to one continuity artifact")
+    continuity_validate.add_argument("--json", action="store_true")
     handover_parser = continuity_subparsers.add_parser(
         "handover",
         help="verify retained state for a declared scalar handover",
@@ -581,6 +588,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate a managed oracle structurally without trusting its sources",
     )
     cedar_validate.add_argument("oracle", help="path to a managed Cedar oracle")
+    cedar_validate.add_argument("--json", action="store_true")
     cedar_align = cedar_subparsers.add_parser(
         "align",
         help="align one managed oracle with reviewed manifest authority",
@@ -956,6 +964,16 @@ def _run_remediation(args: argparse.Namespace) -> int:
     ) else EXIT_OK
 
 
+def _validation_output(kind: str, version: int, text: str, machine: bool) -> str:
+    if not machine:
+        return text
+    return json.dumps({
+        "schema": "agentmandate.validation/v1", "status": "valid",
+        "artifact": kind, "version": version,
+        "scope": "structure only; evidence trust and deployment approval are not assessed",
+    }, indent=2, sort_keys=True) + "\n"
+
+
 def _run_ir(args: argparse.Namespace) -> int:
     try:
         if args.ir_command == "export":
@@ -966,6 +984,7 @@ def _run_ir(args: argparse.Namespace) -> int:
         else:
             snapshot = AuthorityIR.from_json(_read_text(args.snapshot))
             output = f"valid authority IR v{snapshot.ir_version}\n"
+            output = _validation_output("authority-ir", snapshot.ir_version, output, args.json)
     except (IRFormatError, ManifestError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -986,6 +1005,9 @@ def _run_inventory(args: argparse.Namespace) -> int:
         else:
             declaration = DynamicInventory.from_json(_read_text(args.declaration))
             output = f"valid dynamic inventory v{declaration.inventory_version}\n"
+            output = _validation_output(
+                "dynamic-inventory", declaration.inventory_version, output, args.json,
+            )
     except (ValueError, OSError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -998,9 +1020,12 @@ def _run_conditions(args: argparse.Namespace) -> int:
         if args.condition is not None:
             value = ToolCondition.from_json(_read_text(args.condition))
             output = f"valid tool condition v{value.version}\n"
+            kind = "tool-condition"
         else:
             value = ConditionContext.from_json(_read_text(args.context))
             output = f"valid condition context v{value.version}\n"
+            kind = "condition-context"
+        output = _validation_output(kind, value.version, output, args.json)
     except (ConditionFormatError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -1013,9 +1038,12 @@ def _run_delegations(args: argparse.Namespace) -> int:
         if args.attachment is not None:
             value = DelegationAttachment.from_json(_read_text(args.attachment))
             output = f"valid delegation attachment v{value.version}\n"
+            kind = "delegation-attachment"
         else:
             value = DelegationChain.from_json(_read_text(args.chain))
             output = f"valid delegation chain v{value.version}\n"
+            kind = "delegation-chain"
+        output = _validation_output(kind, value.version, output, args.json)
     except (DelegationFormatError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -1027,6 +1055,8 @@ def _run_producers(args: argparse.Namespace) -> int:
     try:
         value = ProducerBoundary.from_json(_read_text(args.boundary))
         output = f"valid producer boundary v{value.producer_boundary_version}\n"
+        output = _validation_output("producer-boundary", value.producer_boundary_version,
+                                    output, args.json)
     except (ProducerBoundaryFormatError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -1158,7 +1188,10 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 RevisionReview: "revision review",
                 ScalarHandover: "scalar handover",
             }
-            print(f"valid {labels[type(artifact)]} v{artifact.version}")
+            label = labels[type(artifact)]
+            output = _validation_output(label.lower().replace(" ", "-"), artifact.version,
+                                        f"valid {label} v{artifact.version}\n", args.json)
+            sys.stdout.write(output)
             return EXIT_OK
 
         if args.continuity_command == "handover":
@@ -1561,6 +1594,8 @@ def _run_cedar(args: argparse.Namespace) -> int:
         if args.cedar_command == "validate":
             oracle = ManagedOracle.from_json(_read_text(args.oracle))
             output = f"valid managed Cedar oracle v{oracle.managed_oracle_version}\n"
+            output = _validation_output("managed-cedar-oracle", oracle.managed_oracle_version,
+                                        output, args.json)
             result_clean = True
         else:
             manifest_content = Path(args.manifest).read_bytes()
@@ -2033,7 +2068,7 @@ def _dynamic_inventory(
 def main(argv: Sequence[str] | None = None) -> int:
     try:
         return _main(argv)
-    except _SearchArithmeticError as exc:
+    except (_SearchArithmeticError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
 
@@ -2281,7 +2316,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
                 print(json.dumps(to_decision_suite(obligations), indent=2))
             except ValueError as exc:
                 print(f"error: {exc}", file=sys.stderr)
-                return EXIT_FINDING
+                return EXIT_FINDING if obligations.obligations else EXIT_USAGE
             return EXIT_OK
         _emit(obligations.to_dict(), args.json, obligations.render())
         return EXIT_FINDING if obligations.unreviewed else EXIT_OK

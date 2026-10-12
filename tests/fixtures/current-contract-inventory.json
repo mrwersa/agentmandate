@@ -343,6 +343,7 @@
         "agentmandate.cedar-effective-diff/v1",
         "agentmandate.conditions/v1",
         "agentmandate.delegations/v1",
+        "agentmandate.validation/v1",
         "agentmandate.verify/v1"
       ],
       "version_fields": [
@@ -757,6 +758,18 @@
           "options": [],
           "required": true,
           "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -822,6 +835,18 @@
           "nargs": null,
           "options": [
             "--context"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
           ],
           "required": false,
           "type": null
@@ -1207,6 +1232,18 @@
           "options": [],
           "required": true,
           "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -1272,6 +1309,18 @@
           "nargs": null,
           "options": [
             "--chain"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
           ],
           "required": false,
           "type": null
@@ -2130,6 +2179,18 @@
           "options": [],
           "required": true,
           "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -2212,6 +2273,18 @@
           "nargs": null,
           "options": [],
           "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
           "type": null
         }
       ],
@@ -2382,6 +2455,18 @@
           "nargs": null,
           "options": [],
           "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
           "type": null
         }
       ],
@@ -3296,7 +3381,7 @@
       ]
     }
   },
-  "coverage_sha256": "46c820fcfc284b3a4282142c352decea7d31529313da99cf4c54e30dc9de3653",
+  "coverage_sha256": "1248cd264935c374dbbc33d706063e12a1e2eaaf72b195224c9c9639f7d8ce26",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3503,7 +3588,8 @@
     "tests/fixtures/revision-review-result-v1-expired.json": "42b75bd4f30a6cc58683783a520efc36c2154255c381a5e9963dd951a95b3ec3",
     "tests/fixtures/scalar-handover-result-v1-expired.json": "193ec81ee05e6b148239a4810e3604475683d58e74d1227bc0987646ec7e43aa",
     "tests/fixtures/scalar-handover-result-v1-reset.json": "b1ca416557e588e9363f4423bcfd9cda0b152a2d9868177089768c6f77db2cb6",
-    "tests/fixtures/scalar-handover-result-v1-retained.json": "ccb1483624824bdca6144d99652eec2fb498fc4eb0bce076861bd1e934ab0d81"
+    "tests/fixtures/scalar-handover-result-v1-retained.json": "ccb1483624824bdca6144d99652eec2fb498fc4eb0bce076861bd1e934ab0d81",
+    "tests/fixtures/structural-validation-v1.json": "3af58e833707b869b6c30332985eb7fc2aa13cef6258f6457e125a989cc8d87a"
   },
   "public_python": {
     "Authority": {

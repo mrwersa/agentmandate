@@ -459,7 +459,9 @@ def test_grid_frontier_preserves_all_previous_contracts_and_fixtures():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.32.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.33.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) == set(previous["cli"])
     for path, command in previous["cli"].items():
@@ -478,6 +480,33 @@ def test_grid_frontier_preserves_all_previous_contracts_and_fixtures():
                 "agentmandate.remediation/v4"
             )
             present["schemas"].remove("agentmandate.remediation/v4")
+        assert present == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_structural_json_addition_preserves_every_existing_contract_and_fixture():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.33.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) == set(previous["cli"])
+    validators = {f"mandate {group} validate" for group in (
+        "ir", "inventory", "conditions", "delegations", "producers", "continuity", "cedar",
+    )}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path in validators:
+            added = [a for a in present["arguments"] if a["dest"] == "json"]
+            assert len(added) == 1 and added[0]["options"] == ["--json"]
+            present["arguments"].remove(added[0])
+        assert present == command
+    assert set(current["artifact_markers"]) == set(previous["artifact_markers"])
+    for path, markers in previous["artifact_markers"].items():
+        present = copy.deepcopy(current["artifact_markers"][path])
+        if path == "cli.py":
+            present["schemas"].remove("agentmandate.validation/v1")
         assert present == markers
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

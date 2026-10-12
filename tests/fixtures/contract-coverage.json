@@ -660,5 +660,20 @@
     "tests": [
       "tests/test_remediation_frontier.py"
     ]
+  },
+  {
+    "doc": "docs/structural-validation.md",
+    "fixtures": [
+      "tests/fixtures/structural-validation-v1.json"
+    ],
+    "id": "structural-validation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.validation/v1"
+    ],
+    "tests": [
+      "tests/test_structural_cli.py",
+      "tests/test_analysis_boundaries.py"
+    ]
   }
 ]

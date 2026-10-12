@@ -331,15 +331,22 @@ def loads(text: str, source: str | None = None) -> Mandate:
     lives beside CI config.
     """
     stripped = text.lstrip()
+    json_error = None
     if stripped.startswith("{"):
         try:
             raw = json.loads(text)
         except json.JSONDecodeError as exc:
-            raise ManifestError(f"manifest: invalid JSON: {exc}") from exc
-        return Mandate.parse(raw, source=source)
+            json_error = exc  # A YAML flow mapping also starts with '{'.
+        else:
+            return Mandate.parse(raw, source=source)
     try:
         import yaml
-    except ImportError as exc:  # pragma: no cover - exercised via the CLI path
+    except ImportError as exc:
+        if json_error is not None:
+            raise ManifestError(
+                f"manifest: invalid JSON: {json_error}. "
+                "Reading YAML flow mappings needs PyYAML: pip install 'agentmandate[yaml]'."
+            ) from exc
         raise ManifestError(
             "reading a YAML manifest needs PyYAML: pip install 'agentmandate[yaml]'. "
             "A JSON manifest works with no extra dependency."
@@ -347,6 +354,8 @@ def loads(text: str, source: str | None = None) -> Mandate:
     try:
         raw = yaml.safe_load(text)
     except yaml.YAMLError as exc:
+        if json_error is not None:
+            raise ManifestError(f"manifest: invalid JSON: {json_error}") from exc
         raise ManifestError(f"manifest: invalid YAML: {exc}") from exc
     return Mandate.parse(raw, source=source)
 

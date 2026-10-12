@@ -4,8 +4,10 @@ A mandate manifest declares what an agent is permitted to do. The core analysis
 commands read it; artifact validators and source scanning have separate inputs.
 
 YAML is the documented format because a manifest is a hand-authored file that
-lives beside CI configuration. JSON is accepted too, and reading JSON needs no
-dependency beyond the standard library.
+lives beside CI configuration. JSON is accepted too, with no dependency beyond
+the standard library. YAML flow mappings such as
+`{agent: a, tools: [{name: t, effect: read}]}` use the optional YAML reader,
+even though they begin with `{`.
 
 ```bash
 pip install "agentmandate[yaml]"   # YAML support
@@ -82,6 +84,15 @@ unquoted fractional numbers before validation. The search preserves parsed
 decimal values using exact arithmetic; its
 [maximum-headroom argument](headroom-abstraction.md) explains why it fills
 ceilings instead of trying every possible amount.
+
+Scalar monetary analysis requires one currency across **all declared tool
+ceilings and the total limit**, including unreachable tools and zero amounts.
+Mixed declarations remain loadable for lint and review, but `reach`, `diff`,
+obligation derivation and other reachability consumers refuse them with a
+`ValueError`; their CLI commands exit 2 without partial results. No exchange-rate
+or cross-currency accounting model is inferred. A wholly GBP or wholly USD
+manifest remains analyzable, and ordinary currency changes between separately
+consistent releases still require diff review.
 
 ### Scopes are types, not instances
 
