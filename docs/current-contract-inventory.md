@@ -30,7 +30,7 @@ apart from explicitly added repair options, presentation markers and the
 required-workflow input and the separate named-review gate. Historical transition
 checks compare fixed inventories;
 the latest extension is checked against the actual package. CLI replay tests
-exercise all three repair result versions. The maintainer supplied a partial
+exercise all four repair result versions. The maintainer supplied a partial
 out-of-band execution review of
 #232 covering the example and structural screening. Author checks cover the
 remaining preservation, cutoff, approval and ranking paths. Neither review is
@@ -63,6 +63,11 @@ command and its initial mapping/result baselines while preserving the
 and initial eligible/expired baselines while preserving the
 [reconciliation snapshot](../tests/fixtures/current-contract-inventory-v0.31.json).
 Earlier declarations and fixture bytes remain pinned unchanged.
+
+Finite ceiling grids and optional [repair trade-offs](remediation.md) add opt-in
+v4 output and a v3-to-v4 compatibility case, preserving the fixed
+[fleet-exception inventory](../tests/fixtures/current-contract-inventory-v0.32.json).
+Commands without the new flags retain all earlier output bytes and exits.
 
 ## What is pinned
 
@@ -103,7 +108,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Principal observations and accounting | [Observations](principal-continuity.md), [accounting](principal-accounting.md); `test_principal_continuity.py`, `test_principal_accounting.py` |
 | Revision and scalar cutover | [Revision review](revision-review.md), [handover](scalar-handover.md); `test_revision_review.py`, `test_scalar_handover.py` |
 | Obligations, scenarios and decision suites | [Obligations](test-obligations.md), [evaluation](evaluation-loop.md); `test_obligations.py`, `test_scenarios.py` |
-| Repair candidates | [Remediation](remediation.md); `test_remediation.py`, `test_ceiling_remediation.py`, `test_required_workflows.py` |
+| Repair candidates | [Remediation](remediation.md); `test_remediation.py`, `test_ceiling_remediation.py`, `test_required_workflows.py`, `test_remediation_frontier.py` |
 | Named acceptance of changes | [Change review](change-review.md); `test_change_review.py` |
 | Trace verification and SARIF | [Traces](traces.md), [CI](ci.md); `test_verify.py`, `test_otel.py`, `test_findings.py` |
 | Historical readers, projections and acceptance | [Historical audit](pre-1.0-consolidation-audit.md), [acceptance](continuation-evidence-acceptance.md); converter, replay and acceptance tests named in the coverage index |

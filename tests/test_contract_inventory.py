@@ -435,7 +435,9 @@ def test_fleet_exceptions_preserve_all_previous_contracts_and_fixtures():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.31.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.32.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) - set(previous["cli"]) == {"mandate fleet exceptions"}
     for path, command in previous["cli"].items():
@@ -449,5 +451,33 @@ def test_fleet_exceptions_preserve_all_previous_contracts_and_fixtures():
     }
     for path, markers in previous["artifact_markers"].items():
         assert current["artifact_markers"][path] == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_grid_frontier_preserves_all_previous_contracts_and_fixtures():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.32.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) == set(previous["cli"])
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate remediate":
+            for dest, options in [("ceiling_grid", ["--ceiling-grid"]), ("pareto", ["--pareto"])]:
+                added = [a for a in present["arguments"] if a["dest"] == dest]
+                assert len(added) == 1 and added[0]["options"] == options
+                present["arguments"].remove(added[0])
+        assert present == command
+    assert set(current["artifact_markers"]) == set(previous["artifact_markers"])
+    for path, markers in previous["artifact_markers"].items():
+        present = copy.deepcopy(current["artifact_markers"][path])
+        if path == "_remediation.py":
+            assert present["constants"].pop("FRONTIER_REMEDIATION_SCHEMA") == (
+                "agentmandate.remediation/v4"
+            )
+            present["schemas"].remove("agentmandate.remediation/v4")
+        assert present == markers
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

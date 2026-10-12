@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.32.0
+agentmandate~=0.33.0
 ```
 
 ## Versioned authority artifacts
@@ -53,6 +53,15 @@ conformance and screened edits; it preserves baseline Authority and its exit.
 Omitting the flag keeps v1/v2 bytes. The [workflow contract](docs/required-workflows.md)
 and before/after compatibility case cover these additions; the Python records
 are private. Annotations do not authenticate a reviewer or prove business success.
+
+Either `--ceiling-grid` or `--pareto` selects `agentmandate.remediation/v4`,
+including with required paths. Finite caller-supplied grids generate exact
+ceiling choices. The optional frontier compares explicit repair costs among
+examined, rechecked candidates; its display cap and enumeration limit remain
+separate from candidate reachability truncation. Omitting both flags preserves
+all v1/v2/v3 bytes. [V4 baselines and a v3-to-v4 compatibility case](docs/remediation.md)
+pin the added domain/frontier fields and preserved original Authority. This is
+a repair trade-off report, not global least-authority synthesis or deployment approval.
 
 The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
 `mandate producers`, `mandate continuity`, `mandate cedar`, and reviewed

@@ -1,0 +1,12 @@
+{
+  "after": "tests/fixtures/remediation-frontier-required-v4.json",
+  "before": "tests/fixtures/remediation-workflow-monetary-v3.json",
+  "preserved_fields": [
+    "baseline",
+    "baseline_lint",
+    "input",
+    "scope",
+    "keep_tools",
+    "requirements"
+  ]
+}

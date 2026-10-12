@@ -29,9 +29,10 @@ For machine-readable results:
 mandate remediate examples/dispute-resolver-v2.yaml --keep-tool issue_refund --json
 ```
 
-Without ceiling or workflow options, the result uses `agentmandate.remediation/v1`.
+Without ceiling, workflow or frontier options, the result uses `agentmandate.remediation/v1`.
 Supplying `--ceiling` selects `agentmandate.remediation/v2`; supplying
-`--required-workflows` selects v3. See the [compatibility rules
+`--required-workflows` selects v3. Either `--ceiling-grid` or `--pareto` selects v4,
+including when combined with workflows. See the [compatibility rules
 below](#compatibility-and-remaining-scope). `input.manifest_sha256` identifies the exact
 source bytes. `baseline` is the unchanged Authority result at the selected depth;
 `baseline_lint` keeps the separate single-manifest findings. Each candidate includes
@@ -66,6 +67,79 @@ reduce a tool to zero spend if zero was explicitly supplied; keeping that tool r
 does not preserve a useful monetary operation. The search never invents a minimum useful
 amount, changes currency, raises the total limit, removes a limit, or treats the limit
 as a runtime guard.
+
+## Explore a ceiling range and compare repair trade-offs
+
+Supply a finite range instead of listing each amount:
+
+```bash
+mandate remediate examples/dispute-resolver-v2.yaml --ceiling-grid issue_refund=0:200:25 --pareto
+```
+
+This checks £0, £25, …, £200 and returns two non-dominated choices:
+
+| Repair | Retained capability | Search result |
+|---|---|---|
+| Lower refund ceiling to £125 | Search and all other tools remain reachable | No breach within eight calls; truncated |
+| Remove `search_cases` | Full £500 refund ceiling remains, with one case binding | No breach; untruncated |
+
+Neither dominates the other: the first retains search, while the second retains
+the original refund headroom. £100 is dominated by £125 under the declared
+repair-cost objectives. The original breach stays visible and the command
+still exits 1. These are alternatives for human review.
+
+To preserve the supplied normal £100 refund, add
+`--required-workflows examples/remediation/required-refund.json`. This screens
+out lost search and ceilings below £100, leaving the £125 candidate. Its
+truncation remains: a deeper search can still find a breach.
+
+`TOOL=MIN:MAX:STEP` generates `MIN + n × STEP` up to and including MAX when
+the step lands on it. It never adds an off-grid endpoint. All numbers must be
+finite and nonnegative. Generated ceilings must stay below
+the tool's current ceiling; STEP must be positive.
+Grids inherit the tool's currency. Repeat the flag for different tools or ranges,
+or combine it with explicit `--ceiling` choices. The combined choices are
+deduplicated numerically and retained in `ceiling_options`; `ceiling_grids`
+records each supplied range and its generated count.
+
+Grid expansion uses exact scaled integers, independent of Decimal context.
+Inputs are limited to 128 characters per number, 100 coefficient digits,
+exponents from −100 to +100, and **512 generated points across all grids before
+deduplication**. Existing explicit `--ceiling` choices retain their prior
+numeric support. A grid defines the choices to explore; it does not infer the
+minimum useful payment or the full continuous domain. Each examined choice
+gets its own recheck; no monotonic safety assumption or binary search is used.
+
+### What the frontier compares
+
+`--pareto` filters the successful candidates before the display cap. A candidate
+dominates another only when it is no worse on every objective and strictly
+better on at least one:
+
+| Objective | Preferred direction |
+|---|---|
+| Number of edits | Fewer |
+| Lost reachable tools | A subset of the other candidate's named losses |
+| Tools gaining approval requirements | A subset of the other candidate's named approval changes |
+| Declared monetary ceiling of each original spending tool | Higher or equal on every tool; a removed tool has zero |
+
+These objectives describe the **cost of a repair and retained capability**.
+They do not minimize all authority, establish business utility, or compare
+unrelated tools by a single count. Each spending tool is a separate axis; extra
+capacity on one cannot compensate for lost capacity on another. Approval is a
+functional constraint here, not a release of a cumulative budget. Currency
+stays fixed. Candidate `repair_cost` exposes the comparison values. Equivalent
+cost vectors remain visible; the command does not arbitrarily discard them.
+
+The existing heuristic orders the remaining alternatives. `search.candidates_found`
+counts every successful recheck, while `frontier.non_dominated` counts the filtered
+alternatives before display. `frontier.display_complete: false` means the
+display cap hid alternatives. `search.enumeration_complete: false` means a
+better candidate, including one dominating a displayed choice, may be unexamined.
+Candidate `authority.truncated` separately describes the breach-search bound.
+Even exhaustive enumeration only covers the supplied finite domain and edit cap.
+A clean or structurally invalid baseline leaves the frontier `not_computed`.
+Grid-only runs leave filtering `disabled` and return the usual ranked candidates.
 
 ## Combine approval and ceiling repairs
 
@@ -115,6 +189,8 @@ synthetic trace remains a separate conformance illustration.
 | `--max-candidates` | 5 | Maximum ranked candidates returned |
 | `--keep-tool NAME` | None | Preserve this tool's reachability at the selected depth; repeat as needed |
 | `--ceiling TOOL=AMOUNT` | None | Include this strictly lower monetary ceiling; repeat for other tools or alternatives |
+| `--ceiling-grid TOOL=MIN:MAX:STEP` | None | Expand a bounded range of exact lower ceilings; repeat or combine with explicit choices |
+| `--pareto` | Off | Return non-dominated repair trade-offs among successful examined candidates |
 | `--required-workflows FILE` | None | Preserve explicitly supplied ordered paths bound to the original manifest bytes |
 
 A kept tool must exist and be reachable in the baseline. Reachability does not establish
@@ -177,6 +253,9 @@ search. The default cap limits the number of searches, not their individual time
 memory. Use the same process resource limits described in the search guide. The current
 implementation retains successful candidate records before ranking, so peak storage also
 grows with successful combinations and manifest size.
+Frontier filtering adds at most quadratic comparisons in the number of successful
+candidates, each linear in the tool count. It does not reduce the number or cost
+of the bounded reachability checks.
 
 ## Review and apply a choice
 
@@ -217,11 +296,12 @@ treating a candidate as a clean overall policy.
 
 ## Compatibility and remaining scope
 
-The CLI and v1/v2/v3 JSON presentations are public; `_remediation` Python records are
+The CLI and v1/v2/v3/v4 JSON presentations are public; `_remediation` Python records are
 private. Results are not accepted as authority inputs. The four initial [result
 fixtures](../tests/fixtures/remediation-kept-v1.json) cover breached, kept-tool,
 enumeration-limited, and clean runs; these are v1 baselines, not migrations from an
-earlier result schema. Commands without `--ceiling` retain exact v1 result bytes and
+earlier result schema. Commands without any opt-in repair flags retain exact
+v1 result bytes and
 exit behavior.
 
 V2 is opt-in because `tighten_ceiling` is a new edit kind that a closed v1 consumer may
@@ -247,7 +327,15 @@ do not establish new observed or accepted policy intent. The unchanged IAM graph
 clean under an irrelevant irreversible budget, retaining its separate service-principal
 lint finding.
 
-Automatic ceiling selection, effect-budget repairs beyond removal, conditions,
+V4 is opt-in with either new flag. It retains the earlier baseline, lint,
+source digest, kept-tool and supplied-path records, and adds `ceiling_grids`
+and `frontier`. Filtered candidates add `repair_cost`. The
+[v4 fixtures](../tests/fixtures/remediation-frontier-refund-v4.json) cover the
+refund frontier, capped enumeration, required paths and a clean baseline. A
+[v3-to-v4 case](../tests/fixtures/remediation-v3-to-v4.json) pins preserved fields;
+commands omitting both new flags retain all earlier result bytes and exit codes.
+
+Ceiling selection outside supplied finite domains, effect-budget repairs beyond removal, conditions,
 delegation changes, application execution and business-scenario success remain outside
 this slice. Ordered positive paths are checked only within manifest v1. Total
 and effect limits are properties the analyzer checks,
