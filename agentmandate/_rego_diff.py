@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import defaultdict
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from ._deployment_drift import _read
@@ -23,6 +24,41 @@ def _json(content):
     value = json.loads(content, object_pairs_hook=pairs)
     json.dumps(value, allow_nan=False)
     return value
+
+
+def _number(text):
+    try:
+        number = Decimal(text)
+    except InvalidOperation as exc:
+        raise ValueError("request number exceeds the supported decimal range") from exc
+    if not number.is_finite():
+        raise ValueError("request number exceeds the supported decimal range")
+    return number
+
+
+def _constant(text):
+    raise ValueError(f"non-finite request number: {text}")
+
+
+def _request_json(value):
+    """Encode exact decimal values without float conversion or context rounding."""
+    if isinstance(value, dict):
+        return "{" + ",".join(
+            json.dumps(key) + ":" + _request_json(item) for key, item in sorted(value.items())
+        ) + "}"
+    if isinstance(value, list):
+        return "[" + ",".join(_request_json(item) for item in value) + "]"
+    if isinstance(value, Decimal):
+        if not value:
+            return "0"
+        sign, digits, exponent = value.as_tuple()
+        coefficient = "".join(str(digit) for digit in digits)
+        significant = coefficient.rstrip("0")
+        exponent += len(coefficient) - len(significant)
+        # Tuple arithmetic is exact even under a low-precision Decimal context;
+        # scientific notation also avoids expanding very large exponents.
+        return ("-" if sign else "") + significant + (f"e{exponent}" if exponent else "")
+    return json.dumps(value, allow_nan=False, separators=(",", ":"))
 
 
 def _side(content, root, as_of):
@@ -51,7 +87,10 @@ def _side(content, root, as_of):
     if hashlib.sha256(export_content).hexdigest() != deployment["inputs"]["materials"][export_path]:
         raise ValueError("export mapping changed during comparison")
     export_mapping = _json(export_content)
-    records = _json(materials["decisions"])
+    records = json.loads(
+        materials["decisions"], object_pairs_hook=pairs,
+        parse_int=_number, parse_float=_number, parse_constant=_constant,
+    )
     requests = defaultdict(list)
     invalid = []
     for row in report["decisions"]:
@@ -64,7 +103,7 @@ def _side(content, root, as_of):
             invalid.append(row["index"])
             continue
         semantic = {key: value for key, value in request.items() if key != input_key}
-        encoded = json.dumps(semantic, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        encoded = _request_json(semantic)
         digest = hashlib.sha256(encoded.encode()).hexdigest()
         # Reconciliation permits unrelated payload masking. Exact full-input
         # comparison does not: even a field unused by the exporter must remain

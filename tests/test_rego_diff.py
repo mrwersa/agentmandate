@@ -6,13 +6,15 @@ import json
 import os
 import shutil
 import subprocess
+from decimal import Decimal, InvalidOperation, localcontext
+from fractions import Fraction
 from pathlib import Path
 
 import pytest
 
 from agentmandate import analyse, loads
 from agentmandate._deployment_reconcile import reconcile
-from agentmandate._rego_diff import compare, render
+from agentmandate._rego_diff import _number, _request_json, compare, render
 from agentmandate._rego_export import export
 from agentmandate.cli import main
 from agentmandate.diff import compare as authority_compare
@@ -417,6 +419,117 @@ def argv(baseline="baseline", candidate="candidate", root=ROOT):
         "--as-of",
         AS_OF,
     ]
+
+
+@pytest.mark.parametrize(
+    "left,right,equal",
+    [
+        ("1", "1.0", True),
+        ("1.00", "1e0", True),
+        ("1000", "1.000e3", True),
+        ("-1.2300", "-123e-2", True),
+        ("0", "-0.000e100", True),
+        ("0.1", "0.1000000000000000055511151231257827", False),
+        ("9007199254740992", "9007199254740993", False),
+        ("1e-999", "2e-999", False),
+        ("1e999", "10e998", True),
+        ("1e1000000", "10e999999", True),
+        ("true", "1", False),
+        ('"1"', "1", False),
+        ('{"a":[1,0.1],"b":null}', '{"b":null,"a":[1.0,1e-1]}', True),
+        ("[1,2]", "[2,1]", False),
+    ],
+)
+def test_exact_request_identity_controls_full_comparison_and_cli(
+    artifacts, left, right, equal, capsys
+):
+    other = artifacts / "other"
+    shutil.copytree(artifacts / "examples", other / "examples")
+    for root, literal in ((artifacts, left), (other, right)):
+        path = material(root, "decisions", "baseline")
+        records = json.loads(path.read_bytes())
+        for record in records:
+            record["input"]["context"]["note"] = "EXACT_NUMBER_PLACEHOLDER"
+        path.write_bytes(
+            encode(records).replace(b'"EXACT_NUMBER_PLACEHOLDER"', literal.encode())
+        )
+        repin(root, "baseline")
+    with localcontext() as context:
+        context.prec = 2
+        report = compare(
+            spec("baseline"), spec("baseline"),
+            baseline_root=artifacts, candidate_root=other, as_of=AS_OF,
+        )
+    assert report["boundary_comparable"]
+    assert not report["baseline"]["findings"] and not report["candidate"]["findings"]
+    assert report["summary"] == {
+        "requests": 3 if equal else 6, "compared": 3 if equal else 0, "widened": 0,
+    }
+    assert codes(report) == (set() if equal else {"rego.request-unmatched-or-ambiguous"})
+    command = argv("baseline", "baseline", artifacts) + ["--json"]
+    command[command.index("--candidate-root") + 1] = str(other)
+    assert main(command) == (0 if equal else 1)
+    assert json.loads(capsys.readouterr().out) == report
+
+
+def test_number_normalization_matches_exact_rational_reference_without_context_rounding():
+    by_value = {}
+    by_encoding = {}
+    with localcontext() as context:
+        context.prec = 1
+        for coefficient in range(-20, 21):
+            for exponent in range(-4, 5):
+                literal = f"{coefficient}e{exponent}"
+                value = Fraction(literal)
+                encoded = _request_json(Decimal(literal))
+                assert Fraction(encoded) == value
+                assert by_value.setdefault(value, encoded) == encoded
+                assert by_encoding.setdefault(encoded, value) == value
+                assert _request_json(Decimal(f"{coefficient}0e{exponent - 1}")) == encoded
+    assert len(_request_json(Decimal("1e1000000"))) < 20
+
+
+@pytest.mark.parametrize("literal", ["NaN", "Infinity", "-Infinity", "1e9999999999999999999999"])
+def test_invalid_request_numbers_are_usage_errors(artifacts, literal, capsys):
+    path = material(artifacts, "decisions", "baseline")
+    records = json.loads(path.read_bytes())
+    records[0]["input"]["context"]["note"] = "INVALID_NUMBER_PLACEHOLDER"
+    path.write_bytes(encode(records).replace(b'"INVALID_NUMBER_PLACEHOLDER"', literal.encode()))
+    repin(artifacts, "baseline")
+    assert main(argv("baseline", "baseline", artifacts) + ["--json"]) == 2
+    output = capsys.readouterr()
+    assert not output.out and output.err.startswith("error: ")
+    assert "Traceback" not in output.err
+
+
+def test_decimal_range_error_is_a_value_error():
+    with pytest.raises(ValueError, match="supported decimal range"):
+        _number("1e9999999999999999999999")
+    with localcontext() as context:
+        context.traps[InvalidOperation] = False
+        with pytest.raises(ValueError, match="supported decimal range"):
+            _number("1e9999999999999999999999")
+
+
+@pytest.mark.parametrize(
+    "left,right,matched",
+    [("1", "1.0", True), ("0.1", "0.1000000000000000055511151231257827", False)],
+)
+def test_exact_numeric_matching_never_hides_independent_authority_widening(
+    artifacts, left, right, matched
+):
+    for side, literal in (("baseline", left), ("candidate", right)):
+        path = material(artifacts, "decisions", side)
+        records = json.loads(path.read_bytes())
+        for record in records:
+            record["input"]["context"]["note"] = "NUMERIC_NOTE_PLACEHOLDER"
+        path.write_bytes(encode(records).replace(b'"NUMERIC_NOTE_PLACEHOLDER"', literal.encode()))
+        repin(artifacts, side)
+    report = run(artifacts)
+    assert {"rego.authority-widened", "rego.authority-breach"} <= codes(report)
+    assert report["summary"]["widened"] == (1 if matched else 0)
+    assert ("rego.decision-widened" in codes(report)) is matched
+    assert ("rego.request-unmatched-or-ambiguous" in codes(report)) is not matched
 
 
 @pytest.mark.parametrize(

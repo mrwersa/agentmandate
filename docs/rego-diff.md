@@ -53,8 +53,9 @@ they do not authenticate a principal, driver, loaded policy or human review.
 
 ## Read the comparison at its actual scope
 
-Requests match by canonical JSON of the entire policy input, excluding only the
-mapping's application correlation object. Principal, action, resource, context
+Requests match by an exact, value-normalized JSON representation of the entire
+policy input, excluding only the mapping's application correlation object.
+Principal, action, resource, context
 and every other input field must agree. The correlation key cannot replace
 one of the four policy request fields. Request digests and decision IDs make
 the match replayable without printing raw context or payloads. Digests are not
@@ -63,8 +64,14 @@ an anonymization mechanism; low-entropy inputs may be guessable.
 Exactly one selected decision per request is required on each side. Repeated
 requests are ambiguous even with distinct execution IDs; they are never paired
 by array order, summed or averaged. A request present on only one side remains
-unresolved. Changes to an input field are different requests, even when the
-generated policy ignores that field.
+unresolved. Changes to an input value are different requests, even when the
+generated policy ignores that field. Object key order is ignored; array order
+and JSON types are preserved. Numbers use their exact decimal value: `1`, `1.0`
+and `1e0` match, as do `0` and `-0`. Distinct decimals such as `0.1` and
+`0.1000000000000000055511151231257827` stay distinct. Boolean `true` does not
+match numeric `1`. No binary-float rounding or currency conversion is involved.
+This is the comparator's exact-number representation, not RFC 8785's
+IEEE-754 number serialization.
 
 The reports use scoped relations:
 

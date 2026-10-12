@@ -18,6 +18,8 @@ All notable changes to this project are documented here. The format follows
   materials. Coverage, expiry, masking, duplicate requests, changed boundaries
   and conflicting revision labels leave comparison unresolved. Native OPA
   tests and a synthetic publication-approval example pin the new v1 contracts.
+- Request matching preserves exact decimal values, normalizing equivalent
+  number spellings without merging distinct decimals through float rounding.
 
 ## 0.34.0 - 2026-10-12
 
