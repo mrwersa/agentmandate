@@ -286,7 +286,7 @@ all.
 | `mandate producers` | Structurally validates a finite-producer boundary without accepting its sources as authority |
 | `mandate continuity` | Structurally validates continuity evidence or reconciles whether consumed authority safely survives a named transition |
 | `mandate cedar` | Exports mapped stateless policies with loss reporting, or validates, aligns and compares managed policy evidence. [Cedar export](docs/cedar-export.md) |
-| `mandate rego` | Exports mapped stateless policies with explicit losses and native OPA tests. [Rego export](docs/rego-export.md) |
+| `mandate rego` | Exports mapped stateless policies and compares captured revision decisions while retaining manifest findings. [Export](docs/rego-export.md), [release comparison](docs/rego-diff.md) |
 | `mandate deployment` | Checks gateway/policy configuration and joins captured decisions to tool attempts. [Drift](docs/deployment-drift.md), [reconciliation](docs/deployment-reconciliation.md) |
 | `mandate fleet` | Queries local repository snapshots and checks named temporary exceptions for overdue reviews. [Inventory](docs/fleet-inventory.md), [exceptions](docs/fleet-exceptions.md) |
 | `mandate diff` | Effective-authority comparison of two manifests, including limits, preconditions, approvals, effects, and scope minting. `--record` emits a change record |

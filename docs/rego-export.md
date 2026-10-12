@@ -101,5 +101,7 @@ Exit 0 means all declared controls fit the supported stateless subset. Exit 1
 means semantic losses, whether export was refused or explicitly partial. Exit 2
 means malformed input, mapping mismatch or I/O failure, with empty stdout.
 Compilation makes no network calls and introduces no Python policy evaluator.
-Policy deployment, Rego import/effective diff and stateful enforcement remain
-separate work.
+[Rego revision comparison](rego-diff.md) compares exact captured requests against
+the generated subset and preserves the full manifest findings. Arbitrary Rego
+import, policy equivalence, deployment authentication and stateful enforcement
+remain separate work.

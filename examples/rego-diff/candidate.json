@@ -1,0 +1,8 @@
+{
+  "rego_capture_version": 1,
+  "manifest": "examples/rego-diff/candidate/manifest.json",
+  "configuration": "examples/rego-diff/candidate/config.json",
+  "decisions": "examples/rego-diff/candidate/decisions.json",
+  "telemetry": "examples/rego-diff/candidate/telemetry.json",
+  "mapping": "examples/rego-diff/candidate/mapping.json"
+}

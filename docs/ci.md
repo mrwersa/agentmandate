@@ -372,6 +372,20 @@ Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with
 | `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, or a non-conformant replay |
 | `2` | Usage or I/O error, malformed manifest/IR/attachment, unsupported composition, version, or analysis profile |
 
+## Compare Rego revisions
+
+To compare generated Rego revisions after capturing their decisions and tool
+attempts, use the [Rego comparison gate](rego-diff.md):
+
+```bash
+mandate rego diff --baseline baseline/capture.json --candidate candidate/capture.json --baseline-root baseline --candidate-root candidate --as-of 2026-10-12 --json
+```
+
+It retains both reconciliation reports and the manifest authority diff. Exit 1
+includes scoped Deny-to-Allow widening, unresolved captures, unsupported controls
+and candidate breaches. Exit 0 is scoped to the matched requests and bounded
+manifest analysis; it does not prove policy equivalence or deployment approval.
+
 ## Check deployment configuration
 
 After exporting and natively validating a policy, compare the deployment

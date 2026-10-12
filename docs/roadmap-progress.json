@@ -82,7 +82,7 @@
           "title": "Policy validation and effective diff",
           "status": "partial",
           "evidence": "docs/cedar-effective-diff-gate-5-review.md",
-          "reason": "Cedar comparisons are delivered; the broader transition and Rego measure remains open."
+          "reason": "Cedar comparisons and exact captured-request comparisons for generated stateless Rego are delivered. Arbitrary Rego import, operational native-decision evidence and the broader transition measure remain open."
         },
         {
           "title": "Cedar and Rego exporters",

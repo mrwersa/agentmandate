@@ -79,6 +79,8 @@ from ._producer import (
     ProducerSelection,
     analyse_producers,
 )
+from ._rego_diff import compare as compare_rego
+from ._rego_diff import render as render_rego_diff
 from ._rego_export import export as export_rego
 from ._rego_export import render as render_rego_export
 from ._rego_export import write_bundle as write_rego_bundle
@@ -563,7 +565,7 @@ def build_parser() -> argparse.ArgumentParser:
     deployment_reconcile.add_argument("--json", action="store_true", help="machine-readable output")
 
     rego_parser = subparsers.add_parser(
-        "rego", help="export mapped Rego policies with loss reporting"
+        "rego", help="export mapped Rego policies or compare captured revision decisions"
     )
     rego_subparsers = rego_parser.add_subparsers(dest="rego_command", required=True)
     rego_export = rego_subparsers.add_parser(
@@ -578,6 +580,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="emit unsupported-loss candidates; still exits 1",
     )
     rego_export.add_argument("--json", action="store_true", help="machine-readable export report")
+    rego_diff = rego_subparsers.add_parser(
+        "diff", help="compare exact captured requests across generated Rego revisions"
+    )
+    rego_diff.add_argument("--baseline", required=True, help="baseline capture-set JSON")
+    rego_diff.add_argument("--candidate", required=True, help="candidate capture-set JSON")
+    rego_diff.add_argument("--baseline-root", required=True, help="baseline artifact directory")
+    rego_diff.add_argument("--candidate-root", required=True, help="candidate artifact directory")
+    rego_diff.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    rego_diff.add_argument("--json", action="store_true", help="machine-readable comparison")
     cedar_parser = subparsers.add_parser(
         "cedar",
         help="validate or compare reviewed managed Cedar evidence",
@@ -1546,6 +1557,8 @@ def _run_deployment_reconciliation(args: argparse.Namespace) -> int:
 
 
 def _run_rego_export(args: argparse.Namespace) -> int:
+    if args.rego_command == "diff":
+        return _run_rego_diff(args)
     try:
         result = export_rego(
             Path(args.manifest).read_bytes(),
@@ -1564,6 +1577,23 @@ def _run_rego_export(args: argparse.Namespace) -> int:
         return EXIT_USAGE
     sys.stdout.write(output)
     return EXIT_FINDING if result["losses"] else EXIT_OK
+
+
+def _run_rego_diff(args: argparse.Namespace) -> int:
+    try:
+        report = compare_rego(
+            Path(args.baseline).read_bytes(), Path(args.candidate).read_bytes(),
+            baseline_root=Path(args.baseline_root), candidate_root=Path(args.candidate_root),
+            as_of=args.as_of,
+        )
+    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.json else render_rego_diff(report)
+    )
+    return EXIT_FINDING if report["findings"] else EXIT_OK
 
 
 def _run_cedar_export(args: argparse.Namespace) -> int:

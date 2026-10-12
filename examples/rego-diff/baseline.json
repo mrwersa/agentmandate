@@ -1,0 +1,8 @@
+{
+  "rego_capture_version": 1,
+  "manifest": "examples/deployment-reconcile/manifest.json",
+  "configuration": "examples/deployment-reconcile/config.json",
+  "decisions": "examples/deployment-reconcile/decisions.json",
+  "telemetry": "examples/deployment-reconcile/telemetry.json",
+  "mapping": "examples/deployment-reconcile/mapping.json"
+}

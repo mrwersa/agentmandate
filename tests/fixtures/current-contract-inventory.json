@@ -258,6 +258,23 @@
         "result_version"
       ]
     },
+    "_rego_diff.py": {
+      "constants": {
+        "CAPTURE_VERSION": 1,
+        "RESULT_SCHEMA": "agentmandate.rego-effective-diff/v1"
+      },
+      "inline_versions": {
+        "rego_capture_version": [
+          1
+        ]
+      },
+      "schemas": [
+        "agentmandate.rego-effective-diff/v1"
+      ],
+      "version_fields": [
+        "rego_capture_version"
+      ]
+    },
     "_rego_export.py": {
       "constants": {
         "EXPORT_SCHEMA": "agentmandate.rego-export/v1",
@@ -2754,10 +2771,101 @@
         {
           "action": "_SubParsersAction",
           "choices": [
+            "diff",
             "export"
           ],
           "dest": "rego_command",
           "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate rego diff": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "baseline",
+          "nargs": null,
+          "options": [
+            "--baseline"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "candidate",
+          "nargs": null,
+          "options": [
+            "--candidate"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "baseline_root",
+          "nargs": null,
+          "options": [
+            "--baseline-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "candidate_root",
+          "nargs": null,
+          "options": [
+            "--candidate-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -3381,7 +3489,7 @@
       ]
     }
   },
-  "coverage_sha256": "1248cd264935c374dbbc33d706063e12a1e2eaaf72b195224c9c9639f7d8ce26",
+  "coverage_sha256": "e34e190571e73398a0c541c9fe99b65635215d732ffe55caf473832f0dde6d4b",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3445,6 +3553,8 @@
     "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
     "examples/principal-continuity/accounting-review.json": "3738eea4c4632b280d512a8da2d0b19a7f74f7d00b432263b98844db9f7f5fd3",
     "examples/principal-continuity/profile.json": "c90bbed8fdd8beb0e720b10ba0f7a2925f7d6248444646e608d71ce82e19bd47",
+    "examples/rego-diff/baseline.json": "399c23cc198907b523d6071d30d6d8faba199386373c3536c42dbe48cdf0d434",
+    "examples/rego-diff/candidate.json": "bfecc81e7a01c3b0a9e3465f61eae0664e199cf94868c54257ac774904c8e003",
     "examples/rego-export/generated/export.json": "153b1accd1ad6063f235dd5822dd0833b6826e84d6e5dec321c203f65112b7e4",
     "examples/rego-export/generated/policy.rego": "22d693620121dd90c460aa772f945ce885554324215a773ce9d3aeefd21ee4a4",
     "examples/rego-export/generated/policy_test.rego": "10448f52ec749bb6acfb6e21dd066e39c7b5f71d261d119835562e4df244f5ef",
@@ -3563,6 +3673,7 @@
     "tests/fixtures/producer-result-v1-clean.json": "995ca859631daee3d94abf435afeabbf5e8538897b7bf8b3ddba3c7e99083bee",
     "tests/fixtures/producer-result-v1-truncated.json": "96ef67aeb7465f046c006efc0ba0d58f5471bb8857fccae6d853a2a5862c661e",
     "tests/fixtures/producer-result-v1-unresolved.json": "7e075b183182d667cfdc197bca3f0732f296f12fdb6617a001c2d48ff3d659a9",
+    "tests/fixtures/rego-effective-diff-v1.json": "a784447881e1b6baf1c2240440e8e884a49539dda39e79978809723bf4288884",
     "tests/fixtures/remediation-breached-v1.json": "78408e338bf934aa8c7e835e3fcbb0fafde40bb5fe9546886244fd6f77c7d0d4",
     "tests/fixtures/remediation-ceiling-clean-v2.json": "0cad89c0bfe7ea37d840b6484fe244e43e15c1f92034622437312e5499a6d348",
     "tests/fixtures/remediation-ceiling-joint-v2.json": "f7e64cd26619ab8bf5ab18e526b9111b39a86d1690daa9330d5231eab7eab6da",
