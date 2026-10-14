@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.36.0 - 2026-10-14
+
+### Added
+
+- `mandate fleet diff` compares authority across two local fleet releases by
+  repository, environment and agent. It preserves inventory and per-deployment
+  authority reports, flags widening, new deployments, candidate breaches and
+  ownership changes, and keeps partial, stale or ambiguous membership unresolved.
+- Separate artifact roots, one explicit search bound, JSON CI output and
+  synthetic replay examples. Existing fleet commands and earlier contracts stay
+  unchanged; authenticated membership and cross-agent accounting remain open.
 ## 0.35.0 - 2026-10-12
 
 ### Added

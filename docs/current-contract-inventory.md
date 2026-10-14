@@ -87,7 +87,7 @@ bug fixes; preserving historical fixture bytes does not preserve those defects.
 
 The [machine inventory](../tests/fixtures/current-contract-inventory.json)
 records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 40 CLI command paths
+methods/properties and constant values. It also records all 42 CLI command paths
 (including intermediate groups), arguments, defaults, choices and mutually
 exclusive groups. The package release number is
 excluded from comparison; `__version__` remains an exported name.
@@ -113,6 +113,7 @@ the source-to-canonical link and remain separate from runtime readers.
 | Conditions and delegation | [Conditions](conditions-delegation.md), [delegation](delegation-v2.md); `test_conditions.py`, `test_delegation.py` |
 | Deployment configuration drift | [Deployment drift](deployment-drift.md); `test_deployment_drift.py` |
 | Local fleet inventory | [Fleet inventory](fleet-inventory.md); `test_fleet.py` |
+| Fleet release comparison | [Fleet comparison](fleet-diff.md); `test_fleet_diff.py` |
 | Captured decision/tool reconciliation | [Deployment reconciliation](deployment-reconciliation.md); `test_deployment_reconcile.py` |
 | Named fleet review-delay exceptions | [Fleet exceptions](fleet-exceptions.md); `test_fleet_exceptions.py` |
 | Stateless Cedar and Rego exports | [Cedar export](cedar-export.md), [Rego export](rego-export.md); `test_cedar_export.py`, `test_rego_export.py` |
@@ -124,6 +125,12 @@ the source-to-canonical link and remain separate from runtime readers.
 | Obligations, scenarios and decision suites | [Obligations](test-obligations.md), [evaluation](evaluation-loop.md); `test_obligations.py`, `test_scenarios.py` |
 | Repair candidates | [Remediation](remediation.md); `test_remediation.py`, `test_ceiling_remediation.py`, `test_required_workflows.py`, `test_remediation_frontier.py` |
 | Named acceptance of changes | [Change review](change-review.md); `test_change_review.py` |
+
+[Fleet release comparison](fleet-diff.md) adds one command and an experimental
+v1 result over the existing fleet indexes. The fixed
+[preceding inventory](../tests/fixtures/current-contract-inventory-v0.35.json)
+preserves all earlier command arguments, Python exports, version markers and
+fixture digests. Its initial replay cases are baselines, not schema migrations.
 | Trace verification and SARIF | [Traces](traces.md), [CI](ci.md); `test_verify.py`, `test_otel.py`, `test_findings.py` |
 | Historical readers, projections and acceptance | [Historical audit](pre-1.0-consolidation-audit.md), [acceptance](continuation-evidence-acceptance.md); converter, replay and acceptance tests named in the coverage index |
 
