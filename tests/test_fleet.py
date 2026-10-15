@@ -52,7 +52,7 @@ def repin(value, tmp_path, kind, content):
 
 def test_pinned_baseline_keeps_repositories_environments_and_same_named_tools_separate():
     report = inventory((EXAMPLE / "index.json").read_bytes(), root=ROOT, as_of="2026-10-11")
-    assert report == json.loads((ROOT / "tests/fixtures/fleet-inventory-v1.json").read_text())
+    assert report == json.loads((ROOT / "tests/fixtures/fleet-inventory-v2.json").read_text())
     assert report["summary"] == {
         "entries": 3,
         "selected_entries": 3,
@@ -219,7 +219,7 @@ def test_repinned_ir_cannot_authorize_false_joins_or_unreviewed_facts(change, tm
         other["identity"] = "another-operator"
         raw = _from_mandate(loads(json.dumps(other)), content=manifest_content).as_dict()
     else:
-        content = content.replace(b'"ir_version":1', b'"ir_version":1,"ir_version":1')
+        content = content.replace(b'"ir_version":2', b'"ir_version":2,"ir_version":2')
     repin(value, tmp_path, "ir", content if change == "duplicate" else json.dumps(raw).encode())
     report = run(value, root=tmp_path)
     assert codes(report) == {"fleet.snapshot-ineligible"}
@@ -354,7 +354,7 @@ def test_cli_json_clean_and_filtered_findings_preserve_exit_code(capsys):
     ]
     assert main(argv) == 0
     output = capsys.readouterr()
-    assert json.loads(output.out)["schema"] == "agentmandate.fleet-inventory/v1"
+    assert json.loads(output.out)["schema"] == "agentmandate.fleet-inventory/v2"
     assert not output.err
     argv[2] = str(EXAMPLE / "findings.json")
     argv.remove("--json")
@@ -391,8 +391,21 @@ def test_cli_symlink_loop_is_an_unavailable_entry(tmp_path, capsys):
     value["entries"][0]["manifest"]["path"] = "loop"
     path = tmp_path / "index.json"
     path.write_text(json.dumps(value))
-    assert main(["fleet", "inventory", str(path), "--root", str(tmp_path),
-                 "--as-of", "2026-10-11", "--json"]) == 1
+    assert (
+        main(
+            [
+                "fleet",
+                "inventory",
+                str(path),
+                "--root",
+                str(tmp_path),
+                "--as-of",
+                "2026-10-11",
+                "--json",
+            ]
+        )
+        == 1
+    )
     captured = capsys.readouterr()
     report = json.loads(captured.out)
     assert codes(report) == {"fleet.artifact-unavailable"}

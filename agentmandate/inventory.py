@@ -769,6 +769,6 @@ def notes_for(inventory: Inventory) -> list[str]:
     notes.append(
         "Source declares what a tool is called and what it takes. It does not "
         "declare whether the effect can be undone, which argument spends "
-        "money, or what a ceiling counts against. Those are below, guessed."
+        "a measured quantity, or what a ceiling counts against. Those are below, guessed."
     )
     return notes

@@ -196,7 +196,7 @@ def _one_capture(monkeypatch: pytest.MonkeyPatch) -> tuple:
 def _write_record(root: Path, record: dict, *, envelope: dict | None = None) -> None:
     directory = root / "sample"
     directory.mkdir()
-    (directory / "artifact.json").write_text("{}\n", encoding="utf-8")
+    (directory / "artifact.json").write_text("{}", encoding="utf-8")
     payload = envelope or {
         "corrections_version": 1,
         "capture": "sample",

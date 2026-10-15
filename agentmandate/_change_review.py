@@ -11,7 +11,7 @@ from .diff import compare
 from .manifest import loads
 
 CHANGE_REVIEW_SCHEMA = "agentmandate.change-review/v1"
-REVIEW_RESULT_SCHEMA = "agentmandate.review/v1"
+REVIEW_RESULT_SCHEMA = "agentmandate.review/v2"
 REVIEW_SCOPE = "all_widening_changes_in_pinned_comparison"
 
 

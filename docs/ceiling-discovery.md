@@ -1,4 +1,4 @@
-# Discover monetary repair ceilings
+# Discover quantity repair ceilings
 
 Use `mandate remediate --discover-ceiling TOOL=STEP` to find usable ceiling
 repairs without guessing amounts or writing a range. It keeps every tool and
@@ -13,13 +13,13 @@ mandate remediate examples/dispute-resolver-v2.yaml --discover-ceiling issue_ref
 ```
 
 The example derives £125, preserving the required £100 refund. Six probes
-resolve a 50,001-point domain. The original monetary breach remains in
+resolve a 50,001-point domain. The original quantity breach remains in
 `baseline`, so exit 1 is expected. The candidate is clean at depth eight and
 truncated; it breaches at depth ten. Completing a ceiling frontier at one depth
 does not prove safety at greater depths.
 
 Without [required workflows](required-workflows.md), zero can be a candidate:
-reachability alone does not establish useful monetary behavior. The command
+reachability alone does not establish useful quantity behavior. The command
 does not infer requirements from a trace or apply changes to source files.
 
 ## Define the domain and read trade-offs
@@ -40,7 +40,7 @@ unchanged 3.5. Only the unchanged ceiling may be off-grid. Unselected ceilings
 stay fixed. This granularity constrains proposed ceilings, not runtime request
 amounts; the numeric model still allows any amount within headroom.
 
-Each tool retains its currency. Exact integer/Decimal-tuple arithmetic is
+Each tool retains its unit. Exact integer/Decimal-tuple arithmetic is
 independent of caller precision, rounding and traps. Discovery supports at most
 eight tools and eight edits. Selected ceilings and steps require at most 100
 digits and exponents from −100 to +100; step text has at most 128 characters.
@@ -70,7 +70,7 @@ If an attempted uncached probe would exceed the evaluation limit, status is
 `evaluation_limit` and `remaining_points` stays positive. Partial candidates
 are rechecked but may omit, or later be dominated by, unexplored alternatives.
 
-`search.enumeration_complete` separately means every Cartesian point was probed.
+`search.exhaustive_point_enumeration` separately means every Cartesian point was probed.
 It can be false when the frontier is complete because pruning avoids exhaustive
 enumeration. `frontier.display_complete` separately means all found alternatives
 fit the display cap. None of these extends reachability depth or changes an
@@ -79,11 +79,11 @@ claim a computed frontier.
 
 ## Why pruning preserves the frontier
 
-For fixed manifest-v1 tools, scopes and approval choices, lower ceilings cannot
+For fixed manifest-v2 tools, scopes and approval choices, lower ceilings cannot
 introduce a reachable breach. Enablement and production do not depend on amounts;
 effect-budgeted calls count even at zero spend. The
-[headroom argument](headroom-abstraction.md) states the monetary model. Adding
-approval removes an ungated-effect breach without changing monetary enablement.
+[headroom argument](headroom-abstraction.md) states the quantity model. Adding
+approval removes an ungated-effect breach without changing quantity enablement.
 Amount-dependent outputs and guards remain outside this model.
 
 The search splits integer index ranges into disjoint boxes and checks corners:
@@ -125,16 +125,18 @@ Worst-case work can remain exponential in edit dimensions, and each recheck
 inherits the [search cost](search-performance.md). Evaluation limits do not
 replace process time or memory limits.
 
-## Compatibility and exit codes
+## Current contract and exit codes
 
-The opt-in schema is `agentmandate.remediation/v5`. Commands without discovery
-retain v1/v2/v3/v4 output bytes and exits. The
-[v5 cases](../tests/fixtures/remediation-discovery-v5.json) are initial baselines.
-A [v4/v5 preservation case](../tests/fixtures/remediation-v4-to-v5.json) checks shared
-baseline/requirement fields across different domains; candidate lists need not match.
+Discovery uses the same `agentmandate.remediation/v6` result as other repair
+modes. There are no v1–v5 output readers or preservation branches. Current
+fixtures exercise complete and cutoff searches, joint approval, two-tool
+trade-offs, display caps and clean baselines. Numeric steps use unsigned decimal
+literals; whitespace, underscores and a leading plus sign are rejected.
 
-Exit 1 retains original reachable breaches or lint errors, exit 0 means the
-original baseline is clean, and exit 2 means malformed or unsupported input,
-composition or arithmetic. Finding a proposal never turns an original breach
-green. Domains, workflow annotations and reviewer labels remain caller-supplied;
-the result authenticates no decision and supplies no runtime enforcement.
+Exit 1 retains original breaches or lint errors, exit 0 means the original
+baseline is clean, and exit 2 means malformed/unsupported input or arithmetic.
+Finding a proposal never turns an original breach green. A complete result with
+no proposal means the declared lattice and constraints have no feasible repair;
+finer steps may change it. Evaluation cutoffs have the explicit
+`search.truncated_by_limit` flag. The result authenticates no decision and
+supplies no runtime enforcement.

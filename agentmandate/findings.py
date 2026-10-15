@@ -34,16 +34,15 @@ SARIF_SCHEMA = (
 )
 
 RULES = {
-    "cumulative_value": (
-        "Compound value extraction",
-        "A sequence of individually permitted calls extracts more value than "
-        "the run limit allows. Each call is within its own ceiling; the total "
-        "is not.",
+    "quantity_budget": (
+        "Cumulative quantity budget",
+        "A sequence of individually permitted calls consumes more of a named quantity than "
+        "its cumulative budget allows. Each call is within its own ceiling; "
+        "their consumption of this pool exceeds its budget.",
     ),
     "ungated_irreversible": (
         "Reachable irreversible effect with no approval",
-        "An irreversible effect is reachable and no approval gate stands in "
-        "front of it.",
+        "An irreversible effect is reachable and no approval gate stands in front of it.",
     ),
 }
 
@@ -257,7 +256,7 @@ def to_mermaid(authority: Authority, mandate: Mandate) -> str:
         if step.binding:
             detail.append(step.binding)
         if step.spent is not None:
-            detail.append(f"{step.spent} {step.currency}")
+            detail.append(f"{step.spent} {step.unit}")
         label = _label(step.tool)
         if detail:
             # The break is ours, added after escaping, so a name carrying
@@ -286,20 +285,14 @@ def to_mermaid(authority: Authority, mandate: Mandate) -> str:
 
     ungated = sorted(authority.ungated_irreversible)
     if ungated:
-        lines.append(
-            f'  note["ungated irreversible: {_label(", ".join(ungated))}"]'
-        )
+        lines.append(f'  note["ungated irreversible: {_label(", ".join(ungated))}"]')
 
-    extra = sorted(
-        authority.reachable_tools - {step.tool for step in breach.path}
-    )
+    extra = sorted(authority.reachable_tools - {step.tool for step in breach.path})
     if extra:
         lines.append(f'  rest["also reachable: {_label(", ".join(extra))}"]')
 
     if len(authority.breaches) > 1:
-        lines.append(
-            f'  more["+{len(authority.breaches) - 1} further reachable breach(es)"]'
-        )
+        lines.append(f'  more["+{len(authority.breaches) - 1} further reachable breach(es)"]')
 
     return "\n".join(lines)
 

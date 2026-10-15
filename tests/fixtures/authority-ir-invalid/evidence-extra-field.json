@@ -1,1 +1,1 @@
-{"ir_version":1,"sources":[],"entities":[],"facts":[{"id":"fact:tool:t:name","subject":"tool:t","predicate":"name","value":"t","evidence":[{"source":"source:test","location":"/x","confidence":"exact","review":"accepted","payload":"do-not-echo"}]}],"edges":[]}
+{"edges":[],"entities":[],"facts":[{"evidence":[{"confidence":"exact","location":"/x","payload":"do-not-echo","review":"accepted","source":"source:test"}],"id":"fact:tool:t:name","predicate":"name","subject":"tool:t","value":"t"}],"ir_version":2,"sources":[]}

@@ -36,7 +36,7 @@ constraint depends on both its configured limit and the runtime's consumed
 state. Even correct per-request enforcement does not bound one mandate if a
 fresh session, handoff, or policy revision restores capacity the mandate has
 already spent. The experimental continuity profile reconciles that lifecycle
-question without changing manifest-v1 reachability or turning AgentMandate into
+question without changing manifest-v2 reachability or turning AgentMandate into
 a session broker or distributed counter.
 
 A **scope** is a type of resource the agent can hold a binding to, such as
@@ -91,7 +91,7 @@ no tracked state is not enqueued. This avoids repeatedly exploring read-only
 calls that add no bindings or budget consumption.
 
 Monetary transitions spend all available headroom on an interchangeable binding.
-Within manifest v1, spending cannot change tool enablement, and ceilings are
+Within manifest v2, spending cannot change tool enablement, and ceilings are
 cumulative and independent per tool/binding. Greedy fills therefore preserve
 the bounded maximum and shortest cumulative-breach length; the
 [prefix argument and independent amount-choice checks](docs/headroom-abstraction.md)
@@ -143,7 +143,7 @@ the entire argument for the command:
 
 Tool names are comparison identities. A rename is reported as a removal and
 an addition; the current diff does not infer that two differently named tools
-are equivalent. General input-schema constraints are outside manifest v1.
+are equivalent. General input-schema constraints are outside manifest v2.
 
 Effective authority is summarised as reachable tools, effect-on-scope pairs,
 ungated irreversible effects, service-principal tools, maximum extractable
@@ -159,11 +159,11 @@ These limit changes are reported separately from gains or losses of breach
 diagnostics. Removing a budget can remove its diagnostic without narrowing
 the allowance. Conversely, a tighter limit can expose a new breach; the
 existing combined verdict still requires review for any newly reachable breach
-as well as any widening allowance change. Amounts in
-different currencies are not ordered. A currency change is sent for review
-rather than being called narrower because its numeral is smaller.
-Each analyzed manifest must itself use one declared monetary currency; scalar
-search refuses mixed currencies rather than summing them as one amount.
+as well as any widening allowance change. Named quantity budgets are compared
+independently of their breach witnesses. Tools sharing one quantity must use
+exactly the same unit. Different quantity names stay independent even when
+units match; GBP and USD pools can coexist without being summed. A unit or
+quantity-assignment change requires review because accounting is not comparable.
 
 Effect claims use required scopes, falling back to a produced scope only when
 there are no requirements, consistently with reach and IR. Adding a new
@@ -197,7 +197,7 @@ Neither proves that the supplied inventory or trace contains every deployed
 path; each result retains its input-completeness boundary.
 
 Conformance is fail closed. A record cannot establish a ceiling without its
-scope, finite value, and currency, or establish identity use without the
+scope, finite value, named quantity and unit, or establish identity use without the
 executing principal. Missing evidence is a violation. Malformed evidence is a
 usage error.
 

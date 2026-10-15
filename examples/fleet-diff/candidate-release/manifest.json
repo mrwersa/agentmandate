@@ -16,5 +16,6 @@
       "effect": "read",
       "principal": "service"
     }
-  ]
+  ],
+  "version": 2
 }

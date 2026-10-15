@@ -126,6 +126,7 @@ def _policy(data: bytes) -> dict[str, Any]:
             "scalar_policy_version",
             "tool",
             "value_arg",
+            "dimension",
             "unit",
             "limit",
             "accounting",
@@ -133,12 +134,12 @@ def _policy(data: bytes) -> dict[str, Any]:
         },
     )
     if (
-        _integer(raw["scalar_policy_version"], "scalar_policy_version") != 1
+        _integer(raw["scalar_policy_version"], "scalar_policy_version") != 2
         or raw["accounting"] != "completed_plus_reserved"
         or raw["comparison"] != "inclusive"
     ):
         raise ContinuityFormatError("unsupported scalar policy model")
-    for key in ("tool", "value_arg", "unit"):
+    for key in ("tool", "value_arg", "dimension", "unit"):
         _string(raw[key], key)
     _integer(raw["limit"], "limit")
     return raw
@@ -230,20 +231,24 @@ def analyse_scalar_handover(
         contract_before = {k: v for k, v in before_policy.items() if k != "limit"}
         contract_after = {k: v for k, v in after_policy.items() if k != "limit"}
         tool = mandate.tool(before_policy["tool"])
-        total = mandate.limits.total
+        total = mandate.limits.quantities.get(before_policy["dimension"])
         if (
             contract_before != contract_after
             or tool is None
             or not tool.spends_value
             or sum(tool.spends_value for tool in mandate.tools) != 1
             or tool.value_arg != before_policy["value_arg"]
-            or tool.ceiling.currency != before_policy["unit"]
+            or tool.quantity != before_policy["dimension"]
+            or tool.ceiling.unit != before_policy["unit"]
             or tool.principal != before_binding.principal
             or total is None
-            or total.currency != before_policy["unit"]
+            or total.unit != before_policy["unit"]
             or total.amount != before_policy["limit"]
         ):
-            gap("model-unjoined", "policies do not match one manifest monetary tool and total")
+            gap(
+                "model-unjoined",
+                "policies do not match one manifest quantity-consuming tool and budget",
+            )
     state = raw["state"]
     if any(value is None for value in state.values()):
         gap(
@@ -298,7 +303,7 @@ def analyse_scalar_handover(
     if authority["breaches"] or authority["truncated"]:
         gap("manifest-authority", "manifest Authority has a breach or truncated search")
     return {
-        "schema": "agentmandate.scalar-handover/v1",
+        "schema": "agentmandate.scalar-handover/v2",
         "as_of": evaluated_at,
         "handover": raw,
         "handover_sha256": hashlib.sha256(handover.to_json().encode()).hexdigest(),

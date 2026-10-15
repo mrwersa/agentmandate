@@ -82,7 +82,7 @@ bytes, then validates the closed managed profile. It requires:
   analyzed;
 - exact, accepted mapping evidence with reviewer and expiry, evaluated against
   a caller-supplied `date`; expiry is inclusive (`as_of <= expires`). This
-  extends the [authority IR evidence-state rule](authority-ir.md#version-1-record-model)
+  extends the [authority IR evidence-state rule](authority-ir.md#version-2-record-model)
   with the same date comparison already used by reviewed condition and
   inventory evidence;
 - an evaluation date on or after the capture date, so later evidence cannot be
@@ -118,8 +118,8 @@ Each request result contains:
 - minimum support naming the reviewed mapping and the digest-pinned request and
   response bytes.
 
-Gate 5e adds two presentation schemas: `agentmandate.cedar-alignment/v1` and
-`agentmandate.cedar-effective-diff/v1`. Each records the manifest content
+Gate 5e adds two presentation schemas: `agentmandate.cedar-alignment/v2` and
+`agentmandate.cedar-effective-diff/v2`. Each records the manifest content
 digest plus the managed-oracle content digest, managed-profile semantic digest,
 and reviewed mapping digest for each side. Per-request support retains the
 request and response locators and digests. These are versioned command outputs,
@@ -178,7 +178,7 @@ facts, comparable mapping facts, and policy/source identities.
 
 The generic IR reader establishes structure only. The managed profile validator
 establishes its closed semantics. `_analyse_ir` continues to reject the profile
-at the manifest-v1 boundary; only the explicit effective-diff consumer may
+at the manifest-v2 boundary; only the explicit effective-diff consumer may
 combine it with reviewed authority.
 
 ## Delivery gates

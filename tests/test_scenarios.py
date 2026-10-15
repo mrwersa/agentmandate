@@ -20,7 +20,7 @@ from agentmandate import (
 
 BREACHING = """
 agent: dispute-resolver
-limits: {total: {amount: 500, currency: GBP}, depth: 8}
+limits: {quantities: {value: {amount: 500, unit: GBP}}, depth: 8}
 tools:
   - name: open_case
     effect: read
@@ -34,7 +34,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: {amount: 500, currency: GBP}
+    quantity: value
+    ceiling: {amount: 500, unit: GBP}
     requires_approval: true
 """
 
@@ -55,9 +56,7 @@ def reviewed(scenario: Scenario) -> Scenario:
 
 
 def test_a_reachable_breach_becomes_a_structured_scenario():
-    scenario = next(
-        item for item in derived().scenarios if item.kind == "cumulative_value"
-    )
+    scenario = next(item for item in derived().scenarios if item.kind == "quantity_budget")
 
     assert [step.tool for step in scenario.path] == [
         "open_case",
@@ -66,7 +65,7 @@ def test_a_reachable_breach_becomes_a_structured_scenario():
         "issue_refund",
     ]
     assert scenario.path[-1].spent == "500"
-    assert scenario.path[-1].currency == "GBP"
+    assert scenario.path[-1].unit == "GBP"
     assert not scenario.reviewed
 
 
@@ -208,7 +207,7 @@ def test_malformed_roots_are_rejected(payload, message):
         ("not-an-object", "must be an object"),
         ({"tool": ""}, "must not be blank"),
         ({"tool": "pay", "spent": "1"}, "supplied together"),
-        ({"tool": "pay", "currency": "GBP"}, "supplied together"),
+        ({"tool": "pay", "unit": "GBP"}, "supplied together"),
     ],
 )
 def test_malformed_steps_are_rejected(payload, message):

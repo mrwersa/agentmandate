@@ -1,34 +1,38 @@
 from __future__ import annotations
 
 import ast
-import json
 from pathlib import Path
-
-import agentmandate
 
 AUDIT = Path(__file__).resolve().parents[1] / "docs" / "pre-1.0-consolidation-audit.md"
 ROOT = AUDIT.parents[1]
 
 
-def test_audit_lists_every_public_python_name() -> None:
+def test_historical_audit_names_its_original_money_model() -> None:
     source = AUDIT.read_text(encoding="utf-8")
-    missing = sorted(name for name in agentmandate.__all__ if f"`{name}`" not in source)
-
-    assert not missing, f"pre-1.0 audit omits public Python names: {', '.join(missing)}"
+    assert "`Money`" in source and "`Quantity`" not in source
+    assert all(f"`{name}`" in source for name in ("Mandate", "ManifestError", "analyse", "compare"))
 
 
 def test_historical_audit_lists_baseline_top_level_cli_commands() -> None:
     source = AUDIT.read_text(encoding="utf-8")
-    # The fixed historical audit cannot acquire every new command. Current
-    # declarations are checked separately against the live contract inventory.
-    path = ROOT / "tests/fixtures/current-contract-inventory-v0.22.json"
-    baseline = json.loads(path.read_text())
-    commands = {
-        path.split()[1] for path in baseline["cli"] if len(path.split()) == 2
-    }
-    missing = sorted(name for name in commands if f"`{name}`" not in source)
-
-    assert not missing, f"historical audit omits baseline CLI commands: {', '.join(missing)}"
+    commands = (
+        "lint",
+        "reach",
+        "diff",
+        "scan",
+        "drift",
+        "verify",
+        "ir",
+        "inventory",
+        "conditions",
+        "delegations",
+        "producers",
+        "continuity",
+        "cedar",
+        "obligations",
+        "scenarios",
+    )
+    assert all(f"`{name}`" in source for name in commands)
 
 
 def test_audit_pins_every_evidence_converter_during_relocation() -> None:

@@ -436,8 +436,8 @@ def argv(baseline="baseline", candidate="candidate", root=ROOT):
         ("1e1000000", "10e999999", True),
         ("true", "1", False),
         ('"1"', "1", False),
-        ('{"a":[1,0.1],"b":null}', '{"b":null,"a":[1.0,1e-1]}', True),
-        ("[1,2]", "[2,1]", False),
+        ('{"a": [1, 0.1], "b": null}', '{"b": null, "a": [1.0, 0.1]}', True),
+        ("[1, 2]", "[2, 1]", False),
     ],
 )
 def test_exact_request_identity_controls_full_comparison_and_cli(
@@ -450,20 +450,23 @@ def test_exact_request_identity_controls_full_comparison_and_cli(
         records = json.loads(path.read_bytes())
         for record in records:
             record["input"]["context"]["note"] = "EXACT_NUMBER_PLACEHOLDER"
-        path.write_bytes(
-            encode(records).replace(b'"EXACT_NUMBER_PLACEHOLDER"', literal.encode())
-        )
+        path.write_bytes(encode(records).replace(b'"EXACT_NUMBER_PLACEHOLDER"', literal.encode()))
         repin(root, "baseline")
     with localcontext() as context:
         context.prec = 2
         report = compare(
-            spec("baseline"), spec("baseline"),
-            baseline_root=artifacts, candidate_root=other, as_of=AS_OF,
+            spec("baseline"),
+            spec("baseline"),
+            baseline_root=artifacts,
+            candidate_root=other,
+            as_of=AS_OF,
         )
     assert report["boundary_comparable"]
     assert not report["baseline"]["findings"] and not report["candidate"]["findings"]
     assert report["summary"] == {
-        "requests": 3 if equal else 6, "compared": 3 if equal else 0, "widened": 0,
+        "requests": 3 if equal else 6,
+        "compared": 3 if equal else 0,
+        "widened": 0,
     }
     assert codes(report) == (set() if equal else {"rego.request-unmatched-or-ambiguous"})
     command = argv("baseline", "baseline", artifacts) + ["--json"]
@@ -534,7 +537,7 @@ def test_exact_numeric_matching_never_hides_independent_authority_widening(
 
 @pytest.mark.parametrize(
     "case",
-    json.loads((ROOT / "tests/fixtures/rego-effective-diff-v1.json").read_text()),
+    json.loads((ROOT / "tests/fixtures/rego-effective-diff-v2.json").read_text()),
     ids=lambda case: case["name"],
 )
 def test_initial_replay_baselines_pin_complete_reports_and_cli_exits(case, capsys):

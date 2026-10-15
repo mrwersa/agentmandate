@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import (
     MAX_EMAX,
     MIN_EMIN,
@@ -42,11 +42,11 @@ from decimal import (
     localcontext,
 )
 
-from .manifest import IRREVERSIBLE, Mandate, Money, Tool
+from .manifest import IRREVERSIBLE, Mandate, Quantity, Tool, _quantity_units
 
 
 class _SearchArithmeticError(ValueError):
-    """Scalar search cannot represent the declared monetary domain."""
+    """Scalar search cannot represent the declared quantity domain."""
 
 
 # A single call in a counterexample path.
@@ -55,7 +55,8 @@ class Step:
     tool: str
     binding: str | None = None
     spent: Decimal | None = None
-    currency: str | None = None
+    unit: str | None = None
+    quantity: str | None = None
 
     def render(self) -> str:
         parts = [self.tool]
@@ -63,7 +64,7 @@ class Step:
         if self.binding:
             detail.append(self.binding)
         if self.spent is not None:
-            detail.append(f"{self.spent} {self.currency}")
+            detail.append(f"{self.spent} {self.unit}")
         if detail:
             parts.append("(" + ", ".join(detail) + ")")
         return "".join(parts)
@@ -103,7 +104,7 @@ class Authority:
     effects: frozenset[tuple[str, str]] = frozenset()
     ungated_irreversible: frozenset[str] = frozenset()
     service_principal_tools: frozenset[str] = frozenset()
-    max_extractable: Money | None = None
+    max_quantities: Mapping[str, Quantity] = field(default_factory=dict)
     breaches: tuple[Breach, ...] = ()
     depth: int = 0
     truncated: bool = False
@@ -114,14 +115,10 @@ class Authority:
             "effects": sorted([list(pair) for pair in self.effects]),
             "ungated_irreversible": sorted(self.ungated_irreversible),
             "service_principal_tools": sorted(self.service_principal_tools),
-            "max_extractable": (
-                None
-                if self.max_extractable is None
-                else {
-                    "amount": str(self.max_extractable.amount),
-                    "currency": self.max_extractable.currency,
-                }
-            ),
+            "max_quantities": {
+                name: {"amount": str(value.amount), "unit": value.unit}
+                for name, value in sorted(self.max_quantities.items())
+            },
             "breaches": [
                 {
                     "kind": b.kind,
@@ -168,9 +165,12 @@ class _State:
                 return value
         return Decimal(0)
 
-    @property
-    def total(self) -> Decimal:
-        return sum((value for _, value in self.spend), Decimal(0))
+    def totals(self, tool_quantities: Mapping[str, str]) -> dict[str, Decimal]:
+        totals: dict[str, Decimal] = {}
+        for (tool, _, _), value in self.spend:
+            name = tool_quantities[tool]
+            totals[name] = totals.get(name, Decimal(0)) + value
+        return totals
 
     def with_binding(self, scope: str) -> _State:
         counts = dict(self.counts)
@@ -268,20 +268,16 @@ def _analyse_with_trace(
 ) -> tuple[Authority, _ReachTrace]:
     """Walk the graph and retain shortest enabling paths for provenance.
 
-    Returns the effective authority summary plus any cumulative-value breach
+    Returns the effective authority summary plus any quantity-budget breach
     found within the depth bound, shortest counterexample first.
     """
     limit = depth if depth is not None else mandate.limits.depth
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
         raise ValueError("depth must be a positive integer")
-    currencies = {t.ceiling.currency for t in mandate.tools if t.ceiling is not None}
-    if mandate.limits.total is not None:
-        currencies.add(mandate.limits.total.currency)
-    if len(currencies) > 1:
-        raise _SearchArithmeticError(
-            "reachability cumulative amounts require one currency; "
-            "no exchange-rate or cross-currency accounting model is declared"
-        )
+    try:
+        _quantity_units(mandate)
+    except ValueError as exc:
+        raise _SearchArithmeticError(str(exc)) from exc
     # One call adds at most one ceiling. Align every nonzero ceiling's digits
     # and reserve enough carry digits for at most `limit` additions. Search
     # arithmetic must not inherit a caller's precision, exponent range or traps.
@@ -300,11 +296,15 @@ def _arithmetic_context(amounts: list[Decimal], calls: int) -> Context:
     nonzero = [amount for amount in amounts if amount]
     width = (
         max(a.adjusted() for a in nonzero) - min(a.as_tuple().exponent for a in nonzero) + 1
-        if nonzero else 1
+        if nonzero
+        else 1
     )
     return Context(
-        prec=max(28, width + calls.bit_length()), Emax=MAX_EMAX, Emin=MIN_EMIN,
-        rounding=ROUND_HALF_EVEN, clamp=0,
+        prec=max(28, width + calls.bit_length()),
+        Emax=MAX_EMAX,
+        Emin=MIN_EMIN,
+        rounding=ROUND_HALF_EVEN,
+        clamp=0,
         traps=[InvalidOperation, DivisionByZero, Overflow, Inexact],
     )
 
@@ -317,7 +317,9 @@ def _walk(
     _metrics: dict[str, int] | None,
 ) -> tuple[Authority, _ReachTrace]:
     """Search under the isolated exact arithmetic context selected by the entrypoint."""
-    total_cap = mandate.limits.total
+    quantity_caps = mandate.limits.quantities
+    units = _quantity_units(mandate)
+    tool_quantities = {t.name: t.quantity for t in mandate.tools if t.ceiling is not None}
     effect_caps = mandate.limits.effects
     bounded_producers = producer_caps or {}
 
@@ -327,7 +329,7 @@ def _walk(
     service: set[str] = set()
     breaches: list[Breach] = []
     reachable_paths: dict[str, tuple[Step, ...]] = {}
-    max_total = Decimal(0)
+    maxima = dict.fromkeys(units, Decimal(0))
     truncated = False
 
     start = _State()
@@ -335,9 +337,13 @@ def _walk(
     queue: deque[_SearchNode] = deque([_SearchNode(start)])
     if _metrics is not None:
         _metrics.update(
-            states_discovered=1, states_expanded=0, tool_checks=0,
-            generated_transitions=0, duplicate_transitions=0,
-            frontier_peak=1, depth_cutoffs=0,
+            states_discovered=1,
+            states_expanded=0,
+            tool_checks=0,
+            generated_transitions=0,
+            duplicate_transitions=0,
+            frontier_peak=1,
+            depth_cutoffs=0,
         )
 
     while queue:
@@ -379,8 +385,7 @@ def _walk(
                 # the agent can actually get to it, and how, is the thing that
                 # decides whether it matters.
                 if not any(
-                    b.kind == "ungated_effect" and b.path[-1].tool == tool.name
-                    for b in breaches
+                    b.kind == "ungated_effect" and b.path[-1].tool == tool.name for b in breaches
                 ):
                     breaches.append(
                         Breach(
@@ -398,7 +403,7 @@ def _walk(
             next_state = state
             step_binding = None
             step_spent = None
-            step_currency = None
+            step_unit = None
             progressed = False
 
             # A budgeted call moves the walk forward the way spending does.
@@ -419,18 +424,22 @@ def _walk(
             if choice is not None:
                 index, headroom = choice
                 next_state = next_state.with_spend(
-                    tool.name, tool.scope_key, index, headroom  # type: ignore[arg-type]
+                    tool.name,
+                    tool.scope_key,
+                    index,
+                    headroom,  # type: ignore[arg-type]
                 )
                 step_binding = f"{tool.scope_key}#{index + 1}"
                 step_spent = headroom
-                step_currency = tool.ceiling.currency  # type: ignore[union-attr]
+                step_unit = tool.ceiling.unit  # type: ignore[union-attr]
                 progressed = True
 
             step = Step(
                 tool=tool.name,
                 binding=step_binding,
                 spent=step_spent,
-                currency=step_currency,
+                unit=step_unit,
+                quantity=tool.quantity if step_spent is not None else None,
             )
             if first_reach:
                 reachable_paths[tool.name] = node.path() + (step,)
@@ -451,24 +460,25 @@ def _walk(
             if _metrics is not None:
                 _metrics["states_discovered"] += 1
 
-            running = next_state.total
-            max_total = max(max_total, running)
-
-            if (
-                total_cap is not None
-                and running > total_cap.amount
-                and not any(b.kind == "cumulative_value" for b in breaches)
-            ):
-                breaches.append(
-                    Breach(
-                        kind="cumulative_value",
-                        detail=(
-                            f"cumulative value {running} {total_cap.currency} "
-                            f"exceeds limit {total_cap.amount} {total_cap.currency}"
-                        ),
-                        path=node.path() + (step,),
+            for name, running in next_state.totals(tool_quantities).items():
+                maxima[name] = max(maxima[name], running)
+                cap = quantity_caps.get(name)
+                if (
+                    cap is not None
+                    and running > cap.amount
+                    and not any(b.kind == "quantity_budget" and b.subject == name for b in breaches)
+                ):
+                    breaches.append(
+                        Breach(
+                            kind="quantity_budget",
+                            detail=(
+                                f"quantity {name!r} reaches {running} {cap.unit}, "
+                                f"above its cumulative budget of {cap.amount} {cap.unit}"
+                            ),
+                            path=node.path() + (step,),
+                            subject=name,
+                        )
                     )
-                )
 
             cap = effect_caps.get(tool.effect)
             if cap is not None:
@@ -478,8 +488,7 @@ def _walk(
                 # to open with the effect name, so a reworded message would
                 # have quietly produced one breach per extra call.
                 if made > cap and not any(
-                    b.kind == "effect_count" and b.subject == tool.effect
-                    for b in breaches
+                    b.kind == "effect_count" and b.subject == tool.effect for b in breaches
                 ):
                     breaches.append(
                         Breach(
@@ -497,15 +506,12 @@ def _walk(
             if _metrics is not None:
                 _metrics["frontier_peak"] = max(_metrics["frontier_peak"], len(queue))
 
-    currency = total_cap.currency if total_cap else _sole_currency(mandate)
     authority = Authority(
         reachable_tools=frozenset(reachable),
         effects=frozenset(effects),
         ungated_irreversible=frozenset(ungated),
         service_principal_tools=frozenset(service),
-        max_extractable=(
-            Money(amount=max_total, currency=currency) if currency else None
-        ),
+        max_quantities={name: Quantity(amount, units[name]) for name, amount in maxima.items()},
         breaches=tuple(breaches),
         depth=limit,
         truncated=truncated,
@@ -517,8 +523,3 @@ def _walk(
 def analyse(mandate: Mandate, depth: int | None = None) -> Authority:
     """Walk the authority graph and report what the agent can reach."""
     return _analyse_with_trace(mandate, depth=depth)[0]
-
-
-def _sole_currency(mandate: Mandate) -> str | None:
-    currencies = {t.ceiling.currency for t in mandate.tools if t.ceiling}
-    return currencies.pop() if len(currencies) == 1 else None

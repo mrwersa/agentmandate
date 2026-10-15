@@ -215,7 +215,7 @@ rest does not, because a manifest is not documentation.
 The three fields the analysis actually turns on are not in the source:
 
 - whether the effect can be undone
-- which argument spends money, and against what a ceiling counts
+- which argument consumes a measured quantity, and against what a ceiling counts
 - whether the tool runs as the caller or as a service account
 
 Effects are guessed from the name and default to `irreversible`, because

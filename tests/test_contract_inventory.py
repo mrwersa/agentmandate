@@ -8,39 +8,15 @@ from pathlib import Path
 import pytest
 
 import agentmandate
-from agentmandate import check, load
+from agentmandate import load
 from agentmandate.cli import build_parser, main
 from scripts import audit_contracts as audit
 
 ROOT = Path(__file__).resolve().parents[1]
-CASES = json.loads((ROOT / "tests/fixtures/legacy-json-results.json").read_text())
 
 
 def test_current_inventory_matches_all_pinned_surfaces():
     assert audit.snapshot() == json.loads(audit.BASELINE.read_text())
-
-
-def test_remediation_addition_preserves_every_previous_contract_and_fixture():
-    path = ROOT / "tests/fixtures/current-contract-inventory-v0.22.json"
-    previous = json.loads(path.read_text())
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.23.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate remediate"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate":
-            selector = next(a for a in present["arguments"] if a["dest"] == "command")
-            selector["choices"].remove("remediate")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_remediation.py",
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
 
 
 def test_coverage_inventory_names_every_presentation_and_real_replay_test():
@@ -61,38 +37,14 @@ def test_coverage_inventory_names_every_presentation_and_real_replay_test():
     assert "mandate continuity handover" in current["cli"]
 
 
-@pytest.mark.parametrize("case", CASES, ids=lambda case: case["name"])
-def test_legacy_output_and_exit_codes_remain_byte_exact(case, monkeypatch, capsys):
-    monkeypatch.chdir(ROOT)
-    for path, digest in case["inputs"].items():
-        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == digest
-    assert main(case["argv"]) == case["exit"]
-    captured = capsys.readouterr()
-    assert captured.out == case["stdout"]
-    assert captured.err == case["stderr"]
+def test_archival_manifests_and_skeletons_are_not_current_inputs():
+    from agentmandate import ManifestError
 
-
-def test_preserved_raw_skeletons_keep_their_expected_missing_producers():
-    expected = {
-        "aws-iam-access-keys": (2, {"access_key", "version"}),
-        "aws-postgres-mcp": (1, {"job"}),
-        "initiative-mcp": (22, {"guild", "calendar"}),
-        "sentry-mcp": (3, {"resource", "projectslugor", "issue"}),
-    }
-    observed = {}
-    for path in sorted((ROOT / "docs/evidence").glob("*/scan-skeleton.yaml")):
-        findings = [f for f in check(load(path)) if f.rule == "scope.missing-producer"]
-        count, scopes = expected[path.parent.name]
-        assert len(findings) == count
-        assert all(f.severity == "error" for f in findings)
-        reported = {
-            scope for scope in scopes if any(f"requires {scope!r}" in f.message for f in findings)
-        }
-        assert reported == scopes
-        observed[path.parent.name] = (len(findings), reported)
-    assert observed == expected
-    for path in (ROOT / "docs/evidence").glob("*/mandate.yaml"):
-        assert not [f for f in check(load(path)) if f.rule == "scope.missing-producer"]
+    for path in (ROOT / "docs/evidence").glob("*/*.yaml"):
+        if path.name not in {"mandate.yaml", "scan-skeleton.yaml", "controls-mandate.yaml"}:
+            continue
+        with pytest.raises(ManifestError):
+            load(path)
 
 
 @pytest.mark.parametrize("change", ["default", "choices", "required", "new-option"])
@@ -226,360 +178,15 @@ def test_script_entrypoint_checks_without_writing(monkeypatch, capsys):
     assert audit.BASELINE.read_bytes() == before
 
 
-def test_ceiling_remediation_addition_preserves_the_preceding_inventory():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.23.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.24.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) == set(previous["cli"])
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate remediate":
-            added = [a for a in present["arguments"] if a["dest"] == "ceiling"]
-            assert len(added) == 1 and added[0]["options"] == ["--ceiling"]
-            present["arguments"].remove(added[0])
-        assert present == command
-    for path, markers in previous["artifact_markers"].items():
-        present = copy.deepcopy(current["artifact_markers"][path])
-        if path == "_remediation.py":
-            assert present["constants"].pop("CEILING_REMEDIATION_SCHEMA") == (
-                "agentmandate.remediation/v2"
-            )
-            present["schemas"].remove("agentmandate.remediation/v2")
-        assert present == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_required_workflow_addition_preserves_every_prior_contract_and_fixture():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.24.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.25.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) == set(previous["cli"])
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate remediate":
-            added = [a for a in present["arguments"] if a["dest"] == "required_workflows"]
-            assert len(added) == 1 and added[0]["options"] == ["--required-workflows"]
-            present["arguments"].remove(added[0])
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_required_workflows.py",
-    }
-    for path, markers in previous["artifact_markers"].items():
-        present = copy.deepcopy(current["artifact_markers"][path])
-        if path == "_remediation.py":
-            assert present["constants"].pop("WORKFLOW_REMEDIATION_SCHEMA") == (
-                "agentmandate.remediation/v3"
-            )
-            present["schemas"].remove("agentmandate.remediation/v3")
-        assert present == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_named_review_addition_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.25.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.26.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate review"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate":
-            selector = next(a for a in present["arguments"] if a["dest"] == "command")
-            selector["choices"].remove("review")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_change_review.py",
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_cedar_export_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.26.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.27.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate cedar export"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate cedar":
-            selector = next(a for a in present["arguments"] if a["dest"] == "cedar_command")
-            selector["choices"].remove("export")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_cedar_export.py"
-    }
-    for path, marker in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == marker
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_rego_export_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.27.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.28.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate rego", "mandate rego export"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate":
-            selector = next(a for a in present["arguments"] if a["dest"] == "command")
-            selector["choices"].remove("rego")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_rego_export.py"
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_deployment_drift_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.28.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.29.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {
-        "mandate deployment", "mandate deployment drift"
-    }
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate":
-            selector = next(a for a in present["arguments"] if a["dest"] == "command")
-            selector["choices"].remove("deployment")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_deployment_drift.py"
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_fleet_inventory_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.29.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.30.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {
-        "mandate fleet", "mandate fleet inventory"
-    }
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate":
-            selector = next(a for a in present["arguments"] if a["dest"] == "command")
-            selector["choices"].remove("fleet")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {"_fleet.py"}
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_deployment_reconciliation_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.30.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.31.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate deployment reconcile"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate deployment":
-            selector = next(a for a in present["arguments"] if a["dest"] == "deployment_command")
-            selector["choices"].remove("reconcile")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_deployment_reconcile.py"
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_fleet_exceptions_preserve_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.31.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.32.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate fleet exceptions"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate fleet":
-            selector = next(a for a in present["arguments"] if a["dest"] == "fleet_command")
-            selector["choices"].remove("exceptions")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_fleet_exceptions.py"
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_grid_frontier_preserves_all_previous_contracts_and_fixtures():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.32.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.33.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) == set(previous["cli"])
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate remediate":
-            for dest, options in [("ceiling_grid", ["--ceiling-grid"]), ("pareto", ["--pareto"])]:
-                added = [a for a in present["arguments"] if a["dest"] == dest]
-                assert len(added) == 1 and added[0]["options"] == options
-                present["arguments"].remove(added[0])
-        assert present == command
-    assert set(current["artifact_markers"]) == set(previous["artifact_markers"])
-    for path, markers in previous["artifact_markers"].items():
-        present = copy.deepcopy(current["artifact_markers"][path])
-        if path == "_remediation.py":
-            assert present["constants"].pop("FRONTIER_REMEDIATION_SCHEMA") == (
-                "agentmandate.remediation/v4"
-            )
-            present["schemas"].remove("agentmandate.remediation/v4")
-        assert present == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_structural_json_addition_preserves_every_existing_contract_and_fixture():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.33.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.34.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) == set(previous["cli"])
-    validators = {f"mandate {group} validate" for group in (
-        "ir", "inventory", "conditions", "delegations", "producers", "continuity", "cedar",
-    )}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path in validators:
-            added = [a for a in present["arguments"] if a["dest"] == "json"]
-            assert len(added) == 1 and added[0]["options"] == ["--json"]
-            present["arguments"].remove(added[0])
-        assert present == command
-    assert set(current["artifact_markers"]) == set(previous["artifact_markers"])
-    for path, markers in previous["artifact_markers"].items():
-        present = copy.deepcopy(current["artifact_markers"][path])
-        if path == "cli.py":
-            present["schemas"].remove("agentmandate.validation/v1")
-        assert present == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_rego_comparison_preserves_every_existing_contract_and_fixture():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.34.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.35.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate rego diff"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate rego":
-            selector = next(a for a in present["arguments"] if a["dest"] == "rego_command")
-            selector["choices"].remove("diff")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_rego_diff.py",
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_fleet_comparison_preserves_every_existing_contract_and_fixture():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.35.json").read_text()
-    )
-    current = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.36.json").read_text()
-    )
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) - set(previous["cli"]) == {"mandate fleet diff"}
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate fleet":
-            selector = next(a for a in present["arguments"] if a["dest"] == "fleet_command")
-            selector["choices"].remove("diff")
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_fleet_diff.py",
-    }
-    for path, markers in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == markers
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
-
-
-def test_ceiling_discovery_preserves_previous_commands_and_fixture_bytes():
-    previous = json.loads(
-        (ROOT / "tests/fixtures/current-contract-inventory-v0.36.json").read_text()
-    )
-    current = audit.snapshot()
-    assert current["public_python"] == previous["public_python"]
-    assert set(current["cli"]) == set(previous["cli"])
-    for path, command in previous["cli"].items():
-        present = copy.deepcopy(current["cli"][path])
-        if path == "mandate remediate":
-            added = next(a for a in present["arguments"] if a["dest"] == "discover_ceiling")
-            assert added["options"] == ["--discover-ceiling"]
-            present["arguments"].remove(added)
-        assert present == command
-    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
-        "_ceiling_discovery.py",
-    }
-    for path, value in previous["artifact_markers"].items():
-        assert current["artifact_markers"][path] == value
-    for path, digest in previous["fixture_sha256"].items():
-        assert current["fixture_sha256"][path] == digest
+@pytest.mark.parametrize(
+    "case",
+    json.loads((ROOT / "tests/fixtures/current-cli-results.json").read_text()),
+    ids=lambda case: case["name"],
+)
+def test_current_cli_results_and_exit_codes(case, monkeypatch, capsys):
+    monkeypatch.chdir(ROOT)
+    for path, digest in case["inputs"].items():
+        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == digest
+    assert main(case["argv"]) == case["exit"]
+    captured = capsys.readouterr()
+    assert captured.out == case["stdout"] and captured.err == case["stderr"]

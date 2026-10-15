@@ -143,7 +143,7 @@ authority. Neither conclusion is available from incomplete evidence.
 
 The implementation projects membership into provenance-bearing IR
 facts and `contains_tool` edges through a dedicated inventory profile. The
-existing manifest-v1 profile remains the only path to authority analysis;
+existing manifest-v2 profile remains the only path to authority analysis;
 successful inventory validation cannot grant tool effects or make a result
 analyzable. The graph keeps the reviewed declaration and captured bytes as
 separate sources: declaration facts cite their JSON locations, while member

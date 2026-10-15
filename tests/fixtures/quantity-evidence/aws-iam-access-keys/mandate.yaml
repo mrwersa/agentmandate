@@ -1,0 +1,13 @@
+version: 2
+agent: iam-key-producer
+identity: spiffe://example/agents/iam-key-producer
+limits:
+  depth: 3
+  effects:
+    write: 2
+tools:
+- name: create_access_key
+  effect: write
+  principal: service
+  produces: access_key
+  unbounded: true

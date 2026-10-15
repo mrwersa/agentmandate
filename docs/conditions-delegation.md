@@ -2,7 +2,7 @@
 
 Status: **conditional CLI exposed; original delegation shape superseded**.
 This document records the shared foundation for conditional authority and
-delegation chains. Both remain reviewed attachments rather than manifest-v1
+delegation chains. Both remain reviewed attachments rather than manifest-v2
 meaning. Structural validation proves graph or artifact integrity only;
 manifest-mode analysis separately establishes whether the evidence is eligible
 to narrow authority.
@@ -19,7 +19,7 @@ absolute validity, and separately reviewed deployment mappings.
 
 ## Problem boundary
 
-Two committed evidence graphs record authority that manifest v1 cannot
+Two committed evidence graphs record authority that manifest v2 cannot
 express:
 
 - **Conditional effects.** `run_query` spans reads, writes, and destructive
@@ -204,7 +204,7 @@ runtime input. Tool-principal v1 is historical and replayed only by
 and chain v1.
 
 Two private version-1 JSON artifacts preserve the tool-side declarations
-without changing manifest v1. A tool condition records one target
+without changing manifest v2. A tool condition records one target
 (`source`, `binding`, and reviewed tool name), one closed predicate, argument,
 class, weaker effect, context reference, and evidence. A tool principal records
 the same target plus exactly one of these closed shapes:
@@ -224,7 +224,7 @@ relations `has_condition`, `uses_context`, `narrows_to`, `constrained_by`, and
 record and its JSON location. The condition and principal profiles reject
 unknown predicates, incomplete fact sets, inconsistent evidence state,
 non-canonical targets, entity mismatch, and digest drift. They deliberately do
-not evaluate conditions, attest grants, or enter the manifest-v1 analysis
+not evaluate conditions, attest grants, or enter the manifest-v2 analysis
 profile.
 
 ## Gate 3 conditional trust semantics
@@ -268,7 +268,7 @@ inventory was complete.
 Gate 4 exposes structural validation through `mandate conditions validate` and
 reviewed inputs through manifest-mode `reach` and `drift`. Conditional human
 output is a separate `APPLIED`/`UNRESOLVED` section; JSON adds a conditional
-`conditions` object with schema `agentmandate.conditions/v1`, the evaluation
+`conditions` object with schema `agentmandate.conditions/v2`, the evaluation
 date, decisions, and replay support. Conditional drift JSON also records
 `source_drift_clean` separately and makes top-level `clean` the combined
 verdict. Any unresolved decision exits 1 after complete output. Malformed or

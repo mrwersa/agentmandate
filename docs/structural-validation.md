@@ -8,7 +8,7 @@ Consume it through the relevant analysis command to evaluate those boundaries.
 Every validator supports JSON output:
 
 ```bash
-mandate ir validate tests/fixtures/authority-ir-v1.json --json
+mandate ir validate tests/fixtures/authority-ir-v2.json --json
 ```
 
 ```json

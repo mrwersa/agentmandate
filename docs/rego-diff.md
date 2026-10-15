@@ -97,7 +97,7 @@ rather than attributed to a policy revision. A shared revision label with
 different policy bytes is likewise unresolved. Changed policy bytes with a new
 revision label are permitted and checked through each side's configuration.
 
-The result is `agentmandate.rego-effective-diff/v1`. It contains both original
+The result is `agentmandate.rego-effective-diff/v2`. It contains both original
 reconciliation reports, capture/input digests, scoped request comparisons and
 the independently recomputed `authority_diff`. Different agent names cannot
 have an authority diff: that field is null and both original Authority reports
@@ -131,7 +131,7 @@ continuity remain `not_assessed`.
 
 The unchanged and narrowing examples can be tried by using the baseline index
 on both sides, or swapping the two indexes. Initial widening, unchanged,
-narrowing and expired [v1 baselines](../tests/fixtures/rego-effective-diff-v1.json)
+narrowing and expired [v1 baselines](../tests/fixtures/rego-effective-diff-v2.json)
 pin the result; earlier exporter and reconciliation outputs are preserved.
 Arbitrary Rego import, general policy equivalence, state migration and live
 enforcement authentication remain outside this contract.

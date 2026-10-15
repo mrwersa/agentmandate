@@ -5,14 +5,17 @@ from pathlib import Path
 
 from agentmandate import analyse, check, load, propose, render
 
-EVIDENCE = (
-    Path(__file__).resolve().parents[1] / "docs" / "evidence" / "aws-postgres-mcp"
-)
+EVIDENCE = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "aws-postgres-mcp"
 
 
 def test_catalogue_and_reviewed_manifest_cover_the_same_tools() -> None:
     catalogue = json.loads((EVIDENCE / "catalogue.json").read_text(encoding="utf-8"))
-    mandate = load(EVIDENCE / "mandate.yaml")
+    mandate = load(
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "mandate.yaml"
+    )
 
     assert len(catalogue["tools"]) == 7
     assert {tool["name"] for tool in catalogue["tools"]} == set(mandate.tool_names)
@@ -30,13 +33,21 @@ def test_scan_misses_the_write_enabled_query_and_connection_state() -> None:
 def test_scan_skeleton_is_the_preserved_cli_output() -> None:
     catalogue = json.loads((EVIDENCE / "catalogue.json").read_text(encoding="utf-8"))
 
-    assert (EVIDENCE / "scan-skeleton.yaml").read_text(encoding="utf-8") == render(
-        propose(catalogue), "aws-postgres-agent"
-    )
+    assert (
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "scan-skeleton.yaml"
+    ).read_text(encoding="utf-8") == render(propose(catalogue), "aws-postgres-agent")
 
 
 def test_reviewed_graph_exposes_the_effect_budget_counterexample() -> None:
-    mandate = load(EVIDENCE / "mandate.yaml")
+    mandate = load(
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "mandate.yaml"
+    )
     authority = analyse(mandate)
     breach = next(item for item in authority.breaches if item.kind == "effect_count")
 
@@ -50,7 +61,14 @@ def test_reviewed_graph_exposes_the_effect_budget_counterexample() -> None:
 
 
 def test_reviewed_graph_keeps_service_principal_findings_visible() -> None:
-    findings = check(load(EVIDENCE / "mandate.yaml"))
+    findings = check(
+        load(
+            Path(__file__).parents[1]
+            / "tests/fixtures/quantity-evidence"
+            / EVIDENCE.name
+            / "mandate.yaml"
+        )
+    )
 
     assert len(findings) == 7
     assert {finding.rule for finding in findings} == {"identity.service-principal"}

@@ -20,7 +20,7 @@ from typing import Any
 from .manifest import Mandate
 from .reach import Breach, Step, analyse
 
-SCENARIOS_SCHEMA = "agentmandate.scenarios/v1"
+SCENARIOS_SCHEMA = "agentmandate.scenarios/v2"
 
 
 def _required_string(value: Any, field: str, *, allow_blank: bool = False) -> str:
@@ -40,7 +40,8 @@ class ScenarioStep:
     tool: str
     binding: str | None = None
     spent: str | None = None
-    currency: str | None = None
+    unit: str | None = None
+    quantity: str | None = None
 
     @classmethod
     def from_step(cls, step: Step) -> ScenarioStep:
@@ -48,7 +49,8 @@ class ScenarioStep:
             tool=step.tool,
             binding=step.binding,
             spent=str(step.spent) if step.spent is not None else None,
-            currency=step.currency,
+            unit=step.unit,
+            quantity=step.quantity,
         )
 
     @classmethod
@@ -58,19 +60,19 @@ class ScenarioStep:
         tool = _required_string(value.get("tool"), "step tool")
         binding = value.get("binding")
         spent = value.get("spent")
-        currency = value.get("currency")
+        unit = value.get("unit")
+        quantity = value.get("quantity")
         for field, item in (
             ("step binding", binding),
             ("step spent", spent),
-            ("step currency", currency),
+            ("step unit", unit),
+            ("step quantity", quantity),
         ):
             if item is not None:
                 _required_string(item, field)
-        if (spent is None) != (currency is None):
-            raise ValueError(
-                "scenario step spent and currency must be supplied together"
-            )
-        return cls(tool=tool, binding=binding, spent=spent, currency=currency)
+        if (spent is None) != (unit is None) or (spent is None) != (quantity is None):
+            raise ValueError("scenario step spent, quantity and unit must be supplied together")
+        return cls(tool=tool, binding=binding, spent=spent, unit=unit, quantity=quantity)
 
     def to_dict(self) -> dict[str, str]:
         payload = {"tool": self.tool}
@@ -78,7 +80,8 @@ class ScenarioStep:
             payload["binding"] = self.binding
         if self.spent is not None:
             payload["spent"] = self.spent
-            payload["currency"] = self.currency or ""
+            payload["unit"] = self.unit or ""
+            payload["quantity"] = self.quantity or ""
         return payload
 
 
@@ -137,12 +140,9 @@ class Scenario:
             raise ValueError("scenario path must be a non-empty list")
         raw_environment = value.get("environment", [])
         if not isinstance(raw_environment, list) or any(
-            not isinstance(item, str) or not item.strip()
-            for item in raw_environment
+            not isinstance(item, str) or not item.strip() for item in raw_environment
         ):
-            raise ValueError(
-                "scenario environment must be a list of non-blank strings"
-            )
+            raise ValueError("scenario environment must be a list of non-blank strings")
         scenario = cls(
             kind=kind,
             detail=detail,
@@ -158,10 +158,7 @@ class Scenario:
             ),
         )
         if "id" in value and value["id"] != scenario.identifier:
-            raise ValueError(
-                f"scenario id {value['id']!r} does not match "
-                f"{scenario.identifier!r}"
-            )
+            raise ValueError(f"scenario id {value['id']!r} does not match {scenario.identifier!r}")
         return scenario
 
     def to_dict(self) -> dict[str, Any]:
@@ -187,11 +184,7 @@ class ScenarioSet:
 
     @property
     def unreviewed(self) -> tuple[str, ...]:
-        return tuple(
-            scenario.identifier
-            for scenario in self.scenarios
-            if not scenario.reviewed
-        )
+        return tuple(scenario.identifier for scenario in self.scenarios if not scenario.reviewed)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -207,9 +200,7 @@ class ScenarioSet:
         if not isinstance(value, dict):
             raise ValueError("scenarios root must be an object")
         if value.get("schema") != SCENARIOS_SCHEMA:
-            raise ValueError(
-                f"unsupported scenarios schema: {value.get('schema')!r}"
-            )
+            raise ValueError(f"unsupported scenarios schema: {value.get('schema')!r}")
         agent = _required_string(value.get("agent"), "agent")
         depth = value.get("depth")
         if isinstance(depth, bool) or not isinstance(depth, int) or depth < 1:
@@ -238,9 +229,7 @@ class ScenarioSet:
             return "\n".join(lines)
         for scenario in self.scenarios:
             lines.append(f"  {scenario.identifier}")
-            lines.append(
-                "    path: " + " -> ".join(step.tool for step in scenario.path)
-            )
+            lines.append("    path: " + " -> ".join(step.tool for step in scenario.path))
             lines.append(
                 "    environment: "
                 + (
@@ -251,10 +240,7 @@ class ScenarioSet:
             )
             lines.append(
                 "    agent input: "
-                + (
-                    scenario.agent_input
-                    or "REVIEW: write the input that should exercise this risk"
-                )
+                + (scenario.agent_input or "REVIEW: write the input that should exercise this risk")
             )
             lines.append(
                 "    expected: "
@@ -265,9 +251,7 @@ class ScenarioSet:
             )
         if self.truncated:
             lines.append("")
-            lines.append(
-                f"search stopped at depth {self.depth}; deeper paths were not analysed"
-            )
+            lines.append(f"search stopped at depth {self.depth}; deeper paths were not analysed")
         return "\n".join(lines)
 
 
@@ -278,9 +262,7 @@ def derive_scenarios(mandate: Mandate, depth: int | None = None) -> ScenarioSet:
         agent=mandate.agent,
         depth=authority.depth,
         truncated=authority.truncated,
-        scenarios=tuple(
-            Scenario.from_breach(breach) for breach in authority.breaches
-        ),
+        scenarios=tuple(Scenario.from_breach(breach) for breach in authority.breaches),
     )
 
 
@@ -291,8 +273,7 @@ def reconcile_scenarios(
     """Carry human-authored fields onto witnesses that remain reachable."""
     if current.agent != reviewed.agent:
         raise ValueError(
-            f"cannot reconcile scenarios for {reviewed.agent!r} with "
-            f"{current.agent!r}"
+            f"cannot reconcile scenarios for {reviewed.agent!r} with {current.agent!r}"
         )
     by_id = {scenario.identifier: scenario for scenario in reviewed.scenarios}
     reconciled = []

@@ -20,7 +20,7 @@ from agentmandate.obligations import (
 
 MANDATE = """
 agent: dispute-resolver
-limits: {total: {amount: 500, currency: GBP}}
+limits: {quantities: {value: {amount: 500, unit: GBP}}}
 tools:
   - name: open_case
     effect: read
@@ -30,7 +30,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: {amount: 500, currency: GBP}
+    quantity: value
+    ceiling: {amount: 500, unit: GBP}
     requires_approval: true
   - name: post_ledger
     effect: write
@@ -92,7 +93,7 @@ class TestCompoundBreachesStayOut:
         found = {o.kind for o in derive(loads(minting)).obligations}
 
         assert "breach" not in found
-        assert "cumulative_value" not in found
+        assert "quantity_budget" not in found
 
 
 class TestDecisionsAreNeverInvented:
@@ -111,9 +112,7 @@ class TestDecisionsAreNeverInvented:
         which is worse than a file that refuses to load."""
         half = ObligationSet(
             agent="a",
-            obligations=(
-                Obligation("irreversible", "pay", "why", decision="paid"),
-            ),
+            obligations=(Obligation("irreversible", "pay", "why", decision="paid"),),
         )
         assert half.unreviewed == ("irreversible:pay",)
         with pytest.raises(ValueError, match="at least one probe"):
@@ -140,8 +139,13 @@ class TestReconciliation:
         return ObligationSet(
             agent="dispute-resolver",
             obligations=tuple(
-                Obligation(o.kind, o.subject, o.reason, decision="refund_approved",
-                           cases=(f"probe for {o.identifier}",))
+                Obligation(
+                    o.kind,
+                    o.subject,
+                    o.reason,
+                    decision="refund_approved",
+                    cases=(f"probe for {o.identifier}",),
+                )
                 for o in derive(loads(MANDATE)).obligations
             ),
         )
@@ -166,9 +170,7 @@ class TestReconciliation:
         from agentmandate.obligations import reconcile
 
         grown = MANDATE + (
-            "  - name: close_account\n"
-            "    effect: irreversible\n"
-            "    requires: [case]\n"
+            "  - name: close_account\n    effect: irreversible\n    requires: [case]\n"
         )
         result = reconcile(derive(loads(grown)), self.fully_reviewed())
 
@@ -209,9 +211,7 @@ class TestSuiteGeneration:
         assert suite["cases"][0]["expected"] == "refund_approved"
 
     def test_consequence_classes_become_critical_decisions(self):
-        suite = to_decision_suite(
-            self.reviewed({"service-principal": "ledger_posted"})
-        )
+        suite = to_decision_suite(self.reviewed({"service-principal": "ledger_posted"}))
         # service-principal is a control concern, not a consequence class, so
         # its decision is required but not critical.
         assert "refund_approved" in suite["contract"]["critical"]
@@ -279,27 +279,21 @@ class TestRoundTrip:
             (
                 {
                     "schema": OBLIGATIONS_SCHEMA,
-                    "obligations": [
-                        {"kind": "x", "subject": "y", "decision": None}
-                    ],
+                    "obligations": [{"kind": "x", "subject": "y", "decision": None}],
                 },
                 "decision must be a string",
             ),
             (
                 {
                     "schema": OBLIGATIONS_SCHEMA,
-                    "obligations": [
-                        {"kind": "x", "subject": "y", "cases": [""]}
-                    ],
+                    "obligations": [{"kind": "x", "subject": "y", "cases": [""]}],
                 },
                 "cases must be a list of non-blank strings",
             ),
             (
                 {
                     "schema": OBLIGATIONS_SCHEMA,
-                    "obligations": [
-                        {"id": "wrong", "kind": "x", "subject": "y"}
-                    ],
+                    "obligations": [{"id": "wrong", "kind": "x", "subject": "y"}],
                 },
                 "does not match",
             ),
@@ -313,18 +307,14 @@ class TestRoundTrip:
             (
                 {
                     "schema": OBLIGATIONS_SCHEMA,
-                    "obligations": [
-                        {"kind": "x", "subject": "y", "decision": " "}
-                    ],
+                    "obligations": [{"kind": "x", "subject": "y", "decision": " "}],
                 },
                 "decision must not be whitespace",
             ),
             (
                 {
                     "schema": OBLIGATIONS_SCHEMA,
-                    "obligations": [
-                        {"kind": "x", "subject": "y", "cases": ["same", "same"]}
-                    ],
+                    "obligations": [{"kind": "x", "subject": "y", "cases": ["same", "same"]}],
                 },
                 "cases must not contain duplicates",
             ),

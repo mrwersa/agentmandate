@@ -21,7 +21,7 @@ pip install agentmandate           # JSON only, no dependencies
 
 | Key | Required | Meaning |
 |---|---|---|
-| `version` | no | Schema version. Defaults to `1`. A build rejects a version it does not understand rather than guessing |
+| `version` | no | Schema version. Defaults to `2`. A build rejects a version it does not understand rather than guessing |
 | `agent` | yes | The agent this mandate describes |
 | `identity` | no | The workload identity the agent runs as, such as a SPIFFE ID. Recorded, not verified |
 | `limits` | no | Bounds that apply to a whole run |
@@ -32,13 +32,13 @@ pip install agentmandate           # JSON only, no dependencies
 
 ```yaml
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
   depth: 8
 ```
 
 | Key | Meaning |
 |---|---|
-| `total` | The most value one run may spend across every tool. This is what `reach` searches for a way to exceed |
+| `quantities` | Named cumulative budgets, each with an exact `amount` and explicit `unit`; quantities stay separate |
 | `depth` | How many calls deep the search goes. Defaults to 8 |
 | `effects` | Optional non-negative integer call limits by effect class (`read`, `write`, `irreversible`). An omitted class has no count limit |
 
@@ -60,7 +60,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 ```
 
@@ -72,7 +73,8 @@ tools:
 | `requires` | no | Scopes the agent must already hold to call this. A bare string is accepted |
 | `produces` | no | A scope this call mints a binding to |
 | `unbounded` | no | Whether this tool can be called repeatedly to mint fresh bindings. Defaults to `false` |
-| `value_arg` | no | Which argument spends value |
+| `quantity` | with a ceiling | Named accounting pool consumed by this tool |
+| `value_arg` | no | Which argument supplies the consumed amount |
 | `scope_key` | no | What the ceiling is measured against. Required whenever a ceiling is declared |
 | `ceiling` | no | The most this tool may cumulatively spend against one binding of `scope_key` |
 | `requires_approval` | no | Whether a human or independent authority must approve. Defaults to `false` |
@@ -82,20 +84,18 @@ argument bounds nothing, and a value argument with no ceiling is unbounded
 spending, so the manifest rejects either on its own.
 
 Use quoted amount strings when decimal precision matters, such as
-`amount: "1.0000000000000000000000000001"`. JSON and YAML readers may round
-unquoted fractional numbers before validation. The search preserves parsed
+`amount: "1.0000000000000000000000000001"`. The JSON reader preserves decimal digits; optional YAML readers may resolve or round
+unquoted scalars before validation. The search preserves parsed
 decimal values using exact arithmetic; its
 [maximum-headroom argument](headroom-abstraction.md) explains why it fills
 ceilings instead of trying every possible amount.
 
-Scalar monetary analysis requires one currency across **all declared tool
-ceilings and the total limit**, including unreachable tools and zero amounts.
-Mixed declarations remain loadable for lint and review, but `reach`, `diff`,
-obligation derivation and other reachability consumers refuse them with a
-`ValueError`; their CLI commands exit 2 without partial results. No exchange-rate
-or cross-currency accounting model is inferred. A wholly GBP or wholly USD
-manifest remains analyzable, and ordinary currency changes between separately
-consistent releases still require diff review.
+A quantity name identifies a shared accounting pool. Tools using the same name
+must declare the same unit as each other and its optional mandate budget.
+Inconsistent declarations remain loadable for lint, but reachability consumers
+refuse them with exit 2. Different quantity names stay independent, including
+GBP and USD pools in the same manifest. Units are case-sensitive; no conversion
+or exchange rate is inferred. See [named quantity budgets](quantity-budgets.md).
 
 ### Scopes are types, not instances
 
@@ -122,10 +122,10 @@ case separately; it does not itself bound the aggregate across cases.
     unbounded: true     # repeated calls can produce fresh case bindings
 ```
 
-`reach` can find a sequence that exceeds a separately declared `limits.total`
+`reach` can find a sequence that exceeds a separately declared `limits.quantities`
 while respecting every per-case ceiling. Exploration remains bounded by
-`limits.depth`. Without a declared total, repetition alone is not a
-cumulative-value breach of the manifest.
+`limits.depth`. Without a budget for a named quantity, repetition alone is not
+a `quantity_budget` breach of the manifest.
 
 ## `roles`
 
@@ -156,12 +156,12 @@ is not a reason to skip an approval on something that cannot be undone.
 ## A complete example
 
 ```yaml
-version: 1
+version: 2
 agent: dispute-resolver
 identity: spiffe://bank/agents/dispute-resolver
 
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
   depth: 8
 
 tools:
@@ -179,7 +179,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 ```
 
@@ -190,7 +191,7 @@ lines beginning with `#` are skipped.
 
 ```jsonl
 {"tool": "open_case", "scope": "case-4471", "principal": "caller"}
-{"tool": "issue_refund", "scope": "case-4471", "value": "500", "currency": "GBP", "approved": true, "principal": "caller"}
+{"tool": "issue_refund", "scope": "case-4471", "value": "500", "unit": "GBP", "quantity": "value", "approved": true, "principal": "caller"}
 ```
 
 | Field | Meaning |
@@ -198,7 +199,8 @@ lines beginning with `#` are skipped.
 | `tool` | The tool called. One the manifest does not declare is a violation |
 | `scope` | The resource instance acted on. Required for a tool with a ceiling. Ceilings accumulate per scope |
 | `value` | Value spent, read as an exact, finite, non-negative decimal. Required for a tool with a ceiling |
-| `currency` | Three-letter currency code. Required for a tool with a ceiling |
+| `quantity` | Named pool; must match the tool declaration |
+| `unit` | Declared unit; must match the tool ceiling |
 | `approved` | Whether an approval was recorded |
 | `principal` | Which identity the call ran as. Required for every declared tool |
 
@@ -206,7 +208,9 @@ Unlike a manifest, these records carry real identifiers, because they come from
 real runs. Handle the file as you would the traces it was derived from.
 
 `verify` fails closed when evidence needed by a declared control is absent. A
-spending call without its scope, value, or currency is non-conformant. A call
+spending call without its scope, value, quantity or unit is non-conformant. A call
+on a tool without a measured quantity must omit value, quantity and unit; any
+of these fields makes that record non-conformant. A call
 without its principal is also non-conformant. Malformed field types are usage
 errors rather than values the verifier guesses or coerces. An empty trace
 cannot establish conformance.

@@ -79,14 +79,14 @@ def test_approval_cannot_repair_an_effect_budget_or_spending_breach():
     result = plan(monetary, max_candidates=100)
     assert {b["kind"] for b in result["baseline"]["breaches"]} == {
         "ungated_effect",
-        "cumulative_value",
+        "quantity_budget",
     }
     assert all(
         c["edits"] != [{"tool": "issue_refund", "kind": "require_approval"}]
         for c in result["candidates"]
     )
     for c in result["candidates"]:
-        assert c["manifest"]["limits"]["total"] == {"amount": "500", "currency": "GBP"}
+        assert c["manifest"]["limits"]["quantities"]["value"] == {"amount": "500", "unit": "GBP"}
         refund = Mandate.parse(c["manifest"]).tool("issue_refund")
         if refund is not None:
             assert refund.ceiling == monetary.tool("issue_refund").ceiling
@@ -98,12 +98,19 @@ def test_removing_the_only_producer_is_not_a_clean_repair():
         c["edits"] != [{"tool": "lookup", "kind": "remove_tool"}] for c in result["candidates"]
     )
     assert result["search"]["candidates_analyzed"] < result["search"]["combinations_examined"]
-    assert _changed(manifest(), (
-        _Edit("delete", "remove_tool"), _Edit("delete", "require_approval"),
-    )) is None
-    assert _changed(manifest(), tuple(
-        _Edit(n, "remove_tool") for n in manifest().tool_names
-    )) is None
+    assert (
+        _changed(
+            manifest(),
+            (
+                _Edit("delete", "remove_tool"),
+                _Edit("delete", "require_approval"),
+            ),
+        )
+        is None
+    )
+    assert (
+        _changed(manifest(), tuple(_Edit(n, "remove_tool") for n in manifest().tool_names)) is None
+    )
 
 
 def test_keep_tools_checks_reachability_after_edits_not_just_tool_membership():
@@ -119,41 +126,60 @@ def test_keep_tools_checks_reachability_after_edits_not_just_tool_membership():
     )
 
 
-@pytest.mark.parametrize("producer_effect,refund_effect", [
-    ("read", "write"), ("read", "irreversible"), ("write", "irreversible"),
-])
+@pytest.mark.parametrize(
+    "producer_effect,refund_effect",
+    [
+        ("read", "write"),
+        ("read", "irreversible"),
+        ("write", "irreversible"),
+    ],
+)
 def test_tied_removals_prefer_losing_the_weaker_effect(producer_effect, refund_effect):
     source = load(ROOT / "examples/dispute-resolver-v2.yaml")
-    source = replace(source, tools=tuple(
-        replace(t, effect=producer_effect, requires_approval=True) if t.name == "search_cases"
-        else replace(t, effect=refund_effect) if t.name == "issue_refund" else t
-        for t in source.tools
-    ))
+    source = replace(
+        source,
+        tools=tuple(
+            replace(t, effect=producer_effect, requires_approval=True)
+            if t.name == "search_cases"
+            else replace(t, effect=refund_effect)
+            if t.name == "issue_refund"
+            else t
+            for t in source.tools
+        ),
+    )
     result = plan(source, max_edits=1, max_candidates=100)
     assert [c["edits"] for c in result["candidates"]] == [
         [{"tool": "search_cases", "kind": "remove_tool"}],
         [{"tool": "issue_refund", "kind": "remove_tool"}],
     ]
     assert [c["impact"]["lost_reachable_tools"] for c in result["candidates"]] == [
-        ["search_cases"], ["issue_refund"],
+        ["search_cases"],
+        ["issue_refund"],
     ]
     assert not result["candidates"][0]["authority"]["truncated"]
     assert all(not c["authority"]["breaches"] for c in result["candidates"])
 
 
 def test_kept_consumer_cannot_be_stranded_behind_a_declared_producer_cycle():
-    source = Mandate.parse({
-        "agent": "producer-cycle",
-        "tools": [
-            {"name": "seed", "effect": "read", "produces": "item"},
-            {"name": "loop", "effect": "read", "requires": ["item"], "produces": "item"},
-            {"name": "delete", "effect": "irreversible", "requires": ["item"]},
-        ],
-    })
+    source = Mandate.parse(
+        {
+            "agent": "producer-cycle",
+            "tools": [
+                {"name": "seed", "effect": "read", "produces": "item"},
+                {"name": "loop", "effect": "read", "requires": ["item"], "produces": "item"},
+                {"name": "delete", "effect": "irreversible", "requires": ["item"]},
+            ],
+        }
+    )
     unkept = plan(source, max_edits=1, max_candidates=100)
-    stranded = next(c for c in unkept["candidates"] if c["edits"] == [
-        {"tool": "seed", "kind": "remove_tool"},
-    ])
+    stranded = next(
+        c
+        for c in unkept["candidates"]
+        if c["edits"]
+        == [
+            {"tool": "seed", "kind": "remove_tool"},
+        ]
+    )
     assert "delete" in {t["name"] for t in stranded["manifest"]["tools"]}
     assert "delete" not in stranded["authority"]["reachable_tools"]
     kept = plan(source, keep_tools=("delete",), max_edits=1, max_candidates=100)
@@ -190,14 +216,14 @@ def test_missing_producer_input_requires_review_even_with_clean_reach():
     assert not result["baseline"]["breaches"]
     assert not result["candidates"]
     assert result["search"]["combinations_examined"] == 0
-    assert result["search"]["enumeration_complete"] is None
+    assert result["search"]["exhaustive_point_enumeration"] is None
     assert any(f["rule"] == "scope.missing-producer" for f in result["baseline_lint"])
 
 
 def test_clean_baseline_and_empty_edit_domain_are_reported_without_a_repair_claim():
     clean = plan(manifest(approved=True))
     assert clean["status"] == "no_reachable_breach_within_bound" and not clean["candidates"]
-    assert clean["search"]["enumeration_complete"] is None
+    assert clean["search"]["exhaustive_point_enumeration"] is None
     one = Mandate.parse(
         {
             "agent": "one",
@@ -206,7 +232,7 @@ def test_clean_baseline_and_empty_edit_domain_are_reported_without_a_repair_clai
         }
     )
     result = plan(one, keep_tools=("write",))
-    assert result["search"]["enumeration_complete"]
+    assert result["search"]["exhaustive_point_enumeration"]
     assert result["search"]["combinations_total"] == 0
     assert result["status"] == "no_candidate_found_within_limits"
     assert plan(one)["search"]["candidates_analyzed"] == 0  # Only edit makes tools empty.
@@ -216,9 +242,9 @@ def test_enumeration_and_reachability_cutoffs_are_separate():
     source = load(ROOT / "examples/dispute-resolver-v2.yaml")
     limited = plan(source, max_evaluations=1)
     assert limited["search"]["combinations_examined"] == 1
-    assert not limited["search"]["enumeration_complete"]
+    assert not limited["search"]["exhaustive_point_enumeration"]
     result = plan(source, max_candidates=1)
-    assert result["search"]["enumeration_complete"]
+    assert result["search"]["exhaustive_point_enumeration"]
     assert result["search"]["candidates_found"] > len(result["candidates"]) == 1
     assert not result["candidates"][0]["authority"]["truncated"]
     full = plan(source, max_candidates=100)
@@ -251,7 +277,7 @@ def test_small_graph_candidates_equal_independent_exhaustive_edit_oracle(approve
             if not analyse(replace(source, tools=tools)).breaches:
                 expected.add(frozenset(edits))
     result = plan(source, max_candidates=100, max_evaluations=100)
-    assert result["search"]["enumeration_complete"]
+    assert result["search"]["exhaustive_point_enumeration"]
     assert {
         frozenset((e["tool"], e["kind"]) for e in c["edits"]) for c in result["candidates"]
     } == expected
@@ -288,17 +314,17 @@ def test_two_independent_breaches_require_joint_edits_when_tools_are_kept():
 
 @pytest.mark.parametrize("graph", ["aws-iam-access-keys", "aws-postgres-mcp", "github-mcp-server"])
 def test_real_graph_candidates_recheck_and_preserve_baseline(graph):
-    source = load(ROOT / "docs/evidence" / graph / "mandate.yaml")
+    source = load(ROOT / "tests/fixtures/quantity-evidence" / graph / "mandate.yaml")
     # Explicit hypothetical budget on existing reviewed graph; not new observed mandate intent.
     source = replace(source, limits=Limits(depth=4, effects={"irreversible": 0}))
     result = plan(source, max_evaluations=64)
     assert result["baseline"] == analyse(source).as_dict()
     if graph == "aws-postgres-mcp":
         assert result["search"]["candidates_found"] == 7
-        assert result["search"]["enumeration_complete"]
+        assert result["search"]["exhaustive_point_enumeration"]
     elif graph == "github-mcp-server":
         assert result["status"] == "no_candidate_found_within_limits"
-        assert not result["search"]["enumeration_complete"]
+        assert not result["search"]["exhaustive_point_enumeration"]
         assert result["search"]["combinations_examined"] == 64
     else:
         assert not result["baseline"]["breaches"] and not result["candidates"]
@@ -312,7 +338,7 @@ def test_real_graph_candidates_recheck_and_preserve_baseline(graph):
 @pytest.mark.parametrize("fixture", ["breached", "kept", "limited", "clean"])
 def test_cli_result_baselines(fixture, capsys, monkeypatch):
     monkeypatch.chdir(ROOT)
-    case = json.loads((ROOT / f"tests/fixtures/remediation-{fixture}-v1.json").read_text())
+    case = json.loads((ROOT / f"tests/fixtures/remediation-{fixture}-v6.json").read_text())
     before = (ROOT / case["argv"][1]).read_bytes()
     assert main(case["argv"]) == case["exit"]
     captured = capsys.readouterr()
@@ -325,10 +351,10 @@ def test_cli_result_baselines(fixture, capsys, monkeypatch):
 def test_cli_text_keeps_original_breach_and_scope(capsys):
     assert main(["remediate", str(ROOT / "examples/dispute-resolver-v2.yaml")]) == 1
     output = capsys.readouterr().out
-    assert "BREACH cumulative_value" in output
+    assert "BREACH quantity_budget" in output
     assert "candidates require human selection" in output
     assert "no_reachable_breach_within_bound" in output
-    assert "truncated=True" in output and "enumeration_complete=True" in output
+    assert "truncated=True" in output and "exhaustive_point_enumeration=True" in output
 
 
 def test_cli_missing_producer_is_a_finding_and_clean_text_exit_is_zero(tmp_path, capsys):

@@ -1,0 +1,36 @@
+version: 2
+agent: aws-postgres-agent
+identity: spiffe://example/agents/aws-postgres-agent
+limits:
+  depth: 8
+  effects:
+    irreversible: 1
+tools:
+- name: run_query
+  effect: irreversible
+  principal: service
+  requires:
+  - database_connection
+  requires_approval: true
+- name: get_table_schema
+  effect: read
+  principal: service
+  requires:
+  - database_connection
+- name: connect_to_database
+  effect: write
+  principal: service
+  produces: database_connection
+- name: is_database_connected
+  effect: read
+  principal: service
+- name: get_database_connection_info
+  effect: read
+  principal: service
+- name: create_cluster
+  effect: write
+  principal: service
+  produces: database_connection
+- name: get_job_status
+  effect: read
+  principal: service

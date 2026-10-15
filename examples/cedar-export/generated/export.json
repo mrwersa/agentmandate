@@ -97,7 +97,7 @@
     }
   ],
   "inputs": {
-    "manifest_sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "manifest_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "mapping_sha256": "0d61b18a9252b444d55527c3e3dbbf813618a4bf47af7c4a6e1bdc2d0e45cbeb"
   },
   "losses": [],

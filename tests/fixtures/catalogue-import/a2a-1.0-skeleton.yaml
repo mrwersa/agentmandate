@@ -24,7 +24,7 @@
 #         transport, URL, protocol version, tenant, and any authenticated
 #         extended-card selection separately.
 #
-version: 1
+version: 2
 agent: "refunds"
 
 # REVIEW: set the workload identity this agent runs as.
@@ -33,7 +33,7 @@ agent: "refunds"
 limits:
   # REVIEW: the most one run may spend. Without this, `reach` has no
   # cumulative limit to search for a way to exceed.
-  # total: { amount: 0, currency: GBP }
+  quantities: {}  # e.g. exported_records: { amount: 1000, unit: record }
   depth: 8
 
 tools:

@@ -47,9 +47,7 @@ from agentmandate._ir import (
 TOOL_PRINCIPAL_VERSION = 1
 PRINCIPAL_ADAPTER = "agentmandate.tool-principal"
 PRINCIPAL_ADAPTER_VERSION = 1
-PRINCIPAL_KINDS = frozenset(
-    {"delegated_user", "fixed_user_credential", "intersecting"}
-)
+PRINCIPAL_KINDS = frozenset({"delegated_user", "fixed_user_credential", "intersecting"})
 _TOOL_PRINCIPAL_ROOT_FIELDS = {
     "principal_version",
     "id",
@@ -104,9 +102,7 @@ class ToolPrincipal:
             "tool_principal",
             _TOOL_PRINCIPAL_ROOT_FIELDS,
         )
-        version = _version(
-            raw, "principal_version", "tool_principal", TOOL_PRINCIPAL_VERSION
-        )
+        version = _version(raw, "principal_version", "tool_principal", TOOL_PRINCIPAL_VERSION)
         principal = _record(
             raw["principal"],
             "tool_principal.principal",
@@ -137,9 +133,7 @@ def _principal_values(raw: dict[str, Any], kind: str) -> dict[str, Any]:
             raise ConditionFormatError(
                 "condition contract intersecting principal requires only principals"
             )
-        principals = _canonical_members(
-            raw["principals"], "tool_principal.principal", "principals"
-        )
+        principals = _canonical_members(raw["principals"], "tool_principal.principal", "principals")
         if len(principals) < 2:
             raise ConditionFormatError(
                 "condition contract intersecting principal requires at least two principals"
@@ -151,17 +145,10 @@ def _principal_values(raw: dict[str, Any], kind: str) -> dict[str, Any]:
         else {"subject", "actor", "audience", "grant", "expires"}
     )
     if fields != required:
-        raise ConditionFormatError(
-            f"condition contract {kind} principal has an invalid field set"
-        )
-    result = {
-        field: _canonical_name(raw, field, "tool_principal.principal")
-        for field in required
-    }
+        raise ConditionFormatError(f"condition contract {kind} principal has an invalid field set")
+    result = {field: _canonical_name(raw, field, "tool_principal.principal") for field in required}
     if kind == "delegated_user":
-        result["expires"] = _canonical_date(
-            raw, "expires", "tool_principal.principal"
-        )
+        result["expires"] = _canonical_date(raw, "expires", "tool_principal.principal")
     return result
 
 
@@ -217,9 +204,7 @@ def _principal_to_ir(value: ToolPrincipal) -> AuthorityIR:
                 value.evidence,
             )
         )
-        for index, (name, member_id) in enumerate(
-            zip(value.principals, member_ids, strict=True)
-        ):
+        for index, (name, member_id) in enumerate(zip(value.principals, member_ids, strict=True)):
             entities.append(Entity(member_id, "principal", name))
             facts.append(
                 _fact(
@@ -397,9 +382,7 @@ def _validate_principal_profile(graph: AuthorityIR) -> None:
         try:
             _canonical_date({"expires": expires}, "expires", "principal_IR")
         except ConditionFormatError as exc:
-            raise ConditionFormatError(
-                "principal IR profile has an invalid expiry"
-            ) from exc
+            raise ConditionFormatError("principal IR profile has an invalid expiry") from exc
         grants = [entity for entity in graph.entities if entity.kind == "grant"]
         if len(grants) != 1 or facts[(root.id, "grant")].value != grants[0].id:
             raise ConditionFormatError("principal IR profile grant does not match entity")
@@ -411,13 +394,13 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
 PROJECTION_DIGESTS = {
     "principal-fixed-user-v1.json": (
-        "21b1edd7d87175ddfe971577817a0b3ea3540c3f7b6c06e28357db2bd2052c29"
+        "687d45e3b3b4c4a389ea852af90aa5f3a0a6e7d266bf6cab01953e98a0fcb021"
     ),
     "principal-intersecting-v1.json": (
-        "e37c6c657b27b10c5418c85bf0cf62e872d89e12fddab8e78d50917b5d9c6b35"
+        "1adf823da89348ccd4c6b51d71c8cead66f32324cc8bcc90abdf93480822f1c4"
     ),
     "principal-delegated-user-v1.json": (
-        "249242e97cfdd8017a1b0e54c4284df94d1eb46af48516c4932ceae89d51a6f4"
+        "d17af73c59a3f809c9817e20d2f4e5768e3b1d9391c614c37ee0fb3919bbab75"
     ),
 }
 
@@ -430,9 +413,7 @@ def verify_fixtures() -> None:
             raise ConditionFormatError(
                 f"principal-v1 replay no longer round-trips canonical fixture {fixture}"
             )
-        projection_digest = hashlib.sha256(
-            principal.to_ir().to_json().encode("utf-8")
-        ).hexdigest()
+        projection_digest = hashlib.sha256(principal.to_ir().to_json().encode("utf-8")).hexdigest()
         if projection_digest != expected_digest:
             raise ConditionFormatError(
                 f"principal-v1 replay projection differs for canonical fixture {fixture}"

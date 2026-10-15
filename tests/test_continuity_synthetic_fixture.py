@@ -77,11 +77,7 @@ def _result_cases():
     transition = outcome.transition
 
     def result_with(changed, code=None, message=None, *, authority=None):
-        findings = (
-            ()
-            if code is None
-            else (ContinuityFinding(code, transition, message, ()),)
-        )
+        findings = () if code is None else (ContinuityFinding(code, transition, message, ()),)
         return replace(
             satisfied,
             authority=satisfied.authority if authority is None else authority,
@@ -198,8 +194,8 @@ def test_continuity_result_v1_round_trips_the_satisfied_fixture():
     rendered = result.to_json()
     body = result.as_dict()
 
-    assert body["schema"] == "agentmandate.continuity/v1"
-    assert body["result_version"] == 1
+    assert body["schema"] == "agentmandate.continuity/v2"
+    assert body["result_version"] == 2
     assert body["inputs"]["binding"]["kind"] == "continuity-binding"
     assert body["inputs"]["provider"]["kind"] == "agentcore-continuity"
     assert body["outcomes"][0]["safe_continuation"] == "satisfied"
@@ -223,7 +219,7 @@ def test_continuity_result_v1_round_trips_the_satisfied_fixture():
 )
 def test_continuity_result_v1_canonical_fixtures(case):
     result = _result_cases()[case]
-    expected = (RESULT_FIXTURES / f"continuity-result-v1-{case}.json").read_text()
+    expected = (RESULT_FIXTURES / f"continuity-result-v2-{case}.json").read_text()
 
     assert result.to_json() == expected
     assert ContinuityResult.from_json(expected) == result
@@ -233,7 +229,7 @@ def test_continuity_result_v1_canonical_fixtures(case):
     ("text", "message"),
     [
         ("{", "not valid JSON"),
-        ('{"value":NaN}', "non-canonical value"),
+        ('{"value": NaN}', "non-canonical value"),
         ("[]", "must be an object"),
         ('{"result_sha256":"' + "0" * 64 + '"}', "missing field"),
     ],
@@ -293,13 +289,13 @@ def test_continuity_result_rejects_unknown_fields_and_bad_checksum():
         ),
         (
             lambda raw: raw["authority"].update(
-                max_extractable={"amount": "not-decimal", "currency": "USD"}
+                max_quantities={"value": {"amount": "not-decimal", "unit": "USD"}}
             ),
             "must be decimal",
         ),
         (
             lambda raw: raw["authority"].update(
-                max_extractable={"amount": "NaN", "currency": "USD"}
+                max_quantities={"value": {"amount": "NaN", "unit": "USD"}}
             ),
             "must be canonical",
         ),
@@ -384,11 +380,11 @@ def test_continuity_result_validates_findings_and_optional_binding():
         ContinuityResult.from_json(_rehash(raw))
 
 
-def test_continuity_result_accepts_complete_money_and_breach_authority():
+def test_continuity_result_accepts_complete_quantity_and_breach_authority():
     result = _analysis().to_result()
     authority = {
         **result.authority,
-        "max_extractable": {"amount": "1.5", "currency": "USD"},
+        "max_quantities": {"value": {"amount": "1.5", "unit": "USD"}},
         "breaches": [{"kind": "effect", "detail": "reviewed breach", "path": ["tool"]}],
     }
     changed = replace(result, authority=authority)
@@ -415,6 +411,4 @@ def test_synthetic_fixture_rejects_mismatched_binding_and_control_mediation():
 
     assert not result.clean
     assert result.outcomes[0].safe_continuation == "unresolved"
-    assert "continuity.derivation-integrity-unresolved" in {
-        item.code for item in result.findings
-    }
+    assert "continuity.derivation-integrity-unresolved" in {item.code for item in result.findings}

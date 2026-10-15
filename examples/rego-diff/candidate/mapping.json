@@ -1,32 +1,32 @@
 {
-  "reconcile_version": 1,
-  "bundle": "release-policy",
-  "input_key": "agentmandate",
   "attributes": {
-    "decision_id": "app.authority.decision_id",
-    "invocation_id": "app.authority.invocation_id",
-    "run_id": "app.authority.run_id",
-    "manifest_sha256": "app.authority.manifest_sha256",
+    "action": "app.authority.action",
+    "approved": "app.authority.approved",
     "configuration_sha256": "app.authority.configuration_sha256",
-    "manifest_version": "app.authority.manifest_version",
+    "decision_id": "app.authority.decision_id",
+    "effect_applied": "app.authority.effect_applied",
     "gateway": "app.authority.gateway",
+    "invocation_id": "app.authority.invocation_id",
+    "manifest_sha256": "app.authority.manifest_sha256",
+    "manifest_version": "app.authority.manifest_version",
     "policy_revision": "app.authority.policy_revision",
     "principal": "app.authority.principal",
-    "action": "app.authority.action",
     "resource": "app.authority.resource",
-    "approved": "app.authority.approved",
-    "effect_applied": "app.authority.effect_applied"
+    "run_id": "app.authority.run_id"
   },
+  "bundle": "release-policy",
   "coverage": {
     "decisions": "complete",
     "telemetry": "complete"
   },
-  "observed_at": "2026-10-12",
   "expires": "2026-11-08",
+  "input_key": "agentmandate",
+  "observed_at": "2026-10-12",
   "pins": {
-    "manifest": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
     "configuration": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
-    "decisions": "61f63a0a6a5033745714de4946d980972b7a7d32cd75fd178830ad4ba35ec35f",
-    "telemetry": "d10629dba8fa5abd40909a996445cfdf3b0e81cbc49b5849d099b2c1501aa316"
-  }
+    "decisions": "8d62f3a7b60cb9d482397208df0b85a2f428bd07e92fea5194381ee8d3c9fda1",
+    "manifest": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
+    "telemetry": "44392cd079495b928b1a16c2ac9af66a63710d4050dc2ede1a813aed8a800c4e"
+  },
+  "reconcile_version": 1
 }

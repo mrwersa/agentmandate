@@ -33,9 +33,7 @@ INVALID = Path(__file__).parent / "fixtures" / "authority-ir-invalid"
         ("duplicate-entity-id.json", "duplicate entity id at entities[1].id"),
     ],
 )
-def test_committed_malformed_records_have_one_safe_error_boundary(
-    name: str, message: str
-) -> None:
+def test_committed_malformed_records_have_one_safe_error_boundary(name: str, message: str) -> None:
     content = (INVALID / name).read_text(encoding="utf-8")
 
     with pytest.raises(IRFormatError, match=re.escape(message)) as caught:
@@ -51,16 +49,14 @@ def test_root_shape_and_version_failures_are_precise() -> None:
     with pytest.raises(IRFormatError, match="root is missing field 'ir_version'"):
         AuthorityIR.from_json("{}")
     with pytest.raises(IRFormatError, match="unsupported authority IR version type") as caught:
-        AuthorityIR.from_json('{"ir_version":"secret-version"}')
+        AuthorityIR.from_json('{"ir_version": "secret-version"}')
     assert "secret-version" not in str(caught.value)
-    with pytest.raises(IRFormatError, match="unsupported authority IR version 2"):
-        AuthorityIR.from_json('{"ir_version":2}')
+    with pytest.raises(IRFormatError, match="unsupported authority IR version 99"):
+        AuthorityIR.from_json('{"ir_version": 99}')
 
 
 def test_reader_rejects_record_and_scalar_types_without_leaking_values() -> None:
-    valid = _from_mandate(
-        loads("agent: a\ntools: [{name: t, effect: read}]\n")
-    ).as_dict()
+    valid = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n")).as_dict()
 
     cases = [
         ("sources", 0, None, "sources[0] must be an object"),
@@ -102,9 +98,7 @@ def test_reader_rejects_record_and_scalar_types_without_leaking_values() -> None
 
 
 def test_reader_rejects_unknown_root_fields_and_non_string_input() -> None:
-    payload = _from_mandate(
-        loads("agent: a\ntools: [{name: t, effect: read}]\n")
-    ).as_dict()
+    payload = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n")).as_dict()
     payload["payload"] = "secret-value"
 
     with pytest.raises(IRFormatError, match="root has unknown field 'payload'") as caught:
@@ -115,16 +109,12 @@ def test_reader_rejects_unknown_root_fields_and_non_string_input() -> None:
 
 
 def test_reader_checks_optional_digest_and_review_types() -> None:
-    payload = _from_mandate(
-        loads("agent: a\ntools: [{name: t, effect: read}]\n")
-    ).as_dict()
+    payload = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n")).as_dict()
     payload["sources"][0]["content_sha256"] = 7
     with pytest.raises(IRFormatError, match="content_sha256 must be a string or null"):
         AuthorityIR.from_json(json.dumps(payload))
 
-    payload = _from_mandate(
-        loads("agent: a\ntools: [{name: t, effect: read}]\n")
-    ).as_dict()
+    payload = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n")).as_dict()
     payload["facts"][0]["evidence"][0]["review"] = "secret-value"
     with pytest.raises(IRFormatError, match="review has an invalid value") as caught:
         AuthorityIR.from_json(json.dumps(payload))

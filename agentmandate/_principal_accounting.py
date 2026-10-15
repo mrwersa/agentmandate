@@ -1,4 +1,4 @@
-"""Reviewed, per-trial monetary accounting; no provider continuity inference."""
+"""Reviewed, per-trial integer quantity accounting; no provider continuity inference."""
 
 from __future__ import annotations
 
@@ -81,9 +81,20 @@ class PrincipalAccountingBinding:
             _load(text, "principal accounting binding"),
             "principal accounting binding",
             {
-                "principal_accounting_binding_version", "id", "manifest_sha256",
-                "profile_sha256", "provider", "boundary", "measurement", "limit",
-                "intent", "mediation", "principals", "trials", "sources", "evidence",
+                "principal_accounting_binding_version",
+                "id",
+                "manifest_sha256",
+                "profile_sha256",
+                "provider",
+                "boundary",
+                "measurement",
+                "limit",
+                "intent",
+                "mediation",
+                "principals",
+                "trials",
+                "sources",
+                "evidence",
             },
         )
         if _integer(raw["principal_accounting_binding_version"], "binding version") != 1:
@@ -93,7 +104,8 @@ class PrincipalAccountingBinding:
         for key in ("manifest_sha256", "profile_sha256"):
             _digest(raw[key], key)
         measurement = _record(
-            raw["measurement"], "measurement",
+            raw["measurement"],
+            "measurement",
             {"profile_tool", "manifest_tool", "value_arg", "dimension", "unit"},
         )
         for key, value in measurement.items():
@@ -126,7 +138,9 @@ class PrincipalAccountingBinding:
 
 
 def _join_gaps(
-    mandate: Mandate, manifest_bytes: bytes, profile: PrincipalContinuity,
+    mandate: Mandate,
+    manifest_bytes: bytes,
+    profile: PrincipalContinuity,
     binding: PrincipalAccountingBinding,
 ) -> list[str]:
     raw = binding.body
@@ -148,21 +162,29 @@ def _join_gaps(
         "dimension": measurement["dimension"],
         "unit": measurement["unit"],
     }
-    if body["measurement"] != expected or measurement["dimension"] != "value":
-        gaps.append("measurement does not support the bound monetary accounting")
+    if body["measurement"] != expected:
+        gaps.append("measurement does not support the bound quantity accounting")
     tool = mandate.tool(measurement["manifest_tool"])
     if (
-        tool is None or not tool.spends_value or tool.value_arg != measurement["value_arg"]
-        or tool.ceiling.currency != measurement["unit"]
+        tool is None
+        or not tool.spends_value
+        or tool.value_arg != measurement["value_arg"]
+        or tool.quantity != measurement["dimension"]
+        or tool.ceiling.unit != measurement["unit"]
     ):
-        gaps.append("manifest value-spending tool, value argument, or currency does not match")
-    total = mandate.limits.total
+        gaps.append(
+            "manifest quantity-consuming tool, value argument, dimension, or unit does not match"
+        )
+    total = mandate.limits.quantities.get(measurement["dimension"])
     if (
-        total is None or total.amount != raw["limit"]["amount"]
-        or total.currency != raw["limit"]["unit"]
+        total is None
+        or total.amount != raw["limit"]["amount"]
+        or total.unit != raw["limit"]["unit"]
         or raw["limit"]["unit"] != measurement["unit"]
     ):
-        gaps.append("binding limit does not match the manifest total and measurement unit")
+        gaps.append(
+            "binding limit does not match the manifest quantity budget and measurement unit"
+        )
     if (
         {p["alias"] for p in raw["principals"]} != {p["alias"] for p in body["principals"]}
         or tool is None
@@ -184,15 +206,26 @@ def _join_gaps(
 
 
 def analyse_principal_accounting(
-    mandate: Mandate, profile: PrincipalContinuity, contents: dict[str, bytes],
-    binding: PrincipalAccountingBinding, binding_contents: dict[str, bytes], *,
-    as_of: datetime, mandate_bytes: bytes, depth: int | None = None,
+    mandate: Mandate,
+    profile: PrincipalContinuity,
+    contents: dict[str, bytes],
+    binding: PrincipalAccountingBinding,
+    binding_contents: dict[str, bytes],
+    *,
+    as_of: datetime,
+    mandate_bytes: bytes,
+    depth: int | None = None,
 ) -> dict[str, Any]:
     """Add shared totals only under a separately eligible, exactly joined binding."""
     profile = PrincipalContinuity.from_json(profile.to_json())
     binding = PrincipalAccountingBinding.from_json(binding.to_json())
     result = analyse_principal_continuity(
-        mandate, profile, contents, as_of=as_of, mandate_bytes=mandate_bytes, depth=depth,
+        mandate,
+        profile,
+        contents,
+        as_of=as_of,
+        mandate_bytes=mandate_bytes,
+        depth=depth,
     )
     findings = [
         f for f in result["findings"] if f["code"] != "continuity.shared-mandate-unresolved"
@@ -201,14 +234,19 @@ def analyse_principal_accounting(
     try:
         _verify_sources(binding.sources, binding_contents)
     except ContinuityFormatError as exc:
-        binding_findings.append({
-            "code": "continuity.accounting-source-untrusted", "message": str(exc),
-        })
+        binding_findings.append(
+            {
+                "code": "continuity.accounting-source-untrusted",
+                "message": str(exc),
+            }
+        )
     if not _eligible_evidence(binding.evidence, result["as_of"]):
-        binding_findings.append({
-            "code": "continuity.accounting-evidence-untrusted",
-            "message": "accounting binding is not exact, accepted, and current",
-        })
+        binding_findings.append(
+            {
+                "code": "continuity.accounting-evidence-untrusted",
+                "message": "accounting binding is not exact, accepted, and current",
+            }
+        )
     binding_findings.extend(
         {"code": "continuity.accounting-binding-mismatch", "message": gap}
         for gap in _join_gaps(mandate, mandate_bytes, profile, binding)
@@ -219,46 +257,62 @@ def analyse_principal_accounting(
     unresolved = False
     for trial in result["trials"]:
         accounting = {
-            "status": "unresolved", "account": None, "observed_completed": None,
-            "limit": None, "budget": "unresolved",
+            "status": "unresolved",
+            "account": None,
+            "observed_completed": None,
+            "limit": None,
+            "budget": "unresolved",
         }
         if eligible and result["observations_eligible"] and trial["completion_known"]:
             amount = sum(trial["observed_completed_by_principal"].values())
             limit = binding.body["limit"]["amount"]
             accounting.update(
-                status="reviewed", account=mapped_trials[trial["id"]]["account"],
-                observed_completed=amount, limit=limit,
+                status="reviewed",
+                account=mapped_trials[trial["id"]]["account"],
+                observed_completed=amount,
+                limit=limit,
                 budget=(
-                    "exceeded_by_observed_calls" if amount > limit
+                    "exceeded_by_observed_calls"
+                    if amount > limit
                     else "not_exceeded_by_observed_calls"
                 ),
             )
             trial["mandate_identity"] = "bound_by_review"
             if amount > limit:
-                findings.append({
-                    "code": "continuity.observed-budget-exceeded",
-                    "message": f"trial {trial['id']}: observed completed {amount} exceeds {limit}",
-                })
+                findings.append(
+                    {
+                        "code": "continuity.observed-budget-exceeded",
+                        "message": (
+                            f"trial {trial['id']}: observed completed {amount} exceeds {limit}"
+                        ),
+                    }
+                )
         else:
             unresolved = True
         trial["accounting"] = accounting
     if unresolved:
-        findings.append({
-            "code": "continuity.shared-mandate-unresolved",
+        findings.append(
+            {
+                "code": "continuity.shared-mandate-unresolved",
+                "message": (
+                    "shared accounting needs eligible observations, binding, and known completion"
+                ),
+            }
+        )
+    findings.append(
+        {
+            "code": "continuity.continuation-unresolved",
             "message": (
-                "shared accounting needs eligible observations, binding, and known completion"
+                "accounting does not establish state continuity, admission, or safe continuation"
             ),
-        })
-    findings.append({
-        "code": "continuity.continuation-unresolved",
-        "message": (
-            "accounting does not establish state continuity, admission, or safe continuation"
-        ),
-    })
+        }
+    )
     result.update(
-        schema="agentmandate.principal-accounting/v1", binding=binding.body,
+        schema="agentmandate.principal-accounting/v2",
+        binding=binding.body,
         binding_sha256=hashlib.sha256(binding.to_json().encode()).hexdigest(),
-        binding_eligible=eligible, findings=findings,
+        binding_eligible=eligible,
+        findings=findings,
     )
     return result
 

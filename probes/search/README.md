@@ -14,6 +14,6 @@ The study also runs the wide workload with a private cap of two bindings per
 producer. That exercises the existing capped kernel; the synthetic cap is not
 an accepted runtime producer boundary.
 
-Run `python scripts/benchmark_search.py --compare-baseline` from the repository
+Run `python scripts/benchmark_search.py` from the repository
 root. See [search bounds and performance](../../docs/search-performance.md) for
 scope, measurements, and practical limits.

@@ -1,8 +1,8 @@
 """A declared budget bounds how many calls of an effect class a run may make.
 
 Two real graphs asked for non-monetary effect budgets: `Limits` carried only a
-`Money` ceiling, so every cumulative question the search could ask was a
-question about currency, and a graph with no currency got "no reachable breach"
+`Quantity` ceiling, so every cumulative question the search could ask was a
+question about unit, and a graph with no unit got "no reachable breach"
 on an agent that can write a workflow, run it with secrets, and delete the logs.
 
 See DESIGN.md, "Counting effects, not only value".
@@ -69,10 +69,13 @@ def test_a_budget_bounds_the_class_and_not_one_tool():
     A per-tool count is a rate limit and belongs at the tool. What a reviewer
     bounds here is the blast radius of a class.
     """
-    two_tools = DESTRUCTIVE + """  - name: purge
+    two_tools = (
+        DESTRUCTIVE
+        + """  - name: purge
     effect: irreversible
     requires_approval: true
 """
+    )
     authority = analyse(loads(two_tools))
     breaches = [b for b in authority.breaches if b.kind == "effect_count"]
 
@@ -106,12 +109,12 @@ def test_a_budget_it_cannot_honour_is_refused(declared, message):
         loads(source)
 
 
-def test_the_money_ceiling_still_works_beside_a_budget():
+def test_the_quantity_ceiling_still_works_beside_a_budget():
     """The axes are independent, and neither disables the other."""
     both = """
 agent: both
 limits:
-  total: { amount: 100, currency: GBP }
+  quantities: {value: { amount: 100, unit: GBP }}
   depth: 8
   effects:
     irreversible: 99
@@ -125,12 +128,13 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 100, currency: GBP }
+    quantity: value
+    ceiling: { amount: 100, unit: GBP }
     requires_approval: true
 """
     kinds = {b.kind for b in analyse(loads(both)).breaches}
 
-    assert "cumulative_value" in kinds
+    assert "quantity_budget" in kinds
 
 
 def test_two_classes_over_budget_are_reported_once_each():

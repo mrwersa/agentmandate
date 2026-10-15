@@ -89,7 +89,7 @@ clear the gate.
 
 ## Read the gate result
 
-JSON uses `agentmandate.review/v1`. `comparison` is the unchanged ordinary diff,
+JSON uses `agentmandate.review/v2`. `comparison` is the unchanged ordinary diff,
 including both Authority results, all changes, breach witnesses and truncation.
 `inputs` contains the computed materials; `review` retains the caller's record,
 its byte digest, per-source digest checks and computed `eligible` flag.
@@ -131,7 +131,7 @@ not renew itself and cannot reuse historical continuity acceptance.
 ## Compatibility
 
 The CLI and input/result contracts are public; `_change_review` Python helpers
-are private. The five [result baselines](../tests/fixtures/change-review-accepted-v1.json)
+are private. The five [result baselines](../tests/fixtures/change-review-accepted-v2.json)
 cover accepted, expired, missing, neutral and deferred decisions. These are v1
 baselines, not migrations from an earlier review-result schema. Existing CLI
 results, root Python exports and historical inventory bytes remain unchanged.

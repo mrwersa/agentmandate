@@ -86,7 +86,7 @@ when policy coverage is incomplete or the snapshot is not current. Observation
 dates and expiry are caller annotations, not authenticated freshness evidence.
 An evaluation date before observation or after expiry prevents a clean result.
 
-The versioned result is `agentmandate.deployment-drift/v1`. It retains separate
+The versioned result is `agentmandate.deployment-drift/v2`. It retains separate
 per-tool comparisons, artifact digests, source digests and the independently
 computed manifest `authority`. Deployment findings do not modify reachable
 breaches. The command does not run a policy engine: `native_validation` stays

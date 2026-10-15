@@ -99,7 +99,7 @@ control remain the application's responsibility.
 
 ## Interpret a consistent join narrowly
 
-The result is `agentmandate.deployment-reconcile/v1`. It checks exact request
+The result is `agentmandate.deployment-reconcile/v2`. It checks exact request
 joins and compares recorded decisions with the *generated stateless subset*.
 Native OPA tests check this comparator against the pinned exporter; the command
 does not evaluate arbitrary Rego or launch a policy engine. A decision that

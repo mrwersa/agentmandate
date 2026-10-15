@@ -312,7 +312,7 @@ def analyse_revision_review(
         )
     )
     return {
-        "schema": "agentmandate.revision-review/v1",
+        "schema": "agentmandate.revision-review/v2",
         "as_of": baseline.as_of,
         "baseline": json.loads(baseline.to_result().to_json()),
         "review": raw,

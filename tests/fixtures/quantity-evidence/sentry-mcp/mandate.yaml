@@ -1,0 +1,33 @@
+version: 2
+agent: sentry-operations-agent
+identity: spiffe://example/agents/sentry-operations-agent
+limits:
+  depth: 8
+  effects:
+    irreversible: 1
+tools:
+- name: find_organizations
+  effect: read
+  principal: service
+- name: find_projects
+  effect: read
+  principal: service
+- name: update_issue
+  effect: write
+  principal: service
+- name: search_events
+  effect: read
+  principal: service
+- name: search_issues
+  effect: read
+  principal: service
+- name: get_sentry_resource
+  effect: read
+  principal: service
+- name: search_sentry_tools
+  effect: read
+  principal: service
+- name: execute_sentry_tool
+  effect: irreversible
+  principal: service
+  requires_approval: true

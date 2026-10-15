@@ -6,7 +6,7 @@ from agentmandate.lint import ERROR, WARNING
 CLEAN = """
 agent: clean
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
 tools:
   - name: open_case
     effect: read
@@ -16,7 +16,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 """
 
@@ -206,7 +207,7 @@ def test_unbounded_without_produces_is_a_warning():
     assert finding.severity == WARNING
 
 
-def test_mixed_currencies_cannot_be_summed():
+def test_mixed_units_cannot_be_summed():
     text = (
         CLEAN
         + """
@@ -215,10 +216,11 @@ def test_mixed_currencies_cannot_be_summed():
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 10, currency: USD }
+    quantity: value
+    ceiling: { amount: 10, unit: USD }
 """
     )
-    assert "ceiling.mixed-currency" in rules(text)
+    assert "quantity.unit-mismatch" in rules(text)
 
 
 def test_findings_are_ordered_worst_first():

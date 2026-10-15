@@ -14,7 +14,7 @@ What it deliberately does not do:
   ``card_security`` is an application label chosen by whoever designed the
   router. No parsing turns one into the other, and inventing the mapping would
   be a confident guess about somebody else's domain.
-- It does not emit compound breaches. A cumulative-value path is a multi-call
+- It does not emit compound breaches. A quantity-budget breach path is a multi-call
   sequence, which is scenario testing rather than decision coverage. Those
   stay in ``reach`` and do not cross into a test suite.
 

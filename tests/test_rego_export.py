@@ -66,7 +66,7 @@ def test_multiple_principals_and_escaped_mapping_literals():
 def test_stateful_loss_refusal_and_partial_candidate():
     manifest = copy.deepcopy(MANIFEST)
     manifest["limits"] = {
-        "total": {"amount": 10, "currency": "GBP"},
+        "quantities": {"value": {"amount": 10, "unit": "GBP"}},
         "effects": {"irreversible": 3},
     }
     manifest["roles"] = {"proposer": ["publish_release"]}
@@ -75,12 +75,13 @@ def test_stateful_loss_refusal_and_partial_candidate():
         requires=["case"],
         value_arg="amount",
         scope_key="case",
-        ceiling={"amount": 5, "currency": "GBP"},
+        ceiling={"amount": 5, "unit": "GBP"},
+        quantity="value",
     )
     result = compile_manifest(manifest)
     assert result["status"] == "refused" and result["policy"] is None
     assert {row["code"] for row in result["losses"]} == {
-        "limits.total",
+        "limits.quantities",
         "limits.effects",
         "roles",
         "tool.produces",
@@ -263,7 +264,7 @@ def test_native_validation_and_independent_request_matrix(opa, tmp_path):
         )
         # Expectations come from the source contract, never generated request cases or policy text.
         expected.append(
-                actor in mapping["principals"][tool.get("principal", "caller")]
+            actor in mapping["principals"][tool.get("principal", "caller")]
             and resource == mapping["resource"]
             and (not tool.get("requires_approval", False) or approval is True)
         )

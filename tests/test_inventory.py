@@ -8,7 +8,7 @@ import pytest
 from agentmandate.inventory import InventoryError, collect, notes_for
 from agentmandate.scan import scan_source
 
-STRANDS_AGENT = '''
+STRANDS_AGENT = """
 from decimal import Decimal
 
 from strands import Agent, tool
@@ -16,24 +16,24 @@ from strands import Agent, tool
 
 @tool
 def search_cases(query: str) -> list:
-    """Find support cases matching a query.
+    \"\"\"Find support cases matching a query.
 
     A second paragraph that should not reach the manifest.
-    """
+    \"\"\"
 
 
 @tool("issue_refund")
-async def refund(case_id: str, amount: Decimal, currency: str) -> str:
-    """Move money back to the customer."""
+async def refund(case_id: str, amount: Decimal, unit: str) -> str:
+    \"\"\"Move money back to the customer.\"\"\"
 
 
 @tool
 def draft_email(case_id: str, body: str) -> str:
-    """Draft an email for a human to send."""
+    \"\"\"Draft an email for a human to send.\"\"\"
 
 
 agent = Agent(model="claude-sonnet-5", tools=[search_cases, refund])
-'''
+"""
 
 
 def write(tmp_path: Path, name: str, source: str) -> Path:
@@ -476,12 +476,9 @@ def test_a_dotted_tool_reference_is_resolved_through_its_module(
     # Selecting by the shared label is refused, which is what stops two
     # different agents being merged by a variable-name collision.
     where = next(
-        b.where for b in collect(tmp_path, union=True).bindings
-        if b.module.endswith("main.py")
+        b.where for b in collect(tmp_path, union=True).bindings if b.module.endswith("main.py")
     )
-    assert "draft_email" in [
-        p.name for p in collect(tmp_path, binding=where).proposals
-    ]
+    assert "draft_email" in [p.name for p in collect(tmp_path, binding=where).proposals]
 
 
 def test_more_than_one_agent_is_refused_rather_than_merged(tmp_path: Path) -> None:
@@ -678,9 +675,10 @@ def test_scan_source_renders_the_notes_before_the_manifest(tmp_path: Path) -> No
 
     rendered = scan_source(tmp_path, "refunds")
 
-    notes_end = rendered.index("version: 1")
+    notes_end = rendered.index("version: 2")
     assert "Declared but not given to this agent: draft_email" in rendered[:notes_end]
     assert rendered.index("REVIEW") < notes_end
+    assert "spends a measured quantity" in " ".join(rendered[:notes_end].split())
     assert 'agent: "refunds"' in rendered
 
 
@@ -688,9 +686,7 @@ def test_a_long_note_wraps_without_repeating_the_marker(tmp_path: Path) -> None:
     write(tmp_path, "agent.py", STRANDS_AGENT)
 
     rendered = scan_source(tmp_path, "refunds")
-    review_lines = [
-        line for line in rendered.splitlines() if line.startswith("# REVIEW:")
-    ]
+    review_lines = [line for line in rendered.splitlines() if line.startswith("# REVIEW:")]
 
     # A repeated marker on a wrapped line reads as several findings.
     assert len(review_lines) < len(notes_for(collect(tmp_path))) + 4
@@ -1083,9 +1079,7 @@ def test_one_declaration_across_modules_needs_no_import_to_resolve(
         "assistant_docs",
     ],
 )
-def test_a_lookalike_callee_does_not_decide_the_inventory(
-    tmp_path: Path, callee: str
-) -> None:
+def test_a_lookalike_callee_does_not_decide_the_inventory(tmp_path: Path, callee: str) -> None:
     write(
         tmp_path,
         "agent.py",

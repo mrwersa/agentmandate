@@ -1,4 +1,4 @@
-# Check compatibility before changing a contract
+# Check the current contract inventory
 
 From a checkout, run:
 
@@ -6,197 +6,50 @@ From a checkout, run:
 python scripts/audit_contracts.py
 ```
 
-The check compares the current package with the committed inventory. Exit 0
-means the recorded surfaces and fixture bytes match; exit 1 lists changed
-locations; exit 2 means the inventory or its files could not be read. This is
-repository maintenance tooling, not a mandate-analysis command or a deployment
-approval.
+Exit 0 means the current declarations and pinned fixture bytes match the
+committed inventory. Exit 1 lists changed locations. Exit 2 means the inventory
+or a material could not be read. This repository check supplies no deployment
+approval or evidence acceptance.
 
-The latest inventory adds `mandate rego diff`, the capture-set input index and
-initial widening/unchanged/narrowing/expired v1 results. The
-[preceding structural-validator inventory](../tests/fixtures/current-contract-inventory-v0.34.json)
-is frozen. Compatibility tests permit only the new command and module markers,
-preserving all earlier Python signatures, command arguments and pinned bytes.
-These initial results are not a migration from an earlier Rego diff schema.
+The [inventory](../tests/fixtures/current-contract-inventory.json) records root
+Python exports and signatures, public class members, CLI paths and arguments,
+version markers and fixture hashes. The
+[coverage map](../tests/fixtures/contract-coverage.json) connects each artifact
+family to its guide, boundary tests and executable fixtures. Semantic tests
+remain necessary: a matching signature or digest cannot establish correct behavior.
 
-The original inventory was prepared against `0c43066`, the merged `0.22.0`
-contract baseline, on 10 October 2026, and is retained as
-[a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.22.json).
-The current inventory adds the repair command, its v1 fixtures, and an opt-in
-ceiling domain with v2 fixtures and a v1-to-v2 compatibility case. Required
-ordered paths add a separate input contract, v3 results and a v2-to-v3 case.
-The separate named-review gate adds initial input/result v1 baselines without
-changing ordinary diff output. The
-[preceding repair inventory](../tests/fixtures/current-contract-inventory-v0.23.json)
-is also retained, together with the
-[ceiling-repair inventory](../tests/fixtures/current-contract-inventory-v0.24.json).
-The [required-path inventory](../tests/fixtures/current-contract-inventory-v0.25.json)
-is retained too.
-Tests preserve every earlier fixture digest and declaration,
-apart from explicitly added repair options, presentation markers and the
-required-workflow input and the separate named-review gate. Historical transition
-checks compare fixed inventories;
-the latest extension is checked against the actual package. CLI replay tests
-exercise all four repair result versions. The maintainer supplied a partial
-out-of-band execution review of
-#232 covering the example and structural screening. Author checks cover the
-remaining preservation, cutoff, approval and ranking paths. Neither review is
-an independent security review. The inventory supplements the
-[historical 0.17.0 audit](pre-1.0-consolidation-audit.md), whose bytes and
-decision remain unchanged. **The maintainer supplied an out-of-band execution
-review of #230 on 10 October 2026.** That review covers the original inventory,
-not subsequent additions. This is not a GitHub approval.
-It does not supply the [external security review](external-security-review.md).
+## Breaking alpha changes
 
-The [Cedar export preview](cedar-export.md) adds one command and initial mapping/result
-baselines. The prior named-review inventory is retained; existing managed Cedar
-commands and every earlier fixture remain unchanged. This is a v1 baseline,
-not a migration from an earlier exporter.
-The [Rego export](rego-export.md) adds its separate command group and v1
-mapping/result baselines. The merged Cedar inventory is retained as
-[a fixed before snapshot](../tests/fixtures/current-contract-inventory-v0.27.json);
-all prior declarations and generated Cedar bytes remain unchanged.
-[Deployment drift](deployment-drift.md) adds a separate group and drift command,
-with v1 configuration/result baselines. Its comparison starts from the fixed
-[merged exporter inventory](../tests/fixtures/current-contract-inventory-v0.28.json);
-existing source drift and both exporter families remain unchanged.
-[Fleet inventory](fleet-inventory.md) adds its query group and initial index/result
-baseline, starting from the fixed
-[deployment inventory](../tests/fixtures/current-contract-inventory-v0.29.json).
-Captured [decision/tool reconciliation](deployment-reconciliation.md) adds one
-command and its initial mapping/result baselines while preserving the
-[fleet inventory snapshot](../tests/fixtures/current-contract-inventory-v0.30.json).
-[Fleet exceptions](fleet-exceptions.md) add a separate recorded-disposition gate
-and initial eligible/expired baselines while preserving the
-[reconciliation snapshot](../tests/fixtures/current-contract-inventory-v0.31.json).
-Earlier declarations and fixture bytes remain pinned unchanged.
+The named-quantity release replaces the money-only model. The current surface
+uses `Quantity`, manifest version 2, named `limits.quantities`, Authority
+`max_quantities` and one remediation result schema. Unsupported old schemas
+fail closed. There are no compatibility aliases, old remediation presentation
+branches or historical inventory-replay chains in the active suite.
 
-Finite ceiling grids and optional [repair trade-offs](remediation.md) add opt-in
-v4 output and a v3-to-v4 compatibility case, preserving the fixed
-[fleet-exception inventory](../tests/fixtures/current-contract-inventory-v0.32.json).
-Commands without the new flags retain all earlier output bytes and exits.
+A deliberate breaking change needs a minor release, a clear changelog entry,
+current-contract fixtures and tests for the unsupported boundary. Old releases
+remain recoverable in Git and published artifacts; retaining their runtime
+readers is not required before 1.0. See [stability](../STABILITY.md).
 
-The [structural validation result](structural-validation.md) adds `--json`
-to all seven validator groups with initial scoped v1 baselines. It preserves
-the fixed [remediation inventory](../tests/fixtures/current-contract-inventory-v0.33.json)
-and every earlier fixture digest. Corrections to mixed-currency analysis,
-effect-scope claims, unrelated review joins and malformed input are intentional
-bug fixes; preserving historical fixture bytes does not preserve those defects.
-
-## What is pinned
-
-The [machine inventory](../tests/fixtures/current-contract-inventory.json)
-records all 51 root Python exports, callable signatures, declared public class
-methods/properties and constant values. It also records all 42 CLI command paths
-(including intermediate groups), arguments, defaults, choices and mutually
-exclusive groups. The package release number is
-excluded from comparison; `__version__` remains an exported name.
-
-The inventory also records version constants, literal presentation schemas,
-version-field names and inline integer version checks from the runtime source.
-These markers detect additions and version changes. They do not describe every
-field or prove that a validator implements its contract. Existing semantic,
-malformed-input, expiry and trust tests remain necessary.
-
-The [coverage index](../tests/fixtures/contract-coverage.json) links each family
-to its contract guide, existing fixtures and executable tests. Its contents and
-the referenced fixture bytes are pinned by digest. Initial result fixtures are
-baselines, not migrations from earlier versions. The repair v1-to-v2 case is
-separately labeled and pins preserved fields across the opt-in format change. Historical converters preserve
-the source-to-canonical link and remain separate from runtime readers.
-
-| Family | Contract and replay checks |
-|---|---|
-| Manifest, defaults and Authority IR adapters | [Manifest](manifest.md), [IR](authority-ir.md); `test_manifest.py`, `test_ir_compatibility.py`, `test_ir_profile.py` |
-| Authority IR results | [IR](authority-ir.md); `test_ir_result.py` |
-| Inventory and protocol imports | [Dynamic inventory](dynamic-inventory.md), [catalogue imports](catalogue-import.md); `test_dynamic_inventory.py`, `test_catalogue_import.py` |
-| Conditions and delegation | [Conditions](conditions-delegation.md), [delegation](delegation-v2.md); `test_conditions.py`, `test_delegation.py` |
-| Deployment configuration drift | [Deployment drift](deployment-drift.md); `test_deployment_drift.py` |
-| Local fleet inventory | [Fleet inventory](fleet-inventory.md); `test_fleet.py` |
-| Fleet release comparison | [Fleet comparison](fleet-diff.md); `test_fleet_diff.py` |
-| Captured decision/tool reconciliation | [Deployment reconciliation](deployment-reconciliation.md); `test_deployment_reconcile.py` |
-| Named fleet review-delay exceptions | [Fleet exceptions](fleet-exceptions.md); `test_fleet_exceptions.py` |
-| Stateless Cedar and Rego exports | [Cedar export](cedar-export.md), [Rego export](rego-export.md); `test_cedar_export.py`, `test_rego_export.py` |
-| Managed Cedar and mapping | [Cedar](cedar-import.md); `test_managed_cedar.py`, `test_cedar.py` |
-| Producer bounds | [Producer contract](bounded-producers.md); `test_producer.py` |
-| Continuity profiles and results | [Continuity](authority-continuity.md); `test_continuity.py` |
-| Principal observations and accounting | [Observations](principal-continuity.md), [accounting](principal-accounting.md); `test_principal_continuity.py`, `test_principal_accounting.py` |
-| Revision and scalar cutover | [Revision review](revision-review.md), [handover](scalar-handover.md); `test_revision_review.py`, `test_scalar_handover.py` |
-| Obligations, scenarios and decision suites | [Obligations](test-obligations.md), [evaluation](evaluation-loop.md); `test_obligations.py`, `test_scenarios.py` |
-| Repair candidates | [Remediation](remediation.md); `test_remediation.py`, `test_ceiling_remediation.py`, `test_required_workflows.py`, `test_remediation_frontier.py` |
-| Named acceptance of changes | [Change review](change-review.md); `test_change_review.py` |
-
-[Fleet release comparison](fleet-diff.md) adds one command and an experimental
-v1 result over the existing fleet indexes. The fixed
-[preceding inventory](../tests/fixtures/current-contract-inventory-v0.35.json)
-preserves all earlier command arguments, Python exports, version markers and
-fixture digests. Its initial replay cases are baselines, not schema migrations.
-| Trace verification and SARIF | [Traces](traces.md), [CI](ci.md); `test_verify.py`, `test_otel.py`, `test_findings.py` |
-| Historical readers, projections and acceptance | [Historical audit](pre-1.0-consolidation-audit.md), [acceptance](continuation-evidence-acceptance.md); converter, replay and acceptance tests named in the coverage index |
-
-The new [legacy output baseline](../tests/fixtures/legacy-json-results.json)
-pins twelve complete CLI runs: lint, clean/breached reach, widening diff, source
-drift, recorded/OTel verification, obligations, reviewed/refused decision-suite
-export, scenarios and malformed input. Each case records exact stdout, stderr,
-exit status and input digests. Some outputs have a schema marker and others
-predate versioned envelopes; both are public contracts. These runs supplement
-the existing attachment and IR result fixtures. They are a fixed regression
-corpus, not exhaustive coverage of every command combination.
-
-The fixture's JSON root is an array of twelve case objects, each with `name`,
-`argv`, `exit`, `stdout`, `stderr` and `inputs`; inspect `argv` for the exact
-command rather than looking for top-level command keys.
-
-## Review a change
-
-When the check reports a difference, first decide whether it is an intentional
-contract change, a regression, or an internal change to a recorded declaration.
-Apply [the stability rules](../STABILITY.md) and add affected before/after
-fixtures where a format changes. A changed digest identifies different bytes;
-it does not decide whether those bytes are compatible.
-
-To inspect a proposed replacement without modifying the baseline:
+To inspect a proposed inventory without overwriting it:
 
 ```bash
 python scripts/audit_contracts.py --candidate /tmp/contract-candidate.json
 git diff --no-index tests/fixtures/current-contract-inventory.json /tmp/contract-candidate.json
 ```
 
-The tool refuses to write a candidate over either inventory file. Review the
-coverage index and candidate together before deliberately replacing a baseline
-in a PR. Updating a snapshot solely to clear CI would defeat the check. The
-existing semantic replay tests must still pass.
+Review the changed surfaces and semantic tests before replacing the baseline.
+Updating a snapshot solely to clear CI defeats the check.
 
-## Preserve raw scanner evidence
+## Historical evidence
 
-The four committed raw scanner skeletons retain their original bytes and
-expected missing-producer findings:
+Original captures, raw scanner proposals, acceptance records and signed bindings
+retain their original bytes under `docs/evidence/` and the dated evidence notes.
+They describe historical contracts and may use unsupported manifest versions.
+Do not edit them to make current lint or analysis pass.
 
-| Raw skeleton | Tool findings | Missing scope names |
-|---|---:|---|
-| AWS IAM access keys | 2 | `access_key`, `version` |
-| AWS Postgres MCP | 1 | `job` |
-| Initiative MCP | 22 | `guild`, `calendar` |
-| Sentry MCP | 3 | `resource`, `projectslugor`, `issue` |
-
-That is 28 tool-level findings across eight names in four raw files. The seven
-reviewed `mandate.yaml` files have no missing-producer findings. The regression
-test pins these diagnostics and the inventory pins the file bytes; it does not
-claim that all other lint findings are absent or that each missing requirement
-is independently established to be an extractor defect. This is a diagnostic
-count over preserved proposals, not a scanner-precision estimate.
-
-Follow the [evidence preservation rule](../CONTRIBUTING.md#contributing-a-real-authority-graph):
-review the separate mandate, and exclude raw skeletons from any future
-corpus-wide clean-manifest gate. Do not repair historical proposals to clear CI.
-
-The inventory tool changes no runtime behavior. Deliberate runtime additions
-are recorded in their own release and contract guides. Its replay tests do not
-accept evidence, renew an expiry, establish a deployment mapping, or complete
-external security review.
-
-[Automatic ceiling discovery](ceiling-discovery.md) adds one opt-in flag and
-the v5 presentation schema. The frozen [preceding inventory](../tests/fixtures/current-contract-inventory-v0.36.json)
-retains all earlier fixture digests, exports and CLI arguments. Initial v5
-results are baselines; the v4/v5 case preserves shared fields across different
-search domains and does not assert candidate or byte equivalence.
+Current graph tests use explicitly identified manifest-v2 projections under
+`tests/fixtures/quantity-evidence/`. These are model annotations, not new captures
+or a transfer of historical acceptance. Synthetic evidence remains labelled as
+synthetic. The external security review and accountable evidence decisions stay
+separate from this inventory check.

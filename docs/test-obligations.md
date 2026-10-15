@@ -61,7 +61,7 @@ an unmodeled deployment path, and it does not replace other testing needs.
 | `irreversible` | A reachable effect that cannot be undone |
 | `approval-required` | A reachable approval gate |
 | `service-principal` | A call spending a service account rather than the caller |
-| `value-bearing` | A call that spends money, with its ceiling named |
+| `value-bearing` | A call that consumes a measured quantity, with its ceiling named |
 
 ## Review
 
@@ -141,7 +141,7 @@ test runner produce impressive numbers about nothing.
 
 ## What does not cross the bridge
 
-**Compound breaches.** A cumulative-value path is a multi-call sequence —
+**Compound breaches.** A quantity-budget breach path is a multi-call sequence —
 open a case, refund, open another, refund again. That is scenario testing, not
 decision coverage, and pushing it into a decision suite would drag a test
 adequacy tool into a job it does not do. Those findings stay out of the

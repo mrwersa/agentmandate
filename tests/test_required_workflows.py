@@ -19,13 +19,13 @@ ROOT = Path(__file__).resolve().parents[1]
 def call(tool, *, value=None, binding=0, approved=True, principal="caller"):
     raw = {"tool": tool, "principal": principal, "approved": approved}
     if value is not None:
-        raw.update(value=str(value), currency="GBP", binding=binding)
+        raw.update(value=str(value), unit="GBP", quantity="value", binding=binding)
     return raw
 
 
 def profile(source, steps=None, *, digest="a" * 64):
     return {
-        "schema": "agentmandate.required-workflows/v1",
+        "schema": "agentmandate.required-workflows/v2",
         "agent": source.agent,
         "manifest_sha256": digest,
         "reviewer": "synthetic-reviewer",
@@ -58,20 +58,21 @@ def small(*, unbounded=True, total=5, budget=None, approved=True):
             "agent": "required-path",
             "limits": {
                 "depth": 4,
-                "total": {"amount": str(total), "currency": "GBP"},
+                "quantities": {"value": {"amount": str(total), "unit": "GBP"}},
                 "effects": {} if budget is None else {"irreversible": budget},
             },
             "tools": [
                 {"name": "seed", "effect": "read", "produces": "item", "unbounded": unbounded},
                 {"name": "inspect", "effect": "read"},
                 {
+                    "quantity": "value",
                     "name": "pay",
                     "effect": "irreversible",
                     "requires": ["item"],
                     "scope_key": "item",
                     "value_arg": "amount",
                     "requires_approval": approved,
-                    "ceiling": {"amount": "3", "currency": "GBP"},
+                    "ceiling": {"amount": "3", "unit": "GBP"},
                 },
             ],
         }
@@ -93,7 +94,7 @@ def test_required_refund_rejects_zero_or_insufficient_ceilings_with_tools_still_
         ceiling_options=("issue_refund=0", "issue_refund=50", "issue_refund=125"),
     )
     assert source == original
-    assert constrained["schema"] == "agentmandate.remediation/v3"
+    assert constrained["schema"] == "agentmandate.remediation/v6"
     assert constrained["baseline"] == unconstrained["baseline"]
     assert constrained["search"]["required_workflow_rejections"] == 2
     assert constrained["search"]["candidates_analyzed"] == 1
@@ -182,7 +183,7 @@ def test_invalid_baseline_paths_report_exact_failure_and_are_not_ignored(steps, 
         plan(source, required_workflows=required)
 
 
-def test_money_fields_require_a_binding_even_when_amount_is_zero():
+def test_quantity_fields_require_a_binding_even_when_amount_is_zero():
     source = small()
     path = [call("seed"), call("pay", value=0)]
     path[1].pop("binding")
@@ -209,15 +210,17 @@ def test_workflow_spend_accounts_are_per_tool_and_binding_not_shared_scope():
         source,
         limits=replace(
             source.limits,
-            total=replace(
-                source.limits.total,
-                amount=Decimal(5),
-            ),
+            quantities={
+                "value": replace(
+                    source.limits.quantities["value"],
+                    amount=Decimal(5),
+                )
+            },
         ),
     )
     assert (
         requirements(source, path).assess(source, 4)[0]["failure"]["rule"]
-        == "workflow.total-exceeded"
+        == "workflow.quantity-exceeded"
     )
 
 
@@ -240,25 +243,27 @@ def test_self_producing_spender_mints_before_its_monetary_binding_selection():
     )
 
 
-@pytest.mark.parametrize("currency_change", ["call", "total"])
-def test_currency_mismatch_is_a_baseline_failure(currency_change):
+@pytest.mark.parametrize("unit_change", ["call", "total"])
+def test_unit_mismatch_is_a_baseline_failure(unit_change):
     source = small()
     path = [call("seed"), call("pay", value=1)]
-    if currency_change == "call":
-        path[-1]["currency"] = "USD"
+    if unit_change == "call":
+        path[-1]["unit"] = "USD"
     else:
         source = replace(
             source,
             limits=replace(
                 source.limits,
-                total=replace(
-                    source.limits.total,
-                    currency="USD",
-                ),
+                quantities={
+                    "value": replace(
+                        source.limits.quantities["value"],
+                        unit="USD",
+                    )
+                },
             ),
         )
     assert requirements(source, path).assess(source, 4)[0]["failure"]["rule"] == (
-        "workflow.currency-mismatch"
+        "workflow.unit-mismatch"
     )
 
 
@@ -296,7 +301,7 @@ def test_all_scope_requirements_must_precede_the_call():
 
 def test_no_total_limit_still_preserves_per_binding_constraints():
     source = small()
-    source = replace(source, limits=replace(source.limits, total=None))
+    source = replace(source, limits=replace(source.limits, quantities={}))
     path = [call("seed"), call("pay", value=2), call("seed"), call("pay", value=2, binding=1)]
     assert requirements(source, path).assess(source, 4)[0]["failure"] is None
 
@@ -327,11 +332,11 @@ def test_no_total_limit_still_preserves_per_binding_constraints():
         ("step", "binding", True, "nonnegative integer"),
         ("step", "binding", -1, "nonnegative integer"),
         ("step", "binding", 0.5, "nonnegative integer"),
-        ("step", "value", 100, "string with a currency"),
+        ("step", "value", 100, "string with quantity and unit"),
         ("step", "value", "NaN", "finite"),
         ("step", "value", "-1", "negative"),
         ("step", "value", "bad", "number"),
-        ("step", "currency", "LONG", "three-letter"),
+        ("step", "unit", "", "non-empty"),
         ("step", "extra", False, "unsupported"),
     ],
 )
@@ -390,11 +395,11 @@ def test_duplicate_keys_and_workflow_names_are_refused():
         _Requirements.load(json.dumps(raw).encode(), source, "a" * 64)
 
 
-def test_value_and_currency_must_be_paired():
+def test_value_and_unit_must_be_paired():
     source = refund()
     raw = profile(source)
-    raw["workflows"][0]["steps"][1].pop("currency")
-    with pytest.raises(ValueError, match="string with a currency"):
+    raw["workflows"][0]["steps"][1].pop("unit")
+    with pytest.raises(ValueError, match="string with quantity and unit"):
         _Requirements.load(json.dumps(raw).encode(), source, "a" * 64)
 
 
@@ -435,7 +440,7 @@ def test_requirement_screen_and_enumeration_cutoffs_are_disclosed():
     )
     assert result["status"] == "no_candidate_found_within_limits"
     assert result["search"]["combinations_examined"] == 1
-    assert not result["search"]["enumeration_complete"]
+    assert not result["search"]["exhaustive_point_enumeration"]
     assert result["search"]["required_workflow_rejections"] == 1
     assert result["search"]["candidates_analyzed"] == 0
 
@@ -457,7 +462,7 @@ def test_partial_amount_paths_do_not_inherit_caller_rounding_or_traps():
         assert saved == (dict(ctx.flags), dict(ctx.traps), ctx.prec, ctx.rounding)
     path[-1]["value"] = "0.2000000000000000000000000001"
     assert requirements(source, path).assess(source, 4)[0]["failure"]["rule"] == (
-        "workflow.total-exceeded"
+        "workflow.quantity-exceeded"
     )
 
 
@@ -550,7 +555,7 @@ def test_cli_bad_requirements_fail_with_empty_stdout(bad, tmp_path, capsys):
 @pytest.mark.parametrize("fixture", ["monetary", "joint", "limited", "clean"])
 def test_v3_cli_fixtures_and_required_source_digest(fixture, capsys, monkeypatch):
     monkeypatch.chdir(ROOT)
-    case = json.loads((ROOT / f"tests/fixtures/remediation-workflow-{fixture}-v3.json").read_text())
+    case = json.loads((ROOT / f"tests/fixtures/remediation-workflow-{fixture}-v6.json").read_text())
     assert main(case["argv"]) == case["exit"]
     output = capsys.readouterr()
     assert not output.err and json.loads(output.out) == case["result"]
@@ -582,33 +587,16 @@ def test_cli_text_names_conformant_paths_and_rejection_reasons(capsys):
         == 1
     )
     text = capsys.readouterr().out
-    assert "caller-supplied annotations; manifest-v1 model only" in text
+    assert "caller-supplied annotations; manifest-v2 model only" in text
     assert "REQUIRED normal-refund: conformant_within_manifest_model" in text
     assert "REJECTED normal-refund: workflow.ceiling-exceeded at step 2" in text
-    assert "BREACH cumulative_value" in text
-
-
-def test_opt_in_v2_to_v3_case_preserves_the_baseline_and_surviving_candidates():
-    migration = json.loads((ROOT / "tests/fixtures/remediation-v2-to-v3.json").read_text())
-    before = json.loads((ROOT / migration["before"]).read_text())
-    after = json.loads((ROOT / migration["after"]).read_text())
-    assert before["exit"] == after["exit"] == 1
-    assert before["result"]["schema"] == "agentmandate.remediation/v2"
-    assert after["result"]["schema"] == "agentmandate.remediation/v3"
-    for field in migration["preserved_fields"]:
-        assert before["result"][field] == after["result"][field]
-    for candidate in after["result"]["candidates"]:
-        candidate = copy.deepcopy(candidate)
-        assessments = candidate.pop("required_workflows")
-        assert all(row["failure"] is None for row in assessments)
-        assert candidate in before["result"]["candidates"]
-    assert after["result"]["search"]["required_workflow_rejections"] > 0
+    assert "BREACH quantity_budget" in text
 
 
 def test_compatibility_v3_case_is_executed_not_just_a_snapshot(capsys, monkeypatch):
     monkeypatch.chdir(ROOT)
     case = json.loads(
-        (ROOT / "tests/fixtures/remediation-workflow-compatibility-v3.json").read_text()
+        (ROOT / "tests/fixtures/remediation-workflow-combined-options-v6.json").read_text()
     )
     assert main(case["argv"]) == case["exit"]
     assert json.loads(capsys.readouterr().out) == case["result"]
@@ -616,7 +604,7 @@ def test_compatibility_v3_case_is_executed_not_just_a_snapshot(capsys, monkeypat
 
 def test_required_workflow_sources_remain_exact_and_read_only(capsys, monkeypatch):
     monkeypatch.chdir(ROOT)
-    case = json.loads((ROOT / "tests/fixtures/remediation-workflow-monetary-v3.json").read_text())
+    case = json.loads((ROOT / "tests/fixtures/remediation-workflow-monetary-v6.json").read_text())
     paths = [ROOT / case["argv"][1], ROOT / "examples/remediation/required-refund.json"]
     before = [path.read_bytes() for path in paths]
     assert main(case["argv"]) == 1
@@ -658,7 +646,7 @@ def test_requirements_without_ceiling_options_preserve_a_valid_removal_repair():
         ),
         max_candidates=100,
     )
-    assert result["schema"] == "agentmandate.remediation/v3"
+    assert result["schema"] == "agentmandate.remediation/v6"
     assert "ceiling_options" not in result
     assert result["candidates"][0]["edits"] == [{"tool": "search_cases", "kind": "remove_tool"}]
     assert result["candidates"][0]["required_workflows"][0]["failure"] is None

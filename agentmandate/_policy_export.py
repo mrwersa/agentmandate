@@ -40,11 +40,11 @@ def stateful_losses(mandate, target):
     def loss(code, subject, detail):
         losses.append({"code": code, "subject": subject, "detail": detail})
 
-    if mandate.limits.total is not None:
+    if mandate.limits.quantities:
         loss(
-            "limits.total",
+            "limits.quantities",
             mandate.agent,
-            f"{target} requests do not retain cumulative monetary spend.",
+            f"{target} requests do not retain cumulative quantity consumption.",
         )
     for effect in sorted(mandate.limits.effects):
         loss("limits.effects", effect, f"{target} requests do not retain effect-call counts.")

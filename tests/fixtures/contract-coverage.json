@@ -2,15 +2,18 @@
   {
     "doc": "docs/manifest.md",
     "fixtures": [
-      "tests/fixtures/manifest-v1-all-defaults.yaml",
-      "tests/fixtures/manifest-v1-shorthand-defaults.yaml"
+      "tests/fixtures/manifest-v2-all-defaults.yaml",
+      "tests/fixtures/manifest-v2-shorthand-defaults.yaml",
+      "examples/quantity-budgets/manifest.json",
+      "tests/fixtures/archived-study-manifest-v1.json"
     ],
     "id": "manifest",
     "kind": "baseline",
     "schemas": [],
     "tests": [
       "tests/test_manifest.py",
-      "tests/test_ir_compatibility.py"
+      "tests/test_manifest_roundtrip.py",
+      "tests/test_quantities.py"
     ]
   },
   {
@@ -25,13 +28,13 @@
       "tests/fixtures/authority-ir-invalid/malformed.json",
       "tests/fixtures/authority-ir-invalid/snapshot-table-type.json",
       "tests/fixtures/authority-ir-invalid/source-missing-field.json",
-      "tests/fixtures/authority-ir-v1.json"
+      "tests/fixtures/authority-ir-v2.json"
     ],
     "id": "authority-ir-and-adapters",
     "kind": "baseline",
     "schemas": [],
     "tests": [
-      "tests/test_ir_compatibility.py",
+      "tests/test_manifest_roundtrip.py",
       "tests/test_ir_validation.py",
       "tests/test_ir_profile.py"
     ]
@@ -39,9 +42,9 @@
   {
     "doc": "docs/authority-ir.md",
     "fixtures": [
-      "tests/fixtures/authority-ir-result-v1-breached.json",
-      "tests/fixtures/authority-ir-result-v1-clean.json",
-      "tests/fixtures/authority-ir-result-v1-truncated.json"
+      "tests/fixtures/authority-ir-result-v2-breached.json",
+      "tests/fixtures/authority-ir-result-v2-clean.json",
+      "tests/fixtures/authority-ir-result-v2-truncated.json"
     ],
     "id": "authority-ir-result",
     "kind": "baseline",
@@ -70,14 +73,14 @@
       "tests/fixtures/condition-context-select-v1.json",
       "tests/fixtures/condition-dispatch-v1.json",
       "tests/fixtures/condition-statement-v1.json",
-      "tests/fixtures/conditional-drift-result-v1.json",
-      "tests/fixtures/conditional-mandate-v1.yaml",
-      "tests/fixtures/conditional-reach-result-v1.json"
+      "tests/fixtures/conditional-drift-result-v2.json",
+      "tests/fixtures/conditional-mandate-v2.yaml",
+      "tests/fixtures/conditional-reach-result-v2.json"
     ],
     "id": "conditions",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.conditions/v1"
+      "agentmandate.conditions/v2"
     ],
     "tests": [
       "tests/test_conditions.py"
@@ -95,7 +98,7 @@
     "id": "delegation",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.delegations/v1"
+      "agentmandate.delegations/v2"
     ],
     "tests": [
       "tests/test_delegation.py"
@@ -107,13 +110,13 @@
       "docs/evidence/agentcore-refund-policy/controls-result.json",
       "docs/evidence/agentcore-refund-policy/managed-oracle-v1.json",
       "docs/evidence/agentcore-refund-policy/mapping.json",
-      "tests/fixtures/cedar-effective-diff-v1.json"
+      "tests/fixtures/cedar-effective-diff-v2.json"
     ],
     "id": "managed-cedar-and-mapping",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.cedar-alignment/v1",
-      "agentmandate.cedar-effective-diff/v1"
+      "agentmandate.cedar-alignment/v2",
+      "agentmandate.cedar-effective-diff/v2"
     ],
     "tests": [
       "tests/test_managed_cedar.py",
@@ -129,17 +132,17 @@
       "tests/fixtures/producer-accepted-synthetic/outcomes.json",
       "tests/fixtures/producer-accepted-synthetic/selection.json",
       "tests/fixtures/producer-boundary-iam-v1.json",
-      "tests/fixtures/producer-reach-result-v1.json",
-      "tests/fixtures/producer-result-v1-bounded.json",
-      "tests/fixtures/producer-result-v1-breached.json",
-      "tests/fixtures/producer-result-v1-clean.json",
-      "tests/fixtures/producer-result-v1-truncated.json",
-      "tests/fixtures/producer-result-v1-unresolved.json"
+      "tests/fixtures/producer-reach-result-v2.json",
+      "tests/fixtures/producer-result-v2-bounded.json",
+      "tests/fixtures/producer-result-v2-breached.json",
+      "tests/fixtures/producer-result-v2-clean.json",
+      "tests/fixtures/producer-result-v2-truncated.json",
+      "tests/fixtures/producer-result-v2-unresolved.json"
     ],
     "id": "producer",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.producers/v1"
+      "agentmandate.producers/v2"
     ],
     "tests": [
       "tests/test_producer.py"
@@ -157,19 +160,19 @@
       "tests/fixtures/continuity-accepted-synthetic/provider-control.json",
       "tests/fixtures/continuity-accepted-synthetic/provider.json",
       "tests/fixtures/continuity-binding-v1.json",
-      "tests/fixtures/continuity-result-v1-overshot.json",
-      "tests/fixtures/continuity-result-v1-reset.json",
-      "tests/fixtures/continuity-result-v1-satisfied.json",
-      "tests/fixtures/continuity-result-v1-tightened.json",
-      "tests/fixtures/continuity-result-v1-truncated.json",
-      "tests/fixtures/continuity-result-v1-unresolved.json",
-      "tests/fixtures/continuity-result-v1-untrusted.json",
-      "tests/fixtures/continuity-result-v1-widened.json"
+      "tests/fixtures/continuity-result-v2-overshot.json",
+      "tests/fixtures/continuity-result-v2-reset.json",
+      "tests/fixtures/continuity-result-v2-satisfied.json",
+      "tests/fixtures/continuity-result-v2-tightened.json",
+      "tests/fixtures/continuity-result-v2-truncated.json",
+      "tests/fixtures/continuity-result-v2-unresolved.json",
+      "tests/fixtures/continuity-result-v2-untrusted.json",
+      "tests/fixtures/continuity-result-v2-widened.json"
     ],
     "id": "continuity",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.continuity/v1"
+      "agentmandate.continuity/v2"
     ],
     "tests": [
       "tests/test_continuity.py"
@@ -180,13 +183,13 @@
     "fixtures": [
       "examples/principal-continuity/profile.json",
       "tests/fixtures/agentcore-principal-continuity-v1.json",
-      "tests/fixtures/principal-continuity-result-v1-eligible.json",
-      "tests/fixtures/principal-continuity-result-v1-expired.json"
+      "tests/fixtures/principal-continuity-result-v2-eligible.json",
+      "tests/fixtures/principal-continuity-result-v2-expired.json"
     ],
     "id": "principal-continuity",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.principal-continuity/v1"
+      "agentmandate.principal-continuity/v2"
     ],
     "tests": [
       "tests/test_principal_continuity.py"
@@ -197,13 +200,13 @@
     "fixtures": [
       "examples/principal-continuity/accounting-binding.json",
       "examples/principal-continuity/accounting-review.json",
-      "tests/fixtures/principal-accounting-result-v1-eligible.json",
-      "tests/fixtures/principal-accounting-result-v1-expired.json"
+      "tests/fixtures/principal-accounting-result-v2-eligible.json",
+      "tests/fixtures/principal-accounting-result-v2-expired.json"
     ],
     "id": "principal-accounting",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.principal-accounting/v1"
+      "agentmandate.principal-accounting/v2"
     ],
     "tests": [
       "tests/test_principal_accounting.py"
@@ -214,13 +217,13 @@
     "fixtures": [
       "examples/revision-review/provider.json",
       "examples/revision-review/review.json",
-      "tests/fixtures/revision-review-result-v1-eligible.json",
-      "tests/fixtures/revision-review-result-v1-expired.json"
+      "tests/fixtures/revision-review-result-v2-eligible.json",
+      "tests/fixtures/revision-review-result-v2-expired.json"
     ],
     "id": "revision-review",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.revision-review/v1"
+      "agentmandate.revision-review/v2"
     ],
     "tests": [
       "tests/test_revision_review.py"
@@ -234,14 +237,14 @@
       "examples/scalar-handover/handover-lost-reservation.json",
       "examples/scalar-handover/handover-reset.json",
       "examples/scalar-handover/handover.json",
-      "tests/fixtures/scalar-handover-result-v1-expired.json",
-      "tests/fixtures/scalar-handover-result-v1-reset.json",
-      "tests/fixtures/scalar-handover-result-v1-retained.json"
+      "tests/fixtures/scalar-handover-result-v2-expired.json",
+      "tests/fixtures/scalar-handover-result-v2-reset.json",
+      "tests/fixtures/scalar-handover-result-v2-retained.json"
     ],
     "id": "scalar-handover-and-policy",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.scalar-handover/v1"
+      "agentmandate.scalar-handover/v2"
     ],
     "tests": [
       "tests/test_scalar_handover.py"
@@ -265,12 +268,12 @@
   {
     "doc": "docs/evaluation-loop.md",
     "fixtures": [
-      "tests/fixtures/legacy-json-results.json"
+      "tests/fixtures/current-cli-results.json"
     ],
     "id": "scenarios",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.scenarios/v1"
+      "agentmandate.scenarios/v2"
     ],
     "tests": [
       "tests/test_scenarios.py",
@@ -282,12 +285,12 @@
     "fixtures": [
       "examples/observed-calls.jsonl",
       "examples/otel-trace.json",
-      "tests/fixtures/legacy-json-results.json"
+      "tests/fixtures/current-cli-results.json"
     ],
     "id": "trace-verification-and-sarif",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.verify/v1"
+      "agentmandate.verify/v2"
     ],
     "tests": [
       "tests/test_verify.py",
@@ -303,16 +306,16 @@
       "examples/catalogue-import/manifest.json",
       "examples/catalogue-import/mcp.json",
       "examples/catalogue-import/openapi.json",
-      "tests/fixtures/catalogue-import/a2a-1.0-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/a2a-1.0-inventory-ir-v2.json",
       "tests/fixtures/catalogue-import/a2a-1.0-inventory-v1.json",
       "tests/fixtures/catalogue-import/a2a-1.0-skeleton.yaml",
-      "tests/fixtures/catalogue-import/a2a-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/a2a-inventory-ir-v2.json",
       "tests/fixtures/catalogue-import/a2a-inventory-v1.json",
       "tests/fixtures/catalogue-import/a2a-skeleton.yaml",
-      "tests/fixtures/catalogue-import/mcp-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/mcp-inventory-ir-v2.json",
       "tests/fixtures/catalogue-import/mcp-inventory-v1.json",
       "tests/fixtures/catalogue-import/mcp-skeleton.yaml",
-      "tests/fixtures/catalogue-import/openapi-inventory-ir-v1.json",
+      "tests/fixtures/catalogue-import/openapi-inventory-ir-v2.json",
       "tests/fixtures/catalogue-import/openapi-inventory-v1.json",
       "tests/fixtures/catalogue-import/openapi-skeleton.yaml"
     ],
@@ -326,7 +329,7 @@
   {
     "doc": "docs/ci.md",
     "fixtures": [
-      "tests/fixtures/legacy-json-results.json"
+      "tests/fixtures/current-cli-results.json"
     ],
     "id": "legacy-json",
     "kind": "baseline",
@@ -424,34 +427,19 @@
   {
     "doc": "docs/remediation.md",
     "fixtures": [
-      "tests/fixtures/remediation-breached-v1.json",
-      "tests/fixtures/remediation-kept-v1.json",
-      "tests/fixtures/remediation-limited-v1.json",
-      "tests/fixtures/remediation-clean-v1.json"
+      "tests/fixtures/remediation-breached-v6.json",
+      "tests/fixtures/remediation-kept-v6.json",
+      "tests/fixtures/remediation-limited-v6.json",
+      "tests/fixtures/remediation-clean-v6.json"
     ],
     "id": "remediation-v1",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.remediation/v1"
+      "agentmandate.remediation/v6"
     ],
     "tests": [
-      "tests/test_remediation.py"
-    ]
-  },
-  {
-    "doc": "docs/current-contract-inventory.md",
-    "fixtures": [
-      "tests/fixtures/current-contract-inventory-v0.22.json",
-      "tests/fixtures/current-contract-inventory-v0.23.json",
-      "tests/fixtures/current-contract-inventory-v0.24.json",
-      "tests/fixtures/current-contract-inventory-v0.25.json"
-    ],
-    "id": "previous-contract-inventory",
-    "kind": "historical_replay",
-    "schemas": [],
-    "tests": [
-      "tests/test_contract_inventory.py",
-      "tests/test_pre_1_0_contract_audit.py"
+      "tests/test_remediation.py",
+      "tests/test_quantities.py"
     ]
   },
   {
@@ -459,19 +447,19 @@
     "fixtures": [
       "examples/remediation/ungated-refund.json",
       "examples/remediation/normal-refund.jsonl",
-      "tests/fixtures/remediation-ceiling-kept-v2.json",
-      "tests/fixtures/remediation-ceiling-joint-v2.json",
-      "tests/fixtures/remediation-ceiling-limited-v2.json",
-      "tests/fixtures/remediation-ceiling-clean-v2.json",
-      "tests/fixtures/remediation-v1-to-v2.json"
+      "tests/fixtures/remediation-ceiling-kept-v6.json",
+      "tests/fixtures/remediation-ceiling-joint-v6.json",
+      "tests/fixtures/remediation-ceiling-limited-v6.json",
+      "tests/fixtures/remediation-ceiling-clean-v6.json"
     ],
     "id": "remediation-v2",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.remediation/v2"
+      "agentmandate.remediation/v6"
     ],
     "tests": [
-      "tests/test_ceiling_remediation.py"
+      "tests/test_ceiling_remediation.py",
+      "tests/test_quantities.py"
     ]
   },
   {
@@ -479,21 +467,21 @@
     "fixtures": [
       "examples/remediation/required-refund.json",
       "examples/remediation/required-joint.json",
-      "tests/fixtures/remediation-workflow-monetary-v3.json",
-      "tests/fixtures/remediation-workflow-joint-v3.json",
-      "tests/fixtures/remediation-workflow-limited-v3.json",
-      "tests/fixtures/remediation-workflow-clean-v3.json",
-      "tests/fixtures/remediation-workflow-compatibility-v3.json",
-      "tests/fixtures/remediation-v2-to-v3.json"
+      "tests/fixtures/remediation-workflow-monetary-v6.json",
+      "tests/fixtures/remediation-workflow-joint-v6.json",
+      "tests/fixtures/remediation-workflow-limited-v6.json",
+      "tests/fixtures/remediation-workflow-clean-v6.json",
+      "tests/fixtures/remediation-workflow-combined-options-v6.json"
     ],
     "id": "required-workflows-and-remediation-v3",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.required-workflows/v1",
-      "agentmandate.remediation/v3"
+      "agentmandate.required-workflows/v2",
+      "agentmandate.remediation/v6"
     ],
     "tests": [
-      "tests/test_required_workflows.py"
+      "tests/test_required_workflows.py",
+      "tests/test_quantities.py"
     ]
   },
   {
@@ -504,17 +492,17 @@
       "examples/change-review/accepted.json",
       "examples/change-review/deferred.json",
       "examples/change-review/decision-note.txt",
-      "tests/fixtures/change-review-accepted-v1.json",
-      "tests/fixtures/change-review-expired-v1.json",
-      "tests/fixtures/change-review-missing-v1.json",
-      "tests/fixtures/change-review-neutral-v1.json",
-      "tests/fixtures/change-review-deferred-v1.json"
+      "tests/fixtures/change-review-accepted-v2.json",
+      "tests/fixtures/change-review-expired-v2.json",
+      "tests/fixtures/change-review-missing-v2.json",
+      "tests/fixtures/change-review-neutral-v2.json",
+      "tests/fixtures/change-review-deferred-v2.json"
     ],
     "id": "named-change-review-v1",
     "kind": "baseline",
     "schemas": [
       "agentmandate.change-review/v1",
-      "agentmandate.review/v1"
+      "agentmandate.review/v2"
     ],
     "tests": [
       "tests/test_change_review.py"
@@ -570,13 +558,13 @@
       "examples/deployment-drift/rego-aligned.json",
       "examples/deployment-drift/rego-drifted.json",
       "examples/deployment-drift/unmanaged-allow.rego",
-      "tests/fixtures/deployment-drift-cedar-v1.json",
-      "tests/fixtures/deployment-drift-rego-v1.json"
+      "tests/fixtures/deployment-drift-cedar-v2.json",
+      "tests/fixtures/deployment-drift-rego-v2.json"
     ],
     "id": "deployment-drift",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.deployment-drift/v1"
+      "agentmandate.deployment-drift/v2"
     ],
     "tests": [
       "tests/test_deployment_drift.py"
@@ -591,12 +579,12 @@
       "examples/fleet-inventory/release-repo/authority-ir.json",
       "examples/fleet-inventory/billing-repo/manifest.json",
       "examples/fleet-inventory/billing-repo/authority-ir.json",
-      "tests/fixtures/fleet-inventory-v1.json"
+      "tests/fixtures/fleet-inventory-v2.json"
     ],
     "id": "fleet-inventory",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.fleet-inventory/v1"
+      "agentmandate.fleet-inventory/v2"
     ],
     "tests": [
       "tests/test_fleet.py"
@@ -612,12 +600,12 @@
       "examples/deployment-reconcile/manifest.json",
       "examples/deployment-reconcile/mapping.json",
       "examples/deployment-reconcile/telemetry.json",
-      "tests/fixtures/deployment-reconcile-v1.json"
+      "tests/fixtures/deployment-reconcile-v2.json"
     ],
     "id": "deployment-reconcile",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.deployment-reconcile/v1"
+      "agentmandate.deployment-reconcile/v2"
     ],
     "tests": [
       "tests/test_deployment_reconcile.py"
@@ -630,13 +618,13 @@
       "examples/fleet-exceptions/exceptions.json",
       "examples/fleet-exceptions/index.json",
       "examples/fleet-exceptions/none.json",
-      "tests/fixtures/fleet-exceptions-v1.json",
-      "tests/fixtures/fleet-exceptions-expired-v1.json"
+      "tests/fixtures/fleet-exceptions-v2.json",
+      "tests/fixtures/fleet-exceptions-expired-v2.json"
     ],
     "id": "fleet-exceptions",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.fleet-exceptions/v1"
+      "agentmandate.fleet-exceptions/v2"
     ],
     "tests": [
       "tests/test_fleet_exceptions.py"
@@ -645,20 +633,20 @@
   {
     "doc": "docs/remediation.md",
     "fixtures": [
-      "tests/fixtures/remediation-frontier-refund-v4.json",
-      "tests/fixtures/remediation-frontier-limited-v4.json",
-      "tests/fixtures/remediation-frontier-required-v4.json",
-      "tests/fixtures/remediation-frontier-clean-v4.json",
-      "tests/fixtures/remediation-frontier-compatibility-v4.json",
-      "tests/fixtures/remediation-v3-to-v4.json"
+      "tests/fixtures/remediation-frontier-refund-v6.json",
+      "tests/fixtures/remediation-frontier-limited-v6.json",
+      "tests/fixtures/remediation-frontier-required-v6.json",
+      "tests/fixtures/remediation-frontier-clean-v6.json",
+      "tests/fixtures/remediation-frontier-combined-options-v6.json"
     ],
     "id": "remediation-v4",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.remediation/v4"
+      "agentmandate.remediation/v6"
     ],
     "tests": [
-      "tests/test_remediation_frontier.py"
+      "tests/test_remediation_frontier.py",
+      "tests/test_quantities.py"
     ]
   },
   {
@@ -681,12 +669,12 @@
     "fixtures": [
       "examples/rego-diff/baseline.json",
       "examples/rego-diff/candidate.json",
-      "tests/fixtures/rego-effective-diff-v1.json"
+      "tests/fixtures/rego-effective-diff-v2.json"
     ],
     "id": "rego-effective-diff",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.rego-effective-diff/v1"
+      "agentmandate.rego-effective-diff/v2"
     ],
     "tests": [
       "tests/test_rego_diff.py"
@@ -700,12 +688,12 @@
       "examples/fleet-diff/widening.json",
       "examples/fleet-diff/candidate-release/manifest.json",
       "examples/fleet-diff/candidate-release/authority-ir.json",
-      "tests/fixtures/fleet-diff-v1.json"
+      "tests/fixtures/fleet-diff-v2.json"
     ],
     "id": "fleet-release-comparison",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.fleet-diff/v1"
+      "agentmandate.fleet-diff/v2"
     ],
     "tests": [
       "tests/test_fleet_diff.py"
@@ -716,13 +704,12 @@
     "fixtures": [
       "examples/ceiling-discovery/two-tools.json",
       "examples/ceiling-discovery/required-two-tools.json",
-      "tests/fixtures/remediation-discovery-v5.json",
-      "tests/fixtures/remediation-v4-to-v5.json"
+      "tests/fixtures/remediation-discovery-v6.json"
     ],
     "id": "automatic-ceiling-discovery",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.remediation/v5"
+      "agentmandate.remediation/v6"
     ],
     "tests": [
       "tests/test_ceiling_discovery.py"

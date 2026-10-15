@@ -53,7 +53,7 @@ def import_args(format):
         "--locator",
         f"examples/catalogue-import/{format}.json",
         "--selection",
-        '{"environment":"example"}',
+        '{"environment": "example"}',
     ]
     if format == "a2a":
         result.extend(["--dispatch-tool", "ask_refund_agent"])
@@ -72,9 +72,9 @@ def test_imported_baselines_keep_existing_contracts_and_do_not_authorize_analysi
     value.verify_source((EXAMPLE / f"{format}.json").read_bytes())
     graph = value.to_ir()
     _validate_inventory_profile(graph)
-    assert graph.to_json() == (FIXTURES / f"{format}-inventory-ir-v1.json").read_text()
+    assert graph.to_json() == (FIXTURES / f"{format}-inventory-ir-v2.json").read_text()
     assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
-    with pytest.raises(ValueError, match="manifest-v1"):
+    with pytest.raises(ValueError, match="manifest-v2"):
         _analyse_ir(graph)
 
 
@@ -129,13 +129,13 @@ def test_scan_and_import_commands_emit_pinned_reviewable_outputs(format, tmp_pat
     assert main([*import_args(format), "--ir"]) == EXIT_OK
     ir = capsys.readouterr()
     assert ir.err == ""
-    assert ir.out == (FIXTURES / f"{format}-inventory-ir-v1.json").read_text()
+    assert ir.out == (FIXTURES / f"{format}-inventory-ir-v2.json").read_text()
     path.write_text(ir.out)
     assert main(["ir", "validate", str(path)]) == EXIT_OK
     capsys.readouterr()
     assert main(["reach", "--ir", str(path), "--json"]) == EXIT_USAGE
     refusal = capsys.readouterr()
-    assert refusal.out == "" and "manifest-v1" in refusal.err
+    assert refusal.out == "" and "manifest-v2" in refusal.err
 
 
 def test_reviewed_example_has_identical_direct_and_ir_authority():
@@ -218,7 +218,7 @@ def test_imported_draft_leaves_cli_drift_unresolved(tmp_path, capsys):
                 "--inventory-capture",
                 str(EXAMPLE / "mcp.json"),
                 "--inventory-selection",
-                '{"environment":"example"}',
+                '{"environment": "example"}',
                 "--inventory-as-of",
                 "2026-10-10",
                 "--json",
@@ -362,7 +362,7 @@ def test_a2a_current_interfaces_keep_one_opaque_candidate_and_pinned_outputs(cap
         dispatch_tool="ask_refund_agent",
     )
     assert value.to_json() == (FIXTURES / "a2a-1.0-inventory-v1.json").read_text()
-    assert value.to_ir().to_json() == (FIXTURES / "a2a-1.0-inventory-ir-v1.json").read_text()
+    assert value.to_ir().to_json() == (FIXTURES / "a2a-1.0-inventory-ir-v2.json").read_text()
     assert value.membership.completeness == "unknown" and value.evidence.review == "unreviewed"
     value.verify_source(content)
 

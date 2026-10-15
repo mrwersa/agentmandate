@@ -1,0 +1,1 @@
+{"error":{"code":-32600,"data":{"requested":"2025-11-25","supported":["2025-03-26"]},"message":"Unsupported protocol version: 2025-11-25"},"id":"tools-list","jsonrpc":"2.0"}

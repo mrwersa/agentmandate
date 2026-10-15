@@ -31,5 +31,6 @@
       "produces": "scope_4",
       "unbounded": true
     }
-  ]
+  ],
+  "version": 2
 }

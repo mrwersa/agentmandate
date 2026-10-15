@@ -1,0 +1,85 @@
+{
+  "argv": [
+    "review",
+    "examples/change-review/before.json",
+    "examples/change-review/before.json",
+    "--as-of",
+    "2026-10-10",
+    "--json"
+  ],
+  "exit": 0,
+  "result": {
+    "as_of": "2026-10-10",
+    "comparison": {
+      "after": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "5",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "5",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "changes": [],
+      "direction": "neutral"
+    },
+    "findings": [],
+    "gate_satisfied": true,
+    "inputs": {
+      "after_sha256": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
+      "agent": "synthetic-release",
+      "before_sha256": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
+      "comparison_sha256": "0cc6d7f42d9e6d9e3c489f9c76bf409a98ca1ad0a16c7ed754dfb6ee845ec7f8",
+      "depth": 4
+    },
+    "review": null,
+    "schema": "agentmandate.review/v2",
+    "scope": "recorded acceptance of a bounded diff; not reviewer authentication or deployment approval",
+    "status": "review_not_required_within_bound"
+  }
+}

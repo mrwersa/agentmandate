@@ -163,7 +163,7 @@ tool is always denied or that no `forbid` can override an observed permit.
 
 ## Local projection and original preservation requirements
 
-The initial Cedar IR profile remains separate from the analyzable manifest-v1
+The initial Cedar IR profile remains separate from the analyzable manifest-v2
 profile. Gate 3 registered `contains_policy` and `decides_request`, preserving
 the policy-set source, observed policy identifiers, requests, decisions, native
 diagnostics, validation state, and implementation identity, and rejecting the

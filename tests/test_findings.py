@@ -34,6 +34,8 @@ def test_sarif_is_a_well_formed_log() -> None:
     driver = log["runs"][0]["tool"]["driver"]
     assert driver["name"] == "AgentMandate"
     assert driver["version"] == "1.2.3"
+    rule = next(rule for rule in driver["rules"] if rule["id"] == "quantity_budget")
+    assert "consumption of this pool exceeds its budget" in rule["fullDescription"]["text"]
     assert log["runs"][0]["results"]
 
 
@@ -137,9 +139,7 @@ def test_the_graph_shows_one_node_per_step_with_its_binding() -> None:
     assert "case#1" in diagram and "case#2" in diagram
     assert "s0 --> s1" in diagram
     assert "--> breach" in diagram
-    assert not any(
-        f"s{i} --> s{i}" in diagram for i in range(len(authority.breaches[0].path))
-    )
+    assert not any(f"s{i} --> s{i}" in diagram for i in range(len(authority.breaches[0].path)))
 
 
 def test_the_graph_shape_comes_from_the_declared_effect() -> None:
@@ -149,8 +149,8 @@ def test_the_graph_shape_comes_from_the_declared_effect() -> None:
 
     diagram = to_mermaid(authority, mandate)
 
-    assert '(["search_cases' in diagram      # read: rounded
-    assert '["issue_refund' in diagram       # irreversible: box
+    assert '(["search_cases' in diagram  # read: rounded
+    assert '["issue_refund' in diagram  # irreversible: box
 
 
 def test_the_graph_names_what_is_reachable_but_not_on_the_path() -> None:
@@ -185,10 +185,10 @@ def test_more_than_one_breach_is_summarised_rather_than_drawn() -> None:
     # Confirm the summary line rather than assuming a fixture has two.
     mandate = loads(
         """
-        version: 1
+        version: 2
         agent: multi
         limits:
-          total: { amount: 100, currency: GBP }
+          quantities: {value: { amount: 100, unit: GBP }}
           depth: 6
         tools:
           - name: seed
@@ -200,7 +200,8 @@ def test_more_than_one_breach_is_summarised_rather_than_drawn() -> None:
             requires: [case]
             value_arg: amount
             scope_key: case
-            ceiling: { amount: 100, currency: GBP }
+            quantity: value
+            ceiling: { amount: 100, unit: GBP }
           - name: wipe
             effect: irreversible
             requires: [case]
@@ -218,15 +219,16 @@ def test_a_hostile_tool_name_cannot_inject_graph_syntax() -> None:
     # for exactly this reason; a Mermaid label is the same exposure.
     mandate = loads(
         """
-        version: 1
+        version: 2
         agent: victim
-        limits: { total: { amount: 100, currency: GBP }, depth: 6 }
+        limits: { quantities: {value: { amount: 100, unit: GBP }}, depth: 6 }
         tools:
           - { name: 'seed"] --> evil["OWNED', effect: read, produces: case,
               unbounded: true }
           - { name: pay, effect: irreversible, requires: [case],
               value_arg: amount, scope_key: case,
-              ceiling: { amount: 100, currency: GBP } }
+              quantity: value,
+              ceiling: { amount: 100, unit: GBP } }
         """
     )
 
@@ -241,14 +243,15 @@ def test_a_hostile_tool_name_cannot_inject_graph_syntax() -> None:
 def test_the_breach_detail_is_escaped_too() -> None:
     mandate = loads(
         """
-        version: 1
+        version: 2
         agent: victim
-        limits: { total: { amount: 10, currency: GBP }, depth: 4 }
+        limits: { quantities: {value: { amount: 10, unit: GBP }}, depth: 4 }
         tools:
           - { name: 'a"]-->x[', effect: read, produces: case, unbounded: true }
           - { name: 'b"]-->y[', effect: irreversible, requires: [case],
               value_arg: amount, scope_key: case,
-              ceiling: { amount: 10, currency: GBP } }
+              quantity: value,
+              ceiling: { amount: 10, unit: GBP } }
         """
     )
 
@@ -270,9 +273,9 @@ def test_a_json_manifest_anchors_at_the_right_line(tmp_path: Path) -> None:
     path.write_text(json_module.dumps(payload, indent=2), encoding="utf-8")
 
     authority = analyse(load(path))
-    region = to_sarif(authority, path)["runs"][0]["results"][0]["locations"][0][
-        "physicalLocation"
-    ]["region"]
+    region = to_sarif(authority, path)["runs"][0]["results"][0]["locations"][0]["physicalLocation"][
+        "region"
+    ]
     line = path.read_text(encoding="utf-8").splitlines()[region["startLine"] - 1]
 
     assert "issue_refund" in line
@@ -283,9 +286,9 @@ def test_a_manifest_inside_the_working_directory_gets_a_relative_uri() -> None:
     # absolute path attaches the finding to nothing.
     authority = analyse(load(V2))
 
-    uri = to_sarif(authority, V2)["runs"][0]["results"][0]["locations"][0][
-        "physicalLocation"
-    ]["artifactLocation"]["uri"]
+    uri = to_sarif(authority, V2)["runs"][0]["results"][0]["locations"][0]["physicalLocation"][
+        "artifactLocation"
+    ]["uri"]
 
     assert not uri.startswith("/")
     assert uri.endswith("examples/dispute-resolver-v2.yaml")
@@ -305,9 +308,7 @@ def test_a_manifest_outside_the_working_directory_keeps_its_path(
 
 
 @pytest.mark.parametrize("style", ["block", "flow", "flow-name-last", "json"])
-def test_every_manifest_spelling_anchors_at_the_tool(
-    tmp_path: Path, style: str
-) -> None:
+def test_every_manifest_spelling_anchors_at_the_tool(tmp_path: Path, style: str) -> None:
     # Flow style was missed at first and every result anchored at line 1,
     # which is not a missing answer but a wrong one: line 1 is `version:`, so
     # the annotation landed somewhere unrelated to the finding.
@@ -329,9 +330,7 @@ def test_every_manifest_spelling_anchors_at_the_tool(
             if style == "flow-name-last":
                 # The key order inside a flow mapping is free, and an earlier
                 # version only found `name` when it came first.
-                items = [i for i in items if i[0] != "name"] + [
-                    i for i in items if i[0] == "name"
-                ]
+                items = [i for i in items if i[0] != "name"] + [i for i in items if i[0] == "name"]
             rows += (
                 "  - { "
                 + ", ".join(
@@ -341,8 +340,8 @@ def test_every_manifest_spelling_anchors_at_the_tool(
                 + " }\n"
             )
         text = (
-            "version: 1\nagent: dispute-resolver\n"
-            "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"
+            "version: 2\nagent: dispute-resolver\n"
+            "limits: { quantities: {value: { amount: 500, unit: GBP }}, depth: 8 }\n"
             f"tools:\n{rows}"
         )
         suffix = "yaml"
@@ -350,9 +349,9 @@ def test_every_manifest_spelling_anchors_at_the_tool(
     path = tmp_path / f"mandate.{suffix}"
     path.write_text(text, encoding="utf-8")
 
-    region = to_sarif(analyse(load(path)), path)["runs"][0]["results"][0][
-        "locations"
-    ][0]["physicalLocation"]["region"]
+    region = to_sarif(analyse(load(path)), path)["runs"][0]["results"][0]["locations"][0][
+        "physicalLocation"
+    ]["region"]
     line = path.read_text(encoding="utf-8").splitlines()[region["startLine"] - 1]
 
     assert "issue_refund" in line
@@ -369,9 +368,9 @@ def test_a_comma_inside_a_quoted_value_does_not_invent_a_tool(
 
     path = tmp_path / "mandate.yaml"
     path.write_text(
-        "version: 1\n"
+        "version: 2\n"
         "tools:\n"
-        '  - { name: seed, effect: read,\n'
+        "  - { name: seed, effect: read,\n"
         '      description: "raises a case, name: bogus" }\n'
         "  - { effect: irreversible, name: pay }\n",
         encoding="utf-8",

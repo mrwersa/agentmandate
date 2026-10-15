@@ -1,309 +1,105 @@
 # API stability and the path to 1.0
 
-AgentMandate is alpha because the authority model has not been pointed at
-enough real tool graphs to know where it is too coarse. The label is a scope
-statement, not a waiver for silent breakage.
+AgentMandate is alpha. The current release supports one current contract for
+each artifact family. Superseded Python aliases, manifest readers and output
+modes are removed rather than carried as compatibility code.
 
-## Guarantees before 1.0
+## Release rules before 1.0
 
-- Patch releases preserve the public Python API and command-line contracts.
-- Breaking Python or CLI changes require a new minor release and migration
-  notes in `CHANGELOG.md`.
-- The manifest supports an explicit `version`, defaulting to `1` when omitted.
-  A build rejects a schema version it does not understand rather than guessing.
-- Exit codes are part of the contract: `0` clean, `1` finding, `2` usage, I/O,
-  malformed manifest/IR, or unsupported IR semantics. CI depends on these, so
-  they will not move in a patch.
-- `--json` output is additive within a minor series. Fields may be added;
-  existing fields will not change meaning.
+- Patch releases preserve supported public Python and CLI contracts. Breaking
+  changes require a minor release and explicit changelog notes.
+- Manifest version 2 is current and is the default when omitted. Unsupported
+  versions fail closed; there is no version-1 conversion in the package.
+- Exit codes remain `0` clean, `1` finding and `2` usage, I/O or malformed or
+  unsupported input. A repair proposal or recorded acceptance does not erase
+  the original analysis finding.
+- Analysis commands support `--json`. `scan` and `ir export` write artifacts
+  and are not gates. Strict hashed results reject unknown fields and versions.
+- Existing releases remain recoverable in Git and published artifacts. Their
+  continued availability does not require old readers in the current package.
 
-Production users should pin the current minor series:
+Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.37.0
+agentmandate~=0.38.0
 ```
 
-## Versioned authority artifacts
+## Current quantity model
 
-`mandate rego diff` adds an experimental `rego_capture_version: 1` capture-set
-index and `agentmandate.rego-effective-diff/v1` result. It reuses the unchanged
-deployment configuration and reconciliation contracts, comparing exact captured
-inputs across generated stateless revisions. Both reconciliations and the
-independent manifest authority diff remain visible. Initial widening, unchanged,
-narrowing and expired baselines pin the new result; earlier exports and reports
-are byte-preserved. These are v1 baselines, not a migration from a prior Rego
-comparison schema. See [Rego revision comparison](docs/rego-diff.md).
+`Quantity(amount, unit)` represents exact non-negative additive consumption.
+Tools name their accounting pool with `quantity`; `limits.quantities` declares
+separate cumulative budgets. Authority exposes `max_quantities`. Units must
+match within a pool and are case-sensitive. Different pools are never summed,
+even when their units match. No exchange rate, conversion or unit equivalence
+is inferred.
 
-All seven structural `validate` command groups accept `--json`, returning the
-opt-in `agentmandate.validation/v1` envelope. It records artifact kind, version,
-structural validity and the explicit unassessed trust/deployment scope. Human
-output without the flag is unchanged. [Validation baselines](docs/structural-validation.md)
-cover every group; these are initial baselines, not a prior-schema migration.
-Malformed, non-finite or excessively nested input exits 2 without partial JSON.
-Scalar monetary reachability requires one currency across all declared ceilings
-and the total limit; the analyzer performs no conversion.
+The money-only alpha API is replaced. `Money`, `limits.total`, currency-only
+manifest/replay inputs and remediation v1–v5 presentation modes are unsupported.
+There are no aliases or compatibility readers. See the
+[quantity contract](docs/quantity-budgets.md) for examples and exclusions.
 
-`mandate review` uses the separate public `agentmandate.change-review/v1` input
-and `agentmandate.review/v1` result contracts. It checks eligibility of recorded
-acceptance against the exact bounded diff; it does not change `diff` or `reach`
-findings and exits. [V1 baselines and trust requirements](docs/change-review.md)
-cover the new gate. These are initial baselines, not a migration from an earlier
-review-result schema; the Python helpers remain private.
+The model covers one quantity per tool call, per-tool/per-binding ceilings,
+mandate-wide named budgets and effect-class call counts. It does not cover
+several simultaneous charges on one call, timed rates, concurrent gauges,
+negative consumption, replenishment or argument-dependent production.
 
-`mandate remediate` exposes the public `agentmandate.remediation/v1` JSON
-presentation with rechecked, unapplied manifest-v1 repair candidates. Its
-Python implementation is private. The command retains baseline Authority and
-lint findings and keeps their exit code even when candidates exist. Candidate
-reachability is scoped to the same depth; enumeration completeness is a
-separate field. Results are not authority inputs. Supplying `--ceiling` opts into `agentmandate.remediation/v2`, which adds a
-caller-supplied monetary edit domain and `tighten_ceiling` records with explicit
-before/after amounts. Omitting the flag preserves v1 bytes. Neither output is
-an authority input; the v1-to-v2 compatibility case pins preserved fields and
-existing edit semantics. The
-[guide and initial fixtures](docs/remediation.md) describe this new surface;
-existing CLI output and root Python exports are unchanged.
+## Current artifact boundaries
 
-Supplying `--required-workflows` opts into `agentmandate.remediation/v3`, with
-or without ceiling options. The separate strict
-`agentmandate.required-workflows/v1` input joins caller-authored positive paths
-to the exact baseline manifest. V3 reports scoped baseline/candidate path
-conformance and screened edits; it preserves baseline Authority and its exit.
-Omitting the flag keeps v1/v2 bytes. The [workflow contract](docs/required-workflows.md)
-and before/after compatibility case cover these additions; the Python records
-are private. Annotations do not authenticate a reviewer or prove business success.
+| Family | Current contract |
+|---|---|
+| Manifest | `version: 2`; public `Mandate`, `Tool`, `Limits`, `Quantity` |
+| Authority IR and hashed result | `ir_version: 2`, `result_version: 2`; private Python records |
+| Manifest adapters | Manifest adapter 3, defaults adapter 2 |
+| Structural validation | `agentmandate.validation/v1`; structure only, not accepted evidence |
+| Remediation | `agentmandate.remediation/v6` for every repair option |
+| Required workflows | `agentmandate.required-workflows/v2` |
+| Scenarios and verify presentation | `agentmandate.scenarios/v2`, `agentmandate.verify/v2` |
+| Conditions and delegations | Current input versions retain independent lifecycles; result presentations use `/v2` |
+| Producer and continuity results | `agentmandate.producers/v2`, `agentmandate.continuity/v2`, hashed result version 2 |
+| Principal, revision and scalar handover results | Current `/v2` presentations; scalar policy version 2 includes its dimension |
+| Managed Cedar alignment and diff | Current `/v2` presentations; captured native request contracts remain separate |
+| Cedar/Rego stateless exports | Current `/v1` mappings and export results; cumulative quantities appear in the loss report |
+| Change review | `agentmandate.change-review/v1` input, `agentmandate.review/v2` result |
+| Deployment, fleet and captured Rego comparisons | Current `/v2` result presentations |
 
-Either `--ceiling-grid` or `--pareto` selects `agentmandate.remediation/v4`,
-including with required paths. Finite caller-supplied grids generate exact
-ceiling choices. The optional frontier compares explicit repair costs among
-examined, rechecked candidates; its display cap and enumeration limit remain
-separate from candidate reachability truncation. Omitting both flags preserves
-all v1/v2/v3 bytes. [V4 baselines and a v3-to-v4 compatibility case](docs/remediation.md)
-pin the added domain/frontier fields and preserved original Authority. This is
-a repair trade-off report, not global least-authority synthesis or deployment approval.
+Artifact versions describe their own boundaries. A source adapter change can
+alter semantic digests without changing the surrounding graph format. An input
+profile does not become accepted evidence because its graph validates. The
+[current inventory](docs/current-contract-inventory.md) records actual exports,
+command paths, version markers, fixtures and replay tests; it is the detailed
+index for this table.
 
-The `mandate ir`, `mandate inventory`, `mandate conditions`, `mandate delegations`,
-`mandate producers`, `mandate continuity`, `mandate cedar`, and reviewed
-`mandate reach` attachment surfaces are public. The Python records remain
-private and are not exported from `agentmandate`. Their explicit artifact
-versions separate compatibility from package releases:
+Historical captures keep their native transport and profile formats. A native
+artifact whose version is still supported is not an alias for an obsolete
+manifest or result. Evidence-only historical projections live in repository
+scripts, outside the runtime package.
 
-- `ir_version` changes when graph records, relations, or canonicalization
-  change incompatibly.
-- Source adapter versions change when projection logic changes; that may alter
-  semantic and result digests without changing either JSON format.
-- `result_version` changes when a hashed envelope field is added, removed,
-  renamed, reinterpreted, or canonicalized differently. The strict reader does
-  not treat additional fields as silently additive.
-- `condition_version` and `context_version` change when their strict artifact
-  records change incompatibly. Conditional command output uses the independent
-  `agentmandate.conditions/v1` presentation schema.
-- `delegation_version` and principal-v2 attachment records change when their
-  strict artifact formats change incompatibly. Delegation command output uses
-  the independent `agentmandate.delegations/v1` presentation schema.
-- `managed_oracle_version` changes when the strict managed-enforcement record
-  changes incompatibly. Cedar alignment and revision output use the independent
-  `agentmandate.cedar-alignment/v1` and
-  `agentmandate.cedar-effective-diff/v1` presentation schemas.
-- `producer_boundary_version` changes when the finite-producer evidence record
-  changes incompatibly. Producer-aware reach output uses the independent,
-  canonical `agentmandate.producers/v1` result schema and closed finding codes.
-- Continuity binding, AgentCore, and Anthropic artifact versions change
-  independently when their strict records change incompatibly. Reconciliation
-  output uses the canonical `agentmandate.continuity/v1` result schema and
-  closed finding codes.
+## Repair and bounded-search claims
 
-Future presentation metadata may be additive only if it is explicitly outside
-the canonical envelope. Adding support for a new format version or changing
-the documented command contract requires a package minor release and migration
-notes. Corrections that restore existing documented behavior may be patch
-releases. These standalone artifact rules are stricter than the additive
-guarantee for existing
-`--json` command output.
+Every repair is rechecked against the complete changed manifest. Required paths
+screen model conformance, not business success. Proposals remain unapplied;
+original budgets and named quantity assignments stay fixed. Different units
+are never added to rank a proposal.
 
-`mandate ir validate` guarantees structural validity only. Eligibility for
-analysis is a separate, stricter check performed by `mandate reach --ir`; this
-distinction will not be weakened in a patch release.
+Discovery's domain-frontier completion, exhaustive point enumeration,
+evaluation-limit truncation, frontier display cap and each Authority's call-depth
+truncation are distinct. A complete frontier at depth eight does not prove
+safety at depth ten. See [remediation](docs/remediation.md) and
+[search limits](docs/search-performance.md).
 
-The same boundary applies to `mandate inventory validate`: it proves only that
-a declaration is structurally valid. `mandate drift` separately checks its
-target, reviewed selection, supplied capture digest, completeness, confidence,
-review, and expiry against an explicit evaluation date.
+## Evidence and 1.0
 
-`mandate inventory import` writes a draft declaration or the existing inventory
-IR profile. It never marks evidence accepted or membership complete. The
-explicit protocol readers in `mandate scan --format` write review-marked
-skeletons. The original MCP reader and public Python scan signatures are
-unchanged when the format flag is omitted. Protocol mappings and their pinned
-v1 baselines are documented in [the import guide](docs/catalogue-import.md).
-The same minor release adds the `scope.missing-producer` lint error. Previously
-clean manifests with a dangling requirement now exit 1; reachability semantics
-and the lint JSON shape are unchanged.
+Historical captures, signed bindings and accountable acceptance records retain
+their original bytes, scope and expiry. New model projections do not inherit
+acceptance. Current graph tests label their synthetic associations explicitly;
+string identity and matching digests do not authenticate an execution or signer.
 
-`mandate conditions validate` likewise proves structure only. Manifest-mode
-`reach` and `drift` separately check profile semantics, reviewed context,
-capture digest, explicit evaluation date, and—during drift—the selected live
-source binding. Conditional JSON is additive and appears only when conditional
-inputs were supplied; legacy output remains unchanged.
+Continuity, shared accounting and scalar handover readers have their own
+reviewed domains and prerequisites. Generic quantity budgets do not establish
+runtime enforcement, live exclusivity, atomic accounting or safe continuation.
+Missing bindings, state, mediation or policy comparability remain unresolved.
 
-`mandate delegations validate` likewise proves only attachment or chain
-structure. Manifest-mode `reach` rechecks closed IR profiles, mapped capture
-digests, source binding, reviewed domains, evidence state, expiry, and
-hop-to-hop attenuation at an explicit UTC timestamp. Delegation JSON appears
-only when delegation inputs were supplied. SARIF, Mermaid, IR, and conditional
-composition are refused until they can preserve delegation uncertainty.
-
-`mandate cedar validate` likewise proves managed-oracle structure only. Cedar
-alignment and diff separately require explicit source roots and an evaluation
-date, verify every declared digest and the closed managed IR profile, and retain
-unchanged manifest authority on uncertainty. Their JSON names all input and
-per-request evidence digests. The presentation is not accepted as an authority
-artifact, and the private Python records remain unsupported.
-
-`mandate producers validate` likewise proves boundary structure only.
-Manifest-mode `reach` rechecks every closed producer profile, caller-mapped
-source digest, exact deployment and reviewed partition selection, complete
-monotone run, evidence state, and expiry. Its canonical result is presentation,
-not an authority input. Findings preserve baseline manifest authority and exit
-1 after complete output. Malformed or incomplete inputs exit 2 with empty
-stdout. IR, SARIF, Mermaid, condition, and delegation composition are refused
-before any input is read or output written.
-
-`mandate continuity validate` proves artifact structure only.
-`mandate continuity reconcile` rechecks the provider profile, exact caller-mapped source
-bytes, optional mandate binding and its source bytes, evidence state, and UTC
-evaluation time. Its canonical result is presentation, not an authority input.
-Violations and unresolved trust retain complete manifest Authority and exit 1
-after complete output. Malformed or incomplete inputs exit 2 with empty stdout.
-IR, SARIF, Mermaid, OTel, condition, delegation, producer, and Cedar
-composition are refused before any input is read. The Python records remain
-private.
-
-Principal/session observations use the separate strict
-`principal_continuity_version: 1` profile and
-`agentmandate.principal-continuity/v1` result schema through the same continuity
-commands. They preserve ordered calls and per-principal totals, with source,
-review, and expiry checks. Without an accounting binding, mandate identity and
-continuity remain unresolved; reconciliation always exits 1. Single-principal
-bindings are refused on this path. The archival `principal_observations_version`
-input remains unsupported.
-See the [profile contract](docs/principal-continuity.md).
-
-The optional `principal_accounting_binding_version: 1` artifact selects the
-separate `agentmandate.principal-accounting/v1` result. It authorizes per-trial
-shared monetary totals only with eligible observations, independent binding
-review, exact sources and joins, and known completion. An observed budget breach
-does not establish reset or resolve continuation safety; this path always exits 1.
-Existing unbound v1 output is unchanged. Both new contracts have initial
-[compatibility fixtures](docs/principal-accounting.md#compatibility-and-remaining-work);
-these are baselines, not migrations or completion of the whole 1.0 audit.
-
-The opt-in `revision_review_version: 1` attachment selects
-`agentmandate.revision-review/v1`. It nests the unchanged continuity baseline
-and reports separately reviewed comparison and issuer-treatment claims within
-an explicit scope. It never promotes these scoped claims to global safe
-continuation and always exits 1. Existing commands without review input keep
-their result bytes and exit behavior. The [contract and initial fixtures](docs/revision-review.md)
-cover this new surface; no historical acceptance or binding is inferred.
-
-`mandate continuity handover` consumes the separate strict
-`scalar_handover_version: 1` artifact and closed `scalar_policy_version: 1`
-policy captures. Its `agentmandate.scalar-handover/v1` result proves only
-conformance to the declared scalar handover at cutover. Exit 0 also requires
-clean, untruncated manifest Authority; it does not establish global provider
-safe continuation. Eligible contradictions and unresolved evidence exit 1;
-malformed artifacts, locator errors, and I/O failures exit 2. Existing
-reconciliation results are unchanged. The [contract](docs/scalar-handover.md)
-and initial retained/reset/expired fixtures extend the compatibility inventory;
-they do not record a migration or complete the repository-wide audit.
-
-## What is most likely to change
-
-The manifest schema and the way standalone evidence profiles compose with it.
-Conditional authority, delegation analysis, finite producer cardinality, and
-authority continuity have public, versioned validate-then-consume command
-surfaces, but remain reviewed attachments rather than new manifest-v1 meanings.
-Their Python records remain private, and presentation results are not accepted
-as authority input. Explicitly synthetic accepted fixtures supply producer and
-continuity clean paths while the real migrations remain unreviewed. Structural
-validity never makes any of these records trusted mandate authority.
-
-Three areas remain deliberately under-modelled:
-
-- **Data-flow labels.** Detecting that a read tool feeds an exfiltration path
-  needs taint labels the manifest does not carry today.
-- **Resource relationships and quantities.** Manifest v1 cannot express fixed
-  ownership or containment relationships. Finite producer cardinality stays a
-  reviewed attachment rather than manifest meaning; evidence-backed value
-  relationships still lack a selected quantity contract.
-- **General cross-session reachability.** Continuity reconciliation covers only
-  reviewed, named scalar cumulative transitions. It does not search arbitrary
-  durable agents, memories, sessions, or asynchronous work.
-
-Integrating any of these into manifest authority may change the schema. The
-`version` field is how that will be handled; standalone artifact versions may
-instead evolve independently when the manifest meaning is unchanged.
-
-`mandate cedar export` is an experimental compiler with
-`cedar_export_version: 1` mapping input and `agentmandate.cedar-export/v1`
-results. It generates only explicitly mapped stateless permissions. Losses
-block export by default; `--allow-partial` emits a candidate and still exits 1.
-Native validation is separate from compilation. Existing managed Cedar
-commands and results are unchanged. See [the export guide](docs/cedar-export.md).
-
-`mandate rego export` adds the experimental `rego_export_version: 1` mapping
-and `agentmandate.rego-export/v1` result. It uses Rego v1 with a pinned native
-OPA runner, refuses stateful losses by default and keeps partial candidates at
-exit 1. This is an initial baseline, not a migration. Existing Cedar output
-and prior commands are unchanged. See [Rego export](docs/rego-export.md).
-
-`mandate deployment drift` adds the experimental `deployment_version: 1`
-configuration input and `agentmandate.deployment-drift/v1` result. Its clean
-status means consistency of supplied configuration and exact policy bytes,
-not authenticated deployment enforcement. Initial Cedar/Rego baselines preserve
-separate manifest Authority. Existing source drift and exporter results remain
-unchanged. See [deployment drift](docs/deployment-drift.md).
-
-`mandate fleet inventory` adds the experimental `fleet_version: 1` index
-and `agentmandate.fleet-inventory/v1` result. It verifies exact local
-manifest/IR joins and retains whole-index findings under display filters.
-Initial v1 baselines cover repository/environment identity, declared tools,
-ownership and review windows; they are not historical migrations. Signatures,
-live exposure and cross-agent authority remain unverified. Earlier exports,
-deployment results and other contracts are unchanged. See
-[fleet inventory](docs/fleet-inventory.md).
-
-`mandate deployment reconcile` adds the experimental `reconcile_version: 1`
-mapping and `agentmandate.deployment-reconcile/v1` result. It joins captured
-OPA Boolean decisions to explicitly mapped OTLP tool attempts for generated
-Rego stateless exports. Initial aligned/denied-effect examples preserve separate
-deployment drift and manifest Authority; earlier results and inputs remain
-unchanged. Recorded joins do not authenticate live mediation or establish
-ordering, accounting or runtime continuity. See
-[deployment reconciliation](docs/deployment-reconciliation.md).
-
-`mandate fleet exceptions` adds the experimental `exceptions_version: 1`
-record and `agentmandate.fleet-exceptions/v1` result. It checks named temporary
-acceptance of an overdue inventory review, joined to exact index/finding bytes
-and local evidence. Original findings and review expiry remain unchanged;
-other inventory trust failures cannot receive this exception. Initial eligible
-and expired fixtures are v1 baselines, not historical migrations. Review
-authentication and renewal are not performed. Earlier inventory, deployment
-and Authority contracts remain unchanged. See [fleet exceptions](docs/fleet-exceptions.md).
-
-`mandate fleet diff` adds the experimental `agentmandate.fleet-diff/v1`
-result over two existing fleet-v1 indexes. It preserves both inventory reports
-and compares unique repository/environment/agent pairs through the unchanged
-manifest diff. Complete current declared membership is required for additions
-or removals. Review, integrity, ownership, widening and candidate-breach findings
-remain blocking; budgets and mandates remain separate. Initial result baselines
-do not establish a schema migration, authenticated membership or live deployment
-approval. Earlier commands and fixtures are unchanged. See
-[fleet release comparison](docs/fleet-diff.md).
-
-`mandate remediate --discover-ceiling` selects the experimental
-`agentmandate.remediation/v5` result. Exact finite ceiling domains retain all
-tools and fixed declared budgets, with bounded approval changes and workflow
-screening. Domain-frontier completeness, point enumeration, display limits and
-reachability truncation are separate fields. Commands without discovery keep
-v1/v2/v3/v4 bytes and exits. Initial v5 fixtures are baselines, not migrations;
-see [ceiling discovery](docs/ceiling-discovery.md).
+The remaining 1.0 criteria are tracked in [the roadmap](ROADMAP.md). Current
+schema boundary fixtures and the contract inventory replace active historical
+compatibility replay chains. Independent security and trace-retention review
+remains deferred and cannot be supplied by author or agent self-review.

@@ -5,7 +5,7 @@ This is the contract for
 [#128](https://github.com/mrwersa/agentmandate/issues/128). It defines the
 minimum trust and analysis contract selected by the
 [AWS IAM cardinality evidence](evidence/aws-iam-access-keys/README.md). It does
-not change manifest version 1 or the analyzable Authority IR profile. Finite
+not change manifest version 2 or the analyzable Authority IR profile. Finite
 producer evidence remains a reviewed attachment consumed only through the
 explicit public CLI.
 
@@ -164,7 +164,7 @@ The producer-specific validator first applies generic IR structural checks,
 then reconstructs the strict boundary record and verifies the complete entity,
 fact, evidence, relation-support, content-digest, and semantic-digest sets.
 This makes the projection portable without making it authority: generic
-manifest-v1 reachability explicitly rejects the standalone source profile.
+manifest-v2 reachability explicitly rejects the standalone source profile.
 Gate 2b adds no private narrowing analysis, manifest meaning, public export, or
 CLI surface.
 
@@ -196,7 +196,7 @@ surface, runtime enforcement, reservation, or release semantics.
 ## Result envelope
 
 The consumer separates analysis from presentation through the
-versioned `agentmandate.producers/v1` result envelope. It records the explicit
+versioned `agentmandate.producers/v2` result envelope. It records the explicit
 evaluation date; manifest semantic identity; boundary content and semantic
 identities; exact selections; applied tool, scope, partition, capacity kind,
 maximum, and support; the complete effective Authority; and every unresolved
@@ -327,7 +327,7 @@ that a call observed after analysis will succeed.
 ## Authority IR profile
 
 Gate 2b projects the artifact through a standalone profile, not the analyzable
-manifest-v1 profile. Its entities are producer boundary, tool, output scope,
+manifest-v2 profile. Its entities are producer boundary, tool, output scope,
 and partition binding. Its source relations are:
 
 | Relation | Endpoints | Cardinality and support |
@@ -397,7 +397,7 @@ CLI attachment boundary; the quantity track has not selected a contract.
 
 ## Explicit non-goals
 
-- changing manifest v1 or interpreting `unbounded` as a number;
+- changing manifest v2 or interpreting `unbounded` as a number;
 - inferring a bound from documentation, schemas, pagination, quotas, or tool
   names without reproduced exhaustion;
 - producer arity or multi-output records;

@@ -1,4 +1,4 @@
-"""Report-only repair candidates over the existing manifest-v1 model."""
+"""Report-only repair candidates over the existing manifest-v2 model."""
 
 from __future__ import annotations
 
@@ -10,22 +10,19 @@ from typing import Any
 
 from ._required_workflows import _Requirements
 from .lint import Finding, check
-from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Money
+from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Quantity
 from .reach import analyse
 
-REMEDIATION_SCHEMA = "agentmandate.remediation/v1"
-CEILING_REMEDIATION_SCHEMA = "agentmandate.remediation/v2"
-WORKFLOW_REMEDIATION_SCHEMA = "agentmandate.remediation/v3"
-FRONTIER_REMEDIATION_SCHEMA = "agentmandate.remediation/v4"
+REMEDIATION_SCHEMA = "agentmandate.remediation/v6"
 _STRUCTURAL_RULES = {
     "scope.missing-producer",
     "ceiling.unbound-scope",
-    "ceiling.mixed-currency",
+    "quantity.unit-mismatch",
 }
 
 
-def _money(value: Money | None) -> dict | None:
-    return None if value is None else {"amount": str(value.amount), "currency": value.currency}
+def _quantity(value: Quantity | None) -> dict | None:
+    return None if value is None else {"amount": str(value.amount), "unit": value.unit}
 
 
 def _manifest(mandate: Mandate) -> dict:
@@ -33,13 +30,12 @@ def _manifest(mandate: Mandate) -> dict:
     for tool in mandate.tools:
         row = asdict(tool)
         row["requires"] = list(tool.requires)
-        row["ceiling"] = _money(tool.ceiling)
+        row["ceiling"] = _quantity(tool.ceiling)
         tools.append({key: value for key, value in row.items() if value is not None})
     limits = {"depth": mandate.limits.depth, "effects": dict(mandate.limits.effects)}
-    if mandate.limits.total is not None:
-        limits["total"] = _money(mandate.limits.total)
+    limits["quantities"] = {name: _quantity(q) for name, q in mandate.limits.quantities.items()}
     return {
-        "version": 1,
+        "version": 2,
         "agent": mandate.agent,
         "identity": mandate.identity,
         "tools": tools,
@@ -52,7 +48,7 @@ def _manifest(mandate: Mandate) -> dict:
 class _Edit:
     tool: str
     kind: str
-    ceiling: Money | None = None
+    ceiling: Quantity | None = None
 
 
 def _ceiling_domain(mandate: Mandate, options: tuple[str, ...]) -> tuple[_Edit, ...]:
@@ -66,8 +62,9 @@ def _ceiling_domain(mandate: Mandate, options: tuple[str, ...]) -> tuple[_Edit, 
         tool = mandate.tool(name)
         if tool is None or tool.ceiling is None:
             raise ValueError(f"ceiling option {name!r} must name a declared spending tool")
-        ceiling = Money.parse({"amount": amount, "currency": tool.ceiling.currency},
-                              f"ceiling option {name!r}")
+        ceiling = Quantity.parse(
+            {"amount": amount, "unit": tool.ceiling.unit}, f"ceiling option {name!r}"
+        )
         if ceiling.amount >= tool.ceiling.amount:
             raise ValueError(f"ceiling option {name!r} must be strictly below its current ceiling")
         # Numeric duplicates choose the first lexical spelling, independent of flag order.
@@ -88,8 +85,12 @@ def _grid_domain(mandate: Mandate, grids: tuple[str, ...]) -> tuple[tuple[str, .
             raise ValueError(f"ceiling grid {name!r} must name a declared spending tool")
         if any(len(part) > 128 for part in parts):
             raise ValueError("ceiling grid numbers are limited to 128 characters")
-        amounts = [Money.parse({"amount": part, "currency": tool.ceiling.currency},
-                               f"ceiling grid {name!r}").amount for part in parts]
+        amounts = [
+            Quantity.parse(
+                {"amount": part, "unit": tool.ceiling.unit}, f"ceiling grid {name!r}"
+            ).amount
+            for part in parts
+        ]
         tuples = [amount.as_tuple() for amount in amounts]
         if any(len(t.digits) > 100 or abs(t.exponent) > 100 for t in tuples):
             raise ValueError("ceiling grid numbers require at most 100 digits and exponent +/-100")
@@ -113,12 +114,19 @@ def _grid_domain(mandate: Mandate, grids: tuple[str, ...]) -> tuple[tuple[str, .
             text = str(start + index * stride)
             # Remove only fractional trailing zeros; do not round in caller context.
             places = min(len(text) - len(text.rstrip("0")), max(0, -exponent))
-            digits = tuple(int(char) for char in text[:len(text) - places]) or (0,)
+            digits = tuple(int(char) for char in text[: len(text) - places]) or (0,)
             value = Decimal((0, digits, exponent + places))
             options.append(f"{name}={value or '0'}")
-        records.append({"tool": name, "minimum": str(lower), "maximum": str(upper),
-                        "step": str(step), "currency": tool.ceiling.currency,
-                        "points_generated": count})
+        records.append(
+            {
+                "tool": name,
+                "minimum": str(lower),
+                "maximum": str(upper),
+                "step": str(step),
+                "unit": tool.ceiling.unit,
+                "points_generated": count,
+            }
+        )
     return tuple(options), records
 
 
@@ -127,12 +135,15 @@ def _repair_cost(mandate: Mandate, candidate: dict) -> dict:
     return {
         "edit_count": candidate["impact"]["edit_count"],
         "lost_reachable_tools": candidate["impact"]["lost_reachable_tools"],
-        "added_approval_tools": sorted(e["tool"] for e in candidate["edits"]
-                                       if e["kind"] == "require_approval"),
+        "added_approval_tools": sorted(
+            e["tool"] for e in candidate["edits"] if e["kind"] == "require_approval"
+        ),
         "retained_ceilings": {
-            tool.name: tools[tool.name]["ceiling"] if tool.name in tools else
-            {"amount": "0", "currency": tool.ceiling.currency}
-            for tool in sorted(mandate.tools, key=lambda t: t.name) if tool.ceiling is not None
+            tool.name: tools[tool.name]["ceiling"]
+            if tool.name in tools
+            else {"amount": "0", "unit": tool.ceiling.unit}
+            for tool in sorted(mandate.tools, key=lambda t: t.name)
+            if tool.ceiling is not None
         },
     }
 
@@ -141,17 +152,19 @@ def _dominates(left: dict, right: dict) -> bool:
     """Compare repair costs, preserving named capabilities rather than counts."""
     comparisons = [
         (left["edit_count"] <= right["edit_count"], left["edit_count"] < right["edit_count"]),
-        (set(left["lost_reachable_tools"]) <= set(right["lost_reachable_tools"]),
-         set(left["lost_reachable_tools"]) < set(right["lost_reachable_tools"])),
-        (set(left["added_approval_tools"]) <= set(right["added_approval_tools"]),
-         set(left["added_approval_tools"]) < set(right["added_approval_tools"])),
+        (
+            set(left["lost_reachable_tools"]) <= set(right["lost_reachable_tools"]),
+            set(left["lost_reachable_tools"]) < set(right["lost_reachable_tools"]),
+        ),
+        (
+            set(left["added_approval_tools"]) <= set(right["added_approval_tools"]),
+            set(left["added_approval_tools"]) < set(right["added_approval_tools"]),
+        ),
     ]
     for name, value in left["retained_ceilings"].items():
         a, b = Decimal(value["amount"]), Decimal(right["retained_ceilings"][name]["amount"])
         comparisons.append((a >= b, a > b))
-    return all(no_worse for no_worse, _ in comparisons) and any(
-        better for _, better in comparisons
-    )
+    return all(no_worse for no_worse, _ in comparisons) and any(better for _, better in comparisons)
 
 
 def _changed(mandate: Mandate, edits: tuple[_Edit, ...]) -> Mandate | None:
@@ -162,13 +175,16 @@ def _changed(mandate: Mandate, edits: tuple[_Edit, ...]) -> Mandate | None:
     if len(set(keys)) != len(keys) or removed & (gated | set(tightened)):
         return None  # One ceiling choice per tool; removal cannot accompany another edit.
     tools = tuple(
-        replace(tool, requires_approval=tool.requires_approval or tool.name in gated,
-                ceiling=tightened.get(tool.name, tool.ceiling))
+        replace(
+            tool,
+            requires_approval=tool.requires_approval or tool.name in gated,
+            ceiling=tightened.get(tool.name, tool.ceiling),
+        )
         for tool in mandate.tools
         if tool.name not in removed
     )
     if not tools:
-        return None  # An empty tool list is not a loadable manifest-v1 policy.
+        return None  # An empty tool list is not a loadable manifest-v2 policy.
     roles = {
         role: tuple(name for name in members if name not in removed)
         for role, members in mandate.roles.items()
@@ -179,16 +195,18 @@ def _changed(mandate: Mandate, edits: tuple[_Edit, ...]) -> Mandate | None:
 def _edit_record(mandate: Mandate, edit: _Edit) -> dict:
     record = {"tool": edit.tool, "kind": edit.kind}
     if edit.kind == "tighten_ceiling":
-        record["before"] = _money(mandate.tool(edit.tool).ceiling)
-        record["after"] = _money(edit.ceiling)
+        record["quantity"] = mandate.tool(edit.tool).quantity
+        record["before"] = _quantity(mandate.tool(edit.tool).ceiling)
+        record["after"] = _quantity(edit.ceiling)
     return record
 
 
-def _retained_value(candidate: dict) -> Decimal:
-    value = candidate["authority"]["max_extractable"]
-    # Copying the sign is exact under any caller context and keeps large
-    # exponents compact. Negating with '-' would round to that context.
-    return Decimal(0) if value is None else Decimal(value["amount"]).copy_negate()
+def _retained_quantities(candidate: dict) -> tuple:
+    """Deterministic named ordering; never sum different quantity dimensions."""
+    return tuple(
+        (name, Decimal(value["amount"]).copy_negate())
+        for name, value in sorted(candidate["authority"]["max_quantities"].items())
+    )
 
 
 def _structural(findings: list[Finding]) -> bool:
@@ -224,9 +242,14 @@ def plan(
         from ._ceiling_discovery import discover
 
         return discover(
-            mandate, options=discover_ceilings, depth=depth, max_edits=max_edits,
-            max_evaluations=max_evaluations, max_candidates=max_candidates,
-            keep_tools=keep_tools, required_workflows=required_workflows,
+            mandate,
+            options=discover_ceilings,
+            depth=depth,
+            max_edits=max_edits,
+            max_evaluations=max_evaluations,
+            max_candidates=max_candidates,
+            keep_tools=keep_tools,
+            required_workflows=required_workflows,
         )
     for name, value in (
         ("max_edits", max_edits),
@@ -248,8 +271,8 @@ def plan(
         raise ValueError("kept tools must be reachable in the baseline at the selected depth")
     findings = check(mandate)
     report = {
-        "schema": CEILING_REMEDIATION_SCHEMA if ceiling_edits else REMEDIATION_SCHEMA,
-        "scope": "manifest-v1 reachability only; candidates require human selection",
+        "schema": REMEDIATION_SCHEMA,
+        "scope": "manifest-v2 reachability only; candidates require human selection",
         "baseline": baseline.as_dict(),
         "baseline_lint": [asdict(f) for f in findings],
         "keep_tools": sorted(set(keep_tools)),
@@ -262,7 +285,8 @@ def plan(
             "combinations_examined": 0,
             "candidates_analyzed": 0,
             "candidates_found": 0,
-            "enumeration_complete": None,
+            "exhaustive_point_enumeration": None,
+            "truncated_by_limit": False,
         },
         "status": "no_reachable_breach_within_bound",
         "candidates": [],
@@ -272,26 +296,36 @@ def plan(
         invalid = next((row for row in assessments if row["failure"] is not None), None)
         if invalid is not None:
             failure = invalid["failure"]
-            raise ValueError(f"required workflow {invalid['name']!r} is invalid in the baseline: "
-                             f"step {failure['step']} {failure['rule']}: {failure['detail']}")
-        report["schema"] = WORKFLOW_REMEDIATION_SCHEMA
+            raise ValueError(
+                f"required workflow {invalid['name']!r} is invalid in the baseline: "
+                f"step {failure['step']} {failure['rule']}: {failure['detail']}"
+            )
         report["requirements"] = {**required_workflows.metadata(), "baseline": assessments}
         report["requirement_rejections"] = []
         report["search"]["required_workflow_rejections"] = 0
     if ceiling_edits:
         report["ceiling_options"] = [
-            {"tool": edit.tool, "ceiling": _money(edit.ceiling)} for edit in ceiling_edits
+            {
+                "tool": edit.tool,
+                "quantity": mandate.tool(edit.tool).quantity,
+                "ceiling": _quantity(edit.ceiling),
+            }
+            for edit in ceiling_edits
         ]
     if grids or pareto:
-        report["schema"] = FRONTIER_REMEDIATION_SCHEMA
         report["ceiling_grids"] = grids
         report["frontier"] = {
-            "enabled": pareto, "status": "not_computed" if pareto else "disabled",
+            "enabled": pareto,
+            "status": "not_computed" if pareto else "disabled",
             "scope": "repair trade-offs among examined, rechecked candidates only",
-            "objectives": {"edit_count": "minimize", "lost_reachable_tools": "set inclusion",
-                           "added_approval_tools": "set inclusion",
-                           "retained_ceilings": "maximize each declared tool ceiling"},
-            "successful_candidates": 0, "non_dominated": None,
+            "objectives": {
+                "edit_count": "minimize",
+                "lost_reachable_tools": "set inclusion",
+                "added_approval_tools": "set inclusion",
+                "retained_ceilings": "maximize each declared tool ceiling",
+            },
+            "successful_candidates": 0,
+            "non_dominated": None,
             "display_complete": True,
         }
     if _structural(findings):
@@ -299,18 +333,21 @@ def plan(
         return report
     if not baseline.breaches:
         return report
-    actions = tuple(
-        _Edit(tool.name, kind)
-        for tool in sorted(mandate.tools, key=lambda t: t.name)
-        for kind in (
-            (["remove_tool"] if tool.name not in keep_tools else [])
-            + (
-                ["require_approval"]
-                if tool.effect == IRREVERSIBLE and not tool.requires_approval
-                else []
+    actions = (
+        tuple(
+            _Edit(tool.name, kind)
+            for tool in sorted(mandate.tools, key=lambda t: t.name)
+            for kind in (
+                (["remove_tool"] if tool.name not in keep_tools else [])
+                + (
+                    ["require_approval"]
+                    if tool.effect == IRREVERSIBLE and not tool.requires_approval
+                    else []
+                )
             )
         )
-    ) + ceiling_edits
+        + ceiling_edits
+    )
     sizes = range(1, min(max_edits, len(actions)) + 1)
     search = report["search"]
     search["combinations_total"] = sum(comb(len(actions), size) for size in sizes)
@@ -329,10 +366,13 @@ def plan(
             assessments = required_workflows.assess(candidate, baseline.depth)
             if any(row["failure"] is not None for row in assessments):
                 search["required_workflow_rejections"] += 1
-                report["requirement_rejections"].append({
-                    "edits": [_edit_record(mandate, edit) for edit in edits],
-                    "stage": "required_workflow_screen", "assessments": assessments,
-                })
+                report["requirement_rejections"].append(
+                    {
+                        "edits": [_edit_record(mandate, edit) for edit in edits],
+                        "stage": "required_workflow_screen",
+                        "assessments": assessments,
+                    }
+                )
                 continue
         authority = analyse(candidate, depth=baseline.depth)
         search["candidates_analyzed"] += 1
@@ -365,26 +405,33 @@ def plan(
         key=lambda c: (
             c["impact"]["edit_count"],
             len(c["impact"]["lost_reachable_tools"]),
-            tuple(sorted(
-                (effect_ranks[name] for name in c["impact"]["lost_reachable_tools"]),
-                reverse=True,
-            )),
+            tuple(
+                sorted(
+                    (effect_ranks[name] for name in c["impact"]["lost_reachable_tools"]),
+                    reverse=True,
+                )
+            ),
             sum(e["kind"] == "remove_tool" for e in c["edits"]),
-            _retained_value(c) if ceiling_edits else Decimal(0),
-            tuple((e["tool"], e["kind"], e.get("after", {}).get("amount", ""))
-                  for e in c["edits"]),
+            _retained_quantities(c) if ceiling_edits else (),
+            tuple((e["tool"], e["kind"], e.get("after", {}).get("amount", "")) for e in c["edits"]),
         )
     )
     search["candidates_found"] = len(candidates)
-    search["enumeration_complete"] = search["combinations_examined"] == search["combinations_total"]
+    search["exhaustive_point_enumeration"] = (
+        search["combinations_examined"] == search["combinations_total"]
+    )
+    search["truncated_by_limit"] = not search["exhaustive_point_enumeration"]
     if pareto:
         for candidate in candidates:
             candidate["repair_cost"] = _repair_cost(mandate, candidate)
-        candidates = [c for c in candidates if not any(
-            _dominates(other["repair_cost"], c["repair_cost"]) for other in candidates
-        )]
+        candidates = [
+            c
+            for c in candidates
+            if not any(_dominates(other["repair_cost"], c["repair_cost"]) for other in candidates)
+        ]
         report["frontier"].update(
-            status="computed", successful_candidates=search["candidates_found"],
+            status="computed",
+            successful_candidates=search["candidates_found"],
             non_dominated=len(candidates),
         )
     if "frontier" in report:

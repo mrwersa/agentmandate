@@ -90,8 +90,8 @@ Anthropic cap changes, or arbitrary multi-revision sequences.
 
 ## Result and limits
 
-`agentmandate.revision-review/v1` contains `baseline`, the complete unchanged
-`agentmandate.continuity/v1` result, plus the canonical review, its digest,
+`agentmandate.revision-review/v2` contains `baseline`, the complete unchanged
+`agentmandate.continuity/v2` result, plus the canonical review, its digest,
 `review_inputs_eligible`, per-control `assessments`, and review findings.
 The baseline's manifest Authority and findings remain intact.
 `review_inputs_eligible` covers the attachment's sources, input digests, and
@@ -129,8 +129,8 @@ closed integer model at cutover. It does not upgrade this attachment's scoped
 comparisons or resolve its global continuation verdict.
 
 The example round-trips through the strict reader. Fixed
-[eligible](../tests/fixtures/revision-review-result-v1-eligible.json) and
-[expired](../tests/fixtures/revision-review-result-v1-expired.json) CLI results
+[eligible](../tests/fixtures/revision-review-result-v2-eligible.json) and
+[expired](../tests/fixtures/revision-review-result-v2-expired.json) CLI results
 pin the new envelope; tests also compare its nested baseline with the original
 analyzer's result. These are initial v1 baselines, not migrations or completion
 of the repository-wide compatibility audit. Commands without review input

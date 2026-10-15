@@ -96,7 +96,7 @@ This surface adds two contracts to the pre-1.0 compatibility inventory:
 | Contract | Committed baseline and check |
 |---|---|
 | `principal_continuity_version: 1` input | The synthetic example round-trips through the strict reader; the separate historical profile is reproduced from pinned sources by `scripts/project_principal_observations.py` |
-| `agentmandate.principal-continuity/v1` output | [Eligible](../tests/fixtures/principal-continuity-result-v1-eligible.json) and [expired](../tests/fixtures/principal-continuity-result-v1-expired.json) synthetic results pin complete CLI JSON output; `tests/test_principal_continuity.py` compares emitted bytes with these fixed files |
+| `agentmandate.principal-continuity/v2` output | [Eligible](../tests/fixtures/principal-continuity-result-v2-eligible.json) and [expired](../tests/fixtures/principal-continuity-result-v2-expired.json) synthetic results pin complete CLI JSON output; `tests/test_principal_continuity.py` compares emitted bytes with these fixed files |
 
 Both result fixtures retain unresolved mandate verdicts and full manifest
 Authority. The expired fixture changes observation eligibility, not the
@@ -111,7 +111,7 @@ new surface without declaring the repository-wide 1.0 audit complete.
 
 ## Result and failure behavior
 
-JSON output uses the separate `agentmandate.principal-continuity/v1` schema.
+JSON output uses the separate `agentmandate.principal-continuity/v2` schema.
 It includes the explicit evaluation time, canonical profile digest, supplied
 manifest digest, measurement, full manifest Authority, and source/review
 findings. Trial results preserve call order and report adjacent principal and

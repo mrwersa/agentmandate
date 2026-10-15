@@ -17,7 +17,7 @@ from agentmandate._ir import (
     _from_mandate,
     _IRAnalysis,
 )
-from agentmandate.manifest import Money
+from agentmandate.manifest import Quantity
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -40,7 +40,7 @@ tools:
 BREACHED = """
 agent: breached
 limits:
-  total: {amount: 500, currency: GBP}
+  quantities: {value: {amount: 500, unit: GBP}}
 tools:
   - name: open_case
     effect: read
@@ -51,7 +51,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: {amount: 500, currency: GBP}
+    quantity: value
+    ceiling: {amount: 500, unit: GBP}
 """
 
 
@@ -75,9 +76,7 @@ def test_canonical_result_fixtures_round_trip(
     breached: bool,
 ) -> None:
     expected = result(manifest, depth)
-    text = (FIXTURES / f"authority-ir-result-v1-{name}.json").read_text(
-        encoding="utf-8"
-    )
+    text = (FIXTURES / f"authority-ir-result-v2-{name}.json").read_text(encoding="utf-8")
 
     assert expected.result_version == RESULT_VERSION
     assert expected.authority.truncated is truncated
@@ -88,9 +87,7 @@ def test_canonical_result_fixtures_round_trip(
     assert restored.to_json() == text
     if name == "breached":
         cumulative = next(
-            breach
-            for breach in restored.authority.breaches
-            if breach.kind == "cumulative_value"
+            breach for breach in restored.authority.breaches if breach.kind == "quantity_budget"
         )
         assert [step.tool for step in cumulative.path] == [
             "open_case",
@@ -111,8 +108,7 @@ def test_result_bytes_are_stable_under_reordered_source_tables_and_support() -> 
             for fact in reversed(source.facts)
         ),
         edges=tuple(
-            replace(edge, support=tuple(reversed(edge.support)))
-            for edge in reversed(source.edges)
+            replace(edge, support=tuple(reversed(edge.support))) for edge in reversed(source.edges)
         ),
     )
 
@@ -127,12 +123,12 @@ def rehash(raw: dict[str, object]) -> str:
 
 def test_result_reader_rejects_version_digest_and_parameter_tampering() -> None:
     raw = result(CLEAN, 2).as_dict()
-    raw["result_version"] = 2
-    with pytest.raises(IRFormatError, match="unsupported authority IR result version 2"):
+    raw["result_version"] = 99
+    with pytest.raises(IRFormatError, match="unsupported authority IR result version 99"):
         _IRAnalysis.from_json(json.dumps(raw))
 
-    with pytest.raises(IRFormatError, match="unsupported authority IR result version 2"):
-        _IRAnalysis.from_json('{"result_version":2,"future_shape":true}')
+    with pytest.raises(IRFormatError, match="unsupported authority IR result version 99"):
+        _IRAnalysis.from_json('{"result_version": 99, "future_shape": true}')
 
     raw = result(CLEAN, 2).as_dict()
     raw["result_sha256"] = "0" * 64
@@ -178,13 +174,13 @@ def test_result_rejects_noncanonical_values_before_and_during_read() -> None:
         value,
         authority=replace(
             value.authority,
-            max_extractable=Money(Decimal("NaN"), "GBP"),
+            max_quantities={"value": Quantity(Decimal(1), "GBP")},
         ),
     )
     with pytest.raises(IRFormatError, match="authority output does not match"):
         nonfinite.to_json()
 
-    text = value.to_json().replace('"result_version":1', '"result_version":NaN')
+    text = value.to_json().replace('"result_version":2', '"result_version":NaN')
     with pytest.raises(IRFormatError, match="non-canonical value"):
         _IRAnalysis.from_json(text)
     with pytest.raises(IRFormatError, match="non-canonical value"):
@@ -194,9 +190,9 @@ def test_result_rejects_noncanonical_values_before_and_during_read() -> None:
 def test_result_object_revalidates_source_identity_and_computed_output() -> None:
     value = result(CLEAN, 2)
     with pytest.raises(IRFormatError, match="result version"):
-        replace(value, result_version=2).to_json()
+        replace(value, result_version=99).to_json()
     with pytest.raises(IRFormatError, match="source graph version"):
-        replace(value, source_ir_version=2).to_json()
+        replace(value, source_ir_version=99).to_json()
     with pytest.raises(IRFormatError, match="source graph digest"):
         replace(value, source_graph_sha256="0" * 64).to_json()
 
@@ -251,6 +247,6 @@ def test_result_reader_has_a_typed_strict_shape_boundary() -> None:
     changed = result(CLEAN, 2).as_dict()
     source = changed["source_graph"]
     assert isinstance(source, dict)
-    source["ir_version"] = 2
+    source["ir_version"] = 99
     with pytest.raises(IRFormatError, match="source graph version does not match"):
         _IRAnalysis.from_json(rehash(changed))

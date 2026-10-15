@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":"deny-over-limit","result":{"isError":false,"content":[{"type":"text","text":"{\"processed\":true,\"amount\":2000}"}]}}

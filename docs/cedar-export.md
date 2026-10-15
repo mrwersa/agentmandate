@@ -51,7 +51,7 @@ store. The loss report names each unsupported source control:
 
 | Loss code | What remains unenforced |
 |---|---|
-| `limits.total` | Accumulated monetary spend |
+| `limits.quantities` | Accumulated consumption per named quantity |
 | `limits.effects` | Accumulated call counts, reported per declared effect |
 | `tool.ceiling` | Cumulative spend by one tool against one scope binding |
 | `tool.requires` | Availability of bindings produced by previous calls |

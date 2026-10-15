@@ -29,9 +29,14 @@ def index(name="baseline"):
 
 
 def run(before=None, after=None, *, root=ROOT, other=None, as_of=AS_OF, depth=8):
-    return compare(encoded(index() if before is None else before),
-                   encoded(index("candidate") if after is None else after),
-                   baseline_root=root, candidate_root=other or root, as_of=as_of, depth=depth)
+    return compare(
+        encoded(index() if before is None else before),
+        encoded(index("candidate") if after is None else after),
+        baseline_root=root,
+        candidate_root=other or root,
+        as_of=as_of,
+        depth=depth,
+    )
 
 
 def codes(report):
@@ -39,9 +44,12 @@ def codes(report):
 
 
 def deployment(report, repository="release-repo", environment="prod"):
-    return next(row for row in report["comparisons"]
-                if row["deployment"]["repository"] == repository
-                and row["deployment"]["environment"] == environment)
+    return next(
+        row
+        for row in report["comparisons"]
+        if row["deployment"]["repository"] == repository
+        and row["deployment"]["environment"] == environment
+    )
 
 
 @pytest.fixture
@@ -64,18 +72,40 @@ def snapshot(value, root, mutate, identifier="release/prod", name="changed"):
 
 
 def command(before, after, root=ROOT, other=None, as_of=AS_OF):
-    return ["fleet", "diff", "--baseline", str(before), "--candidate", str(after),
-            "--baseline-root", str(root), "--candidate-root", str(other or root),
-            "--as-of", as_of]
+    return [
+        "fleet",
+        "diff",
+        "--baseline",
+        str(before),
+        "--candidate",
+        str(after),
+        "--baseline-root",
+        str(root),
+        "--candidate-root",
+        str(other or root),
+        "--as-of",
+        as_of,
+    ]
 
 
 def test_headline_keeps_inventory_reports_and_each_authority_diff_unchanged():
     before, after = index(), index("candidate")
     report = run(before, after)
-    assert report["summary"] == {"deployments": 4, "compared": 3, "widened": 1, "added": 1,
-                                 "removed": 0, "unresolved": 0, "unresolved_entries": 0}
-    assert codes(report) == {"fleet.diff-authority-widened", "fleet.diff-authority-breach",
-                             "fleet.diff-deployment-added", "fleet.review-not-current"}
+    assert report["summary"] == {
+        "deployments": 4,
+        "compared": 3,
+        "widened": 1,
+        "added": 1,
+        "removed": 0,
+        "unresolved": 0,
+        "unresolved_entries": 0,
+    }
+    assert codes(report) == {
+        "fleet.diff-authority-widened",
+        "fleet.diff-authority-breach",
+        "fleet.diff-deployment-added",
+        "fleet.review-not-current",
+    }
     for label, value in (("baseline", before), ("candidate", after)):
         assert report[label] == inventory(encoded(value), root=ROOT, as_of=AS_OF)
     for row in report["comparisons"]:
@@ -93,9 +123,13 @@ def test_headline_keeps_inventory_reports_and_each_authority_diff_unchanged():
     assert not report["gate_passed"] and report["signatures"] == "not_verified"
 
 
-@pytest.mark.parametrize("before,after,direction", [
-    ("baseline", "baseline", "neutral"), ("widening", "baseline", "narrowing"),
-])
+@pytest.mark.parametrize(
+    "before,after,direction",
+    [
+        ("baseline", "baseline", "neutral"),
+        ("widening", "baseline", "narrowing"),
+    ],
+)
 def test_unchanged_and_narrowing_are_clean(before, after, direction):
     report = run(index(before), index(after))
     assert report["gate_passed"] and not report["findings"]
@@ -162,8 +196,9 @@ def test_entry_id_revision_and_array_order_are_labels_not_pairing_keys():
 
 
 @pytest.mark.parametrize("side", ["baseline", "candidate"])
-@pytest.mark.parametrize("fault", ["manifest-pin", "ir-pin", "missing-manifest", "missing-ir",
-                                   "malformed-ir"])
+@pytest.mark.parametrize(
+    "fault", ["manifest-pin", "ir-pin", "missing-manifest", "missing-ir", "malformed-ir"]
+)
 def test_ineligible_duplicate_blocks_pairing_without_hiding_candidate_authority(
     side, fault, artifacts, capsys
 ):
@@ -221,21 +256,30 @@ def test_unknown_agent_reserves_all_agents_in_its_repository_environment(artifac
     extra = copy.deepcopy(before["entries"][0])
     extra["id"] = "secondary/prod"
     before["entries"].append(extra)
-    snapshot(before, artifacts, lambda m: m.update(agent="secondary-agent"),
-             identifier="secondary/prod")
+    snapshot(
+        before, artifacts, lambda m: m.update(agent="secondary-agent"), identifier="secondary/prod"
+    )
     after = copy.deepcopy(before)
     unverified = copy.deepcopy(after["entries"][0])
     unverified["id"] = "unverified-entry"
     after["entries"].append(unverified)
     # Even a syntactically valid untrusted claim naming a third agent cannot
     # establish uniqueness of either verified agent in this bucket.
-    snapshot(after, artifacts, lambda m: m.update(agent="untrusted-third-agent"),
-             identifier="unverified-entry", name="unverified")
+    snapshot(
+        after,
+        artifacts,
+        lambda m: m.update(agent="untrusted-third-agent"),
+        identifier="unverified-entry",
+        name="unverified",
+    )
     unverified["manifest"]["sha256"] = "0" * 64
     report = run(before, after, root=artifacts)
-    affected = [row for row in report["comparisons"]
-                if row["deployment"]["repository"] == "release-repo"
-                and row["deployment"]["environment"] == "prod"]
+    affected = [
+        row
+        for row in report["comparisons"]
+        if row["deployment"]["repository"] == "release-repo"
+        and row["deployment"]["environment"] == "prod"
+    ]
     assert len(affected) == 2
     assert all(row["membership"] == row["relation"] == "unresolved" for row in affected)
     assert all(row["authority_diff"] is None for row in affected)
@@ -293,9 +337,15 @@ def test_current_review_declarations_do_not_accept_widening_or_new_deployments()
     assert not report["gate_passed"]
 
 
-@pytest.mark.parametrize("as_of,current", [
-    ("2026-10-10", False), ("2026-10-11", True), ("2026-11-08", True), ("2026-11-09", False),
-])
+@pytest.mark.parametrize(
+    "as_of,current",
+    [
+        ("2026-10-10", False),
+        ("2026-10-11", True),
+        ("2026-11-08", True),
+        ("2026-11-09", False),
+    ],
+)
 def test_inclusive_dates_block_the_gate_without_erasing_matched_manifest_findings(as_of, current):
     report = run(index(), index("widening"), as_of=as_of)
     assert report["membership_comparable"] is current
@@ -342,33 +392,52 @@ def test_late_manifest_changes_cannot_replace_inventory_verified_bytes(fault, mo
 def test_existing_diff_drives_each_change_class_and_preserves_baseline(change, artifacts):
     before, after = index(), index()
     if change == "approval":
+
         def mutate(m):
             m["tools"][1].update(requires_approval=False)
     elif change == "tool":
+
         def mutate(m):
             m["tools"].append({"name": "another-tool", "effect": "read"})
     elif change == "identity":
+
         def mutate(m):
             m.update(identity="another-operator")
     elif change == "effects":
-        snapshot(before, artifacts, lambda m: m.update(limits={"effects": {"irreversible": 3}}),
-                 name="before")
+        snapshot(
+            before,
+            artifacts,
+            lambda m: m.update(limits={"effects": {"irreversible": 3}}),
+            name="before",
+        )
         after = copy.deepcopy(before)
+
         def mutate(m):
             m["limits"]["effects"].update(irreversible=5)
     else:
+
         def monetary(m):
             m["tools"] = [
                 {"name": "seed", "effect": "read", "produces": "case"},
-                {"name": "pay", "effect": "irreversible", "requires_approval": True,
-                 "requires": ["case"], "scope_key": "case", "value_arg": "amount",
-                 "ceiling": {"amount": "40", "currency": "GBP"}},
+                {
+                    "quantity": "value",
+                    "name": "pay",
+                    "effect": "irreversible",
+                    "requires_approval": True,
+                    "requires": ["case"],
+                    "scope_key": "case",
+                    "value_arg": "amount",
+                    "ceiling": {"amount": "40", "unit": "GBP"},
+                },
             ]
-            m["limits"] = {"total": {"amount": "50", "currency": "GBP"}}
+            m["limits"] = {"quantities": {"value": {"amount": "50", "unit": "GBP"}}}
+
         snapshot(before, artifacts, monetary, name="before")
         after = copy.deepcopy(before)
+
         def mutate(m):
             m["tools"][1]["ceiling"].update(amount="60")
+
     snapshot(after, artifacts, mutate)
     report = run(before, after, root=artifacts)
     row = deployment(report)
@@ -381,12 +450,23 @@ def test_existing_diff_drives_each_change_class_and_preserves_baseline(change, a
 
 def test_amounts_from_separate_deployments_are_never_added(artifacts):
     value = index()
+
     def monetary(m):
-        m["tools"] = [{"name": "seed", "effect": "read", "produces": "case"},
-                      {"name": "pay", "effect": "irreversible", "requires_approval": True,
-                       "requires": ["case"], "scope_key": "case", "value_arg": "amount",
-                       "ceiling": {"amount": "40", "currency": "GBP"}}]
-        m["limits"] = {"total": {"amount": "50", "currency": "GBP"}}
+        m["tools"] = [
+            {"name": "seed", "effect": "read", "produces": "case"},
+            {
+                "quantity": "value",
+                "name": "pay",
+                "effect": "irreversible",
+                "requires_approval": True,
+                "requires": ["case"],
+                "scope_key": "case",
+                "value_arg": "amount",
+                "ceiling": {"amount": "40", "unit": "GBP"},
+            },
+        ]
+        m["limits"] = {"quantities": {"value": {"amount": "50", "unit": "GBP"}}}
+
     snapshot(value, artifacts, monetary)
     extra = copy.deepcopy(value["entries"][0])
     extra.update(id="separate/prod", repository="separate-repo")
@@ -394,8 +474,9 @@ def test_amounts_from_separate_deployments_are_never_added(artifacts):
     report = run(value, value, root=artifacts)
     assert report["gate_passed"] and len(report["comparisons"]) == 2
     for row in report["comparisons"]:
-        assert row["authority_diff"]["after"]["max_extractable"] == {
-            "amount": "40", "currency": "GBP",
+        assert row["authority_diff"]["after"]["max_quantities"]["value"] == {
+            "amount": "40",
+            "unit": "GBP",
         }
         assert not row["authority_diff"]["after"]["breaches"]
     assert "max_extractable" not in report["summary"]
@@ -451,12 +532,17 @@ def test_several_agents_in_one_repository_environment_keep_distinct_comparisons(
     second = copy.deepcopy(value["entries"][0])
     second["id"] = "second-agent/prod"
     value["entries"] = [value["entries"][0], second]
-    snapshot(value, artifacts, lambda m: m.update(agent="secondary-agent"),
-             identifier="second-agent/prod")
+    snapshot(
+        value,
+        artifacts,
+        lambda m: m.update(agent="secondary-agent"),
+        identifier="second-agent/prod",
+    )
     report = run(value, value, root=artifacts)
     assert report["gate_passed"] and report["summary"]["compared"] == 2
     assert {row["deployment"]["agent"] for row in report["comparisons"]} == {
-        "release-agent", "secondary-agent",
+        "release-agent",
+        "secondary-agent",
     }
 
 
@@ -472,10 +558,15 @@ def test_search_bound_and_truncation_travel_with_each_authority(artifacts):
     assert not deep["gate_passed"] and "fleet.diff-authority-breach" in codes(deep)
 
 
-@pytest.mark.parametrize("before,after,expected", [
-    ("baseline", "baseline", 0), ("baseline", "widening", 1),
-    ("widening", "baseline", 0), ("baseline", "candidate", 1),
-])
+@pytest.mark.parametrize(
+    "before,after,expected",
+    [
+        ("baseline", "baseline", 0),
+        ("baseline", "widening", 1),
+        ("widening", "baseline", 0),
+        ("baseline", "candidate", 1),
+    ],
+)
 @pytest.mark.parametrize("machine", [True, False])
 def test_cli_preserves_gate_exit_and_complete_outputs(before, after, expected, machine, capsys):
     args = command(EXAMPLE / (before + ".json"), EXAMPLE / (after + ".json"))
@@ -488,10 +579,23 @@ def test_cli_preserves_gate_exit_and_complete_outputs(before, after, expected, m
         assert output.out == render(run(index(before), index(after)))
 
 
-@pytest.mark.parametrize("fault", [
-    "duplicate-key", "fields", "date", "deep", "utf8", "missing-index", "missing-root",
-    "duplicate-id", "traversal", "absolute", "backslash", "depth",
-])
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "duplicate-key",
+        "fields",
+        "date",
+        "deep",
+        "utf8",
+        "missing-index",
+        "missing-root",
+        "duplicate-id",
+        "traversal",
+        "absolute",
+        "backslash",
+        "depth",
+    ],
+)
 def test_malformed_cli_inputs_fail_2_without_partial_output(fault, artifacts, capsys):
     value = index()
     path = artifacts / "input.json"
@@ -502,7 +606,9 @@ def test_malformed_cli_inputs_fail_2_without_partial_output(fault, artifacts, ca
         value["entries"].append(copy.deepcopy(value["entries"][0]))
     elif fault in ("traversal", "absolute", "backslash"):
         value["entries"][0]["manifest"]["path"] = {
-            "traversal": "../outside.json", "absolute": "/etc/passwd", "backslash": "a\\b.json",
+            "traversal": "../outside.json",
+            "absolute": "/etc/passwd",
+            "backslash": "a\\b.json",
         }[fault]
     content = encoded(value)
     if fault == "duplicate-key":
@@ -539,30 +645,44 @@ def test_symlink_escape_is_rejected_without_partial_output(artifacts, capsys):
     assert not capsys.readouterr().out
 
 
-def test_unsupported_currency_arithmetic_is_usage_2_and_not_a_partial_fleet_verdict(
-    artifacts, capsys
-):
+def test_unsupported_unit_arithmetic_is_usage_2_and_not_a_partial_fleet_verdict(artifacts, capsys):
     value = index()
+
     def monetary(m):
-        m["tools"] = [{"name": "seed", "effect": "read", "produces": "case"},
-                      {"name": "pay", "effect": "irreversible", "requires_approval": True,
-                       "requires": ["case"], "scope_key": "case", "value_arg": "amount",
-                       "ceiling": {"amount": "40", "currency": "USD"}}]
-        m["limits"] = {"total": {"amount": "50", "currency": "GBP"}}
+        m["tools"] = [
+            {"name": "seed", "effect": "read", "produces": "case"},
+            {
+                "quantity": "value",
+                "name": "pay",
+                "effect": "irreversible",
+                "requires_approval": True,
+                "requires": ["case"],
+                "scope_key": "case",
+                "value_arg": "amount",
+                "ceiling": {"amount": "40", "unit": "USD"},
+            },
+        ]
+        m["limits"] = {"quantities": {"value": {"amount": "50", "unit": "GBP"}}}
+
     snapshot(value, artifacts, monetary)
     path = artifacts / "input.json"
     path.write_bytes(encoded(value))
     assert main(command(path, path, artifacts) + ["--json"]) == 2
     output = capsys.readouterr()
-    assert not output.out and "require one currency" in output.err
+    assert not output.out and "incompatible units" in output.err
 
 
 def test_pinned_v1_cases_replay_complete_results_and_exit_codes(capsys):
-    for case in json.loads((ROOT / "tests/fixtures/fleet-diff-v1.json").read_text()):
+    for case in json.loads((ROOT / "tests/fixtures/fleet-diff-v2.json").read_text()):
         before = EXAMPLE / (case["baseline"] + ".json")
         after = EXAMPLE / (case["candidate"] + ".json")
-        result = compare(before.read_bytes(), after.read_bytes(), baseline_root=ROOT,
-                         candidate_root=ROOT, as_of=case["as_of"])
+        result = compare(
+            before.read_bytes(),
+            after.read_bytes(),
+            baseline_root=ROOT,
+            candidate_root=ROOT,
+            as_of=case["as_of"],
+        )
         assert result == case["result"]
         assert main(command(before, after, as_of=case["as_of"]) + ["--json"]) == case["exit"]
         assert json.loads(capsys.readouterr().out) == result

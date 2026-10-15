@@ -37,7 +37,7 @@ def _run(raw=None, *, when=AS_OF, contents=None, depth=None):
 
 def test_three_boundaries_remain_distinct_and_no_observation_authorizes_shared_accounting():
     result = _run()
-    assert result["schema"] == "agentmandate.principal-continuity/v1"
+    assert result["schema"] == "agentmandate.principal-continuity/v2"
     assert result["observations_eligible"] is True
     trials = {trial["id"]: trial for trial in result["trials"]}
     changed = trials["changed-principal-same-session"]
@@ -190,7 +190,7 @@ def test_cli_preserves_released_v1_result_bytes(fixture, as_of, capsys):
     assert main([*args, "--json"]) == 1
     output = capsys.readouterr()
     assert not output.err
-    expected = ROOT / "tests/fixtures" / f"principal-continuity-result-v1-{fixture}.json"
+    expected = ROOT / "tests/fixtures" / f"principal-continuity-result-v2-{fixture}.json"
     assert output.out.encode("utf-8") == expected.read_bytes()
 
 

@@ -16,13 +16,14 @@ possible.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 READ = "read"
 WRITE = "write"
@@ -52,27 +53,41 @@ def _required_name(raw: Any, where: str) -> str:
     return raw
 
 
+def _quantity_name(value: Any, where: str) -> str:
+    name = _required_name(value, where)
+    if name != name.strip():
+        raise ManifestError(f"{where}: quantity name must be trimmed")
+    return name
+
+
 @dataclass(frozen=True)
-class Money:
-    """An amount in a single currency.
+class Quantity:
+    """An exact non-negative cumulative amount with a declared unit.
 
     Decimal rather than float because these values are compared against
     ceilings and summed across a call sequence. Binary floating point would
     make a breach report arguable, and an arguable breach report is useless.
-    Currency codes normalize to uppercase for both construction and parsing.
     """
 
     amount: Decimal
-    currency: str
+    unit: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "currency", self.currency.upper())
+        if not isinstance(self.amount, Decimal) or not self.amount.is_finite() or self.amount < 0:
+            raise ManifestError("quantity amount must be a finite non-negative Decimal")
+        if self.amount.is_zero() and self.amount.is_signed():
+            object.__setattr__(self, "amount", self.amount.copy_abs())
+        _required_name(self.unit, "quantity unit")
+        if self.unit != self.unit.strip():
+            raise ManifestError("quantity unit must not have surrounding whitespace")
 
     @classmethod
-    def parse(cls, raw: Any, where: str) -> Money:
+    def parse(cls, raw: Any, where: str) -> Quantity:
         if not isinstance(raw, dict):
-            raise ManifestError(f"{where}: expected a mapping with amount and currency")
-        missing = {"amount", "currency"} - set(raw)
+            raise ManifestError(f"{where}: expected a mapping with amount and unit")
+        if set(raw) - {"amount", "unit"}:
+            raise ManifestError(f"{where}: expected only amount and unit")
+        missing = {"amount", "unit"} - set(raw)
         if missing:
             raise ManifestError(f"{where}: missing {', '.join(sorted(missing))}")
         try:
@@ -83,16 +98,18 @@ class Money:
             raise ManifestError(f"{where}: amount must be finite")
         if amount < 0:
             raise ManifestError(f"{where}: amount must not be negative")
-        raw_currency = raw["currency"]
-        if not isinstance(raw_currency, str):
-            raise ManifestError(f"{where}: currency must be a three-letter code")
-        currency = raw_currency.upper()
-        if len(currency) != 3 or not currency.isascii() or not currency.isalpha():
-            raise ManifestError(f"{where}: currency must be a three-letter code")
-        return cls(amount=amount, currency=currency)
+        raw_unit = raw["unit"]
+        if not isinstance(raw_unit, str):
+            raise ManifestError(f"{where}: unit must be a non-empty string")
+        unit = _required_name(raw_unit, f"{where}: unit")
+        if isinstance(raw["amount"], str) and not re.fullmatch(
+            r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?", raw["amount"]
+        ):
+            raise ManifestError(f"{where}: amount must use an unsigned decimal literal")
+        return cls(amount=amount, unit=unit)
 
     def __str__(self) -> str:
-        return f"{self.amount} {self.currency}"
+        return f"{self.amount} {self.unit}"
 
 
 @dataclass(frozen=True)
@@ -109,7 +126,8 @@ class Tool:
     # per-scope ceiling is only a real bound when the scope itself is bounded.
     unbounded: bool = False
     value_arg: str | None = None
-    ceiling: Money | None = None
+    ceiling: Quantity | None = None
+    quantity: str | None = None
     scope_key: str | None = None
     requires_approval: bool = False
 
@@ -131,9 +149,7 @@ class Tool:
 
         principal = raw.get("principal", CALLER)
         if principal not in PRINCIPALS:
-            raise ManifestError(
-                f"{where}: principal must be one of {', '.join(PRINCIPALS)}"
-            )
+            raise ManifestError(f"{where}: principal must be one of {', '.join(PRINCIPALS)}")
 
         requires = raw.get("requires", [])
         if isinstance(requires, str):
@@ -144,19 +160,15 @@ class Tool:
             raise ManifestError(f"{where}: requires must be a list of scope names")
 
         produces = raw.get("produces")
-        if produces is not None and (
-            not isinstance(produces, str) or not produces.strip()
-        ):
+        if produces is not None and (not isinstance(produces, str) or not produces.strip()):
             raise ManifestError(f"{where}: produces must be a scope name")
 
         ceiling = None
         if "ceiling" in raw:
-            ceiling = Money.parse(raw["ceiling"], f"{where}.ceiling")
+            ceiling = Quantity.parse(raw["ceiling"], f"{where}.ceiling")
 
         value_arg = raw.get("value_arg")
-        if value_arg is not None and (
-            not isinstance(value_arg, str) or not value_arg.strip()
-        ):
+        if value_arg is not None and (not isinstance(value_arg, str) or not value_arg.strip()):
             raise ManifestError(f"{where}: value_arg must be an argument name")
         if (value_arg is None) != (ceiling is None):
             raise ManifestError(
@@ -164,10 +176,14 @@ class Tool:
                 "otherwise the ceiling bounds nothing"
             )
 
+        quantity = raw.get("quantity")
+        if ceiling is not None:
+            quantity = _quantity_name(quantity, f"{where}: quantity")
+        elif quantity is not None:
+            raise ManifestError(f"{where}: quantity requires value_arg and ceiling")
+
         scope_key = raw.get("scope_key")
-        if scope_key is not None and (
-            not isinstance(scope_key, str) or not scope_key.strip()
-        ):
+        if scope_key is not None and (not isinstance(scope_key, str) or not scope_key.strip()):
             raise ManifestError(f"{where}: scope_key must be a scope name")
         if value_arg is not None and scope_key is None:
             raise ManifestError(
@@ -191,6 +207,7 @@ class Tool:
             unbounded=unbounded,
             value_arg=value_arg,
             ceiling=ceiling,
+            quantity=quantity,
             scope_key=scope_key,
             requires_approval=requires_approval,
         )
@@ -200,7 +217,7 @@ class Tool:
 class Limits:
     """Bounds that apply to a whole run rather than to a single call."""
 
-    total: Money | None = None
+    quantities: Mapping[str, Quantity] = field(default_factory=dict)
     depth: int = DEFAULT_DEPTH
     # Reviewed maximum calls per effect class in one run. Declared only: an
     # absent class is unbounded, because inventing a ceiling is the same
@@ -214,11 +231,23 @@ class Limits:
             return cls()
         if not isinstance(raw, dict):
             raise ManifestError("limits: expected a mapping")
-        total = Money.parse(raw["total"], "limits.total") if "total" in raw else None
+        if "total" in raw:
+            raise ManifestError("limits.total is unsupported; use named limits.quantities")
+        if set(raw) - {"quantities", "depth", "effects"}:
+            raise ManifestError("limits: unknown field; use quantities, depth or effects")
+        declared = raw.get("quantities", {})
+        if not isinstance(declared, dict):
+            raise ManifestError("limits.quantities: expected a mapping")
+        quantities = {
+            _quantity_name(name, "quantity name"): Quantity.parse(
+                value, f"limits.quantities.{name}"
+            )
+            for name, value in declared.items()
+        }
         depth = raw.get("depth", DEFAULT_DEPTH)
         if isinstance(depth, bool) or not isinstance(depth, int) or depth < 1:
             raise ManifestError("limits.depth must be a positive integer")
-        return cls(total=total, depth=depth, effects=cls._parse_effects(raw))
+        return cls(quantities=quantities, depth=depth, effects=cls._parse_effects(raw))
 
     @staticmethod
     def _parse_effects(raw: dict[str, Any]) -> Mapping[str, int]:
@@ -237,8 +266,7 @@ class Limits:
                 )
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ManifestError(
-                    f"limits.effects.{name} must be a whole number of calls, "
-                    "zero or more"
+                    f"limits.effects.{name} must be a whole number of calls, zero or more"
                 )
             budgets[name] = value
         return budgets
@@ -308,9 +336,7 @@ class Mandate:
                 raise ManifestError(f"roles.{role}: expected a list of tool names")
             unknown = [m for m in members if m not in seen]
             if unknown:
-                raise ManifestError(
-                    f"roles.{role}: unknown tool(s) {', '.join(sorted(unknown))}"
-                )
+                raise ManifestError(f"roles.{role}: unknown tool(s) {', '.join(sorted(unknown))}")
             roles[role] = tuple(members)
 
         identity = raw.get("identity")
@@ -338,7 +364,7 @@ def loads(text: str, source: str | None = None) -> Mandate:
     json_error = None
     if stripped.startswith("{"):
         try:
-            raw = json.loads(text)
+            raw = json.loads(text, parse_float=Decimal)
         except json.JSONDecodeError as exc:
             # A quoted first key selects JSON. Never reinterpret malformed
             # JSON numbers or tags using YAML's implicit scalar conversions.
@@ -376,3 +402,29 @@ def load(path: str | Path) -> Mandate:
     except OSError as exc:
         raise ManifestError(f"cannot read manifest {resolved}: {exc}") from exc
     return loads(text, source=str(resolved))
+
+
+def _quantity_units(mandate: Mandate) -> dict[str, str]:
+    """Resolve named units, refusing undeclared dimensions and incompatible sums."""
+    if not isinstance(mandate.limits.quantities, Mapping) or any(
+        not isinstance(name, str) or not name.strip() or not isinstance(value, Quantity)
+        for name, value in mandate.limits.quantities.items()
+    ):
+        raise ManifestError("quantities must map nonblank names to Quantity values")
+    units = {
+        _quantity_name(name, "quantity name"): value.unit
+        for name, value in mandate.limits.quantities.items()
+    }
+    for tool in mandate.tools:
+        if tool.ceiling is None:
+            if tool.quantity is not None:
+                raise ManifestError(f"tool {tool.name!r}: quantity requires a ceiling")
+            continue
+        name = _quantity_name(tool.quantity, f"tool {tool.name!r}: quantity")
+        if name in units and units[name] != tool.ceiling.unit:
+            raise ManifestError(
+                f"quantity {name!r} has incompatible units: "
+                f"{units[name]!r} and {tool.ceiling.unit!r}"
+            )
+        units[name] = tool.ceiling.unit
+    return units

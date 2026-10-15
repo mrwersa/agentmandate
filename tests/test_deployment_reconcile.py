@@ -91,7 +91,7 @@ def test_initial_baseline_has_three_scoped_pairs_and_separate_authority():
         root=ROOT,
         as_of="2026-10-11",
     )
-    assert report == json.loads((ROOT / "tests/fixtures/deployment-reconcile-v1.json").read_text())
+    assert report == json.loads((ROOT / "tests/fixtures/deployment-reconcile-v2.json").read_text())
     assert not report["findings"]
     assert report["summary"]["matched_attempts"] == 3
     assert report["status"] == "consistent_with_captured_join"
@@ -540,7 +540,7 @@ def test_cli_clean_json_denied_effect_human_and_missing_input_exit_codes(capsys,
     ]
     assert main(argv) == 0
     captured = capsys.readouterr()
-    assert json.loads(captured.out)["schema"] == "agentmandate.deployment-reconcile/v1"
+    assert json.loads(captured.out)["schema"] == "agentmandate.deployment-reconcile/v2"
     assert not captured.err
     broken = argv.copy()
     broken[broken.index("--otel") + 1] = str(EXAMPLE / "denied-effect-telemetry.json")

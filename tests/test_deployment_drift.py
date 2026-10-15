@@ -53,7 +53,7 @@ def test_aligned_configuration_has_pinned_scoped_result(target):
         MANIFEST, (EXAMPLE / f"{target}-aligned.json").read_bytes(), root=ROOT, as_of="2026-10-11"
     )
     assert report == json.loads(
-        (ROOT / f"tests/fixtures/deployment-drift-{target}-v1.json").read_text()
+        (ROOT / f"tests/fixtures/deployment-drift-{target}-v2.json").read_text()
     )
     assert report["configuration_consistent"] and not report["findings"]
     assert report["status"] == "consistent_with_declared_configuration"

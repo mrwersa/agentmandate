@@ -1,11 +1,11 @@
 # Why the search spends the available headroom
 
-`reach` does not try every possible refund amount. It chooses the binding with
-the largest remaining ceiling and spends that headroom. For manifest v1, this
-preserves the greatest reachable cumulative value and the existence and shortest
-call length of a cumulative-value breach within the selected depth. The argument
-depends on the model below; it is not a claim about arbitrary tool input schemas
-or provider behavior.
+`reach` does not try every possible consumption amount. It chooses the binding
+with the largest remaining ceiling and spends that headroom. For manifest v2, this
+preserves each named quantity's greatest reachable consumption and the existence
+and shortest call length of its `quantity_budget` breach within the selected
+depth. The argument depends on the model below; it is not a claim about arbitrary
+tool input schemas or provider behavior.
 
 For example, one case has a £5 cumulative refund ceiling. Refunding £2 and then
 £3 cannot exceed what one £5 refund already reaches, and uses an extra call.
@@ -28,17 +28,18 @@ spend only accumulate; there are no refunds, replenishment, expiry or consumptio
 of bindings in this kernel. A finite producer cap, when supplied by a separately
 validated consumer, depends on binding count rather than spending.
 
-`limits.total` and `limits.effects` are properties the search checks for a
+`limits.quantities` and `limits.effects` are properties the search checks for a
 breach, not guards that stop exploration. Approval and principal labels do not
-change monetary enablement. Budgeted calls still count when they spend zero or
-have no remaining monetary headroom. Cumulative analysis needs one currency;
-resolve the structural and currency errors reported by `lint` before relying on
-the model. The argument concerns exact arithmetic on parsed monetary values.
+alter which spending calls the kernel explores. Budgeted calls still count when
+they spend zero or have no remaining quantity headroom. Each named quantity
+requires one consistent unit; resolve structural and per-quantity unit errors
+before relying on the model.
+The argument concerns exact arithmetic on parsed non-negative quantities.
 
 ## A prefix argument
 
 Fix an enabled sequence of tool calls. Keep its scope production and effect
-calls unchanged, but replace its monetary choices with greedy fills.
+calls unchanged, but replace its quantity amounts with greedy fills.
 
 For a tool with positive ceiling C, every binding in the greedy walk is either
 unspent or filled to C. Its next positive-headroom choice therefore fills one
@@ -53,13 +54,16 @@ Calls to other tools leave this tool's account unchanged. A zero ceiling adds
 zero in either walk. This establishes the inequality separately for every tool
 at every prefix, including calls that produce a binding before spending.
 
-Summing the per-tool inequalities shows that greedy spend is at least the spend
-of the original sequence at each prefix. Enablement, scope production and
-budgeted effect counts are preserved because none depends on the amounts.
-Thus any cumulative-value breach in k calls has a greedy breach in at most k
-calls. Conversely, every greedy fill is an allowed amount choice in this model,
-so it cannot create a monetary breach that the full amount-choice model lacks.
-The bounded maximum and minimum breach length agree in both directions.
+Within each named pool, summing the inequalities for tools assigned to that
+pool shows that greedy consumption is at least the original sequence's
+consumption at each prefix. Amounts in different pools are never summed.
+Enablement, scope production and budgeted effect counts are preserved because
+none depends on the amounts.
+Thus a `quantity_budget` breach of any pool in k calls has a greedy breach
+of that pool in at most k calls. Conversely, every greedy fill is an allowed
+amount choice in this model, so it cannot create a quantity-budget breach that
+the full amount-choice model lacks. The bounded maximum and minimum breach
+length agree in both directions.
 
 No-change calls may be omitted from a queued path. They cannot enable a later
 call or add spend; an effect-budgeted call changes its counter and is retained.
@@ -71,14 +75,15 @@ the existential result, not every concrete trace or allocation of amounts.
 
 Suppose paying **exactly £1** unlocks a second tool that can spend £4, while the
 first tool's ceiling is £2. A greedy £2 payment does not unlock that tool; a £1
-payment can reach £5. This amount-dependent example falls outside manifest v1
+payment can reach £5. This amount-dependent example falls outside manifest v2
 and demonstrates why the enablement assumption matters. Do not translate such
 a workflow into unconditional scope production and then apply this argument.
 
-Fixed request amounts, shared cross-tool budgets, binding-specific permissions,
-value conversion, negative/net spending and arbitrary conditions need their
-own models and arguments. The result here does not establish business-scenario
-preservation, live enforcement, state continuity, or general policy equivalence.
+Fixed request amounts, shared cross-tool per-binding ceilings, binding-specific
+permissions, value conversion, negative/net spending and arbitrary conditions
+need their own models and arguments. The result here does not establish
+business-scenario preservation, live enforcement, state continuity, or general
+policy equivalence.
 It does not equate the two searches' state sets, exact witnesses or truncation
 flags. A clean bounded result retains the [ordinary depth limit](search-performance.md).
 
@@ -102,10 +107,11 @@ an analysis report. Precision sizing is not a time or memory cap: widely
 separated decimal places may require large intermediates, so keep the process
 resource limits described in the search guide.
 
-Use quoted amount strings in JSON or YAML when decimal digits matter. An
-unquoted fractional number can be rounded by its format reader before manifest
-validation. This fix preserves parsed values; it does not reconstruct digits
-already lost while decoding an input.
+Use quoted amount strings in JSON or YAML when decimal digits matter. JSON
+fractional numbers are parsed as exact decimals. An unquoted YAML fractional
+number can be rounded by its format reader before manifest validation. This fix
+preserves parsed values; it does not reconstruct digits already lost while
+decoding an input.
 
 ## Reproduce the independent check
 
@@ -119,8 +125,8 @@ python -m pytest tests/test_headroom_abstraction.py -q
 The repository-only reference search uses integer units and tries zero plus
 every permitted positive integer amount on every held binding. It builds its
 own states and transitions; it imports no greedy search helpers. The comparison
-checks maximum cumulative value, reachable tools, effect/scope pairs, principal
-and approval findings, breach subjects and shortest enabling/breach lengths.
+checks maximum consumption per quantity, reachable tools, effect/scope pairs,
+principal and approval findings, breach subjects and shortest enabling/breach lengths.
 Exit 0 means agreement across the configured cases; exit 1 lists mismatches;
 exit 2 reports invalid reference inputs or I/O errors.
 The report is maintenance data, not an authority artifact.
@@ -128,7 +134,7 @@ The report is maintenance data, not an authority artifact.
 The [recorded run](headroom-abstraction-results.json) checks **879 synthetic
 cases**, with **15,404 reference states**, **27,403 examined transitions** and
 **14,454 positive amount choices**; it finds no mismatches. The Cartesian grid
-covers eight graph shapes, three ceilings, three total limits, three budget
+covers eight graph shapes, three ceilings, three quantity budgets, three budget
 settings and four depths. Fifteen additional cases cover finite producer caps.
 Separate tests check fractional units and detect deliberately under-spending
 and fresh-binding-ignoring kernel mutations. These are finite executable checks
@@ -138,3 +144,15 @@ independent security review.
 The report pins generated inputs, reference source and the measured kernel
 source. Future kernel changes must retain semantic agreement; the recorded
 source hash describes that run rather than certifying every later implementation.
+
+## Several named quantities
+
+Apply the prefix argument separately to each quantity. A tool has one amount
+argument and quantity assignment; filling its ceiling affects only that pool.
+Enablement, binding production and effect counts remain amount-independent, so
+greedy filling preserves the componentwise maxima and shortest budget breaches.
+Different quantities are never summed. Their maxima can occur on different
+paths; the report makes no claim that all maxima are jointly attainable.
+`tests/test_quantities.py` checks this extension against an independent Fraction
+sequence oracle over separate/shared pools, matching/different units, bounded
+and unbounded production, zero/fractional amounts and three depths.

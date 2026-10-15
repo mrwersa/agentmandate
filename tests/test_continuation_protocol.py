@@ -22,7 +22,8 @@ def test_agentcore_protocol_pins_templates_and_mandate():
     protocol = _protocol(AGENTCORE)
 
     assert protocol["status"] == "preregistered_not_executed"
-    mandate = ROOT / protocol["mandate"]["path"]
+    mandate = ROOT / "tests/fixtures/archived-study-manifest-v1.json"
+    assert protocol["mandate"]["path"] == "examples/continuity-refund/manifest.json"
     assert hashlib.sha256(mandate.read_bytes()).hexdigest() == protocol["mandate"]["sha256"]
     for name, digest in protocol["templates"].items():
         assert hashlib.sha256((AGENTCORE / name).read_bytes()).hexdigest() == digest

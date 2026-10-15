@@ -1,0 +1,5 @@
+agent: all-defaults
+tools:
+- name: get_status
+  effect: read
+version: 2

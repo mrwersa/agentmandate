@@ -6,7 +6,7 @@ contract for
 smallest common analysis contract selected by the reviewed
 [AgentCore](evidence/agentcore-refund-policy/README.md) and
 [Anthropic](evidence/anthropic-managed-budget/README.md) evidence. It does not
-change manifest version 1, Authority IR, or ordinary reachability.
+change manifest version 2, Authority IR, or ordinary reachability.
 
 For principal changes, use the separately versioned
 [principal observation profile](principal-continuity.md). It preserves the
@@ -16,8 +16,8 @@ state continuity and safe continuation unresolved.
 
 For two reviewed bindings and explicit cutover state, the separate
 [scalar handover verifier](scalar-handover.md) checks retained consumption,
-pending reservations, fencing, and next-request capacity in a closed monetary
-model. Its model-conformance result does not replace the provider continuity
+pending reservations, fencing, and next-request capacity in a closed integer
+quantity model. Its model-conformance result does not replace the provider continuity
 verdict below.
 
 ## Question and invariant
@@ -465,7 +465,7 @@ without implying a stronger result.
    validate-then-consume CLI after explicit pairing, pre-I/O composition
    refusal, human and canonical JSON rendering, and exit/no-partial-output
    tests. A complete explicitly synthetic fixture supplies the accepted clean
-   path, and `agentmandate.continuity/v1` supplies the public canonical
+   path, and `agentmandate.continuity/v2` supplies the public canonical
    presentation envelope. Python records remain private.
 
 This initiative remains experimental and does not block 1.0. The generalized
@@ -480,7 +480,7 @@ in the advanced roadmap phase.
 - interpreting cost, money, effects, calls and produced bindings as one unit;
 - inferring strict enforcement from completed-event telemetry;
 - declaring complete mediation from a signature or deployment diagram alone;
-- changing manifest v1 or narrowing existing reachability;
+- changing manifest v2 or narrowing existing reachability;
 - provider credentials, raw session identifiers or account metadata in public
   fixtures; and
 - public-paper or anonymity-sensitive cross-links before review permits them.

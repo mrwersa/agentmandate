@@ -1,1 +1,1 @@
-{"ir_version":1,"sources":[],"entities":[],"facts":[],"edges":[{"id":"edge:tool:a:requires:scope:x","source":"tool:a","relation":"requires","target":"scope:x","support":"secret-value"}]}
+{"edges":[{"id":"edge:tool:a:requires:scope:x","relation":"requires","source":"tool:a","support":"secret-value","target":"scope:x"}],"entities":[],"facts":[],"ir_version":2,"sources":[]}

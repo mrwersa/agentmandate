@@ -128,7 +128,7 @@
                   }
                 },
                 {
-                  "key": "app.currency",
+                  "key": "app.unit",
                   "value": {
                     "stringValue": "GBP"
                   }
@@ -143,6 +143,12 @@
                   "key": "app.principal",
                   "value": {
                     "stringValue": "caller"
+                  }
+                },
+                {
+                  "key": "app.quantity",
+                  "value": {
+                    "stringValue": "value"
                   }
                 }
               ]
@@ -184,7 +190,7 @@
                   }
                 },
                 {
-                  "key": "app.currency",
+                  "key": "app.unit",
                   "value": {
                     "stringValue": "GBP"
                   }
@@ -199,6 +205,12 @@
                   "key": "app.principal",
                   "value": {
                     "stringValue": "caller"
+                  }
+                },
+                {
+                  "key": "app.quantity",
+                  "value": {
+                    "stringValue": "value"
                   }
                 }
               ]
