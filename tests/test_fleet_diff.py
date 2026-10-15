@@ -161,6 +161,88 @@ def test_entry_id_revision_and_array_order_are_labels_not_pairing_keys():
     assert report["gate_passed"]
 
 
+@pytest.mark.parametrize("side", ["baseline", "candidate"])
+@pytest.mark.parametrize("fault", ["manifest-pin", "ir-pin", "missing-manifest", "missing-ir",
+                                   "malformed-ir"])
+def test_ineligible_duplicate_blocks_pairing_without_hiding_candidate_authority(
+    side, fault, artifacts, capsys
+):
+    before, after = index(), index("candidate")
+    value = before if side == "baseline" else after
+    extra = copy.deepcopy(value["entries"][0])
+    extra.update(id="release/unverified-duplicate", revision="synthetic-older")
+    if fault.endswith("-pin"):
+        extra[fault.removesuffix("-pin")]["sha256"] = "0" * 64
+    elif fault.startswith("missing-"):
+        extra[fault.removeprefix("missing-")]["path"] = "absent.json"
+    else:
+        (artifacts / "malformed-ir.json").write_bytes(b"{}")
+        extra["ir"] = {"path": "malformed-ir.json", "sha256": hashlib.sha256(b"{}").hexdigest()}
+    value["entries"].append(extra)
+    report = run(before, after, root=artifacts)
+    row = deployment(report)
+    assert row["membership"] == row["relation"] == "unresolved"
+    assert row["authority_diff"] is None
+    assert not report["membership_comparable"] and not report["gate_passed"]
+    assert "fleet.diff-deployment-ambiguous" in codes(report)
+    assert report["unresolved_entries"][side] == [extra["id"]]
+    assert row["candidate_authorities"]["release/prod"]["breaches"]
+    assert "fleet.diff-authority-breach" in codes(report)
+    assert report["summary"]["compared"] == 2
+    for label, content in (("baseline", before), ("candidate", after)):
+        assert report[label] == inventory(encoded(content), root=artifacts, as_of=AS_OF)
+    old_path, new_path = artifacts / "before.json", artifacts / "after.json"
+    old_path.write_bytes(encoded(before))
+    new_path.write_bytes(encoded(after))
+    assert main(command(old_path, new_path, artifacts) + ["--json"]) == 1
+    assert json.loads(capsys.readouterr().out) == report
+
+
+@pytest.mark.parametrize(
+    "field,value", [("repository", "another-repo"), ("environment", "preview")]
+)
+def test_unknown_claims_do_not_block_unrelated_repository_or_environment(field, value):
+    after = index("widening")
+    extra = copy.deepcopy(after["entries"][0])
+    extra.update(id="unverified-entry", **{field: value})
+    extra["manifest"]["sha256"] = "0" * 64
+    after["entries"].append(extra)
+    report = run(index(), after)
+    row = deployment(report)
+    assert row["membership"] == "matched"
+    assert row["relation"] == "widening_within_compared_manifest_scope"
+    assert "fleet.diff-deployment-ambiguous" not in codes(report)
+    assert report["summary"]["compared"] == 3
+    assert not report["gate_passed"]
+
+
+def test_unknown_agent_reserves_all_agents_in_its_repository_environment(artifacts):
+    before = index()
+    extra = copy.deepcopy(before["entries"][0])
+    extra["id"] = "secondary/prod"
+    before["entries"].append(extra)
+    snapshot(before, artifacts, lambda m: m.update(agent="secondary-agent"),
+             identifier="secondary/prod")
+    after = copy.deepcopy(before)
+    unverified = copy.deepcopy(after["entries"][0])
+    unverified["id"] = "unverified-entry"
+    after["entries"].append(unverified)
+    # Even a syntactically valid untrusted claim naming a third agent cannot
+    # establish uniqueness of either verified agent in this bucket.
+    snapshot(after, artifacts, lambda m: m.update(agent="untrusted-third-agent"),
+             identifier="unverified-entry", name="unverified")
+    unverified["manifest"]["sha256"] = "0" * 64
+    report = run(before, after, root=artifacts)
+    affected = [row for row in report["comparisons"]
+                if row["deployment"]["repository"] == "release-repo"
+                and row["deployment"]["environment"] == "prod"]
+    assert len(affected) == 2
+    assert all(row["membership"] == row["relation"] == "unresolved" for row in affected)
+    assert all(row["authority_diff"] is None for row in affected)
+    assert report["summary"]["compared"] == 2
+    assert report["unresolved_entries"]["candidate"] == ["unverified-entry"]
+
+
 @pytest.mark.parametrize("field,new", [("repository", "another-repo"), ("environment", "preview")])
 def test_repository_and_environment_changes_are_not_cross_boundary_authority_diffs(field, new):
     before, after = index(), index()

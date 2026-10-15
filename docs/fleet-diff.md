@@ -61,6 +61,13 @@ membership change, with no automatic continuity mapping.
 
 Exactly one entry with the deployment key is required on each side. Duplicate
 deployments stay ambiguous even when one ID or revision appears to match.
+If any entry's snapshot identity is unavailable, its declared repository and
+environment remain a possible conflicting claim. Comparisons for every known
+agent in that same repository/environment stay unresolved; the comparator does
+not trust an agent name read from an unverified snapshot to narrow the conflict.
+Entries elsewhere remain independently comparable. Original inventory reports
+stay unchanged; this uncertainty adds `fleet.diff-deployment-ambiguous` to the
+comparison findings and retains the unverified IDs in `unresolved_entries`.
 Every eligible candidate manifest still gets an independent authority report,
 including duplicate and unmatched entries, so ambiguity cannot hide a breach.
 
@@ -100,6 +107,12 @@ by entry ID. Unavailable analysis has a null value, not an empty trusted result.
 These reports retain reachability, breaches and truncation. Baseline breaches
 remain visible during a narrowing release; every candidate breach blocks the
 gate, including one in an unchanged, new or duplicated deployment.
+
+A removal withdraws an entry from the supplied index. It does not verify that
+the deployment stopped or establish what replaced it. A removal alone stays
+non-blocking when both membership declarations are complete and current;
+baseline breaches remain visible. A CI process that requires approval for
+decommissioning should also gate on rows with `membership: removed`.
 
 Authority widening, new deployments and owner changes produce findings.
 Ownership changes require a separate handoff review; this command records no

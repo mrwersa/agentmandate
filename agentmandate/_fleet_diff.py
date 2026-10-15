@@ -67,11 +67,15 @@ def compare(
         for label, report in reports.items()
     )
     groups = {label: defaultdict(list) for label in sides}
+    unknown_claims = {label: defaultdict(list) for label in sides}
     unresolved_entries = {label: [] for label in sides}
     for label, report in reports.items():
         for row in report["entries"]:
             if row["agent"] is None:
                 unresolved_entries[label].append(row["id"])
+                # An unverified snapshot cannot disambiguate its agent. Keep
+                # its whole repository/environment reserved against pairing.
+                unknown_claims[label][(row["repository"], row["environment"])].append(row["id"])
             else:
                 groups[label][(row["repository"], row["environment"], row["agent"])].append(row)
 
@@ -89,8 +93,12 @@ def compare(
         }
         comparisons.append(row)
         authorities = {label: {} for label in sides}
-        if any(len(value) > 1 for value in entries.values()):
-            finding("deployment-ambiguous", subject, "exactly one entry per deployment is required")
+        uncertain = {label: claims.get(key[:2], []) for label, claims in unknown_claims.items()}
+        if any(len(value) > 1 for value in entries.values()) or any(uncertain.values()):
+            finding("deployment-ambiguous", subject,
+                    "exactly one entry per deployment and no unverified agent claim in its "
+                    "repository/environment are required; unverified entries="
+                    + json.dumps(uncertain, sort_keys=True))
         elif all(entries.values()):
             row["membership"] = "matched"
             left, right = entries["baseline"][0], entries["candidate"][0]

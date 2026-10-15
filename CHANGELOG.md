@@ -17,6 +17,9 @@ All notable changes to this project are documented here. The format follows
 - Separate artifact roots, one explicit search bound, JSON CI output and
   synthetic replay examples. Existing fleet commands and earlier contracts stay
   unchanged; authenticated membership and cross-agent accounting remain open.
+- Unverified fleet entries reserve their repository/environment against pairing,
+  so a duplicate with an invalid snapshot cannot create a matched authority
+  comparison. Eligible candidate breaches remain independently visible.
 ## 0.35.0 - 2026-10-12
 
 ### Added
