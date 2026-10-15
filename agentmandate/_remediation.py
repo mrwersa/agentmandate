@@ -207,12 +207,27 @@ def plan(
     required_workflows: _Requirements | None = None,
     ceiling_grids: tuple[str, ...] = (),
     pareto: bool = False,
+    discover_ceilings: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Enumerate edits, recheck the full graph, and rank scoped candidates.
 
     This private record is presentation, never reviewed authority or a mutation.
     Combinations examined include rejected conflicting/structural edits.
     """
+    if not isinstance(discover_ceilings, (tuple, list)):
+        raise ValueError("discovery options must use TOOL=STEP")
+    if discover_ceilings:
+        if ceiling_options or ceiling_grids:
+            raise ValueError("discovery cannot be combined with explicit ceilings or grids")
+        if type(pareto) is not bool:
+            raise ValueError("pareto must be a boolean")
+        from ._ceiling_discovery import discover
+
+        return discover(
+            mandate, options=discover_ceilings, depth=depth, max_edits=max_edits,
+            max_evaluations=max_evaluations, max_candidates=max_candidates,
+            keep_tools=keep_tools, required_workflows=required_workflows,
+        )
     for name, value in (
         ("max_edits", max_edits),
         ("max_evaluations", max_evaluations),

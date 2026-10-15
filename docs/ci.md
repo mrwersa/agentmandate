@@ -18,6 +18,10 @@ not clean results. The [search bounds guide](search-performance.md) explains
 the measured costs and the resource limits a CI wrapper must enforce.
 
 Use [repair candidates](remediation.md) to investigate a breached manifest.
+Use [automatic ceiling discovery](ceiling-discovery.md) with a declared
+granularity and required workflows to derive usable monetary proposals. Its
+domain-frontier completeness does not extend the reachability depth or accept
+the original widening; successful proposals still require human selection.
 `mandate remediate` reports the original breach and still exits 1 when a
 candidate is found. It never edits the policy or turns a failing baseline into
 a passing CI result. Exit 0 also requires baseline lint to have no errors;

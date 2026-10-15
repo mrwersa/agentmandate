@@ -710,5 +710,22 @@
     "tests": [
       "tests/test_fleet_diff.py"
     ]
+  },
+  {
+    "doc": "docs/ceiling-discovery.md",
+    "fixtures": [
+      "examples/ceiling-discovery/two-tools.json",
+      "examples/ceiling-discovery/required-two-tools.json",
+      "tests/fixtures/remediation-discovery-v5.json",
+      "tests/fixtures/remediation-v4-to-v5.json"
+    ],
+    "id": "automatic-ceiling-discovery",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v5"
+    ],
+    "tests": [
+      "tests/test_ceiling_discovery.py"
+    ]
   }
 ]

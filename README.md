@@ -278,7 +278,7 @@ all.
 | `mandate drift` | Compares the declared mandate against the agent's source and fails when the two have separated |
 | `mandate lint` | Single-manifest checks: separation of duties, ungated irreversible effects, service-account principals, invalid ceilings, and required scopes with no producer |
 | `mandate reach` | Bounded search over a manifest or reviewed `--ir` snapshot for a legal call sequence that breaches a limit, reported as a counterexample |
-| `mandate remediate` | Rechecks removal, approval and supplied ceiling choices or ranges; preserves named tools and supplied ordered paths, with optional repair trade-offs and explicit search limits; [repair guide](docs/remediation.md) |
+| `mandate remediate` | Rechecks repairs and can discover monetary ceilings while preserving supplied workflows, with ranked trade-offs and explicit limits. [Repair guide](docs/remediation.md), [ceiling discovery](docs/ceiling-discovery.md) |
 | `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
 | `mandate inventory` | Imports local protocol catalogues as unreviewed declarations/IR, or validates declaration structure |
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |

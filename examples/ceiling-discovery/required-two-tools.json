@@ -1,0 +1,35 @@
+{
+  "schema": "agentmandate.required-workflows/v1",
+  "agent": "two-payments",
+  "manifest_sha256": "9187a10a6579cdd1775d369485d05e8eaa122faab9529b1c92cf956fc019d1aa",
+  "reviewer": "synthetic-example-reviewer",
+  "reason": "Synthetic required payments; not live or business-success evidence.",
+  "workflows": [
+    {
+      "name": "two-payments",
+      "steps": [
+        {
+          "tool": "seed",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "pay",
+          "principal": "caller",
+          "approved": true,
+          "binding": 0,
+          "value": "1",
+          "currency": "GBP"
+        },
+        {
+          "tool": "other",
+          "principal": "caller",
+          "approved": true,
+          "binding": 0,
+          "value": "1",
+          "currency": "GBP"
+        }
+      ]
+    }
+  ]
+}

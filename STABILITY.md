@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.36.0
+agentmandate~=0.37.0
 ```
 
 ## Versioned authority artifacts
@@ -299,3 +299,11 @@ remain blocking; budgets and mandates remain separate. Initial result baselines
 do not establish a schema migration, authenticated membership or live deployment
 approval. Earlier commands and fixtures are unchanged. See
 [fleet release comparison](docs/fleet-diff.md).
+
+`mandate remediate --discover-ceiling` selects the experimental
+`agentmandate.remediation/v5` result. Exact finite ceiling domains retain all
+tools and fixed declared budgets, with bounded approval changes and workflow
+screening. Domain-frontier completeness, point enumeration, display limits and
+reachability truncation are separate fields. Commands without discovery keep
+v1/v2/v3/v4 bytes and exits. Initial v5 fixtures are baselines, not migrations;
+see [ceiling discovery](docs/ceiling-discovery.md).

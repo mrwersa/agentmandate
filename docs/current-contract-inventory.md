@@ -194,3 +194,9 @@ The inventory tool changes no runtime behavior. Deliberate runtime additions
 are recorded in their own release and contract guides. Its replay tests do not
 accept evidence, renew an expiry, establish a deployment mapping, or complete
 external security review.
+
+[Automatic ceiling discovery](ceiling-discovery.md) adds one opt-in flag and
+the v5 presentation schema. The frozen [preceding inventory](../tests/fixtures/current-contract-inventory-v0.36.json)
+retains all earlier fixture digests, exports and CLI arguments. Initial v5
+results are baselines; the v4/v5 case preserves shared fields across different
+search domains and does not assert candidate or byte equivalence.

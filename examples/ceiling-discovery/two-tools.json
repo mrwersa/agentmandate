@@ -1,0 +1,46 @@
+{
+  "agent": "two-payments",
+  "limits": {
+    "depth": 3,
+    "total": {
+      "amount": "5",
+      "currency": "GBP"
+    }
+  },
+  "tools": [
+    {
+      "name": "seed",
+      "effect": "read",
+      "produces": "item",
+      "unbounded": true
+    },
+    {
+      "name": "pay",
+      "effect": "irreversible",
+      "requires": [
+        "item"
+      ],
+      "scope_key": "item",
+      "value_arg": "amount",
+      "requires_approval": true,
+      "ceiling": {
+        "amount": "3.5",
+        "currency": "GBP"
+      }
+    },
+    {
+      "name": "other",
+      "effect": "irreversible",
+      "requires": [
+        "item"
+      ],
+      "scope_key": "item",
+      "value_arg": "amount",
+      "requires_approval": true,
+      "ceiling": {
+        "amount": "3.5",
+        "currency": "GBP"
+      }
+    }
+  ]
+}

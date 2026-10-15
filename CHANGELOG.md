@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.37.0 - 2026-10-15
+
+### Added
+
+- `mandate remediate --discover-ceiling TOOL=STEP` derives monetary ceiling
+  proposals on exact finite lattices while retaining all tools, fixed declared
+  budgets and supplied required workflows. Bounded approval changes combine
+  with ceiling edits; every emitted proposal is rechecked on the full graph.
+- Opt-in v5 reports distinguish complete domain frontiers, point enumeration,
+  evaluation cutoffs, display caps and reachability truncation. Monotone box
+  pruning finds the example's £125 ceiling in six probes over 50,001 choices.
+  Existing v1/v2/v3/v4 outputs and exits remain unchanged.
 ## 0.36.0 - 2026-10-14
 
 ### Added

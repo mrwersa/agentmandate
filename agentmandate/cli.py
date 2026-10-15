@@ -288,6 +288,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--pareto", action="store_true",
         help="return non-dominated repair trade-offs among examined candidates",
     )
+    remediation_parser.add_argument(
+        "--discover-ceiling", action="append", default=[], metavar="TOOL=STEP",
+        help="discover exact ceiling repairs on this monetary lattice, retaining all tools",
+    )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     review_parser = subparsers.add_parser(
@@ -929,6 +933,7 @@ def _run_remediation(args: argparse.Namespace) -> int:
             ceiling_options=tuple(args.ceiling),
             required_workflows=requirements,
             ceiling_grids=tuple(args.ceiling_grid), pareto=args.pareto,
+            discover_ceilings=tuple(args.discover_ceiling),
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -940,6 +945,12 @@ def _run_remediation(args: argparse.Namespace) -> int:
     lines.extend(f"CEILING OPTION {option['tool']}: "
                  f"{option['ceiling']['amount']} {option['ceiling']['currency']}"
                  for option in result.get("ceiling_options", []))
+    if "discovery" in result:
+        discovery = result["discovery"]
+        complete = discovery["frontier_complete_within_domain"]
+        lines.append(f"DISCOVERY {discovery['status']} frontier_complete_within_domain={complete} "
+                     f"resolved={discovery['resolved_points']}/{discovery['domain_points']}: "
+                     f"{discovery['scope']}")
     if "frontier" in result:
         frontier = result["frontier"]
         count = frontier["non_dominated"] if frontier["status"] == "computed" else "n/a"

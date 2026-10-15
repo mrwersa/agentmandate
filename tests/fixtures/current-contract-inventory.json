@@ -39,6 +39,16 @@
         "mapping_version"
       ]
     },
+    "_ceiling_discovery.py": {
+      "constants": {
+        "RESULT_SCHEMA": "agentmandate.remediation/v5"
+      },
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.remediation/v5"
+      ],
+      "version_fields": []
+    },
     "_change_review.py": {
       "constants": {
         "CHANGE_REVIEW_SCHEMA": "agentmandate.change-review/v1",
@@ -3193,6 +3203,18 @@
           "type": null
         },
         {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": [],
+          "dest": "discover_ceiling",
+          "nargs": null,
+          "options": [
+            "--discover-ceiling"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
           "action": "_StoreTrueAction",
           "choices": null,
           "default": false,
@@ -3602,7 +3624,7 @@
       ]
     }
   },
-  "coverage_sha256": "581dd0011f14849d86068d59b3b93e20c818edb9c17ee7026e3e6098be40b531",
+  "coverage_sha256": "852dadda65a8f2df92aaa46c2d05488464c771a9433f604e87d415d4aef7d4d0",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3634,6 +3656,8 @@
     "examples/cedar-export/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
     "examples/cedar-export/mapping.json": "0d61b18a9252b444d55527c3e3dbbf813618a4bf47af7c4a6e1bdc2d0e45cbeb",
     "examples/cedar-export/package-lock.json": "18d89d6485956ce5161f2e5b6ed318d90600c0a111c7c497a138f50a7a023c3f",
+    "examples/ceiling-discovery/required-two-tools.json": "b2caaf30e898c08e89fef52a0e4c87130cc3905829a4785a17571c697fc74ddc",
+    "examples/ceiling-discovery/two-tools.json": "9187a10a6579cdd1775d369485d05e8eaa122faab9529b1c92cf956fc019d1aa",
     "examples/change-review/accepted.json": "2b642c1df42fc58dc57166e1845682215a79e22ac8111ec67ca647aa2afee389",
     "examples/change-review/after.json": "f5464650e9be795d9b5e51b0710778c036361af195bfa27567b601a226de2994",
     "examples/change-review/before.json": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
@@ -3799,6 +3823,7 @@
     "tests/fixtures/remediation-ceiling-kept-v2.json": "50c309acdc32e7b706b9ec239aecaaa786e96a404a36e1bd3f924c87a6638c80",
     "tests/fixtures/remediation-ceiling-limited-v2.json": "417fed7b20fd951af8f2de27f9048d8b7477c3239781b549c250f08370d9c935",
     "tests/fixtures/remediation-clean-v1.json": "cea189b344ee99d9ee7acc89195a070873a88ce070ab1ffe38bf30f9a95c93cd",
+    "tests/fixtures/remediation-discovery-v5.json": "fad1ac9a6d8b7146a9a0f781682694238822f9f81992fa166d483076578f9f22",
     "tests/fixtures/remediation-frontier-clean-v4.json": "f639012e338f09dc15df731e6a1505fa8b358e47f348cb30eee8d6b998cefd7e",
     "tests/fixtures/remediation-frontier-compatibility-v4.json": "e4747214998e4f6cef83a7d1bc5cd756c8583e5a0165acb9a03b058536dabc61",
     "tests/fixtures/remediation-frontier-limited-v4.json": "def146f67a89acab40dc61420784ac12a0b56ae85f8b5e8e7c1e006fa1422885",
@@ -3809,6 +3834,7 @@
     "tests/fixtures/remediation-v1-to-v2.json": "99954ac2b1fd38a1ef62d4d7d1467eab20363309f79016828e7bbebec4521a30",
     "tests/fixtures/remediation-v2-to-v3.json": "36b1bc72ede8e7bf8aabf0f2ec18d1ad45be93f64e6dcfd77add6a66ef4c0451",
     "tests/fixtures/remediation-v3-to-v4.json": "7f72f3fa1ac4668852be9c3b42dad3547c4e2970fe769542173c1654478724d0",
+    "tests/fixtures/remediation-v4-to-v5.json": "b1f2a32ec862fc39b6963ead87698efb5658e170e72cccc5f5c35ca1b094c574",
     "tests/fixtures/remediation-workflow-clean-v3.json": "bf636522054b412275f0e382901233f7f5c56e198e9e78b5c8fe1a008635d0c4",
     "tests/fixtures/remediation-workflow-compatibility-v3.json": "06ad050d856722041e4c2147aac99a043324e53811af44396bf37ece2f8c955b",
     "tests/fixtures/remediation-workflow-joint-v3.json": "b4dcad91bf86acc0cba275a2ad386f01db42dff84f761fcb7684e2e9c7a4225d",
