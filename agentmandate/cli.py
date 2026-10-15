@@ -49,6 +49,8 @@ from ._deployment_reconcile import reconcile as reconcile_deployment
 from ._deployment_reconcile import render as render_deployment_reconciliation
 from ._fleet import inventory as fleet_inventory
 from ._fleet import render as render_fleet_inventory
+from ._fleet_diff import compare as compare_fleet
+from ._fleet_diff import render as render_fleet_diff
 from ._fleet_exceptions import evaluate as evaluate_fleet_exceptions
 from ._fleet_exceptions import render as render_fleet_exceptions
 from ._inventory import DynamicInventory, InventoryFormatError, InventoryReconciliation
@@ -537,6 +539,17 @@ def build_parser() -> argparse.ArgumentParser:
     fleet_exceptions_parser.add_argument("--root", required=True)
     fleet_exceptions_parser.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
     fleet_exceptions_parser.add_argument("--json", action="store_true")
+
+    fleet_diff_parser = fleet_subparsers.add_parser(
+        "diff", help="compare declared fleet releases without combining agent authority"
+    )
+    fleet_diff_parser.add_argument("--baseline", required=True, help="baseline fleet index JSON")
+    fleet_diff_parser.add_argument("--candidate", required=True, help="candidate fleet index JSON")
+    fleet_diff_parser.add_argument("--baseline-root", required=True)
+    fleet_diff_parser.add_argument("--candidate-root", required=True)
+    fleet_diff_parser.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
+    fleet_diff_parser.add_argument("--depth", type=int, default=8)
+    fleet_diff_parser.add_argument("--json", action="store_true")
 
     deployment_parser = subparsers.add_parser(
         "deployment", help="compare supplied gateway configuration with an exported policy"
@@ -1487,6 +1500,8 @@ def _render_managed_diff(result: ManagedDiff) -> str:
 
 
 def _run_fleet(args: argparse.Namespace) -> int:
+    if args.fleet_command == "diff":
+        return _run_fleet_diff(args)
     if args.fleet_command == "exceptions":
         return _run_fleet_exceptions(args)
     try:
@@ -1502,6 +1517,21 @@ def _run_fleet(args: argparse.Namespace) -> int:
         if args.json else render_fleet_inventory(report)
     )
     return EXIT_FINDING if report["findings"] else EXIT_OK
+
+
+def _run_fleet_diff(args: argparse.Namespace) -> int:
+    try:
+        report = compare_fleet(
+            Path(args.baseline).read_bytes(), Path(args.candidate).read_bytes(),
+            baseline_root=Path(args.baseline_root), candidate_root=Path(args.candidate_root),
+            as_of=args.as_of, depth=args.depth,
+        )
+    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(json.dumps(report, indent=2, sort_keys=True) + "\n"
+                     if args.json else render_fleet_diff(report))
+    return EXIT_OK if report["gate_passed"] else EXIT_FINDING
 
 
 def _run_fleet_exceptions(args: argparse.Namespace) -> int:

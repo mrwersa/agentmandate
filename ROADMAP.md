@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 12 October 2026
+### Measured planning progress — 14 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,15 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Fleet release comparison implementation — 14 October 2026:**
+[The release gate](docs/fleet-diff.md) compares existing indexes by repository,
+environment and agent, retaining original inventory findings and independent
+authority reports. Additions and removals require complete current declared
+membership. Matched widening, candidate breaches and owner changes stay
+blocking; no mandates or budgets are combined. This extends the partial fleet
+inventory initiative. Signed snapshots, authenticated membership and registry
+connectors remain open, so the 50% ledger does not advance.
 
 **Rego comparison implementation — 12 October 2026:**
 [Generated-policy release comparison](docs/rego-diff.md) reuses pinned deployment,
@@ -159,6 +168,7 @@ model initiatives completed together. The present frontier is:
 | **Merged captured-decision slice** | [Decision/tool reconciliation](docs/deployment-reconciliation.md), [#251](https://github.com/mrwersa/agentmandate/pull/251): exact OPA/OTLP configuration, request and invocation joins with the original deployment/Authority reports preserved. Merged after fresh author review, 155 targeted tests and all 16 checks green. This is author review, not independent human approval. Captures remain synthetic; live authentication, causal order, accounting and runtime continuity remain open. |
 | **Merged local exception slice** | [Fleet review-delay exceptions](docs/fleet-exceptions.md), [#253](https://github.com/mrwersa/agentmandate/pull/253): portable named owner/reviewer records, exact index/finding and evidence joins, inclusive expiry and routing of unchanged findings. Only overdue accepted reviews can receive this temporary disposition; other inventory trust failures remain blockers. Authenticated approval and independent privacy review remain open. |
 | **Reviewed implementation** | [Rego revision comparison](docs/rego-diff.md), [#259](https://github.com/mrwersa/agentmandate/pull/259): exact matched requests, inherited capture/configuration findings, independent manifest diff and native OPA checks. The maintainer supplied an out-of-band execution review on 12 October; its numeric-identity finding is addressed by exact decimal normalization and CLI regressions. This is not a GitHub approval or external security review. The generated stateless subset is not arbitrary Rego import or global policy equivalence; the planning ledger is unchanged. |
+| **Reviewed implementation** | [Fleet release comparison](docs/fleet-diff.md), [#261](https://github.com/mrwersa/agentmandate/pull/261): per-deployment manifest diff, scoped membership changes, original inventory/review findings and independent candidate breaches. The maintainer supplied an out-of-band execution review on 15 October; its ineligible-duplicate finding is addressed by reserving unknown agent claims within their repository/environment. This is not a GitHub approval or external security review. No cross-agent accounting, authenticated membership or completed fleet initiative is claimed. |
 | **Deferred external review** | Independent security/trace-retention review deferred at the maintainer's request on 10 October 2026. The [prepared scope](docs/external-security-review.md) remains available and the 1.0 gate remains open; implementation and agent self-review cannot satisfy it |
 | **Deferred continuity extensions** | Operational policy/state/fencing evidence and a versioned settlement/retry contract are prerequisites for extending the scalar cutover model to later execution or a global continuation verdict. Historical binding approval remains deferred pending the [gap audit's evidence and owner requirements](docs/continuation-binding-gap-audit.md); locate contemporaneous mandate/principal/deployment and mediation evidence before applying accounting to those captures. No historical mandate identity, safe-continuation, or deployment approval is established |
 | **Deferred adoption pilot** | Workplace integration deferred at the maintainer's request on 9 October 2026. The [pilot below](#near-term-adoption-workflow-publication-review) remains a report-only proposal and supplies no new evidence graph or cleared model gate |

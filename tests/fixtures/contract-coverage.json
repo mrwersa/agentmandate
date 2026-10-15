@@ -691,5 +691,24 @@
     "tests": [
       "tests/test_rego_diff.py"
     ]
+  },
+  {
+    "doc": "docs/fleet-diff.md",
+    "fixtures": [
+      "examples/fleet-diff/baseline.json",
+      "examples/fleet-diff/candidate.json",
+      "examples/fleet-diff/widening.json",
+      "examples/fleet-diff/candidate-release/manifest.json",
+      "examples/fleet-diff/candidate-release/authority-ir.json",
+      "tests/fixtures/fleet-diff-v1.json"
+    ],
+    "id": "fleet-release-comparison",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.fleet-diff/v1"
+    ],
+    "tests": [
+      "tests/test_fleet_diff.py"
+    ]
   }
 ]

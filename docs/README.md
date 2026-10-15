@@ -18,6 +18,7 @@ guarantee.
 | Join captured policy decisions to tool attempts | [Deployment reconciliation](deployment-reconciliation.md) |
 | Compare captured Rego decisions across releases | [Rego revision comparison](rego-diff.md) |
 | Find tools, owners and stale reviews across repositories | [Fleet inventory](fleet-inventory.md) |
+| Compare authority across a multi-repository release | [Fleet release comparison](fleet-diff.md) |
 | Record a named temporary delay to an overdue fleet review | [Fleet exceptions](fleet-exceptions.md) |
 | Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
@@ -90,6 +91,7 @@ change an analysis result:
 - [Deployment reconciliation](deployment-reconciliation.md): captured OPA decisions and OTLP tool attempts.
 - [Rego revision comparison](rego-diff.md): exact matched requests, scoped widening and unchanged authority findings.
 - [Fleet inventory](fleet-inventory.md): local repository snapshots, ownership queries and review expiry.
+- [Fleet release comparison](fleet-diff.md): per-deployment authority, scoped membership changes and whole-fleet review findings.
 - [Fleet exceptions](fleet-exceptions.md): named review-delay records and routing of unchanged findings.
 - [Cedar export](cedar-export.md) and [Rego export](rego-export.md): policies, schemas, native decision tests and explicit semantic loss.
 - [Managed Cedar evidence](cedar-import.md) and

@@ -20,7 +20,7 @@ statement, not a waiver for silent breakage.
 Production users should pin the current minor series:
 
 ```text
-agentmandate~=0.35.0
+agentmandate~=0.36.0
 ```
 
 ## Versioned authority artifacts
@@ -289,3 +289,13 @@ other inventory trust failures cannot receive this exception. Initial eligible
 and expired fixtures are v1 baselines, not historical migrations. Review
 authentication and renewal are not performed. Earlier inventory, deployment
 and Authority contracts remain unchanged. See [fleet exceptions](docs/fleet-exceptions.md).
+
+`mandate fleet diff` adds the experimental `agentmandate.fleet-diff/v1`
+result over two existing fleet-v1 indexes. It preserves both inventory reports
+and compares unique repository/environment/agent pairs through the unchanged
+manifest diff. Complete current declared membership is required for additions
+or removals. Review, integrity, ownership, widening and candidate-breach findings
+remain blocking; budgets and mandates remain separate. Initial result baselines
+do not establish a schema migration, authenticated membership or live deployment
+approval. Earlier commands and fixtures are unchanged. See
+[fleet release comparison](docs/fleet-diff.md).

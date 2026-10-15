@@ -106,3 +106,7 @@ signed bundles, infer runtime exposure or search across agents. Use
 [deployment drift](deployment-drift.md) for supplied gateway/policy joins and
 `reach` on each manifest for bounded authority analysis. No network access,
 application imports or runtime dependencies are required.
+
+Use [fleet release comparison](fleet-diff.md) to compare two supplied indexes
+and identify per-deployment authority widening, membership changes and review
+findings without combining mandates.

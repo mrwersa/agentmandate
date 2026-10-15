@@ -400,3 +400,20 @@ and differing/additional active policy files visible. The [deployment guide](dep
 defines the configuration fields and scope. A matching supplied configuration
 is not proof of live evaluation or state retention; source `drift`, manifest
 reachability and native policy tests remain separate checks.
+
+## Compare fleet releases
+
+Use two pinned [fleet indexes](fleet-inventory.md) to gate a release spanning
+multiple repositories or environments:
+
+```bash
+mandate fleet diff --baseline baseline/index.json --candidate candidate/index.json --baseline-root baseline --candidate-root candidate --as-of 2026-10-14 --depth 8 --json
+```
+
+The [fleet comparison guide](fleet-diff.md) defines deployment matching and
+membership uncertainty. Exit 1 preserves inventory/review findings and flags
+authority widening, candidate breaches, new deployments and ownership changes.
+Complete current declared membership is required for additions or removals;
+partial indexes cannot establish absence. Each mandate retains its own budget
+and search result. Review declarations are not release acceptance, and this
+command does not consume fleet exceptions or authenticate deployment membership.

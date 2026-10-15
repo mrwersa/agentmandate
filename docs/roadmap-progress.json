@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-12",
+  "as_of": "2026-10-14",
   "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
   "phases": [
     {
@@ -118,7 +118,7 @@
           "title": "Federated agent and tool inventory",
           "status": "partial",
           "evidence": "docs/fleet-inventory.md",
-          "reason": "Local cross-repository manifest/IR indexing, owners, environments, review expiry and queries are implemented. Signed snapshots, authenticated membership and registry connectors remain open; declared tools are not live exposure."
+          "reason": "Local cross-repository manifest/IR indexing, owner/review queries and per-deployment release comparisons are implemented. Complete current declared membership gates additions/removals; original findings and separate budgets remain intact. Signed snapshots, authenticated membership and registry connectors remain open; declared tools are not live exposure."
         },
         {
           "title": "Decision and OTel reconciliation",

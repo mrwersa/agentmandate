@@ -518,7 +518,9 @@ def test_rego_comparison_preserves_every_existing_contract_and_fixture():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.34.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.35.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) - set(previous["cli"]) == {"mandate rego diff"}
     for path, command in previous["cli"].items():
@@ -529,6 +531,28 @@ def test_rego_comparison_preserves_every_existing_contract_and_fixture():
         assert present == command
     assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
         "_rego_diff.py",
+    }
+    for path, markers in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_fleet_comparison_preserves_every_existing_contract_and_fixture():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.35.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) - set(previous["cli"]) == {"mandate fleet diff"}
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate fleet":
+            selector = next(a for a in present["arguments"] if a["dest"] == "fleet_command")
+            selector["choices"].remove("diff")
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_fleet_diff.py",
     }
     for path, markers in previous["artifact_markers"].items():
         assert current["artifact_markers"][path] == markers

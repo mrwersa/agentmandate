@@ -152,6 +152,16 @@
         "fleet_version"
       ]
     },
+    "_fleet_diff.py": {
+      "constants": {
+        "RESULT_SCHEMA": "agentmandate.fleet-diff/v1"
+      },
+      "inline_versions": {},
+      "schemas": [
+        "agentmandate.fleet-diff/v1"
+      ],
+      "version_fields": []
+    },
     "_fleet_exceptions.py": {
       "constants": {
         "EXCEPTIONS_VERSION": 1,
@@ -1832,11 +1842,114 @@
         {
           "action": "_SubParsersAction",
           "choices": [
+            "diff",
             "exceptions",
             "inventory"
           ],
           "dest": "fleet_command",
           "required": true
+        }
+      ],
+      "exclusive_groups": []
+    },
+    "mandate fleet diff": {
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "nargs": 0,
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "baseline",
+          "nargs": null,
+          "options": [
+            "--baseline"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "candidate",
+          "nargs": null,
+          "options": [
+            "--candidate"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "baseline_root",
+          "nargs": null,
+          "options": [
+            "--baseline-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "candidate_root",
+          "nargs": null,
+          "options": [
+            "--candidate-root"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "as_of",
+          "nargs": null,
+          "options": [
+            "--as-of"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": 8,
+          "dest": "depth",
+          "nargs": null,
+          "options": [
+            "--depth"
+          ],
+          "required": false,
+          "type": "int"
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "default": false,
+          "dest": "json",
+          "nargs": 0,
+          "options": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -3489,7 +3602,7 @@
       ]
     }
   },
-  "coverage_sha256": "e34e190571e73398a0c541c9fe99b65635215d732ffe55caf473832f0dde6d4b",
+  "coverage_sha256": "581dd0011f14849d86068d59b3b93e20c818edb9c17ee7026e3e6098be40b531",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3538,6 +3651,11 @@
     "examples/deployment-reconcile/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
     "examples/deployment-reconcile/mapping.json": "a08340730cf758aa1060d60a263733f2a5080f45bfc251d8dc8201c2dcfc4d34",
     "examples/deployment-reconcile/telemetry.json": "2fa71901442a38c8bfbfb863826638a6c4d66e734e744dac743db8f139d14edb",
+    "examples/fleet-diff/baseline.json": "6cc7e7614f973259c55e367a268407d93b38f2260960933da9ccc5ba68fd19cf",
+    "examples/fleet-diff/candidate-release/authority-ir.json": "edcb0870a3623d27c3f17fceb3805c198d2e9a4425138a283fd9bb6818072c4e",
+    "examples/fleet-diff/candidate-release/manifest.json": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+    "examples/fleet-diff/candidate.json": "05aedb4794c2b37a71c057b6d185f66acb736930389d3a798b48008590cd88bb",
+    "examples/fleet-diff/widening.json": "4a3ca1f324380c8d37190320153241de42fe6d3515409f8418865f024a8689d4",
     "examples/fleet-exceptions/decision-note.txt": "6045690cb2fdcfb4660568d3d421dc4893462fcf08595de55eab7f97f633bb7c",
     "examples/fleet-exceptions/exceptions.json": "0d49d91ed3efde09bdc0830a66a83e42bbdcf02ce0fdeab0dfbe87d4383b763b",
     "examples/fleet-exceptions/index.json": "ea13823f5e396859e1892d8773dae390ce6a2d1c039990aaa2439658cd6374f0",
@@ -3648,6 +3766,7 @@
     "tests/fixtures/deployment-reconcile-v1.json": "f1855ba347862c39b67aba253135f878566c0724f481bf7ab90e5d1e11d6e204",
     "tests/fixtures/dynamic-inventory-agentkit-v1.json": "09b587e8880ca05d7ed85dc1d3b05881bb338772e9245d746dfd65b5b05df450",
     "tests/fixtures/dynamic-inventory-sentry-v1.json": "9b19e47e23871e96069c7526b0adb5315aa5a8d40cd358719b9b0d2db46c4799",
+    "tests/fixtures/fleet-diff-v1.json": "be6212e81a8f252f37c8e1a443379f9b138f1e0096fc940822752d8a8e05975b",
     "tests/fixtures/fleet-exceptions-expired-v1.json": "2b54d383c70c8a4a243157245f50c6913ae2859cb5c1c3eaeabb0f588d923c3c",
     "tests/fixtures/fleet-exceptions-v1.json": "bdac015cbacc88470c0a32c5dbded2468b45983cd472943e923a8c339791139f",
     "tests/fixtures/fleet-inventory-v1.json": "3563eb60f28fa86810ee4597e43c79fe00bac8b0d1968b80b92e5bd0487b325f",
