@@ -17,11 +17,11 @@ from agentmandate._ir import (
 )
 
 RICH = """
-version: 1
+version: 2
 agent: operations/team
 identity: spiffe://example/agents/operations
 limits:
-  total: {amount: 75.50, currency: gbp}
+  quantities: {value: {amount: 75.50, unit: GBP}}
   depth: 5
   effects:
     irreversible: 2
@@ -37,7 +37,8 @@ tools:
     principal: service
     requires: [case]
     value_arg: amount
-    ceiling: {amount: 50, currency: GBP}
+    quantity: value
+    ceiling: {amount: 50, unit: GBP}
     scope_key: case
     requires_approval: true
 """
@@ -91,9 +92,9 @@ def test_records_preserve_entity_fact_edge_and_source_provenance() -> None:
     assert role_name.evidence[0].location == "/roles/operator~1team"
     assert source.content_sha256 == hashlib.sha256(RICH.encode()).hexdigest()
     assert source.adapter == "agentmandate.manifest"
-    assert source.adapter_version == 2
-    assert sources["source:manifest-v1"].adapter == "agentmandate.manifest-defaults"
-    assert sources["source:manifest-v1"].adapter_version == 1
+    assert source.adapter_version == 3
+    assert sources["source:manifest-v2"].adapter == "agentmandate.manifest-defaults"
+    assert sources["source:manifest-v2"].adapter_version == 2
 
 
 def test_canonical_json_orders_tables_evidence_and_edge_support() -> None:
@@ -127,7 +128,7 @@ def test_content_digest_is_optional_and_independent_of_semantic_projection() -> 
     assert _to_mandate(without_content) == mandate
 
 
-@pytest.mark.parametrize("version", [True, 2])
+@pytest.mark.parametrize("version", [True, 1, 99])
 def test_reader_rejects_an_unsupported_ir_version(version: object) -> None:
     payload = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n")).as_dict()
     payload["ir_version"] = version
@@ -140,7 +141,7 @@ def test_mandate_adapter_rejects_a_snapshot_from_another_ir_version() -> None:
     snapshot = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read}]\n"))
 
     with pytest.raises(IRFormatError, match="unsupported authority IR version"):
-        _to_mandate(replace(snapshot, ir_version=2))
+        _to_mandate(replace(snapshot, ir_version=99))
 
 
 def test_mandate_adapter_requires_one_agent_and_every_required_fact() -> None:
@@ -157,7 +158,7 @@ def test_mandate_adapter_requires_one_agent_and_every_required_fact() -> None:
 
     with pytest.raises(IRFormatError, match="exactly one agent"):
         _to_mandate(without_agent)
-    with pytest.raises(IRFormatError, match="complete analyzable manifest-v1 predicate set"):
+    with pytest.raises(IRFormatError, match="complete analyzable manifest-v2 predicate set"):
         _to_mandate(without_identity)
 
 
@@ -188,9 +189,7 @@ def test_manifest_projection_refuses_an_internal_id_collision(
 
 
 def test_mandate_adapter_rejects_a_reference_to_the_wrong_entity_kind() -> None:
-    snapshot = _from_mandate(
-        loads("agent: a\ntools: [{name: t, effect: read, produces: case}]\n")
-    )
+    snapshot = _from_mandate(loads("agent: a\ntools: [{name: t, effect: read, produces: case}]\n"))
     facts = tuple(
         replace(item, value=["scope:case"])
         if item.subject == "agent:a" and item.predicate == "tools"

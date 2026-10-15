@@ -2,9 +2,11 @@
   "agent": "synthetic-release",
   "limits": {
     "depth": 4,
-    "total": {
-      "amount": "5",
-      "currency": "GBP"
+    "quantities": {
+      "value": {
+        "amount": "5",
+        "unit": "GBP"
+      }
     }
   },
   "tools": [
@@ -17,7 +19,7 @@
     {
       "ceiling": {
         "amount": "5",
-        "currency": "GBP"
+        "unit": "GBP"
       },
       "effect": "irreversible",
       "name": "pay",
@@ -26,7 +28,9 @@
       ],
       "requires_approval": true,
       "scope_key": "item",
-      "value_arg": "amount"
+      "value_arg": "amount",
+      "quantity": "value"
     }
-  ]
+  ],
+  "version": 2
 }

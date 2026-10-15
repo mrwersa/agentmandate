@@ -20,17 +20,18 @@ def encoded(value):
 def manifests():
     before = {
         "agent": "synthetic-release",
-        "limits": {"depth": 4, "total": {"amount": "5", "currency": "GBP"}},
+        "limits": {"depth": 4, "quantities": {"value": {"amount": "5", "unit": "GBP"}}},
         "tools": [
             {"name": "seed", "effect": "read", "produces": "item"},
             {
+                "quantity": "value",
                 "name": "pay",
                 "effect": "irreversible",
                 "requires": ["item"],
                 "scope_key": "item",
                 "value_arg": "amount",
                 "requires_approval": True,
-                "ceiling": {"amount": "5", "currency": "GBP"},
+                "ceiling": {"amount": "5", "unit": "GBP"},
             },
         ],
     }
@@ -344,7 +345,7 @@ def test_cli_accepts_scoped_review_but_diff_and_reach_still_fail(tmp_path, capsy
     assert json.loads(capsys.readouterr().out) == report["comparison"]["after"]
     assert main(args) == 0
     text = capsys.readouterr().out
-    assert "eligible_recorded_acceptance" in text and "BREACH cumulative_value" in text
+    assert "eligible_recorded_acceptance" in text and "BREACH quantity_budget" in text
     assert "not reviewer authentication or deployment approval" in text
     assert "Authority findings remain unchanged" in text
 
@@ -449,7 +450,7 @@ def test_historical_acceptance_is_not_a_release_decision(tmp_path, capsys):
 @pytest.mark.parametrize("name", ["accepted", "expired", "missing", "neutral", "deferred"])
 def test_v1_baselines_replay_exact_output_and_exit(name, monkeypatch, capsys):
     monkeypatch.chdir(ROOT)
-    fixture = json.loads((ROOT / f"tests/fixtures/change-review-{name}-v1.json").read_text())
+    fixture = json.loads((ROOT / f"tests/fixtures/change-review-{name}-v2.json").read_text())
     assert main(fixture["argv"]) == fixture["exit"]
     captured = capsys.readouterr()
     assert json.loads(captured.out) == fixture["result"] and captured.err == ""

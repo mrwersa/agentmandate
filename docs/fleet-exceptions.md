@@ -75,7 +75,7 @@ gate does not infer permission to reuse or extend an earlier decision.
 
 ## Read the result and its blockers
 
-`agentmandate.fleet-exceptions/v1` embeds the unchanged inventory result.
+`agentmandate.fleet-exceptions/v2` embeds the unchanged inventory result.
 `routes` retains each finding and its canonical digest, identifies its entry
 and owner where available, and reports either `blocked` or
 `accepted_review_delay_within_recorded_scope`. Global membership/window

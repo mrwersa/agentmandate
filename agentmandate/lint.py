@@ -153,21 +153,21 @@ def check(mandate: Mandate) -> list[Finding]:
                 )
             )
 
-    currencies = {t.ceiling.currency for t in mandate.tools if t.ceiling}
-    if mandate.limits.total is not None:
-        currencies.add(mandate.limits.total.currency)
-    if len(currencies) > 1:
-        findings.append(
-            Finding(
-                rule="ceiling.mixed-currency",
-                severity=ERROR,
-                subject=", ".join(sorted(currencies)),
-                message=(
-                    "ceilings in more than one currency cannot be summed, so "
-                    "cumulative analysis would be meaningless"
-                ),
+    units = {name: {q.unit} for name, q in mandate.limits.quantities.items()}
+    for tool in mandate.tools:
+        if tool.ceiling is not None:
+            units.setdefault(tool.quantity, set()).add(tool.ceiling.unit)
+    for name, declared in units.items():
+        if len(declared) > 1:
+            findings.append(
+                Finding(
+                    rule="quantity.unit-mismatch",
+                    severity=ERROR,
+                    subject=str(name),
+                    message=f"quantity {name!r} mixes units {sorted(declared)!r}; "
+                    "no conversion model is declared",
+                )
             )
-        )
 
     order = {ERROR: 0, WARNING: 1}
     return sorted(findings, key=lambda f: (order[f.severity], f.rule, f.subject))

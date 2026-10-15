@@ -196,7 +196,7 @@ def analyse_principal_continuity(
         }
     )
     return {
-        "schema": "agentmandate.principal-continuity/v1",
+        "schema": "agentmandate.principal-continuity/v2",
         "as_of": evaluated_at,
         "profile_sha256": hashlib.sha256(profile.to_json().encode()).hexdigest(),
         "manifest_sha256": hashlib.sha256(mandate_bytes).hexdigest(),

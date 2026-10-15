@@ -47,7 +47,7 @@ def validate_authority(
         "effects",
         "ungated_irreversible",
         "service_principal_tools",
-        "max_extractable",
+        "max_quantities",
         "breaches",
         "depth",
         "truncated",
@@ -68,19 +68,21 @@ def validate_authority(
     if pairs != sorted(set(pairs)):
         fail("/authority/effects must be sorted and unique")
 
-    maximum = authority["max_extractable"]
-    if maximum is not None:
-        money = record(maximum, "/authority/max_extractable", {"amount", "currency"})
-        amount = string(money["amount"], "/authority/max_extractable/amount")
+    maximum = authority["max_quantities"]
+    if not isinstance(maximum, dict):
+        fail("/authority/max_quantities must be an object")
+    for name, value in maximum.items():
+        string(name, "/authority/max_quantities/name")
+        path = f"/authority/max_quantities/{name}"
+        quantity = record(value, path, {"amount", "unit"})
+        amount = string(quantity["amount"], f"{path}/amount")
         try:
             parsed = Decimal(amount)
         except InvalidOperation as exc:
-            raise error_type(
-                f"{result_name} /authority/max_extractable/amount must be decimal"
-            ) from exc
-        if not parsed.is_finite() or str(parsed) != amount:
-            fail("/authority/max_extractable/amount must be canonical")
-        string(money["currency"], "/authority/max_extractable/currency")
+            raise error_type(f"{result_name} {path}/amount must be decimal") from exc
+        if not parsed.is_finite() or parsed < 0 or str(parsed) != amount:
+            fail(f"{path}/amount must be canonical and non-negative")
+        string(quantity["unit"], f"{path}/unit")
 
     breaches = authority["breaches"]
     if not isinstance(breaches, list):

@@ -44,7 +44,7 @@ ERROR_STATUS = {"STATUS_CODE_ERROR", 2, "2"}
 
 # Fields a mandate needs that no GenAI convention supplies. Each must be
 # pointed at an attribute by the caller, or it stays absent.
-MAPPABLE = ("scope", "value", "currency", "principal", "approved")
+MAPPABLE = ("scope", "value", "quantity", "unit", "principal", "approved")
 
 
 class TraceError(ValueError):
@@ -173,7 +173,8 @@ class Conversion:
             )
         if self.unmapped:
             lines.append(
-                "  no attribute mapped for: " + ", ".join(self.unmapped)
+                "  no attribute mapped for: "
+                + ", ".join(self.unmapped)
                 + ". verify will fail closed on any control that needs them."
             )
         return "\n".join(lines)
@@ -203,8 +204,7 @@ def convert(
     unknown = sorted(set(mapping) - set(MAPPABLE))
     if unknown:
         raise TraceError(
-            "cannot map " + ", ".join(unknown)
-            + ". mappable fields are: " + ", ".join(MAPPABLE)
+            "cannot map " + ", ".join(unknown) + ". mappable fields are: " + ", ".join(MAPPABLE)
         )
 
     documents = payload if isinstance(payload, list) else [payload]

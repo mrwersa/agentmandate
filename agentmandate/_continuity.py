@@ -43,8 +43,8 @@ CONTINUITY_BINDING_IR_ADAPTER = "agentmandate.continuity-binding-ir"
 AGENTCORE_CONTINUITY_IR_ADAPTER = "agentmandate.agentcore-continuity-ir"
 ANTHROPIC_CONTINUITY_IR_ADAPTER = "agentmandate.anthropic-continuity-ir"
 CONTINUITY_IR_ADAPTER_VERSION = 1
-CONTINUITY_RESULT_VERSION = 1
-CONTINUITY_RESULT_SCHEMA = "agentmandate.continuity/v1"
+CONTINUITY_RESULT_VERSION = 2
+CONTINUITY_RESULT_SCHEMA = "agentmandate.continuity/v2"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
@@ -100,14 +100,10 @@ class ContinuityFormatError(ValueError):
 def _refuse_continuity_composition(composition: frozenset[str]) -> None:
     unknown = sorted(composition - _UNSUPPORTED_COMPOSITIONS)
     if unknown:
-        raise ContinuityFormatError(
-            f"unsupported authority-continuity composition {unknown[0]!r}"
-        )
+        raise ContinuityFormatError(f"unsupported authority-continuity composition {unknown[0]!r}")
     if composition:
         requested = ", ".join(sorted(composition))
-        raise ContinuityFormatError(
-            f"authority continuity cannot yet be composed with {requested}"
-        )
+        raise ContinuityFormatError(f"authority continuity cannot yet be composed with {requested}")
 
 
 def _reject_constant(_: str) -> None:
@@ -827,7 +823,6 @@ def _adapter(value: Any, path: str, expected_name: str) -> tuple[str, int]:
     return name, version
 
 
-
 def _canonical_json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
@@ -1482,9 +1477,7 @@ _ADMISSIONS = frozenset({"within_bound", "overshot", "unresolved"})
 _COMPARABILITY = frozenset({"established", "unresolved"})
 _ISSUER_AMENDMENTS = frozenset({"not_required", "approved", "unresolved"})
 _SAFE_CONTINUATION = frozenset({"satisfied", "violated", "unresolved"})
-_ARTIFACT_KINDS = frozenset(
-    {"continuity-binding", "agentcore-continuity", "anthropic-continuity"}
-)
+_ARTIFACT_KINDS = frozenset({"continuity-binding", "agentcore-continuity", "anthropic-continuity"})
 
 
 def _result_record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
@@ -1492,14 +1485,10 @@ def _result_record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
         raise ContinuityFormatError(f"continuity result {path} must be an object")
     missing = sorted(fields - value.keys())
     if missing:
-        raise ContinuityFormatError(
-            f"continuity result {path} is missing field {missing[0]!r}"
-        )
+        raise ContinuityFormatError(f"continuity result {path} is missing field {missing[0]!r}")
     extra = sorted(value.keys() - fields)
     if extra:
-        raise ContinuityFormatError(
-            f"continuity result {path} has unknown field {extra[0]!r}"
-        )
+        raise ContinuityFormatError(f"continuity result {path} has unknown field {extra[0]!r}")
     return value
 
 
@@ -1508,16 +1497,12 @@ def _result_strings(value: Any, path: str, *, allow_empty: bool = True) -> tuple
         raise ContinuityFormatError(f"continuity result {path} must be an array")
     items = tuple(_string(item, f"result{path}/{index}") for index, item in enumerate(value))
     if list(items) != sorted(set(items)):
-        raise ContinuityFormatError(
-            f"continuity result {path} must contain sorted unique strings"
-        )
+        raise ContinuityFormatError(f"continuity result {path} must contain sorted unique strings")
     return items
 
 
 def _result_identity(value: Any, path: str) -> ContinuityArtifactIdentity:
-    record = _result_record(
-        value, path, {"kind", "id", "content_sha256", "semantic_sha256"}
-    )
+    record = _result_record(value, path, {"kind", "id", "content_sha256", "semantic_sha256"})
     kind = _string(record["kind"], f"result{path}/kind")
     if kind not in _ARTIFACT_KINDS:
         raise ContinuityFormatError(f"continuity result {path}/kind is unsupported")
@@ -1599,9 +1584,7 @@ def _parse_outcomes(value: Any) -> tuple[ContinuityOutcome, ...]:
                 f"continuity result {path}/alignments must cover the canonical checks"
             )
         state = _string(record["state"], f"result{path}/state")
-        authority_change = _string(
-            record["authority_change"], f"result{path}/authority_change"
-        )
+        authority_change = _string(record["authority_change"], f"result{path}/authority_change")
         admission = _string(record["admission"], f"result{path}/admission")
         comparability = _string(record["comparability"], f"result{path}/comparability")
         amendment = _string(record["issuer_amendment"], f"result{path}/issuer_amendment")
@@ -1706,9 +1689,7 @@ def _parse_continuity_result_body(value: Any) -> ContinuityResult:
     if parsed_binding is not None and parsed_binding.kind != "continuity-binding":
         raise ContinuityFormatError("continuity result binding identity has the wrong kind")
     outcomes = _parse_outcomes(root["outcomes"])
-    expected_provider = (
-        "aws-agentcore" if provider.kind == "agentcore-continuity" else "Anthropic"
-    )
+    expected_provider = "aws-agentcore" if provider.kind == "agentcore-continuity" else "Anthropic"
     if any(outcome.provider != expected_provider for outcome in outcomes):
         raise ContinuityFormatError(
             "continuity result outcome provider does not match its input profile"
@@ -1719,18 +1700,14 @@ def _parse_continuity_result_body(value: Any) -> ContinuityResult:
         finding.transition is not None and finding.transition not in transitions
         for finding in findings
     ):
-        raise ContinuityFormatError(
-            "continuity result finding cites an unknown transition"
-        )
+        raise ContinuityFormatError("continuity result finding cites an unknown transition")
     return ContinuityResult(
         CONTINUITY_RESULT_VERSION,
         CONTINUITY_RESULT_SCHEMA,
         _utc(root["as_of"], "result.as_of"),
         ContinuityManifestIdentity(
             _string(manifest["locator"], "result.inputs.manifest.locator"),
-            _digest(
-                manifest["semantic_sha256"], "result.inputs.manifest.semantic_sha256"
-            ),
+            _digest(manifest["semantic_sha256"], "result.inputs.manifest.semantic_sha256"),
         ),
         provider,
         parsed_binding,
@@ -2321,9 +2298,7 @@ def analyse_continuity(
         evaluated_at,
         tuple(outcomes),
         tuple(ContinuityFinding(*item) for item in unique_findings),
-        ContinuityManifestIdentity(
-            manifest_source.locator, manifest_source.semantic_sha256
-        ),
+        ContinuityManifestIdentity(manifest_source.locator, manifest_source.semantic_sha256),
         provider_identity,
         binding_identity,
     )

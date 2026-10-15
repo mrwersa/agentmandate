@@ -34,7 +34,7 @@
                 {
                   "key": "app.authority.manifest_sha256",
                   "value": {
-                    "stringValue": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615"
+                    "stringValue": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6"
                   }
                 },
                 {
@@ -46,7 +46,7 @@
                 {
                   "key": "app.authority.manifest_version",
                   "value": {
-                    "intValue": "1"
+                    "intValue": "2"
                   }
                 },
                 {
@@ -129,7 +129,7 @@
                 {
                   "key": "app.authority.manifest_sha256",
                   "value": {
-                    "stringValue": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615"
+                    "stringValue": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6"
                   }
                 },
                 {
@@ -141,7 +141,7 @@
                 {
                   "key": "app.authority.manifest_version",
                   "value": {
-                    "intValue": "1"
+                    "intValue": "2"
                   }
                 },
                 {
@@ -224,7 +224,7 @@
                 {
                   "key": "app.authority.manifest_sha256",
                   "value": {
-                    "stringValue": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615"
+                    "stringValue": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6"
                   }
                 },
                 {
@@ -236,7 +236,7 @@
                 {
                   "key": "app.authority.manifest_version",
                   "value": {
-                    "intValue": "1"
+                    "intValue": "2"
                   }
                 },
                 {

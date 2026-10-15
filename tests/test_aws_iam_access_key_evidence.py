@@ -25,9 +25,12 @@ def test_catalogue_is_the_pinned_full_server_inventory() -> None:
 
 
 def test_scan_skeleton_is_the_exact_scanner_output() -> None:
-    assert (EVIDENCE / "scan-skeleton.yaml").read_text(encoding="utf-8") == render(
-        propose(_json("catalogue.json")), "iam-key-agent"
-    )
+    assert (
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "scan-skeleton.yaml"
+    ).read_text(encoding="utf-8") == render(propose(_json("catalogue.json")), "iam-key-agent")
 
 
 def test_live_capture_proves_two_bindings_and_exhaustion() -> None:
@@ -93,7 +96,12 @@ def test_committed_live_result_contains_no_aws_identity_or_secret() -> None:
 
 
 def test_reviewed_graph_exposes_only_the_false_third_binding_path() -> None:
-    mandate = load(EVIDENCE / "mandate.yaml")
+    mandate = load(
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "mandate.yaml"
+    )
     authority = analyse(mandate)
 
     assert mandate.tool_names == ("create_access_key",)

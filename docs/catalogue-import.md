@@ -101,7 +101,7 @@ source bytes, reviewer, and expiry. Do not make a draft eligible by changing
 its flags without the evidence those flags assert.
 
 Add `--ir` to the import command to emit its canonical inventory graph. The
-existing `ir_version: 1` and dynamic-inventory adapter profiles are reused.
+existing `ir_version: 2` and dynamic-inventory adapter profiles are reused.
 `mandate ir validate` checks structure. `mandate reach --ir` rejects an
 inventory-only graph with exit 2: membership cannot supply effects or mandate
 intent. To analyze a reviewed manifest, use `mandate ir export MANIFEST` and

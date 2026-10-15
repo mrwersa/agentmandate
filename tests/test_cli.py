@@ -20,24 +20,24 @@ CONDITION = ROOT / "tests/fixtures/condition-statement-v1.json"
 CONTEXT = ROOT / "tests/fixtures/condition-context-select-v1.json"
 CONTEXT_COMPLETE = ROOT / "tests/fixtures/condition-context-select-only-complete-v1.json"
 CONDITION_CAPTURE = ROOT / "tests/fixtures/condition-context-capture.sql"
-CONDITIONAL_MANIFEST_PATH = ROOT / "tests/fixtures/conditional-mandate-v1.yaml"
+CONDITIONAL_MANIFEST_PATH = ROOT / "tests/fixtures/conditional-mandate-v2.yaml"
 CONDITIONAL_SOURCE = ROOT / "tests/fixtures/conditional-source"
-CONDITIONAL_REACH_RESULT = ROOT / "tests/fixtures/conditional-reach-result-v1.json"
-CONDITIONAL_DRIFT_RESULT = ROOT / "tests/fixtures/conditional-drift-result-v1.json"
+CONDITIONAL_REACH_RESULT = ROOT / "tests/fixtures/conditional-reach-result-v2.json"
+CONDITIONAL_DRIFT_RESULT = ROOT / "tests/fixtures/conditional-drift-result-v2.json"
 DELEGATION_ATTACHMENT = ROOT / "tests/fixtures/delegation-attachment-v2.json"
 DELEGATION_CHAIN = ROOT / "tests/fixtures/delegation-chain-authorizer-v1.json"
 DELEGATION_CAPTURE = ROOT / "docs/evidence/authorizer-delegation/capture.json"
-CEDAR_EVIDENCE = ROOT / "docs/evidence/agentcore-refund-policy"
+CEDAR_EVIDENCE = ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy"
 CEDAR_MANIFEST = CEDAR_EVIDENCE / "mandate.yaml"
 CEDAR_BASELINE = CEDAR_EVIDENCE / "managed-oracle-v1.json"
 CEDAR_CANDIDATE = CEDAR_EVIDENCE / "candidate-managed-oracle-v1.json"
-CEDAR_DIFF_RESULT = ROOT / "tests/fixtures/cedar-effective-diff-v1.json"
+CEDAR_DIFF_RESULT = ROOT / "tests/fixtures/cedar-effective-diff-v2.json"
 PRODUCER_FIXTURE = ROOT / "tests/fixtures/producer-accepted-synthetic"
 PRODUCER_BOUNDARY = PRODUCER_FIXTURE / "boundary.json"
 PRODUCER_MANIFEST = PRODUCER_FIXTURE / "manifest.json"
 PRODUCER_MANIFEST_INPUT = str(PRODUCER_MANIFEST.relative_to(ROOT))
 PRODUCER_SELECTION = PRODUCER_FIXTURE / "selection.json"
-PRODUCER_RESULT = ROOT / "tests/fixtures/producer-reach-result-v1.json"
+PRODUCER_RESULT = ROOT / "tests/fixtures/producer-reach-result-v2.json"
 CONTINUITY_FIXTURE = ROOT / "tests/fixtures/continuity-accepted-synthetic"
 CONTINUITY_MANIFEST = CONTINUITY_FIXTURE / "manifest.json"
 CONTINUITY_PROVIDER = CONTINUITY_FIXTURE / "provider.json"
@@ -158,7 +158,7 @@ def write_delegation_manifest(tmp_path: Path) -> Path:
     path.write_text(
         json.dumps(
             {
-                "version": 1,
+                "version": 2,
                 "agent": "export-agent",
                 "tools": [
                     {
@@ -213,7 +213,7 @@ def test_reach_finds_no_breach_in_v1(capsys):
     assert main(["reach", V1]) == EXIT_OK
     out = capsys.readouterr().out
     assert "no reachable breach" in out
-    assert "most extractable 500 GBP" in out
+    assert "reachable quantities value=500 GBP" in out
 
 
 def test_reach_finds_the_compound_breach_in_v2(capsys):
@@ -221,7 +221,7 @@ def test_reach_finds_the_compound_breach_in_v2(capsys):
     assert main(["reach", V2]) == EXIT_FINDING
     out = capsys.readouterr().out
     assert "BREACH" in out
-    assert "exceeds limit 500 GBP" in out
+    assert "above its cumulative budget of 500 GBP" in out
     assert "issue_refund" in out
 
 
@@ -244,7 +244,7 @@ def test_conditions_validate_is_structural_only(flag, path, output, capsys):
 
 def test_conditions_validate_failure_emits_no_stdout(tmp_path, capsys):
     invalid = tmp_path / "invalid.json"
-    invalid.write_text('{"condition_version":1,"unexpected":true}', encoding="utf-8")
+    invalid.write_text('{"condition_version": 1, "unexpected": true}', encoding="utf-8")
 
     assert main(["conditions", "validate", "--condition", str(invalid)]) == EXIT_USAGE
     captured = capsys.readouterr()
@@ -266,7 +266,7 @@ def test_delegations_validate_is_structural_only(flag, path, output, capsys):
 
 def test_delegations_validate_failure_emits_no_stdout(tmp_path, capsys):
     invalid = tmp_path / "invalid.json"
-    invalid.write_text('{"delegation_version":1,"unexpected":true}', encoding="utf-8")
+    invalid.write_text('{"delegation_version": 1, "unexpected": true}', encoding="utf-8")
 
     assert main(["delegations", "validate", "--chain", str(invalid)]) == EXIT_USAGE
     captured = capsys.readouterr()
@@ -324,7 +324,7 @@ def test_cedar_align_candidate_json_is_clean_and_versioned(capsys) -> None:
     assert main([*cedar_align_args(CEDAR_CANDIDATE), "--json"]) == EXIT_OK
     payload = json.loads(capsys.readouterr().out)
 
-    assert payload["schema"] == "agentmandate.cedar-alignment/v1"
+    assert payload["schema"] == "agentmandate.cedar-alignment/v2"
     assert payload["clean"] is True
     assert len(payload["inputs"]["manifest_sha256"]) == 64
     assert set(payload["inputs"]["oracle"]) == {
@@ -337,10 +337,7 @@ def test_cedar_align_candidate_json_is_clean_and_versioned(capsys) -> None:
         len(payload["inputs"]["oracle"][key]) == 64
         for key in ("oracle_sha256", "profile_sha256", "mapping_sha256")
     )
-    assert all(
-        len(value) == 64
-        for value in payload["inputs"]["oracle"]["source_sha256"].values()
-    )
+    assert all(len(value) == 64 for value in payload["inputs"]["oracle"]["source_sha256"].values())
     assert {item["alignment"] for item in payload["alignments"]} == {"aligned_allow"}
 
 
@@ -350,7 +347,7 @@ def test_cedar_diff_emits_the_live_widening_before_finding_exit(capsys) -> None:
     assert captured.err == ""
     payload = json.loads(captured.out)
 
-    assert payload["schema"] == "agentmandate.cedar-effective-diff/v1"
+    assert payload["schema"] == "agentmandate.cedar-effective-diff/v2"
     assert [item["classification"] for item in payload["changes"]] == [
         "stable_allow",
         "widens",
@@ -471,7 +468,7 @@ def test_reach_delegation_json_is_namespaced_and_complete(capsys, tmp_path):
     assert captured.err == ""
     payload = json.loads(captured.out)
     delegation = payload["delegations"]
-    assert delegation["schema"] == "agentmandate.delegations/v1"
+    assert delegation["schema"] == "agentmandate.delegations/v2"
     assert delegation["as_of"] == "2026-08-25T12:00:00Z"
     assert delegation["attenuated"] == []
     assert {item["code"] for item in delegation["findings"]} == {
@@ -480,7 +477,7 @@ def test_reach_delegation_json_is_namespaced_and_complete(capsys, tmp_path):
     }
     assert all(item["support"] for item in delegation["findings"])
     assert hashlib.sha256(captured.out.encode()).hexdigest() == (
-        "37e8cc7f786e4e6b0bff38325d0770d72a888c6059eee82d71c62fba8ed2492d"
+        "2046113e0446f1e282be2b1fa7454faf7a4090b016eec84b8c755ea6a99c79da"
     )
 
 
@@ -577,7 +574,7 @@ def test_reach_refuses_delegation_ir_and_condition_composition(capsys):
             [
                 "reach",
                 "--ir",
-                str(ROOT / "tests/fixtures/authority-ir-v1.json"),
+                str(ROOT / "tests/fixtures/authority-ir-v2.json"),
                 *delegation_args(),
             ]
         )
@@ -628,7 +625,12 @@ def test_continuity_validate_is_structural_only(artifact, label, capsys):
 
 
 def test_continuity_validate_rejects_unknown_or_malformed_artifacts(tmp_path, capsys):
-    cases = ["{", "[]", "{}", '{"continuity_binding_version":1,"agentcore_continuity_version":1}']
+    cases = [
+        "{",
+        "[]",
+        "{}",
+        '{"continuity_binding_version": 1, "agentcore_continuity_version": 1}',
+    ]
     for index, content in enumerate(cases):
         path = tmp_path / f"invalid-{index}.json"
         path.write_text(content, encoding="utf-8")
@@ -652,7 +654,7 @@ def test_continuity_reconcile_emits_complete_json_and_human_output(capsys):
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
     assert captured.err == ""
-    assert payload["schema"] == "agentmandate.continuity/v1"
+    assert payload["schema"] == "agentmandate.continuity/v2"
     assert payload["authority"]["reachable_tools"] == ["bounded_action"]
     assert payload["outcomes"][0]["safe_continuation"] == "satisfied"
     assert payload["findings"] == []
@@ -795,9 +797,8 @@ def test_continuity_reconcile_rejects_bad_pairing_and_artifact_roles(capsys):
 
 
 def test_continuity_reconcile_rejects_duplicate_and_extra_source_locators(capsys):
-    source = (
-        "tests/fixtures/continuity-accepted-synthetic/provider-control.json="
-        + str(CONTINUITY_FIXTURE / "provider-control.json")
+    source = "tests/fixtures/continuity-accepted-synthetic/provider-control.json=" + str(
+        CONTINUITY_FIXTURE / "provider-control.json"
     )
     base = [
         "continuity",
@@ -832,22 +833,18 @@ def test_reach_applies_accepted_producer_boundary(capsys):
     assert "BOUNDED     mint_access_token: concurrent maximum 2" in captured.out
     assert "no reachable breach" in captured.out
 
-    assert main(
-        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), "--json"]
-    ) == EXIT_OK
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), "--json"]) == EXIT_OK
     captured = capsys.readouterr()
     assert captured.err == ""
     payload = json.loads(captured.out)
-    assert payload["schema"] == "agentmandate.producers/v1"
+    assert payload["schema"] == "agentmandate.producers/v2"
     assert payload["applied"][0]["maximum"] == 2
     assert payload["findings"] == []
     assert payload["authority"]["breaches"] == []
 
 
 def test_producer_public_json_fixture_is_byte_stable(capsys):
-    assert main(
-        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), "--json"]
-    ) == EXIT_OK
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), "--json"]) == EXIT_OK
     assert capsys.readouterr().out == PRODUCER_RESULT.read_text(encoding="utf-8")
 
 
@@ -874,9 +871,7 @@ def test_reach_producer_findings_emit_complete_output_and_exit_one(capsys):
 
 @pytest.mark.parametrize("format_flag", ["--sarif", "--graph"])
 def test_reach_refuses_producer_formats_before_output(format_flag, capsys):
-    assert main(
-        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), format_flag]
-    ) == EXIT_USAGE
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *producer_args(), format_flag]) == EXIT_USAGE
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "human or --json" in captured.err
@@ -933,9 +928,7 @@ def test_reach_requires_complete_producer_option_groups(remove, message, capsys)
 
 @pytest.mark.parametrize("as_of", ["20260903", "2026-99-03"])
 def test_reach_rejects_invalid_producer_dates(as_of, capsys):
-    assert main(
-        ["reach", PRODUCER_MANIFEST_INPUT, *producer_args(as_of=as_of)]
-    ) == EXIT_USAGE
+    assert main(["reach", PRODUCER_MANIFEST_INPUT, *producer_args(as_of=as_of)]) == EXIT_USAGE
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "YYYY-MM-DD" in captured.err
@@ -1045,28 +1038,29 @@ def test_reach_applies_reviewed_conditional_authority(tmp_path, capsys):
     assert main(["reach", str(manifest), *condition_args(), "--json"]) == EXIT_OK
     payload = json.loads(capsys.readouterr().out)
     assert payload["ungated_irreversible"] == []
-    assert payload["conditions"]["schema"] == "agentmandate.conditions/v1"
+    assert payload["conditions"]["schema"] == "agentmandate.conditions/v2"
     assert payload["conditions"]["as_of"] == "2027-01-01"
     assert payload["conditions"]["findings"] == []
     assert payload["conditions"]["applied"][0]["support"]
 
 
 def test_conditional_public_json_fixtures_are_byte_stable(capsys):
-    assert main(
-        ["reach", str(CONDITIONAL_MANIFEST_PATH), *condition_args(), "--json"]
-    ) == EXIT_OK
+    assert main(["reach", str(CONDITIONAL_MANIFEST_PATH), *condition_args(), "--json"]) == EXIT_OK
     assert capsys.readouterr().out == CONDITIONAL_REACH_RESULT.read_text(encoding="utf-8")
 
-    assert main(
-        [
-            "drift",
-            str(CONDITIONAL_MANIFEST_PATH),
-            "--source",
-            str(CONDITIONAL_SOURCE),
-            *condition_args(),
-            "--json",
-        ]
-    ) == EXIT_OK
+    assert (
+        main(
+            [
+                "drift",
+                str(CONDITIONAL_MANIFEST_PATH),
+                "--source",
+                str(CONDITIONAL_SOURCE),
+                *condition_args(),
+                "--json",
+            ]
+        )
+        == EXIT_OK
+    )
     assert capsys.readouterr().out == CONDITIONAL_DRIFT_RESULT.read_text(encoding="utf-8")
 
 
@@ -1132,9 +1126,7 @@ def test_reach_condition_uncertainty_is_a_finding_at_full_authority(
         ),
     ],
 )
-def test_incomplete_condition_inputs_are_usage_errors(
-    tmp_path, extra, message, capsys
-):
+def test_incomplete_condition_inputs_are_usage_errors(tmp_path, extra, message, capsys):
     manifest = write_conditional_manifest(tmp_path)
 
     assert main(["reach", str(manifest), *extra]) == EXIT_USAGE
@@ -1146,33 +1138,34 @@ def test_incomplete_condition_inputs_are_usage_errors(
 def test_one_context_id_cannot_pair_with_different_capture_bytes(tmp_path, capsys):
     manifest = write_conditional_manifest(tmp_path)
 
-    assert main(
-        [
-            "reach",
-            str(manifest),
-            "--condition",
-            str(CONDITION),
-            "--condition-context",
-            str(CONTEXT_COMPLETE),
-            "--condition-capture",
-            str(CONDITION_CAPTURE),
-            "--condition-context",
-            str(CONTEXT_COMPLETE),
-            "--condition-capture",
-            str(ROOT / "README.md"),
-            "--condition-as-of",
-            "2027-01-01",
-        ]
-    ) == EXIT_USAGE
+    assert (
+        main(
+            [
+                "reach",
+                str(manifest),
+                "--condition",
+                str(CONDITION),
+                "--condition-context",
+                str(CONTEXT_COMPLETE),
+                "--condition-capture",
+                str(CONDITION_CAPTURE),
+                "--condition-context",
+                str(CONTEXT_COMPLETE),
+                "--condition-capture",
+                str(ROOT / "README.md"),
+                "--condition-as-of",
+                "2027-01-01",
+            ]
+        )
+        == EXIT_USAGE
+    )
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "one id supplied different capture bytes" in captured.err
 
 
 @pytest.mark.parametrize("output", ["--sarif", "--graph"])
-def test_condition_findings_refuse_unsupported_output_formats(
-    tmp_path, output, capsys
-):
+def test_condition_findings_refuse_unsupported_output_formats(tmp_path, output, capsys):
     manifest = write_conditional_manifest(tmp_path)
 
     assert main(["reach", str(manifest), *condition_args(), output]) == EXIT_USAGE
@@ -1182,9 +1175,7 @@ def test_condition_findings_refuse_unsupported_output_formats(
 
 
 def test_ir_reach_refuses_standalone_condition_composition(capsys):
-    assert main(
-        ["reach", "--ir", "unused.json", *condition_args()]
-    ) == EXIT_USAGE
+    assert main(["reach", "--ir", "unused.json", *condition_args()]) == EXIT_USAGE
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "cannot be composed with --ir" in captured.err
@@ -1212,7 +1203,7 @@ def test_verify_reports_violations_against_recorded_calls(capsys):
 def test_verify_passes_on_a_conformant_record(tmp_path, capsys):
     path = tmp_path / "ok.jsonl"
     path.write_text(
-        '{"tool": "open_case", "scope": "c1", "principal": "caller"}\n',
+        '{"tool": "open_case", "scope": "c1", "principal": "caller"}',
         encoding="utf-8",
     )
     assert main(["verify", V1, "--traces", str(path)]) == EXIT_OK
@@ -1256,9 +1247,7 @@ def test_a_malformed_manifest_on_the_diff_path_is_a_usage_error(tmp_path, capsys
 def test_diff_of_different_agents_is_a_usage_error(tmp_path, capsys):
     other = tmp_path / "other.yaml"
     other.write_text(
-        Path(V1).read_text(encoding="utf-8").replace(
-            "agent: dispute-resolver", "agent: another"
-        ),
+        Path(V1).read_text(encoding="utf-8").replace("agent: dispute-resolver", "agent: another"),
         encoding="utf-8",
     )
     assert main(["diff", V1, str(other)]) == EXIT_USAGE
@@ -1267,7 +1256,7 @@ def test_diff_of_different_agents_is_a_usage_error(tmp_path, capsys):
 
 def test_a_malformed_trace_is_a_usage_error(tmp_path, capsys):
     path = tmp_path / "bad.jsonl"
-    path.write_text('{"tool": "open_case", "approved": "yes"}\n', encoding="utf-8")
+    path.write_text('{"tool": "open_case", "approved": "yes"}', encoding="utf-8")
     assert main(["verify", V1, "--traces", str(path)]) == EXIT_USAGE
     assert "approved must be true or false" in capsys.readouterr().err
 
@@ -1327,11 +1316,11 @@ def test_scan_reports_a_payload_that_is_not_a_catalogue(tmp_path, capsys):
 def test_scan_source_reads_agent_code(tmp_path, capsys):
     source = tmp_path / "agent.py"
     source.write_text(
-        'from strands import Agent, tool\n\n\n'
-        '@tool\n'
-        'def issue_refund(case_id: str, amount: float) -> str:\n'
+        "from strands import Agent, tool\n\n\n"
+        "@tool\n"
+        "def issue_refund(case_id: str, amount: float) -> str:\n"
         '    """Refund a case."""\n\n\n'
-        'agent = Agent(tools=[issue_refund])\n',
+        "agent = Agent(tools=[issue_refund])\n",
         encoding="utf-8",
     )
 
@@ -1429,7 +1418,7 @@ def test_obligations_emit_parseable_json(capsys):
 
 def test_lint_json_reports_the_full_service_principal_finding(tmp_path, capsys):
     text = """
-version: 1
+version: 2
 agent: a
 limits: {depth: 4}
 tools:
@@ -1443,9 +1432,7 @@ tools:
     assert main(["lint", str(manifest), "--json"]) == EXIT_FINDING
     payload = json.loads(capsys.readouterr().out)
 
-    finding = next(
-        f for f in payload["findings"] if f["rule"] == "identity.service-principal"
-    )
+    finding = next(f for f in payload["findings"] if f["rule"] == "identity.service-principal")
     assert finding["rule"] == "identity.service-principal"
     assert finding["severity"] == "error"
     assert finding["subject"] == "ledger"
@@ -1458,7 +1445,7 @@ def test_scenarios_export_the_reachable_breach_for_review(capsys):
     assert main(["scenarios", V2]) == EXIT_FINDING
     output = capsys.readouterr().out
 
-    assert "cumulative_value:" in output
+    assert "quantity_budget:" in output
     assert "open_case -> search_cases -> issue_refund" in output
     assert "REVIEW: write the input" in output
 
@@ -1467,7 +1454,7 @@ def test_scenarios_emit_parseable_json(capsys):
     assert main(["scenarios", V2, "--json"]) == EXIT_FINDING
     payload = json.loads(capsys.readouterr().out)
 
-    assert payload["schema"] == "agentmandate.scenarios/v1"
+    assert payload["schema"] == "agentmandate.scenarios/v2"
     assert payload["scenarios"][0]["agent_input"] == ""
 
 
@@ -1534,9 +1521,18 @@ def test_a_malformed_reviewed_file_is_a_usage_error(tmp_path, capsys):
 
 OTEL = str(EXAMPLES / "otel-trace.json")
 OTEL_MAP = [
-    "--map", "scope=app.case.id", "--map", "value=app.refund.amount",
-    "--map", "currency=app.currency", "--map", "approved=app.approved",
-    "--map", "principal=app.principal",
+    "--map",
+    "scope=app.case.id",
+    "--map",
+    "value=app.refund.amount",
+    "--map",
+    "unit=app.unit",
+    "--map",
+    "quantity=app.quantity",
+    "--map",
+    "approved=app.approved",
+    "--map",
+    "principal=app.principal",
 ]
 
 
@@ -1604,23 +1600,28 @@ def test_a_malformed_mapping_is_a_usage_error(capsys):
 def test_two_independent_traces_do_not_share_a_budget(tmp_path, capsys):
     """The blocker: two runs each under the ceiling were combined into one
     breach that neither run committed."""
+
     def refund(trace, start):
         return {
-            "name": "execute_tool issue_refund", "traceId": trace,
+            "name": "execute_tool issue_refund",
+            "traceId": trace,
             "startTimeUnixNano": str(start),
             "attributes": [
                 {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
                 {"key": "gen_ai.tool.name", "value": {"stringValue": "issue_refund"}},
                 {"key": "app.case.id", "value": {"stringValue": "c1"}},
                 {"key": "app.refund.amount", "value": {"stringValue": "300"}},
-                {"key": "app.currency", "value": {"stringValue": "GBP"}},
+                {"key": "app.unit", "value": {"stringValue": "GBP"}},
+                {"key": "app.quantity", "value": {"stringValue": "value"}},
                 {"key": "app.approved", "value": {"boolValue": True}},
                 {"key": "app.principal", "value": {"stringValue": "caller"}},
             ],
         }
+
     def opener(trace, start):
         return {
-            "name": "execute_tool open_case", "traceId": trace,
+            "name": "execute_tool open_case",
+            "traceId": trace,
             "startTimeUnixNano": str(start),
             "attributes": [
                 {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
@@ -1629,10 +1630,29 @@ def test_two_independent_traces_do_not_share_a_budget(tmp_path, capsys):
                 {"key": "app.principal", "value": {"stringValue": "caller"}},
             ],
         }
+
     path = tmp_path / "two.json"
-    path.write_text(json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [
-        opener("A", 100), refund("A", 200), opener("B", 300), refund("B", 400)]}]}]}),
-        encoding="utf-8")
+    path.write_text(
+        json.dumps(
+            {
+                "resourceSpans": [
+                    {
+                        "scopeSpans": [
+                            {
+                                "spans": [
+                                    opener("A", 100),
+                                    refund("A", 200),
+                                    opener("B", 300),
+                                    refund("B", 400),
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
 
     assert main(["verify", V1, "--otel", str(path), *OTEL_MAP]) == EXIT_OK
     out = capsys.readouterr().out
@@ -1662,10 +1682,34 @@ def test_otel_only_flags_are_refused_with_a_jsonl_file(capsys):
 
 def test_lenient_mode_is_opt_in(tmp_path, capsys):
     path = tmp_path / "bare.json"
-    path.write_text(json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [{
-        "name": "t", "traceId": "t1", "startTimeUnixNano": "1", "attributes": [
-            {"key": "gen_ai.tool.name", "value": {"stringValue": "open_case"}}]}]}]}]}),
-        encoding="utf-8")
+    path.write_text(
+        json.dumps(
+            {
+                "resourceSpans": [
+                    {
+                        "scopeSpans": [
+                            {
+                                "spans": [
+                                    {
+                                        "name": "t",
+                                        "traceId": "t1",
+                                        "startTimeUnixNano": "1",
+                                        "attributes": [
+                                            {
+                                                "key": "gen_ai.tool.name",
+                                                "value": {"stringValue": "open_case"},
+                                            }
+                                        ],
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
 
     main(["verify", V1, "--otel", str(path)])
     assert "0 tool call(s)" in capsys.readouterr().out
@@ -1676,11 +1720,39 @@ def test_lenient_mode_is_opt_in(tmp_path, capsys):
 
 def test_newline_delimited_requests_are_accepted(tmp_path, capsys):
     """OpenTelemetry's file exporter writes one request per line."""
-    one = json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [{
-        "name": "e", "traceId": "t1", "startTimeUnixNano": "1", "attributes": [
-            {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
-            {"key": "gen_ai.tool.name", "value": {"stringValue": "open_case"}},
-            {"key": "app.principal", "value": {"stringValue": "caller"}}]}]}]}]})
+    one = json.dumps(
+        {
+            "resourceSpans": [
+                {
+                    "scopeSpans": [
+                        {
+                            "spans": [
+                                {
+                                    "name": "e",
+                                    "traceId": "t1",
+                                    "startTimeUnixNano": "1",
+                                    "attributes": [
+                                        {
+                                            "key": "gen_ai.operation.name",
+                                            "value": {"stringValue": "execute_tool"},
+                                        },
+                                        {
+                                            "key": "gen_ai.tool.name",
+                                            "value": {"stringValue": "open_case"},
+                                        },
+                                        {
+                                            "key": "app.principal",
+                                            "value": {"stringValue": "caller"},
+                                        },
+                                    ],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    )
     path = tmp_path / "ndjson.json"
     path.write_text(one + "\n" + one + "\n", encoding="utf-8")
 
@@ -1692,14 +1764,43 @@ def test_an_errored_call_survives_the_emit_round_trip(tmp_path, capsys):
     """The errored flag has to reach the emitted file, or a re-run from it
     would silently pass where the trace did not."""
     path = tmp_path / "err.json"
-    path.write_text(json.dumps({"resourceSpans": [{"scopeSpans": [{"spans": [{
-        "name": "e", "traceId": "t1", "startTimeUnixNano": "1",
-        "status": {"code": "STATUS_CODE_ERROR"},
-        "attributes": [
-            {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
-            {"key": "gen_ai.tool.name", "value": {"stringValue": "issue_refund"}},
-            {"key": "app.principal", "value": {"stringValue": "caller"}}]}]}]}]}),
-        encoding="utf-8")
+    path.write_text(
+        json.dumps(
+            {
+                "resourceSpans": [
+                    {
+                        "scopeSpans": [
+                            {
+                                "spans": [
+                                    {
+                                        "name": "e",
+                                        "traceId": "t1",
+                                        "startTimeUnixNano": "1",
+                                        "status": {"code": "STATUS_CODE_ERROR"},
+                                        "attributes": [
+                                            {
+                                                "key": "gen_ai.operation.name",
+                                                "value": {"stringValue": "execute_tool"},
+                                            },
+                                            {
+                                                "key": "gen_ai.tool.name",
+                                                "value": {"stringValue": "issue_refund"},
+                                            },
+                                            {
+                                                "key": "app.principal",
+                                                "value": {"stringValue": "caller"},
+                                            },
+                                        ],
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
     out_path = tmp_path / "observed.jsonl"
 
     main(["verify", V1, "--otel", str(path), *OTEL_MAP, "--emit", str(out_path)])
@@ -1784,7 +1885,7 @@ def test_inventory_validate_checks_both_evidence_declarations(fixture, capsys):
 
 def test_inventory_validate_failure_emits_no_stdout(tmp_path, capsys):
     invalid = tmp_path / "invalid.json"
-    invalid.write_text('{"inventory_version":1,"unexpected":true}', encoding="utf-8")
+    invalid.write_text('{"inventory_version": 1, "unexpected": true}', encoding="utf-8")
 
     assert main(["inventory", "validate", str(invalid)]) == EXIT_USAGE
     captured = capsys.readouterr()
@@ -1813,34 +1914,35 @@ def test_drift_accepts_complete_reviewed_dynamic_inventory(tmp_path, capsys):
         }
     )
 
-    assert main(
-        [
-            "drift",
-            str(ROOT / "docs/evidence/agentkit/mandate.yaml"),
-            "--source",
-            str(tmp_path),
-            "--binding",
-            "agent",
-            "--inventory-declaration",
-            str(AGENTKIT_INVENTORY),
-            "--inventory-capture",
-            str(ROOT / "docs/evidence/agentkit/inventory-v074.json"),
-            "--inventory-selection",
-            selection,
-            "--inventory-as-of",
-            "2027-01-01",
-            "--json",
-        ]
-    ) == EXIT_OK
+    assert (
+        main(
+            [
+                "drift",
+                str(ROOT / "tests/fixtures/quantity-evidence/agentkit/mandate.yaml"),
+                "--source",
+                str(tmp_path),
+                "--binding",
+                "agent",
+                "--inventory-declaration",
+                str(AGENTKIT_INVENTORY),
+                "--inventory-capture",
+                str(ROOT / "docs/evidence/agentkit/inventory-v074.json"),
+                "--inventory-selection",
+                selection,
+                "--inventory-as-of",
+                "2027-01-01",
+                "--json",
+            ]
+        )
+        == EXIT_OK
+    )
     payload = json.loads(capsys.readouterr().out)
     assert payload["clean"] is True
     assert payload["inventory_as_of"] == "2027-01-01"
     assert len(payload["discovered"]) == 20
 
 
-def test_drift_reconciles_condition_decisions_in_a_separate_output_section(
-    tmp_path, capsys
-):
+def test_drift_reconciles_condition_decisions_in_a_separate_output_section(tmp_path, capsys):
     manifest = write_conditional_manifest(tmp_path)
     source = write_conditional_source(tmp_path)
     argv = ["drift", str(manifest), "--source", str(source), *condition_args()]
@@ -1854,7 +1956,7 @@ def test_drift_reconciles_condition_decisions_in_a_separate_output_section(
     assert main([*argv, "--json"]) == EXIT_OK
     payload = json.loads(capsys.readouterr().out)
     assert payload["clean"] is True
-    assert payload["conditions"]["schema"] == "agentmandate.conditions/v1"
+    assert payload["conditions"]["schema"] == "agentmandate.conditions/v2"
     assert payload["conditions"]["applied"][0]["tool"] == "run_query"
     assert payload["conditions"]["findings"] == []
 
@@ -1863,16 +1965,19 @@ def test_condition_finding_makes_combined_drift_json_unclean(tmp_path, capsys):
     manifest = write_conditional_manifest(tmp_path)
     source = write_conditional_source(tmp_path)
 
-    assert main(
-        [
-            "drift",
-            str(manifest),
-            "--source",
-            str(source),
-            *condition_args(CONTEXT, as_of="2026-09-01"),
-            "--json",
-        ]
-    ) == EXIT_FINDING
+    assert (
+        main(
+            [
+                "drift",
+                str(manifest),
+                "--source",
+                str(source),
+                *condition_args(CONTEXT, as_of="2026-09-01"),
+                "--json",
+            ]
+        )
+        == EXIT_FINDING
+    )
     payload = json.loads(capsys.readouterr().out)
     assert payload["clean"] is False
     assert payload["source_drift_clean"] is True
@@ -1880,9 +1985,7 @@ def test_condition_finding_makes_combined_drift_json_unclean(tmp_path, capsys):
     assert "not complete" in payload["conditions"]["findings"][0]["message"]
 
 
-def test_multi_agent_condition_drift_explains_how_to_select_a_binding(
-    tmp_path, capsys
-):
+def test_multi_agent_condition_drift_explains_how_to_select_a_binding(tmp_path, capsys):
     manifest = write_conditional_manifest(tmp_path)
     source = write_conditional_source(tmp_path)
     other = source / "other.py"
@@ -1895,16 +1998,19 @@ def test_multi_agent_condition_drift_explains_how_to_select_a_binding(
         encoding="utf-8",
     )
 
-    assert main(
-        [
-            "drift",
-            str(manifest),
-            "--source",
-            str(source),
-            "--union-bindings",
-            *condition_args(),
-        ]
-    ) == EXIT_FINDING
+    assert (
+        main(
+            [
+                "drift",
+                str(manifest),
+                "--source",
+                str(source),
+                "--union-bindings",
+                *condition_args(),
+            ]
+        )
+        == EXIT_FINDING
+    )
     output = capsys.readouterr().out
     assert "UNRESOLVED  run_query" in output
     assert "select one with --binding rather than --union-bindings" in output
@@ -2000,9 +2106,10 @@ def test_dynamic_inventory_requires_a_declaration(tmp_path, capsys):
         encoding="utf-8",
     )
 
-    assert main(
-        ["drift", V1, "--source", str(tmp_path), "--inventory-capture", "missing"]
-    ) == EXIT_USAGE
+    assert (
+        main(["drift", V1, "--source", str(tmp_path), "--inventory-capture", "missing"])
+        == EXIT_USAGE
+    )
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "--inventory-declaration" in captured.err
@@ -2019,28 +2126,31 @@ def test_dynamic_inventory_rejects_different_bytes_for_one_locator(tmp_path, cap
     changed.write_text("{}", encoding="utf-8")
     capture = ROOT / "docs/evidence/agentkit/inventory-v074.json"
 
-    assert main(
-        [
-            "drift",
-            str(ROOT / "docs/evidence/agentkit/mandate.yaml"),
-            "--source",
-            str(tmp_path),
-            "--binding",
-            "agent",
-            "--inventory-declaration",
-            str(AGENTKIT_INVENTORY),
-            "--inventory-capture",
-            str(capture),
-            "--inventory-declaration",
-            str(AGENTKIT_INVENTORY),
-            "--inventory-capture",
-            str(changed),
-            "--inventory-selection",
-            '{"provider":"cdp_api"}',
-            "--inventory-as-of",
-            "2027-01-01",
-        ]
-    ) == EXIT_USAGE
+    assert (
+        main(
+            [
+                "drift",
+                str(ROOT / "tests/fixtures/quantity-evidence/agentkit/mandate.yaml"),
+                "--source",
+                str(tmp_path),
+                "--binding",
+                "agent",
+                "--inventory-declaration",
+                str(AGENTKIT_INVENTORY),
+                "--inventory-capture",
+                str(capture),
+                "--inventory-declaration",
+                str(AGENTKIT_INVENTORY),
+                "--inventory-capture",
+                str(changed),
+                "--inventory-selection",
+                '{"provider": "cdp_api"}',
+                "--inventory-as-of",
+                "2027-01-01",
+            ]
+        )
+        == EXIT_USAGE
+    )
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "different capture bytes" in captured.err
@@ -2058,7 +2168,7 @@ def test_dynamic_inventory_text_records_the_evaluation_date(tmp_path, capsys):
     main(
         [
             "drift",
-            str(ROOT / "docs/evidence/agentkit/mandate.yaml"),
+            str(ROOT / "tests/fixtures/quantity-evidence/agentkit/mandate.yaml"),
             "--source",
             str(tmp_path),
             "--binding",

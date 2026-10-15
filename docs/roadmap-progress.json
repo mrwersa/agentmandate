@@ -4,7 +4,7 @@
   "phases": [
     {
       "id": "foundation",
-      "title": "0–3 months: authority foundation",
+      "title": "0\u20133 months: authority foundation",
       "initiatives": [
         {
           "title": "Two additional real graphs",
@@ -34,7 +34,7 @@
     },
     {
       "id": "model",
-      "title": "3–6 months: model real authority",
+      "title": "3\u20136 months: model real authority",
       "initiatives": [
         {
           "title": "Conditional authority",
@@ -64,7 +64,7 @@
           "title": "Bounded producers and quantities",
           "status": "partial",
           "evidence": "docs/bounded-producer-gate-4-review.md",
-          "reason": "Finite cardinality is delivered; quantity relations lack a reviewed input domain."
+          "reason": "Finite cardinality and named additive quantity budgets are delivered. Conversion, collateral and gross/net quantity relations still lack a reviewed operational input domain."
         },
         {
           "title": "Reviewed data-flow labels",
@@ -76,7 +76,7 @@
     },
     {
       "id": "policy",
-      "title": "6–12 months: policy control-plane preview",
+      "title": "6\u201312 months: policy control-plane preview",
       "initiatives": [
         {
           "title": "Policy validation and effective diff",
@@ -100,7 +100,7 @@
           "title": "Explainable counterfactual remediation",
           "status": "partial",
           "evidence": "docs/remediation.md",
-          "reason": "Removal, approval, supplied ceilings/grids, required paths and automatic finite-lattice ceiling discovery with bounded approval combinations are delivered. Complete domain frontiers remain distinct from search-depth truncation; condition/delegation repairs, broader families and global synthesis remain open."
+          "reason": "Removal, approval, named-quantity ceilings/grids, required paths and finite-lattice discovery with bounded approval combinations are delivered. Domain completeness remains distinct from reach-depth truncation; condition/delegation repairs and global synthesis remain open."
         },
         {
           "title": "Named-review CI workflow",
@@ -112,7 +112,7 @@
     },
     {
       "id": "fleet",
-      "title": "12–18 months: fleet governance",
+      "title": "12\u201318 months: fleet governance",
       "initiatives": [
         {
           "title": "Federated agent and tool inventory",
@@ -148,7 +148,7 @@
     },
     {
       "id": "advanced",
-      "title": "18–24 months: advanced authority",
+      "title": "18\u201324 months: advanced authority",
       "initiatives": [
         {
           "title": "Cross-agent and cross-session reachability",
@@ -166,7 +166,7 @@
           "title": "Least-authority synthesis",
           "status": "not_started",
           "evidence": "ROADMAP.md",
-          "reason": "Repair candidates and required paths are prerequisites, not complete Pareto synthesis."
+          "reason": "Finite ceiling/approval optimization is part of remediation; broader synthesis and operational positive-obligation evidence remain open."
         },
         {
           "title": "Extension interfaces",

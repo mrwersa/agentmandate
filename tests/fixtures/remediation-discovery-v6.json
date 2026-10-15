@@ -1,0 +1,3285 @@
+[
+  {
+    "exit": 1,
+    "kwargs": {},
+    "manifest": "examples/dispute-resolver-v2.yaml",
+    "name": "refund-complete",
+    "options": [
+      "issue_refund=0.01"
+    ],
+    "requirements": "examples/remediation/required-refund.json",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP",
+            "kind": "quantity_budget",
+            "path": [
+              "open_case(case#1)",
+              "search_cases(case#2)",
+              "issue_refund(case#1, 500 GBP)",
+              "issue_refund(case#2, 500 GBP)"
+            ]
+          }
+        ],
+        "depth": 8,
+        "effects": [
+          [
+            "irreversible",
+            "case"
+          ],
+          [
+            "read",
+            "case"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "2000",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "fetch_case",
+          "issue_refund",
+          "open_case",
+          "search_cases"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 8,
+            "effects": [
+              [
+                "irreversible",
+                "case"
+              ],
+              [
+                "read",
+                "case"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "500",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "fetch_case",
+              "issue_refund",
+              "open_case",
+              "search_cases"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "125",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "500",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "issue_refund"
+            }
+          ],
+          "impact": {
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "dispute-resolver",
+            "identity": "spiffe://bank/agents/dispute-resolver",
+            "limits": {
+              "depth": 8,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "500",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "read",
+                "name": "open_case",
+                "principal": "caller",
+                "produces": "case",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": false
+              },
+              {
+                "effect": "read",
+                "name": "search_cases",
+                "principal": "caller",
+                "produces": "case",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "effect": "read",
+                "name": "fetch_case",
+                "principal": "caller",
+                "requires": [
+                  "case"
+                ],
+                "requires_approval": false,
+                "unbounded": false
+              },
+              {
+                "ceiling": {
+                  "amount": "125",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "issue_refund",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "case"
+                ],
+                "requires_approval": true,
+                "scope_key": "case",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "issue_refund": {
+                "amount": "125",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "normal-refund",
+              "status": "conformant_within_manifest_model",
+              "steps": 2
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        }
+      ],
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 1,
+        "approval_tools": [],
+        "domain_points": 50001,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "500",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 50001,
+            "quantity": "value",
+            "step": {
+              "amount": "0.01",
+              "unit": "GBP"
+            },
+            "tool": "issue_refund"
+          }
+        ],
+        "frontier_complete_within_domain": true,
+        "probes": [
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "500",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 0,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "250.01",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "250",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "125.01",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "125",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "candidate"
+          }
+        ],
+        "remaining_points": 0,
+        "resolved_points": 50001,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "complete",
+        "tools_retained": [
+          "fetch_case",
+          "issue_refund",
+          "open_case",
+          "search_cases"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": 1,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 1
+      },
+      "input": {
+        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+      },
+      "keep_tools": [],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 2
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "500",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "issue_refund"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "dispute-resolver",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "normal-refund",
+            "status": "conformant_within_manifest_model",
+            "steps": 2
+          }
+        ],
+        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
+        "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+        "reviewer": "synthetic-example-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 4,
+        "candidates_found": 1,
+        "combinations_examined": 6,
+        "combinations_total": 50001,
+        "depth": 8,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "required_workflow_rejections": 1,
+        "truncated_by_limit": false
+      },
+      "status": "candidates_found"
+    }
+  },
+  {
+    "exit": 1,
+    "kwargs": {
+      "max_evaluations": 2
+    },
+    "manifest": "examples/dispute-resolver-v2.yaml",
+    "name": "refund-cutoff",
+    "options": [
+      "issue_refund=0.01"
+    ],
+    "requirements": "examples/remediation/required-refund.json",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP",
+            "kind": "quantity_budget",
+            "path": [
+              "open_case(case#1)",
+              "search_cases(case#2)",
+              "issue_refund(case#1, 500 GBP)",
+              "issue_refund(case#2, 500 GBP)"
+            ]
+          }
+        ],
+        "depth": 8,
+        "effects": [
+          [
+            "irreversible",
+            "case"
+          ],
+          [
+            "read",
+            "case"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "2000",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "fetch_case",
+          "issue_refund",
+          "open_case",
+          "search_cases"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [],
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 1,
+        "approval_tools": [],
+        "domain_points": 50001,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "500",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 50001,
+            "quantity": "value",
+            "step": {
+              "amount": "0.01",
+              "unit": "GBP"
+            },
+            "tool": "issue_refund"
+          }
+        ],
+        "frontier_complete_within_domain": false,
+        "probes": [
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "500",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 0,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "issue_refund": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          }
+        ],
+        "remaining_points": 50001,
+        "resolved_points": 0,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "evaluation_limit",
+        "tools_retained": [
+          "fetch_case",
+          "issue_refund",
+          "open_case",
+          "search_cases"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": 0,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 0
+      },
+      "input": {
+        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+      },
+      "keep_tools": [],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 2
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "500",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "issue_refund"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "dispute-resolver",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "normal-refund",
+            "status": "conformant_within_manifest_model",
+            "steps": 2
+          }
+        ],
+        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
+        "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+        "reviewer": "synthetic-example-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 0,
+        "candidates_found": 0,
+        "combinations_examined": 2,
+        "combinations_total": 50001,
+        "depth": 8,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 2,
+        "required_workflow_rejections": 1,
+        "truncated_by_limit": true
+      },
+      "status": "no_candidate_found_within_limits"
+    }
+  },
+  {
+    "exit": 1,
+    "kwargs": {},
+    "manifest": "examples/remediation/ungated-refund.json",
+    "name": "joint-approval",
+    "options": [
+      "pay=0.01"
+    ],
+    "requirements": "examples/remediation/required-joint.json",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "pay is irreversible and needs no approval, reachable in 2 call(s)",
+            "kind": "ungated_effect",
+            "path": [
+              "seed(item#1)",
+              "pay"
+            ]
+          },
+          {
+            "detail": "quantity 'value' reaches 10 GBP, above its cumulative budget of 5 GBP",
+            "kind": "quantity_budget",
+            "path": [
+              "seed(item#1)",
+              "seed(item#2)",
+              "pay(item#1, 5 GBP)",
+              "pay(item#2, 5 GBP)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "10",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": [
+          "pay"
+        ]
+      },
+      "baseline_lint": [
+        {
+          "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+          "rule": "effect.ungated-irreversible",
+          "severity": "error",
+          "subject": "pay"
+        }
+      ],
+      "candidates": [
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 4,
+            "effects": [
+              [
+                "irreversible",
+                "item"
+              ],
+              [
+                "read",
+                "item"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "5.0",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "pay",
+              "seed"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "kind": "require_approval",
+              "tool": "pay"
+            },
+            {
+              "after": {
+                "amount": "2.5",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "impact": {
+            "edit_count": 2,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "ceiling-repair",
+            "identity": "synthetic-caller",
+            "limits": {
+              "depth": 4,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "5",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {
+              "operator": [
+                "seed",
+                "pay"
+              ]
+            },
+            "tools": [
+              {
+                "effect": "read",
+                "name": "seed",
+                "principal": "caller",
+                "produces": "item",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "2.5",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "pay",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [
+              "pay"
+            ],
+            "edit_count": 2,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "pay": {
+                "amount": "2.5",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "normal-refund",
+              "status": "conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        }
+      ],
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 2,
+        "approval_tools": [
+          "pay"
+        ],
+        "domain_points": 1002,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "5",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 501,
+            "quantity": "value",
+            "step": {
+              "amount": "0.01",
+              "unit": "GBP"
+            },
+            "tool": "pay"
+          }
+        ],
+        "frontier_complete_within_domain": true,
+        "probes": [
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget",
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 0,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget",
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.51",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.26",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.89",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.2",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.19",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.05",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.04",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.97",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.01",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "ungated_effect"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.99",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.98",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.96",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.88",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "1.25",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [
+              "pay"
+            ],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [
+              "pay"
+            ],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [
+              "pay"
+            ],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "pay": {
+                "amount": "2.51",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [
+              "pay"
+            ],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "pay": {
+                "amount": "2.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "candidate"
+          }
+        ],
+        "remaining_points": 0,
+        "resolved_points": 1002,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "complete",
+        "tools_retained": [
+          "pay",
+          "seed"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": 1,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 1
+      },
+      "input": {
+        "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792"
+      },
+      "keep_tools": [],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.26",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.89",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.97",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.99",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.98",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.96",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.88",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1.25",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "normal-refund",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "kind": "require_approval",
+              "tool": "pay"
+            },
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "ceiling-repair",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "normal-refund",
+            "status": "conformant_within_manifest_model",
+            "steps": 3
+          }
+        ],
+        "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792",
+        "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
+        "reviewer": "synthetic-example-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "5e2396636f2df2079dbb9325572e211d998d57e255ef428f5b1554cdf7d3f972"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 11,
+        "candidates_found": 1,
+        "combinations_examined": 22,
+        "combinations_total": 1002,
+        "depth": 4,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "required_workflow_rejections": 10,
+        "truncated_by_limit": false
+      },
+      "status": "candidates_found"
+    }
+  },
+  {
+    "exit": 1,
+    "kwargs": {},
+    "manifest": "examples/ceiling-discovery/two-tools.json",
+    "name": "two-tool-frontier",
+    "options": [
+      "pay=1",
+      "other=1"
+    ],
+    "requirements": "examples/ceiling-discovery/required-two-tools.json",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "quantity 'value' reaches 7.0 GBP, above its cumulative budget of 5 GBP",
+            "kind": "quantity_budget",
+            "path": [
+              "seed(item#1)",
+              "pay(item#1, 3.5 GBP)",
+              "other(item#1, 3.5 GBP)"
+            ]
+          }
+        ],
+        "depth": 3,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "7.0",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "other",
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 3,
+            "effects": [
+              [
+                "irreversible",
+                "item"
+              ],
+              [
+                "read",
+                "item"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "4.5",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "other",
+              "pay",
+              "seed"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "1",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "impact": {
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "two-payments",
+            "identity": null,
+            "limits": {
+              "depth": 3,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "5",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "read",
+                "name": "seed",
+                "principal": "caller",
+                "produces": "item",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "1",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "pay",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              },
+              {
+                "ceiling": {
+                  "amount": "3.5",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "other",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "1",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-payments",
+              "status": "conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        },
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 3,
+            "effects": [
+              [
+                "irreversible",
+                "item"
+              ],
+              [
+                "read",
+                "item"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "4.5",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "other",
+              "pay",
+              "seed"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "1",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            }
+          ],
+          "impact": {
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "two-payments",
+            "identity": null,
+            "limits": {
+              "depth": 3,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "5",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "read",
+                "name": "seed",
+                "principal": "caller",
+                "produces": "item",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "3.5",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "pay",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              },
+              {
+                "ceiling": {
+                  "amount": "1",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "other",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "other": {
+                "amount": "1",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-payments",
+              "status": "conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        },
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 3,
+            "effects": [
+              [
+                "irreversible",
+                "item"
+              ],
+              [
+                "read",
+                "item"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "5",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "other",
+              "pay",
+              "seed"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "impact": {
+            "edit_count": 2,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "two-payments",
+            "identity": null,
+            "limits": {
+              "depth": 3,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "5",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "read",
+                "name": "seed",
+                "principal": "caller",
+                "produces": "item",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "2",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "pay",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              },
+              {
+                "ceiling": {
+                  "amount": "3",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "other",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 2,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "2",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-payments",
+              "status": "conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        },
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 3,
+            "effects": [
+              [
+                "irreversible",
+                "item"
+              ],
+              [
+                "read",
+                "item"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "5",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "other",
+              "pay",
+              "seed"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "impact": {
+            "edit_count": 2,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "two-payments",
+            "identity": null,
+            "limits": {
+              "depth": 3,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "5",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "read",
+                "name": "seed",
+                "principal": "caller",
+                "produces": "item",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "3",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "pay",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              },
+              {
+                "ceiling": {
+                  "amount": "2",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "other",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 2,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "other": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-payments",
+              "status": "conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        }
+      ],
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 1,
+        "approval_tools": [],
+        "domain_points": 25,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "3.5",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 5,
+            "quantity": "value",
+            "step": {
+              "amount": "1",
+              "unit": "GBP"
+            },
+            "tool": "other"
+          },
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "3.5",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 5,
+            "quantity": "value",
+            "step": {
+              "amount": "1",
+              "unit": "GBP"
+            },
+            "tool": "pay"
+          }
+        ],
+        "frontier_complete_within_domain": true,
+        "probes": [
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 0,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "2",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "2",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "candidate"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "1",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "candidate"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "candidate"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "1",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "candidate"
+          }
+        ],
+        "remaining_points": 0,
+        "resolved_points": 25,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "complete",
+        "tools_retained": [
+          "other",
+          "pay",
+          "seed"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": 4,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 4
+      },
+      "input": {
+        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1"
+      },
+      "keep_tools": [],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "two-payments",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "two-payments",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "two-payments",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "two-payments",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "two-payments",
+            "status": "conformant_within_manifest_model",
+            "steps": 3
+          }
+        ],
+        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1",
+        "reason": "Synthetic required payments; not live or business-success evidence.",
+        "reviewer": "synthetic-example-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 7,
+        "candidates_found": 4,
+        "combinations_examined": 11,
+        "combinations_total": 25,
+        "depth": 3,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "required_workflow_rejections": 3,
+        "truncated_by_limit": false
+      },
+      "status": "candidates_found"
+    }
+  },
+  {
+    "exit": 1,
+    "kwargs": {
+      "max_candidates": 1
+    },
+    "manifest": "examples/ceiling-discovery/two-tools.json",
+    "name": "display-limited",
+    "options": [
+      "pay=1",
+      "other=1"
+    ],
+    "requirements": "examples/ceiling-discovery/required-two-tools.json",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "quantity 'value' reaches 7.0 GBP, above its cumulative budget of 5 GBP",
+            "kind": "quantity_budget",
+            "path": [
+              "seed(item#1)",
+              "pay(item#1, 3.5 GBP)",
+              "other(item#1, 3.5 GBP)"
+            ]
+          }
+        ],
+        "depth": 3,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "7.0",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "other",
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 3,
+            "effects": [
+              [
+                "irreversible",
+                "item"
+              ],
+              [
+                "read",
+                "item"
+              ]
+            ],
+            "max_quantities": {
+              "value": {
+                "amount": "4.5",
+                "unit": "GBP"
+              }
+            },
+            "reachable_tools": [
+              "other",
+              "pay",
+              "seed"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "1",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "impact": {
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "two-payments",
+            "identity": null,
+            "limits": {
+              "depth": 3,
+              "effects": {},
+              "quantities": {
+                "value": {
+                  "amount": "5",
+                  "unit": "GBP"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "read",
+                "name": "seed",
+                "principal": "caller",
+                "produces": "item",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "1",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "pay",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              },
+              {
+                "ceiling": {
+                  "amount": "3.5",
+                  "unit": "GBP"
+                },
+                "effect": "irreversible",
+                "name": "other",
+                "principal": "caller",
+                "quantity": "value",
+                "requires": [
+                  "item"
+                ],
+                "requires_approval": true,
+                "scope_key": "item",
+                "unbounded": false,
+                "value_arg": "amount"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "1",
+                "unit": "GBP"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-payments",
+              "status": "conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        }
+      ],
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 1,
+        "approval_tools": [],
+        "domain_points": 25,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "3.5",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 5,
+            "quantity": "value",
+            "step": {
+              "amount": "1",
+              "unit": "GBP"
+            },
+            "tool": "other"
+          },
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "3.5",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 5,
+            "quantity": "value",
+            "step": {
+              "amount": "1",
+              "unit": "GBP"
+            },
+            "tool": "pay"
+          }
+        ],
+        "frontier_complete_within_domain": true,
+        "probes": [
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 0,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "0",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "2",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "2",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "candidate"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "1",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "candidate"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "other": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "2",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 2,
+            "status": "candidate"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "other": {
+                "amount": "1",
+                "unit": "GBP"
+              },
+              "pay": {
+                "amount": "3.5",
+                "unit": "GBP"
+              }
+            },
+            "edit_count": 1,
+            "status": "candidate"
+          }
+        ],
+        "remaining_points": 0,
+        "resolved_points": 25,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "complete",
+        "tools_retained": [
+          "other",
+          "pay",
+          "seed"
+        ]
+      },
+      "frontier": {
+        "display_complete": false,
+        "enabled": true,
+        "non_dominated": 4,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 4
+      },
+      "input": {
+        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1"
+      },
+      "keep_tools": [],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "two-payments",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 2
+              },
+              "name": "two-payments",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "two-payments",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 3
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "other"
+            },
+            {
+              "after": {
+                "amount": "3",
+                "unit": "GBP"
+              },
+              "before": {
+                "amount": "3.5",
+                "unit": "GBP"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "value",
+              "tool": "pay"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "two-payments",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "two-payments",
+            "status": "conformant_within_manifest_model",
+            "steps": 3
+          }
+        ],
+        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1",
+        "reason": "Synthetic required payments; not live or business-success evidence.",
+        "reviewer": "synthetic-example-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 7,
+        "candidates_found": 4,
+        "combinations_examined": 11,
+        "combinations_total": 25,
+        "depth": 3,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 1,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "required_workflow_rejections": 3,
+        "truncated_by_limit": false
+      },
+      "status": "candidates_found"
+    }
+  },
+  {
+    "exit": 0,
+    "kwargs": {},
+    "manifest": "examples/dispute-resolver.yaml",
+    "name": "clean-baseline",
+    "options": [
+      "issue_refund=1"
+    ],
+    "requirements": null,
+    "result": {
+      "baseline": {
+        "breaches": [],
+        "depth": 8,
+        "effects": [
+          [
+            "irreversible",
+            "case"
+          ],
+          [
+            "read",
+            "case"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "500",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "fetch_case",
+          "issue_refund",
+          "open_case"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [],
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 1,
+        "approval_tools": [],
+        "domain_points": 501,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "500",
+              "unit": "GBP"
+            },
+            "minimum": "0",
+            "points": 501,
+            "quantity": "value",
+            "step": {
+              "amount": "1",
+              "unit": "GBP"
+            },
+            "tool": "issue_refund"
+          }
+        ],
+        "frontier_complete_within_domain": false,
+        "probes": [],
+        "remaining_points": 501,
+        "resolved_points": 0,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "not_needed_baseline_clean",
+        "tools_retained": [
+          "fetch_case",
+          "issue_refund",
+          "open_case"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": null,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "not_computed",
+        "successful_candidates": 0
+      },
+      "input": {
+        "manifest_sha256": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+      },
+      "keep_tools": [],
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 0,
+        "candidates_found": 0,
+        "combinations_examined": 0,
+        "combinations_total": 501,
+        "depth": 8,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "truncated_by_limit": false
+      },
+      "status": "no_reachable_breach_within_bound"
+    }
+  }
+]

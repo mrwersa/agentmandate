@@ -57,8 +57,8 @@ def copy_root(tmp_path):
 
 def test_eligible_and_expired_baselines_preserve_original_review_and_findings():
     for as_of, fixture in (
-        ("2026-10-11", "fleet-exceptions-v1.json"),
-        ("2026-10-19", "fleet-exceptions-expired-v1.json"),
+        ("2026-10-11", "fleet-exceptions-v2.json"),
+        ("2026-10-19", "fleet-exceptions-expired-v2.json"),
     ):
         report = run(as_of=as_of)
         assert report == json.loads((ROOT / "tests/fixtures" / fixture).read_bytes())

@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":"tools-list","result":{"tools":[{"description":"Process a test refund amount for AgentMandate policy evidence","inputSchema":{"properties":{"amount":{"description":"Synthetic refund amount in dollars","type":"integer"}},"required":["amount"],"type":"object"},"name":"RefundIamTarget___process_refund"}]}}

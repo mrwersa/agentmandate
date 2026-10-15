@@ -5,12 +5,15 @@ counterexample, installation, and the command summary. The pages below serve
 different purposes. A contract page describes a current or experimental data
 boundary. A gate review records why a public surface was exposed or deferred.
 An evidence page records what was observed and must not be read as a product
-guarantee.
+guarantee. Dated gate reviews and capture instructions describe their original
+release and may contain superseded schemas. Use the current guides below for
+commands; historical captures and acceptance records keep their original bytes.
 
 ## Choose a task
 
 | What you want to do | Start here |
 |---|---|
+| Bound money, records, tokens or compute | [Named quantity budgets](quantity-budgets.md) |
 | Run a complete example | [README quickstart](../README.md#run-the-example) |
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
@@ -25,7 +28,7 @@ guarantee.
 | Check artifact structure before evidence analysis | [Structural validation](structural-validation.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
-| Find monetary repair ceilings without guessing amounts | [Automatic ceiling discovery](ceiling-discovery.md) |
+| Find quantity repair ceilings without guessing amounts | [Automatic ceiling discovery](ceiling-discovery.md) |
 | Preserve required ordered calls during repair | [Required workflows](required-workflows.md) |
 | Check recorded calls against a mandate | [Trace verification](traces.md) |
 | Turn reachable authority into tests | [Evaluation loop](evaluation-loop.md) |
@@ -61,11 +64,11 @@ specific evidence gaps and have additional review and source-byte requirements.
 
 - [Design](../DESIGN.md): the authority model, search boundary, and non-goals.
 - [Maximum-headroom argument](headroom-abstraction.md): why greedy fills preserve
-  bounded monetary results, exact arithmetic, and independent amount-choice checks.
+  bounded quantity results, exact arithmetic, and independent amount-choice checks.
 - [Search bounds and performance](search-performance.md): depth semantics,
   worst-case growth, reproducible measurements, and CI resource limits.
 - [Authority IR](authority-ir.md): canonical provenance and the reviewed
-  manifest-v1 analysis profile.
+  manifest-v2 analysis profile.
 - [Stability](../STABILITY.md): supported public surfaces and versioning.
   Python callers can use `load`, `analyse`, and `compare` from `agentmandate`;
   the complete public export list is `agentmandate.__all__`. Private attachment
@@ -77,7 +80,7 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Pre-1.0 consolidation audit](pre-1.0-consolidation-audit.md): public contracts,
   private compatibility paths, fixture coverage, and the completed baseline
   alongside its historical initial findings.
-- [Current compatibility inventory](current-contract-inventory.md): check Python,
+- [Current contract inventory](current-contract-inventory.md): check Python,
   CLI and version declarations against pinned fixture bytes and replay coverage.
 
 ## Reviewed evidence attachments

@@ -205,7 +205,7 @@ def render(
         lines.append("#")
 
     lines += [
-        "version: 1",
+        "version: 2",
         f"agent: {_yaml_scalar(agent)}",
         "",
         "# REVIEW: set the workload identity this agent runs as.",
@@ -214,7 +214,7 @@ def render(
         "limits:",
         "  # REVIEW: the most one run may spend. Without this, `reach` has no",
         "  # cumulative limit to search for a way to exceed.",
-        "  # total: { amount: 0, currency: GBP }",
+        "  quantities: {}  # e.g. exported_records: { amount: 1000, unit: record }",
         "  depth: 8",
         "",
         "tools:",
@@ -255,7 +255,8 @@ def render(
             )
             lines.append(f"    # value_arg: {_yaml_scalar(proposal.value_arg)}")
             lines.append(f"    # scope_key: {_yaml_scalar(proposal.scope or 'REVIEW')}")
-            lines.append("    # ceiling: { amount: 0, currency: GBP }")
+            lines.append("    # quantity: exported_records")
+            lines.append("    # ceiling: { amount: 0, unit: record }")
         if proposal.effect == "irreversible":
             lines.append("    requires_approval: true")
         lines.append("")

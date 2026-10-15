@@ -1,7 +1,7 @@
 # Why the search spends the available headroom
 
 `reach` does not try every possible refund amount. It chooses the binding with
-the largest remaining ceiling and spends that headroom. For manifest v1, this
+the largest remaining ceiling and spends that headroom. For manifest v2, this
 preserves the greatest reachable cumulative value and the existence and shortest
 call length of a cumulative-value breach within the selected depth. The argument
 depends on the model below; it is not a claim about arbitrary tool input schemas
@@ -28,12 +28,12 @@ spend only accumulate; there are no refunds, replenishment, expiry or consumptio
 of bindings in this kernel. A finite producer cap, when supplied by a separately
 validated consumer, depends on binding count rather than spending.
 
-`limits.total` and `limits.effects` are properties the search checks for a
+`limits.quantities` and `limits.effects` are properties the search checks for a
 breach, not guards that stop exploration. Approval and principal labels do not
 change monetary enablement. Budgeted calls still count when they spend zero or
-have no remaining monetary headroom. Cumulative analysis needs one currency;
-resolve the structural and currency errors reported by `lint` before relying on
-the model. The argument concerns exact arithmetic on parsed monetary values.
+have no remaining monetary headroom. Each named quantity requires one consistent unit;
+resolve structural and per-quantity unit errors before relying on the model.
+The argument concerns exact arithmetic on parsed non-negative quantities.
 
 ## A prefix argument
 
@@ -71,7 +71,7 @@ the existential result, not every concrete trace or allocation of amounts.
 
 Suppose paying **exactly £1** unlocks a second tool that can spend £4, while the
 first tool's ceiling is £2. A greedy £2 payment does not unlock that tool; a £1
-payment can reach £5. This amount-dependent example falls outside manifest v1
+payment can reach £5. This amount-dependent example falls outside manifest v2
 and demonstrates why the enablement assumption matters. Do not translate such
 a workflow into unconditional scope production and then apply this argument.
 
@@ -138,3 +138,15 @@ independent security review.
 The report pins generated inputs, reference source and the measured kernel
 source. Future kernel changes must retain semantic agreement; the recorded
 source hash describes that run rather than certifying every later implementation.
+
+## Several named quantities
+
+Apply the prefix argument separately to each quantity. A tool has one amount
+argument and quantity assignment; filling its ceiling affects only that pool.
+Enablement, binding production and effect counts remain amount-independent, so
+greedy filling preserves the componentwise maxima and shortest budget breaches.
+Different quantities are never summed. Their maxima can occur on different
+paths; the report makes no claim that all maxima are jointly attainable.
+`tests/test_quantities.py` checks this extension against an independent Fraction
+sequence oracle over separate/shared pools, matching/different units, bounded
+and unbounded production, zero/fractional amounts and three depths.

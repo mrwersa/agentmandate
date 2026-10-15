@@ -16,6 +16,7 @@ from datetime import date, datetime
 from typing import Any
 
 from ._ir import (
+    IR_VERSION,
     AuthorityIR,
     Edge,
     Entity,
@@ -35,8 +36,8 @@ from .reach import Authority, _analyse_with_trace
 PRODUCER_BOUNDARY_VERSION = 1
 PRODUCER_BOUNDARY_ADAPTER = "agentmandate.producer-boundary"
 PRODUCER_BOUNDARY_ADAPTER_VERSION = 1
-PRODUCER_RESULT_VERSION = 1
-PRODUCER_RESULT_SCHEMA = "agentmandate.producers/v1"
+PRODUCER_RESULT_VERSION = 2
+PRODUCER_RESULT_SCHEMA = "agentmandate.producers/v2"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _REVIEWED_ALIAS = re.compile(r"reviewed-[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -45,9 +46,7 @@ _REVIEW = frozenset({"accepted", "contested", "unreviewed"})
 _COMPLETENESS = frozenset({"complete", "partial", "unknown"})
 _CAPACITY_KINDS = frozenset({"concurrent"})
 _EXHAUSTION_REASONS = frozenset({"capacity_exhausted"})
-_SOURCE_ROLES = frozenset(
-    {"upstream-inventory", "capacity-controls", "selected-run-boundary"}
-)
+_SOURCE_ROLES = frozenset({"upstream-inventory", "capacity-controls", "selected-run-boundary"})
 _SOURCE_KINDS = {
     "upstream-inventory": "tool-catalogue",
     "capacity-controls": "producer-outcomes",
@@ -138,18 +137,12 @@ class ProducerSelection:
             raise ProducerBoundaryFormatError("producer selection must be an object")
         missing = sorted(fields - raw.keys())
         if missing:
-            raise ProducerBoundaryFormatError(
-                f"producer selection is missing field {missing[0]!r}"
-            )
+            raise ProducerBoundaryFormatError(f"producer selection is missing field {missing[0]!r}")
         extra = sorted(raw.keys() - fields)
         if extra:
-            raise ProducerBoundaryFormatError(
-                f"producer selection has unknown field {extra[0]!r}"
-            )
+            raise ProducerBoundaryFormatError(f"producer selection has unknown field {extra[0]!r}")
         source = _path(raw["source"], "selection.source")
-        partition_binding = _string(
-            raw["partition_binding"], "selection.partition_binding"
-        )
+        partition_binding = _string(raw["partition_binding"], "selection.partition_binding")
         if _REVIEWED_ALIAS.fullmatch(partition_binding) is None:
             raise ProducerBoundaryFormatError(
                 "producer selection partition_binding must be a reviewed non-secret alias"
@@ -313,9 +306,7 @@ def _canonical_bytes(value: Any) -> bytes:
             value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
         ).encode("utf-8")
     except (TypeError, ValueError) as exc:
-        raise ProducerBoundaryFormatError(
-            "producer result contains a non-canonical value"
-        ) from exc
+        raise ProducerBoundaryFormatError("producer result contains a non-canonical value") from exc
 
 
 def _result_record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
@@ -323,14 +314,10 @@ def _result_record(value: Any, path: str, fields: set[str]) -> dict[str, Any]:
         raise ProducerBoundaryFormatError(f"producer result {path} must be an object")
     missing = sorted(fields - value.keys())
     if missing:
-        raise ProducerBoundaryFormatError(
-            f"producer result {path} is missing field {missing[0]!r}"
-        )
+        raise ProducerBoundaryFormatError(f"producer result {path} is missing field {missing[0]!r}")
     extra = sorted(value.keys() - fields)
     if extra:
-        raise ProducerBoundaryFormatError(
-            f"producer result {path} has unknown field {extra[0]!r}"
-        )
+        raise ProducerBoundaryFormatError(f"producer result {path} has unknown field {extra[0]!r}")
     return value
 
 
@@ -381,17 +368,17 @@ def _parse_manifest_identity(value: Any) -> ProducerManifestIdentity:
 
 def _parse_boundary_identities(value: Any) -> tuple[ProducerBoundaryIdentity, ...]:
     if not isinstance(value, list):
-        raise ProducerBoundaryFormatError(
-            "producer result /inputs/boundaries must be an array"
-        )
+        raise ProducerBoundaryFormatError("producer result /inputs/boundaries must be an array")
     items = tuple(
         ProducerBoundaryIdentity(
             _result_string(
-                (record := _result_record(
-                    item,
-                    f"/inputs/boundaries/{index}",
-                    {"id", "content_sha256", "semantic_sha256"},
-                ))["id"],
+                (
+                    record := _result_record(
+                        item,
+                        f"/inputs/boundaries/{index}",
+                        {"id", "content_sha256", "semantic_sha256"},
+                    )
+                )["id"],
                 f"/inputs/boundaries/{index}/id",
             ),
             _result_digest(
@@ -405,21 +392,15 @@ def _parse_boundary_identities(value: Any) -> tuple[ProducerBoundaryIdentity, ..
         )
         for index, item in enumerate(value)
     )
-    identity_keys = [
-        (item.id, item.content_sha256, item.semantic_sha256) for item in items
-    ]
+    identity_keys = [(item.id, item.content_sha256, item.semantic_sha256) for item in items]
     if identity_keys != sorted(identity_keys):
-        raise ProducerBoundaryFormatError(
-            "producer result /inputs/boundaries must be sorted"
-        )
+        raise ProducerBoundaryFormatError("producer result /inputs/boundaries must be sorted")
     return items
 
 
 def _parse_selections(value: Any) -> tuple[ProducerSelection, ...]:
     if not isinstance(value, list):
-        raise ProducerBoundaryFormatError(
-            "producer result /inputs/selections must be an array"
-        )
+        raise ProducerBoundaryFormatError("producer result /inputs/selections must be an array")
     fields = {
         "source",
         "binding",
@@ -448,16 +429,12 @@ def _parse_selections(value: Any) -> tuple[ProducerSelection, ...]:
                 record["partition_binding"],
                 f"result /inputs/selections/{index}/partition_binding",
             ),
-            _result_string(
-                record["output_scope"], f"/inputs/selections/{index}/output_scope"
-            ),
+            _result_string(record["output_scope"], f"/inputs/selections/{index}/output_scope"),
         )
         items.append(selection)
     keys = [tuple(item.as_dict().values()) for item in items]
     if keys != sorted(keys):
-        raise ProducerBoundaryFormatError(
-            "producer result /inputs/selections must be sorted"
-        )
+        raise ProducerBoundaryFormatError("producer result /inputs/selections must be sorted")
     return tuple(items)
 
 
@@ -651,16 +628,16 @@ def _integer(value: Any, path: str, *, minimum: int = 1) -> int:
 
 def _digest(value: Any, path: str) -> str:
     if not isinstance(value, str) or not _SHA256.fullmatch(value):
-        raise ProducerBoundaryFormatError(
-            f"producer boundary {path} must be lowercase SHA-256"
-        )
+        raise ProducerBoundaryFormatError(f"producer boundary {path} must be lowercase SHA-256")
     return value
 
 
 def _path(value: Any, path: str) -> str:
     value = _string(value, path)
-    if value.startswith("/") or "\\" in value or any(
-        part in {"", ".", ".."} for part in value.split("/")
+    if (
+        value.startswith("/")
+        or "\\" in value
+        or any(part in {"", ".", ".."} for part in value.split("/"))
     ):
         raise ProducerBoundaryFormatError(
             f"producer boundary {path} must be a repository-relative POSIX path"
@@ -680,9 +657,7 @@ def _pointer(value: Any, path: str) -> str:
 def _strings(value: Any, path: str, *, allow_empty: bool = False) -> tuple[str, ...]:
     if not isinstance(value, list) or (not value and not allow_empty):
         qualifier = "possibly empty " if allow_empty else "non-empty "
-        raise ProducerBoundaryFormatError(
-            f"producer boundary {path} must be a {qualifier}array"
-        )
+        raise ProducerBoundaryFormatError(f"producer boundary {path} must be a {qualifier}array")
     result = tuple(_string(item, f"{path}[]") for item in value)
     if len(result) != len(set(result)):
         raise ProducerBoundaryFormatError(f"producer boundary {path} contains duplicates")
@@ -849,9 +824,10 @@ class ProducerBoundary:
         }
 
     def to_json(self) -> str:
-        return json.dumps(
-            self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        ) + "\n"
+        return (
+            json.dumps(self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+            + "\n"
+        )
 
     def verify_sources(self, contents: Mapping[str, bytes]) -> None:
         _verify_sources(self.sources, contents)
@@ -984,16 +960,9 @@ def _run_boundary(value: Any) -> ProducerRunBoundary:
     inventory_completeness = _string(
         raw["inventory_completeness"], "run_boundary.inventory_completeness"
     )
-    release_completeness = _string(
-        raw["release_completeness"], "run_boundary.release_completeness"
-    )
-    if (
-        inventory_completeness not in _COMPLETENESS
-        or release_completeness not in _COMPLETENESS
-    ):
-        raise ProducerBoundaryFormatError(
-            "producer boundary run completeness has an invalid value"
-        )
+    release_completeness = _string(raw["release_completeness"], "run_boundary.release_completeness")
+    if inventory_completeness not in _COMPLETENESS or release_completeness not in _COMPLETENESS:
+        raise ProducerBoundaryFormatError("producer boundary run completeness has an invalid value")
     return ProducerRunBoundary(
         _strings(raw["inventory"], "run_boundary.inventory"),
         inventory_completeness,
@@ -1109,9 +1078,7 @@ def _evidence(value: Any) -> ProducerEvidence:
     return ProducerEvidence(confidence, review, reviewer, expires)
 
 
-def _verify_sources(
-    sources: tuple[ProducerSource, ...], contents: Mapping[str, bytes]
-) -> None:
+def _verify_sources(sources: tuple[ProducerSource, ...], contents: Mapping[str, bytes]) -> None:
     if not isinstance(contents, Mapping) or any(
         not isinstance(locator, str) or not isinstance(content, bytes)
         for locator, content in contents.items()
@@ -1139,9 +1106,9 @@ def _profile_digest(
         "facts": [item.as_dict() for item in sorted(facts, key=lambda item: item.id)],
         "edges": [item.as_dict() for item in sorted(edges, key=lambda item: item.id)],
     }
-    encoded = json.dumps(
-        body, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("utf-8")
+    encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+        "utf-8"
+    )
     return hashlib.sha256(encoded).hexdigest()
 
 
@@ -1231,8 +1198,7 @@ def _to_producer_ir(boundary: ProducerBoundary) -> AuthorityIR:
     )
     producer_support = tuple(
         sorted(
-            _fact_id(boundary_id, predicate)
-            for predicate in ("producer", "target", "run_boundary")
+            _fact_id(boundary_id, predicate) for predicate in ("producer", "target", "run_boundary")
         )
     )
     output_support = tuple(
@@ -1243,8 +1209,7 @@ def _to_producer_ir(boundary: ProducerBoundary) -> AuthorityIR:
     )
     partition_support = tuple(
         sorted(
-            _fact_id(boundary_id, predicate)
-            for predicate in ("partition", "partition_argument")
+            _fact_id(boundary_id, predicate) for predicate in ("partition", "partition_argument")
         )
     )
     edges = (
@@ -1274,7 +1239,7 @@ def _to_producer_ir(boundary: ProducerBoundary) -> AuthorityIR:
     ordered_facts = tuple(sorted(facts, key=lambda item: item.id))
     ordered_edges = tuple(sorted(edges, key=lambda item: item.id))
     graph = AuthorityIR(
-        1,
+        IR_VERSION,
         (
             Source(
                 source_id,
@@ -1315,9 +1280,7 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
         or source.adapter != PRODUCER_BOUNDARY_ADAPTER
         or source.adapter_version != PRODUCER_BOUNDARY_ADAPTER_VERSION
     ):
-        raise ProducerBoundaryFormatError(
-            "producer boundary IR profile has an unsupported source"
-        )
+        raise ProducerBoundaryFormatError("producer boundary IR profile has an unsupported source")
     entities = {entity.id: entity for entity in graph.entities}
     boundaries = [entity for entity in graph.entities if entity.kind == "producer_boundary"]
     if len(boundaries) != 1 or any(
@@ -1340,13 +1303,10 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
             )
         facts[(fact.subject, fact.predicate)] = fact
     required = {
-        (boundary_entity.id, predicate)
-        for predicate in _PROFILE_PREDICATES["producer_boundary"]
+        (boundary_entity.id, predicate) for predicate in _PROFILE_PREDICATES["producer_boundary"]
     }
     required.update(
-        (entity.id, "name")
-        for entity in graph.entities
-        if entity.kind != "producer_boundary"
+        (entity.id, "name") for entity in graph.entities if entity.kind != "producer_boundary"
     )
     if set(facts) != required:
         raise ProducerBoundaryFormatError(
@@ -1357,8 +1317,7 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
         for predicate in _PROFILE_PREDICATES["producer_boundary"]
     }
     evidence_states = {
-        (fact.evidence[0].confidence, fact.evidence[0].review)
-        for fact in graph.facts
+        (fact.evidence[0].confidence, fact.evidence[0].review) for fact in graph.facts
     }
     if len(evidence_states) != 1:
         raise ProducerBoundaryFormatError(
@@ -1433,9 +1392,7 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
         (boundary_entity.id, "expires"): record.evidence.expires,
         (boundary_entity.id, "name"): record.id,
         (boundary_entity.id, "output"): _entity_id("scope", record.output.scope),
-        (boundary_entity.id, "partition"): _entity_id(
-            "resource_binding", record.partition.binding
-        ),
+        (boundary_entity.id, "partition"): _entity_id("resource_binding", record.partition.binding),
         (boundary_entity.id, "partition_argument"): record.partition.argument,
         (boundary_entity.id, "producer"): _entity_id("tool", record.target.binding),
         (boundary_entity.id, "reviewer"): record.evidence.reviewer,
@@ -1508,14 +1465,11 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
             "partitioned_by",
             _entity_id("resource_binding", record.partition.binding),
             frozenset(
-                _fact_id(boundary_entity.id, item)
-                for item in ("partition", "partition_argument")
+                _fact_id(boundary_entity.id, item) for item in ("partition", "partition_argument")
             ),
         ),
     }
-    actual_edges = {
-        (edge.relation, edge.target, frozenset(edge.support)) for edge in graph.edges
-    }
+    actual_edges = {(edge.relation, edge.target, frozenset(edge.support)) for edge in graph.edges}
     if actual_edges != expected_edges or any(
         edge.source != boundary_entity.id for edge in graph.edges
     ):
@@ -1524,10 +1478,7 @@ def _validate_producer_profile(graph: AuthorityIR) -> None:
         )
     content_digest = hashlib.sha256(record.to_json().encode("utf-8")).hexdigest()
     expected_source_id = _entity_id("source", f"producer-boundary:{record.id}")
-    if (
-        source.id != expected_source_id
-        or source.locator != f"memory:producer-boundary:{record.id}"
-    ):
+    if source.id != expected_source_id or source.locator != f"memory:producer-boundary:{record.id}":
         raise ProducerBoundaryFormatError(
             "producer boundary IR source identity does not match the record"
         )
@@ -1553,8 +1504,10 @@ def analyse_producers(
     """Apply only current, exact producer bounds to private reachability."""
     if isinstance(as_of, datetime) or not isinstance(as_of, date):
         raise ProducerBoundaryFormatError("producer analysis as_of must be a date")
-    if not isinstance(selections, Sequence) or isinstance(selections, (str, bytes)) or any(
-        not isinstance(selection, ProducerSelection) for selection in selections
+    if (
+        not isinstance(selections, Sequence)
+        or isinstance(selections, (str, bytes))
+        or any(not isinstance(selection, ProducerSelection) for selection in selections)
     ):
         raise ProducerBoundaryFormatError(
             "producer analysis selections must contain ProducerSelection records"
@@ -1563,16 +1516,11 @@ def analyse_producers(
         not isinstance(locator, str) or not isinstance(content, bytes)
         for locator, content in source_bytes.items()
     ):
-        raise ProducerBoundaryFormatError(
-            "producer analysis sources must map locators to bytes"
-        )
+        raise ProducerBoundaryFormatError("producer analysis sources must map locators to bytes")
     evaluated_on = as_of.isoformat()
     canonical = tuple(
         sorted(
-            (
-                ProducerBoundary.from_json(boundary.to_json())
-                for boundary in boundaries
-            ),
+            (ProducerBoundary.from_json(boundary.to_json()) for boundary in boundaries),
             key=lambda boundary: (boundary.id, boundary.to_json()),
         )
     )
@@ -1611,9 +1559,7 @@ def analyse_producers(
         message: str,
         support: tuple[str, ...],
     ) -> None:
-        findings.append(
-            ProducerFinding(code, boundary.id, tool_name, message, support)
-        )
+        findings.append(ProducerFinding(code, boundary.id, tool_name, message, support))
 
     for boundary, graph in zip(canonical, graphs, strict=True):
         start = len(findings)
@@ -1728,10 +1674,7 @@ def analyse_producers(
                 "producer output has another reachable producer",
                 support,
             )
-        if (
-            boundary.evidence.confidence != "exact"
-            or boundary.evidence.review != "accepted"
-        ):
+        if boundary.evidence.confidence != "exact" or boundary.evidence.review != "accepted":
             unresolved(
                 boundary,
                 tool_name,
@@ -1824,9 +1767,7 @@ def analyse_producers(
         tuple(dict.fromkeys(findings)),
         tuple(applied),
         evaluated_on,
-        ProducerManifestIdentity(
-            manifest_source.locator, manifest_source.semantic_sha256
-        ),
+        ProducerManifestIdentity(manifest_source.locator, manifest_source.semantic_sha256),
         boundary_identities,
         canonical_selections,
     )

@@ -1,1 +1,1 @@
-{"ir_version":1,"sources":[{"id":"source:test","kind":"test","format_version":1,"producer_version":null,"semantic_sha256":"digest","adapter":"test","adapter_version":1}],"entities":[],"facts":[],"edges":[]}
+{"edges":[],"entities":[],"facts":[],"ir_version":2,"sources":[{"adapter":"test","adapter_version":1,"format_version":1,"id":"source:test","kind":"test","producer_version":null,"semantic_sha256":"digest"}]}

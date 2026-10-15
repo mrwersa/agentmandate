@@ -26,8 +26,8 @@ EXAMPLES = ROOT / "examples"
 V1 = EXAMPLES / "dispute-resolver.yaml"
 V2 = EXAMPLES / "dispute-resolver-v2.yaml"
 INVALID = ROOT / "tests" / "fixtures" / "authority-ir-invalid"
-MIGRATION = ROOT / "tests" / "fixtures" / "authority-ir-v1.json"
-EVIDENCE = tuple(sorted((ROOT / "docs" / "evidence").glob("*/mandate.yaml")))
+MIGRATION = ROOT / "tests" / "fixtures" / "authority-ir-v2.json"
+EVIDENCE = tuple(sorted((ROOT / "tests/fixtures/quantity-evidence").glob("*/mandate.yaml")))
 
 
 def write_snapshot(path: Path, manifest: Path) -> AuthorityIR:
@@ -46,9 +46,7 @@ def test_ir_export_writes_one_canonical_content_bound_snapshot(capsys) -> None:
     assert captured.err == ""
     assert captured.out == expected.to_json()
     restored = AuthorityIR.from_json(captured.out)
-    mandate_source = next(
-        source for source in restored.sources if source.id == "source:mandate"
-    )
+    mandate_source = next(source for source in restored.sources if source.id == "source:mandate")
     assert mandate_source.content_sha256 is not None
 
 
@@ -70,7 +68,7 @@ def test_ir_validate_is_structural_and_does_not_accept_evidence_as_authority(
 
     assert main(["ir", "validate", str(path)]) == EXIT_OK
     captured = capsys.readouterr()
-    assert captured.out == "valid authority IR v1\n"
+    assert captured.out == "valid authority IR v2\n"
     assert captured.err == ""
 
     assert main(["reach", "--ir", str(path)]) == EXIT_USAGE
@@ -90,9 +88,7 @@ def test_ir_validate_rejects_every_malformed_fixture_without_partial_stdout(
 
 
 @pytest.mark.parametrize("command", ["export", "validate"])
-def test_ir_commands_report_io_and_encoding_errors(
-    command: str, tmp_path: Path, capsys
-) -> None:
+def test_ir_commands_report_io_and_encoding_errors(command: str, tmp_path: Path, capsys) -> None:
     missing = tmp_path / "missing"
     assert main(["ir", command, str(missing)]) == EXIT_USAGE
     captured = capsys.readouterr()
@@ -138,9 +134,7 @@ def test_reach_ir_supports_sarif_and_graph_outputs(tmp_path: Path, capsys) -> No
     assert "flowchart LR" in capsys.readouterr().out
 
 
-def test_reach_ir_rejects_unknown_semantics_and_malformed_input(
-    tmp_path: Path, capsys
-) -> None:
+def test_reach_ir_rejects_unknown_semantics_and_malformed_input(tmp_path: Path, capsys) -> None:
     snapshot = _from_mandate(load(V1))
     extra = Fact(
         id=_fact_id("tool:open_case", "future"),
@@ -167,22 +161,18 @@ def test_reach_ir_rejects_unknown_semantics_and_malformed_input(
     unsupported_source = replace(source, adapter="future.adapter")
     unsupported = replace(
         snapshot,
-        sources=tuple(
-            unsupported_source if item == source else item for item in snapshot.sources
-        ),
+        sources=tuple(unsupported_source if item == source else item for item in snapshot.sources),
     )
     path.write_text(unsupported.to_json(), encoding="utf-8")
     assert main(["reach", "--ir", str(path)]) == EXIT_USAGE
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "outside the analyzable manifest-v1 profile" in captured.err
+    assert "outside the analyzable manifest-v2 profile" in captured.err
 
 
-def test_ir_cli_rejects_future_versions_without_partial_output(
-    tmp_path: Path, capsys
-) -> None:
+def test_ir_cli_rejects_future_versions_without_partial_output(tmp_path: Path, capsys) -> None:
     raw = _from_mandate(load(V1)).as_dict()
-    raw["ir_version"] = 2
+    raw["ir_version"] = 99
     path = tmp_path / "future.json"
     path.write_text(json.dumps(raw), encoding="utf-8")
 
@@ -190,7 +180,7 @@ def test_ir_cli_rejects_future_versions_without_partial_output(
         assert main(argv) == EXIT_USAGE
         captured = capsys.readouterr()
         assert captured.out == ""
-        assert "unsupported authority IR version 2" in captured.err
+        assert "unsupported authority IR version 99" in captured.err
 
 
 def test_ir_commands_never_emit_partial_stdout_on_late_failure(
@@ -232,9 +222,7 @@ def test_ir_commands_never_emit_partial_stdout_on_late_failure(
 
 def test_ir_parser_help_and_mutual_exclusion_are_public_contracts(capsys) -> None:
     choices = {
-        name
-        for action in build_parser()._subparsers._group_actions
-        for name in action.choices
+        name for action in build_parser()._subparsers._group_actions for name in action.choices
     }
     assert "ir" in choices
 
@@ -283,10 +271,10 @@ def test_every_real_evidence_graph_crosses_the_public_ir_boundary(
 
 def test_migration_fixture_crosses_validate_and_reach_cli(capsys) -> None:
     assert main(["ir", "validate", str(MIGRATION)]) == EXIT_OK
-    assert capsys.readouterr().out == "valid authority IR v1\n"
+    assert capsys.readouterr().out == "valid authority IR v2\n"
 
     status = main(["reach", "--ir", str(MIGRATION), "--json"])
     captured = capsys.readouterr()
     assert status in {EXIT_OK, EXIT_FINDING}
     assert captured.err == ""
-    assert _IRAnalysis.from_json(captured.out).result_version == 1
+    assert _IRAnalysis.from_json(captured.out).result_version == 2

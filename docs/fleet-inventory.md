@@ -72,7 +72,7 @@ record; it is not a signature.
 
 ## Read the integrity and review results separately
 
-The command checks file digests, validates the existing closed manifest-v1 IR
+The command checks file digests, validates the existing closed manifest-v2 IR
 profile, joins its source digest to the exact manifest bytes, and reconstructs
 the mandate to compare its meaning with the manifest. It accepts the profile
 already used by `reach --ir`, including its accepted, exact fact requirements.
@@ -87,7 +87,7 @@ into an empty, trusted list. An expired review can leave a valid snapshot
 queryable, with `review_current: false`; snapshot integrity and current review
 are different properties.
 
-The result is `agentmandate.fleet-inventory/v1`. `summary` counts the whole
+The result is `agentmandate.fleet-inventory/v2`. `summary` counts the whole
 index and separately counts selected entries. Tool occurrences are counted per
 eligible entry, without summing monetary limits or composing mandates.
 `inventory_complete_within_declared_index` requires a current, complete

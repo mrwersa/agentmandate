@@ -11,11 +11,20 @@ import hashlib
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from typing import Any, TypeVar
 from urllib.parse import quote
 
-from .manifest import EFFECTS, PRINCIPALS, SCHEMA_VERSION, Limits, Mandate, Money, Tool
+from .manifest import (
+    EFFECTS,
+    PRINCIPALS,
+    SCHEMA_VERSION,
+    Limits,
+    Mandate,
+    Quantity,
+    Tool,
+    _quantity_name,
+)
 from .reach import (
     Authority,
     Step,
@@ -25,21 +34,22 @@ from .reach import (
     _State,
 )
 
-IR_VERSION = 1
-RESULT_VERSION = 1
+IR_VERSION = 2
+RESULT_VERSION = 2
 MANIFEST_ADAPTER = "agentmandate.manifest"
-MANIFEST_ADAPTER_VERSION = 2
+MANIFEST_ADAPTER_VERSION = 3
 MANIFEST_DEFAULTS_ADAPTER = "agentmandate.manifest-defaults"
-MANIFEST_DEFAULTS_ADAPTER_VERSION = 1
+MANIFEST_DEFAULTS_ADAPTER_VERSION = 2
 _NO_DEFAULT = object()
 _RecordT = TypeVar("_RecordT")
-_MANIFEST_V1_DEFAULTS = {
+_MANIFEST_DEFAULTS = {
     "agent.identity": None,
     "agent.roles": [],
     "limits.depth": 8,
     "limits.effects": {},
-    "limits.total": None,
+    "limits.quantities": {},
     "tool.ceiling": None,
+    "tool.quantity": None,
     "tool.principal": "caller",
     "tool.produces": None,
     "tool.requires": [],
@@ -79,12 +89,13 @@ MANIFEST_PREDICATES = {
     ("constraint", "depth"): ManifestPredicate("constraint", "positive_integer"),
     ("constraint", "effects"): ManifestPredicate("constraint", "effect_limits"),
     ("constraint", "name"): ManifestPredicate("constraint", "entity_name"),
-    ("constraint", "total"): ManifestPredicate("constraint", "nullable_money"),
+    ("constraint", "quantities"): ManifestPredicate("constraint", "quantity_limits"),
     ("principal", "name"): ManifestPredicate("principal", "entity_name"),
     ("role", "members"): ManifestPredicate("role", "tool_refs"),
     ("role", "name"): ManifestPredicate("role", "entity_name"),
     ("scope", "name"): ManifestPredicate("scope", "entity_name"),
-    ("tool", "ceiling"): ManifestPredicate("tool", "nullable_money"),
+    ("tool", "ceiling"): ManifestPredicate("tool", "nullable_quantity"),
+    ("tool", "quantity"): ManifestPredicate("tool", "nullable_quantity_name"),
     ("tool", "effect"): ManifestPredicate("tool", "effect"),
     ("tool", "name"): ManifestPredicate("tool", "entity_name"),
     ("tool", "principal"): ManifestPredicate("tool", "principal_ref"),
@@ -102,45 +113,27 @@ RELATIONS = {
     "after_state": Relation("transition", "boundary_state", "one", "single", "after"),
     "at_hop": Relation("principal", "hop", "one", "single", "hop"),
     "before_state": Relation("transition", "boundary_state", "one", "single", "before"),
-    "bounds_output": Relation(
-        "producer_boundary", "scope", "one", "single", "output"
-    ),
-    "bounds_producer": Relation(
-        "producer_boundary", "tool", "one", "single", "producer"
-    ),
+    "bounds_output": Relation("producer_boundary", "scope", "one", "single", "output"),
+    "bounds_producer": Relation("producer_boundary", "tool", "one", "single", "producer"),
     "binds_boundary": Relation(
         "continuity_binding", "enforcement_boundary", "one", "single", "boundary"
     ),
-    "binds_mandate": Relation(
-        "continuity_binding", "mandate", "one", "single", "mandate"
-    ),
-    "can_reach": Relation(
-        "agent", "tool", "many", "union", None, True, "reachable"
-    ),
+    "binds_mandate": Relation("continuity_binding", "mandate", "one", "single", "mandate"),
+    "can_reach": Relation("agent", "tool", "many", "union", None, True, "reachable"),
     "ceiling_on": Relation("tool", "scope", "one", "single", "scope_key"),
     "contains_tool": Relation("boundary", "tool", "many", "union", "members"),
-    "contains_policy": Relation(
-        "policy_set", "policy", "many", "union", "observed_policies"
-    ),
+    "contains_policy": Relation("policy_set", "policy", "many", "union", "observed_policies"),
     "constrained_by": Relation("principal", "principal", "many", "union", "principals"),
     "delegates_for": Relation("delegation", "principal", "one", "single", "subject"),
     "decides_request": Relation("decision", "request", "one", "single", "request"),
-    "enforces_for": Relation(
-        "enforcement_point", "decision", "many", "union", "decisions"
-    ),
-    "has_breach": Relation(
-        "agent", "breach", "many", "union", None, True, "breach"
-    ),
-    "has_effect": Relation(
-        "tool", "scope", "many", "union", None, True, "effect"
-    ),
+    "enforces_for": Relation("enforcement_point", "decision", "many", "union", "decisions"),
+    "has_breach": Relation("agent", "breach", "many", "union", None, True, "breach"),
+    "has_effect": Relation("tool", "scope", "many", "union", None, True, "effect"),
     "has_condition": Relation("tool", "condition", "many", "union", "conditions"),
     "has_hop": Relation("delegation", "hop", "many", "union", "hops"),
     "has_surface": Relation("hop", "surface", "many", "union", "surfaces"),
     "narrows_to": Relation("condition", "effect", "one", "single", "effect"),
-    "observes_decision": Relation(
-        "transition", "decision", "many", "union", "decisions"
-    ),
+    "observes_decision": Relation("transition", "decision", "many", "union", "decisions"),
     "partitioned_by": Relation(
         "producer_boundary", "resource_binding", "one", "single", "partition"
     ),
@@ -149,16 +142,10 @@ RELATIONS = {
     "previous_hop": Relation("hop", "hop", "one", "single", "previous"),
     "requires": Relation("tool", "scope", "many", "union", "requires"),
     "role_contains": Relation("role", "tool", "many", "union", "members"),
-    "state_of": Relation(
-        "boundary_state", "enforcement_boundary", "one", "single", "boundary"
-    ),
-    "transitions_to": Relation(
-        "tool", "tool", "many", "union", None, True, "transition"
-    ),
+    "state_of": Relation("boundary_state", "enforcement_boundary", "one", "single", "boundary"),
+    "transitions_to": Relation("tool", "tool", "many", "union", None, True, "transition"),
     "under_grant": Relation("principal", "grant", "one", "single", "grant"),
-    "uses_delegation": Relation(
-        "principal", "delegation", "one", "single", "delegation"
-    ),
+    "uses_delegation": Relation("principal", "delegation", "one", "single", "delegation"),
     "uses_context": Relation("condition", "context", "one", "single", "context"),
 }
 
@@ -294,10 +281,16 @@ class AuthorityIR:
         """Return canonical JSON suitable for hashing and committed fixtures."""
         for fact in self.facts:
             _check_json_value(fact.value)
-        return json.dumps(
-            self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True,
-            allow_nan=False,
-        ) + "\n"
+        return (
+            json.dumps(
+                self.as_dict(),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+                allow_nan=False,
+            )
+            + "\n"
+        )
 
     def validate(self) -> None:
         """Reject graph ambiguity before an analysis can consume IR edges."""
@@ -339,29 +332,21 @@ class AuthorityIR:
                     f"authority IR facts[{index}].id: fact id does not match subject/predicate"
                 )
             if fact.subject not in entities:
-                raise IRFormatError(
-                    f"authority IR facts[{index}].subject has unknown subject"
-                )
+                raise IRFormatError(f"authority IR facts[{index}].subject has unknown subject")
             key = (fact.subject, fact.predicate)
             if key in predicates:
-                raise IRFormatError(
-                    f"authority IR facts[{index}].id has conflicting facts"
-                )
+                raise IRFormatError(f"authority IR facts[{index}].id has conflicting facts")
             predicates.add(key)
             for evidence_index, evidence in enumerate(fact.evidence):
                 evidence_path = f"facts[{index}].evidence[{evidence_index}]"
                 if evidence.source not in sources:
-                    raise IRFormatError(
-                        f"authority IR {evidence_path}.source has unknown source"
-                    )
+                    raise IRFormatError(f"authority IR {evidence_path}.source has unknown source")
                 if evidence.confidence not in {"exact", "heuristic", "unknown"}:
                     raise IRFormatError(
                         f"authority IR {evidence_path}.confidence has unknown confidence"
                     )
                 if evidence.review not in {"unreviewed", "accepted", "contested"}:
-                    raise IRFormatError(
-                        f"authority IR {evidence_path}.review has unknown review"
-                    )
+                    raise IRFormatError(f"authority IR {evidence_path}.review has unknown review")
 
         edges = {edge.id: edge for edge in self.edges}
         actual_edges = {(edge.source, edge.relation, edge.target) for edge in self.edges}
@@ -374,9 +359,7 @@ class AuthorityIR:
                 )
             relation = RELATIONS.get(edge.relation)
             if relation is None:
-                raise IRFormatError(
-                    f"authority IR {edge_path}.relation has unknown relation"
-                )
+                raise IRFormatError(f"authority IR {edge_path}.relation has unknown relation")
             source = entities.get(edge.source)
             target = entities.get(edge.target)
             if source is None or target is None:
@@ -389,8 +372,7 @@ class AuthorityIR:
                 for support_index, support_id in enumerate(edge.support):
                     if support_id not in facts and support_id not in edges:
                         raise IRFormatError(
-                            f"authority IR {edge_path}.support[{support_index}] "
-                            "has unknown support"
+                            f"authority IR {edge_path}.support[{support_index}] has unknown support"
                         )
                 _validate_derived_edge(
                     edge, edge_path, entities, facts, edges, relation.support_rule
@@ -401,8 +383,7 @@ class AuthorityIR:
                 support = facts.get(support_id)
                 if support is None:
                     raise IRFormatError(
-                        f"authority IR {edge_path}.support[{support_index}] "
-                        "has unknown support"
+                        f"authority IR {edge_path}.support[{support_index}] has unknown support"
                     )
                 if support.subject != edge.source:
                     raise IRFormatError(
@@ -413,9 +394,7 @@ class AuthorityIR:
                 if support.predicate == relation.predicate and edge.target in targets:
                     establishes_relation = True
             if not establishes_relation:
-                raise IRFormatError(
-                    f"authority IR {edge_path} is not established by its support"
-                )
+                raise IRFormatError(f"authority IR {edge_path} is not established by its support")
         for index, fact in enumerate(self.facts):
             for relation_name, relation in RELATIONS.items():
                 if (
@@ -529,17 +508,13 @@ def _validate_derived_edge(
 
     def require(identifier: str) -> None:
         if identifier not in support:
-            raise IRFormatError(
-                f"authority IR {path}.support lacks required {rule} support"
-            )
+            raise IRFormatError(f"authority IR {path}.support lacks required {rule} support")
 
     if rule == "reachable":
         tools_fact_id = _fact_id(edge.source, "tools")
         require(tools_fact_id)
         if edge.target not in facts[tools_fact_id].value:
-            raise IRFormatError(
-                f"authority IR {path}.target targets an undeclared tool"
-            )
+            raise IRFormatError(f"authority IR {path}.target targets an undeclared tool")
         require(_fact_id(edge.target, "requires"))
         if any(
             support_id in edges
@@ -547,9 +522,7 @@ def _validate_derived_edge(
             and support_relation.derived
             for support_id in support
         ):
-            raise IRFormatError(
-                f"authority IR {path}.support must be rooted in source records"
-            )
+            raise IRFormatError(f"authority IR {path}.support must be rooted in source records")
         required_edges = [
             edges[support_id]
             for support_id in support
@@ -576,9 +549,7 @@ def _validate_derived_edge(
             and edges[support_id].relation in {"requires", "produces"}
             for support_id in support
         ):
-            raise IRFormatError(
-                f"authority IR {path}.support lacks effect scope support"
-            )
+            raise IRFormatError(f"authority IR {path}.support lacks effect scope support")
         return
     if rule == "transition":
         agent = next(iter(_agents(entities)))
@@ -593,12 +564,10 @@ def _validate_derived_edge(
             and edges[support_id].relation == "can_reach"
             for support_id in support
         ):
-            raise IRFormatError(
-                f"authority IR {path}.support lacks a reachable path"
-            )
+            raise IRFormatError(f"authority IR {path}.support lacks a reachable path")
         name = entities[edge.target].name
-        if name.startswith("cumulative_value:"):
-            require(_fact_id(_entity_id("constraint", "run"), "total"))
+        if name.startswith("quantity_budget:"):
+            require(_fact_id(_entity_id("constraint", "run"), "quantities"))
         elif name.startswith("effect_count:"):
             require(_fact_id(_entity_id("constraint", "run"), "effects"))
         elif name.startswith("ungated_effect:"):
@@ -660,9 +629,7 @@ def _record(
     return raw
 
 
-def _table(
-    raw: Any, name: str, load: Callable[[Any, str], _RecordT]
-) -> tuple[_RecordT, ...]:
+def _table(raw: Any, name: str, load: Callable[[Any, str], _RecordT]) -> tuple[_RecordT, ...]:
     if not isinstance(raw, list):
         raise IRFormatError(f"authority IR {name} must be an array")
     return tuple(load(item, f"{name}[{index}]") for index, item in enumerate(raw))
@@ -700,14 +667,10 @@ def _source_from_dict(raw: Any, path: str) -> Source:
     )
     producer_version = raw["producer_version"]
     if producer_version is not None and not isinstance(producer_version, str):
-        raise IRFormatError(
-            f"authority IR {path}.producer_version must be a string or null"
-        )
+        raise IRFormatError(f"authority IR {path}.producer_version must be a string or null")
     content_sha256 = raw.get("content_sha256")
     if content_sha256 is not None and not isinstance(content_sha256, str):
-        raise IRFormatError(
-            f"authority IR {path}.content_sha256 must be a string or null"
-        )
+        raise IRFormatError(f"authority IR {path}.content_sha256 must be a string or null")
     return Source(
         id=_string(raw, "id", path),
         kind=_string(raw, "kind", path),
@@ -787,11 +750,9 @@ def _entity_id(kind: str, name: str) -> str:
 _PROFILE_DEFAULT_KINDS = {"agent": "agent", "limits": "constraint", "tool": "tool"}
 _PROFILE_DEFAULTS = {
     (_PROFILE_DEFAULT_KINDS[section], predicate): (
-        _entity_id("principal", value)
-        if (section, predicate) == ("tool", "principal")
-        else value
+        _entity_id("principal", value) if (section, predicate) == ("tool", "principal") else value
     )
-    for key, value in _MANIFEST_V1_DEFAULTS.items()
+    for key, value in _MANIFEST_DEFAULTS.items()
     for section, predicate in (key.split(".", 1),)
 }
 
@@ -840,7 +801,7 @@ def _semantic_payload(
 def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR:
     """Project a parsed v1 mandate into the experimental canonical records."""
     source_id = "source:mandate"
-    defaults_source_id = "source:manifest-v1"
+    defaults_source_id = "source:manifest-v2"
     entities: dict[str, Entity] = {}
     facts: list[Fact] = []
     edges: dict[str, Edge] = {}
@@ -927,18 +888,12 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
             entity("scope", name, f"{base}/requires/{required_index}")
             for required_index, name in enumerate(tool.requires)
         ]
-        required = fact(
-            tool_id, "requires", required_ids, f"{base}/requires", [], "tool.requires"
-        )
+        required = fact(tool_id, "requires", required_ids, f"{base}/requires", [], "tool.requires")
         for scope_id in set(required_ids):
             edge(tool_id, "requires", scope_id, (required,))
 
-        produces_id = (
-            entity("scope", tool.produces, f"{base}/produces") if tool.produces else None
-        )
-        produces = fact(
-            tool_id, "produces", produces_id, f"{base}/produces", None, "tool.produces"
-        )
+        produces_id = entity("scope", tool.produces, f"{base}/produces") if tool.produces else None
+        produces = fact(tool_id, "produces", produces_id, f"{base}/produces", None, "tool.produces")
         if produces_id is not None:
             edge(tool_id, "produces", produces_id, (produces,))
 
@@ -958,14 +913,13 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
             None,
             "tool.value_arg",
         )
+        fact(tool_id, "quantity", tool.quantity, f"{base}/quantity", None, "tool.quantity")
         ceiling_value = (
             None
             if tool.ceiling is None
-            else {"amount": str(tool.ceiling.amount), "currency": tool.ceiling.currency}
+            else {"amount": str(tool.ceiling.amount), "unit": tool.ceiling.unit}
         )
-        ceiling = fact(
-            tool_id, "ceiling", ceiling_value, f"{base}/ceiling", None, "tool.ceiling"
-        )
+        ceiling = fact(tool_id, "ceiling", ceiling_value, f"{base}/ceiling", None, "tool.ceiling")
         scope_key_id = (
             entity("scope", tool.scope_key, f"{base}/scope_key") if tool.scope_key else None
         )
@@ -1000,15 +954,11 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
     fact(agent_id, "roles", role_ids, "/roles", [], "agent.roles")
 
     limits_id = entity("constraint", "run", "/limits")
-    total = (
-        None
-        if mandate.limits.total is None
-        else {
-            "amount": str(mandate.limits.total.amount),
-            "currency": mandate.limits.total.currency,
-        }
-    )
-    fact(limits_id, "total", total, "/limits/total", None, "limits.total")
+    quantities = {
+        name: {"amount": str(q.amount), "unit": q.unit}
+        for name, q in sorted(mandate.limits.quantities.items())
+    }
+    fact(limits_id, "quantities", quantities, "/limits/quantities", {}, "limits.quantities")
     fact(limits_id, "depth", mandate.limits.depth, "/limits/depth", 8, "limits.depth")
     fact(
         limits_id,
@@ -1042,7 +992,7 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
         locator="agentmandate:manifest/v1",
         format_version=SCHEMA_VERSION,
         producer_version=None,
-        semantic_sha256=hashlib.sha256(_canonical_bytes(_MANIFEST_V1_DEFAULTS)).hexdigest(),
+        semantic_sha256=hashlib.sha256(_canonical_bytes(_MANIFEST_DEFAULTS)).hexdigest(),
         adapter=MANIFEST_DEFAULTS_ADAPTER,
         adapter_version=MANIFEST_DEFAULTS_ADAPTER_VERSION,
     )
@@ -1058,14 +1008,14 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
 
 
 def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
-    """Require the closed, trusted manifest-v1 subset eligible for analysis."""
+    """Require the closed, trusted manifest-v2 subset eligible for analysis."""
     expected_sources = {
         "source:mandate": (
             "mandate-semantic",
             MANIFEST_ADAPTER,
             MANIFEST_ADAPTER_VERSION,
         ),
-        "source:manifest-v1": (
+        "source:manifest-v2": (
             "manifest-schema",
             MANIFEST_DEFAULTS_ADAPTER,
             MANIFEST_DEFAULTS_ADAPTER_VERSION,
@@ -1073,9 +1023,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     }
     sources = {source.id: source for source in snapshot.sources}
     if set(sources) != set(expected_sources):
-        raise IRFormatError(
-            "authority IR sources do not match the analyzable manifest-v1 profile"
-        )
+        raise IRFormatError("authority IR sources do not match the analyzable manifest-v2 profile")
     for index, source in enumerate(snapshot.sources):
         kind, adapter, adapter_version = expected_sources[source.id]
         if (
@@ -1085,8 +1033,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
             or source.adapter_version != adapter_version
         ):
             raise IRFormatError(
-                f"authority IR sources[{index}] is outside the analyzable "
-                "manifest-v1 profile"
+                f"authority IR sources[{index}] is outside the analyzable manifest-v2 profile"
             )
 
     entities = {entity.id: entity for entity in snapshot.entities}
@@ -1098,8 +1045,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     for index, entity in enumerate(snapshot.entities):
         if entity.kind not in allowed_kinds:
             raise IRFormatError(
-                f"authority IR entities[{index}].kind is outside the analyzable "
-                "manifest-v1 profile"
+                f"authority IR entities[{index}].kind is outside the analyzable manifest-v2 profile"
             )
 
     facts: dict[tuple[str, str], Fact] = {}
@@ -1110,7 +1056,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
         if specification is None:
             raise IRFormatError(
                 f"authority IR facts[{index}].predicate is unsupported by the "
-                "analyzable manifest-v1 profile"
+                "analyzable manifest-v2 profile"
             )
         if not fact.evidence:
             raise IRFormatError(
@@ -1131,14 +1077,10 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
         for evidence_index, evidence in enumerate(fact.evidence):
             path = f"facts[{index}].evidence[{evidence_index}]"
             if evidence.review != "accepted":
-                raise IRFormatError(
-                    f"authority IR {path}.review is not accepted for analysis"
-                )
+                raise IRFormatError(f"authority IR {path}.review is not accepted for analysis")
             if evidence.confidence != "exact":
-                raise IRFormatError(
-                    f"authority IR {path}.confidence is not exact for analysis"
-                )
-            if evidence.source == "source:manifest-v1" and (
+                raise IRFormatError(f"authority IR {path}.confidence is not exact for analysis")
+            if evidence.source == "source:manifest-v2" and (
                 (entity.kind, fact.predicate) not in _PROFILE_DEFAULTS
                 or fact.value != _PROFILE_DEFAULTS[(entity.kind, fact.predicate)]
             ):
@@ -1150,15 +1092,13 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
 
     for entity in snapshot.entities:
         expected = {
-            predicate
-            for (kind, predicate), _ in MANIFEST_PREDICATES.items()
-            if kind == entity.kind
+            predicate for (kind, predicate), _ in MANIFEST_PREDICATES.items() if kind == entity.kind
         }
         actual = predicates_by_entity.get(entity.id, set())
         if actual != expected:
             raise IRFormatError(
                 f"authority IR entities[{entity_indexes[entity.id]}] does not have the "
-                "complete analyzable manifest-v1 predicate set"
+                "complete analyzable manifest-v2 predicate set"
             )
 
     def fact_value(subject: str, predicate: str) -> Any:
@@ -1169,30 +1109,18 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     if len(agents) != 1:
         raise IRFormatError("authority IR analyzable profile requires exactly one agent")
     if len(constraints) != 1 or constraints[0].name != "run":
-        raise IRFormatError(
-            "authority IR analyzable profile requires the run constraint"
-        )
+        raise IRFormatError("authority IR analyzable profile requires the run constraint")
     agent = agents[0]
     tool_ids = {entity.id for entity in snapshot.entities if entity.kind == "tool"}
     role_ids = {entity.id for entity in snapshot.entities if entity.kind == "role"}
     scope_ids = {entity.id for entity in snapshot.entities if entity.kind == "scope"}
-    principal_ids = {
-        entity.id for entity in snapshot.entities if entity.kind == "principal"
-    }
+    principal_ids = {entity.id for entity in snapshot.entities if entity.kind == "principal"}
     declared_tools = fact_value(agent.id, "tools")
-    if (
-        set(declared_tools) != tool_ids
-        or len(declared_tools) != len(tool_ids)
-        or not tool_ids
-    ):
-        raise IRFormatError(
-            "authority IR agent tools do not cover the analyzable tool entities"
-        )
+    if set(declared_tools) != tool_ids or len(declared_tools) != len(tool_ids) or not tool_ids:
+        raise IRFormatError("authority IR agent tools do not cover the analyzable tool entities")
     declared_roles = fact_value(agent.id, "roles")
     if set(declared_roles) != role_ids or len(declared_roles) != len(role_ids):
-        raise IRFormatError(
-            "authority IR agent roles do not cover the analyzable role entities"
-        )
+        raise IRFormatError("authority IR agent roles do not cover the analyzable role entities")
 
     referenced_scopes: set[str] = set()
     referenced_principals: set[str] = set()
@@ -1208,13 +1136,11 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
         value_arg = fact_value(tool_id, "value_arg")
         scope_key = fact_value(tool_id, "scope_key")
         if (ceiling is None) != (value_arg is None):
-            raise IRFormatError(
-                "authority IR tool ceiling and value_arg must be declared together"
-            )
+            raise IRFormatError("authority IR tool ceiling and value_arg must be declared together")
+        if (ceiling is None) != (fact_value(tool_id, "quantity") is None):
+            raise IRFormatError("authority IR quantity and ceiling must be declared together")
         if ceiling is not None and scope_key is None:
-            raise IRFormatError(
-                "authority IR tool scope_key is required with a ceiling"
-            )
+            raise IRFormatError("authority IR tool scope_key is required with a ceiling")
     if referenced_scopes != scope_ids:
         raise IRFormatError(
             "authority IR scope entities do not match the analyzable tool references"
@@ -1233,11 +1159,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     source_facts = tuple(sorted(snapshot.facts, key=lambda item: item.id))
     source_edges = tuple(
         sorted(
-            (
-                edge
-                for edge in snapshot.edges
-                if not RELATIONS[edge.relation].derived
-            ),
+            (edge for edge in snapshot.edges if not RELATIONS[edge.relation].derived),
             key=lambda item: item.id,
         )
     )
@@ -1248,10 +1170,10 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
         raise IRFormatError(
             "authority IR source:mandate semantic_sha256 does not match the profile"
         )
-    defaults_digest = hashlib.sha256(_canonical_bytes(_MANIFEST_V1_DEFAULTS)).hexdigest()
-    if sources["source:manifest-v1"].semantic_sha256 != defaults_digest:
+    defaults_digest = hashlib.sha256(_canonical_bytes(_MANIFEST_DEFAULTS)).hexdigest()
+    if sources["source:manifest-v2"].semantic_sha256 != defaults_digest:
         raise IRFormatError(
-            "authority IR source:manifest-v1 semantic_sha256 does not match the profile"
+            "authority IR source:manifest-v2 semantic_sha256 does not match the profile"
         )
 
 
@@ -1263,9 +1185,7 @@ def _validate_profile_value(
     entities: dict[str, Entity],
 ) -> None:
     def reject() -> None:
-        raise IRFormatError(
-            f"authority IR {path} does not match manifest profile schema {schema}"
-        )
+        raise IRFormatError(f"authority IR {path} does not match manifest profile schema {schema}")
 
     def reference(identifier: Any, kind: str) -> bool:
         return (
@@ -1286,6 +1206,13 @@ def _validate_profile_value(
     if schema == "nullable_string":
         if value is not None and not isinstance(value, str):
             reject()
+        return
+    if schema == "nullable_quantity_name":
+        if value is not None:
+            try:
+                _quantity_name(value, path)
+            except ValueError:
+                reject()
         return
     if schema == "nullable_name":
         if value is not None and (
@@ -1317,27 +1244,29 @@ def _validate_profile_value(
         ):
             reject()
         return
-    if schema == "nullable_money":
+    if schema == "quantity_limits":
+        if not isinstance(value, dict):
+            reject()
+        for name, limit in value.items():
+            if (
+                not isinstance(name, str)
+                or not name.strip()
+                or name != name.strip()
+                or any(c in name for c in "\r\n\x00")
+            ):
+                reject()
+            if limit is None:
+                reject()
+            _validate_profile_value(limit, "nullable_quantity", path, entity, entities)
+        return
+    if schema == "nullable_quantity":
         if value is None:
             return
-        if not isinstance(value, dict) or set(value) != {"amount", "currency"}:
-            reject()
-        amount = value["amount"]
-        currency = value["currency"]
-        if not isinstance(amount, str) or not isinstance(currency, str):
+        if not isinstance(value, dict) or not isinstance(value.get("amount"), str):
             reject()
         try:
-            decimal = Decimal(amount)
-        except InvalidOperation:
-            reject()
-        if (
-            not decimal.is_finite()
-            or decimal < 0
-            or len(currency) != 3
-            or not currency.isascii()
-            or not currency.isalpha()
-            or currency != currency.upper()
-        ):
+            Quantity.parse(value, path)
+        except ValueError:
             reject()
         return
     if schema == "principal_ref":
@@ -1356,9 +1285,7 @@ def _validate_profile_value(
     if schema not in reference_kinds:
         raise IRFormatError(f"authority IR has unknown manifest profile schema {schema!r}")
     kind = reference_kinds[schema]
-    if not isinstance(value, list) or any(
-        not reference(identifier, kind) for identifier in value
-    ):
+    if not isinstance(value, list) or any(not reference(identifier, kind) for identifier in value):
         reject()
 
 
@@ -1383,7 +1310,7 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
         ceiling = (
             None
             if ceiling_raw is None
-            else Money(Decimal(ceiling_raw["amount"]), ceiling_raw["currency"])
+            else Quantity(Decimal(ceiling_raw["amount"]), ceiling_raw["unit"])
         )
         tools.append(
             Tool(
@@ -1392,13 +1319,12 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
                 principal=name(value(tool_id, "principal")),
                 requires=tuple(name(item) for item in value(tool_id, "requires")),
                 produces=(
-                    None
-                    if value(tool_id, "produces") is None
-                    else name(value(tool_id, "produces"))
+                    None if value(tool_id, "produces") is None else name(value(tool_id, "produces"))
                 ),
                 unbounded=value(tool_id, "unbounded"),
                 value_arg=value(tool_id, "value_arg"),
                 ceiling=ceiling,
+                quantity=value(tool_id, "quantity"),
                 scope_key=(
                     None
                     if value(tool_id, "scope_key") is None
@@ -1409,18 +1335,14 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
         )
 
     roles = {
-        name(role_id): tuple(
-            name(tool_id) for tool_id in value(role_id, "members")
-        )
+        name(role_id): tuple(name(tool_id) for tool_id in value(role_id, "members"))
         for role_id in value(agent.id, "roles")
     }
     limits_entity = next(item for item in snapshot.entities if item.kind == "constraint")
-    total_raw = value(limits_entity.id, "total")
-    total = (
-        None
-        if total_raw is None
-        else Money(Decimal(total_raw["amount"]), total_raw["currency"])
-    )
+    quantities = {
+        name: Quantity(Decimal(q["amount"]), q["unit"])
+        for name, q in value(limits_entity.id, "quantities").items()
+    }
     source = next((item for item in snapshot.sources if item.kind == "mandate-semantic"), None)
     locator = None if source is None or source.locator == "memory:mandate" else source.locator
     return Mandate(
@@ -1428,7 +1350,7 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
         tools=tuple(tools),
         identity=value(agent.id, "identity"),
         limits=Limits(
-            total=total,
+            quantities=quantities,
             depth=value(limits_entity.id, "depth"),
             effects=value(limits_entity.id, "effects"),
         ),
@@ -1463,9 +1385,7 @@ def _source_graph(graph: AuthorityIR) -> AuthorityIR:
         sources=graph.sources,
         entities=entities,
         facts=tuple(fact for fact in graph.facts if fact.subject in entity_ids),
-        edges=tuple(
-            edge for edge in graph.edges if not RELATIONS[edge.relation].derived
-        ),
+        edges=tuple(edge for edge in graph.edges if not RELATIONS[edge.relation].derived),
     )
     source.validate()
     return source
@@ -1477,9 +1397,7 @@ def _source_graph_sha256(graph: AuthorityIR) -> str:
 
 def _validate_ir_analysis(result: _IRAnalysis) -> None:
     if result.result_version != RESULT_VERSION:
-        raise IRFormatError(
-            f"unsupported authority IR result version {result.result_version!r}"
-        )
+        raise IRFormatError(f"unsupported authority IR result version {result.result_version!r}")
     result.graph.validate()
     source = _source_graph(result.graph)
     if result.source_ir_version != source.ir_version:
@@ -1588,17 +1506,13 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
         raise IRFormatError("reachability retained a path that does not replay")
 
     entities = {item.id: item for item in snapshot.entities}
-    input_edges = {
-        (item.source, item.relation, item.target): item for item in snapshot.edges
-    }
+    input_edges = {(item.source, item.relation, item.target): item for item in snapshot.edges}
     derived: dict[str, Edge] = {}
     agent = next(item for item in snapshot.entities if item.kind == "agent")
     tools = {tool.name: tool for tool in mandate.tools}
     tool_ids = {name: _entity_id("tool", name) for name in tools}
 
-    def add_edge(
-        source: str, relation: str, target: str, support: set[str]
-    ) -> Edge:
+    def add_edge(source: str, relation: str, target: str, support: set[str]) -> Edge:
         identifier = _edge_id(source, relation, target)
         existing = derived.get(identifier)
         if existing is not None:
@@ -1621,9 +1535,7 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
             support.add(_fact_id(tool_id, "unbounded"))
             if tool.produces is not None:
                 support.add(
-                    input_edges[
-                        (tool_id, "produces", _entity_id("scope", tool.produces))
-                    ].id
+                    input_edges[(tool_id, "produces", _entity_id("scope", tool.produces))].id
                 )
         return support
 
@@ -1677,9 +1589,7 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
     constraint_id = _entity_id("constraint", "run")
     for breach in authority.breaches:
         final_tool = breach.path[-1].tool
-        discriminator = breach.subject or (
-            final_tool if breach.kind == "ungated_effect" else "run"
-        )
+        discriminator = breach.subject or (final_tool if breach.kind == "ungated_effect" else "run")
         breach_name = f"{breach.kind}:{discriminator}"
         breach_id = _entity_id("breach", breach_name)
         entities[breach_id] = Entity(breach_id, "breach", breach_name)
@@ -1694,8 +1604,8 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
                     _fact_id(final_id, "requires_approval"),
                 }
             )
-        elif breach.kind == "cumulative_value":
-            support.add(_fact_id(constraint_id, "total"))
+        elif breach.kind == "quantity_budget":
+            support.add(_fact_id(constraint_id, "quantities"))
             for step in breach.path:
                 tool_id = tool_ids[step.tool]
                 support.update(
@@ -1704,13 +1614,12 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
                         _fact_id(tool_id, "scope_key"),
                         _fact_id(tool_id, "unbounded"),
                         _fact_id(tool_id, "value_arg"),
+                        _fact_id(tool_id, "quantity"),
                     }
                 )
         elif breach.kind == "effect_count":
             support.add(_fact_id(constraint_id, "effects"))
-            support.update(
-                _fact_id(tool_ids[step.tool], "effect") for step in breach.path
-            )
+            support.update(_fact_id(tool_ids[step.tool], "effect") for step in breach.path)
         else:  # pragma: no cover - the closed search vocabulary prevents this
             raise IRFormatError(f"unsupported reachability breach {breach.kind!r}")
         add_edge(agent.id, "has_breach", breach_id, support)

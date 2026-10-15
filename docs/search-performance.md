@@ -5,7 +5,7 @@ elapsed time, memory, or the number of states. Independent tools and fresh
 resource bindings can make the state space grow quickly even at a small depth.
 The measured corpus below makes that distinction concrete.
 
-This guide covers the manifest-v1 search kernel, including the private finite
+This guide covers the manifest-v2 search kernel, including the private finite
 producer-cap input. Attachment validation, file parsing, Authority IR
 construction, and multiple searches performed by `diff` or other consumers add
 their own costs. It does not certify a whole command pipeline or provider run.
@@ -101,75 +101,48 @@ the actual byte and operation costs. These formulas count records and ordinary
 operations, not constant-size arbitrary-precision arithmetic. Depth alone
 does not give a useful hard process memory or latency guarantee.
 
-## Reproduce the study
+## Reproduce the current study
 
-Install the development extras, then run from the repository root:
+From the repository root with development extras installed:
 
 ```bash
-python scripts/benchmark_search.py --repeat 5 --compare-baseline --output /tmp/search-study.json
+python scripts/benchmark_search.py --repeat 3 --output /tmp/search-study.json
 ```
 
-Baseline comparison needs Git and the pinned predecessor commit recorded in
-[`search-baselines.json`](../tests/fixtures/search-baselines.json). The harness
-verifies that source digest before loading its code. A shallow checkout can
-run without `--compare-baseline`; it still checks current Authority and enabling
-paths against the pinned pre-change digests. `--case agentkit` selects that
-graph's five depths; `--case wide-mint` selects a synthetic stress case.
+The harness checks the current quantity-model Authority and enabling paths
+against [`search-baselines.json`](../tests/fixtures/search-baselines.json).
+It does not load a historical kernel or need Git. `--case agentkit` selects
+that graph's five depths; `--case wide-mint` selects a synthetic stress case.
 
-There are 25 real-graph runs: AgentKit, GitHub MCP, AWS PostgreSQL, Sentry, and
-Initiative at depths 1, 2, 4, 8, and 12. Five additional synthetic cases cover
-wide fresh-scope production, a 64-call chain, duplicate bindings, pure reads,
-and a finite producer cap. These synthetic cases do not count as new real
-graphs or reviewed operational evidence.
+The corpus has 25 graph/depth runs: AgentKit, GitHub MCP, AWS PostgreSQL,
+Sentry and Initiative at depths 1, 2, 4, 8 and 12. Their manifest-v2 annotations
+are labelled test projections of the preserved source graphs, not new captures
+or transferred evidence acceptance. Five synthetic cases cover a broad frontier,
+a 64-call chain, duplicate bindings, pure reads and finite producer capacity.
 
-The [recorded report](search-performance-results.json) pins input, baseline,
-current kernel, and harness digests, Python/platform details, work counters,
-counterexample lengths, truncation, five elapsed-time samples per kernel, and
-peak traced Python allocation. Timing uses `perf_counter_ns`; allocation
-measurement is a separate run under `tracemalloc`. Input loading and result
-serialization are excluded. Allocation peaks are not RSS or a memory ceiling.
-Timed kernel order alternates; measurements are observations on this machine,
-not CI performance thresholds or guarantees for another workload.
+The [current report](search-performance-results.json) records input, kernel,
+harness and baseline digests, environment, work counters, witness lengths,
+truncation, three timing samples and a separately measured tracemalloc peak.
+Input loading and serialization are excluded. Traced peaks are not RSS or a
+hard memory ceiling. These are observations on one machine; CI asserts no timing
+or allocation threshold. Earlier before/after optimization measurements remain
+recoverable in Git and are not a compatibility path in the current harness.
 
-The measured results and practical guidance below belong to the report's pinned
-kernels; performance changes or corpus changes require rerunning the study.
-The later exact-arithmetic wrapper is covered by semantic replay and a fresh
-study recorded in [the arithmetic follow-up](search-arithmetic-results.json).
-It retains all 30 Authority/provenance fingerprints and the same 20/25 real-graph
-truncation count, with three timing samples per kernel. Small workloads still
-have mixed timing and allocation changes; the earlier table remains a historical
-measurement of its pinned kernels. Output matching checks behavior, not
-operational truth of the reviewed graph annotations.
+At the default depth eight in this run:
 
-## Recorded measurements
-
-This CPython 3.12.3 run on Linux/WSL2 compared the revised kernel with the
-digest-pinned search in the `0.21.0` merge commit. At the default depth 8:
-
-| Graph | States | Peak frontier | Median ms, before → after | Peak KiB, before → after | Witness calls | Truncated |
+| Graph | States | Peak frontier | Median ms | Peak KiB | Witness calls | Truncated |
 |---|---:|---:|---:|---:|---|---|
-| AgentKit | 4,537 | 2,045 | 200.302 → 192.753 | 3062.6 → 2689.5 | 3 | yes |
-| GitHub MCP | 9 | 1 | 0.453 → 0.436 | 18.3 → 17.4 | none | yes |
-| AWS PostgreSQL | 9 | 1 | 0.227 → 0.226 | 12.8 → 12.0 | 3 | yes |
-| Sentry | 9 | 1 | 0.242 → 0.216 | 12.6 → 12.1 | 2 | yes |
-| Initiative | 1 | 1 | 0.115 → 0.125 | 13.3 → 13.4 | 1 | no |
+| agentkit | 4,537 | 2,045 | 212.652 | 2723.0 | 3 | yes |
+| github-mcp-server | 9 | 1 | 0.504 | 18.3 | none | yes |
+| aws-postgres-mcp | 9 | 1 | 0.242 | 12.8 | 3 | yes |
+| sentry-mcp | 9 | 1 | 0.246 | 13.0 | 2 | yes |
+| initiative-mcp | 1 | 1 | 0.236 | 14.4 | 1 | no |
 
-Four of five graphs truncate at depth 8; 20 of the 25 graph/depth cases
-truncate overall. This is a frequency over this fixed depth sweep, not an
-estimated probability of truncation in production. Effect-budget counters can
-keep creating states even after the first breach is found, so a known short
-counterexample does not imply an exhaustive walk.
-
-AgentKit grows from 4,537 states at depth 8 to 31,472 at depth 12. Its measured
-allocation peak falls 12.2% at depth 8 and 7.3% at depth 12; the wide synthetic
-frontier falls 14.1%. The finite-cap synthetic case visits 243 states instead
-of 6,188 for its unbounded counterpart. These improvements retain every pinned
-Authority result and shortest enabling path.
-
-Small workloads have mixed timing changes and can allocate slightly more
-with the parent-linked representation. The report supports a lower allocation
-peak on the broad frontiers measured here, not a universal speedup. No timing
-or memory threshold is asserted in CI.
+Four of five graphs truncate at depth eight; 20 of 25 graph/depth runs truncate
+overall. This is a frequency over the fixed sweep, not a production probability.
+Effect counters can keep producing states after the first breach; a short
+counterexample does not imply an exhaustive walk. The finite-cap synthetic case
+visits 243 states, compared with 6,188 for its unbounded counterpart.
 
 ## Practical CI use
 

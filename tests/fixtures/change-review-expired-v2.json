@@ -1,0 +1,158 @@
+{
+  "argv": [
+    "review",
+    "examples/change-review/before.json",
+    "examples/change-review/after.json",
+    "--as-of",
+    "2026-11-09",
+    "--json",
+    "--decision",
+    "examples/change-review/accepted.json",
+    "--source",
+    "review-note=examples/change-review/decision-note.txt"
+  ],
+  "exit": 1,
+  "result": {
+    "as_of": "2026-11-09",
+    "comparison": {
+      "after": {
+        "breaches": [
+          {
+            "detail": "quantity 'value' reaches 10 GBP, above its cumulative budget of 5 GBP",
+            "kind": "quantity_budget",
+            "path": [
+              "seed(item#1)",
+              "seed(item#2)",
+              "pay(item#1, 5 GBP)",
+              "pay(item#2, 5 GBP)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "10",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "item"
+          ],
+          [
+            "read",
+            "item"
+          ]
+        ],
+        "max_quantities": {
+          "value": {
+            "amount": "5",
+            "unit": "GBP"
+          }
+        },
+        "reachable_tools": [
+          "pay",
+          "seed"
+        ],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "seed: can now mint fresh bindings",
+          "direction": "widening",
+          "kind": "scope minting"
+        },
+        {
+          "detail": "5 -> 10 GBP",
+          "direction": "widening",
+          "kind": "reachable quantity value"
+        },
+        {
+          "detail": "gained quantity_budget",
+          "direction": "widening",
+          "kind": "reachable breach"
+        }
+      ],
+      "direction": "widening"
+    },
+    "findings": [
+      {
+        "detail": "recorded acceptance has expired (inclusive UTC date)",
+        "rule": "review.expired"
+      }
+    ],
+    "gate_satisfied": false,
+    "inputs": {
+      "after_sha256": "866dd9fcc1e0b5a068a8941fce165e643d4d1ce0da1326ee8eee6d1210b7318d",
+      "agent": "synthetic-release",
+      "before_sha256": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
+      "comparison_sha256": "e94b9b33786b646370e4777957eadbd376d75d45b955d900ff893a03797b8b72",
+      "depth": 4
+    },
+    "review": {
+      "after_sha256": "866dd9fcc1e0b5a068a8941fce165e643d4d1ce0da1326ee8eee6d1210b7318d",
+      "agent": "synthetic-release",
+      "attestation": "caller-supplied annotations and pinned bytes; author identity and enforcement not verified",
+      "before_sha256": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
+      "comparison_sha256": "e94b9b33786b646370e4777957eadbd376d75d45b955d900ff893a03797b8b72",
+      "decision": "accept",
+      "depth": 4,
+      "eligible": false,
+      "evidence": [
+        {
+          "locator": "review-note",
+          "purpose": "decision",
+          "sha256": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f"
+        }
+      ],
+      "evidence_checks": [
+        {
+          "actual_sha256": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f",
+          "locator": "review-note",
+          "matches": true,
+          "purpose": "decision",
+          "sha256": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f"
+        }
+      ],
+      "expires": "2026-11-08",
+      "owner": "synthetic-owner",
+      "reason": "Accept this bounded authority expansion for the synthetic example.",
+      "reviewed_at": "2026-10-10",
+      "reviewer": "synthetic-reviewer",
+      "schema": "agentmandate.change-review/v1",
+      "scope": "all_widening_changes_in_pinned_comparison",
+      "source_sha256": "96326c4641614f151c03dea1754c2a2a5d305c8c00addf94cfdd143762c4b56c",
+      "target_policy": {
+        "reason": "No deployed policy in this example.",
+        "status": "not_applicable"
+      }
+    },
+    "schema": "agentmandate.review/v2",
+    "scope": "recorded acceptance of a bounded diff; not reviewer authentication or deployment approval",
+    "status": "recorded_acceptance_unresolved"
+  }
+}

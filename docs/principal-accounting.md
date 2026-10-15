@@ -57,7 +57,7 @@ check:
    attempt. Request IDs are insufficient. Repeated observations of one
    execution must be removed before authoring this format; it has no deduplication
    algorithm. The amount, completion classification, tool contract, value
-   argument, and currency must agree with the pinned sources and manifest.
+   argument, quantity, and unit must agree with the pinned sources and manifest.
 
 The reader checks structure, exact joins, review status, expiry, and hashes.
 It does not authenticate a reviewer, parse provider-specific identity proofs,
@@ -76,7 +76,7 @@ below are required; unknown fields and versions are rejected.
 | `profile_sha256` | Digest of the canonical principal profile, including its review metadata |
 | `provider`, `boundary` | Exact matches to the observation profile |
 | `measurement` | `profile_tool`, `manifest_tool`, `value_arg`, `dimension`, `unit`; maps the observed tool to a manifest value-spending tool without conversion |
-| `limit` | Nonnegative integer `amount`, `unit`, `comparison: inclusive`, `scope: per_trial_run`; must equal `limits.total` in the manifest |
+| `limit` | Nonnegative integer `amount`, `unit`, `comparison: inclusive`, `scope: per_trial_run`; must equal `limits.quantities` in the manifest |
 | `intent` | `kind: shared_mandate_per_trial`, a nonempty `statement`, and binding `sources` references |
 | `mediation` | `kind: complete` or `unknown`, and binding `sources` references; unknown cannot authorize accounting |
 | `principals` | Exactly the profile's aliases, each with `alias`, `subject`, `manifest_principal`, and binding `sources` references |
@@ -95,14 +95,14 @@ mappings. It does not reorder the observation calls. The profile digest pins
 the complete canonical profile rather than its original JSON formatting.
 
 This first binding supports integer monetary observations in `dimension: value`,
-one manifest tool and currency, and an inclusive manifest total per run. It
+one manifest tool and quantity unit, and an inclusive manifest total per run. It
 does not support cost conversion, multiple mandates in one trial, effect counts,
 policy amendments, rolling windows, or reconstructing an initial balance.
 
 ## Result contract
 
-Binding input selects `agentmandate.principal-accounting/v1`; it does not change
-`agentmandate.principal-continuity/v1`. The result retains all observation fields
+Binding input selects `agentmandate.principal-accounting/v2`; it does not change
+`agentmandate.principal-continuity/v2`. The result retains all observation fields
 and the full independent manifest Authority analysis. It adds the canonical
 binding digest, the complete binding, `binding_eligible`, and per-trial
 `accounting` records.
@@ -142,8 +142,8 @@ both eligibility flags and known completion. Finding codes distinguish
 
 The [example binding](../examples/principal-continuity/accounting-binding.json)
 round-trips through its strict reader. Complete
-[eligible](../tests/fixtures/principal-accounting-result-v1-eligible.json) and
-[expired](../tests/fixtures/principal-accounting-result-v1-expired.json) results
+[eligible](../tests/fixtures/principal-accounting-result-v2-eligible.json) and
+[expired](../tests/fixtures/principal-accounting-result-v2-expired.json) results
 are fixed CLI baselines in `tests/test_principal_accounting.py`. The existing
 observation v1 baselines remain byte-identical and tested. This is a new opt-in
 contract, not a migration of the existing result.

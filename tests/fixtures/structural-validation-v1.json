@@ -3,11 +3,12 @@
     "argv": [
       "ir",
       "validate",
-      "tests/fixtures/authority-ir-v1.json",
+      "tests/fixtures/authority-ir-v2.json",
       "--json"
     ],
     "exit": 0,
-    "stdout": "{\n  \"artifact\": \"authority-ir\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
+    "stderr": "",
+    "stdout": "{\n  \"artifact\": \"authority-ir\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 2\n}\n"
   },
   {
     "argv": [
@@ -17,6 +18,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"dynamic-inventory\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   },
   {
@@ -28,6 +30,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"tool-condition\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   },
   {
@@ -39,6 +42,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"condition-context\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   },
   {
@@ -50,6 +54,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"delegation-attachment\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 2\n}\n"
   },
   {
@@ -61,6 +66,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"delegation-chain\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   },
   {
@@ -71,6 +77,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"producer-boundary\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   },
   {
@@ -81,6 +88,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"agentcore-continuity-profile\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   },
   {
@@ -91,6 +99,7 @@
       "--json"
     ],
     "exit": 0,
+    "stderr": "",
     "stdout": "{\n  \"artifact\": \"managed-cedar-oracle\",\n  \"schema\": \"agentmandate.validation/v1\",\n  \"scope\": \"structure only; evidence trust and deployment approval are not assessed\",\n  \"status\": \"valid\",\n  \"version\": 1\n}\n"
   }
 ]

@@ -15,7 +15,7 @@ from .manifest import loads
 from .reach import analyse
 
 DEPLOYMENT_VERSION = 1
-RESULT_SCHEMA = "agentmandate.deployment-drift/v1"
+RESULT_SCHEMA = "agentmandate.deployment-drift/v2"
 
 
 def _date(value):

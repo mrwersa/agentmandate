@@ -10,7 +10,8 @@ Use `--otel` to read an OTLP JSON export instead of converting it to the
 $ mandate verify mandate.yaml --otel trace.json \
     --map scope=app.case.id \
     --map value=app.refund.amount \
-    --map currency=app.currency \
+    --map quantity=app.quantity \
+    --map unit=app.unit \
     --map approved=app.approved \
     --map principal=app.principal
 ```
@@ -44,7 +45,8 @@ They do not describe what a mandate needs in order to check a **control**:
 |---|---|---|
 | `scope` | ceilings accumulate per resource | your application |
 | `value` | how much was spent | your application |
-| `currency` | amounts in two currencies cannot be summed | your application |
+| `quantity` | names the accounting pool | your application |
+| `unit` | must match the tool ceiling | your application |
 | `principal` | whose authority the call spent | your application |
 | `approved` | whether a gate actually held | your application |
 
@@ -57,7 +59,7 @@ Run it without mappings and you get this:
 
 ```text
 read 5 span(s), 3 tool call(s), 3 observation(s)
-  no attribute mapped for: scope, value, currency, principal, approved.
+  no attribute mapped for: scope, value, quantity, unit, principal, approved.
   verify will fail closed on any control that needs them.
 
 VIOLATION  missing_principal  open_case    line 1
@@ -161,7 +163,7 @@ sees the warnings that explain a suspiciously clean report:
 
 ```json
 {
-  "schema": "agentmandate.verify/v1",
+  "schema": "agentmandate.verify/v2",
   "conversion": {
     "total_spans": 5, "tool_calls": 3, "observations": 3,
     "traces": 1, "errored": 0, "duplicates": 0, "unmapped": []

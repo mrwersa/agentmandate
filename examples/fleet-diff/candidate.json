@@ -1,93 +1,93 @@
 {
-  "fleet_version": 1,
-  "fleet": "example-platform",
   "coverage": "complete",
-  "observed_at": "2026-10-11",
-  "expires": "2026-11-08",
   "entries": [
     {
-      "id": "release/prod",
-      "repository": "release-repo",
-      "revision": "synthetic-commit-2",
       "environment": "prod",
-      "owner": "release-security",
-      "review": {
-        "state": "accepted",
-        "reviewer": "synthetic-reviewer",
-        "reviewed_at": "2026-10-11",
-        "expires": "2026-11-08"
+      "id": "release/prod",
+      "ir": {
+        "path": "examples/fleet-diff/candidate-release/authority-ir.json",
+        "sha256": "beeeac5db5d995b07d53dbb63ef2b6001147756cd10adfb40fe1e5e13e99ed9d"
       },
       "manifest": {
         "path": "examples/fleet-diff/candidate-release/manifest.json",
-        "sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615"
+        "sha256": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6"
       },
-      "ir": {
-        "path": "examples/fleet-diff/candidate-release/authority-ir.json",
-        "sha256": "edcb0870a3623d27c3f17fceb3805c198d2e9a4425138a283fd9bb6818072c4e"
-      }
+      "owner": "release-security",
+      "repository": "release-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "revision": "synthetic-commit-2"
     },
     {
-      "id": "release/staging",
-      "repository": "release-repo",
-      "revision": "synthetic-commit-1",
       "environment": "staging",
-      "owner": "release-security",
-      "review": {
-        "state": "accepted",
-        "reviewer": "synthetic-reviewer",
-        "reviewed_at": "2026-10-11",
-        "expires": "2026-11-08"
+      "id": "release/staging",
+      "ir": {
+        "path": "examples/fleet-inventory/release-repo/authority-ir.json",
+        "sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb"
       },
       "manifest": {
         "path": "examples/fleet-inventory/release-repo/manifest.json",
-        "sha256": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19"
+        "sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e"
       },
-      "ir": {
-        "path": "examples/fleet-inventory/release-repo/authority-ir.json",
-        "sha256": "9b6e4ccedce66098f9d7d2f79a16e74d4ac28e44df2f7fbc087de31b6f501f76"
-      }
-    },
-    {
-      "id": "billing/prod",
-      "repository": "billing-repo",
-      "revision": "synthetic-commit-1",
-      "environment": "prod",
-      "owner": "billing-security",
+      "owner": "release-security",
+      "repository": "release-repo",
       "review": {
-        "state": "unreviewed",
-        "reviewer": null,
-        "reviewed_at": null,
-        "expires": null
-      },
-      "manifest": {
-        "path": "examples/fleet-inventory/billing-repo/manifest.json",
-        "sha256": "9d514bf22268baf892ea451d4134d98fc0fa7f8fc553afda215c892099795746"
-      },
-      "ir": {
-        "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
-        "sha256": "ada14f4bbcd833799f197a508a7cad5761ce2a7ce04a313d8c09eb6f0d294329"
-      }
-    },
-    {
-      "id": "billing/staging",
-      "repository": "billing-repo",
-      "revision": "synthetic-commit-1",
-      "environment": "staging",
-      "owner": "billing-security",
-      "review": {
-        "state": "accepted",
-        "reviewer": "synthetic-reviewer",
+        "expires": "2026-11-08",
         "reviewed_at": "2026-10-11",
-        "expires": "2026-11-08"
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "revision": "synthetic-commit-1"
+    },
+    {
+      "environment": "prod",
+      "id": "billing/prod",
+      "ir": {
+        "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
+        "sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d"
       },
       "manifest": {
         "path": "examples/fleet-inventory/billing-repo/manifest.json",
-        "sha256": "9d514bf22268baf892ea451d4134d98fc0fa7f8fc553afda215c892099795746"
+        "sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810"
       },
+      "owner": "billing-security",
+      "repository": "billing-repo",
+      "review": {
+        "expires": null,
+        "reviewed_at": null,
+        "reviewer": null,
+        "state": "unreviewed"
+      },
+      "revision": "synthetic-commit-1"
+    },
+    {
+      "environment": "staging",
+      "id": "billing/staging",
       "ir": {
         "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
-        "sha256": "ada14f4bbcd833799f197a508a7cad5761ce2a7ce04a313d8c09eb6f0d294329"
-      }
+        "sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d"
+      },
+      "manifest": {
+        "path": "examples/fleet-inventory/billing-repo/manifest.json",
+        "sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810"
+      },
+      "owner": "billing-security",
+      "repository": "billing-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "revision": "synthetic-commit-1"
     }
-  ]
+  ],
+  "expires": "2026-11-08",
+  "fleet": "example-platform",
+  "fleet_version": 1,
+  "observed_at": "2026-10-11"
 }

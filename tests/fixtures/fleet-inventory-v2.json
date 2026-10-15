@@ -1,0 +1,175 @@
+{
+  "as_of": "2026-10-11",
+  "declared_coverage": "complete",
+  "entries": [
+    {
+      "agent": "billing-agent",
+      "artifacts": {
+        "ir": {
+          "expected_sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d",
+          "observed_sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d",
+          "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
+          "status": "verified"
+        },
+        "manifest": {
+          "expected_sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810",
+          "observed_sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810",
+          "path": "examples/fleet-inventory/billing-repo/manifest.json",
+          "status": "verified"
+        }
+      },
+      "declared_tools": [
+        {
+          "effect": "irreversible",
+          "name": "issue_refund",
+          "principal": "caller",
+          "requires_approval": true
+        },
+        {
+          "effect": "read",
+          "name": "read_release",
+          "principal": "caller",
+          "requires_approval": false
+        }
+      ],
+      "environment": "prod",
+      "id": "billing/prod",
+      "identity": "billing-operator",
+      "owner": "billing-security",
+      "repository": "billing-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "review_current": true,
+      "revision": "synthetic-commit-1",
+      "snapshot_eligible": true
+    },
+    {
+      "agent": "release-agent",
+      "artifacts": {
+        "ir": {
+          "expected_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+          "observed_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+          "path": "examples/fleet-inventory/release-repo/authority-ir.json",
+          "status": "verified"
+        },
+        "manifest": {
+          "expected_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+          "observed_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+          "path": "examples/fleet-inventory/release-repo/manifest.json",
+          "status": "verified"
+        }
+      },
+      "declared_tools": [
+        {
+          "effect": "irreversible",
+          "name": "publish_release",
+          "principal": "caller",
+          "requires_approval": true
+        },
+        {
+          "effect": "read",
+          "name": "read_build_status",
+          "principal": "service",
+          "requires_approval": false
+        },
+        {
+          "effect": "read",
+          "name": "read_release",
+          "principal": "caller",
+          "requires_approval": false
+        }
+      ],
+      "environment": "prod",
+      "id": "release/prod",
+      "identity": "release-operator",
+      "owner": "release-security",
+      "repository": "release-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "review_current": true,
+      "revision": "synthetic-commit-1",
+      "snapshot_eligible": true
+    },
+    {
+      "agent": "release-agent",
+      "artifacts": {
+        "ir": {
+          "expected_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+          "observed_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+          "path": "examples/fleet-inventory/release-repo/authority-ir.json",
+          "status": "verified"
+        },
+        "manifest": {
+          "expected_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+          "observed_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+          "path": "examples/fleet-inventory/release-repo/manifest.json",
+          "status": "verified"
+        }
+      },
+      "declared_tools": [
+        {
+          "effect": "irreversible",
+          "name": "publish_release",
+          "principal": "caller",
+          "requires_approval": true
+        },
+        {
+          "effect": "read",
+          "name": "read_build_status",
+          "principal": "service",
+          "requires_approval": false
+        },
+        {
+          "effect": "read",
+          "name": "read_release",
+          "principal": "caller",
+          "requires_approval": false
+        }
+      ],
+      "environment": "staging",
+      "id": "release/staging",
+      "identity": "release-operator",
+      "owner": "release-security",
+      "repository": "release-repo",
+      "review": {
+        "expires": "2026-11-08",
+        "reviewed_at": "2026-10-11",
+        "reviewer": "synthetic-reviewer",
+        "state": "accepted"
+      },
+      "review_current": true,
+      "revision": "synthetic-commit-1",
+      "snapshot_eligible": true
+    }
+  ],
+  "findings": [],
+  "fleet": "example-platform",
+  "index_sha256": "e2058a916c47f11b2ede16256ba1d9ff52ae9aca100f002ab5958ed53e1a1b6f",
+  "inventory_complete_within_declared_index": true,
+  "query": {
+    "environment": null,
+    "owner": null,
+    "tool": null
+  },
+  "schema": "agentmandate.fleet-inventory/v2",
+  "scope": "declared manifest tools and local IR joins; not runtime exposure or cross-agent reachability",
+  "signatures": "not_verified",
+  "snapshot_current": true,
+  "status": "consistent_with_declared_index",
+  "summary": {
+    "current_reviews": 3,
+    "declared_tool_occurrences": 8,
+    "eligible_snapshots": 3,
+    "entries": 3,
+    "selected_entries": 3,
+    "unassigned_owners": 0
+  }
+}

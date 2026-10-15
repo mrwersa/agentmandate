@@ -15,7 +15,7 @@ from .diff import compare as compare_authority
 from .manifest import loads
 
 CAPTURE_VERSION = 1
-RESULT_SCHEMA = "agentmandate.rego-effective-diff/v1"
+RESULT_SCHEMA = "agentmandate.rego-effective-diff/v2"
 MATERIALS = ("manifest", "configuration", "decisions", "telemetry", "mapping")
 REQUEST_FIELDS = ("principal", "action", "resource", "context")
 
@@ -43,9 +43,13 @@ def _constant(text):
 def _request_json(value):
     """Encode exact decimal values without float conversion or context rounding."""
     if isinstance(value, dict):
-        return "{" + ",".join(
-            json.dumps(key) + ":" + _request_json(item) for key, item in sorted(value.items())
-        ) + "}"
+        return (
+            "{"
+            + ",".join(
+                json.dumps(key) + ":" + _request_json(item) for key, item in sorted(value.items())
+            )
+            + "}"
+        )
     if isinstance(value, list):
         return "[" + ",".join(_request_json(item) for item in value) + "]"
     if isinstance(value, Decimal):
@@ -88,8 +92,11 @@ def _side(content, root, as_of):
         raise ValueError("export mapping changed during comparison")
     export_mapping = _json(export_content)
     records = json.loads(
-        materials["decisions"], object_pairs_hook=pairs,
-        parse_int=_number, parse_float=_number, parse_constant=_constant,
+        materials["decisions"],
+        object_pairs_hook=pairs,
+        parse_int=_number,
+        parse_float=_number,
+        parse_constant=_constant,
     )
     requests = defaultdict(list)
     invalid = []

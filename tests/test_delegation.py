@@ -73,7 +73,7 @@ def mandate():
     return loads(
         json.dumps(
             {
-                "version": 1,
+                "version": 2,
                 "agent": "export-agent",
                 "tools": [
                     {
@@ -366,12 +366,12 @@ def test_projection_digest_is_pinned_for_stability():
     [
         pytest.param(
             authorizer_chain(),
-            "b1e8c43497d9408526cb649eecf844bbbf8f6b00afa37aa8703a3f8eeb2346f8",
+            "1eb47612d25da557b399f253bda722c4ca2709eae453e8a33f536ef8932f0212",
             id="authorizer",
         ),
         pytest.param(
             migrate_grant_v1(Grant.from_json(GRANT.read_text(encoding="utf-8"))),
-            "a5b2ad851500cd8f554e9bab124b7b291dee431815812b73ce5345d63066528d",
+            "f7bde1c402904f32df8755009d74eadbd4be3d061cde49d8c3c0c03fbc18309d",
             id="migrated-grant",
         ),
     ],
@@ -388,7 +388,7 @@ def test_delegation_ir_projection_is_structural_and_byte_stable(chain, projectio
     assert [edge.relation for edge in graph.edges].count("previous_hop") == len(chain.hops) - 1
     assert [edge.relation for edge in graph.edges].count("has_surface") == 3 * len(chain.hops)
 
-    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
         _analyse_ir(graph)
 
 
@@ -611,7 +611,7 @@ def test_attachment_reader_and_profile_are_canonical_and_standalone():
         "at_hop",
         "uses_delegation",
     }
-    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
         _analyse_ir(graph)
 
 
@@ -652,17 +652,13 @@ def test_attachment_profile_rejects_semantic_tampering_after_rehash():
     changed_target = replace(target, value={**target.value, "tool": "other"})
     tampered_target = replace(
         graph,
-        facts=tuple(
-            changed_target if fact.id == target.id else fact for fact in graph.facts
-        ),
+        facts=tuple(changed_target if fact.id == target.id else fact for fact in graph.facts),
     )
     with pytest.raises(DelegationFormatError, match="target does not match"):
         _validate_attachment_profile(rehash(tampered_target))
 
     extra = Entity(_entity_id("principal", "extra"), "principal", "extra")
-    name = Fact(
-        _fact_id(extra.id, "name"), extra.id, "name", "extra", graph.facts[0].evidence
-    )
+    name = Fact(_fact_id(extra.id, "name"), extra.id, "name", "extra", graph.facts[0].evidence)
     with pytest.raises(DelegationFormatError, match="unsupported entities"):
         _validate_attachment_profile(
             rehash(replace(graph, entities=(*graph.entities, extra), facts=(*graph.facts, name)))
@@ -678,9 +674,12 @@ def test_authorizer_analysis_is_unresolved_only_and_preserves_authority():
         as_of="2026-08-25T12:00:00Z",
     )
 
-    assert result.authority.as_dict() == analyse_delegations(
-        mandate(), [], [], {}, as_of="2026-08-25T12:00:00Z"
-    ).authority.as_dict()
+    assert (
+        result.authority.as_dict()
+        == analyse_delegations(
+            mandate(), [], [], {}, as_of="2026-08-25T12:00:00Z"
+        ).authority.as_dict()
+    )
     assert not result.clean and not result.attenuated
     assert "delegation.validity-unresolved" in {finding.code for finding in result.findings}
     assert "delegation.surface-unresolved" in {finding.code for finding in result.findings}
@@ -756,9 +755,7 @@ def test_analysis_names_missing_locator_and_rejects_noncanonical_time():
     assert chain.hops[0].source.locator in source.message
 
     with pytest.raises(DelegationFormatError, match="canonical UTC timestamp"):
-        analyse_delegations(
-            mandate(), [], [], {}, as_of="2026-08-25T12:00:00+00:00"
-        )
+        analyse_delegations(mandate(), [], [], {}, as_of="2026-08-25T12:00:00+00:00")
 
 
 @pytest.mark.parametrize(
@@ -771,7 +768,7 @@ def test_analysis_names_missing_locator_and_rejects_noncanonical_time():
     ],
 )
 def test_empty_delegation_inputs_preserve_all_four_evidence_graphs(path):
-    value = load(Path(__file__).parents[1] / "docs" / "evidence" / path)
+    value = load(Path(__file__).parents[1] / "tests/fixtures/quantity-evidence" / path)
     result = analyse_delegations(value, [], [], {}, as_of="2026-08-25T12:00:00Z")
 
     assert result.authority.as_dict() == analyse(value).as_dict()

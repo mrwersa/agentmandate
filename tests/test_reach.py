@@ -8,7 +8,7 @@ from agentmandate.reach import Step, _analyse_with_trace
 CAPPED = """
 agent: capped
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
   depth: 8
 tools:
   - name: open_case
@@ -19,14 +19,13 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 """
 
 # Identical, except the agent can mint cases at will.
-UNBOUNDED = CAPPED.replace(
-    "    produces: case\n", "    produces: case\n    unbounded: true\n"
-)
+UNBOUNDED = CAPPED.replace("    produces: case\n", "    produces: case\n    unbounded: true\n")
 
 
 def test_private_trace_retains_each_shortest_enabling_path_without_changing_authority():
@@ -40,10 +39,7 @@ def test_private_trace_retains_each_shortest_enabling_path_without_changing_auth
     assert refund_path == (
         Step(tool="open_case", binding="case#1"),
         Step(
-            tool="issue_refund",
-            binding="case#1",
-            spent=Decimal(500),
-            currency="GBP",
+            tool="issue_refund", binding="case#1", spent=Decimal(500), unit="GBP", quantity="value"
         ),
     )
     assert trace.path_for("missing") is None
@@ -53,7 +49,7 @@ def test_private_trace_retains_each_shortest_enabling_path_without_changing_auth
 def test_a_bounded_scope_keeps_the_ceiling_meaningful():
     authority = analyse(loads(CAPPED))
     assert authority.breaches == ()
-    assert authority.max_extractable.amount == Decimal(500)
+    assert authority.max_quantities.get("value").amount == Decimal(500)
 
 
 def test_an_unbounded_scope_makes_the_ceiling_unenforceable():
@@ -61,9 +57,9 @@ def test_an_unbounded_scope_makes_the_ceiling_unenforceable():
     authority = analyse(loads(UNBOUNDED))
     assert len(authority.breaches) == 1
     breach = authority.breaches[0]
-    assert breach.kind == "cumulative_value"
-    assert "exceeds limit 500 GBP" in breach.detail
-    assert authority.max_extractable.amount > Decimal(500)
+    assert breach.kind == "quantity_budget"
+    assert "above its cumulative budget of 500 GBP" in breach.detail
+    assert authority.max_quantities.get("value").amount > Decimal(500)
 
 
 def test_a_breach_reports_the_call_sequence_that_produces_it():
@@ -136,18 +132,18 @@ def test_ungated_irreversible_and_service_principal_are_surfaced():
 
 def test_authority_serialises_to_plain_json_types():
     payload = analyse(loads(UNBOUNDED)).as_dict()
-    assert payload["max_extractable"]["currency"] == "GBP"
-    assert payload["breaches"][0]["kind"] == "cumulative_value"
+    assert payload["max_quantities"]["value"]["unit"] == "GBP"
+    assert payload["breaches"][0]["kind"] == "quantity_budget"
     assert isinstance(payload["breaches"][0]["path"], list)
     assert payload["depth"] == 8
 
 
-def test_max_extractable_is_absent_when_no_currency_is_declared():
+def test_max_extractable_is_absent_when_no_unit_is_declared():
     authority = analyse(loads("agent: a\ntools:\n  - name: t\n    effect: read\n"))
-    assert authority.max_extractable is None
+    assert authority.max_quantities.get("value") is None
 
 
-def test_currency_is_inferred_from_a_sole_ceiling_without_a_run_limit():
+def test_unit_is_inferred_from_a_sole_ceiling_without_a_run_limit():
     mandate = loads(
         """
         agent: a
@@ -160,14 +156,15 @@ def test_currency_is_inferred_from_a_sole_ceiling_without_a_run_limit():
             requires: [case]
             value_arg: amount
             scope_key: case
-            ceiling: { amount: 40, currency: USD }
+            quantity: value
+            ceiling: { amount: 40, unit: USD }
             requires_approval: true
         """
     )
     authority = analyse(mandate)
     assert authority.breaches == ()
-    assert authority.max_extractable.currency == "USD"
-    assert authority.max_extractable.amount == Decimal(40)
+    assert authority.max_quantities.get("value").unit == "USD"
+    assert authority.max_quantities.get("value").amount == Decimal(40)
 
 
 def test_a_breach_renders_a_numbered_sequence():
@@ -181,7 +178,7 @@ def test_step_render_covers_each_field_combination():
     assert Step("t").render() == "t"
     assert Step("t", binding="case#1").render() == "t(case#1)"
     assert (
-        Step("t", binding="case#1", spent=Decimal(5), currency="GBP").render()
+        Step("t", binding="case#1", spent=Decimal(5), unit="GBP", quantity="value").render()
         == "t(case#1, 5 GBP)"
     )
 

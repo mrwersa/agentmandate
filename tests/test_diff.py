@@ -9,7 +9,7 @@ from agentmandate.diff import NARROWING, NEUTRAL, WIDENING
 V1 = """
 agent: dispute
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
 tools:
   - name: open_case
     effect: read
@@ -19,15 +19,15 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 """
 
 # The whole change is one read-only tool.
 V2 = V1.replace(
     "tools:\n",
-    "tools:\n  - name: search_cases\n    effect: read\n"
-    "    produces: case\n    unbounded: true\n",
+    "tools:\n  - name: search_cases\n    effect: read\n    produces: case\n    unbounded: true\n",
 )
 
 
@@ -44,7 +44,7 @@ def test_a_read_only_addition_is_reported_as_widening():
     assert delta.widened is True
     kinds = {change.kind for change in delta.changes}
     assert "tool" in kinds
-    assert "extractable value" in kinds
+    assert "reachable quantity value" in kinds
     assert "reachable breach" in kinds
 
 
@@ -57,7 +57,7 @@ def test_removing_a_tool_narrows_authority():
 
 def test_extractable_value_change_is_quantified():
     delta = compare(loads(V1), loads(V2))
-    change = next(c for c in delta.changes if c.kind == "extractable value")
+    change = next(c for c in delta.changes if c.kind == "reachable quantity value")
     assert change.detail.startswith("500 -> ")
     assert change.detail.endswith("GBP")
 
@@ -86,8 +86,7 @@ def test_an_effect_reaching_a_new_scope_is_widening():
     )
     delta = compare(loads(V1), loads(extended))
     assert any(
-        c.kind == "effect" and c.detail == "gained irreversible on ledger"
-        for c in delta.changes
+        c.kind == "effect" and c.detail == "gained irreversible on ledger" for c in delta.changes
     )
 
 
@@ -165,32 +164,35 @@ def test_the_change_record_carries_the_caveat_about_unchanged_manifests():
 
 
 def test_raising_the_run_limit_is_widening_even_when_the_graph_is_unchanged():
-    raised = V1.replace("total: { amount: 500", "total: { amount: 1000")
+    raised = V1.replace("quantities: {value: { amount: 500", "quantities: {value: { amount: 1000")
     delta = compare(loads(V1), loads(raised))
     assert delta.widened is True
     assert any(
-        change.kind == "run limit" and "500 -> 1000 GBP" in change.detail
+        change.kind == "quantity budget value" and "500 -> 1000 GBP" in change.detail
         for change in delta.changes
     )
 
 
 def test_removing_the_run_limit_is_widening():
-    removed = V1.replace("limits:\n  total: { amount: 500, currency: GBP }\n", "")
+    removed = V1.replace(
+        """limits:
+  quantities: {value: { amount: 500, unit: GBP }}
+""",
+        "",
+    )
     delta = compare(loads(V1), loads(removed))
     assert delta.widened is True
     assert any(
-        change.kind == "run limit" and "removed limit" in change.detail
+        change.kind == "quantity budget value" and "removed limit" in change.detail
         for change in delta.changes
     )
 
 
-def test_cross_currency_amounts_are_not_compared_numerically():
-    changed = V1.replace("500, currency: GBP", "1, currency: USD")
+def test_cross_unit_amounts_are_not_compared_numerically():
+    changed = V1.replace("500, unit: GBP", "1, unit: USD")
     delta = compare(loads(V1), loads(changed))
     assert delta.widened is True
-    assert any(
-        "amounts are not comparable" in change.detail for change in delta.changes
-    )
+    assert any("amounts are not comparable" in change.detail for change in delta.changes)
 
 
 def test_removing_a_required_scope_is_widening():
@@ -239,8 +241,11 @@ def test_removing_approval_from_a_write_tool_is_widening():
 
 def test_lowering_the_default_search_depth_cannot_hide_authority():
     deep = V2.replace(
-        "  total: { amount: 500, currency: GBP }\n",
-        "  total: { amount: 500, currency: GBP }\n  depth: 8\n",
+        """  quantities: {value: { amount: 500, unit: GBP }}
+""",
+        """  quantities: {value: { amount: 500, unit: GBP }}
+  depth: 8
+""",
     )
     shallow = deep.replace("  depth: 8", "  depth: 1")
     delta = compare(loads(deep), loads(shallow))
@@ -252,8 +257,11 @@ def test_lowering_the_default_search_depth_cannot_hide_authority():
 
 def test_comparison_uses_the_larger_default_depth_on_both_sides():
     shallow = V1.replace(
-        "  total: { amount: 500, currency: GBP }\n",
-        "  total: { amount: 500, currency: GBP }\n  depth: 2\n",
+        """  quantities: {value: { amount: 500, unit: GBP }}
+""",
+        """  quantities: {value: { amount: 500, unit: GBP }}
+  depth: 2
+""",
     )
     delta = compare(loads(shallow), loads(V1))
     assert delta.before.depth == 8
@@ -290,7 +298,7 @@ def test_changing_the_value_argument_needs_review():
 
 BASE = """
 agent: a
-limits: {total: {amount: 500, currency: GBP}}
+limits: {quantities: {value: {amount: 500, unit: GBP}}}
 tools:
   - name: seed
     effect: read
@@ -357,7 +365,7 @@ def test_removing_a_produced_scope_is_narrowing():
 
 CEILINGED = """
 agent: a
-limits: {total: {amount: 500, currency: GBP}}
+limits: {quantities: {value: {amount: 500, unit: GBP}}}
 tools:
   - name: seed
     effect: read
@@ -367,14 +375,15 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: {amount: 100, currency: GBP}
+    quantity: value
+    ceiling: {amount: 100, unit: GBP}
     requires_approval: true
 """
 
 
 LEDGER_SCOPED = """
 agent: a
-limits: {total: {amount: 500, currency: GBP}}
+limits: {quantities: {value: {amount: 500, unit: GBP}}}
 tools:
   - name: seed
     effect: read
@@ -387,7 +396,8 @@ tools:
     requires: [ledger]
     value_arg: amount
     scope_key: ledger
-    ceiling: {amount: 100, currency: GBP}
+    quantity: value
+    ceiling: {amount: 100, unit: GBP}
     requires_approval: true
 """
 
@@ -403,8 +413,11 @@ def test_changing_the_ceiling_scope_makes_limits_incomparable():
 # scope_key is kept on both sides so the comparison isolates the ceiling.
 # Dropping it too would route to the "ceiling scope" rule above instead.
 UNCAPPED = CEILINGED.replace(
-    "    value_arg: amount\n    scope_key: case\n"
-    "    ceiling: {amount: 100, currency: GBP}\n",
+    """    value_arg: amount
+    scope_key: case
+    quantity: value
+    ceiling: {amount: 100, unit: GBP}
+""",
     "    scope_key: case\n",
 )
 
@@ -450,7 +463,7 @@ tools:
 
 WITH_MONEY = """
 agent: a
-limits: {total: {amount: 50, currency: GBP}}
+limits: {quantities: {value: {amount: 50, unit: GBP}}}
 tools:
   - name: seed
     effect: read
@@ -460,19 +473,24 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: {amount: 50, currency: GBP}
+    quantity: value
+    ceiling: {amount: 50, unit: GBP}
     requires_approval: true
 """
 
 
 def test_an_agent_that_could_spend_nothing_and_now_can_is_widening():
-    change = only(compare(loads(NO_MONEY), loads(WITH_MONEY)).changes, "extractable value")[0]
+    change = only(compare(loads(NO_MONEY), loads(WITH_MONEY)).changes, "reachable quantity value")[
+        0
+    ]
     assert change.direction == WIDENING
     assert change.detail == "gained 50 GBP"
 
 
 def test_an_agent_that_can_no_longer_spend_is_narrowing():
-    change = only(compare(loads(WITH_MONEY), loads(NO_MONEY)).changes, "extractable value")[0]
+    change = only(compare(loads(WITH_MONEY), loads(NO_MONEY)).changes, "reachable quantity value")[
+        0
+    ]
     assert change.direction == NARROWING
     assert change.detail == "removed 50 GBP"
 
@@ -487,27 +505,37 @@ def test_declaring_a_workload_identity_is_narrowing():
 
 
 def budget_mandate(budgets, *, effect="irreversible", depth=2):
-    return Mandate.parse({
-        "agent": "budget-regression", "limits": {"depth": depth, "effects": budgets},
-        "tools": [{"name": "act", "effect": effect, "requires_approval": True}],
-    })
+    return Mandate.parse(
+        {
+            "agent": "budget-regression",
+            "limits": {"depth": depth, "effects": budgets},
+            "tools": [{"name": "act", "effect": effect, "requires_approval": True}],
+        }
+    )
 
 
 @pytest.mark.parametrize("effect", ["read", "write", "irreversible"])
-@pytest.mark.parametrize("previous,proposed,direction,detail", [
-    (3, 5, WIDENING, "3 -> 5 calls"),
-    (5, 3, NARROWING, "5 -> 3 calls"),
-    (None, 3, NARROWING, "added limit 3 calls"),
-    (3, None, WIDENING, "removed limit 3 calls"),
-    (0, None, WIDENING, "removed limit 0 calls"),
-    (None, 0, NARROWING, "added limit 0 calls"),
-    (0, 1, WIDENING, "0 -> 1 calls"),
-    (1, 0, NARROWING, "1 -> 0 calls"),
-    (3, 3, NEUTRAL, None),
-    (None, None, NEUTRAL, None),
-])
+@pytest.mark.parametrize(
+    "previous,proposed,direction,detail",
+    [
+        (3, 5, WIDENING, "3 -> 5 calls"),
+        (5, 3, NARROWING, "5 -> 3 calls"),
+        (None, 3, NARROWING, "added limit 3 calls"),
+        (3, None, WIDENING, "removed limit 3 calls"),
+        (0, None, WIDENING, "removed limit 0 calls"),
+        (None, 0, NARROWING, "added limit 0 calls"),
+        (0, 1, WIDENING, "0 -> 1 calls"),
+        (1, 0, NARROWING, "1 -> 0 calls"),
+        (3, 3, NEUTRAL, None),
+        (None, None, NEUTRAL, None),
+    ],
+)
 def test_effect_allowance_changes_are_explicit_even_without_a_breach(
-    effect, previous, proposed, direction, detail,
+    effect,
+    previous,
+    proposed,
+    direction,
+    detail,
 ):
     before = budget_mandate({} if previous is None else {effect: previous}, effect=effect)
     after = budget_mandate({} if proposed is None else {effect: proposed}, effect=effect)
@@ -533,14 +561,14 @@ def test_removing_a_budget_is_widening_even_when_its_breach_disappears():
     assert {b.kind for b in delta.before.breaches} == {"effect_count"}
     assert not delta.after.breaches
     assert delta.direction == WIDENING
-    assert any(c.kind == "reachable breach" and c.direction == NARROWING
-               for c in delta.changes)
+    assert any(c.kind == "reachable breach" and c.direction == NARROWING for c in delta.changes)
     assert only(delta.changes, "effect budget")[0].direction == WIDENING
 
 
 def test_raising_a_budget_is_widening_when_both_releases_still_breach():
-    delta = compare(budget_mandate({"irreversible": 3}, depth=8),
-                    budget_mandate({"irreversible": 5}, depth=8))
+    delta = compare(
+        budget_mandate({"irreversible": 3}, depth=8), budget_mandate({"irreversible": 5}, depth=8)
+    )
     assert {b.kind for b in delta.before.breaches} == {"effect_count"}
     assert {b.kind for b in delta.after.breaches} == {"effect_count"}
     assert not only(delta.changes, "reachable breach")
@@ -571,17 +599,26 @@ def test_tighter_allowance_and_new_breach_remain_separate_review_signals():
 @pytest.mark.parametrize("proposed", [5, None])
 @pytest.mark.parametrize("output", ["text", "json", "record"])
 def test_cli_blocks_budget_relaxation_and_names_the_changed_allowance(
-    proposed, output, tmp_path, capsys,
+    proposed,
+    output,
+    tmp_path,
+    capsys,
 ):
     paths = []
     for name, cap in (("before", 3), ("after", proposed)):
         path = tmp_path / f"{name}.json"
-        path.write_text(json.dumps({
-            "agent": "budget-cli", "limits": {
-                "depth": 8, "effects": {} if cap is None else {"irreversible": cap},
-            },
-            "tools": [{"name": "act", "effect": "irreversible", "requires_approval": True}],
-        }))
+        path.write_text(
+            json.dumps(
+                {
+                    "agent": "budget-cli",
+                    "limits": {
+                        "depth": 8,
+                        "effects": {} if cap is None else {"irreversible": cap},
+                    },
+                    "tools": [{"name": "act", "effect": "irreversible", "requires_approval": True}],
+                }
+            )
+        )
         paths.append(str(path))
     argv = ["diff", *paths] + ([] if output == "text" else [f"--{output}"])
     assert main(argv) == 1
@@ -591,8 +628,9 @@ def test_cli_blocks_budget_relaxation_and_names_the_changed_allowance(
         result = json.loads(captured.out)
         assert set(result) == {"direction", "changes", "before", "after"}
         assert result["direction"] == WIDENING
-        assert any(c["kind"] == "effect budget" and c["direction"] == WIDENING
-                   for c in result["changes"])
+        assert any(
+            c["kind"] == "effect budget" and c["direction"] == WIDENING for c in result["changes"]
+        )
     else:
         assert "effect budget: irreversible:" in captured.out
         assert "WIDENING" in captured.out

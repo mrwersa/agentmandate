@@ -13,7 +13,7 @@
 #         approvals, identity, ceilings, or deployment completeness. Review
 #         every tool, including reads.
 #
-version: 1
+version: 2
 agent: "refunds"
 
 # REVIEW: set the workload identity this agent runs as.
@@ -22,7 +22,7 @@ agent: "refunds"
 limits:
   # REVIEW: the most one run may spend. Without this, `reach` has no
   # cumulative limit to search for a way to exceed.
-  # total: { amount: 0, currency: GBP }
+  quantities: {}  # e.g. exported_records: { amount: 1000, unit: record }
   depth: 8
 
 tools:
@@ -46,5 +46,6 @@ tools:
     # REVIEW: amount looks like a value argument. A ceiling needs scope_key too.
     # value_arg: "amount"
     # scope_key: "case"
-    # ceiling: { amount: 0, currency: GBP }
+    # quantity: exported_records
+    # ceiling: { amount: 0, unit: record }
     requires_approval: true

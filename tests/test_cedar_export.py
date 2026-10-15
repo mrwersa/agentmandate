@@ -63,7 +63,7 @@ def test_multiple_explicit_principals_and_collision_free_negative_cases():
 def test_stateful_controls_are_refused_and_partial_never_says_clean():
     manifest = copy.deepcopy(MANIFEST)
     manifest["limits"] = {
-        "total": {"amount": 10, "currency": "GBP"},
+        "quantities": {"value": {"amount": 10, "unit": "GBP"}},
         "effects": {"irreversible": 3},
     }
     manifest["roles"] = {"proposer": ["publish_release"]}
@@ -72,12 +72,13 @@ def test_stateful_controls_are_refused_and_partial_never_says_clean():
         requires=["case"],
         value_arg="amount",
         scope_key="case",
-        ceiling={"amount": 5, "currency": "GBP"},
+        ceiling={"amount": 5, "unit": "GBP"},
+        quantity="value",
     )
     refused = compile_manifest(manifest)
     assert refused["status"] == "refused" and refused["policies"] is None
     assert {row["code"] for row in refused["losses"]} == {
-        "limits.total",
+        "limits.quantities",
         "limits.effects",
         "roles",
         "tool.produces",

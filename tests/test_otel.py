@@ -18,7 +18,8 @@ from agentmandate.otel import (
 FULL_MAP = {
     "scope": "app.case.id",
     "value": "app.refund.amount",
-    "currency": "app.currency",
+    "unit": "app.unit",
+    "quantity": "app.quantity",
     "approved": "app.approved",
     "principal": "app.principal",
 }
@@ -49,8 +50,11 @@ class TestOnlyToolCallsBecomeObservations:
     def test_a_chat_span_is_not_a_tool_call(self):
         payload = doc(
             tool("open_case", 100),
-            {"name": "chat", "startTimeUnixNano": "200",
-             "attributes": [attr("gen_ai.operation.name", "chat")]},
+            {
+                "name": "chat",
+                "startTimeUnixNano": "200",
+                "attributes": [attr("gen_ai.operation.name", "chat")],
+            },
         )
         result = convert(payload)
 
@@ -59,26 +63,46 @@ class TestOnlyToolCallsBecomeObservations:
         assert [o.tool for o in result.observations] == ["open_case"]
 
     def test_an_agent_span_is_not_a_tool_call(self):
-        payload = doc({"name": "invoke_agent x", "startTimeUnixNano": "100",
-                       "attributes": [attr("gen_ai.operation.name", "invoke_agent")]})
+        payload = doc(
+            {
+                "name": "invoke_agent x",
+                "startTimeUnixNano": "100",
+                "attributes": [attr("gen_ai.operation.name", "invoke_agent")],
+            }
+        )
         assert convert(payload).observations == ()
 
     def test_a_bare_tool_name_is_ignored_by_default(self):
         """The convention requires both attributes on a tool span. Inferring
         an execution from a name alone is a guess."""
-        payload = doc({"name": "t", "startTimeUnixNano": "100",
-                       "attributes": [attr("gen_ai.tool.name", "open_case")]})
+        payload = doc(
+            {
+                "name": "t",
+                "startTimeUnixNano": "100",
+                "attributes": [attr("gen_ai.tool.name", "open_case")],
+            }
+        )
         assert convert(payload).observations == ()
 
     def test_a_bare_tool_name_is_accepted_only_when_asked(self):
-        payload = doc({"name": "t", "startTimeUnixNano": "100",
-                       "attributes": [attr("gen_ai.tool.name", "open_case")]})
+        payload = doc(
+            {
+                "name": "t",
+                "startTimeUnixNano": "100",
+                "attributes": [attr("gen_ai.tool.name", "open_case")],
+            }
+        )
         result = convert(payload, lenient=True)
         assert [o.tool for o in result.observations] == ["open_case"]
 
     def test_a_tool_span_with_no_name_is_refused(self):
-        payload = doc({"name": "t", "startTimeUnixNano": "100",
-                       "attributes": [attr("gen_ai.operation.name", "execute_tool")]})
+        payload = doc(
+            {
+                "name": "t",
+                "startTimeUnixNano": "100",
+                "attributes": [attr("gen_ai.operation.name", "execute_tool")],
+            }
+        )
         with pytest.raises(TraceError, match="cannot be identified"):
             convert(payload)
 
@@ -117,7 +141,8 @@ class TestNothingIsInvented:
                 requires: [case]
                 value_arg: amount
                 scope_key: case
-                ceiling: {amount: 500, currency: GBP}
+                quantity: value
+                ceiling: {amount: 500, unit: GBP}
                 requires_approval: true
             """
         )
@@ -134,7 +159,7 @@ class TestNothingIsInvented:
         mandate = loads(
             """
             agent: a
-            limits: {total: {amount: 500, currency: GBP}}
+            limits: {quantities: {value: {amount: 500, unit: GBP}}}
             tools:
               - name: open_case
                 effect: read
@@ -145,17 +170,25 @@ class TestNothingIsInvented:
                 requires: [case]
                 value_arg: amount
                 scope_key: case
-                ceiling: {amount: 500, currency: GBP}
+                quantity: value
+                ceiling: {amount: 500, unit: GBP}
                 requires_approval: true
             """
         )
         payload = doc(
-            tool("open_case", 100, [attr("app.case.id", "c1"),
-                                    attr("app.principal", "caller")]),
-            tool("issue_refund", 200, [
-                attr("app.case.id", "c1"), attr("app.refund.amount", "500"),
-                attr("app.currency", "GBP"), attr("app.approved", True, "boolValue"),
-                attr("app.principal", "caller")]),
+            tool("open_case", 100, [attr("app.case.id", "c1"), attr("app.principal", "caller")]),
+            tool(
+                "issue_refund",
+                200,
+                [
+                    attr("app.case.id", "c1"),
+                    attr("app.refund.amount", "500"),
+                    attr("app.unit", "GBP"),
+                    attr("app.quantity", "value"),
+                    attr("app.approved", True, "boolValue"),
+                    attr("app.principal", "caller"),
+                ],
+            ),
         )
         conformance = replay(mandate, list(convert(payload, FULL_MAP).observations))
         assert conformance.conformant is True
@@ -174,9 +207,16 @@ class TestOrdering:
         assert [o.tool for o in convert(payload).observations] == ["a", "b"]
 
     def test_a_missing_start_time_does_not_crash(self):
-        payload = doc({"name": "t", "traceId": "t1", "attributes": [
-            attr("gen_ai.operation.name", "execute_tool"),
-            attr("gen_ai.tool.name", "x")]})
+        payload = doc(
+            {
+                "name": "t",
+                "traceId": "t1",
+                "attributes": [
+                    attr("gen_ai.operation.name", "execute_tool"),
+                    attr("gen_ai.tool.name", "x"),
+                ],
+            }
+        )
         assert [o.tool for o in convert(payload).observations] == ["x"]
 
 
@@ -220,7 +260,9 @@ class TestMapping:
 
     def test_mapping_arguments_parse(self):
         assert parse_mapping(["scope=app.case.id", "value=app.amount"]) == {
-            "scope": "app.case.id", "value": "app.amount"}
+            "scope": "app.case.id",
+            "value": "app.amount",
+        }
 
     def test_an_attribute_containing_an_equals_sign_survives(self):
         assert parse_mapping(["scope=a=b"]) == {"scope": "a=b"}
@@ -283,17 +325,32 @@ def test_the_shipped_example_trace_converts_and_finds_the_breach():
 class TestAttributeEdgeCases:
     def test_a_plain_attribute_value_is_passed_through(self):
         """Some exporters write a bare value rather than an AnyValue wrapper."""
-        payload = doc({"name": "t", "traceId": "t1", "startTimeUnixNano": "1",
-                       "attributes": [
-                           {"key": "gen_ai.operation.name", "value": "execute_tool"},
-                           {"key": "gen_ai.tool.name", "value": "open_case"}]})
+        payload = doc(
+            {
+                "name": "t",
+                "traceId": "t1",
+                "startTimeUnixNano": "1",
+                "attributes": [
+                    {"key": "gen_ai.operation.name", "value": "execute_tool"},
+                    {"key": "gen_ai.tool.name", "value": "open_case"},
+                ],
+            }
+        )
         assert [o.tool for o in convert(payload).observations] == ["open_case"]
 
     def test_an_array_attribute_is_unwrapped(self):
         from agentmandate.otel import attributes
 
-        span = {"attributes": [{"key": "app.tags", "value": {"arrayValue": {
-            "values": [{"stringValue": "a"}, {"stringValue": "b"}]}}}]}
+        span = {
+            "attributes": [
+                {
+                    "key": "app.tags",
+                    "value": {
+                        "arrayValue": {"values": [{"stringValue": "a"}, {"stringValue": "b"}]}
+                    },
+                }
+            ]
+        }
         assert attributes(span)["app.tags"] == ["a", "b"]
 
     def test_an_unrecognised_attribute_shape_becomes_none(self):
@@ -303,10 +360,18 @@ class TestAttributeEdgeCases:
         assert attributes(span)["app.odd"] is None
 
     def test_an_attribute_explicitly_set_to_null_is_treated_as_absent(self):
-        payload = doc({"name": "t", "traceId": "t1", "startTimeUnixNano": "1", "attributes": [
-            {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
-            {"key": "gen_ai.tool.name", "value": {"stringValue": "pay"}},
-            {"key": "app.case.id", "value": {"bytesValue": "x"}}]})
+        payload = doc(
+            {
+                "name": "t",
+                "traceId": "t1",
+                "startTimeUnixNano": "1",
+                "attributes": [
+                    {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+                    {"key": "gen_ai.tool.name", "value": {"stringValue": "pay"}},
+                    {"key": "app.case.id", "value": {"bytesValue": "x"}},
+                ],
+            }
+        )
         result = convert(payload, {"scope": "app.case.id"})
         assert result.observations[0].scope is None
 
@@ -320,10 +385,16 @@ class TestFalseBreachesAreTheFailureThatMatters:
         """Instrumentations commonly attach the tool name to the LLM span
         that REQUESTED the call. Counting it doubles the value."""
         payload = doc(
-            {"name": "chat", "traceId": "t", "startTimeUnixNano": "100", "attributes": [
-                attr("gen_ai.operation.name", "chat"),
-                attr("gen_ai.tool.name", "issue_refund"),
-                attr("app.amount", "500")]},
+            {
+                "name": "chat",
+                "traceId": "t",
+                "startTimeUnixNano": "100",
+                "attributes": [
+                    attr("gen_ai.operation.name", "chat"),
+                    attr("gen_ai.tool.name", "issue_refund"),
+                    attr("app.amount", "500"),
+                ],
+            },
             tool("issue_refund", 200, [attr("app.amount", "500")]),
         )
         result = convert(payload, {"value": "app.amount"})
@@ -332,9 +403,17 @@ class TestFalseBreachesAreTheFailureThatMatters:
         assert [str(o.value) for o in result.observations] == ["500"]
 
     def test_an_explicit_operation_is_authoritative_over_a_tool_name(self):
-        payload = doc({"name": "x", "traceId": "t", "startTimeUnixNano": "100", "attributes": [
-            attr("gen_ai.operation.name", "invoke_agent"),
-            attr("gen_ai.tool.name", "issue_refund")]})
+        payload = doc(
+            {
+                "name": "x",
+                "traceId": "t",
+                "startTimeUnixNano": "100",
+                "attributes": [
+                    attr("gen_ai.operation.name", "invoke_agent"),
+                    attr("gen_ai.tool.name", "issue_refund"),
+                ],
+            }
+        )
         assert convert(payload).observations == ()
 
     def test_an_errored_call_is_carried_as_incomplete_evidence(self):
@@ -342,11 +421,18 @@ class TestFalseBreachesAreTheFailureThatMatters:
         applied. A timeout is exactly the case where the write may have
         landed, so the call must not vanish into a clean report."""
         payload = doc(
-            {"name": "e", "traceId": "t", "startTimeUnixNano": "100",
-             "status": {"code": "STATUS_CODE_ERROR", "message": "timeout"},
-             "attributes": [attr("gen_ai.operation.name", "execute_tool"),
-                            attr("gen_ai.tool.name", "issue_refund"),
-                            attr("app.amount", "500")]})
+            {
+                "name": "e",
+                "traceId": "t",
+                "startTimeUnixNano": "100",
+                "status": {"code": "STATUS_CODE_ERROR", "message": "timeout"},
+                "attributes": [
+                    attr("gen_ai.operation.name", "execute_tool"),
+                    attr("gen_ai.tool.name", "issue_refund"),
+                    attr("app.amount", "500"),
+                ],
+            }
+        )
         result = convert(payload, {"value": "app.amount"})
 
         assert len(result.observations) == 1
@@ -371,10 +457,14 @@ class TestFalseBreachesAreTheFailureThatMatters:
     def test_one_call_instrumented_twice_is_collapsed_by_call_id(self):
         """A client span and a server span for the same call share the tool
         call id and are one logical call."""
+
         def span(start):
-            return tool("issue_refund", start, [
-                attr("gen_ai.tool.call.id", "call_abc"),
-                attr("app.amount", "500")])
+            return tool(
+                "issue_refund",
+                start,
+                [attr("gen_ai.tool.call.id", "call_abc"), attr("app.amount", "500")],
+            )
+
         result = convert(doc(span(100), span(110)), {"value": "app.amount"})
 
         assert len(result.observations) == 1
@@ -400,10 +490,12 @@ class TestFalseBreachesAreTheFailureThatMatters:
 
     def test_the_first_of_a_duplicate_pair_is_the_one_kept(self):
         payload = doc(
-            tool("issue_refund", 100, [attr("gen_ai.tool.call.id", "a"),
-                                       attr("app.amount", "500")]),
-            tool("issue_refund", 200, [attr("gen_ai.tool.call.id", "a"),
-                                       attr("app.amount", "999")]),
+            tool(
+                "issue_refund", 100, [attr("gen_ai.tool.call.id", "a"), attr("app.amount", "500")]
+            ),
+            tool(
+                "issue_refund", 200, [attr("gen_ai.tool.call.id", "a"), attr("app.amount", "999")]
+            ),
         )
         result = convert(payload, {"value": "app.amount"})
         assert [str(o.value) for o in result.observations] == ["500"]
@@ -412,8 +504,13 @@ class TestFalseBreachesAreTheFailureThatMatters:
 def test_a_span_with_no_operation_and_no_tool_name_is_ignored():
     """Not every span in a trace is a GenAI span at all. An HTTP or database
     span carries neither attribute and must pass through untouched."""
-    payload = doc({"name": "GET /health", "startTimeUnixNano": "100",
-                   "attributes": [attr("http.route", "/health")]})
+    payload = doc(
+        {
+            "name": "GET /health",
+            "startTimeUnixNano": "100",
+            "attributes": [attr("http.route", "/health")],
+        }
+    )
     result = convert(payload)
 
     assert result.observations == ()
@@ -424,8 +521,16 @@ def test_a_span_with_no_operation_and_no_tool_name_is_ignored():
 def test_a_span_without_a_trace_id_still_groups():
     """Not every exporter writes traceId at the span level. Those calls share
     one unnamed run rather than being dropped."""
-    payload = doc({"name": "e", "startTimeUnixNano": "1", "attributes": [
-        attr("gen_ai.operation.name", "execute_tool"), attr("gen_ai.tool.name", "x")]})
+    payload = doc(
+        {
+            "name": "e",
+            "startTimeUnixNano": "1",
+            "attributes": [
+                attr("gen_ai.operation.name", "execute_tool"),
+                attr("gen_ai.tool.name", "x"),
+            ],
+        }
+    )
     result = convert(payload)
 
     assert len(result.runs) == 1
@@ -434,8 +539,17 @@ def test_a_span_without_a_trace_id_still_groups():
 
 
 def test_a_non_string_trace_id_is_normalised():
-    payload = doc({"name": "e", "traceId": 7, "startTimeUnixNano": "1", "attributes": [
-        attr("gen_ai.operation.name", "execute_tool"), attr("gen_ai.tool.name", "x")]})
+    payload = doc(
+        {
+            "name": "e",
+            "traceId": 7,
+            "startTimeUnixNano": "1",
+            "attributes": [
+                attr("gen_ai.operation.name", "execute_tool"),
+                attr("gen_ai.tool.name", "x"),
+            ],
+        }
+    )
     assert convert(payload).runs[0][0] == ""
 
 

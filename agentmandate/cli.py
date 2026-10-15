@@ -235,67 +235,87 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mandate",
         description=(
-            "Analyse what an AI agent is permitted to do, and what changed "
-            "between two releases."
+            "Analyse what an AI agent is permitted to do, and what changed between two releases."
         ),
     )
     parser.add_argument("--version", action="version", version=f"agentmandate {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    lint_parser = subparsers.add_parser(
-        "lint", help="single-manifest control checks"
-    )
+    lint_parser = subparsers.add_parser("lint", help="single-manifest control checks")
     _add_manifest(lint_parser)
     lint_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     remediation_parser = subparsers.add_parser(
-        "remediate", help="rank rechecked removal, approval and ceiling candidates",
+        "remediate",
+        help="rank rechecked removal, approval and ceiling candidates",
     )
     _add_manifest(remediation_parser)
     remediation_parser.add_argument(
-        "--depth", type=_positive_int, default=None,
+        "--depth",
+        type=_positive_int,
+        default=None,
         help="use this reachability depth for baseline and every candidate",
     )
     remediation_parser.add_argument(
-        "--max-edits", type=_positive_int, default=2,
+        "--max-edits",
+        type=_positive_int,
+        default=2,
         help="maximum edits per combination (default: 2)",
     )
     remediation_parser.add_argument(
-        "--max-evaluations", type=_positive_int, default=128,
+        "--max-evaluations",
+        type=_positive_int,
+        default=128,
         help="maximum combinations examined, including rejected ones (default: 128)",
     )
     remediation_parser.add_argument(
-        "--max-candidates", type=_positive_int, default=5,
+        "--max-candidates",
+        type=_positive_int,
+        default=5,
         help="maximum ranked candidates returned (default: 5)",
     )
     remediation_parser.add_argument(
-        "--keep-tool", action="append", default=[],
+        "--keep-tool",
+        action="append",
+        default=[],
         help="preserve this tool's reachability; repeat for more tools",
     )
     remediation_parser.add_argument(
-        "--ceiling", action="append", default=[], metavar="TOOL=AMOUNT",
+        "--ceiling",
+        action="append",
+        default=[],
+        metavar="TOOL=AMOUNT",
         help="include this lower monetary ceiling in the edit domain; repeat for alternatives",
     )
     remediation_parser.add_argument(
-        "--required-workflows", metavar="FILE",
+        "--required-workflows",
+        metavar="FILE",
         help="preserve caller-authored ordered paths bound to this manifest's exact bytes",
     )
     remediation_parser.add_argument(
-        "--ceiling-grid", action="append", default=[], metavar="TOOL=MIN:MAX:STEP",
+        "--ceiling-grid",
+        action="append",
+        default=[],
+        metavar="TOOL=MIN:MAX:STEP",
         help="enumerate exact lower ceilings in this finite range (512 total grid points)",
     )
     remediation_parser.add_argument(
-        "--pareto", action="store_true",
+        "--pareto",
+        action="store_true",
         help="return non-dominated repair trade-offs among examined candidates",
     )
     remediation_parser.add_argument(
-        "--discover-ceiling", action="append", default=[], metavar="TOOL=STEP",
+        "--discover-ceiling",
+        action="append",
+        default=[],
+        metavar="TOOL=STEP",
         help="discover exact ceiling repairs on this monetary lattice, retaining all tools",
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     review_parser = subparsers.add_parser(
-        "review", help="check scoped, time-bounded acceptance of an authority change",
+        "review",
+        help="check scoped, time-bounded acceptance of an authority change",
     )
     review_parser.add_argument("before", help="baseline manifest path")
     review_parser.add_argument("after", help="proposed manifest path")
@@ -357,16 +377,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate snapshot structure without accepting it as authority",
     )
     ir_validate.add_argument("snapshot", help="path to an Authority IR snapshot")
-    ir_validate.add_argument("--json", action="store_true",
-                            help="machine-readable structural result")
+    ir_validate.add_argument(
+        "--json", action="store_true", help="machine-readable structural result"
+    )
 
     inventory_parser = subparsers.add_parser(
         "inventory",
         help="import local catalogues or validate dynamic-inventory declarations",
     )
-    inventory_subparsers = inventory_parser.add_subparsers(
-        dest="inventory_command", required=True
-    )
+    inventory_subparsers = inventory_parser.add_subparsers(dest="inventory_command", required=True)
     inventory_validate = inventory_subparsers.add_parser(
         "validate",
         help="validate declaration structure without accepting it as authority",
@@ -374,26 +393,38 @@ def build_parser() -> argparse.ArgumentParser:
     inventory_validate.add_argument("declaration", help="path to a declaration")
     inventory_validate.add_argument("--json", action="store_true")
     inventory_import = inventory_subparsers.add_parser(
-        "import", help="derive an unreviewed inventory declaration from local JSON",
+        "import",
+        help="derive an unreviewed inventory declaration from local JSON",
     )
     inventory_import.add_argument("catalogue", help="local catalogue JSON; URLs are not fetched")
     inventory_import.add_argument("--format", required=True, choices=("mcp", "a2a", "openapi"))
     inventory_import.add_argument("--boundary", required=True, help="reviewer-chosen boundary ID")
     inventory_import.add_argument(
-        "--target-source", required=True, help="relative Python source path",
+        "--target-source",
+        required=True,
+        help="relative Python source path",
     )
     inventory_import.add_argument(
-        "--target-binding", required=True, help="one selected source binding",
+        "--target-binding",
+        required=True,
+        help="one selected source binding",
     )
     inventory_import.add_argument(
-        "--locator", required=True, help="repository-relative capture path",
+        "--locator",
+        required=True,
+        help="repository-relative capture path",
     )
     inventory_import.add_argument(
-        "--selection", required=True, metavar="JSON", help="explicit deployment selection object",
+        "--selection",
+        required=True,
+        metavar="JSON",
+        help="explicit deployment selection object",
     )
     inventory_import.add_argument("--dispatch-tool", help="application tool wrapping an A2A agent")
     inventory_import.add_argument(
-        "--ir", action="store_true", help="emit the existing inventory IR profile",
+        "--ir",
+        action="store_true",
+        help="emit the existing inventory IR profile",
     )
 
     conditions_parser = subparsers.add_parser(
@@ -408,12 +439,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate artifact structure without accepting it as authority",
     )
     conditions_input = conditions_validate.add_mutually_exclusive_group(required=True)
-    conditions_input.add_argument(
-        "--condition", help="path to one tool-condition artifact"
-    )
-    conditions_input.add_argument(
-        "--context", help="path to one condition-context artifact"
-    )
+    conditions_input.add_argument("--condition", help="path to one tool-condition artifact")
+    conditions_input.add_argument("--context", help="path to one condition-context artifact")
     conditions_validate.add_argument("--json", action="store_true")
 
     delegations_parser = subparsers.add_parser(
@@ -436,9 +463,7 @@ def build_parser() -> argparse.ArgumentParser:
         "producers",
         help="structurally validate finite-producer boundaries",
     )
-    producers_subparsers = producers_parser.add_subparsers(
-        dest="producers_command", required=True
-    )
+    producers_subparsers = producers_parser.add_subparsers(dest="producers_command", required=True)
     producers_validate = producers_subparsers.add_parser(
         "validate",
         help="validate a boundary structurally without trusting its sources",
@@ -487,7 +512,10 @@ def build_parser() -> argparse.ArgumentParser:
     continuity_reconcile.add_argument("--continuity-binding", metavar="BINDING")
     continuity_reconcile.add_argument("--continuity-review", metavar="REVISION_REVIEW")
     continuity_reconcile.add_argument(
-        "--continuity-review-source", action="append", default=None, metavar="LOCATOR=CAPTURE",
+        "--continuity-review-source",
+        action="append",
+        default=None,
+        metavar="LOCATOR=CAPTURE",
         help="captured bytes for one revision-review source locator; repeatable",
     )
     continuity_reconcile.add_argument(
@@ -644,7 +672,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-dir", help="write a new policy/schema/test bundle directory"
     )
     cedar_export.add_argument(
-        "--allow-partial", action="store_true",
+        "--allow-partial",
+        action="store_true",
         help="emit a partial candidate; losses still exit 1",
     )
     cedar_export.add_argument("--json", action="store_true", help="machine-readable export report")
@@ -684,9 +713,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_manifest(obligations_parser)
     obligations_parser.add_argument("--depth", type=_positive_int, default=None)
-    obligations_parser.add_argument(
-        "--json", action="store_true", help="machine-readable output"
-    )
+    obligations_parser.add_argument("--json", action="store_true", help="machine-readable output")
     obligations_parser.add_argument(
         "--suite",
         action="store_true",
@@ -704,9 +731,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_manifest(scenarios_parser)
     scenarios_parser.add_argument("--depth", type=_positive_int, default=None)
-    scenarios_parser.add_argument(
-        "--json", action="store_true", help="machine-readable output"
-    )
+    scenarios_parser.add_argument("--json", action="store_true", help="machine-readable output")
     scenarios_parser.add_argument(
         "--reviewed",
         default=None,
@@ -724,9 +749,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_manifest(verify_parser)
     # Exactly one source, so a run can never silently verify the wrong file.
     verify_source = verify_parser.add_mutually_exclusive_group(required=True)
-    verify_source.add_argument(
-        "--traces", help="JSON Lines file of observed tool calls"
-    )
+    verify_source.add_argument("--traces", help="JSON Lines file of observed tool calls")
     verify_source.add_argument(
         "--otel", help="OTLP JSON trace, converted to observations before replay"
     )
@@ -738,8 +761,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="FIELD=ATTRIBUTE",
         help=(
             "where a control field lives in the trace, for example "
-            "scope=app.case.id. repeatable. fields: "
-            + ", ".join(MAPPABLE)
+            "scope=app.case.id. repeatable. fields: " + ", ".join(MAPPABLE)
         ),
     )
     verify_parser.add_argument(
@@ -826,7 +848,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--agent", default="unnamed-agent", help="agent name to write into the skeleton"
     )
     scan_parser.add_argument(
-        "--format", choices=("mcp", "a2a", "openapi"),
+        "--format",
+        choices=("mcp", "a2a", "openapi"),
         help="strict local protocol reader; omission preserves the original MCP skeleton reader",
     )
     scan_parser.add_argument("--dispatch-tool", help="application tool wrapping an A2A agent")
@@ -873,8 +896,10 @@ def _observation_to_dict(observation: Any) -> dict:
         record["scope"] = observation.scope
     if observation.value is not None:
         record["value"] = str(observation.value)
-    if observation.currency is not None:
-        record["currency"] = observation.currency
+    if observation.quantity is not None:
+        record["quantity"] = observation.quantity
+    if observation.unit is not None:
+        record["unit"] = observation.unit
     if observation.principal is not None:
         record["principal"] = observation.principal
     if observation.approved:
@@ -904,8 +929,10 @@ def _run_change_review(args: argparse.Namespace) -> int:
                 raise ValueError("--source needs unique LOCATOR=CAPTURE mappings")
             sources[locator] = Path(path).read_bytes()
         report = evaluate_change_review(
-            Path(args.before).read_bytes(), Path(args.after).read_bytes(),
-            as_of=args.as_of, depth=args.depth,
+            Path(args.before).read_bytes(),
+            Path(args.after).read_bytes(),
+            as_of=args.as_of,
+            depth=args.depth,
             decision=None if args.decision is None else Path(args.decision).read_bytes(),
             sources=sources,
         )
@@ -923,16 +950,21 @@ def _run_remediation(args: argparse.Namespace) -> int:
         requirements = None
         if args.required_workflows is not None:
             requirements = _Requirements.load(
-                Path(args.required_workflows).read_bytes(), mandate,
+                Path(args.required_workflows).read_bytes(),
+                mandate,
                 hashlib.sha256(content).hexdigest(),
             )
         result = plan_remediation(
-            mandate, depth=args.depth, max_edits=args.max_edits,
-            max_evaluations=args.max_evaluations, max_candidates=args.max_candidates,
+            mandate,
+            depth=args.depth,
+            max_edits=args.max_edits,
+            max_evaluations=args.max_evaluations,
+            max_candidates=args.max_candidates,
             keep_tools=tuple(args.keep_tool),
             ceiling_options=tuple(args.ceiling),
             required_workflows=requirements,
-            ceiling_grids=tuple(args.ceiling_grid), pareto=args.pareto,
+            ceiling_grids=tuple(args.ceiling_grid),
+            pareto=args.pareto,
             discover_ceilings=tuple(args.discover_ceiling),
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
@@ -940,39 +972,59 @@ def _run_remediation(args: argparse.Namespace) -> int:
         return EXIT_USAGE
     result["input"] = {"manifest_sha256": hashlib.sha256(content).hexdigest()}
     baseline = result["baseline"]
-    lines = [f"STATUS {result['status']}", f"SCOPE {result['scope']}",
-             f"BASELINE depth={baseline['depth']} truncated={baseline['truncated']}"]
-    lines.extend(f"CEILING OPTION {option['tool']}: "
-                 f"{option['ceiling']['amount']} {option['ceiling']['currency']}"
-                 for option in result.get("ceiling_options", []))
+    lines = [
+        f"STATUS {result['status']}",
+        f"SCOPE {result['scope']}",
+        f"BASELINE depth={baseline['depth']} truncated={baseline['truncated']}",
+    ]
+    lines.extend(
+        f"CEILING OPTION {option['tool']}: "
+        f"{option['ceiling']['amount']} {option['ceiling']['unit']}"
+        for option in result.get("ceiling_options", [])
+    )
     if "discovery" in result:
         discovery = result["discovery"]
         complete = discovery["frontier_complete_within_domain"]
-        lines.append(f"DISCOVERY {discovery['status']} frontier_complete_within_domain={complete} "
-                     f"resolved={discovery['resolved_points']}/{discovery['domain_points']}: "
-                     f"{discovery['scope']}")
+        lines.append(
+            f"DISCOVERY {discovery['status']} frontier_complete_within_domain={complete} "
+            f"resolved={discovery['resolved_points']}/{discovery['domain_points']}: "
+            f"{discovery['scope']}"
+        )
+        if result["status"] == "no_feasible_candidate_in_declared_domain":
+            lines.append(
+                "No candidate: the declared steps and edit/workflow limits "
+                "produce no feasible ceiling; finer steps may change this result."
+            )
     if "frontier" in result:
         frontier = result["frontier"]
         count = frontier["non_dominated"] if frontier["status"] == "computed" else "n/a"
-        lines.append(f"FRONTIER enabled={frontier['enabled']} status={frontier['status']} "
-                     f"non_dominated={count} "
-                     f"display_complete={frontier['display_complete']}: {frontier['scope']}")
+        lines.append(
+            f"FRONTIER enabled={frontier['enabled']} status={frontier['status']} "
+            f"non_dominated={count} "
+            f"display_complete={frontier['display_complete']}: {frontier['scope']}"
+        )
     if "requirements" in result:
         lines.append(f"REQUIREMENTS {result['requirements']['scope']}")
-        lines.extend(f"REQUIRED {row['name']}: {row['status']} steps={row['steps']}"
-                     for row in result["requirements"]["baseline"])
+        lines.extend(
+            f"REQUIRED {row['name']}: {row['status']} steps={row['steps']}"
+            for row in result["requirements"]["baseline"]
+        )
     lines.extend(
         f"BREACH {b['kind']}: {b['detail']}\n       {' -> '.join(b['path'])}"
         for b in baseline["breaches"]
     )
-    lines.extend(f"LINT {f['severity']} {f['rule']}: {f['message']}"
-                 for f in result["baseline_lint"])
+    lines.extend(
+        f"LINT {f['severity']} {f['rule']}: {f['message']}" for f in result["baseline_lint"]
+    )
     for index, candidate in enumerate(result["candidates"], 1):
         edits = ", ".join(
-            f"{e['kind']} {e['tool']}" + (
-                f" {e['before']['amount']} -> {e['after']['amount']} {e['after']['currency']}"
-                if e["kind"] == "tighten_ceiling" else ""
-            ) for e in candidate["edits"]
+            f"{e['kind']} {e['tool']}"
+            + (
+                f" {e['before']['amount']} -> {e['after']['amount']} {e['after']['unit']}"
+                if e["kind"] == "tighten_ceiling"
+                else ""
+            )
+            for e in candidate["edits"]
         )
         lines.append(
             f"CANDIDATE {index} {candidate['status']}: {edits}\n"
@@ -981,32 +1033,48 @@ def _run_remediation(args: argparse.Namespace) -> int:
             f"          remaining lint={candidate['lint']} "
             f"removed role members={candidate['impact']['removed_role_members']}"
         )
-        lines.extend(f"          REQUIRED {row['name']}: {row['status']}"
-                     for row in candidate.get("required_workflows", []))
+        lines.extend(
+            f"          REQUIRED {row['name']}: {row['status']}"
+            for row in candidate.get("required_workflows", [])
+        )
     for rejected in result.get("requirement_rejections", []):
-        lines.extend(f"REJECTED {row['name']}: {row['failure']['rule']} "
-                     f"at step {row['failure']['step']} edits={rejected['edits']}"
-                     for row in rejected["assessments"] if row["failure"] is not None)
+        lines.extend(
+            f"REJECTED {row['name']}: {row['failure']['rule']} "
+            f"at step {row['failure']['step']} edits={rejected['edits']}"
+            for row in rejected["assessments"]
+            if row["failure"] is not None
+        )
     search = result["search"]
     lines.append(
         f"SEARCH examined={search['combinations_examined']}/{search['combinations_total']} "
         f"analyzed={search['candidates_analyzed']} found={search['candidates_found']} "
-        f"enumeration_complete={search['enumeration_complete']}"
+        f"exhaustive_point_enumeration={search['exhaustive_point_enumeration']}"
     )
     _emit(result, args.json, "\n".join(lines))
-    return EXIT_FINDING if baseline["breaches"] or any(
-        f["severity"] == ERROR for f in result["baseline_lint"]
-    ) else EXIT_OK
+    return (
+        EXIT_FINDING
+        if baseline["breaches"] or any(f["severity"] == ERROR for f in result["baseline_lint"])
+        else EXIT_OK
+    )
 
 
 def _validation_output(kind: str, version: int, text: str, machine: bool) -> str:
     if not machine:
         return text
-    return json.dumps({
-        "schema": "agentmandate.validation/v1", "status": "valid",
-        "artifact": kind, "version": version,
-        "scope": "structure only; evidence trust and deployment approval are not assessed",
-    }, indent=2, sort_keys=True) + "\n"
+    return (
+        json.dumps(
+            {
+                "schema": "agentmandate.validation/v1",
+                "status": "valid",
+                "artifact": kind,
+                "version": version,
+                "scope": "structure only; evidence trust and deployment approval are not assessed",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _run_ir(args: argparse.Namespace) -> int:
@@ -1031,17 +1099,24 @@ def _run_inventory(args: argparse.Namespace) -> int:
     try:
         if args.inventory_command == "import":
             declaration = import_inventory(
-                Path(args.catalogue).read_bytes(), args.format,
-                boundary=args.boundary, target_source=args.target_source,
-                target_binding=args.target_binding, locator=args.locator,
-                selection=json.loads(args.selection), dispatch_tool=args.dispatch_tool,
+                Path(args.catalogue).read_bytes(),
+                args.format,
+                boundary=args.boundary,
+                target_source=args.target_source,
+                target_binding=args.target_binding,
+                locator=args.locator,
+                selection=json.loads(args.selection),
+                dispatch_tool=args.dispatch_tool,
             )
             output = declaration.to_ir().to_json() if args.ir else declaration.to_json()
         else:
             declaration = DynamicInventory.from_json(_read_text(args.declaration))
             output = f"valid dynamic inventory v{declaration.inventory_version}\n"
             output = _validation_output(
-                "dynamic-inventory", declaration.inventory_version, output, args.json,
+                "dynamic-inventory",
+                declaration.inventory_version,
+                output,
+                args.json,
             )
     except (ValueError, OSError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -1090,8 +1165,9 @@ def _run_producers(args: argparse.Namespace) -> int:
     try:
         value = ProducerBoundary.from_json(_read_text(args.boundary))
         output = f"valid producer boundary v{value.producer_boundary_version}\n"
-        output = _validation_output("producer-boundary", value.producer_boundary_version,
-                                    output, args.json)
+        output = _validation_output(
+            "producer-boundary", value.producer_boundary_version, output, args.json
+        )
     except (ProducerBoundaryFormatError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -1102,8 +1178,13 @@ def _run_producers(args: argparse.Namespace) -> int:
 def _continuity_artifact(
     text: str,
 ) -> (
-    ContinuityBinding | AgentCoreContinuity | AnthropicContinuity
-    | PrincipalContinuity | PrincipalAccountingBinding | RevisionReview | ScalarHandover
+    ContinuityBinding
+    | AgentCoreContinuity
+    | AnthropicContinuity
+    | PrincipalContinuity
+    | PrincipalAccountingBinding
+    | RevisionReview
+    | ScalarHandover
 ):
     try:
         raw = json.loads(text)
@@ -1130,13 +1211,9 @@ def _continuity_artifact(
 
 def _continuity_timestamp(value: str, *, flag: str = "--continuity-as-of") -> datetime:
     try:
-        parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=timezone.utc
-        )
+        parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     except ValueError as exc:
-        raise ContinuityFormatError(
-            f"{flag} must be YYYY-MM-DDTHH:MM:SSZ"
-        ) from exc
+        raise ContinuityFormatError(f"{flag} must be YYYY-MM-DDTHH:MM:SSZ") from exc
     return parsed
 
 
@@ -1197,9 +1274,7 @@ def _render_continuity(analysis: ContinuityAnalysis) -> str:
             )
         )
         for alignment in outcome.alignments:
-            lines.append(
-                f"  alignment {alignment.check}={alignment.status} ({alignment.strength})"
-            )
+            lines.append(f"  alignment {alignment.check}={alignment.status} ({alignment.strength})")
         lines.extend(f"  assumption: {item}" for item in outcome.assumptions)
     for finding in analysis.findings:
         subject = "" if finding.transition is None else f" [{finding.transition}]"
@@ -1224,8 +1299,12 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 ScalarHandover: "scalar handover",
             }
             label = labels[type(artifact)]
-            output = _validation_output(label.lower().replace(" ", "-"), artifact.version,
-                                        f"valid {label} v{artifact.version}\n", args.json)
+            output = _validation_output(
+                label.lower().replace(" ", "-"),
+                artifact.version,
+                f"valid {label} v{artifact.version}\n",
+                args.json,
+            )
             sys.stdout.write(output)
             return EXIT_OK
 
@@ -1253,9 +1332,7 @@ def _run_continuity(args: argparse.Namespace) -> int:
         composition = _continuity_composition(args)
         _refuse_continuity_composition(composition)
         as_of = _continuity_timestamp(args.continuity_as_of)
-        provider_paths = _continuity_source_paths(
-            args.continuity_source, "--continuity-source"
-        )
+        provider_paths = _continuity_source_paths(args.continuity_source, "--continuity-source")
         binding_paths = _continuity_source_paths(
             args.continuity_binding_source, "--continuity-binding-source"
         )
@@ -1302,13 +1379,23 @@ def _run_continuity(args: argparse.Namespace) -> int:
             manifest = loads(manifest_bytes.decode("utf-8"), source=args.manifest)
             if accounting_binding is None:
                 result = analyse_principal_continuity(
-                    manifest, provider, source_bytes, as_of=as_of,
-                    mandate_bytes=manifest_bytes, depth=args.depth,
+                    manifest,
+                    provider,
+                    source_bytes,
+                    as_of=as_of,
+                    mandate_bytes=manifest_bytes,
+                    depth=args.depth,
                 )
             else:
                 result = analyse_principal_accounting(
-                    manifest, provider, source_bytes, accounting_binding, accounting_sources,
-                    as_of=as_of, mandate_bytes=manifest_bytes, depth=args.depth,
+                    manifest,
+                    provider,
+                    source_bytes,
+                    accounting_binding,
+                    accounting_sources,
+                    as_of=as_of,
+                    mandate_bytes=manifest_bytes,
+                    depth=args.depth,
                 )
             if args.json:
                 print(json.dumps(result, sort_keys=True, separators=(",", ":")))
@@ -1332,9 +1419,7 @@ def _run_continuity(args: argparse.Namespace) -> int:
         binding_sources = (
             None
             if binding is None
-            else _continuity_sources(
-                binding_paths, binding.sources, "--continuity-binding-source"
-            )
+            else _continuity_sources(binding_paths, binding.sources, "--continuity-binding-source")
         )
         manifest_path = Path(args.manifest)
         mandate_bytes = manifest_path.read_bytes()
@@ -1349,8 +1434,16 @@ def _run_continuity(args: argparse.Namespace) -> int:
                 review_paths, review.sources, "--continuity-review-source"
             )
             result = analyse_revision_review(
-                mandate, provider, provider_sources, binding, binding_sources,
-                review, review_sources, as_of=as_of, mandate_bytes=mandate_bytes, depth=args.depth,
+                mandate,
+                provider,
+                provider_sources,
+                binding,
+                binding_sources,
+                review,
+                review_sources,
+                as_of=as_of,
+                mandate_bytes=mandate_bytes,
+                depth=args.depth,
             )
             if args.json:
                 print(json.dumps(result, sort_keys=True, separators=(",", ":")))
@@ -1437,7 +1530,7 @@ def _managed_alignment_payload(
     oracle_sha256: str,
 ) -> dict[str, Any]:
     return {
-        "schema": "agentmandate.cedar-alignment/v1",
+        "schema": "agentmandate.cedar-alignment/v2",
         "inputs": {
             "manifest_sha256": manifest_sha256,
             "oracle": _oracle_digests(
@@ -1462,7 +1555,7 @@ def _managed_diff_payload(
     candidate_sha256: str,
 ) -> dict[str, Any]:
     return {
-        "schema": "agentmandate.cedar-effective-diff/v1",
+        "schema": "agentmandate.cedar-effective-diff/v2",
         "inputs": {
             "manifest_sha256": manifest_sha256,
             "baseline": _oracle_digests(
@@ -1517,15 +1610,20 @@ def _run_fleet(args: argparse.Namespace) -> int:
         return _run_fleet_exceptions(args)
     try:
         report = fleet_inventory(
-            Path(args.index).read_bytes(), root=Path(args.root), as_of=args.as_of,
-            owner=args.owner, environment=args.environment, tool=args.tool,
+            Path(args.index).read_bytes(),
+            root=Path(args.root),
+            as_of=args.as_of,
+            owner=args.owner,
+            environment=args.environment,
+            tool=args.tool,
         )
     except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     sys.stdout.write(
         json.dumps(report, indent=2, sort_keys=True) + "\n"
-        if args.json else render_fleet_inventory(report)
+        if args.json
+        else render_fleet_inventory(report)
     )
     return EXIT_FINDING if report["findings"] else EXIT_OK
 
@@ -1533,30 +1631,39 @@ def _run_fleet(args: argparse.Namespace) -> int:
 def _run_fleet_diff(args: argparse.Namespace) -> int:
     try:
         report = compare_fleet(
-            Path(args.baseline).read_bytes(), Path(args.candidate).read_bytes(),
-            baseline_root=Path(args.baseline_root), candidate_root=Path(args.candidate_root),
-            as_of=args.as_of, depth=args.depth,
-        )
-    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        return EXIT_USAGE
-    sys.stdout.write(json.dumps(report, indent=2, sort_keys=True) + "\n"
-                     if args.json else render_fleet_diff(report))
-    return EXIT_OK if report["gate_passed"] else EXIT_FINDING
-
-
-def _run_fleet_exceptions(args: argparse.Namespace) -> int:
-    try:
-        report = evaluate_fleet_exceptions(
-            Path(args.index).read_bytes(), Path(args.exceptions).read_bytes(),
-            root=Path(args.root), as_of=args.as_of,
+            Path(args.baseline).read_bytes(),
+            Path(args.candidate).read_bytes(),
+            baseline_root=Path(args.baseline_root),
+            candidate_root=Path(args.candidate_root),
+            as_of=args.as_of,
+            depth=args.depth,
         )
     except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     sys.stdout.write(
         json.dumps(report, indent=2, sort_keys=True) + "\n"
-        if args.json else render_fleet_exceptions(report)
+        if args.json
+        else render_fleet_diff(report)
+    )
+    return EXIT_OK if report["gate_passed"] else EXIT_FINDING
+
+
+def _run_fleet_exceptions(args: argparse.Namespace) -> int:
+    try:
+        report = evaluate_fleet_exceptions(
+            Path(args.index).read_bytes(),
+            Path(args.exceptions).read_bytes(),
+            root=Path(args.root),
+            as_of=args.as_of,
+        )
+    except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    sys.stdout.write(
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.json
+        else render_fleet_exceptions(report)
     )
     return EXIT_OK if report["gate_passed"] else EXIT_FINDING
 
@@ -1566,15 +1673,18 @@ def _run_deployment_drift(args: argparse.Namespace) -> int:
         return _run_deployment_reconciliation(args)
     try:
         report = evaluate_deployment_drift(
-            Path(args.manifest).read_bytes(), Path(args.config).read_bytes(),
-            root=Path(args.root), as_of=args.as_of,
+            Path(args.manifest).read_bytes(),
+            Path(args.config).read_bytes(),
+            root=Path(args.root),
+            as_of=args.as_of,
         )
     except (ValueError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     output = (
         json.dumps(report, indent=2, sort_keys=True) + "\n"
-        if args.json else render_deployment_drift(report)
+        if args.json
+        else render_deployment_drift(report)
     )
     sys.stdout.write(output)
     return EXIT_OK if report["configuration_consistent"] else EXIT_FINDING
@@ -1583,16 +1693,21 @@ def _run_deployment_drift(args: argparse.Namespace) -> int:
 def _run_deployment_reconciliation(args: argparse.Namespace) -> int:
     try:
         report = reconcile_deployment(
-            Path(args.manifest).read_bytes(), Path(args.config).read_bytes(),
-            Path(args.decisions).read_bytes(), Path(args.otel).read_bytes(),
-            Path(args.mapping).read_bytes(), root=Path(args.root), as_of=args.as_of,
+            Path(args.manifest).read_bytes(),
+            Path(args.config).read_bytes(),
+            Path(args.decisions).read_bytes(),
+            Path(args.otel).read_bytes(),
+            Path(args.mapping).read_bytes(),
+            root=Path(args.root),
+            as_of=args.as_of,
         )
     except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     sys.stdout.write(
         json.dumps(report, indent=2, sort_keys=True) + "\n"
-        if args.json else render_deployment_reconciliation(report)
+        if args.json
+        else render_deployment_reconciliation(report)
     )
     return EXIT_FINDING if report["findings"] else EXIT_OK
 
@@ -1623,8 +1738,10 @@ def _run_rego_export(args: argparse.Namespace) -> int:
 def _run_rego_diff(args: argparse.Namespace) -> int:
     try:
         report = compare_rego(
-            Path(args.baseline).read_bytes(), Path(args.candidate).read_bytes(),
-            baseline_root=Path(args.baseline_root), candidate_root=Path(args.candidate_root),
+            Path(args.baseline).read_bytes(),
+            Path(args.candidate).read_bytes(),
+            baseline_root=Path(args.baseline_root),
+            candidate_root=Path(args.candidate_root),
             as_of=args.as_of,
         )
     except (ValueError, OSError, UnicodeError, RuntimeError) as exc:
@@ -1632,7 +1749,8 @@ def _run_rego_diff(args: argparse.Namespace) -> int:
         return EXIT_USAGE
     sys.stdout.write(
         json.dumps(report, indent=2, sort_keys=True) + "\n"
-        if args.json else render_rego_diff(report)
+        if args.json
+        else render_rego_diff(report)
     )
     return EXIT_FINDING if report["findings"] else EXIT_OK
 
@@ -1642,14 +1760,16 @@ def _run_cedar_export(args: argparse.Namespace) -> int:
 
     try:
         result = export_cedar(
-            Path(args.manifest).read_bytes(), Path(args.mapping).read_bytes(),
+            Path(args.manifest).read_bytes(),
+            Path(args.mapping).read_bytes(),
             allow_partial=args.allow_partial,
         )
         if args.output_dir and result["policies"] is not None:
             write_bundle(result, Path(args.output_dir))
         output = (
             json.dumps(result, indent=2, sort_keys=True) + "\n"
-            if args.json else render_cedar_export(result)
+            if args.json
+            else render_cedar_export(result)
         )
     except (ValueError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -1665,8 +1785,9 @@ def _run_cedar(args: argparse.Namespace) -> int:
         if args.cedar_command == "validate":
             oracle = ManagedOracle.from_json(_read_text(args.oracle))
             output = f"valid managed Cedar oracle v{oracle.managed_oracle_version}\n"
-            output = _validation_output("managed-cedar-oracle", oracle.managed_oracle_version,
-                                        output, args.json)
+            output = _validation_output(
+                "managed-cedar-oracle", oracle.managed_oracle_version, output, args.json
+            )
             result_clean = True
         else:
             manifest_content = Path(args.manifest).read_bytes()
@@ -1674,9 +1795,7 @@ def _run_cedar(args: argparse.Namespace) -> int:
             as_of = _cedar_date(args.as_of)
             manifest_sha256 = hashlib.sha256(manifest_content).hexdigest()
             if args.cedar_command == "align":
-                oracle, contents, oracle_sha256 = _oracle_input(
-                    args.oracle, args.source_root
-                )
+                oracle, contents, oracle_sha256 = _oracle_input(args.oracle, args.source_root)
                 analysis = analyse_managed_cedar(
                     mandate,
                     oracle,
@@ -1752,14 +1871,17 @@ def _delegations_supplied(args: argparse.Namespace) -> bool:
 
 def _delegation_inputs(
     args: argparse.Namespace,
-) -> tuple[
-    tuple[DelegationAttachment, ...],
-    tuple[DelegationChain, ...],
-    dict[str, bytes],
-    str,
-    str,
-    str,
-] | None:
+) -> (
+    tuple[
+        tuple[DelegationAttachment, ...],
+        tuple[DelegationChain, ...],
+        dict[str, bytes],
+        str,
+        str,
+        str,
+    ]
+    | None
+):
     if not _delegations_supplied(args):
         return None
     attachment_paths = args.delegation_attachment or []
@@ -1787,20 +1909,14 @@ def _delegation_inputs(
     source_bytes: dict[str, bytes] = {}
     for value in capture_values:
         if "=" not in value:
-            raise DelegationFormatError(
-                "--delegation-capture must be LOCATOR=PATH"
-            )
+            raise DelegationFormatError("--delegation-capture must be LOCATOR=PATH")
         locator, path = value.split("=", maxsplit=1)
         if not locator or not path:
-            raise DelegationFormatError(
-                "--delegation-capture must be LOCATOR=PATH"
-            )
+            raise DelegationFormatError("--delegation-capture must be LOCATOR=PATH")
         content = Path(path).read_bytes()
         previous = source_bytes.get(locator)
         if previous is not None and previous != content:
-            raise DelegationFormatError(
-                "one delegation locator supplied different capture bytes"
-            )
+            raise DelegationFormatError("one delegation locator supplied different capture bytes")
         source_bytes[locator] = content
     required_locators = set().union(*(_chain_locators(chain) for chain in chains))
     missing = sorted(required_locators - source_bytes.keys())
@@ -1809,9 +1925,7 @@ def _delegation_inputs(
             f"--delegation-capture is required for reviewed locator {missing[0]}"
         )
     if source_bytes.keys() - required_locators:
-        raise DelegationFormatError(
-            "--delegation-capture includes an undeclared locator"
-        )
+        raise DelegationFormatError("--delegation-capture includes an undeclared locator")
     return (
         attachments,
         chains,
@@ -1824,7 +1938,7 @@ def _delegation_inputs(
 
 def _delegation_payload(analysis: DelegationAnalysis) -> dict[str, Any]:
     return {
-        "schema": "agentmandate.delegations/v1",
+        "schema": "agentmandate.delegations/v2",
         "as_of": analysis.as_of,
         "attenuated": [
             {
@@ -1902,12 +2016,15 @@ def _producer_boundary_key(boundary: ProducerBoundary) -> tuple[str, ...]:
 
 def _producer_inputs(
     args: argparse.Namespace,
-) -> tuple[
-    tuple[ProducerBoundary, ...],
-    dict[str, bytes],
-    tuple[ProducerSelection, ...],
-    date,
-] | None:
+) -> (
+    tuple[
+        tuple[ProducerBoundary, ...],
+        dict[str, bytes],
+        tuple[ProducerSelection, ...],
+        date,
+    ]
+    | None
+):
     if not _producers_supplied(args):
         return None
     boundary_paths = args.producer_boundary or []
@@ -1924,18 +2041,12 @@ def _producer_inputs(
     try:
         as_of = date.fromisoformat(args.producer_as_of)
     except ValueError as exc:
-        raise ProducerBoundaryFormatError(
-            "--producer-as-of must be YYYY-MM-DD"
-        ) from exc
+        raise ProducerBoundaryFormatError("--producer-as-of must be YYYY-MM-DD") from exc
     if as_of.isoformat() != args.producer_as_of:
         raise ProducerBoundaryFormatError("--producer-as-of must be YYYY-MM-DD")
 
-    boundaries = tuple(
-        ProducerBoundary.from_json(_read_text(path)) for path in boundary_paths
-    )
-    selections = tuple(
-        ProducerSelection.from_json(value) for value in selection_values
-    )
+    boundaries = tuple(ProducerBoundary.from_json(_read_text(path)) for path in boundary_paths)
+    selections = tuple(ProducerSelection.from_json(value) for value in selection_values)
     boundary_keys = {_producer_boundary_key(boundary) for boundary in boundaries}
     if any(_producer_selection_key(selection) not in boundary_keys for selection in selections):
         raise ProducerBoundaryFormatError(
@@ -1945,14 +2056,10 @@ def _producer_inputs(
     source_bytes: dict[str, bytes] = {}
     for value in source_values:
         if "=" not in value:
-            raise ProducerBoundaryFormatError(
-                "--producer-source must be LOCATOR=PATH"
-            )
+            raise ProducerBoundaryFormatError("--producer-source must be LOCATOR=PATH")
         locator, path = value.split("=", maxsplit=1)
         if not locator or not path:
-            raise ProducerBoundaryFormatError(
-                "--producer-source must be LOCATOR=PATH"
-            )
+            raise ProducerBoundaryFormatError("--producer-source must be LOCATOR=PATH")
         content = Path(path).read_bytes()
         previous = source_bytes.get(locator)
         if previous is not None and previous != content:
@@ -1960,18 +2067,14 @@ def _producer_inputs(
                 "one producer locator supplied different source bytes"
             )
         source_bytes[locator] = content
-    required_locators = {
-        source.locator for boundary in boundaries for source in boundary.sources
-    }
+    required_locators = {source.locator for boundary in boundaries for source in boundary.sources}
     missing = sorted(required_locators - source_bytes.keys())
     if missing:
         raise ProducerBoundaryFormatError(
             f"--producer-source is required for reviewed locator {missing[0]}"
         )
     if source_bytes.keys() - required_locators:
-        raise ProducerBoundaryFormatError(
-            "--producer-source includes an undeclared locator"
-        )
+        raise ProducerBoundaryFormatError("--producer-source includes an undeclared locator")
     return boundaries, source_bytes, selections, as_of
 
 
@@ -1999,12 +2102,15 @@ def _conditions_supplied(args: argparse.Namespace) -> bool:
 
 def _condition_inputs(
     args: argparse.Namespace,
-) -> tuple[
-    tuple[ToolCondition, ...],
-    tuple[ConditionContext, ...],
-    dict[str, bytes],
-    date,
-] | None:
+) -> (
+    tuple[
+        tuple[ToolCondition, ...],
+        tuple[ConditionContext, ...],
+        dict[str, bytes],
+        date,
+    ]
+    | None
+):
     if not _conditions_supplied(args):
         return None
     condition_paths = args.condition or []
@@ -2015,9 +2121,7 @@ def _condition_inputs(
     if not context_paths:
         raise ConditionFormatError("--condition-context is required")
     if len(context_paths) != len(captures):
-        raise ConditionFormatError(
-            "supply one --condition-capture for each --condition-context"
-        )
+        raise ConditionFormatError("supply one --condition-capture for each --condition-context")
     if args.condition_as_of is None:
         raise ConditionFormatError("--condition-as-of is required")
     try:
@@ -2027,9 +2131,7 @@ def _condition_inputs(
     if as_of.isoformat() != args.condition_as_of:
         raise ConditionFormatError("--condition-as-of must be YYYY-MM-DD")
 
-    conditions = tuple(
-        ToolCondition.from_json(_read_text(path)) for path in condition_paths
-    )
+    conditions = tuple(ToolCondition.from_json(_read_text(path)) for path in condition_paths)
     contexts: list[ConditionContext] = []
     source_bytes: dict[str, bytes] = {}
     for context_path, capture_path in zip(context_paths, captures, strict=True):
@@ -2037,9 +2139,7 @@ def _condition_inputs(
         content = Path(capture_path).read_bytes()
         previous = source_bytes.get(context.id)
         if previous is not None and previous != content:
-            raise ConditionFormatError(
-                "contexts with one id supplied different capture bytes"
-            )
+            raise ConditionFormatError("contexts with one id supplied different capture bytes")
         source_bytes[context.id] = content
         contexts.append(context)
     return conditions, tuple(contexts), source_bytes, as_of
@@ -2047,7 +2147,7 @@ def _condition_inputs(
 
 def _condition_payload(analysis: ConditionalAnalysis) -> dict[str, Any]:
     return {
-        "schema": "agentmandate.conditions/v1",
+        "schema": "agentmandate.conditions/v2",
         "as_of": analysis.as_of,
         "applied": [
             {
@@ -2205,11 +2305,14 @@ def _main(argv: Sequence[str] | None = None) -> int:
                     )
                 if args.format is not None:
                     catalogue = read_catalogue(
-                        Path(args.catalogue).read_bytes(), args.format,
+                        Path(args.catalogue).read_bytes(),
+                        args.format,
                         dispatch_tool=args.dispatch_tool,
                     )
                     output = render(
-                        list(catalogue.proposals), args.agent, list(catalogue.notes),
+                        list(catalogue.proposals),
+                        args.agent,
+                        list(catalogue.notes),
                         origin="protocol catalogue",
                     )
                 else:
@@ -2268,8 +2371,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
             return EXIT_USAGE
         if _producers_supplied(args) and args.ir_snapshot is not None:
             print(
-                "error: producer boundaries require a manifest and cannot be "
-                "composed with --ir",
+                "error: producer boundaries require a manifest and cannot be composed with --ir",
                 file=sys.stderr,
             )
             return EXIT_USAGE
@@ -2328,9 +2430,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "drift":
         try:
-            inventory = collect(
-                args.source, binding=args.binding, union=args.union_bindings
-            )
+            inventory = collect(args.source, binding=args.binding, union=args.union_bindings)
             dynamic = _dynamic_inventory(args, inventory)
             if condition_inputs is None:
                 drift = compare_drift(mandate, inventory, dynamic=dynamic)
@@ -2431,9 +2531,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
             ]
         }
         text = (
-            "\n".join(f.render() for f in findings)
-            if findings
-            else "no single-manifest findings"
+            "\n".join(f.render() for f in findings) if findings else "no single-manifest findings"
         )
         _emit(payload, args.json, text)
         return EXIT_FINDING if any(f.severity == ERROR for f in findings) else EXIT_OK
@@ -2492,22 +2590,22 @@ def _main(argv: Sequence[str] | None = None) -> int:
             delegation_analysis = None
             producer_analysis = None
             authority = (
-                ir_result.authority
-                if ir_result is not None
-                else analyse(mandate, depth=args.depth)
+                ir_result.authority if ir_result is not None else analyse(mandate, depth=args.depth)
             )
         if authority.breaches:
             text = "\n\n".join(b.render() for b in authority.breaches)
         else:
             reached = f"{len(authority.reachable_tools)} tool(s) reachable"
             bound = (
-                f", most extractable {authority.max_extractable}"
-                if authority.max_extractable
+                ", reachable quantities "
+                + ", ".join(
+                    f"{name}={value}" for name, value in sorted(authority.max_quantities.items())
+                )
+                if authority.max_quantities
                 else ""
             )
-            depth_note = (
-                f" within depth {authority.depth}"
-                + (" (search truncated)" if authority.truncated else "")
+            depth_note = f" within depth {authority.depth}" + (
+                " (search truncated)" if authority.truncated else ""
             )
             text = f"no reachable breach{depth_note}. {reached}{bound}"
         if args.sarif:
@@ -2531,12 +2629,11 @@ def _main(argv: Sequence[str] | None = None) -> int:
             if producer_analysis is not None:
                 text = f"{_render_producers(producer_analysis)}\n\n{text}"
             _emit(payload, args.json, text)
-        finding = bool(authority.breaches) or bool(
-            conditional_analysis is not None and conditional_analysis.findings
-        ) or bool(
-            delegation_analysis is not None and delegation_analysis.findings
-        ) or bool(
-            producer_analysis is not None and producer_analysis.findings
+        finding = (
+            bool(authority.breaches)
+            or bool(conditional_analysis is not None and conditional_analysis.findings)
+            or bool(delegation_analysis is not None and delegation_analysis.findings)
+            or bool(producer_analysis is not None and producer_analysis.findings)
         )
         return EXIT_FINDING if finding else EXIT_OK
 
@@ -2570,8 +2667,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
             if args.emit:
                 Path(args.emit).write_text(
                     "".join(
-                        json.dumps(_observation_to_dict(o)) + "\n"
-                        for o in conversion.observations
+                        json.dumps(_observation_to_dict(o)) + "\n" for o in conversion.observations
                     ),
                     encoding="utf-8",
                 )
@@ -2579,15 +2675,13 @@ def _main(argv: Sequence[str] | None = None) -> int:
             # run's spending against another's and report a breach that
             # neither run committed.
             per_run = [
-                (trace, replay(mandate, list(group)))
-                for trace, group in conversion.runs
+                (trace, replay(mandate, list(group))) for trace, group in conversion.runs
             ] or [("", replay(mandate, []))]
             conformance = _merge(per_run)
         else:
             if args.mapping or args.emit or args.lenient_tool_spans:
                 print(
-                    "error: --map, --emit and --lenient-tool-spans apply to "
-                    "--otel only",
+                    "error: --map, --emit and --lenient-tool-spans apply to --otel only",
                     file=sys.stderr,
                 )
                 return EXIT_USAGE
@@ -2600,7 +2694,7 @@ def _main(argv: Sequence[str] | None = None) -> int:
         # CI reads the JSON. Omitting the conversion counts there would hide
         # exactly the warnings that explain a suspiciously clean result.
         payload = {
-            "schema": "agentmandate.verify/v1",
+            "schema": "agentmandate.verify/v2",
             "conversion": {
                 "total_spans": conversion.total_spans,
                 "tool_calls": conversion.tool_spans,

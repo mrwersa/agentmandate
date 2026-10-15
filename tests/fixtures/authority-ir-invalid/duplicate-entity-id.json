@@ -1,1 +1,1 @@
-{"ir_version":1,"sources":[],"entities":[{"id":"tool:t","kind":"tool","name":"t"},{"id":"tool:t","kind":"tool","name":"t"}],"facts":[],"edges":[]}
+{"edges":[],"entities":[{"id":"tool:t","kind":"tool","name":"t"},{"id":"tool:t","kind":"tool","name":"t"}],"facts":[],"ir_version":2,"sources":[]}

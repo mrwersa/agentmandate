@@ -2,9 +2,11 @@
   "agent": "two-payments",
   "limits": {
     "depth": 3,
-    "total": {
-      "amount": "5",
-      "currency": "GBP"
+    "quantities": {
+      "value": {
+        "amount": "5",
+        "unit": "GBP"
+      }
     }
   },
   "tools": [
@@ -25,8 +27,9 @@
       "requires_approval": true,
       "ceiling": {
         "amount": "3.5",
-        "currency": "GBP"
-      }
+        "unit": "GBP"
+      },
+      "quantity": "value"
     },
     {
       "name": "other",
@@ -39,8 +42,10 @@
       "requires_approval": true,
       "ceiling": {
         "amount": "3.5",
-        "currency": "GBP"
-      }
+        "unit": "GBP"
+      },
+      "quantity": "value"
     }
-  ]
+  ],
+  "version": 2
 }

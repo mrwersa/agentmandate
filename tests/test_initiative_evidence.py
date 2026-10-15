@@ -13,7 +13,12 @@ def catalogue() -> dict:
 
 
 def test_catalogue_and_reviewed_manifest_cover_the_same_tools() -> None:
-    mandate = load(EVIDENCE / "mandate.yaml")
+    mandate = load(
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "mandate.yaml"
+    )
 
     assert len(catalogue()["tools"]) == 25
     assert {tool["name"] for tool in catalogue()["tools"]} == set(mandate.tool_names)
@@ -31,19 +36,27 @@ def test_scan_confuses_bearer_ids_and_result_shapes_with_authority() -> None:
 def test_scan_skeleton_is_the_exact_scanner_output() -> None:
     generated = render(propose(catalogue()), "initiative-agent")
 
-    assert (EVIDENCE / "scan-skeleton.yaml").read_text(encoding="utf-8") == generated
+    assert (
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "scan-skeleton.yaml"
+    ).read_text(encoding="utf-8") == generated
 
 
 def test_reviewed_graph_keeps_the_real_move_finding() -> None:
-    mandate = load(EVIDENCE / "mandate.yaml")
+    mandate = load(
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "mandate.yaml"
+    )
     authority = analyse(mandate)
 
     assert authority.reachable_tools == frozenset(mandate.tool_names)
     assert len(authority.breaches) == 1
     assert authority.breaches[0].kind == "ungated_effect"
-    assert [step.tool for step in authority.breaches[0].path] == [
-        "move_task_api_v1_g"
-    ]
+    assert [step.tool for step in authority.breaches[0].path] == ["move_task_api_v1_g"]
     findings = check(mandate)
     assert [(finding.rule, finding.subject) for finding in findings] == [
         ("effect.ungated-irreversible", "move_task_api_v1_g")

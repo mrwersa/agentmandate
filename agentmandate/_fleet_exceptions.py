@@ -13,7 +13,7 @@ from ._fleet import _reference, inventory
 from ._policy_export import object_fields, pairs, string
 
 EXCEPTIONS_VERSION = 1
-RESULT_SCHEMA = "agentmandate.fleet-exceptions/v1"
+RESULT_SCHEMA = "agentmandate.fleet-exceptions/v2"
 
 
 def _digest(value):

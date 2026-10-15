@@ -13,13 +13,13 @@ against the declaration, so it is usable without another tool alongside it.
 
 from __future__ import annotations
 
-__version__ = "0.37.0"
+__version__ = "0.38.0"
 
 from .diff import Change, Delta, compare
 from .drift import Drift, DriftFinding, compare_source
 from .inventory import Binding, Declaration, Inventory, InventoryError, collect
 from .lint import Finding, check
-from .manifest import Limits, Mandate, ManifestError, Money, Tool, load, loads
+from .manifest import Limits, Mandate, ManifestError, Quantity, Tool, load, loads
 from .obligations import (
     OBLIGATIONS_SCHEMA,
     Obligation,
@@ -54,7 +54,7 @@ __all__ = [
     "Mandate",
     "ManifestError",
     "OBLIGATIONS_SCHEMA",
-    "Money",
+    "Quantity",
     "Obligation",
     "ObligationSet",
     "Observation",

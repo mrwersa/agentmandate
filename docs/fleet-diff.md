@@ -84,7 +84,7 @@ label mismatch prevents paired authority comparisons; individual reports remain.
 
 ## Read authority, membership and review separately
 
-The result schema is `agentmandate.fleet-diff/v1`:
+The result schema is `agentmandate.fleet-diff/v2`:
 
 | Field | Meaning |
 |---|---|
@@ -133,7 +133,7 @@ different deployments' budgets are never combined or converted.
 
 This is an experimental result contract and a new command. Existing fleet
 inventory, fleet exceptions, manifest diff and Authority results remain
-unchanged. The [v1 replay baselines](../tests/fixtures/fleet-diff-v1.json) pin
+unchanged. The [v1 replay baselines](../tests/fixtures/fleet-diff-v2.json) pin
 unchanged, widening, narrowing, membership/review and expired cases. They are
 initial baselines, not migrations from an earlier fleet-diff schema.
 

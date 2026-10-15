@@ -82,7 +82,7 @@ def _assert_unresolved(result):
 
 def test_scoped_claims_do_not_rewrite_baseline_reset_or_authority():
     result = _run()
-    assert result["schema"] == "agentmandate.revision-review/v1"
+    assert result["schema"] == "agentmandate.revision-review/v2"
     assert result["review_inputs_eligible"] is True
     assert result["review_sha256"] == _sha(
         RevisionReview.from_json(json.dumps(_raw())).to_json().encode()
@@ -168,7 +168,8 @@ def test_unknown_amendment_and_late_decision_are_not_approval():
 def test_approved_retention_never_excuses_a_reset():
     raw = _raw()
     raw["controls"][0]["amendment"].update(
-        status="approved", decision_at="2026-10-09T11:00:00Z",
+        status="approved",
+        decision_at="2026-10-09T11:00:00Z",
     )
     result = _run(raw)
     assert result["assessments"][0]["issuer_amendment"] == "approved_retaining_state"
@@ -384,7 +385,7 @@ def test_fixed_result_fixtures(name, when, capsys):
     assert not output.err
     assert (
         output.out.encode()
-        == (ROOT / f"tests/fixtures/revision-review-result-v1-{name}.json").read_bytes()
+        == (ROOT / f"tests/fixtures/revision-review-result-v2-{name}.json").read_bytes()
     )
 
 

@@ -52,9 +52,10 @@ def test_multiagent_protocol_freezes_topology_and_nonreplacement_rules():
     protocol = json.loads((EVIDENCE / "multiagent-protocol.json").read_text())
 
     assert protocol["status"] == "capability_pending_confirmation_not_implemented"
-    assert protocol["binding_sha256"] == json.loads(
-        (EVIDENCE / "protocol.json").read_text()
-    )["binding"]["sha256"]
+    assert (
+        protocol["binding_sha256"]
+        == json.loads((EVIDENCE / "protocol.json").read_text())["binding"]["sha256"]
+    )
     assert {name: cell["child_count"] for name, cell in protocol["cells"].items()} == {
         "subagent_handoff": 1,
         "concurrent_subagents_2": 2,
@@ -81,17 +82,16 @@ def test_multiagent_capability_summary_proves_topology_without_live_identifiers(
     summary = json.loads(text)
 
     assert summary["excluded_from_confirmation"] is True
-    assert summary["protocol_sha256"] == hashlib.sha256(
-        (EVIDENCE / "multiagent-protocol.json").read_bytes()
-    ).hexdigest()
+    assert (
+        summary["protocol_sha256"]
+        == hashlib.sha256((EVIDENCE / "multiagent-protocol.json").read_bytes()).hexdigest()
+    )
     assert [cell["requested_children"] for cell in summary["cells"]] == [1, 2, 4]
     assert [cell["observed_children"] for cell in summary["cells"]] == [1, 2, 4]
     assert [cell["final_list_cost_minor_units"] for cell in summary["cells"]] == [2, 4, 6]
     assert all(cell["primary_threads"] == 1 for cell in summary["cells"])
     assert all(cell["all_children_attached_to_primary"] for cell in summary["cells"])
-    assert all(
-        cell["all_children_created_before_first_child_idle"] for cell in summary["cells"]
-    )
+    assert all(cell["all_children_created_before_first_child_idle"] for cell in summary["cells"])
     assert summary["cleanup"] == {
         "sessions_deleted_and_verified_absent": 3,
         "agents_archived": 2,
@@ -171,14 +171,15 @@ def test_multiagent_topology_rejects_wrong_parent_and_missing_primary():
     assert capture._multiagent_topology(no_primary, 1)["protocol_conformant"] is False
 
 
-def test_multiagent_confirmation_preserves_concurrency_result_without_identifiers():
+def test_multiagent_confirmation_preserves_conunit_result_without_identifiers():
     text = (EVIDENCE / "multiagent-confirmation.json").read_text()
     result = json.loads(text)
     trials = result["trials"]
 
-    assert result["protocol_sha256"] == hashlib.sha256(
-        (EVIDENCE / "multiagent-protocol.json").read_bytes()
-    ).hexdigest()
+    assert (
+        result["protocol_sha256"]
+        == hashlib.sha256((EVIDENCE / "multiagent-protocol.json").read_bytes()).hexdigest()
+    )
     assert len(result["raw_capture_sha256"]) == 32
     assert len(trials) == 30
     assert [trial["order"] for trial in trials] == list(range(1, 31))
@@ -210,12 +211,10 @@ def test_multiagent_confirmation_preserves_concurrency_result_without_identifier
         2,
         2,
     ]
-    assert sorted(
-        trial["list_cost_minor_units"] for trial in cells["concurrent_subagents_2"]
-    ) == [2] * 9 + [3]
-    assert [
-        trial["list_cost_minor_units"] for trial in cells["concurrent_subagents_4"]
-    ] == [4] * 10
+    assert sorted(trial["list_cost_minor_units"] for trial in cells["concurrent_subagents_2"]) == [
+        2
+    ] * 9 + [3]
+    assert [trial["list_cost_minor_units"] for trial in cells["concurrent_subagents_4"]] == [4] * 10
     assert all(
         trial["topology"]["all_children_running_before_first_child_idle"]
         for name in ("concurrent_subagents_2", "concurrent_subagents_4")
@@ -273,9 +272,10 @@ def test_single_agent_confirmation_preserves_session_boundary_results_without_id
     trials = result["trials"]
 
     assert result["evidence_version"] == 1
-    assert result["protocol_sha256"] == hashlib.sha256(
-        (EVIDENCE / "protocol.json").read_bytes()
-    ).hexdigest()
+    assert (
+        result["protocol_sha256"]
+        == hashlib.sha256((EVIDENCE / "protocol.json").read_bytes()).hexdigest()
+    )
     assert len(result["raw_capture_sha256"]) == 32
     assert len(trials) == 30
     assert [trial["order"] for trial in trials] == list(range(1, 31))
@@ -298,14 +298,13 @@ def test_single_agent_confirmation_preserves_session_boundary_results_without_id
         for session in trial["sessions"]
     )
     assert all(
-        trial["revision"]
-        == {"cap_after": 2, "consumed_before": 1, "cost_immediately_after": 1}
+        trial["revision"] == {"cap_after": 2, "consumed_before": 1, "cost_immediately_after": 1}
         for trial in revised
     )
     assert all(trial["after_revision"][-1]["idle_reason"] == "budget_reached" for trial in revised)
-    assert sorted(
-        trial["after_revision"][-1]["list_cost_minor_units"] for trial in revised
-    ) == [2] * 9 + [3]
+    assert sorted(trial["after_revision"][-1]["list_cost_minor_units"] for trial in revised) == [
+        2
+    ] * 9 + [3]
     assert result["cleanup"] == {
         "agent_archived": True,
         "environment_deleted": True,

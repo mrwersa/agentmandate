@@ -7,7 +7,7 @@ The checker rejects candidates that break the supplied path and still runs the
 full bounded breach search on every candidate that passes.
 
 The file describes **caller-supplied requirements**, not observations from a
-live run. The library checks their conformance within manifest v1. It does not
+live run. The library checks their conformance within manifest v2. It does not
 execute the application, authenticate the reviewer, or prove business success.
 Use the [trace guide](traces.md) for observed calls and the
 [repair guide](remediation.md) for candidate generation and ranking.
@@ -39,7 +39,7 @@ The strict UTF-8 JSON root has exactly these fields:
 
 | Field | Meaning |
 |---|---|
-| `schema` | `agentmandate.required-workflows/v1` |
+| `schema` | `agentmandate.required-workflows/v2` |
 | `agent` | The baseline manifest's agent name |
 | `manifest_sha256` | Lowercase SHA-256 of the exact baseline file bytes |
 | `reviewer` | Caller-supplied name identifying who chose these requirements |
@@ -64,11 +64,12 @@ nonblank and contain no carriage return, newline or NUL. Each step has:
 | `approved` | Explicit boolean; true when this path includes approval |
 | `binding` | For spending calls, a zero-based integer selecting a held binding of the tool's `scope_key` |
 | `value` | For spending calls, a quoted finite nonnegative decimal string |
-| `currency` | For spending calls, the three-letter monetary currency |
+| `quantity` | Named accounting pool, matching the tool |
+| `unit` | Unit matching the tool ceiling |
 
-A nonspending call omits monetary fields; `binding: null` is equivalent to
-omission. A spending call needs all three monetary fields, even for zero value.
-`value` and `currency` must appear together. Unknown fields, duplicate JSON keys,
+A nonspending call omits quantity fields; `binding: null` is equivalent to
+omission. A spending call needs value, quantity, unit and binding, even for zero value.
+`value`, `quantity` and `unit` must appear together. Unknown fields, duplicate JSON keys,
 empty paths, duplicate names and unsupported schemas are refused. Unquoted
 numeric values are refused, avoiding precision loss during JSON decoding.
 
@@ -90,12 +91,12 @@ Spend is cumulative per **tool, scope and binding**. Two tools sharing one
 scope do not share a ceiling. The run total includes every spending call.
 Currency, principal and required approval must match their declarations.
 Every call counts against its declared effect budget, including pure reads,
-zero-spend calls and calls with no new monetary headroom. No-change calls remain
+zero-spend calls and calls with no new quantity headroom. No-change calls remain
 in the supplied path and count toward its full length.
 
 A path must fit the selected search depth and conform to its numeric limits.
 These are conformance checks, not new guards in the reachability kernel:
-`limits.total` and `limits.effects` remain properties whose violation the
+`limits.quantities` and `limits.effects` remain properties whose violation the
 search can find. An invalid baseline requirement is a configuration error,
 not a requirement the command silently drops. Fix the path or mandate intent
 before requesting narrowing candidates.
@@ -109,7 +110,7 @@ amounts; see the [search guide](search-performance.md).
 
 ## Read the result
 
-Supplying `--required-workflows` selects `agentmandate.remediation/v3`, with or
+Every repair mode uses `agentmandate.remediation/v6`, with or
 without ceiling options. The unchanged `baseline`, lint, source digest, edit
 semantics and original exit remain separate from requirements:
 
@@ -132,8 +133,8 @@ A bad path does not hide the other path assessments.
 Failure rules cover `workflow.undeclared-tool`, `workflow.scope-unavailable`,
 `workflow.principal-mismatch`, `workflow.approval-missing`,
 `workflow.unexpected-spend`, `workflow.spend-missing`,
-`workflow.binding-unavailable`, `workflow.currency-mismatch`,
-`workflow.ceiling-exceeded`, `workflow.total-exceeded`,
+`workflow.binding-unavailable`, `workflow.unit-mismatch`,
+`workflow.ceiling-exceeded`, `workflow.quantity-exceeded`,
 `workflow.effect-budget-exceeded` and `workflow.depth-exceeded`.
 
 Malformed files, wrong joins, arithmetic exhaustion or baseline paths that do
@@ -143,19 +144,6 @@ requirement never turns original findings into a green result.
 
 ## Compatibility and limits
 
-Without the flag, v1 and v2 result bytes and exits are unchanged. Consumers must
-support v3 before requesting workflow constraints. The
-[before/after compatibility case](../tests/fixtures/remediation-v2-to-v3.json)
-pins preserved baseline fields and surviving candidate semantics; the
-[v3 baselines](../tests/fixtures/remediation-workflow-monetary-v3.json) cover
-monetary, joint, limited and clean runs. Earlier inventories remain pinned.
-The Python records are private, and these results are not authority inputs.
-
-This checks the declared graph and supplied calls. It does not establish
-provider resource identity, actual output values, fixed ownership, data flow,
-amount-dependent tool enablement, live approval, reviewer authenticity,
-external policy decisions, durable state or continuation safety. Environment
-setup and application outcomes still need their own tests and review. Required
-paths do not supply missing mandate-binding evidence or reuse historical
-acceptance. Automated business correctness and global policy synthesis remain
-outside this slice.
+The current workflow input is `agentmandate.required-workflows/v2`. Older
+currency-only paths are unsupported; there is no compatibility reader. Current
+fixtures cover quantity amounts, joint approvals, limits and clean baselines.

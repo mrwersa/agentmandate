@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## Unreleased
 
+## 0.38.0 - 2026-10-15
+
+### Changed
+
+- Replace the money-only alpha model with named cumulative quantity budgets:
+  `Quantity(amount, unit)`, manifest version 2, tool `quantity`,
+  `limits.quantities` and Authority `max_quantities`. Independent pools never
+  merge, including pools with matching units or different currencies.
+- Carry quantities through reach, release diff, replay/OTel, IR provenance,
+  required workflows, repair ranking and automatic ceiling discovery. Reports
+  identify each exceeded budget. Stateless exports disclose cumulative limits.
+- Remove `Money`, `limits.total`, currency-only input and remediation v1–v5
+  presentation branches; there are no aliases or compatibility readers. Current
+  IR and affected result contracts advance their versions. Historical captures
+  and acceptance records retain their bytes and scope.
+- Use one remediation/v6 result with explicit evaluation-limit truncation and
+  exhaustive point enumeration. Complete discovery with no candidate names
+  the declared domain; steps reject whitespace, underscores and leading plus.
+
 ## 0.37.0 - 2026-10-15
 
 ### Added

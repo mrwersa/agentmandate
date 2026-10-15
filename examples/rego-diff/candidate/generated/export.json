@@ -29,7 +29,7 @@
     "type": "object"
   },
   "inputs": {
-    "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+    "manifest_sha256": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
     "mapping_sha256": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3"
   },
   "losses": [],

@@ -1,7 +1,7 @@
 {
   "principal_accounting_binding_version": 1,
   "id": "synthetic-accounting-only",
-  "manifest_sha256": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+  "manifest_sha256": "7b4433fec3cd9ba85441472fca0e531d9d71981833b17ee5fe09b91c4cd18d9a",
   "profile_sha256": "9dee36d7942d4ac203fd98f376b8798c43723af060833016c8455241a9c89db4",
   "provider": "synthetic",
   "boundary": "synthetic-refund-boundary",

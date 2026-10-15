@@ -144,7 +144,7 @@ def test_traces_add_verify_with_the_mapping(
     monkeypatch.setenv("INPUT_TRACES", "otel-trace.json")
     monkeypatch.setenv(
         "INPUT_MAP",
-        "scope=app.case.id\nvalue=app.refund.amount\ncurrency=app.currency\n"
+        "scope=app.case.id\nvalue=app.refund.amount\nunit=app.unit\n"
         "approved=app.approved\nprincipal=app.principal",
     )
     action_gate.main()
@@ -175,7 +175,7 @@ def test_the_summary_carries_the_finding_and_the_graph(
     summary = (workspace / "summary.md").read_text(encoding="utf-8")
 
     assert "## AgentMandate" in summary
-    assert "cumulative value 1000 GBP exceeds limit 500 GBP" in summary
+    assert "quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP" in summary
     assert "```mermaid" in summary
     # The boundary has to travel with the finding, or the finding overclaims.
     assert "not what the model tends to do" in summary
@@ -268,12 +268,13 @@ def test_a_lint_warning_is_reported_without_blocking(
     finding, which is the failure this package is about.
     """
     (workspace / "warned.yaml").write_text(
-        "version: 1\n"
-        "agent: warner\n"
-        "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"
-        "tools:\n"
-        "  - { name: open_case, effect: read, principal: caller, produces: case }\n"
-        "  - { name: list_notes, effect: read, principal: service, requires: [case] }\n",
+        """version: 2
+agent: warner
+limits: { quantities: {value: { amount: 500, unit: GBP }}, depth: 8 }
+tools:
+  - { name: open_case, effect: read, principal: caller, produces: case }
+  - { name: list_notes, effect: read, principal: service, requires: [case] }
+""",
         encoding="utf-8",
     )
     monkeypatch.setenv("INPUT_MANIFEST", "warned.yaml")
@@ -296,12 +297,13 @@ def test_an_error_still_blocks_and_is_not_a_note(
     workspace: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     (workspace / "broken.yaml").write_text(
-        "version: 1\n"
-        "agent: broken\n"
-        "limits: { total: { amount: 500, currency: GBP }, depth: 8 }\n"
-        "tools:\n"
-        "  - { name: open_case, effect: read, principal: caller, produces: case }\n"
-        "  - { name: pay, effect: irreversible, principal: service, requires: [case] }\n",
+        """version: 2
+agent: broken
+limits: { quantities: {value: { amount: 500, unit: GBP }}, depth: 8 }
+tools:
+  - { name: open_case, effect: read, principal: caller, produces: case }
+  - { name: pay, effect: irreversible, principal: service, requires: [case] }
+""",
         encoding="utf-8",
     )
     monkeypatch.setenv("INPUT_MANIFEST", "broken.yaml")

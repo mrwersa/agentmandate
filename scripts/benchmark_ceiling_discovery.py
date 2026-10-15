@@ -62,7 +62,9 @@ def run():
         "source_sha256": {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest()
                           for p in ("scripts/benchmark_ceiling_discovery.py",
                                     "agentmandate/_ceiling_discovery.py",
-                                    "agentmandate/_remediation.py", "agentmandate/reach.py")},
+                                    "agentmandate/_remediation.py", "agentmandate/reach.py",
+                                    "agentmandate/manifest.py",
+                                    "agentmandate/_required_workflows.py")},
         "cases": rows,
     }
 

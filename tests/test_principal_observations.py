@@ -35,7 +35,7 @@ def test_principal_observations_preserve_principals_and_session_without_a_verdic
     assert (
         record["mandate_sha256"]
         == hashlib.sha256(
-            (ROOT / "examples/continuity-refund/manifest.json").read_bytes()
+            (ROOT / "tests/fixtures/archived-study-manifest-v1.json").read_bytes()
         ).hexdigest()
     )
     assert len(record["sources"]) == 10

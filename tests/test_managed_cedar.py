@@ -24,7 +24,13 @@ from agentmandate._managed_cedar import (
 )
 from agentmandate.manifest import load
 
-ROOT = Path(__file__).parents[1] / "docs" / "evidence" / "agentcore-refund-policy"
+ROOT = (
+    Path(__file__).parents[1]
+    / "tests"
+    / "fixtures"
+    / "quantity-evidence"
+    / "agentcore-refund-policy"
+)
 ORACLE = ROOT / "managed-oracle-v1.json"
 
 
@@ -87,8 +93,7 @@ def test_live_managed_oracle_is_canonical_and_digest_bound() -> None:
         ("deny-over-limit", "deny", "default_deny"),
     ]
     assert oracle.decisions[0].request_key == (
-        '{"arguments":{"amount":500},"method":"tools/call",'
-        '"tool":"RefundIamTarget___process_refund"}'
+        '{"arguments":{"amount":500},"method":"tools/call","tool":"RefundIamTarget___process_refund"}'
     )
     oracle.verify_sources(source_bytes(oracle))
 
@@ -351,7 +356,7 @@ def test_managed_oracle_projects_a_closed_standalone_ir_profile() -> None:
     restored = AuthorityIR.from_json(graph.to_json())
     assert restored.to_json() == graph.to_json()
     _validate_managed_profile(restored)
-    with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
         _analyse_ir(restored)
 
 
@@ -607,7 +612,7 @@ def candidate_allowing_2000() -> tuple[ManagedOracle, dict[str, bytes]]:
             "jsonrpc": "2.0",
             "id": "deny-over-limit",
             "result": {
-                "content": [{"text": '{"processed":true,"amount":2000}', "type": "text"}],
+                "content": [{"text": '{"processed": true, "amount": 2000}', "type": "text"}],
                 "isError": False,
             },
         }

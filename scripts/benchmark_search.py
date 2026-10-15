@@ -8,10 +8,8 @@ import hashlib
 import json
 import platform
 import statistics
-import subprocess
 import sys
 import tracemalloc
-import types
 from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter_ns
@@ -33,7 +31,8 @@ def fingerprint(authority, trace):
                     "tool": step.tool,
                     "binding": step.binding,
                     "spent": None if step.spent is None else str(step.spent),
-                    "currency": step.currency,
+                    "unit": step.unit,
+                    "quantity": step.quantity,
                 }
                 for step in path
             ],
@@ -50,19 +49,6 @@ def fingerprint(authority, trace):
         "authority_sha256": digest(authority.as_dict()),
         "trace_sha256": digest(paths),
     }
-
-
-def _baseline_kernel(baselines):
-    source = subprocess.check_output(
-        ["git", "show", f"{baselines['baseline_ref']}:agentmandate/reach.py"], cwd=ROOT
-    )
-    if hashlib.sha256(source).hexdigest() != baselines["baseline_source_sha256"]:
-        raise ValueError("baseline search source does not match its pinned digest")
-    module = types.ModuleType("agentmandate._benchmark_baseline")
-    module.__package__ = "agentmandate"
-    sys.modules[module.__name__] = module
-    exec(compile(source, "<pinned-search-baseline>", "exec"), module.__dict__)
-    return module._analyse_with_trace
 
 
 def _measure(kernels, mandate, case, repeat):
@@ -99,7 +85,7 @@ def _measure(kernels, mandate, case, repeat):
     }
 
 
-def benchmark(*, repeat=3, compare_baseline=False, names=None):
+def benchmark(*, repeat=3, names=None):
     if isinstance(repeat, bool) or not isinstance(repeat, int) or repeat < 1:
         raise ValueError("repeat must be a positive integer")
     baselines = json.loads(BASELINES.read_text())
@@ -107,8 +93,6 @@ def benchmark(*, repeat=3, compare_baseline=False, names=None):
     if not cases or (names is not None and set(names) - {case["name"] for case in cases}):
         raise ValueError("unknown or empty benchmark case selection")
     kernels = {"current": _analyse_with_trace}
-    if compare_baseline:
-        kernels["baseline"] = _baseline_kernel(baselines)
     rows = []
     for case in cases:
         data = (ROOT / case["path"]).read_bytes()
@@ -159,8 +143,7 @@ def benchmark(*, repeat=3, compare_baseline=False, names=None):
         "source_sha256": hashlib.sha256((ROOT / "agentmandate/reach.py").read_bytes()).hexdigest(),
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "baselines_sha256": hashlib.sha256(BASELINES.read_bytes()).hexdigest(),
-        "baseline_ref": baselines["baseline_ref"],
-        "baseline_source_sha256": baselines["baseline_source_sha256"],
+        "model": "manifest-v2",
         "real_graph_runs": len(real),
         "real_graph_truncated_runs": sum(row["truncated"] for row in real),
         "cases": rows,
@@ -170,20 +153,17 @@ def benchmark(*, repeat=3, compare_baseline=False, names=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repeat", type=int, default=3)
-    parser.add_argument("--compare-baseline", action="store_true")
     parser.add_argument("--case", action="append", dest="names")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
     try:
-        result = benchmark(
-            repeat=args.repeat, compare_baseline=args.compare_baseline, names=args.names
-        )
+        result = benchmark(repeat=args.repeat, names=args.names)
         text = json.dumps(result, sort_keys=True, indent=2) + "\n"
         if args.output:
             args.output.write_text(text)
         else:
             print(text, end="")
-    except (ValueError, OSError, subprocess.CalledProcessError) as exc:
+    except (ValueError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     return 0

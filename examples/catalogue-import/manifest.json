@@ -1,13 +1,36 @@
 {
-  "version": 1,
+  "version": 2,
   "agent": "synthetic-refunds",
-  "limits": {"total": {"amount": 500, "currency": "GBP"}, "depth": 8},
+  "limits": {
+    "depth": 8,
+    "quantities": {
+      "value": {
+        "amount": 500,
+        "unit": "GBP"
+      }
+    }
+  },
   "tools": [
-    {"name": "search_cases", "effect": "read", "produces": "case", "unbounded": true},
     {
-      "name": "issue_refund", "effect": "irreversible", "requires": ["case"],
-      "value_arg": "amount", "scope_key": "case",
-      "ceiling": {"amount": 500, "currency": "GBP"}, "requires_approval": true
+      "name": "search_cases",
+      "effect": "read",
+      "produces": "case",
+      "unbounded": true
+    },
+    {
+      "name": "issue_refund",
+      "effect": "irreversible",
+      "requires": [
+        "case"
+      ],
+      "value_arg": "amount",
+      "scope_key": "case",
+      "ceiling": {
+        "amount": 500,
+        "unit": "GBP"
+      },
+      "requires_approval": true,
+      "quantity": "value"
     }
   ]
 }

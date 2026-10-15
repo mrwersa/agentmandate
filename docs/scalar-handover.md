@@ -17,7 +17,7 @@ commands keep their own results and verdicts.
 Both captured policies must use this closed JSON contract:
 
 ```json
-{"scalar_policy_version":1,"tool":"process_refund","value_arg":"amount",
+{"scalar_policy_version":2,"tool":"process_refund","value_arg":"amount","dimension":"value",
  "unit":"GBP","limit":1000,"accounting":"completed_plus_reserved",
  "comparison":"inclusive"}
 ```
@@ -26,7 +26,7 @@ Requests have nonnegative integer amounts. At cutover, a request `q` is
 admissible exactly when `completed + sum(pending) + q <= limit`.
 The tool, argument, unit, accounting, and comparison must agree on both sides
 and with the manifest's sole value-spending tool. The predecessor limit equals
-the manifest total; the successor may tighten it. There is no currency
+the named manifest quantity budget; the successor may tighten it. There is no unit
 conversion, rolling window, compensation, or amended mandate in this model.
 This domain describes cumulative admission only. Approval, resource scope,
 per-tool ceilings, and other manifest restrictions retain their separate
@@ -95,7 +95,7 @@ Those runtime properties remain part of the operational evidence boundary.
 
 ## Result and gate
 
-`agentmandate.scalar-handover/v1` includes the canonical handover and digest,
+`agentmandate.scalar-handover/v2` includes the canonical handover and digest,
 explicit evaluation time, full independent manifest Authority, evidence
 findings, and `proof`. The proof reports both remaining capacities, a successor
 admission witness when one exists, the admission-inclusion assessment, and one
@@ -118,9 +118,9 @@ result and is not established by exit 0.
 
 ## Compatibility
 
-The [retained](../tests/fixtures/scalar-handover-result-v1-retained.json),
-[reset](../tests/fixtures/scalar-handover-result-v1-reset.json), and
-[expired](../tests/fixtures/scalar-handover-result-v1-expired.json) fixtures pin
+The [retained](../tests/fixtures/scalar-handover-result-v2-retained.json),
+[reset](../tests/fixtures/scalar-handover-result-v2-reset.json), and
+[expired](../tests/fixtures/scalar-handover-result-v2-expired.json) fixtures pin
 the initial CLI result bytes, including the embedded handover input. These are
 v1 baselines, not migrations. Future changes to this strict input, policy model,
 or result meaning require an explicit compatibility decision and affected

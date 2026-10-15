@@ -39,25 +39,15 @@
         "mapping_version"
       ]
     },
-    "_ceiling_discovery.py": {
-      "constants": {
-        "RESULT_SCHEMA": "agentmandate.remediation/v5"
-      },
-      "inline_versions": {},
-      "schemas": [
-        "agentmandate.remediation/v5"
-      ],
-      "version_fields": []
-    },
     "_change_review.py": {
       "constants": {
         "CHANGE_REVIEW_SCHEMA": "agentmandate.change-review/v1",
-        "REVIEW_RESULT_SCHEMA": "agentmandate.review/v1"
+        "REVIEW_RESULT_SCHEMA": "agentmandate.review/v2"
       },
       "inline_versions": {},
       "schemas": [
         "agentmandate.change-review/v1",
-        "agentmandate.review/v1"
+        "agentmandate.review/v2"
       ],
       "version_fields": []
     },
@@ -82,12 +72,12 @@
         "ANTHROPIC_CONTINUITY_VERSION": 1,
         "CONTINUITY_BINDING_VERSION": 1,
         "CONTINUITY_IR_ADAPTER_VERSION": 1,
-        "CONTINUITY_RESULT_SCHEMA": "agentmandate.continuity/v1",
-        "CONTINUITY_RESULT_VERSION": 1
+        "CONTINUITY_RESULT_SCHEMA": "agentmandate.continuity/v2",
+        "CONTINUITY_RESULT_VERSION": 2
       },
       "inline_versions": {},
       "schemas": [
-        "agentmandate.continuity/v1"
+        "agentmandate.continuity/v2"
       ],
       "version_fields": [
         "agentcore_continuity_version",
@@ -113,7 +103,7 @@
     "_deployment_drift.py": {
       "constants": {
         "DEPLOYMENT_VERSION": 1,
-        "RESULT_SCHEMA": "agentmandate.deployment-drift/v1"
+        "RESULT_SCHEMA": "agentmandate.deployment-drift/v2"
       },
       "inline_versions": {
         "deployment_version": [
@@ -121,7 +111,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.deployment-drift/v1"
+        "agentmandate.deployment-drift/v2"
       ],
       "version_fields": [
         "deployment_version"
@@ -130,7 +120,7 @@
     "_deployment_reconcile.py": {
       "constants": {
         "RECONCILE_VERSION": 1,
-        "RESULT_SCHEMA": "agentmandate.deployment-reconcile/v1"
+        "RESULT_SCHEMA": "agentmandate.deployment-reconcile/v2"
       },
       "inline_versions": {
         "reconcile_version": [
@@ -138,7 +128,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.deployment-reconcile/v1"
+        "agentmandate.deployment-reconcile/v2"
       ],
       "version_fields": [
         "manifest_version",
@@ -148,7 +138,7 @@
     "_fleet.py": {
       "constants": {
         "FLEET_VERSION": 1,
-        "RESULT_SCHEMA": "agentmandate.fleet-inventory/v1"
+        "RESULT_SCHEMA": "agentmandate.fleet-inventory/v2"
       },
       "inline_versions": {
         "fleet_version": [
@@ -156,7 +146,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.fleet-inventory/v1"
+        "agentmandate.fleet-inventory/v2"
       ],
       "version_fields": [
         "fleet_version"
@@ -164,18 +154,18 @@
     },
     "_fleet_diff.py": {
       "constants": {
-        "RESULT_SCHEMA": "agentmandate.fleet-diff/v1"
+        "RESULT_SCHEMA": "agentmandate.fleet-diff/v2"
       },
       "inline_versions": {},
       "schemas": [
-        "agentmandate.fleet-diff/v1"
+        "agentmandate.fleet-diff/v2"
       ],
       "version_fields": []
     },
     "_fleet_exceptions.py": {
       "constants": {
         "EXCEPTIONS_VERSION": 1,
-        "RESULT_SCHEMA": "agentmandate.fleet-exceptions/v1"
+        "RESULT_SCHEMA": "agentmandate.fleet-exceptions/v2"
       },
       "inline_versions": {
         "exceptions_version": [
@@ -183,7 +173,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.fleet-exceptions/v1"
+        "agentmandate.fleet-exceptions/v2"
       ],
       "version_fields": [
         "exceptions_version"
@@ -205,10 +195,10 @@
     },
     "_ir.py": {
       "constants": {
-        "IR_VERSION": 1,
-        "MANIFEST_ADAPTER_VERSION": 2,
-        "MANIFEST_DEFAULTS_ADAPTER_VERSION": 1,
-        "RESULT_VERSION": 1
+        "IR_VERSION": 2,
+        "MANIFEST_ADAPTER_VERSION": 3,
+        "MANIFEST_DEFAULTS_ADAPTER_VERSION": 2,
+        "RESULT_VERSION": 2
       },
       "inline_versions": {},
       "schemas": [],
@@ -241,7 +231,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.principal-accounting/v1"
+        "agentmandate.principal-accounting/v2"
       ],
       "version_fields": [
         "principal_accounting_binding_version"
@@ -255,7 +245,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.principal-continuity/v1"
+        "agentmandate.principal-continuity/v2"
       ],
       "version_fields": [
         "principal_continuity_version"
@@ -265,12 +255,12 @@
       "constants": {
         "PRODUCER_BOUNDARY_ADAPTER_VERSION": 1,
         "PRODUCER_BOUNDARY_VERSION": 1,
-        "PRODUCER_RESULT_SCHEMA": "agentmandate.producers/v1",
-        "PRODUCER_RESULT_VERSION": 1
+        "PRODUCER_RESULT_SCHEMA": "agentmandate.producers/v2",
+        "PRODUCER_RESULT_VERSION": 2
       },
       "inline_versions": {},
       "schemas": [
-        "agentmandate.producers/v1"
+        "agentmandate.producers/v2"
       ],
       "version_fields": [
         "producer_boundary_version",
@@ -281,7 +271,7 @@
     "_rego_diff.py": {
       "constants": {
         "CAPTURE_VERSION": 1,
-        "RESULT_SCHEMA": "agentmandate.rego-effective-diff/v1"
+        "RESULT_SCHEMA": "agentmandate.rego-effective-diff/v2"
       },
       "inline_versions": {
         "rego_capture_version": [
@@ -289,7 +279,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.rego-effective-diff/v1"
+        "agentmandate.rego-effective-diff/v2"
       ],
       "version_fields": [
         "rego_capture_version"
@@ -316,27 +306,21 @@
     },
     "_remediation.py": {
       "constants": {
-        "CEILING_REMEDIATION_SCHEMA": "agentmandate.remediation/v2",
-        "FRONTIER_REMEDIATION_SCHEMA": "agentmandate.remediation/v4",
-        "REMEDIATION_SCHEMA": "agentmandate.remediation/v1",
-        "WORKFLOW_REMEDIATION_SCHEMA": "agentmandate.remediation/v3"
+        "REMEDIATION_SCHEMA": "agentmandate.remediation/v6"
       },
       "inline_versions": {},
       "schemas": [
-        "agentmandate.remediation/v1",
-        "agentmandate.remediation/v2",
-        "agentmandate.remediation/v3",
-        "agentmandate.remediation/v4"
+        "agentmandate.remediation/v6"
       ],
       "version_fields": []
     },
     "_required_workflows.py": {
       "constants": {
-        "REQUIRED_WORKFLOWS_SCHEMA": "agentmandate.required-workflows/v1"
+        "REQUIRED_WORKFLOWS_SCHEMA": "agentmandate.required-workflows/v2"
       },
       "inline_versions": {},
       "schemas": [
-        "agentmandate.required-workflows/v1"
+        "agentmandate.required-workflows/v2"
       ],
       "version_fields": []
     },
@@ -348,7 +332,7 @@
         ]
       },
       "schemas": [
-        "agentmandate.revision-review/v1"
+        "agentmandate.revision-review/v2"
       ],
       "version_fields": [
         "revision_review_version"
@@ -361,11 +345,11 @@
           1
         ],
         "scalar_policy_version": [
-          1
+          2
         ]
       },
       "schemas": [
-        "agentmandate.scalar-handover/v1"
+        "agentmandate.scalar-handover/v2"
       ],
       "version_fields": [
         "scalar_handover_version",
@@ -376,12 +360,12 @@
       "constants": {},
       "inline_versions": {},
       "schemas": [
-        "agentmandate.cedar-alignment/v1",
-        "agentmandate.cedar-effective-diff/v1",
-        "agentmandate.conditions/v1",
-        "agentmandate.delegations/v1",
+        "agentmandate.cedar-alignment/v2",
+        "agentmandate.cedar-effective-diff/v2",
+        "agentmandate.conditions/v2",
+        "agentmandate.delegations/v2",
         "agentmandate.validation/v1",
-        "agentmandate.verify/v1"
+        "agentmandate.verify/v2"
       ],
       "version_fields": [
         "agentcore_continuity_version",
@@ -404,7 +388,7 @@
     },
     "manifest.py": {
       "constants": {
-        "SCHEMA_VERSION": 1
+        "SCHEMA_VERSION": 2
       },
       "inline_versions": {},
       "schemas": [],
@@ -423,11 +407,11 @@
     },
     "scenarios.py": {
       "constants": {
-        "SCENARIOS_SCHEMA": "agentmandate.scenarios/v1"
+        "SCENARIOS_SCHEMA": "agentmandate.scenarios/v2"
       },
       "inline_versions": {},
       "schemas": [
-        "agentmandate.scenarios/v1"
+        "agentmandate.scenarios/v2"
       ],
       "version_fields": []
     }
@@ -3624,7 +3608,7 @@
       ]
     }
   },
-  "coverage_sha256": "852dadda65a8f2df92aaa46c2d05488464c771a9433f604e87d415d4aef7d4d0",
+  "coverage_sha256": "0ea0ff701b3291aec1f6eaac7960c79f33874f0415f08ce2351c21645fd7312e",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3645,207 +3629,201 @@
     "docs/pre-1.0-consolidation-audit.md": "f55e1d04949e4a1dbb772e7126f12319299332824820798644ad1d7fb8ce02aa",
     "examples/catalogue-import/a2a-1.0.json": "3a4b5a24c0fe5f76a00abc1d783919e7e67bdb01a0701cb29cd321b6c3de236e",
     "examples/catalogue-import/a2a.json": "c03a965e329d57d506cc14c8f52101c5e3e13e79dc96bc789e93d7da17abcaeb",
-    "examples/catalogue-import/manifest.json": "87623182f9c331df0818ed1adb485ede581934994235a3885c404dff7f8b7c18",
+    "examples/catalogue-import/manifest.json": "bfe25ad6c3a109fb3a6318feb3a5ad116eceb536273bd36bb318ae0f9b010332",
     "examples/catalogue-import/mcp.json": "8a7504f6ae19ee4ea13e7a3253e0c05b1ee8d842b6ccad0dd6401dd717b84207",
     "examples/catalogue-import/openapi.json": "c9bd11f2b9305454d9e334fd698c11bb7729b271a2bc386721d04fd4fee492c5",
     "examples/cedar-export/generated/entities.json": "9637b3b169e3fc755412eb90d5f7005b4eb746945b7e2a2a731a3f9f42e437dc",
-    "examples/cedar-export/generated/export.json": "918d5e29dda5fda1bb707e985689c9d0035fa04f3edcb4ee2a01906a1c60b578",
+    "examples/cedar-export/generated/export.json": "e73f93ecc1d6a45fb74b5bacb4cccb5b707f2f5b9e05e56a51a484645e26791f",
     "examples/cedar-export/generated/policies.cedar": "928c25c5aca0839d7f11e7df7b6cf107d63b30c44edcf06bd33e141094bfbd89",
     "examples/cedar-export/generated/schema.json": "f92d050e07b7963f23748bac7877f0db0e453a41586f572ffee2c9e94a8fc74f",
     "examples/cedar-export/generated/tests.json": "e61692b212fe6b6a29edd20940545474715a63b1e4bf8139c1646e6c8f73f21e",
-    "examples/cedar-export/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "examples/cedar-export/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/cedar-export/mapping.json": "0d61b18a9252b444d55527c3e3dbbf813618a4bf47af7c4a6e1bdc2d0e45cbeb",
     "examples/cedar-export/package-lock.json": "18d89d6485956ce5161f2e5b6ed318d90600c0a111c7c497a138f50a7a023c3f",
-    "examples/ceiling-discovery/required-two-tools.json": "b2caaf30e898c08e89fef52a0e4c87130cc3905829a4785a17571c697fc74ddc",
-    "examples/ceiling-discovery/two-tools.json": "9187a10a6579cdd1775d369485d05e8eaa122faab9529b1c92cf956fc019d1aa",
-    "examples/change-review/accepted.json": "2b642c1df42fc58dc57166e1845682215a79e22ac8111ec67ca647aa2afee389",
-    "examples/change-review/after.json": "f5464650e9be795d9b5e51b0710778c036361af195bfa27567b601a226de2994",
-    "examples/change-review/before.json": "13fa390ee23d6dc7d2c88607588193ad12569c9dc9c4c11cc1c7c2b1dbeec0ba",
+    "examples/ceiling-discovery/required-two-tools.json": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36",
+    "examples/ceiling-discovery/two-tools.json": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1",
+    "examples/change-review/accepted.json": "96326c4641614f151c03dea1754c2a2a5d305c8c00addf94cfdd143762c4b56c",
+    "examples/change-review/after.json": "866dd9fcc1e0b5a068a8941fce165e643d4d1ce0da1326ee8eee6d1210b7318d",
+    "examples/change-review/before.json": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
     "examples/change-review/decision-note.txt": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f",
-    "examples/change-review/deferred.json": "68fa98d2e5816d9768aceb313b3357a35b7680f65f500af8f68871ef2e99a8bd",
+    "examples/change-review/deferred.json": "2810cb4d01daef4be3fe10280a4d3abbdb11d3e85699d393f9ddddcc7f670948",
     "examples/deployment-drift/cedar-aligned.json": "857bd4c4848b7b54292ff40ee49193fd86ded5b59d98efd0d27f9989975f2f69",
-    "examples/deployment-drift/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "examples/deployment-drift/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/deployment-drift/rego-aligned.json": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
     "examples/deployment-drift/rego-drifted.json": "23af1d412164c9632558586de124d8ef7b2698094f272f6d82253d6a0df0ad4d",
     "examples/deployment-drift/unmanaged-allow.rego": "7b9db08a7d774d6835d18258cc24857ea3312cf8d55c66ae32e6da3bdf7c604f",
     "examples/deployment-reconcile/config.json": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
-    "examples/deployment-reconcile/decisions.json": "3e90a88cfc7ae77a5fea39a004d610ec64b81489a520fa5a14dca4174057e53a",
-    "examples/deployment-reconcile/denied-effect-mapping.json": "73fbdbbaa98451fb854a405b18dc80c9c5402a35867ef8f4b37c3a9fa2f364b8",
-    "examples/deployment-reconcile/denied-effect-telemetry.json": "18fece4ff1395be84e0655a305926d14220b01d303f6d4fac7518724af0da1d0",
-    "examples/deployment-reconcile/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
-    "examples/deployment-reconcile/mapping.json": "a08340730cf758aa1060d60a263733f2a5080f45bfc251d8dc8201c2dcfc4d34",
-    "examples/deployment-reconcile/telemetry.json": "2fa71901442a38c8bfbfb863826638a6c4d66e734e744dac743db8f139d14edb",
-    "examples/fleet-diff/baseline.json": "6cc7e7614f973259c55e367a268407d93b38f2260960933da9ccc5ba68fd19cf",
-    "examples/fleet-diff/candidate-release/authority-ir.json": "edcb0870a3623d27c3f17fceb3805c198d2e9a4425138a283fd9bb6818072c4e",
-    "examples/fleet-diff/candidate-release/manifest.json": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
-    "examples/fleet-diff/candidate.json": "05aedb4794c2b37a71c057b6d185f66acb736930389d3a798b48008590cd88bb",
-    "examples/fleet-diff/widening.json": "4a3ca1f324380c8d37190320153241de42fe6d3515409f8418865f024a8689d4",
+    "examples/deployment-reconcile/decisions.json": "79f5075ac4ce8d1c149f80c1b09ca0b3a14a0c7e10daa481f19a6643887b5df0",
+    "examples/deployment-reconcile/denied-effect-mapping.json": "f0ee40f17a68498d84175711beb52b0312b4733313887e4f61aafb27a43d7713",
+    "examples/deployment-reconcile/denied-effect-telemetry.json": "9a70df98b034dc29067b9dd331bf6706d294fd6d6799b85061680276ca53391c",
+    "examples/deployment-reconcile/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+    "examples/deployment-reconcile/mapping.json": "d0965747f30fe1f125770346ba6087ce059153ce52338d47648bfbba19889698",
+    "examples/deployment-reconcile/telemetry.json": "231c70d86bd8be30f60e91ee9c5f3bc71a278f383c9672f93e1229b4ef2a4106",
+    "examples/fleet-diff/baseline.json": "e2058a916c47f11b2ede16256ba1d9ff52ae9aca100f002ab5958ed53e1a1b6f",
+    "examples/fleet-diff/candidate-release/authority-ir.json": "beeeac5db5d995b07d53dbb63ef2b6001147756cd10adfb40fe1e5e13e99ed9d",
+    "examples/fleet-diff/candidate-release/manifest.json": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
+    "examples/fleet-diff/candidate.json": "e0650bb7de70a98e777cfaca876d5adfc5fdeafb1ee39d39cb2bf41868fdaeb1",
+    "examples/fleet-diff/widening.json": "7bfc0f9092f5f6f3defe4f54957be7d86da1215f04f32367e2b18abc9b8be978",
     "examples/fleet-exceptions/decision-note.txt": "6045690cb2fdcfb4660568d3d421dc4893462fcf08595de55eab7f97f633bb7c",
-    "examples/fleet-exceptions/exceptions.json": "0d49d91ed3efde09bdc0830a66a83e42bbdcf02ce0fdeab0dfbe87d4383b763b",
-    "examples/fleet-exceptions/index.json": "ea13823f5e396859e1892d8773dae390ce6a2d1c039990aaa2439658cd6374f0",
-    "examples/fleet-exceptions/none.json": "2f413c26665ecfe33e9d7122438d724fc95b6b4b049899f8e4d4693a6415380f",
-    "examples/fleet-inventory/billing-repo/authority-ir.json": "ada14f4bbcd833799f197a508a7cad5761ce2a7ce04a313d8c09eb6f0d294329",
-    "examples/fleet-inventory/billing-repo/manifest.json": "9d514bf22268baf892ea451d4134d98fc0fa7f8fc553afda215c892099795746",
-    "examples/fleet-inventory/findings.json": "a81567045d3bbd1a8db3f89f4762a9a1478c0ec6cbf9c86c4725d0f1194a8ea6",
-    "examples/fleet-inventory/index.json": "6cc7e7614f973259c55e367a268407d93b38f2260960933da9ccc5ba68fd19cf",
-    "examples/fleet-inventory/release-repo/authority-ir.json": "9b6e4ccedce66098f9d7d2f79a16e74d4ac28e44df2f7fbc087de31b6f501f76",
-    "examples/fleet-inventory/release-repo/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
-    "examples/observed-calls.jsonl": "d4769b576e6a2e15d4d657db875b17db0e0de9b5c0129d07718e72d69ab30930",
-    "examples/otel-trace.json": "82e6f24ecbb6df50bb5cdc68652d18ad6865084c38c59c3b11d5aed75d9a3013",
-    "examples/principal-continuity/accounting-binding.json": "0cc1bfb9692aae907a66876cf1c5d897757038b2a9b852aa7ed7287017f68b12",
+    "examples/fleet-exceptions/exceptions.json": "2a1366b997271bf894f26c2042a40e8e1eab9fe7a54f76d200bbe41d64ebe924",
+    "examples/fleet-exceptions/index.json": "038595fd76dce84979cd2bb779cc7bb08e3ef34868be68531712faf5a8bf3bbb",
+    "examples/fleet-exceptions/none.json": "3c276c8bae85577ebbccd5d3e845d0683eae7185344e07375d825d028cdf7726",
+    "examples/fleet-inventory/billing-repo/authority-ir.json": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d",
+    "examples/fleet-inventory/billing-repo/manifest.json": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810",
+    "examples/fleet-inventory/findings.json": "a6366e7628a72d02d7eb8ecc05e3637a76dad634e2387c9c10d39294e0f159b1",
+    "examples/fleet-inventory/index.json": "e2058a916c47f11b2ede16256ba1d9ff52ae9aca100f002ab5958ed53e1a1b6f",
+    "examples/fleet-inventory/release-repo/authority-ir.json": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+    "examples/fleet-inventory/release-repo/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+    "examples/observed-calls.jsonl": "dbc243f5638bde7b675c6316f68bd8e3610a1496376f5274f8bceb346195f00d",
+    "examples/otel-trace.json": "b12fbc64574743fbfe3caed67e58cae29f47bed73b362e35709a6a51153d0cf2",
+    "examples/principal-continuity/accounting-binding.json": "d746e1dd8149bae69d5def7c4c2c6266e227a5362267b944c4955ea6dcea4e9a",
     "examples/principal-continuity/accounting-review.json": "3738eea4c4632b280d512a8da2d0b19a7f74f7d00b432263b98844db9f7f5fd3",
     "examples/principal-continuity/profile.json": "c90bbed8fdd8beb0e720b10ba0f7a2925f7d6248444646e608d71ce82e19bd47",
+    "examples/quantity-budgets/manifest.json": "874062305265d4cfd5fe59202ca55bce14d84591b365e8f16058e5f08d4782df",
     "examples/rego-diff/baseline.json": "399c23cc198907b523d6071d30d6d8faba199386373c3536c42dbe48cdf0d434",
     "examples/rego-diff/candidate.json": "bfecc81e7a01c3b0a9e3465f61eae0664e199cf94868c54257ac774904c8e003",
-    "examples/rego-export/generated/export.json": "153b1accd1ad6063f235dd5822dd0833b6826e84d6e5dec321c203f65112b7e4",
+    "examples/rego-export/generated/export.json": "4b800a67cdf16bbf7f26a43184b376e675c1d61d33fcf6db94f9db9275a322ff",
     "examples/rego-export/generated/policy.rego": "22d693620121dd90c460aa772f945ce885554324215a773ce9d3aeefd21ee4a4",
     "examples/rego-export/generated/policy_test.rego": "10448f52ec749bb6acfb6e21dd066e39c7b5f71d261d119835562e4df244f5ef",
     "examples/rego-export/generated/schema.json": "fadae571cbdb7a9046ae94317beb054ba1747aa9dc05f9540bda170053bff170",
     "examples/rego-export/generated/tests.json": "d3b49669acada21d4c46a1adb360ce4c7aa5e44215634456736d97a2495ea2ea",
-    "examples/rego-export/manifest.json": "8f0d1284aef02def541e4f9974d9b07676a7b4b3b5cf3c6b650c3cf8556c0b19",
+    "examples/rego-export/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/rego-export/mapping.json": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3",
     "examples/rego-export/opa-target.json": "4a9205cdd27169aeb4ee8ccae877345c4303ea8aeeb047f30a7f5df088d58b1d",
-    "examples/remediation/normal-refund.jsonl": "8a73ddd978320fe751dabb5c13ccb9f09a2be379c5554ce471163fda1f198a98",
-    "examples/remediation/required-joint.json": "c8d21db3df6b37e4f69a3f4e5476dc9befe198ffdf3f482bd2122bc459b7c1fe",
-    "examples/remediation/required-refund.json": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1",
-    "examples/remediation/ungated-refund.json": "c5c9f6599945454c78d37138bbeb1f4e9332f0552fc525a9f9deecba06775b5a",
+    "examples/remediation/normal-refund.jsonl": "a29bef9d55bea45836f4339de810e98901b832fd54d736dea0e094116e07530b",
+    "examples/remediation/required-joint.json": "5e2396636f2df2079dbb9325572e211d998d57e255ef428f5b1554cdf7d3f972",
+    "examples/remediation/required-refund.json": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325",
+    "examples/remediation/ungated-refund.json": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792",
     "examples/reviewed-obligations.json": "cb91e47a05ded04e40f74e52f7379bbbf6c7b0e2be06bf218e158eff4f872066",
     "examples/revision-review/provider.json": "6e52d0c8b4677e743903a5025df9ae721a41c737d0993d55b33d25219dd667bc",
-    "examples/revision-review/review.json": "106d843fab2785661018c5672b51454cb604810d62801f9cd6a75bc9450c7573",
-    "examples/scalar-handover/after-policy.json": "177c573c99257693109abaa6f4f6e91a94e7b035c07964e1b276ff3082fabcc9",
-    "examples/scalar-handover/before-policy.json": "8263fbcd4e0d919924367d41da6938373d6c58669c841ecc5b5afa400e2f5de3",
-    "examples/scalar-handover/handover-lost-reservation.json": "b2a19007b951391bf2dc05ba9f1aeca59cc9717a4dac3289535c51caefa017df",
-    "examples/scalar-handover/handover-reset.json": "ed91e99deb022c9d9712a6e5e29af420da18062edfbabdb47deecb3465ac6fa1",
-    "examples/scalar-handover/handover.json": "e891878cc03fa486182e593d317e5dacba1d62884aeca1dedb3716bc4d73b4de",
+    "examples/revision-review/review.json": "abbb267299a20fee6aab4aae5829ccc49c24c0c567b05addb2d99a2ed9197b35",
+    "examples/scalar-handover/after-policy.json": "d7492c2d50d2cb433f5dba11269e59e303dc4ea3467e2e8985d5a42900737b5c",
+    "examples/scalar-handover/before-policy.json": "1763173b60c85913cd2dc2f9b5b031fe8d1c9c000bd48980286d94064de3ec9e",
+    "examples/scalar-handover/handover-lost-reservation.json": "8feae6b3220dadf50388c5838c2a30826d0be7ba671c747fca175eef3114467b",
+    "examples/scalar-handover/handover-reset.json": "01a8032233885d9ac0fac9b7e3645d41a2ec3d6c38fa99c1a4dca036b3fa5944",
+    "examples/scalar-handover/handover.json": "338aebb0809f3b48ac000ac95857e1590d8043536a3d2f61c06c00f235de8d63",
     "tests/fixtures/agentcore-continuation-v1.json": "b22f056132e838aadaa7b5191b28f4a5c2fcc1ec8508d332c3d5f1f1df35c254",
     "tests/fixtures/agentcore-continuity-v1.json": "35b4f6e6a2fbe6996a05562cc91cf6b83da2442fae92a77f07006934c2d6de8f",
     "tests/fixtures/agentcore-principal-continuity-v1.json": "d84ca855f1096fd956d6a8389844e084d1df4fde38ac55a32c1c1522333d2b5a",
     "tests/fixtures/agentcore-principal-observations-v1.json": "96581d736210889d3da916522d622a91151c0302563a5d9a61e521f04d6794a1",
     "tests/fixtures/agentcore-retransmission-v1.json": "0cedc6ae7716dafb5fa8d69aff8a25028741298f845508e7df80975bc1ef5c88",
     "tests/fixtures/anthropic-continuity-v1.json": "39485b0ef4f892d1ebf9e2e607977993f0d0ba87f7f8fafab56ec2e6967c366b",
-    "tests/fixtures/authority-ir-invalid/duplicate-entity-id.json": "a03c8db9f2315a81471b1609a65095c5dd8b04f8a952f1fc3f04072e647afb3a",
-    "tests/fixtures/authority-ir-invalid/edge-invalid-relation.json": "fc4b0146a3cc9d8e836dfe892340f18bf3a48115e9087dc8c9549c291ac8b427",
-    "tests/fixtures/authority-ir-invalid/edge-support-type.json": "c92ff97f32864a5881bfa8e3dce11c0b0c9edae5e9816cb07aa693765197f8ba",
-    "tests/fixtures/authority-ir-invalid/entity-extra-field.json": "5e27aed82981eebc9f8cc8af9abe7807ea5eaeb0733782c85571c05ede7c0ff4",
-    "tests/fixtures/authority-ir-invalid/evidence-extra-field.json": "ed46ac4bee48a3dacff2aac8eeb1b249cee50703e62bcf87a2e9c5cf95bdf579",
-    "tests/fixtures/authority-ir-invalid/fact-invalid-evidence.json": "be1985850351e5767049171ca59f1a448d44dbbe58cd818deacdaa4ebafef99b",
+    "tests/fixtures/archived-study-manifest-v1.json": "f8aa99a6d889db19002c193801cd84bce36e10219d343804eb717f61b5236326",
+    "tests/fixtures/authority-ir-invalid/duplicate-entity-id.json": "03fc209a79519e459eac6692af91f927d50684cad1139ece5d74f7473817528e",
+    "tests/fixtures/authority-ir-invalid/edge-invalid-relation.json": "8d85130f097d8759e9bf759eee527c6bfb058ca51d47dad0cc215a4b7cf93b31",
+    "tests/fixtures/authority-ir-invalid/edge-support-type.json": "f3fe4d8f6f3d45856f83c6b6e3670a959fd8156b619fd90a131443a8df8f5d56",
+    "tests/fixtures/authority-ir-invalid/entity-extra-field.json": "19d7cd66b676dfe07a57123577ed935765221b09ae84df60b0ebaf27537b4c8c",
+    "tests/fixtures/authority-ir-invalid/evidence-extra-field.json": "3c19420c9f23f6645d7d6ec3de736c59f5e45add6ee2f4d464762c9b580a0c6e",
+    "tests/fixtures/authority-ir-invalid/fact-invalid-evidence.json": "bf408b79fa8cabc7538b6a96951ce2df1822f9720478a0debd88dda85874ba2c",
     "tests/fixtures/authority-ir-invalid/malformed.json": "9b4aacc7933574db0570443dbad07eead9a0a9475a01df57b8f2772699495790",
-    "tests/fixtures/authority-ir-invalid/snapshot-table-type.json": "cb770670ec435c9de0d3039d28c35851bc820db877c19cf3b5df384cf77bb7dd",
-    "tests/fixtures/authority-ir-invalid/source-missing-field.json": "be47a956edeade28083e47c8ec66d470af3af5ebc4655cc5a36414f3ecd260bd",
-    "tests/fixtures/authority-ir-result-v1-breached.json": "22cd5985b929f1186d3a5a56d3f49acc6fe77c5e2a24af5e876230343713ec12",
-    "tests/fixtures/authority-ir-result-v1-clean.json": "5f38f6e1d42564f626a2598e373a8e3dada0398cba0702ea56e9328fd6e1c39a",
-    "tests/fixtures/authority-ir-result-v1-truncated.json": "1d07edf670c34b0e6ddbc0d72b84069d7a39e488384659c747d1878e00d4cfcb",
-    "tests/fixtures/authority-ir-v1.json": "035852c0a653878208a7893e6a6f6ee707130757945dc6c593a64b7f63df53be",
-    "tests/fixtures/catalogue-import/a2a-1.0-inventory-ir-v1.json": "2b6740abca61519603165e407dd6fd2bf1f5a7489abc765da62811ff12e9f3f1",
+    "tests/fixtures/authority-ir-invalid/snapshot-table-type.json": "3e4456959df19614647cf1170fd366f4ebfb94f13fb921b55d6b0c2d1a977f2d",
+    "tests/fixtures/authority-ir-invalid/source-missing-field.json": "c09abf8c714d0fcacee057e43b7bef6728aad46db70d8a1331c0d222d5045826",
+    "tests/fixtures/authority-ir-result-v2-breached.json": "32bcdf398ae25975bf6cee91d5290013a80527b35151e4358424788f91758696",
+    "tests/fixtures/authority-ir-result-v2-clean.json": "8f7e0611eaba94aa07084f534999aac091a52fcbebc8271f2bb5b1a985acd78d",
+    "tests/fixtures/authority-ir-result-v2-truncated.json": "a7c4f95353c546688aeca6aa3d86b51ed72241211d24ed8127d0c39fbfe075f6",
+    "tests/fixtures/authority-ir-v2.json": "c1e7bfa6ce81d201c97ead0296f89b9fc64ccdf274fd8622dd2271a0c9cd2c5b",
+    "tests/fixtures/catalogue-import/a2a-1.0-inventory-ir-v2.json": "1f53e3e7f63297f3868f35744ceb9e1beedba10fa0f1f8cfe9760ac1331c4677",
     "tests/fixtures/catalogue-import/a2a-1.0-inventory-v1.json": "897e01e772a532721e19aa0db6636c2b8d0659bc91c7bc54059dcb1fba165ae1",
-    "tests/fixtures/catalogue-import/a2a-1.0-skeleton.yaml": "928554a27445466488b7c6e1f2bd4a5b27e1b777751191e87c44260bfd03bdf6",
-    "tests/fixtures/catalogue-import/a2a-inventory-ir-v1.json": "fc688d991c96e291ecc6e2d0750a081e495c6bef1d7b155ee354524a0ad28bc6",
+    "tests/fixtures/catalogue-import/a2a-1.0-skeleton.yaml": "0a9c2b256d3ed2d2c4f52c8571b07997cc9c6429bfca599a23b30dea2b256cd6",
+    "tests/fixtures/catalogue-import/a2a-inventory-ir-v2.json": "8842889bdf6db8a513c8bfc647b10280c6e63930bcde7d4ccf7ff1175dbaee14",
     "tests/fixtures/catalogue-import/a2a-inventory-v1.json": "1b66844f18e71635294491ec4e549407bb2b59116f11599481c8ca89ce792e76",
-    "tests/fixtures/catalogue-import/a2a-skeleton.yaml": "e4c2f6be244a46d682f57f47507857cb41e757dc3309e90c9dbdbadaf9e759a6",
-    "tests/fixtures/catalogue-import/mcp-inventory-ir-v1.json": "cd7eac02c1d671b3cbddbfc64fa90371f234c5e6faccdf7648ad89cbf078d279",
+    "tests/fixtures/catalogue-import/a2a-skeleton.yaml": "3f5678aa4ba5a1931f2bed58f1116495cea51aa451b2ff46a19bdf4f9ffc949a",
+    "tests/fixtures/catalogue-import/mcp-inventory-ir-v2.json": "c4fa1bbd54096b6957ce77e99246b13a815da13ea5e180e3c57858459c79d723",
     "tests/fixtures/catalogue-import/mcp-inventory-v1.json": "f2adc28eefa63698743ba18e1096384af1ef5de0488fdf1a5cc60e69c4c9359e",
-    "tests/fixtures/catalogue-import/mcp-skeleton.yaml": "08642211f303311db942d2e75b986f2a2a8b774399cda4d4f06de07df3658f57",
-    "tests/fixtures/catalogue-import/openapi-inventory-ir-v1.json": "8df3bd2862c3111642849a3335c90cb23b466c92aed329e277df861eb37bcea3",
+    "tests/fixtures/catalogue-import/mcp-skeleton.yaml": "3c58a7891fcb29b67aaae23b08c2eb13e2cfc4ce661eb8f651e2e9861749e0f3",
+    "tests/fixtures/catalogue-import/openapi-inventory-ir-v2.json": "49786e9753445c1456a30493c6d7c2a6e26475f1b6596620be47f1e5e1a17d32",
     "tests/fixtures/catalogue-import/openapi-inventory-v1.json": "2de79e615ff0eb9bca6f7c48fcce436cddcbb236b8e10b1240999d5ff2e94334",
-    "tests/fixtures/catalogue-import/openapi-skeleton.yaml": "58695901aae75c003d22ae0fffb4f36edfb4553fb2cb99d7f631c6922c9eebd2",
-    "tests/fixtures/cedar-effective-diff-v1.json": "2feba94ef5d9a5e83eb895f65db9346e8659bf8997d35b4ec7b113e922725809",
-    "tests/fixtures/change-review-accepted-v1.json": "315b22fd83ccdb9a101f99d856ee6b6d3a3f0fc89f3d0b5791c1dda7748c4fa0",
-    "tests/fixtures/change-review-deferred-v1.json": "70f13076d5e79a19452a58ef8431ec6a8e49d83a3c2f2ddc0063cdcfcb8e8d71",
-    "tests/fixtures/change-review-expired-v1.json": "d59ca909129be28817c69f26376a9d511813a302b8b82e90b01cac316c551578",
-    "tests/fixtures/change-review-missing-v1.json": "9e18cf280800841199fca4a9970be1e7e67c4e1754363d79272d1e6885130f47",
-    "tests/fixtures/change-review-neutral-v1.json": "3bbe3f8942e180874d4f79f71a20cce560cbd8ac2c658583a2c2b8d489ab2230",
+    "tests/fixtures/catalogue-import/openapi-skeleton.yaml": "6f7d0edb4d6aa4d7165f8a972202f0ca3285773cf75276f3da571e848873c2b9",
+    "tests/fixtures/cedar-effective-diff-v2.json": "69620252e957f8253b8a57f93f26061ed9d08fac88134aa4fbb769aaac203267",
+    "tests/fixtures/change-review-accepted-v2.json": "b92ad044f880bbd539bb43d9d46254a29a57797958f96874c156fb497f86eb37",
+    "tests/fixtures/change-review-deferred-v2.json": "2e8749e5bcf467bc9089261a772337ba9ac999cdd6792803246e071c6011cc0a",
+    "tests/fixtures/change-review-expired-v2.json": "718dd7c7f228156ba60eefd5c4c52eebfaee695cfbb27573897c9154cc9b730a",
+    "tests/fixtures/change-review-missing-v2.json": "0528598c579a8d6ceb39faaf86c03b6646fbd4dd300ca014dd108ca9dbddfe15",
+    "tests/fixtures/change-review-neutral-v2.json": "b215d2214ca645ec20561ee29d66c65e8f3555aefe4ed886191afcd2b7c52bdc",
     "tests/fixtures/condition-context-select-only-complete-v1.json": "a023b9e5e345ddd0f86208bebf75c5dc63abbaa7f54be9bf03986e94bc391044",
     "tests/fixtures/condition-context-select-v1.json": "c9fa5e310223aede3be07d01b874ddf14625b6d9097c78633573eb3dbe2ed48a",
     "tests/fixtures/condition-dispatch-v1.json": "97cb6fbc90e2450b21a5597e231ec66adff4d99c958456bc7b1a3c355e457a38",
     "tests/fixtures/condition-statement-v1.json": "ead16b9e005173e90b1598c79b4b81e178c53897d39b7a41657f606dee3bae77",
-    "tests/fixtures/conditional-drift-result-v1.json": "65deae7b37b834cdcf9952ef90fe490a432572c81a7f3f59e7f4365e5110aa9d",
-    "tests/fixtures/conditional-mandate-v1.yaml": "43f5b68149af32238b08ac4038a080eeb131fb8a03d477bf719f4e75fbed15e7",
-    "tests/fixtures/conditional-reach-result-v1.json": "acbc8f04681da47aad0bc22bbf366545b9c34898b01cc8cd85146873a9a20970",
+    "tests/fixtures/conditional-drift-result-v2.json": "60e1ac5d27a4dd9bb805d0d874a3092c17d4d8f2f9a74952605a2eb18b1f6c49",
+    "tests/fixtures/conditional-mandate-v2.yaml": "af408a8a456e0e0ee7d74f7903b33c759345b8d01d029f28792cb470203e5cf0",
+    "tests/fixtures/conditional-reach-result-v2.json": "0f12ddf274494bcb06ea0310de0f82b94742b8975e4196324849643f5b08a407",
     "tests/fixtures/continuity-accepted-synthetic/binding-verification.json": "8bf6cadc7d062b4576208003677941f1225b32bbdc096d8fc083a7c3e5b0301c",
-    "tests/fixtures/continuity-accepted-synthetic/binding.json": "88f3fc85a7bdc9a88a745262697c937c71955b45f024b55f4622da4daf930c4b",
-    "tests/fixtures/continuity-accepted-synthetic/manifest.json": "747e2da10df0fd010501a3e0294f93d027dfd4ce3eb5e399e24ee440f8ad8b2e",
+    "tests/fixtures/continuity-accepted-synthetic/binding.json": "2513f29b0da396a337e53e578667fd27b99be098a97efc03881540f7ffed5d29",
+    "tests/fixtures/continuity-accepted-synthetic/manifest.json": "8af455a841f3fc4115f7467e43333da8ef806f369df23d1d93a61982efeba280",
     "tests/fixtures/continuity-accepted-synthetic/policy.json": "08aecd4aa26fb21e4abbd625cd85c027ad39dcd4b7bebcf535b2e09b7d4d87e7",
     "tests/fixtures/continuity-accepted-synthetic/provider-control.json": "1a0ff2cb3a7ff75d86ca28831bbd0a44135bc3bbd74c99e2112bc76df4a28bdc",
     "tests/fixtures/continuity-accepted-synthetic/provider.json": "634885f26de9611d2b57acd09f71f912850841492dd85fb5e588f553e2b5d394",
     "tests/fixtures/continuity-binding-v1.json": "a8ee3fda3f338f7d04b7db3aa47fe5e5107b1996edd6e9013d714f5e24a460f3",
-    "tests/fixtures/continuity-result-v1-overshot.json": "4716fa91bc7bbd9d1bb37da6dbd8b60016a6c37844aca86607dd72e2024e809d",
-    "tests/fixtures/continuity-result-v1-reset.json": "edeb1c402e7ec4411122186126d8192fcaa6b6d5412a38d9fcaf60e4192fd741",
-    "tests/fixtures/continuity-result-v1-satisfied.json": "3286a3668155c48b42075cd3ee7937309efb37426d0680559114af1441f9bd31",
-    "tests/fixtures/continuity-result-v1-tightened.json": "5b99a28ae64a1f948a85c4b79a9cb64285bd4880366b8e18ed63af24c6012022",
-    "tests/fixtures/continuity-result-v1-truncated.json": "f90e0d2be0b9d0c8cbd0aa164ba5d90bd6aee11fc4ab22f875f3a197d2a1235d",
-    "tests/fixtures/continuity-result-v1-unresolved.json": "72efffaa73a4a12c688a6e69eb26c188412f61f5f2682b12274b2ce3c5b41353",
-    "tests/fixtures/continuity-result-v1-untrusted.json": "a77a35b0c0618f5396731367d3839b1db867fa911d9d17d3c71fdb0d5b7d0a9b",
-    "tests/fixtures/continuity-result-v1-widened.json": "46766b1cd039c3f98649a17c4e7dd9f2657f13658ebd4e9c7f7b0c96fd6f75ea",
-    "tests/fixtures/current-contract-inventory-v0.22.json": "f5aeb1b9a6b0a46aebe6b71eaf394f4f2b05c948adc10b96bc995737ef2d58ef",
-    "tests/fixtures/current-contract-inventory-v0.23.json": "5e5639fe183ad4e691534bb394c1883eb65a2b7359d3762543f0484ae90dc3a5",
-    "tests/fixtures/current-contract-inventory-v0.24.json": "2a6c77208f4d70975cf66947810f7a85e58f8394de1e40ab1f0371907a975b17",
-    "tests/fixtures/current-contract-inventory-v0.25.json": "8b391868b044b78f37c1a84a822c479ff873c52b400b82189b40266217f1b543",
+    "tests/fixtures/continuity-result-v2-overshot.json": "e89202799e2fb119329396a2f1bb286e5819c01c7400143d1cdd383b056797f1",
+    "tests/fixtures/continuity-result-v2-reset.json": "85cafdb91a722e590c58031c56fa5eba47a9a5e43ec4781307a2cfad72bc29cc",
+    "tests/fixtures/continuity-result-v2-satisfied.json": "82470c01aec96df4fcff84c889d21b6256085039e20896c884c64c6c3564165f",
+    "tests/fixtures/continuity-result-v2-tightened.json": "ae731b6d2e941657adcd5913d3275f393b9a272eb5ea2893d6e78460648ad131",
+    "tests/fixtures/continuity-result-v2-truncated.json": "ca90e7cae7282527d143a354436d2521bc52a87e8b71aaa6b47ad88a67a1e0b1",
+    "tests/fixtures/continuity-result-v2-unresolved.json": "aadbc88844992b8d81e30212e6a954c65da573760b3d6bd2611812979be24b02",
+    "tests/fixtures/continuity-result-v2-untrusted.json": "d1d195aa2b16f9095b904ac82deb49d2c915a74946a27d23404b1c5a3e1d5d8e",
+    "tests/fixtures/continuity-result-v2-widened.json": "d2ad225c64db3b4f5b932304cd34926efe17ba1b61ef57035042a8d86c2c8b23",
+    "tests/fixtures/current-cli-results.json": "38c4d5e3f600aa5cbbb25fbbae7d8e39413695b4c3449cd009c3a63b2a51ed94",
     "tests/fixtures/delegation-attachment-v2.json": "41990995ed030df2e11c7f28eceb621bcb1fce55955b783b1f16366c6b1f7766",
     "tests/fixtures/delegation-chain-authorizer-v1.json": "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764",
     "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",
     "tests/fixtures/delegation-grant-capture.json": "bf7d49763d54ac0dc2add5d5dc84d24e12a56f5bcd6470dc9b12f22e6936fcd5",
     "tests/fixtures/delegation-grant-v1.json": "34b61cc3f8b618e365743d210869a821dd56b013323ac6cdbe895264f9df9a55",
-    "tests/fixtures/deployment-drift-cedar-v1.json": "59a0b3d6679828fc1dd7f3981d92de714caae45757f6f536ef651888b4bf3093",
-    "tests/fixtures/deployment-drift-rego-v1.json": "11f14e4b8ba2504ec6e0f0bb11291955d5bfcff023b54bb5cb58bd8cd03b876f",
-    "tests/fixtures/deployment-reconcile-v1.json": "f1855ba347862c39b67aba253135f878566c0724f481bf7ab90e5d1e11d6e204",
+    "tests/fixtures/deployment-drift-cedar-v2.json": "41c7f681837180661a8de20b726cc487b275bdbedb6bd11ff1e9febf3edd9b73",
+    "tests/fixtures/deployment-drift-rego-v2.json": "1e93597444ab98f8d84fbbd92bb02b97df7239f8b26b5e4ae1bd78c828200f6b",
+    "tests/fixtures/deployment-reconcile-v2.json": "d4485d2789a48697910f57e8a924e82f5d8e97117898226fb19bfdbda71ad75a",
     "tests/fixtures/dynamic-inventory-agentkit-v1.json": "09b587e8880ca05d7ed85dc1d3b05881bb338772e9245d746dfd65b5b05df450",
     "tests/fixtures/dynamic-inventory-sentry-v1.json": "9b19e47e23871e96069c7526b0adb5315aa5a8d40cd358719b9b0d2db46c4799",
-    "tests/fixtures/fleet-diff-v1.json": "be6212e81a8f252f37c8e1a443379f9b138f1e0096fc940822752d8a8e05975b",
-    "tests/fixtures/fleet-exceptions-expired-v1.json": "2b54d383c70c8a4a243157245f50c6913ae2859cb5c1c3eaeabb0f588d923c3c",
-    "tests/fixtures/fleet-exceptions-v1.json": "bdac015cbacc88470c0a32c5dbded2468b45983cd472943e923a8c339791139f",
-    "tests/fixtures/fleet-inventory-v1.json": "3563eb60f28fa86810ee4597e43c79fe00bac8b0d1968b80b92e5bd0487b325f",
-    "tests/fixtures/legacy-json-results.json": "8c23d75c15934f7cc652810c59dc90602524cc8a893852c226e1500d23b76407",
-    "tests/fixtures/manifest-v1-all-defaults.yaml": "5f31d7b5cecef0eeaaa072d1cbb65e1d59b1523788a1bb029afd43a2414cd1a2",
-    "tests/fixtures/manifest-v1-shorthand-defaults.yaml": "c263a0176a7856bea813d129f5aad097665fdb32e18a7c90b92ec73a957ea607",
-    "tests/fixtures/principal-accounting-result-v1-eligible.json": "c5b684ca5c2e8d27275ccc609e15c9562b180e4bf0f0c9d1deae1da4cee55140",
-    "tests/fixtures/principal-accounting-result-v1-expired.json": "64ab2372df251321683e59c789ee85c969e6bd9700631921cc322aad2cd27c59",
-    "tests/fixtures/principal-continuity-result-v1-eligible.json": "a9aa179b1a6225b3797b4ea1bd8b453f24512e4ed9c402bd8e34d4b3532e910d",
-    "tests/fixtures/principal-continuity-result-v1-expired.json": "f13ec90c9d2250137b27b038cb5c86219b7c78dc1521fe5f857a02b14e79e9ee",
+    "tests/fixtures/fleet-diff-v2.json": "d1c0023ac8b2dc370b4b721e1b03fafeafea2c3e95cdc72d868a7b9c5491ce0c",
+    "tests/fixtures/fleet-exceptions-expired-v2.json": "311b702c96b18e38022797a6cdbf644cdc4c18aa0a47785dfa9b623b49424ae1",
+    "tests/fixtures/fleet-exceptions-v2.json": "f614e84e97e8769f81927a48c5284f5aa38f92abd1d5ce686b5d71c547a3042d",
+    "tests/fixtures/fleet-inventory-v2.json": "9e0e72bf534bebc7e2bf5785ff0642d5a7b484138b11d478a12ae950d0eb6f20",
+    "tests/fixtures/manifest-v2-all-defaults.yaml": "faafcfaab3fa250e3c6c4219897ffa9019fceeddfc5e365ebd3db1c9faca1c68",
+    "tests/fixtures/manifest-v2-shorthand-defaults.yaml": "25b1c9a78c5e01d71d1067653158248e168af2c50eb7b12a4bd5e6c821e3ccf1",
+    "tests/fixtures/principal-accounting-result-v2-eligible.json": "a327fa717a9155eb235b8b04d5334edae54968f1bea2f24eb2b3158344eb840a",
+    "tests/fixtures/principal-accounting-result-v2-expired.json": "b560d48635b6eeb42730cc11e12bc8a7d1378ec72c25803a766fc875a061ca30",
+    "tests/fixtures/principal-continuity-result-v2-eligible.json": "90acbcccff1974f9669cba4d2c1ea1f98aa5c3dc03adba454e9db0de18c8da72",
+    "tests/fixtures/principal-continuity-result-v2-expired.json": "2346af36d0971b83bb45a0006350f2968e56105d57990d6e206d92e4cec7c55d",
     "tests/fixtures/principal-delegated-user-v1.json": "698817379d9761ea8a705305471bdf6c7bd3c809108155b678a20038a02c1548",
     "tests/fixtures/principal-fixed-user-v1.json": "c2537cb8d22188b8fc9a0ede1511a7b367bb2c412cf23f1b32859ccb776e0b52",
     "tests/fixtures/principal-intersecting-v1.json": "3417eaaa39ff8bd1b028e6d599aa6f7194795da79a0dda70896c7e7b1649cca8",
     "tests/fixtures/producer-accepted-synthetic/boundary.json": "f9569af2f80788f07960086e32805057b18e8df2a5ccde8fec9a7b076aefc5b4",
     "tests/fixtures/producer-accepted-synthetic/catalogue.json": "3babbbfe9aeff2e40d1c4d154131403d1cfb2bd4b197c36ea45e268e3d9ea975",
-    "tests/fixtures/producer-accepted-synthetic/manifest.json": "fe620998fc753aff223f5b3140231bd7114bc989f6b969520306952a8d86f014",
+    "tests/fixtures/producer-accepted-synthetic/manifest.json": "25a4e088a83dec816edc4a333dc0e25ebc4365a3a5e56b4212509f1a62db94d7",
     "tests/fixtures/producer-accepted-synthetic/outcomes.json": "a9b00aa32fc10933f7160c478cbb1fbdc0d5c8c83f1306742d6f6f29ca5b2362",
     "tests/fixtures/producer-accepted-synthetic/selection.json": "3c5e25bd42a4b7757833c230875c69699b9774ec6e8b4f0d1f6ee5d71c9309a1",
     "tests/fixtures/producer-boundary-iam-v1.json": "41e4e5b848a16ed22a07ef9c184432e479f09c0f21d9d9305860dce7a4b3753e",
-    "tests/fixtures/producer-reach-result-v1.json": "55eb0271797dc3149886ff448ccf8e7fede4b14d0913f0205d6a65b956c66e34",
-    "tests/fixtures/producer-result-v1-bounded.json": "b147ba85cc7e677d6c10e4217fde3c8316ea5631763657bdb52e5b031b3583bc",
-    "tests/fixtures/producer-result-v1-breached.json": "f0e28215c5bf87bda3155257cfdbb471be574fbcf6af87da797040e8c356baf1",
-    "tests/fixtures/producer-result-v1-clean.json": "995ca859631daee3d94abf435afeabbf5e8538897b7bf8b3ddba3c7e99083bee",
-    "tests/fixtures/producer-result-v1-truncated.json": "96ef67aeb7465f046c006efc0ba0d58f5471bb8857fccae6d853a2a5862c661e",
-    "tests/fixtures/producer-result-v1-unresolved.json": "7e075b183182d667cfdc197bca3f0732f296f12fdb6617a001c2d48ff3d659a9",
-    "tests/fixtures/rego-effective-diff-v1.json": "a784447881e1b6baf1c2240440e8e884a49539dda39e79978809723bf4288884",
-    "tests/fixtures/remediation-breached-v1.json": "78408e338bf934aa8c7e835e3fcbb0fafde40bb5fe9546886244fd6f77c7d0d4",
-    "tests/fixtures/remediation-ceiling-clean-v2.json": "0cad89c0bfe7ea37d840b6484fe244e43e15c1f92034622437312e5499a6d348",
-    "tests/fixtures/remediation-ceiling-joint-v2.json": "f7e64cd26619ab8bf5ab18e526b9111b39a86d1690daa9330d5231eab7eab6da",
-    "tests/fixtures/remediation-ceiling-kept-v2.json": "50c309acdc32e7b706b9ec239aecaaa786e96a404a36e1bd3f924c87a6638c80",
-    "tests/fixtures/remediation-ceiling-limited-v2.json": "417fed7b20fd951af8f2de27f9048d8b7477c3239781b549c250f08370d9c935",
-    "tests/fixtures/remediation-clean-v1.json": "cea189b344ee99d9ee7acc89195a070873a88ce070ab1ffe38bf30f9a95c93cd",
-    "tests/fixtures/remediation-discovery-v5.json": "fad1ac9a6d8b7146a9a0f781682694238822f9f81992fa166d483076578f9f22",
-    "tests/fixtures/remediation-frontier-clean-v4.json": "f639012e338f09dc15df731e6a1505fa8b358e47f348cb30eee8d6b998cefd7e",
-    "tests/fixtures/remediation-frontier-compatibility-v4.json": "e4747214998e4f6cef83a7d1bc5cd756c8583e5a0165acb9a03b058536dabc61",
-    "tests/fixtures/remediation-frontier-limited-v4.json": "def146f67a89acab40dc61420784ac12a0b56ae85f8b5e8e7c1e006fa1422885",
-    "tests/fixtures/remediation-frontier-refund-v4.json": "39010aacd10447e286c8d7006ca1e6d154fe332a9c6786370491dca4dbb7a0ec",
-    "tests/fixtures/remediation-frontier-required-v4.json": "3aa8f350f6f283fc8d0034f4485a0eee8ca2ed9dc097da231ec99358141e1334",
-    "tests/fixtures/remediation-kept-v1.json": "2ad8b5ead0174aa9cc32191882e0ce1e47cc1a016f0a3bd293da8f6c79d234e4",
-    "tests/fixtures/remediation-limited-v1.json": "5f9acaa80b80e302b7cf1d0d718aabda8d335e6685ee4a37f6afbd3feac49145",
-    "tests/fixtures/remediation-v1-to-v2.json": "99954ac2b1fd38a1ef62d4d7d1467eab20363309f79016828e7bbebec4521a30",
-    "tests/fixtures/remediation-v2-to-v3.json": "36b1bc72ede8e7bf8aabf0f2ec18d1ad45be93f64e6dcfd77add6a66ef4c0451",
-    "tests/fixtures/remediation-v3-to-v4.json": "7f72f3fa1ac4668852be9c3b42dad3547c4e2970fe769542173c1654478724d0",
-    "tests/fixtures/remediation-v4-to-v5.json": "b1f2a32ec862fc39b6963ead87698efb5658e170e72cccc5f5c35ca1b094c574",
-    "tests/fixtures/remediation-workflow-clean-v3.json": "bf636522054b412275f0e382901233f7f5c56e198e9e78b5c8fe1a008635d0c4",
-    "tests/fixtures/remediation-workflow-compatibility-v3.json": "06ad050d856722041e4c2147aac99a043324e53811af44396bf37ece2f8c955b",
-    "tests/fixtures/remediation-workflow-joint-v3.json": "b4dcad91bf86acc0cba275a2ad386f01db42dff84f761fcb7684e2e9c7a4225d",
-    "tests/fixtures/remediation-workflow-limited-v3.json": "39a37b02555b4eac2b71011d3136e827ac92866501e3c4c513c33a214b5ec6cb",
-    "tests/fixtures/remediation-workflow-monetary-v3.json": "76acb05fdda214842b2c214e1e42dee7d2753823b8c2805224a925fb0cd14825",
-    "tests/fixtures/revision-review-result-v1-eligible.json": "35cb0da391051b7ae081d8f8c573a120ddc343878c30d15cbedaf6e0ef317868",
-    "tests/fixtures/revision-review-result-v1-expired.json": "42b75bd4f30a6cc58683783a520efc36c2154255c381a5e9963dd951a95b3ec3",
-    "tests/fixtures/scalar-handover-result-v1-expired.json": "193ec81ee05e6b148239a4810e3604475683d58e74d1227bc0987646ec7e43aa",
-    "tests/fixtures/scalar-handover-result-v1-reset.json": "b1ca416557e588e9363f4423bcfd9cda0b152a2d9868177089768c6f77db2cb6",
-    "tests/fixtures/scalar-handover-result-v1-retained.json": "ccb1483624824bdca6144d99652eec2fb498fc4eb0bce076861bd1e934ab0d81",
-    "tests/fixtures/structural-validation-v1.json": "3af58e833707b869b6c30332985eb7fc2aa13cef6258f6457e125a989cc8d87a"
+    "tests/fixtures/producer-reach-result-v2.json": "ffd5ddae44fc674d658196b7bc7444fe91df1271d648c9b20078874b2cdb59b9",
+    "tests/fixtures/producer-result-v2-bounded.json": "747430eb3ca5895e9ce29790206a688b22c85b1b84c1230a6a4ec3ef3c1af1b5",
+    "tests/fixtures/producer-result-v2-breached.json": "94a012f386f70292af49808fe082adac11a17974143dfe9bb33bd6f7f56b61d9",
+    "tests/fixtures/producer-result-v2-clean.json": "06cc8342d377040eeea1c5700139d54b58d85983987e895277479a7e8b5f7207",
+    "tests/fixtures/producer-result-v2-truncated.json": "7057330849d00e0185a1eca641a41b2da786c64140e57b8969d52816c315a129",
+    "tests/fixtures/producer-result-v2-unresolved.json": "0e078b474ace2421c70188694025c42aa5233ad6b244815b422ee068c6abc13c",
+    "tests/fixtures/rego-effective-diff-v2.json": "ee9360ca2e14e32e6d6dd305eda785723d2f90dbb5d26cd9a28ef4334bd99ca1",
+    "tests/fixtures/remediation-breached-v6.json": "ca69b5e04a75cdf64c964ddd202e38ff5fc61b0e465008b2c200a97eb2be9fa9",
+    "tests/fixtures/remediation-ceiling-clean-v6.json": "30f8ed38e0796cfa8c022f492a563370880255d29d83b015386a13a2365cd8c6",
+    "tests/fixtures/remediation-ceiling-joint-v6.json": "683225bddde42d696e6a77b4ba77f6a83990059e583ec3baaaa9e2c78f5ea9f9",
+    "tests/fixtures/remediation-ceiling-kept-v6.json": "88239d4d761729aa9c861059241327beceb0288c89ff036b1c35fe05251c30e3",
+    "tests/fixtures/remediation-ceiling-limited-v6.json": "6e38b6ae600a37d6491d2476b2b84d621ef4a1c0cf9f0aab155296ac7bd03b01",
+    "tests/fixtures/remediation-clean-v6.json": "beb0f32d76aa49cd90bf547b4dc3f9cecc90d1731e471dd1e7576f6d35a1458d",
+    "tests/fixtures/remediation-discovery-v6.json": "20f7a3eec9cbb2605a73855fef3b000e2300405499bc8bd04e190d01b08043ee",
+    "tests/fixtures/remediation-frontier-clean-v6.json": "401bf98dd17b74994fc0baf7e1b30005f73da46333ab0751b2039003aff637f3",
+    "tests/fixtures/remediation-frontier-combined-options-v6.json": "017ae89c6caf198963231d26f3285cc9f9fee1f64a0a5329e59eb8fa035dc338",
+    "tests/fixtures/remediation-frontier-limited-v6.json": "1e65ee88766040702ca8e90153721798ad1f0f796aa12cfca3fa2ad8797caf69",
+    "tests/fixtures/remediation-frontier-refund-v6.json": "6868d2bbe7f8f8363c6bd469a085274ca7698a2424df4bcaf9f68fc9b6b6c490",
+    "tests/fixtures/remediation-frontier-required-v6.json": "775d1d67906589354a26f0be40f887add01313a7ddf5ba5f7e5393d5e7994c23",
+    "tests/fixtures/remediation-kept-v6.json": "80451e20635b6b3646bdc758d7a85eeb761f22ecbfd7534d11bbca15227790bc",
+    "tests/fixtures/remediation-limited-v6.json": "996f6bdc7dbbfe93b0734f74ff37fb3c03609eb111ee13952affb4d5680c822a",
+    "tests/fixtures/remediation-workflow-clean-v6.json": "5531961f22aa60aeb3e96ddbc408b1b918a95068566c8dc8af9423d44cbe5ea6",
+    "tests/fixtures/remediation-workflow-combined-options-v6.json": "bf8687fb9b2564fd9be9a921bb5bded0be346632a78cd3cd9ed20f129b5602c8",
+    "tests/fixtures/remediation-workflow-joint-v6.json": "a8f33111cae6a774b7b6d332e191d3afe107a27411a579a0c382a7738a87f143",
+    "tests/fixtures/remediation-workflow-limited-v6.json": "2675b2427c5d8d60ab4860cb9aae3596cfe386f8b9f87138f28c1b3683731b6b",
+    "tests/fixtures/remediation-workflow-monetary-v6.json": "d212dcc6d2b3d5fbd66b349d9e9217184c13eb561ac1442d0279bb216de43ffb",
+    "tests/fixtures/revision-review-result-v2-eligible.json": "2819c0801a2bc516b764d7333bd2af3bd6a243b8ee6c5a3155016e267f1fab33",
+    "tests/fixtures/revision-review-result-v2-expired.json": "e7668ba5ceb1b4fa63f8577b1c75f468341edfdfe521afe7df76042d6685d1dc",
+    "tests/fixtures/scalar-handover-result-v2-expired.json": "e5fe76ce0eab27e33417a7120b990e84658183e421ae13ec9400e728cfbe729c",
+    "tests/fixtures/scalar-handover-result-v2-reset.json": "166a3beb7081381746297248d803993bc5b356b3825f0106b636887eb41cf22f",
+    "tests/fixtures/scalar-handover-result-v2-retained.json": "b899f04ec4983470742f46e4e2c7336d1af93e1e04ab23efa46eef3a592f4853",
+    "tests/fixtures/structural-validation-v1.json": "2eb3fc5e0e69f064fa3dafadb5d252bdff9eabae82d2e80e6b9e59d8877a3ce1"
   },
   "public_python": {
     "Authority": {
@@ -3859,7 +3837,7 @@
           "signature": "(self) -> 'dict'"
         }
       },
-      "signature": "(reachable_tools: 'frozenset[str]' = frozenset(), effects: 'frozenset[tuple[str, str]]' = frozenset(), ungated_irreversible: 'frozenset[str]' = frozenset(), service_principal_tools: 'frozenset[str]' = frozenset(), max_extractable: 'Money | None' = None, breaches: 'tuple[Breach, ...]' = (), depth: 'int' = 0, truncated: 'bool' = False) -> None"
+      "signature": "(reachable_tools: 'frozenset[str]' = frozenset(), effects: 'frozenset[tuple[str, str]]' = frozenset(), ungated_irreversible: 'frozenset[str]' = frozenset(), service_principal_tools: 'frozenset[str]' = frozenset(), max_quantities: 'Mapping[str, Quantity]' = <factory>, breaches: 'tuple[Breach, ...]' = (), depth: 'int' = 0, truncated: 'bool' = False) -> None"
     },
     "Binding": {
       "bases": [
@@ -4050,7 +4028,7 @@
           "signature": "(raw: 'Any') -> 'Limits'"
         }
       },
-      "signature": "(total: 'Money | None' = None, depth: 'int' = 8, effects: 'Mapping[str, int]' = <factory>) -> None"
+      "signature": "(quantities: 'Mapping[str, Quantity]' = <factory>, depth: 'int' = 8, effects: 'Mapping[str, int]' = <factory>) -> None"
     },
     "Mandate": {
       "bases": [
@@ -4080,19 +4058,6 @@
       "kind": "class",
       "members": {},
       "signature": null
-    },
-    "Money": {
-      "bases": [
-        "object"
-      ],
-      "kind": "class",
-      "members": {
-        "parse": {
-          "kind": "classmethod",
-          "signature": "(raw: 'Any', where: 'str') -> 'Money'"
-        }
-      },
-      "signature": "(amount: 'Decimal', currency: 'str') -> None"
     },
     "OBLIGATIONS_SCHEMA": {
       "kind": "constant",
@@ -4163,7 +4128,7 @@
           "signature": "(raw: 'dict', line: 'int') -> 'Observation'"
         }
       },
-      "signature": "(tool: 'str', scope: 'str | None' = None, value: 'Decimal | None' = None, approved: 'bool' = False, principal: 'str | None' = None, currency: 'str | None' = None, errored: 'bool' = False, line: 'int' = 0) -> None"
+      "signature": "(tool: 'str', scope: 'str | None' = None, value: 'Decimal | None' = None, approved: 'bool' = False, principal: 'str | None' = None, unit: 'str | None' = None, quantity: 'str | None' = None, errored: 'bool' = False, line: 'int' = 0) -> None"
     },
     "Proposal": {
       "bases": [
@@ -4173,9 +4138,22 @@
       "members": {},
       "signature": "(name: 'str', effect: 'str', guessed_effect: 'bool', scope: 'str | None' = None, value_arg: 'str | None' = None, description: 'str' = '') -> None"
     },
+    "Quantity": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "members": {
+        "parse": {
+          "kind": "classmethod",
+          "signature": "(raw: 'Any', where: 'str') -> 'Quantity'"
+        }
+      },
+      "signature": "(amount: 'Decimal', unit: 'str') -> None"
+    },
     "SCENARIOS_SCHEMA": {
       "kind": "constant",
-      "value": "agentmandate.scenarios/v1"
+      "value": "agentmandate.scenarios/v2"
     },
     "Scenario": {
       "bases": [
@@ -4250,7 +4228,7 @@
           "signature": "(self) -> 'dict[str, str]'"
         }
       },
-      "signature": "(tool: 'str', binding: 'str | None' = None, spent: 'str | None' = None, currency: 'str | None' = None) -> None"
+      "signature": "(tool: 'str', binding: 'str | None' = None, spent: 'str | None' = None, unit: 'str | None' = None, quantity: 'str | None' = None) -> None"
     },
     "Step": {
       "bases": [
@@ -4263,7 +4241,7 @@
           "signature": "(self) -> 'str'"
         }
       },
-      "signature": "(tool: 'str', binding: 'str | None' = None, spent: 'Decimal | None' = None, currency: 'str | None' = None) -> None"
+      "signature": "(tool: 'str', binding: 'str | None' = None, spent: 'Decimal | None' = None, unit: 'str | None' = None, quantity: 'str | None' = None) -> None"
     },
     "Tool": {
       "bases": [
@@ -4280,7 +4258,7 @@
           "signature": "(self) -> 'bool'"
         }
       },
-      "signature": "(name: 'str', effect: 'str', principal: 'str' = 'caller', requires: 'tuple[str, ...]' = (), produces: 'str | None' = None, unbounded: 'bool' = False, value_arg: 'str | None' = None, ceiling: 'Money | None' = None, scope_key: 'str | None' = None, requires_approval: 'bool' = False) -> None"
+      "signature": "(name: 'str', effect: 'str', principal: 'str' = 'caller', requires: 'tuple[str, ...]' = (), produces: 'str | None' = None, unbounded: 'bool' = False, value_arg: 'str | None' = None, ceiling: 'Quantity | None' = None, quantity: 'str | None' = None, scope_key: 'str | None' = None, requires_approval: 'bool' = False) -> None"
     },
     "Violation": {
       "bases": [

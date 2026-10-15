@@ -14,7 +14,7 @@ from ._policy_export import object_fields, pairs, string
 from .manifest import loads
 
 FLEET_VERSION = 1
-RESULT_SCHEMA = "agentmandate.fleet-inventory/v1"
+RESULT_SCHEMA = "agentmandate.fleet-inventory/v2"
 
 
 def _reference(value):

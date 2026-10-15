@@ -16,7 +16,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from .manifest import EFFECT_RANK, Mandate, Money, Tool
+from .manifest import EFFECT_RANK, Mandate, Quantity, Tool
 from .reach import Authority, analyse
 
 WIDENING = "widening"
@@ -93,8 +93,7 @@ class Delta:
         lines.extend([f"- {c.kind}: {c.detail}" for c in narrowing] or ["- none"])
         lines.extend(["", "## Reachable breaches after this change", ""])
         lines.extend(
-            [f"- {b.detail}" for b in self.after.breaches]
-            or ["- none within the search depth"]
+            [f"- {b.detail}" for b in self.after.breaches] or ["- none within the search depth"]
         )
         lines.extend(["", "## Review", ""])
         if self.widened:
@@ -103,9 +102,7 @@ class Delta:
                 "named reviewer who accepts the gained authority above."
             )
         else:
-            lines.append(
-                "This change does not widen what the agent is permitted to do."
-            )
+            lines.append("This change does not widen what the agent is permitted to do.")
         lines.append("")
         lines.append(
             "Authority is computed from the manifests by bounded reachability. "
@@ -118,17 +115,14 @@ class Delta:
         return {
             "direction": self.direction,
             "changes": [
-                {"direction": c.direction, "kind": c.kind, "detail": c.detail}
-                for c in self.changes
+                {"direction": c.direction, "kind": c.kind, "detail": c.detail} for c in self.changes
             ],
             "before": self.before.as_dict(),
             "after": self.after.as_dict(),
         }
 
 
-def _set_change(
-    kind: str, before: frozenset[str], after: frozenset[str]
-) -> list[Change]:
+def _set_change(kind: str, before: frozenset[str], after: frozenset[str]) -> list[Change]:
     changes: list[Change] = []
     for gained in sorted(after - before):
         changes.append(Change(WIDENING, kind, f"gained {gained}"))
@@ -137,20 +131,19 @@ def _set_change(
     return changes
 
 
-def _money_change(kind: str, before: Money | None, after: Money | None) -> list[Change]:
+def _quantity_change(kind: str, before: Quantity | None, after: Quantity | None) -> list[Change]:
     if before is None and after is None:
         return []
     if before is None:
         return [Change(NARROWING, kind, f"added limit {after}")]
     if after is None:
         return [Change(WIDENING, kind, f"removed limit {before}")]
-    if before.currency != after.currency:
+    if before.unit != after.unit:
         return [
             Change(
                 WIDENING,
                 kind,
-                f"currency changed {before.currency} -> {after.currency}; "
-                "amounts are not comparable",
+                f"unit changed {before.unit} -> {after.unit}; amounts are not comparable",
             )
         ]
     if before.amount == after.amount:
@@ -160,27 +153,24 @@ def _money_change(kind: str, before: Money | None, after: Money | None) -> list[
         Change(
             direction,
             kind,
-            f"{before.amount} -> {after.amount} {after.currency}",
+            f"{before.amount} -> {after.amount} {after.unit}",
         )
     ]
 
 
-def _money_quantity_change(
-    kind: str, before: Money | None, after: Money | None
+def _quantity_quantity_change(
+    kind: str, before: Quantity | None, after: Quantity | None
 ) -> list[Change]:
-    if before is None and after is None:
-        return []
     if before is None:
-        return [Change(WIDENING, kind, f"gained {after}")]
+        return [] if after.amount == 0 else [Change(WIDENING, kind, f"gained {after}")]
     if after is None:
-        return [Change(NARROWING, kind, f"removed {before}")]
-    if before.currency != after.currency:
+        return [] if before.amount == 0 else [Change(NARROWING, kind, f"removed {before}")]
+    if before.unit != after.unit:
         return [
             Change(
                 WIDENING,
                 kind,
-                f"currency changed {before.currency} -> {after.currency}; "
-                "amounts are not comparable",
+                f"unit changed {before.unit} -> {after.unit}; amounts are not comparable",
             )
         ]
     if before.amount == after.amount:
@@ -190,14 +180,12 @@ def _money_quantity_change(
         Change(
             direction,
             kind,
-            f"{before.amount} -> {after.amount} {after.currency}",
+            f"{before.amount} -> {after.amount} {after.unit}",
         )
     ]
 
 
-def _effect_budget_changes(
-    before: Mapping[str, int], after: Mapping[str, int]
-) -> list[Change]:
+def _effect_budget_changes(before: Mapping[str, int], after: Mapping[str, int]) -> list[Change]:
     """Compare declared call allowances independently of breach witnesses."""
     changes: list[Change] = []
     for effect in sorted(set(before) | set(after)):
@@ -218,9 +206,7 @@ def _effect_budget_changes(
     return changes
 
 
-def _optional_value_change(
-    kind: str, before: str | None, after: str | None
-) -> list[Change]:
+def _optional_value_change(kind: str, before: str | None, after: str | None) -> list[Change]:
     if before == after:
         return []
     if before is None:
@@ -243,9 +229,7 @@ def _tool_contract_changes(before: Tool, after: Tool) -> list[Change]:
 
     if before.effect != after.effect:
         direction = (
-            WIDENING
-            if EFFECT_RANK[after.effect] > EFFECT_RANK[before.effect]
-            else NARROWING
+            WIDENING if EFFECT_RANK[after.effect] > EFFECT_RANK[before.effect] else NARROWING
         )
         changes.append(
             Change(
@@ -267,9 +251,7 @@ def _tool_contract_changes(before: Tool, after: Tool) -> list[Change]:
         )
 
     changes.extend(
-        _optional_value_change(
-            f"produced scope on {subject}", before.produces, after.produces
-        )
+        _optional_value_change(f"produced scope on {subject}", before.produces, after.produces)
     )
 
     if before.unbounded != after.unbounded:
@@ -298,8 +280,16 @@ def _tool_contract_changes(before: Tool, after: Tool) -> list[Change]:
             )
         )
     else:
-        changes.extend(
-            _money_change(f"ceiling on {subject}", before.ceiling, after.ceiling)
+        changes.extend(_quantity_change(f"ceiling on {subject}", before.ceiling, after.ceiling))
+
+    if before.quantity != after.quantity:
+        changes.append(
+            Change(
+                WIDENING,
+                "quantity assignment",
+                f"{subject}: {before.quantity!r} -> {after.quantity!r}; "
+                "accounting domains are not comparable",
+            )
         )
 
     if before.value_arg != after.value_arg:
@@ -324,13 +314,9 @@ def _tool_effects(tool: Tool) -> set[str]:
 def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
     """Diff the reachable authority of two mandates."""
     if before.agent != after.agent:
-        raise ValueError(
-            f"cannot compare different agents: {before.agent!r} and {after.agent!r}"
-        )
+        raise ValueError(f"cannot compare different agents: {before.agent!r} and {after.agent!r}")
 
-    comparison_depth = (
-        depth if depth is not None else max(before.limits.depth, after.limits.depth)
-    )
+    comparison_depth = depth if depth is not None else max(before.limits.depth, after.limits.depth)
     lhs = analyse(before, depth=comparison_depth)
     rhs = analyse(after, depth=comparison_depth)
     changes: list[Change] = []
@@ -347,13 +333,9 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
 
     if before.identity != after.identity:
         if before.identity is None:
-            changes.append(
-                Change(NARROWING, "workload identity", f"declared {after.identity}")
-            )
+            changes.append(Change(NARROWING, "workload identity", f"declared {after.identity}"))
         elif after.identity is None:
-            changes.append(
-                Change(WIDENING, "workload identity", f"removed {before.identity}")
-            )
+            changes.append(Change(WIDENING, "workload identity", f"removed {before.identity}"))
         else:
             changes.append(
                 Change(
@@ -399,20 +381,26 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
         if before_tool is not None and after_tool is not None:
             changes.extend(_tool_contract_changes(before_tool, after_tool))
 
-    changes.extend(
-        _money_quantity_change(
-            "extractable value", lhs.max_extractable, rhs.max_extractable
+    for name in sorted(set(lhs.max_quantities) | set(rhs.max_quantities)):
+        changes.extend(
+            _quantity_quantity_change(
+                f"reachable quantity {name}",
+                lhs.max_quantities.get(name),
+                rhs.max_quantities.get(name),
+            )
         )
-    )
-    changes.extend(
-        _money_change("run limit", before.limits.total, after.limits.total)
-    )
+    for name in sorted(set(before.limits.quantities) | set(after.limits.quantities)):
+        changes.extend(
+            _quantity_change(
+                f"quantity budget {name}",
+                before.limits.quantities.get(name),
+                after.limits.quantities.get(name),
+            )
+        )
     changes.extend(_effect_budget_changes(before.limits.effects, after.limits.effects))
 
     before_breaches = frozenset(b.kind for b in lhs.breaches)
     after_breaches = frozenset(b.kind for b in rhs.breaches)
     changes.extend(_set_change("reachable breach", before_breaches, after_breaches))
 
-    return Delta(
-        before=lhs, after=rhs, changes=tuple(changes), after_agent=after.agent
-    )
+    return Delta(before=lhs, after=rhs, changes=tuple(changes), after_agent=after.agent)

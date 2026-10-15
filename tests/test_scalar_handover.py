@@ -72,7 +72,7 @@ def _manifest_change(raw, manifest):
 
 def test_retained_state_proves_useful_tightening_in_declared_model():
     result = _run()
-    assert result["schema"] == "agentmandate.scalar-handover/v1"
+    assert result["schema"] == "agentmandate.scalar-handover/v2"
     assert result["evidence_eligible"] is True
     assert not result["findings"]
     assert result["proof"] == {
@@ -243,33 +243,34 @@ def test_policies_must_share_the_complete_tool_contract(changes):
 
 
 @pytest.mark.parametrize(
-    "change", ["total", "tool", "value_arg", "tool_currency", "total_currency", "multiple_tools",
-               "consistent_currency"]
+    "change",
+    ["total", "tool", "value_arg", "tool_unit", "total_unit", "multiple_tools", "consistent_unit"],
 )
 def test_manifest_semantics_are_checked_after_matching_all_digests(change):
     raw = _raw()
     manifest = json.loads(MANIFEST.read_text())
     if change == "total":
-        manifest["limits"].pop("total")
+        manifest["limits"].pop("quantities")
     elif change == "tool":
         manifest["tools"][1]["name"] = "different"
     elif change == "value_arg":
         manifest["tools"][1].pop("value_arg")
         manifest["tools"][1].pop("ceiling")
-    elif change == "tool_currency":
-        manifest["tools"][1]["ceiling"]["currency"] = "USD"
-    elif change == "total_currency":
-        manifest["limits"]["total"]["currency"] = "USD"
-    elif change == "consistent_currency":
-        manifest["limits"]["total"]["currency"] = "USD"
-        manifest["tools"][1]["ceiling"]["currency"] = "USD"
+        manifest["tools"][1].pop("quantity")
+    elif change == "tool_unit":
+        manifest["tools"][1]["ceiling"]["unit"] = "USD"
+    elif change == "total_unit":
+        manifest["limits"]["quantities"]["value"]["unit"] = "USD"
+    elif change == "consistent_unit":
+        manifest["limits"]["quantities"]["value"]["unit"] = "USD"
+        manifest["tools"][1]["ceiling"]["unit"] = "USD"
     else:
         tool = copy.deepcopy(manifest["tools"][1])
         tool["name"] = "another_refund"
         manifest["tools"].append(tool)
     data = _manifest_change(raw, manifest)
-    if change in {"tool_currency", "total_currency"}:
-        with pytest.raises(ValueError, match="require one currency"):
+    if change in {"tool_unit", "total_unit"}:
+        with pytest.raises(ValueError, match="incompatible units"):
             _run(raw, manifest=data)
         return
     result = _run(raw, manifest=data)
@@ -373,7 +374,7 @@ def test_cli_fixed_result_baselines(fixture, name, when, exit_code, capsys):
     assert not output.err
     assert (
         output.out.encode()
-        == (ROOT / f"tests/fixtures/scalar-handover-result-v1-{fixture}.json").read_bytes()
+        == (ROOT / f"tests/fixtures/scalar-handover-result-v2-{fixture}.json").read_bytes()
     )
 
 

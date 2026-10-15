@@ -1,0 +1,28 @@
+[
+  {
+    "name": "process_refund",
+    "description": "Process a test refund amount for AgentMandate policy evidence",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "description": "Synthetic refund amount in dollars"
+        }
+      },
+      "required": ["amount"]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "processed": {
+          "type": "boolean"
+        },
+        "amount": {
+          "type": "integer"
+        }
+      },
+      "required": ["processed", "amount"]
+    }
+  }
+]

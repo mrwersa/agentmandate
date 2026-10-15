@@ -45,9 +45,10 @@ def test_refund_example_pins_every_claimed_source_byte() -> None:
     provider = AgentCoreContinuity.from_json((EXAMPLE / "provider.json").read_text())
     reset = AgentCoreContinuity.from_json((EXAMPLE / "provider-reset.json").read_text())
 
-    assert binding.mandate_sha256 == hashlib.sha256(
-        (EXAMPLE / "manifest.json").read_bytes()
-    ).hexdigest()
+    assert (
+        binding.mandate_sha256
+        == hashlib.sha256((EXAMPLE / "manifest.json").read_bytes()).hexdigest()
+    )
     binding.verify_sources(
         {source.locator: (ROOT / source.locator).read_bytes() for source in binding.sources}
     )
@@ -72,7 +73,7 @@ def test_refund_example_preserves_consumed_authority_across_reconnect(capsys) ->
     assert captured.err == ""
     assert result["findings"] == []
     assert result["authority"]["reachable_tools"] == ["open_case", "process_refund"]
-    assert result["authority"]["max_extractable"] == {"amount": "1000", "currency": "GBP"}
+    assert result["authority"]["max_quantities"]["value"] == {"amount": "1000", "unit": "GBP"}
     assert outcome["transition"] == "refund-agent-reconnect"
     assert outcome["kind"] == "fresh_session"
     assert outcome["completed_values"] == [600]

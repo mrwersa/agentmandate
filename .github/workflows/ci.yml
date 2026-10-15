@@ -87,16 +87,28 @@ jobs:
         run: |
           cd "${RUNNER_TEMP}"
           cat > m.json <<'JSON'
-          {"agent": "a", "limits": {"total": {"amount": 10, "currency": "GBP"}},
+          {"version": 2, "agent": "a",
+           "limits": {"depth": 4,
+                      "quantities": {"exported_records": {"amount": "10", "unit": "record"}}},
            "tools": [{"name": "seed", "effect": "read", "produces": "case",
                       "unbounded": true},
                      {"name": "pay", "effect": "irreversible", "requires": ["case"],
-                      "value_arg": "amount", "scope_key": "case",
+                      "value_arg": "amount", "scope_key": "case", "quantity": "exported_records",
                       "requires_approval": true,
-                      "ceiling": {"amount": 10, "currency": "GBP"}}]}
+                      "ceiling": {"amount": "10", "unit": "record"}}]}
           JSON
-          mandate reach m.json && exit 1
-          echo "reach correctly exited non-zero on a reachable breach"
+          python - <<'PYTHON'
+          import json
+          import subprocess
+
+          result = subprocess.run(["mandate", "reach", "m.json", "--json"],
+                                  capture_output=True, text=True)
+          assert result.returncode == 1, (result.returncode, result.stderr)
+          authority = json.loads(result.stdout)
+          assert authority["max_quantities"]["exported_records"] == {
+              "amount": "20", "unit": "record"}
+          assert any(breach["kind"] == "quantity_budget" for breach in authority["breaches"])
+          PYTHON
 
   package:
     name: Package

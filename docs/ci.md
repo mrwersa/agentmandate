@@ -263,7 +263,7 @@ and existing manifest producer:
 
 Repeat boundaries, locator mappings, and explicit selection objects as needed.
 An unresolved producer finding writes the complete
-`agentmandate.producers/v1` result and exits 1. Malformed records or selections,
+`agentmandate.producers/v2` result and exits 1. Malformed records or selections,
 invalid dates, missing or conflicting mappings, and undeclared locators exit 2
 with empty stdout. Authority IR, SARIF, Mermaid, condition, and delegation
 composition also fail before reading inputs or writing partial authority.
@@ -289,7 +289,7 @@ survived each named transition:
 
 The command exits 0 only when every transition has
 `safe_continuation: satisfied`. A violated or unresolved transition writes the
-complete `agentmandate.continuity/v1` result and exits 1. Malformed or
+complete `agentmandate.continuity/v2` result and exits 1. Malformed or
 incomplete artifacts and mappings exit 2 with empty stdout. IR, SARIF,
 Mermaid, OTel, condition, delegation, producer, and Cedar composition is
 refused before any input is read.

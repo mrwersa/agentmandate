@@ -15,7 +15,7 @@ BASELINES = json.loads(study.BASELINES.read_text())
 @pytest.mark.parametrize(
     "case", BASELINES["cases"], ids=lambda case: f"{case['name']}-depth-{case['depth']}"
 )
-def test_pre_change_authority_and_provenance_are_unchanged(case):
+def test_current_model_authority_and_provenance_match_recorded_baselines(case):
     data = (ROOT / case["path"]).read_bytes()
     assert hashlib.sha256(data).hexdigest() == case["input_sha256"]
     mandate = loads(data.decode(), source=case["path"])
@@ -52,7 +52,8 @@ def test_no_progress_calls_and_duplicate_states_are_not_new_work():
     }
     assert trace.path_for("read")[0].tool == "first"
     _analyse_with_trace(
-        loads('{"agent":"a","tools":[{"name":"read","effect":"read"}]}'), _metrics=metrics
+        loads('{"agent": "a", "tools": [{"name": "read", "effect": "read"}], "version": 2}'),
+        _metrics=metrics,
     )
     assert metrics["states_discovered"] == 1
     assert metrics["tool_checks"] == 1
@@ -75,16 +76,6 @@ def test_replay_uses_current_code_without_git_and_does_not_assert_timing_thresho
     assert row["measurements"]["current"]["elapsed_ns_median"] > 0
     assert row["measurements"]["current"]["peak_traced_bytes"] > 0
     assert "baseline" not in row["measurements"]
-
-
-def test_baseline_source_digest_is_checked_before_execution(monkeypatch):
-    source = b'def _analyse_with_trace(*args, **kwargs): return "baseline-sentinel"\n'
-    monkeypatch.setattr(study.subprocess, "check_output", lambda *a, **kw: source)
-    baselines = {"baseline_ref": "pinned", "baseline_source_sha256": "0" * 64}
-    with pytest.raises(ValueError, match="pinned digest"):
-        study._baseline_kernel(baselines)
-    baselines["baseline_source_sha256"] = hashlib.sha256(source).hexdigest()
-    assert study._baseline_kernel(baselines)() == "baseline-sentinel"
 
 
 def test_benchmark_refuses_changed_inputs_without_partial_output(tmp_path, monkeypatch, capsys):

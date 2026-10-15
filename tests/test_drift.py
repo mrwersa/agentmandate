@@ -10,10 +10,10 @@ from agentmandate.drift import compare_source
 from agentmandate.inventory import InventoryError
 
 MANIFEST = """
-version: 1
+version: 2
 agent: dispute-resolver
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
   depth: 8
 tools:
   - name: open_case
@@ -26,11 +26,12 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 """
 
-SOURCE = '''
+SOURCE = """
 from decimal import Decimal
 
 from strands import Agent, tool
@@ -38,16 +39,16 @@ from strands import Agent, tool
 
 @tool
 def open_case(customer_id: str) -> str:
-    """Open a case."""
+    \"\"\"Open a case.\"\"\"
 
 
 @tool("issue_refund")
-def refund(case_id: str, amount: Decimal, currency: str) -> str:
-    """Refund a case."""
+def refund(case_id: str, amount: Decimal, unit: str) -> str:
+    \"\"\"Refund a case.\"\"\"
 
 
 agent = Agent(tools=[open_case, refund])
-'''
+"""
 
 
 def write(tmp_path: Path, source: str = SOURCE) -> Path:
@@ -80,9 +81,7 @@ agent = Agent(tools=[open_case, refund, issue_credit_note])''',
 
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
 
-    assert [(f.kind, f.tool) for f in drift.findings] == [
-        ("undeclared", "issue_credit_note")
-    ]
+    assert [(f.kind, f.tool) for f in drift.findings] == [("undeclared", "issue_credit_note")]
     assert "smaller graph than the real one" in drift.findings[0].message
 
 
@@ -92,15 +91,15 @@ def test_a_ceiling_counted_against_an_argument_that_no_longer_exists(
     # The quiet one. The manifest still parses, `reach` still runs, and the
     # ceiling counts against nothing.
     source = SOURCE.replace(
-        "def refund(case_id: str, amount: Decimal, currency: str)",
-        "def refund(case_id: str, total: Decimal, currency: str)",
+        "def refund(case_id: str, amount: Decimal, unit: str)",
+        "def refund(case_id: str, total: Decimal, unit: str)",
     )
 
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
 
     assert [(f.kind, f.tool) for f in drift.findings] == [("argument", "issue_refund")]
     assert "value_arg names 'amount'" in drift.findings[0].message
-    assert "case_id, total, currency" in drift.findings[0].message
+    assert "case_id, total, unit" in drift.findings[0].message
 
 
 def test_a_scope_key_carried_by_an_argument_is_not_drift(tmp_path: Path) -> None:
@@ -114,8 +113,8 @@ def test_a_scope_key_carried_by_an_argument_is_not_drift(tmp_path: Path) -> None
 
 def test_a_scope_key_nothing_carries_is_drift(tmp_path: Path) -> None:
     source = SOURCE.replace(
-        "def refund(case_id: str, amount: Decimal, currency: str)",
-        "def refund(ticket: str, amount: Decimal, currency: str)",
+        "def refund(case_id: str, amount: Decimal, unit: str)",
+        "def refund(ticket: str, amount: Decimal, unit: str)",
     )
 
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
@@ -166,16 +165,14 @@ def test_a_tool_declared_outside_the_scanned_path_is_not_a_clean_pass(
 
     drift = compare_source(loads(MANIFEST), write(tmp_path, source))
 
-    assert [(f.kind, f.tool) for f in drift.findings] == [
-        ("unresolved", "lookup_partner")
-    ]
+    assert [(f.kind, f.tool) for f in drift.findings] == [("unresolved", "lookup_partner")]
     assert "Widen --source" in drift.findings[0].message
 
 
 def test_findings_are_ordered_by_how_much_they_matter(tmp_path: Path) -> None:
     source = SOURCE.replace(
-        "def refund(case_id: str, amount: Decimal, currency: str)",
-        "def refund(case_id: str, total: Decimal, currency: str)",
+        "def refund(case_id: str, amount: Decimal, unit: str)",
+        "def refund(case_id: str, total: Decimal, unit: str)",
     ).replace(
         "agent = Agent(tools=[open_case, refund])",
         '''@tool
@@ -195,7 +192,7 @@ agent = Agent(tools=[refund, wipe])''',
 
 def test_a_tool_with_no_arguments_is_not_argument_drift(tmp_path: Path) -> None:
     source = SOURCE.replace(
-        'def refund(case_id: str, amount: Decimal, currency: str) -> str:',
+        "def refund(case_id: str, amount: Decimal, unit: str) -> str:",
         "def refund() -> str:",
     )
 
@@ -321,10 +318,13 @@ def test_a_tool_bound_outside_the_scan_is_not_reported_removed(
     # `unresolved` finding beside it: the tool is given to the agent, the scan
     # just never read the file that declares it. An absent declaration is not
     # an absent tool.
-    manifest = MANIFEST + """
+    manifest = (
+        MANIFEST
+        + """
   - name: fetch_case
     effect: read
 """
+    )
     source = SOURCE.replace(
         "from strands import Agent, tool",
         "from partner_kit import fetch_case\nfrom strands import Agent, tool",
@@ -381,10 +381,13 @@ def test_a_label_shared_by_two_agents_is_refused(tmp_path: Path) -> None:
     # Merging two of them would be the overstatement --binding exists to
     # escape, reintroduced through the escape hatch itself.
     for name, tools in (("triage.py", "[open_case]"), ("resolver.py", "[open_case, refund]")):
-        write(tmp_path, SOURCE.replace(
-            "agent = Agent(tools=[open_case, refund])",
-            f"agent = Agent(tools={tools})",
-        ))
+        write(
+            tmp_path,
+            SOURCE.replace(
+                "agent = Agent(tools=[open_case, refund])",
+                f"agent = Agent(tools={tools})",
+            ),
+        )
         (tmp_path / name).write_text(
             (tmp_path / "agent.py").read_text(encoding="utf-8"), encoding="utf-8"
         )
@@ -397,8 +400,7 @@ def test_a_label_shared_by_two_agents_is_refused(tmp_path: Path) -> None:
     from agentmandate.inventory import collect
 
     where = next(
-        b.where for b in collect(tmp_path, union=True).bindings
-        if b.module == "resolver.py"
+        b.where for b in collect(tmp_path, union=True).bindings if b.module == "resolver.py"
     )
     assert compare_source(loads(MANIFEST), tmp_path, binding=where).clean
 
@@ -447,12 +449,8 @@ def test_the_withheld_note_is_not_a_tool_in_the_json(tmp_path: Path) -> None:
         "agent = Agent(tools=[open_case, *more()])",
     )
 
-    findings = compare_source(loads(MANIFEST), write(tmp_path, source)).as_dict()[
-        "findings"
-    ]
+    findings = compare_source(loads(MANIFEST), write(tmp_path, source)).as_dict()["findings"]
     note = next(f for f in findings if f["subject"] == "<removals>")
 
     assert note["tool"] is None
-    assert all(
-        f["tool"] == f["subject"] for f in findings if f["subject"] != "<removals>"
-    )
+    assert all(f["tool"] == f["subject"] for f in findings if f["subject"] != "<removals>")

@@ -22,6 +22,14 @@ not whether the model is likely to choose a particular path.
 
 Alpha. Apache-2.0.
 
+## What can be limited?
+
+Named cumulative quantities include money, exported records, generated tokens,
+and compute consumed. Each pool has an exact amount and explicit unit; different
+pools are never summed. Effect-class call counts are separate limits. See the
+[records-and-tokens example](docs/quantity-budgets.md) and
+[manifest reference](docs/manifest.md).
+
 ## Run the example
 
 The examples live in this repository. Clone it and install into a virtual
@@ -61,7 +69,7 @@ wrong:
 
 ```console
 $ mandate reach examples/dispute-resolver-v2.yaml
-BREACH  cumulative value 1000 GBP exceeds limit 500 GBP
+BREACH  quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP
   1. open_case(case#1)
   2. search_cases(case#2)
   3. issue_refund(case#1, 500 GBP)
@@ -84,8 +92,8 @@ agent's effective authority:
 $ mandate diff examples/dispute-resolver.yaml examples/dispute-resolver-v2.yaml
 authority diff  v1 -> v2
   + tool: gained search_cases
-  + extractable value: 500 -> 2000 GBP
-  + reachable breach: gained cumulative_value
+  + reachable quantity value: 500 -> 2000 GBP
+  + reachable breach: gained quantity_budget
 
 verdict: WIDENING
 a widening change needs named review before release
@@ -180,7 +188,7 @@ not supply is marked:
     # REVIEW: amount looks like a value argument. A ceiling needs scope_key too.
     # value_arg: amount
     # scope_key: case
-    # ceiling: { amount: 0, currency: GBP }
+    # ceiling: { amount: 0, unit: GBP }
     requires_approval: true
 ```
 
@@ -234,12 +242,12 @@ carry: the effect class, which argument spends value, and which scope the limit
 is measured against.
 
 ```yaml
-version: 1
+version: 2
 agent: dispute-resolver
 identity: spiffe://bank/agents/dispute-resolver
 
 limits:
-  total: { amount: 500, currency: GBP }
+  quantities: {value: { amount: 500, unit: GBP }}
   depth: 8
   effects:                    # optional. an absent class is unbounded
     irreversible: 3           # at most three irreversible calls in one run
@@ -255,7 +263,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case           # the ceiling is per case
-    ceiling: { amount: 500, currency: GBP }
+    quantity: value
+    ceiling: { amount: 500, unit: GBP }
     requires_approval: true
 ```
 
@@ -264,7 +273,7 @@ do not model arbitrary preconditions, postconditions, or tool implementations.
 
 A **cumulative constraint** makes a decision depend on qualifying earlier
 actions. Its **limit** is the configured bound; its consumed state is what the
-runtime has already counted. In manifest v1, a `ceiling` is the maximum
+runtime has already counted. In manifest v2, a `ceiling` is the maximum
 cumulative value one tool may spend against one binding of its `scope_key`.
 `unbounded: true` marks a tool that can be called repeatedly to mint fresh
 bindings, which is what turns a per-scope limit into no mandate-wide bound at
@@ -278,7 +287,7 @@ all.
 | `mandate drift` | Compares the declared mandate against the agent's source and fails when the two have separated |
 | `mandate lint` | Single-manifest checks: separation of duties, ungated irreversible effects, service-account principals, invalid ceilings, and required scopes with no producer |
 | `mandate reach` | Bounded search over a manifest or reviewed `--ir` snapshot for a legal call sequence that breaches a limit, reported as a counterexample |
-| `mandate remediate` | Rechecks repairs and can discover monetary ceilings while preserving supplied workflows, with ranked trade-offs and explicit limits. [Repair guide](docs/remediation.md), [ceiling discovery](docs/ceiling-discovery.md) |
+| `mandate remediate` | Rechecks repairs and can discover quantity ceilings while preserving supplied workflows, with ranked trade-offs and explicit limits. [Repair guide](docs/remediation.md), [ceiling discovery](docs/ceiling-discovery.md) |
 | `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
 | `mandate inventory` | Imports local protocol catalogues as unreviewed declarations/IR, or validates declaration structure |
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |

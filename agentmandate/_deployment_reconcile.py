@@ -14,7 +14,7 @@ from .manifest import SCHEMA_VERSION
 from .otel import OP_ATTR, TOOL_NAME_ATTR, TOOL_OP
 
 RECONCILE_VERSION = 1
-RESULT_SCHEMA = "agentmandate.deployment-reconcile/v1"
+RESULT_SCHEMA = "agentmandate.deployment-reconcile/v2"
 JOIN_FIELDS = (
     "decision_id",
     "invocation_id",

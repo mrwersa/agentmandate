@@ -26,7 +26,7 @@ MANIFEST = """
 agent: profile
 identity: spiffe://example/agent/profile
 limits:
-  total: {amount: 100, currency: GBP}
+  quantities: {value: {amount: 100, unit: GBP}}
   depth: 4
   effects: {irreversible: 1}
 roles:
@@ -41,7 +41,8 @@ tools:
     principal: service
     requires: [case]
     value_arg: amount
-    ceiling: {amount: 100, currency: GBP}
+    quantity: value
+    ceiling: {amount: 100, unit: GBP}
     scope_key: case
     requires_approval: true
 """
@@ -79,12 +80,13 @@ def test_manifest_predicate_registry_is_closed_and_profile_round_trips() -> None
         ("constraint", "depth"),
         ("constraint", "effects"),
         ("constraint", "name"),
-        ("constraint", "total"),
+        ("constraint", "quantities"),
         ("principal", "name"),
         ("role", "members"),
         ("role", "name"),
         ("scope", "name"),
         ("tool", "ceiling"),
+        ("tool", "quantity"),
         ("tool", "effect"),
         ("tool", "name"),
         ("tool", "principal"),
@@ -141,14 +143,14 @@ def test_wrong_value_shapes_fail_as_ir_errors_before_projection() -> None:
     value = replace_fact(snapshot(), "tool:pay", "ceiling", value="opaque")
 
     value.validate()
-    with pytest.raises(IRFormatError, match="schema nullable_money"):
+    with pytest.raises(IRFormatError, match="schema nullable_quantity"):
         _analyse_ir(value)
 
     default_backed = _from_mandate(
         loads("agent: defaults\ntools:\n  - name: look\n    effect: read\n")
     )
     default_backed = replace_fact(default_backed, "tool:look", "ceiling", value="opaque")
-    with pytest.raises(IRFormatError, match=r"facts\[.*\]\.value.*nullable_money"):
+    with pytest.raises(IRFormatError, match=r"facts\[.*\]\.value.*nullable_quantity"):
         _to_mandate(default_backed)
 
 
@@ -176,17 +178,17 @@ def test_each_manifest_value_schema_fails_closed(
 @pytest.mark.parametrize(
     "money",
     [
-        {"amount": 1, "currency": "GBP"},
-        {"amount": "NaN", "currency": "GBP"},
-        {"amount": "1", "currency": "gbp"},
-        {"amount": "1", "currency": "GB"},
-        {"amount": "1", "currency": "GBP", "extra": "field"},
+        {"amount": 1, "unit": "GBP"},
+        {"amount": "NaN", "unit": "GBP"},
+        {"amount": "1", "unit": ""},
+        {"amount": "1", "unit": " record "},
+        {"amount": "1", "unit": "GBP", "extra": "field"},
     ],
 )
-def test_money_profile_requires_canonical_decimal_strings(money: object) -> None:
+def test_quantity_profile_requires_canonical_decimal_strings(money: object) -> None:
     value = replace_fact(snapshot(), "tool:pay", "ceiling", value=money)
 
-    with pytest.raises(IRFormatError, match="schema nullable_money"):
+    with pytest.raises(IRFormatError, match="schema nullable_quantity"):
         _to_mandate(value)
 
 
@@ -213,7 +215,7 @@ def test_profile_requires_supported_adapters_and_exact_source_digests() -> None:
         ),
     )
     changed.validate()
-    with pytest.raises(IRFormatError, match="outside the analyzable manifest-v1 profile"):
+    with pytest.raises(IRFormatError, match="outside the analyzable manifest-v2 profile"):
         _to_mandate(changed)
 
     wrong_digest = replace(mandate_source, semantic_sha256="0" * 64)
@@ -234,7 +236,7 @@ def test_profile_rejects_missing_or_false_default_provenance() -> None:
     with pytest.raises(IRFormatError, match="evidence is empty"):
         _to_mandate(without_evidence)
 
-    schema_evidence = Evidence("source:manifest-v1", "manifest:v1#/defaults/tool.effect")
+    schema_evidence = Evidence("source:manifest-v2", "manifest:v1#/defaults/tool.effect")
     false_default = replace_fact(
         value,
         effect.subject,
@@ -281,7 +283,7 @@ def test_profile_requires_exact_sources_and_reviewed_manifest_support() -> None:
         value,
         effect.subject,
         "effect",
-        evidence=(Evidence("source:manifest-v1", "/defaults/effect"),),
+        evidence=(Evidence("source:manifest-v2", "/defaults/effect"),),
     )
     with pytest.raises(IRFormatError, match="lacks reviewed manifest support"):
         _to_mandate(schema_only)
@@ -385,13 +387,13 @@ def test_profile_requires_the_run_constraint_and_default_digest() -> None:
     with pytest.raises(IRFormatError, match="requires the run constraint"):
         _to_mandate(changed)
 
-    defaults = next(source for source in value.sources if source.id == "source:manifest-v1")
+    defaults = next(source for source in value.sources if source.id == "source:manifest-v2")
     wrong_digest = replace(defaults, semantic_sha256="0" * 64)
     changed = replace(
         value,
         sources=tuple(wrong_digest if source == defaults else source for source in value.sources),
     )
-    with pytest.raises(IRFormatError, match="source:manifest-v1 semantic_sha256"):
+    with pytest.raises(IRFormatError, match="source:manifest-v2 semantic_sha256"):
         _to_mandate(changed)
 
 
@@ -404,9 +406,9 @@ def test_profile_rejects_name_mismatch_invalid_decimal_and_unknown_schema() -> N
         snapshot(),
         "tool:pay",
         "ceiling",
-        value={"amount": "not-a-number", "currency": "GBP"},
+        value={"amount": "not-a-number", "unit": "GBP"},
     )
-    with pytest.raises(IRFormatError, match="schema nullable_money"):
+    with pytest.raises(IRFormatError, match="schema nullable_quantity"):
         _to_mandate(value)
 
     tool = Entity("tool:t", "tool", "t")

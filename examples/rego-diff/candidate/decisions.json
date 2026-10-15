@@ -12,9 +12,9 @@
       "agentmandate": {
         "invocation_id": "synthetic-candidate-invocation-1",
         "run_id": "synthetic-candidate-run",
-        "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+        "manifest_sha256": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
         "configuration_sha256": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
-        "manifest_version": 1,
+        "manifest_version": 2,
         "gateway": "release-gateway"
       }
     },
@@ -39,9 +39,9 @@
       "agentmandate": {
         "invocation_id": "synthetic-candidate-invocation-2",
         "run_id": "synthetic-candidate-run",
-        "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+        "manifest_sha256": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
         "configuration_sha256": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
-        "manifest_version": 1,
+        "manifest_version": 2,
         "gateway": "release-gateway"
       }
     },
@@ -66,9 +66,9 @@
       "agentmandate": {
         "invocation_id": "synthetic-candidate-invocation-3",
         "run_id": "synthetic-candidate-run",
-        "manifest_sha256": "967b66357721d9dde28f043ac15d14d165bc379dc8653f3e541db5896bfd2615",
+        "manifest_sha256": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
         "configuration_sha256": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
-        "manifest_version": 1,
+        "manifest_version": 2,
         "gateway": "release-gateway"
       }
     },

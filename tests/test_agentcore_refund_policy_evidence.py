@@ -6,14 +6,14 @@ import json
 import re
 import statistics
 import sys
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 from agentmandate._cedar_mapping import _mapping
-from agentmandate._managed_cedar import ManagedOracle, compare_managed_cedar
+from agentmandate._managed_cedar import ManagedOracle
 from agentmandate.manifest import load
 from agentmandate.reach import analyse
 
@@ -95,9 +95,7 @@ _deployment_refusal_spec = importlib.util.spec_from_file_location(
     EVIDENCE / "capture_deployment_continuity_refusal.py",
 )
 assert _deployment_refusal_spec is not None and _deployment_refusal_spec.loader is not None
-capture_deployment_continuity_refusal = importlib.util.module_from_spec(
-    _deployment_refusal_spec
-)
+capture_deployment_continuity_refusal = importlib.util.module_from_spec(_deployment_refusal_spec)
 sys.modules["capture_deployment_continuity_refusal"] = capture_deployment_continuity_refusal
 _deployment_refusal_spec.loader.exec_module(capture_deployment_continuity_refusal)
 
@@ -289,7 +287,7 @@ def test_tool_inventory_mapping_and_manifest_are_exactly_joined() -> None:
     schema = read_json("tool-schema.json")
     listed = read_json("tools-list-response.json")["result"]["tools"]
     mapping = _mapping(read_json("mapping.json"))
-    mandate = load(EVIDENCE / "mandate.yaml")
+    mandate = load(ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml")
 
     assert [tool["name"] for tool in schema] == ["process_refund"]
     assert schema[0]["outputSchema"]["required"] == ["processed", "amount"]
@@ -340,82 +338,25 @@ def test_live_enforce_controls_preserve_opposite_decisions() -> None:
     assert state["tool_inventory_complete"] is True
 
 
-def test_live_candidate_preserves_the_boundary_and_widens_the_exact_request() -> None:
-    baseline = ManagedOracle.from_json(
-        (EVIDENCE / "managed-oracle-v1.json").read_text(encoding="utf-8")
-    )
-    candidate = ManagedOracle.from_json(
-        (EVIDENCE / "candidate-managed-oracle-v1.json").read_text(encoding="utf-8")
-    )
+def test_archival_managed_capture_refuses_the_superseded_manifest_contract() -> None:
+    from agentmandate._managed_cedar import ManagedOracleFormatError
 
-    def contents(oracle: ManagedOracle) -> dict[str, bytes]:
-        return {item.locator: (EVIDENCE / item.locator).read_bytes() for item in oracle.sources}
-
-    baseline_contents = contents(baseline)
-    candidate_contents = contents(candidate)
-    baseline.verify_sources(baseline_contents)
-    candidate.verify_sources(candidate_contents)
-    assert baseline.to_json() == (EVIDENCE / "managed-oracle-v1.json").read_text(encoding="utf-8")
-    assert candidate.to_json() == (EVIDENCE / "candidate-managed-oracle-v1.json").read_text(
-        encoding="utf-8"
-    )
-
-    result = compare_managed_cedar(
-        load(EVIDENCE / "mandate.yaml"),
-        baseline,
-        baseline_contents,
-        candidate,
-        candidate_contents,
-        as_of=date(2026, 8, 29),
-    )
-
-    assert result.findings == ()
-    assert [(item.baseline, item.candidate, item.classification) for item in result.changes] == [
-        ("allow", "allow", "stable_allow"),
-        ("deny", "allow", "widens"),
-    ]
-    assert all(len(item.support) == 6 for item in result.changes)
-    assert read_json("candidate-allow-request.json") == read_json("allow-request.json")
-    assert read_json("candidate-widen-request.json") == read_json("deny-request.json")
-    assert read_json("candidate-tools-list-request.json") == read_json("tools-list-request.json")
-    assert read_json("candidate-tools-list-response.json") == read_json("tools-list-response.json")
-    widen_text = read_json("candidate-widen-response.json")["result"]["content"][0]["text"]
-    assert json.loads(widen_text) == {
-        "amount": 2000,
-        "processed": True,
-    }
-    baseline_policy = (EVIDENCE / "policy.cedar").read_text(encoding="utf-8")
-    candidate_policy = (EVIDENCE / "candidate-policy.cedar").read_text(encoding="utf-8")
-    assert baseline_policy.replace("amount < 1000", "amount < 3000") == candidate_policy
+    for name in ("managed-oracle-v1.json", "candidate-managed-oracle-v1.json"):
+        text = (EVIDENCE / name).read_text()
+        oracle = ManagedOracle.from_json(text)
+        assert oracle.to_json() == text
+        contents = {
+            source.locator: (EVIDENCE / source.locator).read_bytes() for source in oracle.sources
+        }
+        with pytest.raises(ManagedOracleFormatError, match="manifest source"):
+            oracle.verify_sources(contents)
 
 
-def test_analysis_measurement_reproduces_the_widening_result(tmp_path: Path) -> None:
-    result = measure_analysis.measure(warmups=0, repetitions=1, measured_at="2026-08-29T00:00:00Z")
+def test_archival_measurement_requires_its_original_manifest_contract() -> None:
+    from agentmandate import ManifestError
 
-    assert result["counterexample_length"] == 1
-    assert result["analysis_wall_clock_ms"] > 0
-    assert result["samples"]["repetitions"] == 1
-    assert result["result"] == {
-        "classifications": ["stable_allow", "widens"],
-        "finding_count": 0,
-    }
-    output = tmp_path / "measurement.json"
-    assert (
-        measure_analysis.main(
-            [
-                "--warmups",
-                "0",
-                "--repetitions",
-                "1",
-                "--measured-at",
-                "2026-08-29T00:00:00Z",
-                "--output",
-                str(output),
-            ]
-        )
-        == 0
-    )
-    assert json.loads(output.read_text(encoding="utf-8"))["measurement_version"] == 1
+    with pytest.raises(ManifestError, match="unsupported schema version"):
+        measure_analysis.measure(warmups=0, repetitions=1, measured_at="2026-08-29T00:00:00Z")
 
 
 def test_analysis_measurement_rejects_invalid_sample_counts() -> None:
@@ -492,20 +433,8 @@ def test_managed_controls_regenerate_and_prove_negative_controls(tmp_path: Path)
     raw.mkdir()
     _write_control_raw(raw)
 
-    result = capture_controls.capture(raw, output)
-
-    assert result["comparisons"] == {
-        "noop": ["stable_deny", "stable_allow"],
-        "narrow": ["stable_deny", "tightens"],
-    }
-    assert result["sequence"]["aggregate_amount"] == 1200
-    assert all(item["outcome"] == "allow" for item in result["sequence"]["calls"])
-    index = json.loads((output / "controls-index.json").read_text(encoding="utf-8"))
-    for source in index["sources"]:
-        if source["locator"] != "capture_controls.py":
-            assert (output / source["locator"]).read_bytes() == (
-                EVIDENCE / source["locator"]
-            ).read_bytes()
+    with pytest.raises(ValueError, match="manifest source"):
+        capture_controls.capture(raw, output)
 
 
 def test_managed_control_capture_rejects_wrong_outcomes_and_inventory(tmp_path: Path) -> None:
@@ -515,7 +444,7 @@ def test_managed_control_capture_rejects_wrong_outcomes_and_inventory(tmp_path: 
     response = json.loads((raw / "agentmandate-paper-noop-500.raw").read_text(encoding="utf-8"))
     response["id"] = "wrong"
     (raw / "agentmandate-paper-noop-500.raw").write_text(json.dumps(response), encoding="utf-8")
-    with pytest.raises(ValueError, match="response does not match"):
+    with pytest.raises(ValueError, match="manifest source"):
         capture_controls.capture(raw, tmp_path / "bad-response")
 
     _write_control_raw(raw)
@@ -523,7 +452,7 @@ def test_managed_control_capture_rejects_wrong_outcomes_and_inventory(tmp_path: 
     status = json.loads(status_path.read_text(encoding="utf-8"))
     status["resources"].pop()
     status_path.write_text(json.dumps(status), encoding="utf-8")
-    with pytest.raises(ValueError, match="reviewed boundary"):
+    with pytest.raises(ValueError, match="manifest source"):
         capture_controls.capture(raw, tmp_path / "bad-status")
 
 
@@ -1173,7 +1102,7 @@ def test_principal_continuity_capture_is_balanced_and_fail_closed(tmp_path: Path
     summary = read_json("principal-continuity-summary.json")
     deployment = read_json("principal-continuity-deployment.json")
 
-    capture_principal_continuity.verify(EVIDENCE, ROOT)
+    capture_principal_continuity.verify(EVIDENCE, _archival_root(tmp_path))
     assert summary["results"]["same_principal_allow_then_deny"] == 10
     assert summary["results"]["changed_principal_allow_then_allow"] == 10
     assert summary["results"]["changed_principal_aggregate"] == 1200
@@ -1202,11 +1131,7 @@ def test_principal_continuity_capture_is_balanced_and_fail_closed(tmp_path: Path
         if call["wall_clock_delta_ms"] < 0
     ]
     assert deltas == [-127.88]
-    assert all(
-        call["duration_ms"] > 0
-        for row in events["trials"]
-        for call in row["calls"]
-    )
+    assert all(call["duration_ms"] > 0 for row in events["trials"] for call in row["calls"])
 
     for source in read_json("principal-continuity-index.json")["sources"]:
         (tmp_path / source["locator"]).write_bytes((EVIDENCE / source["locator"]).read_bytes())
@@ -1215,7 +1140,7 @@ def test_principal_continuity_capture_is_balanced_and_fail_closed(tmp_path: Path
     changed["calls"][1]["outcome"] = "deny"
     (tmp_path / "principal-continuity-events.json").write_text(json.dumps(mutated))
     with pytest.raises(ValueError, match="reviewed outcomes have drifted"):
-        capture_principal_continuity.verify(tmp_path, ROOT)
+        capture_principal_continuity.verify(tmp_path, _archival_root(tmp_path))
 
 
 def test_principal_continuity_bundle_contains_no_live_identifiers() -> None:
@@ -1269,8 +1194,7 @@ def test_deployment_continuity_refusal_is_bounded_and_fail_closed(tmp_path: Path
 def test_deployment_continuity_refusal_has_clean_cleanup_and_no_identifiers() -> None:
     index = read_json("deployment-continuity-refusal-index.json")
     text = "".join(
-        (EVIDENCE / source["locator"]).read_text(encoding="utf-8")
-        for source in index["sources"]
+        (EVIDENCE / source["locator"]).read_text(encoding="utf-8") for source in index["sources"]
     )
     assert not re.search(
         r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
@@ -1289,7 +1213,7 @@ def test_retry_continuity_capture_executes_and_accumulates_same_id_retries(
     events = read_json("retry-continuity-events.json")
     summary = read_json("retry-continuity-summary.json")
     contract = read_json("retry-continuity-contract.json")
-    capture_retry_continuity.verify(EVIDENCE, ROOT)
+    capture_retry_continuity.verify(EVIDENCE, _archival_root(tmp_path))
 
     assert summary["same_id"] == {
         "allow_allow_deny": 10,
@@ -1318,8 +1242,7 @@ def test_retry_continuity_capture_executes_and_accumulates_same_id_retries(
     assert len(same) == len(fresh) == 10
     assert all(row["calls"][0]["request_bytes"] == row["calls"][1]["request_bytes"] for row in same)
     assert all(
-        row["calls"][0]["execution_alias"] != row["calls"][1]["execution_alias"]
-        for row in same
+        row["calls"][0]["execution_alias"] != row["calls"][1]["execution_alias"] for row in same
     )
     assert all(
         [call["outcome"] for call in row["calls"]] == ["allow", "allow", "deny"]
@@ -1336,14 +1259,13 @@ def test_retry_continuity_capture_executes_and_accumulates_same_id_retries(
     mutated["trials"][0]["calls"][2]["outcome"] = "allow"
     (tmp_path / "retry-continuity-events.json").write_text(json.dumps(mutated))
     with pytest.raises(ValueError, match="reviewed outcomes have drifted"):
-        capture_retry_continuity.verify(tmp_path, ROOT)
+        capture_retry_continuity.verify(tmp_path, _archival_root(tmp_path))
 
 
 def test_retry_continuity_bundle_has_clean_cleanup_and_no_identifiers() -> None:
     index = read_json("retry-continuity-index.json")
     text = "".join(
-        (EVIDENCE / source["locator"]).read_text(encoding="utf-8")
-        for source in index["sources"]
+        (EVIDENCE / source["locator"]).read_text(encoding="utf-8") for source in index["sources"]
     )
     assert not re.search(
         r"arn:aws|https://|\b\d{12}\b|\b(?:AKIA|ASIA)[A-Z0-9]+|"
@@ -1461,3 +1383,11 @@ def test_committed_evidence_contains_no_live_aws_identity_or_credential() -> Non
         ],
         "policy_resource_replaced_with_binding": True,
     }
+
+
+def _archival_root(tmp_path: Path) -> Path:
+    """Resolve the study's original path to its unchanged, archived bytes."""
+    path = tmp_path / "examples/continuity-refund/manifest.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes((ROOT / "tests/fixtures/archived-study-manifest-v1.json").read_bytes())
+    return tmp_path

@@ -57,7 +57,9 @@ def test_continuation_profile_preserves_all_six_arms_and_missing_recovery():
     assert by_id["tightening-to-700"].provider_limits == (1000, 700)
     assert by_id["tightening-to-700"].transition == "limit_revision"
     assert json.loads(contents[BASE + "continuation-protocol.json"])["mandate"]["sha256"] == (
-        hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
+        hashlib.sha256(
+            (ROOT / "tests/fixtures/archived-study-manifest-v1.json").read_bytes()
+        ).hexdigest()
     )
     assert not hasattr(agentmandate, "project_agentcore_continuation")
 
@@ -155,9 +157,14 @@ def test_continuation_profile_works_through_existing_cli(capsys):
     assert main(["continuity", "validate", str(FIXTURE)]) == EXIT_OK
     capsys.readouterr()
     args = [
-        "continuity", "reconcile", str(MANIFEST),
-        "--continuity-provider", str(FIXTURE),
-        "--continuity-as-of", "2026-10-09T00:00:00Z", "--json",
+        "continuity",
+        "reconcile",
+        str(MANIFEST),
+        "--continuity-provider",
+        str(FIXTURE),
+        "--continuity-as-of",
+        "2026-10-09T00:00:00Z",
+        "--json",
     ]
     for locator in _contents():
         args.extend(["--continuity-source", f"{locator}={ROOT / locator}"])
@@ -200,9 +207,7 @@ def test_accepted_observations_preserve_binding_gaps_expiry_and_source_checks(
     if tampered:
         contents[BASE + "continuation-events.json"] += b" "
     mandate = load(MANIFEST)
-    result = analyse_continuity(
-        mandate, profile, contents, as_of=datetime.fromisoformat(as_of)
-    )
+    result = analyse_continuity(mandate, profile, contents, as_of=datetime.fromisoformat(as_of))
     assert result.authority == analyse(mandate)
     assert not result.clean
     assert len(result.outcomes) == 6
@@ -233,9 +238,14 @@ def test_accepted_profile_cli_still_exits_with_unresolved_continuity(capsys):
     assert main(["continuity", "validate", str(ACCEPTED)]) == EXIT_OK
     capsys.readouterr()
     args = [
-        "continuity", "reconcile", str(MANIFEST),
-        "--continuity-provider", str(ACCEPTED),
-        "--continuity-as-of", "2026-10-09T12:53:28Z", "--json",
+        "continuity",
+        "reconcile",
+        str(MANIFEST),
+        "--continuity-provider",
+        str(ACCEPTED),
+        "--continuity-as-of",
+        "2026-10-09T12:53:28Z",
+        "--json",
     ]
     for locator in _contents():
         args.extend(["--continuity-source", f"{locator}={ROOT / locator}"])

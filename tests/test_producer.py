@@ -66,7 +66,12 @@ def _raw() -> dict:
 
 
 def _mandate():
-    path = EVIDENCE / "mandate.yaml"
+    path = (
+        Path(__file__).parents[1]
+        / "tests/fixtures/quantity-evidence"
+        / EVIDENCE.name
+        / "mandate.yaml"
+    )
     return loads(path.read_text(), source=str(path.relative_to(ROOT)))
 
 
@@ -80,12 +85,8 @@ def _reviewed(maximum: int = 2) -> ProducerBoundary:
         ),
         controls=replace(
             boundary.controls,
-            accepted_through=replace(
-                boundary.controls.accepted_through, count=maximum
-            ),
-            exhausted_at=replace(
-                boundary.controls.exhausted_at, attempt=maximum + 1
-            ),
+            accepted_through=replace(boundary.controls.accepted_through, count=maximum),
+            exhausted_at=replace(boundary.controls.exhausted_at, attempt=maximum + 1),
         ),
         evidence=ProducerEvidence("exact", "accepted", "reviewer", "2026-12-31"),
     )
@@ -200,9 +201,7 @@ def _rehash(graph: AuthorityIR) -> AuthorityIR:
         sources=(
             replace(
                 graph.sources[0],
-                semantic_sha256=_profile_digest(
-                    graph.entities, graph.facts, graph.edges
-                ),
+                semantic_sha256=_profile_digest(graph.entities, graph.facts, graph.edges),
             ),
         ),
     )
@@ -239,7 +238,7 @@ def test_generic_reachability_refuses_the_standalone_producer_profile() -> None:
     graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
 
     with pytest.raises(
-        IRFormatError, match="sources do not match the analyzable manifest-v1 profile"
+        IRFormatError, match="sources do not match the analyzable manifest-v2 profile"
     ):
         _analyse_ir(graph)
 
@@ -252,8 +251,7 @@ def test_producer_profile_wraps_structural_ir_failures() -> None:
         _validate_producer_profile(broken)
 
     facts = tuple(
-        replace(fact, value={}) if fact.predicate == "output" else fact
-        for fact in graph.facts
+        replace(fact, value={}) if fact.predicate == "output" else fact for fact in graph.facts
     )
     with pytest.raises(ProducerBoundaryFormatError, match="structurally invalid"):
         _validate_producer_profile(replace(graph, facts=facts))
@@ -275,9 +273,7 @@ def test_producer_profile_rejects_unknown_entity_kind() -> None:
     graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
     extra = Entity("mystery:extra", "mystery", "extra")
 
-    with pytest.raises(
-        ProducerBoundaryFormatError, match="one boundary and three typed targets"
-    ):
+    with pytest.raises(ProducerBoundaryFormatError, match="one boundary and three typed targets"):
         _validate_producer_profile(replace(graph, entities=(*graph.entities, extra)))
 
 
@@ -378,9 +374,7 @@ def test_producer_profile_fact_values_and_evidence_locations_are_closed() -> Non
         _validate_producer_profile(_rehash(replace(graph, facts=facts)))
 
     first = graph.facts[0]
-    changed_location = replace(
-        first, evidence=(replace(first.evidence[0], location="/different"),)
-    )
+    changed_location = replace(first, evidence=(replace(first.evidence[0], location="/different"),))
     facts = (changed_location, *graph.facts[1:])
     with pytest.raises(ProducerBoundaryFormatError, match="evidence locations"):
         _validate_producer_profile(_rehash(replace(graph, facts=facts)))
@@ -424,9 +418,7 @@ def test_producer_profile_checks_source_identity() -> None:
     )
 
     with pytest.raises(ProducerBoundaryFormatError, match="source identity"):
-        _validate_producer_profile(
-            replace(graph, sources=(changed_source,), facts=facts)
-        )
+        _validate_producer_profile(replace(graph, sources=(changed_source,), facts=facts))
 
 
 def test_private_analysis_applies_the_real_maximum_two_boundary() -> None:
@@ -465,9 +457,7 @@ def test_private_analysis_applies_the_real_maximum_two_boundary() -> None:
     }
     assert result.as_of == "2026-09-03"
 
-    one_call_budget = replace(
-        mandate, limits=replace(mandate.limits, effects={"write": 1})
-    )
+    one_call_budget = replace(mandate, limits=replace(mandate.limits, effects={"write": 1}))
     two_step = analyse_producers(
         one_call_budget,
         (boundary,),
@@ -533,11 +523,18 @@ def test_producer_analysis_requires_a_caller_date(as_of, message: str) -> None:
 def test_producer_analysis_validates_selection_and_source_input_types() -> None:
     with pytest.raises(ProducerBoundaryFormatError, match="ProducerSelection"):
         analyse_producers(
-            _mandate(), (), {}, "selection", as_of=date(2026, 9, 3)  # type: ignore[arg-type]
+            _mandate(),
+            (),
+            {},
+            "selection",
+            as_of=date(2026, 9, 3),  # type: ignore[arg-type]
         )
     with pytest.raises(ProducerBoundaryFormatError, match="map locators to bytes"):
         analyse_producers(
-            _mandate(), (), {"source": "text"}, as_of=date(2026, 9, 3)  # type: ignore[dict-item]
+            _mandate(),
+            (),
+            {"source": "text"},
+            as_of=date(2026, 9, 3),  # type: ignore[dict-item]
         )
 
 
@@ -545,9 +542,7 @@ def test_missing_selection_retains_the_manifest_result() -> None:
     mandate = _mandate()
     boundary = _reviewed()
 
-    result = analyse_producers(
-        mandate, (boundary,), _contents(), as_of=date(2026, 9, 3)
-    )
+    result = analyse_producers(mandate, (boundary,), _contents(), as_of=date(2026, 9, 3))
 
     assert result.authority.as_dict() == analyse(mandate).as_dict()
     assert [finding.message for finding in result.findings] == [
@@ -669,14 +664,10 @@ def test_distinct_selected_boundaries_can_bound_distinct_producers() -> None:
             id="producer-boundaries/other-key",
             target=replace(first.target, binding="other_producer"),
             output=replace(first.output, scope="other_key"),
-            run_boundary=replace(
-                first.run_boundary, inventory=("other_producer",)
-            ),
+            run_boundary=replace(first.run_boundary, inventory=("other_producer",)),
         ).to_json()
     )
-    other_tool = replace(
-        mandate.tools[0], name="other_producer", produces="other_key"
-    )
+    other_tool = replace(mandate.tools[0], name="other_producer", produces="other_key")
     expanded = replace(mandate, tools=(*mandate.tools, other_tool))
 
     result = analyse_producers(
@@ -803,9 +794,10 @@ def test_duplicate_and_competing_boundaries_block_every_narrowing() -> None:
         as_of=date(2026, 9, 3),
     )
     assert duplicate_selection.findings[0].code == "producer.selection-unresolved"
-    assert ProducerResult.from_json(
-        duplicate_selection.to_result().to_json()
-    ) == duplicate_selection.to_result()
+    assert (
+        ProducerResult.from_json(duplicate_selection.to_result().to_json())
+        == duplicate_selection.to_result()
+    )
 
 
 def test_depth_is_forwarded_to_the_private_search() -> None:
@@ -828,7 +820,7 @@ def test_depth_is_forwarded_to_the_private_search() -> None:
 @pytest.mark.parametrize("case", ["clean", "bounded", "breached", "unresolved", "truncated"])
 def test_producer_result_v1_canonical_fixtures(case: str) -> None:
     result = _result_cases()[case]
-    expected = (RESULT_FIXTURES / f"producer-result-v1-{case}.json").read_text()
+    expected = (RESULT_FIXTURES / f"producer-result-v2-{case}.json").read_text()
 
     assert result.to_json() == expected
     assert ProducerResult.from_json(expected) == result
@@ -840,8 +832,8 @@ def test_producer_result_records_inputs_codes_and_capacity_semantics() -> None:
     bounded = cases["bounded"].as_dict()
     unresolved = cases["unresolved"].as_dict()
 
-    assert bounded["schema"] == "agentmandate.producers/v1"
-    assert bounded["result_version"] == 1
+    assert bounded["schema"] == "agentmandate.producers/v2"
+    assert bounded["result_version"] == 2
     assert bounded["inputs"]["manifest"]["locator"].endswith("mandate.yaml")
     assert len(bounded["inputs"]["boundaries"]) == 1
     assert bounded["applied"][0]["capacity_kind"] == "concurrent"
@@ -856,7 +848,7 @@ def test_producer_result_records_inputs_codes_and_capacity_semantics() -> None:
     ("text", "message"),
     [
         ("{", "not valid JSON"),
-        ('{"value":NaN}', "non-canonical value"),
+        ('{"value": NaN}', "non-canonical value"),
         ("[]", "must be an object"),
         ('{"result_sha256":"' + "0" * 64 + '"}', "missing field"),
     ],
@@ -923,9 +915,7 @@ def test_producer_result_rejects_unknown_outer_fields_and_bad_checksums() -> Non
             "selections must be sorted",
         ),
         (
-            lambda raw: raw["inputs"]["selections"][0].update(
-                partition_binding="secret"
-            ),
+            lambda raw: raw["inputs"]["selections"][0].update(partition_binding="secret"),
             "reviewed non-secret alias",
         ),
         (lambda raw: raw.update(authority=[]), "must be an object"),
@@ -946,19 +936,19 @@ def test_producer_result_rejects_unknown_outer_fields_and_bad_checksums() -> Non
         ),
         (
             lambda raw: raw["authority"].update(
-                max_extractable={"amount": "not-decimal", "currency": "USD"}
+                max_quantities={"value": {"amount": "not-decimal", "unit": "USD"}}
             ),
             "must be decimal",
         ),
         (
             lambda raw: raw["authority"].update(
-                max_extractable={"amount": "NaN", "currency": "USD"}
+                max_quantities={"value": {"amount": "NaN", "unit": "USD"}}
             ),
             "must be canonical",
         ),
         (
             lambda raw: raw["authority"].update(
-                max_extractable={"amount": "1", "currency": " "}
+                max_quantities={"value": {"amount": "1", "unit": " "}}
             ),
             "non-empty trimmed string",
         ),
@@ -1221,9 +1211,7 @@ def _rehashed(monkeypatch, contents: dict[str, bytes]) -> None:
     monkeypatch.setattr(producer_migrations, "_IAM_SOURCES", sources)
 
 
-def _replace_json(
-    contents: dict[str, bytes], suffix: str, mutate
-) -> dict[str, bytes]:
+def _replace_json(contents: dict[str, bytes], suffix: str, mutate) -> dict[str, bytes]:
     changed = dict(contents)
     locator = next(path for path in changed if path.endswith(suffix))
     raw = json.loads(changed[locator])

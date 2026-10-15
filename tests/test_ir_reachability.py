@@ -24,7 +24,7 @@ from agentmandate.reach import Step
 COMPOUND = """
 agent: compound
 limits:
-  total: {amount: 500, currency: GBP}
+  quantities: {value: {amount: 500, unit: GBP}}
   depth: 8
   effects: {irreversible: 1}
 tools:
@@ -37,7 +37,8 @@ tools:
     requires: [case]
     value_arg: amount
     scope_key: case
-    ceiling: {amount: 500, currency: GBP}
+    quantity: value
+    ceiling: {amount: 500, unit: GBP}
 """
 
 
@@ -65,16 +66,10 @@ def test_derived_edges_cite_reach_effect_transition_and_limit_support() -> None:
     result = _analyse_ir(_from_mandate(loads(COMPOUND)))
     edges = {edge.id: edge for edge in result.graph.edges}
     facts = {fact.id for fact in result.graph.facts}
-    input_edges = {
-        edge.id for edge in result.graph.edges if not RELATIONS[edge.relation].derived
-    }
+    input_edges = {edge.id for edge in result.graph.edges if not RELATIONS[edge.relation].derived}
 
-    refund_reach = edges[
-        _edge_id("agent:compound", "can_reach", "tool:issue_refund")
-    ]
-    refund_effect = edges[
-        _edge_id("tool:issue_refund", "has_effect", "scope:case")
-    ]
+    refund_reach = edges[_edge_id("agent:compound", "can_reach", "tool:issue_refund")]
+    refund_effect = edges[_edge_id("tool:issue_refund", "has_effect", "scope:case")]
     assert _fact_id("agent:compound", "tools") in refund_reach.support
     assert _fact_id("tool:issue_refund", "requires") in refund_reach.support
     assert _edge_id("tool:open_case", "produces", "scope:case") in refund_reach.support
@@ -91,10 +86,10 @@ def test_derived_edges_cite_reach_effect_transition_and_limit_support() -> None:
         )[0]: edge
         for edge in breach_edges
     }
-    cumulative = by_kind["cumulative_value"]
+    cumulative = by_kind["quantity_budget"]
     effect_count = by_kind["effect_count"]
     ungated = by_kind["ungated_effect"]
-    assert _fact_id("constraint:run", "total") in cumulative.support
+    assert _fact_id("constraint:run", "quantities") in cumulative.support
     assert _fact_id("constraint:run", "effects") in effect_count.support
     assert _fact_id("tool:issue_refund", "requires_approval") in ungated.support
 
@@ -136,7 +131,7 @@ def test_retained_paths_replay_the_same_enabling_preconditions() -> None:
             "edge:agent:compound:can_reach:tool:issue_refund",
             "transition support",
         ),
-        ("has_breach", "fact:constraint:run:total", "breach support"),
+        ("has_breach", "fact:constraint:run:quantities", "breach support"),
     ],
 )
 def test_each_derived_relation_rejects_missing_semantic_support(
@@ -147,7 +142,7 @@ def test_each_derived_relation_rejects_missing_semantic_support(
         edge
         for edge in graph.edges
         if edge.relation == relation
-        and (relation != "has_breach" or "cumulative_value" in edge.target)
+        and (relation != "has_breach" or "quantity_budget" in edge.target)
         and missing in edge.support
     )
     changed = replace(
@@ -183,9 +178,7 @@ def test_derived_validation_rejects_unknown_or_irrelevant_provenance() -> None:
     with pytest.raises(IRFormatError, match="rooted in source records"):
         replace(
             graph,
-            edges=tuple(
-                derived_root if edge == reachable else edge for edge in graph.edges
-            ),
+            edges=tuple(derived_root if edge == reachable else edge for edge in graph.edges),
         ).validate()
 
     producer = _edge_id("tool:open_case", "produces", "scope:case")
@@ -196,9 +189,7 @@ def test_derived_validation_rejects_unknown_or_irrelevant_provenance() -> None:
     with pytest.raises(IRFormatError, match="lacks a producer"):
         replace(
             graph,
-            edges=tuple(
-                without_producer if edge == reachable else edge for edge in graph.edges
-            ),
+            edges=tuple(without_producer if edge == reachable else edge for edge in graph.edges),
         ).validate()
 
 
@@ -244,7 +235,7 @@ def test_breach_validation_rejects_missing_paths_and_unknown_breach_kinds() -> N
     cumulative = next(
         edge
         for edge in graph.edges
-        if edge.relation == "has_breach" and "cumulative_value" in edge.target
+        if edge.relation == "has_breach" and "quantity_budget" in edge.target
     )
     edges = {edge.id: edge for edge in graph.edges}
     without_path = replace(
@@ -258,9 +249,7 @@ def test_breach_validation_rejects_missing_paths_and_unknown_breach_kinds() -> N
     with pytest.raises(IRFormatError, match="lacks a reachable path"):
         replace(
             graph,
-            edges=tuple(
-                without_path if edge == cumulative else edge for edge in graph.edges
-            ),
+            edges=tuple(without_path if edge == cumulative else edge for edge in graph.edges),
         ).validate()
 
     old_entity = next(entity for entity in graph.entities if entity.id == cumulative.target)

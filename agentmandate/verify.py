@@ -13,10 +13,11 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, DecimalException, InvalidOperation, localcontext
 from pathlib import Path
 
-from .manifest import IRREVERSIBLE, WRITE, Mandate
+from .manifest import IRREVERSIBLE, WRITE, Mandate, _quantity_units
+from .reach import _arithmetic_context
 
 VIOLATION_KINDS = (
     "no_observations",
@@ -25,13 +26,16 @@ VIOLATION_KINDS = (
     "missing_principal",
     "missing_scope",
     "missing_value",
-    "missing_currency",
+    "missing_unit",
+    "missing_quantity",
+    "quantity_mismatch",
     "unexpected_value",
     "ceiling_exceeded",
     "missing_approval",
     "wrong_principal",
-    "currency_mismatch",
-    "total_exceeded",
+    "unit_mismatch",
+    "quantity_exceeded",
+    "effect_budget_exceeded",
 )
 
 
@@ -44,7 +48,8 @@ class Observation:
     value: Decimal | None = None
     approved: bool = False
     principal: str | None = None
-    currency: str | None = None
+    unit: str | None = None
+    quantity: str | None = None
     # The call ended in an error. For a read that is uninteresting. For a call
     # that changes something it is ambiguous: an error means the operation
     # ended badly, not that the effect failed to commit, and a timeout is
@@ -83,21 +88,21 @@ class Observation:
             raise ValueError(f"line {line}: errored must be true or false")
 
         principal = raw.get("principal")
-        if principal is not None and (
-            not isinstance(principal, str) or not principal.strip()
-        ):
+        if principal is not None and (not isinstance(principal, str) or not principal.strip()):
             raise ValueError(f"line {line}: principal must be a non-empty string")
 
-        currency = raw.get("currency")
-        if currency is not None:
-            if (
-                not isinstance(currency, str)
-                or len(currency) != 3
-                or not currency.isascii()
-                or not currency.isalpha()
+        if "currency" in raw:
+            raise ValueError(f"line {line}: currency is unsupported; use quantity and unit")
+        unit = raw.get("unit")
+        quantity = raw.get("quantity")
+        for name, item in (("unit", unit), ("quantity", quantity)):
+            if item is not None and (
+                not isinstance(item, str)
+                or not item.strip()
+                or item != item.strip()
+                or any(c in item for c in "\r\n\x00")
             ):
-                raise ValueError(f"line {line}: currency must be a three-letter code")
-            currency = currency.upper()
+                raise ValueError(f"line {line}: {name} must be a non-empty trimmed string")
 
         return cls(
             tool=tool,
@@ -106,7 +111,8 @@ class Observation:
             approved=approved,
             errored=errored,
             principal=principal,
-            currency=currency,
+            unit=unit,
+            quantity=quantity,
             line=line,
         )
 
@@ -140,8 +146,7 @@ class Conformance:
             lines.extend(v.render() for v in self.violations)
             lines.append("")
             lines.append(
-                f"{len(self.violations)} violation(s) across "
-                f"{self.observed} observed call(s)"
+                f"{len(self.violations)} violation(s) across {self.observed} observed call(s)"
             )
         return "\n".join(lines)
 
@@ -179,10 +184,29 @@ def parse_observations(text: str) -> list[Observation]:
 
 
 def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
+    """Check exact named cumulative quantities without inheriting numeric context."""
+    _quantity_units(mandate)
+    if any(
+        o.value is not None
+        and (not isinstance(o.value, Decimal) or not o.value.is_finite() or o.value < 0)
+        for o in observations
+    ):
+        raise ValueError("observed quantity amounts must be finite non-negative Decimal values")
+    amounts = [t.ceiling.amount for t in mandate.tools if t.ceiling is not None]
+    amounts.extend(o.value for o in observations if o.value is not None)
+    try:
+        with localcontext(_arithmetic_context(amounts, len(observations))):
+            return _replay(mandate, observations)
+    except DecimalException as exc:
+        raise ValueError("replay quantities exceed supported exact decimal arithmetic") from exc
+
+
+def _replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
     """Report every observed call the mandate does not permit."""
     violations: list[Violation] = []
     spent: dict[tuple[str, str | None], Decimal] = {}
-    total = Decimal(0)
+    totals: dict[str, Decimal] = {}
+    effect_counts: dict[str, int] = {}
 
     if not observations:
         violations.append(
@@ -224,9 +248,7 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 )
             )
 
-        if observation.errored and (
-            tool.effect in {WRITE, IRREVERSIBLE} or tool.spends_value
-        ):
+        if observation.errored and (tool.effect in {WRITE, IRREVERSIBLE} or tool.spends_value):
             violations.append(
                 Violation(
                     "errored_effect",
@@ -246,8 +268,7 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 Violation(
                     "missing_approval",
                     observation,
-                    "the mandate requires approval for this call and the record "
-                    "shows none",
+                    "the mandate requires approval for this call and the record shows none",
                 )
             )
 
@@ -269,12 +290,12 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 )
             )
 
-        if tool.spends_value and observation.currency is None:
+        if tool.spends_value and observation.unit is None:
             violations.append(
                 Violation(
-                    "missing_currency",
+                    "missing_unit",
                     observation,
-                    "the record omits the currency, so its value cannot be compared "
+                    "the record omits the unit, so its value cannot be compared "
                     "with the declared ceiling",
                 )
             )
@@ -284,8 +305,31 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 Violation(
                     "unexpected_value",
                     observation,
-                    "the call records spending but the tool declares no value argument "
-                    "or ceiling",
+                    "the call records spending but the tool declares no value argument or ceiling",
+                )
+            )
+
+        if tool.spends_value and observation.quantity is None:
+            violations.append(
+                Violation("missing_quantity", observation, "the record omits the named quantity")
+            )
+        elif tool.spends_value and observation.quantity != tool.quantity:
+            violations.append(
+                Violation(
+                    "quantity_mismatch",
+                    observation,
+                    "the recorded quantity differs from the tool declaration",
+                )
+            )
+
+        effect_counts[tool.effect] = effect_counts.get(tool.effect, 0) + 1
+        effect_cap = mandate.limits.effects.get(tool.effect)
+        if effect_cap is not None and effect_counts[tool.effect] > effect_cap:
+            violations.append(
+                Violation(
+                    "effect_budget_exceeded",
+                    observation,
+                    f"{tool.effect} calls exceed budget {effect_cap}",
                 )
             )
 
@@ -293,40 +337,25 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
             tool.spends_value
             and observation.value is not None
             and observation.scope is not None
-            and observation.currency is not None
+            and observation.unit is not None
+            and observation.quantity == tool.quantity
         )
         if complete_spend:
-            if (
-                tool.ceiling is not None
-                and observation.currency != tool.ceiling.currency
-            ):
-                # Summing across currencies would make the run total a
+            if tool.ceiling is not None and observation.unit != tool.ceiling.unit:
+                # Summing across units would make the run total a
                 # meaningless number, so this is reported rather than converted.
                 violations.append(
                     Violation(
-                        "currency_mismatch",
+                        "unit_mismatch",
                         observation,
-                        f"the call spent {observation.currency} against a ceiling "
-                        f"declared in {tool.ceiling.currency}",
+                        f"the call spent {observation.unit} against a ceiling "
+                        f"declared in {tool.ceiling.unit}",
                     )
                 )
                 continue
 
-            if (
-                mandate.limits.total is not None
-                and observation.currency != mandate.limits.total.currency
-            ):
-                violations.append(
-                    Violation(
-                        "currency_mismatch",
-                        observation,
-                        f"the call spent {observation.currency} against a run limit "
-                        f"declared in {mandate.limits.total.currency}",
-                    )
-                )
-                continue
-
-            total += observation.value
+            name = tool.quantity
+            totals[name] = totals.get(name, Decimal(0)) + observation.value
             if tool.ceiling is not None and observation.scope is not None:
                 key = (tool.name, observation.scope)
                 spent[key] = spent.get(key, Decimal(0)) + observation.value
@@ -341,15 +370,17 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                         )
                     )
 
-    if mandate.limits.total is not None and total > mandate.limits.total.amount:
-        violations.append(
-            Violation(
-                "total_exceeded",
-                Observation(tool="<run>", line=0),
-                f"the run spent {total} against a declared total limit of "
-                f"{mandate.limits.total.amount}",
+    for name, cap in mandate.limits.quantities.items():
+        total = totals.get(name, Decimal(0))
+        if total > cap.amount:
+            violations.append(
+                Violation(
+                    "quantity_exceeded",
+                    Observation(tool="<run>", line=0),
+                    f"quantity {name!r} consumed {total} {cap.unit}, "
+                    f"above budget {cap.amount} {cap.unit}",
+                )
             )
-        )
 
     return Conformance(observed=len(observations), violations=tuple(violations))
 

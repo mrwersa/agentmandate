@@ -9,7 +9,7 @@ profiles, captured bytes, reviewed domains, expiry, and hop attenuation before
 using the attachment. Compatibility follows `STABILITY.md`.
 
 The independent version fields are `delegation_version: 1` for a chain and
-`principal_version: 2` for its tool attachment. Neither changes manifest v1.
+`principal_version: 2` for its tool attachment. Neither changes manifest v2.
 For command syntax and expected outcomes, use the
 [CLI review](delegation-gate-4-review.md#closing-verdict).
 
@@ -210,7 +210,7 @@ Structural parsing and IR projection remain distinct from analysis eligibility.
 The implemented standalone profile requires one pinned delegation-chain source,
 recomputes its semantic digest, and rejects mixed evidence states. Generic IR
 validation accepts its additive relations, while `reach --ir` refuses the
-profile at the manifest-v1 trust boundary.
+profile at the manifest-v2 trust boundary.
 Before consumption, the analyzer re-reads each artifact, validates its closed
 profile, verifies every supplied digest, requires exact and accepted evidence,
 and evaluates review expiry against a caller-supplied date and token validity

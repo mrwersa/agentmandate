@@ -20,6 +20,7 @@ from agentmandate._continuity import (
     ContinuityEvidence,
     ContinuityFormatError,
     ContinuityResult,
+    ContinuitySource,
     _agentcore_controls,
     _anthropic_axes,
     _anthropic_controls,
@@ -246,7 +247,7 @@ def test_continuity_profiles_project_registered_relations_and_round_trip():
         decoded = AuthorityIR.from_json(encoded)
         assert decoded.to_json() == encoded
         assert {item.review for fact in graph.facts for item in fact.evidence} == {"unreviewed"}
-        with pytest.raises(IRFormatError, match="analyzable manifest-v1 profile"):
+        with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
             _analyse_ir(graph)
 
 
@@ -370,14 +371,30 @@ def _evaluation_time() -> datetime:
 
 
 def _agentcore_analysis(**changes) -> ContinuityAnalysis:
-    path = AGENTCORE / "mandate.yaml"
+    path = ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml"
     mandate = load(path)
+    # Interpretation tests explicitly assume a synthetic association to the new model.
+    # The archived signature never acquires a binding to these changed bytes.
+    proof = b"synthetic quantity-model association for unit tests only"
+    source = ContinuitySource(
+        "synthetic-quantity-association",
+        "synthetic-review",
+        "synthetic-quantity-association.txt",
+        hashlib.sha256(proof).hexdigest(),
+    )
+    binding = _reviewed(migrate_agentcore_binding(_binding_contents()))
+    binding = replace(
+        binding,
+        mandate_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+        sources=(source,),
+        evidence=replace(binding.evidence, reviewer="synthetic-model-test"),
+    )
     arguments = {
         "provider": _reviewed(migrate_agentcore_continuity(_agentcore_contents())),
         "source_bytes": _agentcore_contents(),
         "as_of": _evaluation_time(),
-        "binding": _reviewed(migrate_agentcore_binding(_binding_contents())),
-        "binding_source_bytes": _binding_contents(),
+        "binding": binding,
+        "binding_source_bytes": {source.locator: proof},
         "mandate_bytes": path.read_bytes(),
     }
     arguments.update(changes)
@@ -385,7 +402,7 @@ def _agentcore_analysis(**changes) -> ContinuityAnalysis:
 
 
 def _anthropic_analysis(**changes) -> ContinuityAnalysis:
-    path = AGENTCORE / "mandate.yaml"
+    path = ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml"
     arguments = {
         "provider": _reviewed(migrate_anthropic_continuity(_anthropic_contents())),
         "source_bytes": _anthropic_contents(),
@@ -482,7 +499,9 @@ def test_agentcore_reconciliation_preserves_reviewed_control_matrix():
         "continuity.state-unresolved",
         "continuity.complete-mediation-unresolved",
     }
-    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+    assert result.authority == analyse(
+        load(ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml")
+    )
     assert not result.clean
 
 
@@ -527,7 +546,9 @@ def test_anthropic_reconciliation_keeps_reset_widening_and_overshoot_separate():
         "continuity.derivation-integrity-unresolved",
         "continuity.complete-mediation-unresolved",
     }
-    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+    assert result.authority == analyse(
+        load(ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml")
+    )
 
 
 @pytest.mark.parametrize(
@@ -564,7 +585,9 @@ def test_reviewed_recovery_requires_successor_allow_but_not_a_final_allow(
         expected_state == "reset"
     )
     assert outcome.safe_continuation == "unresolved"
-    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+    assert result.authority == analyse(
+        load(ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml")
+    )
     assert ContinuityResult.from_json(result.to_result().to_json()) == result.to_result()
 
 
@@ -589,11 +612,13 @@ def test_recovery_followed_by_denial_does_not_bypass_evidence_gaps(gap):
     assert result.outcomes[0].state == "unresolved"
     assert result.outcomes[0].safe_continuation == "unresolved"
     assert "continuity.state-reset" not in {item.code for item in result.findings}
-    assert result.authority == analyse(load(AGENTCORE / "mandate.yaml"))
+    assert result.authority == analyse(
+        load(ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml")
+    )
 
 
 def test_unreviewed_or_tampered_profiles_fail_closed_with_full_authority():
-    path = AGENTCORE / "mandate.yaml"
+    path = ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml"
     mandate = load(path)
     unreviewed = analyse_continuity(
         mandate,
@@ -619,7 +644,7 @@ def test_unreviewed_or_tampered_profiles_fail_closed_with_full_authority():
 
 
 def test_binding_failures_never_establish_cross_boundary_reset():
-    path = AGENTCORE / "mandate.yaml"
+    path = ROOT / "tests/fixtures/quantity-evidence/agentcore-refund-policy/mandate.yaml"
     mandate = load(path)
     bad_binding = replace(
         _reviewed(migrate_agentcore_binding(_binding_contents())),
@@ -826,7 +851,7 @@ def test_missing_or_unreadable_mandate_bytes_do_not_establish_a_binding(mandate_
     ("text", "message"),
     [
         ("{", "not valid JSON"),
-        ('{"x":NaN}', "non-canonical"),
+        ('{"x": NaN}', "non-canonical"),
     ],
 )
 def test_json_errors_are_typed(text, message):
@@ -1141,3 +1166,11 @@ def test_anthropic_migration_rejects_bad_joins_and_cells(monkeypatch):
     )
     with pytest.raises(ContinuityFormatError, match="cell concurrent_subagents_2 differs"):
         migrate_anthropic_continuity(bad_topology)
+
+
+def test_historical_binding_does_not_transfer_to_the_quantity_model():
+    original = _reviewed(migrate_agentcore_binding(_binding_contents()))
+    result = _agentcore_analysis(binding=original, binding_source_bytes=_binding_contents())
+    assert "continuity.binding-untrusted" in {finding.code for finding in result.findings}
+    signed = next(outcome for outcome in result.outcomes if outcome.transition == "signed-binding")
+    assert signed.state == "unresolved"

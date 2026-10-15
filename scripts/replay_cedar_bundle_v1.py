@@ -171,9 +171,10 @@ class CedarBundle:
 
     def to_json(self) -> str:
         """Return deterministic JSON suitable for committed fixtures."""
-        return json.dumps(
-            self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        ) + "\n"
+        return (
+            json.dumps(self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+            + "\n"
+        )
 
     def verify_sources(self, contents: Mapping[str, bytes]) -> None:
         """Verify caller-supplied bytes without resolving source locators."""
@@ -471,6 +472,7 @@ def _bundle_to_ir(bundle: CedarBundle) -> AuthorityIR:
         *(Entity(request_ids[name], "request", name) for name in request_names),
         *(Entity(decision_ids[item.id], "decision", item.id) for item in bundle.decisions),
     )
+
     def fact(subject: str, predicate: str, value: Any, location: str) -> Fact:
         return Fact(
             _fact_id(subject, predicate),
@@ -739,7 +741,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "docs" / "evidence" / "cedar-document-cloud"
 BUNDLE_PATH = EVIDENCE / "bundle.json"
 BUNDLE_SHA256 = "592699ddc1c20cadf8a1914d18f815bbd49363bbacbe97a1b9a78f458e5860e7"
-PROJECTION_SHA256 = "48a092ce3e555c5d144263b32351d9572bcd7a71cf16c5dc6ee86dc25cbae9c5"
+PROJECTION_SHA256 = "4ad3faef7f1ef75566fc25d3c0180dfd282d6a9326fc06e4d6914e3966624f47"
 
 
 def verify_fixture() -> None:
@@ -750,8 +752,7 @@ def verify_fixture() -> None:
     if bundle.to_json().encode("utf-8") != bundle_bytes:
         raise CedarBundleFormatError("Cedar bundle replay is not byte-canonical")
     contents = {
-        source.locator: (EVIDENCE / source.locator).read_bytes()
-        for source in bundle.sources
+        source.locator: (EVIDENCE / source.locator).read_bytes() for source in bundle.sources
     }
     bundle.verify_sources(contents)
     projection_digest = hashlib.sha256(bundle.to_ir().to_json().encode("utf-8")).hexdigest()

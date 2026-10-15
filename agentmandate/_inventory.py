@@ -16,6 +16,7 @@ from pathlib import PurePosixPath
 from typing import Any
 
 from ._ir import (
+    IR_VERSION,
     AuthorityIR,
     Edge,
     Entity,
@@ -173,9 +174,10 @@ class DynamicInventory:
 
     def to_json(self) -> str:
         """Return deterministic JSON suitable for committed fixtures."""
-        return json.dumps(
-            self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        ) + "\n"
+        return (
+            json.dumps(self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+            + "\n"
+        )
 
     def verify_source(self, content: bytes) -> None:
         """Verify explicitly supplied capture bytes without resolving the locator."""
@@ -216,8 +218,7 @@ class DynamicInventory:
         version = raw["inventory_version"]
         if isinstance(version, bool) or not isinstance(version, int):
             raise InventoryFormatError(
-                "unsupported dynamic inventory version type; "
-                f"this build reads {INVENTORY_VERSION}"
+                f"unsupported dynamic inventory version type; this build reads {INVENTORY_VERSION}"
             )
         if version != INVENTORY_VERSION:
             raise InventoryFormatError(
@@ -267,11 +268,7 @@ def reconcile(
     for declaration in declarations:
         boundary = declaration.boundary.id
         target = declaration.boundary.target
-        if (
-            selected is None
-            or target.source != selected.module
-            or target.binding != selected.label
-        ):
+        if selected is None or target.source != selected.module or target.binding != selected.label:
             findings.append(
                 InventoryReconciliationFinding(
                     boundary,
@@ -319,8 +316,7 @@ def reconcile(
         content = source_contents.get(declaration.source.locator)
         if (
             content is None
-            or hashlib.sha256(content).hexdigest()
-            != declaration.source.content_sha256
+            or hashlib.sha256(content).hexdigest() != declaration.source.content_sha256
         ):
             continue
         if declaration.membership.completeness != "complete":
@@ -388,16 +384,11 @@ def _conflicted_boundaries(
 
 
 def _to_inventory_ir(declaration: DynamicInventory) -> AuthorityIR:
-    declaration_source_id = _entity_id(
-        "source", f"inventory-declaration:{declaration.boundary.id}"
-    )
-    capture_source_id = _entity_id(
-        "source", f"inventory-capture:{declaration.boundary.id}"
-    )
+    declaration_source_id = _entity_id("source", f"inventory-declaration:{declaration.boundary.id}")
+    capture_source_id = _entity_id("source", f"inventory-capture:{declaration.boundary.id}")
     boundary_id = _entity_id("boundary", declaration.boundary.id)
-    tool_ids = tuple(
-        _entity_id("tool", member) for member in declaration.membership.members
-    )
+    tool_ids = tuple(_entity_id("tool", member) for member in declaration.membership.members)
+
     def evidence(location: str, *, captured: bool = False) -> tuple[Evidence, ...]:
         items = [
             Evidence(
@@ -417,11 +408,13 @@ def _to_inventory_ir(declaration: DynamicInventory) -> AuthorityIR:
                 )
             )
         return tuple(items)
+
     entities = (
         Entity(boundary_id, "boundary", declaration.boundary.id),
-        *(Entity(identifier, "tool", name) for identifier, name in zip(
-            tool_ids, declaration.membership.members, strict=True
-        )),
+        *(
+            Entity(identifier, "tool", name)
+            for identifier, name in zip(tool_ids, declaration.membership.members, strict=True)
+        ),
     )
     selection = {
         key: sorted(value) if isinstance(value, tuple) else value
@@ -492,7 +485,7 @@ def _to_inventory_ir(declaration: DynamicInventory) -> AuthorityIR:
         ).encode("utf-8")
     ).hexdigest()
     graph = AuthorityIR(
-        ir_version=1,
+        ir_version=IR_VERSION,
         sources=(
             Source(
                 id=declaration_source_id,
@@ -503,9 +496,7 @@ def _to_inventory_ir(declaration: DynamicInventory) -> AuthorityIR:
                 semantic_sha256=semantic_sha256,
                 adapter=INVENTORY_ADAPTER,
                 adapter_version=INVENTORY_ADAPTER_VERSION,
-                content_sha256=hashlib.sha256(
-                    declaration.to_json().encode("utf-8")
-                ).hexdigest(),
+                content_sha256=hashlib.sha256(declaration.to_json().encode("utf-8")).hexdigest(),
             ),
             Source(
                 id=capture_source_id,
@@ -535,9 +526,9 @@ def _inventory_semantic_sha256(
         "facts": [fact.as_dict() for fact in sorted(facts, key=lambda item: item.id)],
         "edges": [edge.as_dict() for edge in sorted(edges, key=lambda item: item.id)],
     }
-    encoded = json.dumps(
-        body, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("utf-8")
+    encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+        "utf-8"
+    )
     return hashlib.sha256(encoded).hexdigest()
 
 
@@ -585,28 +576,21 @@ def _validate_inventory_profile(graph: AuthorityIR) -> None:
             declaration_source.id,
             capture_source.id,
         }:
-            raise InventoryFormatError(
-                "dynamic inventory IR profile fact has unsupported evidence"
-            )
+            raise InventoryFormatError("dynamic inventory IR profile fact has unsupported evidence")
         facts[key] = fact
 
     required = {(boundary.id, predicate) for predicate in INVENTORY_PREDICATES["boundary"]}
-    required.update(
-        (entity.id, "name") for entity in graph.entities if entity.kind == "tool"
-    )
+    required.update((entity.id, "name") for entity in graph.entities if entity.kind == "tool")
     if set(facts) != required:
         raise InventoryFormatError(
             "dynamic inventory IR profile does not contain its complete predicate set"
         )
     all_evidence = [item for fact in graph.facts for item in fact.evidence]
     if any(
-        (item.confidence, item.review)
-        != (all_evidence[0].confidence, all_evidence[0].review)
+        (item.confidence, item.review) != (all_evidence[0].confidence, all_evidence[0].review)
         for item in all_evidence
     ):
-        raise InventoryFormatError(
-            "dynamic inventory IR profile facts disagree on evidence state"
-        )
+        raise InventoryFormatError("dynamic inventory IR profile facts disagree on evidence state")
     if facts[(boundary.id, "name")].value != boundary.name:
         raise InventoryFormatError("dynamic inventory IR boundary name does not match entity")
     for entity in graph.entities:
@@ -632,23 +616,16 @@ def _validate_inventory_profile(graph: AuthorityIR) -> None:
     )
     if (
         _string(capture, "kind", "IR capture") != capture_source.kind
-        or _relative_path(capture, "locator", "IR capture")
-        != capture_source.locator
-        or _string(capture, "producer_version", "IR capture")
-        != capture_source.producer_version
-        or _string(capture, "content_sha256", "IR capture")
-        != capture_source.content_sha256
+        or _relative_path(capture, "locator", "IR capture") != capture_source.locator
+        or _string(capture, "producer_version", "IR capture") != capture_source.producer_version
+        or _string(capture, "content_sha256", "IR capture") != capture_source.content_sha256
     ):
-        raise InventoryFormatError(
-            "dynamic inventory IR capture fact does not match its source"
-        )
+        raise InventoryFormatError("dynamic inventory IR capture fact does not match its source")
     _string(capture, "format_version", "IR capture")
     _string(capture, "producer", "IR capture")
     completeness = facts[(boundary.id, "completeness")].value
     if completeness not in COMPLETENESS:
-        raise InventoryFormatError(
-            "dynamic inventory IR profile completeness has an invalid value"
-        )
+        raise InventoryFormatError("dynamic inventory IR profile completeness has an invalid value")
     _evidence(
         {
             "confidence": all_evidence[0].confidence,
@@ -663,23 +640,18 @@ def _validate_inventory_profile(graph: AuthorityIR) -> None:
         raise InventoryFormatError("dynamic inventory IR profile members do not match tools")
     required_capture_facts = {
         (boundary.id, "members"),
-        *(
-            (entity.id, "name")
-            for entity in graph.entities
-            if entity.kind == "tool"
-        ),
+        *((entity.id, "name") for entity in graph.entities if entity.kind == "tool"),
     }
     if any(
-        capture_source.id
-        not in {item.source for item in facts[key].evidence}
+        capture_source.id not in {item.source for item in facts[key].evidence}
         for key in required_capture_facts
     ):
-        raise InventoryFormatError(
-            "dynamic inventory IR membership lacks captured-source evidence"
-        )
+        raise InventoryFormatError("dynamic inventory IR membership lacks captured-source evidence")
     digest = capture_source.content_sha256
-    if digest is None or len(digest) != 64 or any(
-        character not in "0123456789abcdef" for character in digest
+    if (
+        digest is None
+        or len(digest) != 64
+        or any(character not in "0123456789abcdef" for character in digest)
     ):
         raise InventoryFormatError(
             "dynamic inventory IR source content_sha256 must be lowercase SHA-256"
@@ -689,9 +661,7 @@ def _validate_inventory_profile(graph: AuthorityIR) -> None:
         raise InventoryFormatError(
             "dynamic inventory IR source semantic_sha256 does not match the profile"
         )
-    member_names = sorted(
-        entity.name for entity in graph.entities if entity.kind == "tool"
-    )
+    member_names = sorted(entity.name for entity in graph.entities if entity.kind == "tool")
     capture_semantic = hashlib.sha256(
         json.dumps(
             {"members": member_names},
@@ -711,23 +681,17 @@ def _record(raw: Any, path: str, fields: set[str]) -> dict[str, Any]:
         raise InventoryFormatError(f"dynamic inventory {path} must be an object")
     missing = sorted(fields - raw.keys())
     if missing:
-        raise InventoryFormatError(
-            f"dynamic inventory {path} is missing field {missing[0]!r}"
-        )
+        raise InventoryFormatError(f"dynamic inventory {path} is missing field {missing[0]!r}")
     extra = sorted(raw.keys() - fields)
     if extra:
-        raise InventoryFormatError(
-            f"dynamic inventory {path} has unknown field {extra[0]!r}"
-        )
+        raise InventoryFormatError(f"dynamic inventory {path} has unknown field {extra[0]!r}")
     return raw
 
 
 def _string(raw: dict[str, Any], field: str, path: str) -> str:
     value = raw[field]
     if not isinstance(value, str) or not value or value.strip() != value:
-        raise InventoryFormatError(
-            f"dynamic inventory {path}.{field} must be a non-empty string"
-        )
+        raise InventoryFormatError(f"dynamic inventory {path}.{field} must be a non-empty string")
     return value
 
 
@@ -775,9 +739,7 @@ def _selection(raw: Any) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
         raise InventoryFormatError(f"dynamic inventory {path} must be an object")
     unknown = sorted(raw.keys() - SELECTION_KEYS)
     if unknown:
-        raise InventoryFormatError(
-            f"dynamic inventory {path} has unsupported key {unknown[0]!r}"
-        )
+        raise InventoryFormatError(f"dynamic inventory {path} has unsupported key {unknown[0]!r}")
     result: list[tuple[str, str | tuple[str, ...]]] = []
     for key, value in raw.items():
         item_path = f"{path}.{key}"
@@ -787,9 +749,7 @@ def _selection(raw: Any) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
         if (
             isinstance(value, list)
             and value
-            and all(
-                isinstance(item, str) and item and item.strip() == item for item in value
-            )
+            and all(isinstance(item, str) and item and item.strip() == item for item in value)
         ):
             if len(set(value)) != len(value):
                 raise InventoryFormatError(
@@ -840,8 +800,7 @@ def _membership(raw: Any) -> InventoryMembership:
         raise InventoryFormatError("dynamic inventory membership.relation has an invalid value")
     members = record["members"]
     if not isinstance(members, list) or any(
-        not isinstance(member, str) or not member or member.strip() != member
-        for member in members
+        not isinstance(member, str) or not member or member.strip() != member for member in members
     ):
         raise InventoryFormatError(
             "dynamic inventory membership.members must be an array of non-empty strings"
@@ -859,9 +818,7 @@ def _membership(raw: Any) -> InventoryMembership:
 
 def _nullable_string(raw: dict[str, Any], field: str, path: str) -> str | None:
     value = raw[field]
-    if value is not None and (
-        not isinstance(value, str) or not value or value.strip() != value
-    ):
+    if value is not None and (not isinstance(value, str) or not value or value.strip() != value):
         raise InventoryFormatError(
             f"dynamic inventory {path}.{field} must be a non-empty string or null"
         )

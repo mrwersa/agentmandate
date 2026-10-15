@@ -76,15 +76,11 @@ def test_agentkit_members_are_the_distinct_preserved_provider_actions() -> None:
 
 def test_sentry_partial_members_are_exactly_the_visible_catalogue() -> None:
     source = json.loads(
-        (ROOT / "docs" / "evidence" / "sentry-mcp" / "catalogue.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "docs" / "evidence" / "sentry-mcp" / "catalogue.json").read_text(encoding="utf-8")
     )
     declaration = DynamicInventory.from_json(SENTRY.read_text(encoding="utf-8"))
 
-    assert set(declaration.membership.members) == {
-        tool["name"] for tool in source["tools"]
-    }
+    assert set(declaration.membership.members) == {tool["name"] for tool in source["tools"]}
     assert declaration.membership.completeness == "partial"
 
 
@@ -101,9 +97,7 @@ def test_canonicalization_sorts_members_selection_keys_and_list_values() -> None
 
     assert list(rendered["selection"]) == ["environment", "skills"]
     assert rendered["selection"]["skills"] == ["inspect", "triage"]
-    assert rendered["membership"]["members"] == sorted(
-        rendered["membership"]["members"]
-    )
+    assert rendered["membership"]["members"] == sorted(rendered["membership"]["members"])
 
 
 def test_an_empty_selection_is_valid() -> None:
@@ -342,7 +336,11 @@ def test_complete_agentkit_boundary_discharges_static_uncertainty(tmp_path: Path
         selection=dict(value.selection),
         as_of=date(2027, 1, 1),
     )
-    drift = compare(load(ROOT / "docs/evidence/agentkit/mandate.yaml"), inventory, dynamic=result)
+    drift = compare(
+        load(ROOT / "tests/fixtures/quantity-evidence/agentkit/mandate.yaml"),
+        inventory,
+        dynamic=result,
+    )
 
     assert result.complete
     assert result.covers_binding
@@ -354,9 +352,7 @@ def test_complete_agentkit_boundary_discharges_static_uncertainty(tmp_path: Path
 
 def test_partial_sentry_boundary_widens_but_cannot_claim_completeness() -> None:
     value = declaration(SENTRY)
-    inventory = selected_inventory(
-        "docs/evidence/sentry-mcp/capture-catalogue.mjs", "tools/list"
-    )
+    inventory = selected_inventory("docs/evidence/sentry-mcp/capture-catalogue.mjs", "tools/list")
 
     result = reconcile(
         inventory,
@@ -365,7 +361,11 @@ def test_partial_sentry_boundary_widens_but_cannot_claim_completeness() -> None:
         selection=dict(value.selection),
         as_of=date(2027, 1, 1),
     )
-    drift = compare(load(ROOT / "docs/evidence/sentry-mcp/mandate.yaml"), inventory, dynamic=result)
+    drift = compare(
+        load(ROOT / "tests/fixtures/quantity-evidence/sentry-mcp/mandate.yaml"),
+        inventory,
+        dynamic=result,
+    )
 
     assert not result.complete
     assert result.members == tuple(sorted(value.membership.members))
@@ -379,7 +379,7 @@ def test_expired_complete_evidence_is_unresolved_and_never_authorizes_removal() 
     value = declaration()
     value = replace(value, evidence=replace(value.evidence, expires="2026-01-01"))
     inventory = selected_inventory(value.boundary.target.source, value.boundary.target.binding)
-    mandate = load(ROOT / "docs/evidence/agentkit/mandate.yaml")
+    mandate = load(ROOT / "tests/fixtures/quantity-evidence/agentkit/mandate.yaml")
     mandate = replace(
         mandate,
         tools=mandate.tools + (replace(mandate.tools[0], name="reviewed_but_absent"),),
@@ -456,15 +456,11 @@ def test_each_ineligible_boundary_names_the_failed_condition(case: str, message:
     elif case == "digest":
         contents = {value.source.locator: b"tampered"}
     elif case == "confidence":
-        value = replace(
-            value, evidence=replace(value.evidence, confidence="heuristic")
-        )
+        value = replace(value, evidence=replace(value.evidence, confidence="heuristic"))
     else:
         value = replace(value, evidence=replace(value.evidence, review="contested"))
 
-    result = reconcile_one(
-        value, inventory=inventory, contents=contents, selection=selection
-    )
+    result = reconcile_one(value, inventory=inventory, contents=contents, selection=selection)
 
     assert not result.complete
     assert any(message in finding.message for finding in result.findings)
@@ -474,9 +470,7 @@ def test_unreviewed_boundary_is_unaccepted_and_has_no_current_expiry() -> None:
     value = declaration()
     value = replace(
         value,
-        evidence=replace(
-            value.evidence, review="unreviewed", reviewer=None, expires=None
-        ),
+        evidence=replace(value.evidence, review="unreviewed", reviewer=None, expires=None),
     )
 
     messages = [finding.message for finding in reconcile_one(value).findings]
@@ -499,9 +493,7 @@ def test_duplicate_and_disagreeing_boundary_claims_are_conflicts() -> None:
     changed = replace(
         value,
         source=replace(value.source, producer_version="0.7.5"),
-        membership=replace(
-            value.membership, members=value.membership.members + ("new_tool",)
-        ),
+        membership=replace(value.membership, members=value.membership.members + ("new_tool",)),
     )
     disagreement = reconcile(
         inventory,
@@ -530,8 +522,7 @@ def rehash(graph: AuthorityIR) -> AuthorityIR:
 
 def replace_fact(graph: AuthorityIR, predicate: str, **changes) -> AuthorityIR:
     facts = tuple(
-        replace(fact, **changes) if fact.predicate == predicate else fact
-        for fact in graph.facts
+        replace(fact, **changes) if fact.predicate == predicate else fact for fact in graph.facts
     )
     return rehash(replace(graph, facts=facts))
 
@@ -567,9 +558,7 @@ def membership_without_capture_evidence(graph: AuthorityIR) -> AuthorityIR:
     facts = tuple(
         replace(
             fact,
-            evidence=tuple(
-                item for item in fact.evidence if item.source == declaration_source
-            ),
+            evidence=tuple(item for item in fact.evidence if item.source == declaration_source),
         )
         if fact.predicate == "members"
         else fact
@@ -588,8 +577,7 @@ def membership_without_capture_evidence(graph: AuthorityIR) -> AuthorityIR:
         (
             lambda graph: replace(
                 graph,
-                sources=graph.sources
-                + (replace(graph.sources[0], id="source:inventory:third"),),
+                sources=graph.sources + (replace(graph.sources[0], id="source:inventory:third"),),
             ),
             "exactly two sources",
         ),
@@ -610,8 +598,7 @@ def membership_without_capture_evidence(graph: AuthorityIR) -> AuthorityIR:
         (
             lambda graph: replace(
                 graph,
-                entities=graph.entities
-                + (Entity("scope:extra", "scope", "extra"),),
+                entities=graph.entities + (Entity("scope:extra", "scope", "extra"),),
             ),
             "one boundary and only tool entities",
         ),
@@ -638,9 +625,7 @@ def membership_without_capture_evidence(graph: AuthorityIR) -> AuthorityIR:
                 replace(
                     graph,
                     facts=tuple(
-                        replace(fact, evidence=())
-                        if fact.predicate == "expires"
-                        else fact
+                        replace(fact, evidence=()) if fact.predicate == "expires" else fact
                         for fact in graph.facts
                     ),
                 )
@@ -651,9 +636,7 @@ def membership_without_capture_evidence(graph: AuthorityIR) -> AuthorityIR:
             lambda graph: rehash(
                 replace(
                     graph,
-                    facts=tuple(
-                        fact for fact in graph.facts if fact.predicate != "expires"
-                    ),
+                    facts=tuple(fact for fact in graph.facts if fact.predicate != "expires"),
                 )
             ),
             "complete predicate set",
@@ -665,9 +648,7 @@ def membership_without_capture_evidence(graph: AuthorityIR) -> AuthorityIR:
                     facts=tuple(
                         replace(
                             fact,
-                            evidence=(
-                                replace(fact.evidence[0], confidence="heuristic"),
-                            ),
+                            evidence=(replace(fact.evidence[0], confidence="heuristic"),),
                         )
                         if fact.predicate == "expires"
                         else fact
