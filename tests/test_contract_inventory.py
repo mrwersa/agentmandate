@@ -542,7 +542,9 @@ def test_fleet_comparison_preserves_every_existing_contract_and_fixture():
     previous = json.loads(
         (ROOT / "tests/fixtures/current-contract-inventory-v0.35.json").read_text()
     )
-    current = audit.snapshot()
+    current = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.36.json").read_text()
+    )
     assert current["public_python"] == previous["public_python"]
     assert set(current["cli"]) - set(previous["cli"]) == {"mandate fleet diff"}
     for path, command in previous["cli"].items():
@@ -556,5 +558,28 @@ def test_fleet_comparison_preserves_every_existing_contract_and_fixture():
     }
     for path, markers in previous["artifact_markers"].items():
         assert current["artifact_markers"][path] == markers
+    for path, digest in previous["fixture_sha256"].items():
+        assert current["fixture_sha256"][path] == digest
+
+
+def test_ceiling_discovery_preserves_previous_commands_and_fixture_bytes():
+    previous = json.loads(
+        (ROOT / "tests/fixtures/current-contract-inventory-v0.36.json").read_text()
+    )
+    current = audit.snapshot()
+    assert current["public_python"] == previous["public_python"]
+    assert set(current["cli"]) == set(previous["cli"])
+    for path, command in previous["cli"].items():
+        present = copy.deepcopy(current["cli"][path])
+        if path == "mandate remediate":
+            added = next(a for a in present["arguments"] if a["dest"] == "discover_ceiling")
+            assert added["options"] == ["--discover-ceiling"]
+            present["arguments"].remove(added)
+        assert present == command
+    assert set(current["artifact_markers"]) - set(previous["artifact_markers"]) == {
+        "_ceiling_discovery.py",
+    }
+    for path, value in previous["artifact_markers"].items():
+        assert current["artifact_markers"][path] == value
     for path, digest in previous["fixture_sha256"].items():
         assert current["fixture_sha256"][path] == digest

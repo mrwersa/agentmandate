@@ -1,0 +1,127 @@
+{
+  "cases": [
+    {
+      "additional_reach_calls": 4,
+      "candidate_truncated": [
+        true
+      ],
+      "choices": [
+        "issue_refund=0.01"
+      ],
+      "domain_points": 50001,
+      "elapsed_ns": 4791734,
+      "frontier_complete_within_domain": true,
+      "input_sha256": {
+        "examples/dispute-resolver-v2.yaml": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9",
+        "examples/remediation/required-refund.json": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1"
+      },
+      "manifest": "examples/dispute-resolver-v2.yaml",
+      "max_evaluations": 128,
+      "name": "refund-cents",
+      "non_dominated": 1,
+      "probes": 6,
+      "requirements": "examples/remediation/required-refund.json"
+    },
+    {
+      "additional_reach_calls": 4,
+      "candidate_truncated": [
+        true
+      ],
+      "choices": [
+        "issue_refund=0.000001"
+      ],
+      "domain_points": 500000001,
+      "elapsed_ns": 7338870,
+      "frontier_complete_within_domain": true,
+      "input_sha256": {
+        "examples/dispute-resolver-v2.yaml": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9",
+        "examples/remediation/required-refund.json": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1"
+      },
+      "manifest": "examples/dispute-resolver-v2.yaml",
+      "max_evaluations": 128,
+      "name": "refund-micro-units",
+      "non_dominated": 1,
+      "probes": 6,
+      "requirements": "examples/remediation/required-refund.json"
+    },
+    {
+      "additional_reach_calls": 4,
+      "candidate_truncated": [
+        true
+      ],
+      "choices": [
+        "issue_refund=0.03"
+      ],
+      "domain_points": 16668,
+      "elapsed_ns": 5198538,
+      "frontier_complete_within_domain": true,
+      "input_sha256": {
+        "examples/dispute-resolver-v2.yaml": "123ba860d19423126346c16a2c17999f54ee92b1c7ee1ae7fc5a96f9e3df22e9",
+        "examples/remediation/required-refund.json": "a641df221e4d86e5e164d4e07cb507352f5e77c53ae3e66e614821dbc22dc1b1"
+      },
+      "manifest": "examples/dispute-resolver-v2.yaml",
+      "max_evaluations": 128,
+      "name": "refund-off-grid",
+      "non_dominated": 1,
+      "probes": 6,
+      "requirements": "examples/remediation/required-refund.json"
+    },
+    {
+      "additional_reach_calls": 7,
+      "candidate_truncated": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "choices": [
+        "pay=1",
+        "other=1"
+      ],
+      "domain_points": 25,
+      "elapsed_ns": 3016153,
+      "frontier_complete_within_domain": true,
+      "input_sha256": {
+        "examples/ceiling-discovery/required-two-tools.json": "b2caaf30e898c08e89fef52a0e4c87130cc3905829a4785a17571c697fc74ddc",
+        "examples/ceiling-discovery/two-tools.json": "9187a10a6579cdd1775d369485d05e8eaa122faab9529b1c92cf956fc019d1aa"
+      },
+      "manifest": "examples/ceiling-discovery/two-tools.json",
+      "max_evaluations": 128,
+      "name": "two-tools",
+      "non_dominated": 4,
+      "probes": 11,
+      "requirements": "examples/ceiling-discovery/required-two-tools.json"
+    },
+    {
+      "additional_reach_calls": 1,
+      "candidate_truncated": [],
+      "choices": [
+        "pay=1",
+        "other=1"
+      ],
+      "domain_points": 25,
+      "elapsed_ns": 931580,
+      "frontier_complete_within_domain": false,
+      "input_sha256": {
+        "examples/ceiling-discovery/required-two-tools.json": "b2caaf30e898c08e89fef52a0e4c87130cc3905829a4785a17571c697fc74ddc",
+        "examples/ceiling-discovery/two-tools.json": "9187a10a6579cdd1775d369485d05e8eaa122faab9529b1c92cf956fc019d1aa"
+      },
+      "manifest": "examples/ceiling-discovery/two-tools.json",
+      "max_evaluations": 4,
+      "name": "two-tools-cutoff",
+      "non_dominated": 0,
+      "probes": 4,
+      "requirements": "examples/ceiling-discovery/required-two-tools.json"
+    }
+  ],
+  "package_version": "0.37.0",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "scope": "five fixed synthetic cases; one local timing each, not a performance guarantee",
+  "source_sha256": {
+    "agentmandate/_ceiling_discovery.py": "7d5466fca2943b2ad2c0d040c60df22f7a83151ed612c952d1e40ca087cff396",
+    "agentmandate/_remediation.py": "02bcd04c8b2c3fccfa28bcbe71b8078f6abef34b104ba15be8dbfacb737ef4fc",
+    "agentmandate/reach.py": "387a2a7140cd3edaff0411835529ad22cd609f49ea285001f41e2dc121497d5a",
+    "scripts/benchmark_ceiling_discovery.py": "b621c6a5182f5a0e864ff5352202acb931a43bc53317b32ae3b5386128f5878c"
+  }
+}

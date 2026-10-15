@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-14",
+  "as_of": "2026-10-15",
   "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
   "phases": [
     {
@@ -100,7 +100,7 @@
           "title": "Explainable counterfactual remediation",
           "status": "partial",
           "evidence": "docs/remediation.md",
-          "reason": "Removal, approval, explicit ceilings, finite caller-defined ceiling grids, required paths and a bounded repair trade-off frontier are delivered; broader repair families and global synthesis remain open."
+          "reason": "Removal, approval, supplied ceilings/grids, required paths and automatic finite-lattice ceiling discovery with bounded approval combinations are delivered. Complete domain frontiers remain distinct from search-depth truncation; condition/delegation repairs, broader families and global synthesis remain open."
         },
         {
           "title": "Named-review CI workflow",

@@ -32,7 +32,9 @@ mandate remediate examples/dispute-resolver-v2.yaml --keep-tool issue_refund --j
 Without ceiling, workflow or frontier options, the result uses `agentmandate.remediation/v1`.
 Supplying `--ceiling` selects `agentmandate.remediation/v2`; supplying
 `--required-workflows` selects v3. Either `--ceiling-grid` or `--pareto` selects v4,
-including when combined with workflows. See the [compatibility rules
+including when combined with workflows. `--discover-ceiling TOOL=STEP` selects
+the opt-in [automatic ceiling search](ceiling-discovery.md), v5, retaining all
+tools and fixed declared budgets. See the [compatibility rules
 below](#compatibility-and-remaining-scope). `input.manifest_sha256` identifies the exact
 source bytes. `baseline` is the unchanged Authority result at the selected depth;
 `baseline_lint` keeps the separate single-manifest findings. Each candidate includes
@@ -192,6 +194,7 @@ synthetic trace remains a separate conformance illustration.
 | `--keep-tool NAME` | None | Preserve this tool's reachability at the selected depth; repeat as needed |
 | `--ceiling TOOL=AMOUNT` | None | Include this strictly lower monetary ceiling; repeat for other tools or alternatives |
 | `--ceiling-grid TOOL=MIN:MAX:STEP` | None | Expand a bounded range of exact lower ceilings; repeat or combine with explicit choices |
+| `--discover-ceiling TOOL=STEP` | None | Discover exact ceiling repairs while retaining all tools and supplied workflows; [v5 guide](ceiling-discovery.md) |
 | `--pareto` | Off | Return non-dominated repair trade-offs among successful examined candidates |
 | `--required-workflows FILE` | None | Preserve explicitly supplied ordered paths bound to the original manifest bytes |
 
@@ -343,7 +346,9 @@ command with only `--pareto` added and pins preserved fields, including the full
 search record and supplied ceiling domain;
 commands omitting both new flags retain all earlier result bytes and exit codes.
 
-Ceiling selection outside supplied finite domains, effect-budget repairs beyond removal, conditions,
+Automatic selection on derived finite lattices is implemented by the separate
+[discovery mode](ceiling-discovery.md). Continuous or unconstrained ceiling
+selection, effect-budget repairs beyond removal, conditions,
 delegation changes, application execution and business-scenario success remain outside
 this slice. Ordered positive paths are checked only within manifest v1. Total
 and effect limits are properties the analyzer checks,
