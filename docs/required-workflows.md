@@ -88,7 +88,7 @@ search, production occurs before spending for a tool that does both. A spending
 call can select only a binding already held at that point.
 
 Spend is cumulative per **tool, scope and binding**. Two tools sharing one
-scope do not share a ceiling. The run total includes every spending call.
+scope do not share a ceiling. Each named pool accumulates every call assigned to that quantity.
 Currency, principal and required approval must match their declarations.
 Every call counts against its declared effect budget, including pure reads,
 zero-spend calls and calls with no new quantity headroom. No-change calls remain

@@ -24,6 +24,10 @@ All notable changes to this project are documented here. The format follows
 - Use one remediation/v6 result with explicit evaluation-limit truncation and
   exhaustive point enumeration. Complete discovery with no candidate names
   the declared domain; steps reject whitespace, underscores and leading plus.
+- Reject quantity and unit labels on replay calls whose tool declares no
+  measured quantity. Scan notes, CLI help, SARIF descriptions and current
+  guides use named-pool terminology; the IR guide distinguishes structural
+  validity from analysis-time unit consistency.
 
 ## 0.37.0 - 2026-10-15
 

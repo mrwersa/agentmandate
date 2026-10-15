@@ -1,4 +1,4 @@
-"""Reviewed, per-trial monetary accounting; no provider continuity inference."""
+"""Reviewed, per-trial integer quantity accounting; no provider continuity inference."""
 
 from __future__ import annotations
 

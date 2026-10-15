@@ -175,6 +175,13 @@ between declared and referenced entity sets. Quantities, effects, principals,
 references, limits, and tool ceiling fields are type- and relationship-checked
 before projection.
 
+`ir validate` checks graph structure, not whether its accounting is usable. For
+example, a snapshot may preserve a tool ceiling in EUR and a budget in USD for
+the same quantity. Structural validation succeeds; `reach --ir` rejects that
+unit disagreement at analysis time with exit 2 and no partial result. The same
+check rejects conflicting units across tools sharing a quantity, even without
+a declared budget. Use manifest `lint` to find these disagreements before export.
+
 Every consumed fact must cite the reviewed manifest source, and every evidence
 reference on that fact must be both `exact` and `accepted`. This conservative
 first resolution rule means contested, unreviewed, heuristic, unknown, or

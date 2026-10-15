@@ -92,7 +92,7 @@ The result schema is `agentmandate.fleet-diff/v2`:
 | `membership_comparable` | Supplied membership supports scoped addition/removal classification |
 | `comparisons` | One row per known deployment key, with entry IDs, metadata changes and independently computed authority |
 | `unresolved_entries` | IDs whose snapshot identity is unavailable, retained separately on each side |
-| `summary` | Deployment and comparison counts; no combined monetary or effect total |
+| `summary` | Deployment and comparison counts; no combined quantity or effect total |
 | `findings`, `gate_passed` | Whole-input findings and the gate outcome |
 
 Matched rows carry the unchanged manifest `diff` report in `authority_diff`.

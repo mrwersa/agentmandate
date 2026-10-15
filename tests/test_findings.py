@@ -34,6 +34,8 @@ def test_sarif_is_a_well_formed_log() -> None:
     driver = log["runs"][0]["tool"]["driver"]
     assert driver["name"] == "AgentMandate"
     assert driver["version"] == "1.2.3"
+    rule = next(rule for rule in driver["rules"] if rule["id"] == "quantity_budget")
+    assert "consumption of this pool exceeds its budget" in rule["fullDescription"]["text"]
     assert log["runs"][0]["results"]
 
 

@@ -8,11 +8,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 242057,
+          "elapsed_ns_median": 159305,
           "elapsed_ns_samples": [
-            277867,
-            202466,
-            242057
+            185534,
+            159305,
+            155442
           ],
           "peak_traced_bytes": 13581
         }
@@ -42,11 +42,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 798626,
+          "elapsed_ns_median": 440536,
           "elapsed_ns_samples": [
-            798626,
-            1243058,
-            567828
+            445162,
+            440536,
+            436402
           ],
           "peak_traced_bytes": 28922
         }
@@ -76,11 +76,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 8762741,
+          "elapsed_ns_median": 6165829,
           "elapsed_ns_samples": [
-            8762741,
-            10707878,
-            6817973
+            6165829,
+            6285084,
+            5638079
           ],
           "peak_traced_bytes": 160956
         }
@@ -112,11 +112,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 212651742,
+          "elapsed_ns_median": 172053460,
           "elapsed_ns_samples": [
-            212651742,
-            212509097,
-            219691707
+            172053460,
+            171555694,
+            174635822
           ],
           "peak_traced_bytes": 2788304
         }
@@ -148,11 +148,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 1859071715,
+          "elapsed_ns_median": 1663781734,
           "elapsed_ns_samples": [
-            2068900270,
-            1859071715,
-            1787461364
+            1630130876,
+            1663781734,
+            1706450961
           ],
           "peak_traced_bytes": 21591072
         }
@@ -184,11 +184,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 148877,
+          "elapsed_ns_median": 167998,
           "elapsed_ns_samples": [
-            545264,
-            148810,
-            148877
+            170471,
+            150808,
+            167998
           ],
           "peak_traced_bytes": 14206
         }
@@ -218,11 +218,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 216396,
+          "elapsed_ns_median": 216354,
           "elapsed_ns_samples": [
-            294164,
-            210121,
-            216396
+            216354,
+            269190,
+            183164
           ],
           "peak_traced_bytes": 15209
         }
@@ -252,11 +252,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 307694,
+          "elapsed_ns_median": 283453,
           "elapsed_ns_samples": [
-            307694,
-            291846,
-            666193
+            276701,
+            301576,
+            283453
           ],
           "peak_traced_bytes": 16735
         }
@@ -286,11 +286,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 503687,
+          "elapsed_ns_median": 519617,
           "elapsed_ns_samples": [
-            503687,
-            482621,
-            522249
+            519617,
+            481747,
+            617867
           ],
           "peak_traced_bytes": 18763
         }
@@ -320,11 +320,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 887500,
+          "elapsed_ns_median": 688226,
           "elapsed_ns_samples": [
-            887500,
-            1389202,
-            790788
+            695030,
+            688226,
+            646765
           ],
           "peak_traced_bytes": 20794
         }
@@ -354,11 +354,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 116290,
+          "elapsed_ns_median": 105429,
           "elapsed_ns_samples": [
-            116290,
-            110748,
-            118617
+            104543,
+            105429,
+            118491
           ],
           "peak_traced_bytes": 8204
         }
@@ -388,11 +388,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 191190,
+          "elapsed_ns_median": 115897,
           "elapsed_ns_samples": [
-            191190,
-            151595,
-            240017
+            115897,
+            159082,
+            110101
           ],
           "peak_traced_bytes": 9524
         }
@@ -422,11 +422,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 219521,
+          "elapsed_ns_median": 147580,
           "elapsed_ns_samples": [
-            202075,
-            219521,
-            306396
+            174850,
+            147580,
+            142599
           ],
           "peak_traced_bytes": 11298
         }
@@ -458,11 +458,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 241619,
+          "elapsed_ns_median": 234206,
           "elapsed_ns_samples": [
-            236243,
-            241619,
-            320112
+            234206,
+            231217,
+            260640
           ],
           "peak_traced_bytes": 13074
         }
@@ -494,11 +494,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 329607,
+          "elapsed_ns_median": 309194,
           "elapsed_ns_samples": [
-            327920,
-            333787,
-            329607
+            310627,
+            309194,
+            308384
           ],
           "peak_traced_bytes": 14898
         }
@@ -530,11 +530,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 113980,
+          "elapsed_ns_median": 133733,
           "elapsed_ns_samples": [
-            98301,
-            113980,
-            114846
+            110140,
+            133733,
+            179473
           ],
           "peak_traced_bytes": 9216
         }
@@ -564,11 +564,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 122567,
+          "elapsed_ns_median": 123837,
           "elapsed_ns_samples": [
-            123297,
-            122567,
-            118862
+            119424,
+            123837,
+            128353
           ],
           "peak_traced_bytes": 10062
         }
@@ -600,11 +600,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 187519,
+          "elapsed_ns_median": 164247,
           "elapsed_ns_samples": [
-            195507,
-            187519,
-            171279
+            154811,
+            175715,
+            164247
           ],
           "peak_traced_bytes": 11438
         }
@@ -636,11 +636,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 246133,
+          "elapsed_ns_median": 288035,
           "elapsed_ns_samples": [
-            246133,
-            241834,
-            260345
+            264868,
+            288035,
+            295582
           ],
           "peak_traced_bytes": 13262
         }
@@ -672,11 +672,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 329433,
+          "elapsed_ns_median": 353839,
           "elapsed_ns_samples": [
-            329433,
-            301681,
-            383335
+            392058,
+            348465,
+            353839
           ],
           "peak_traced_bytes": 15086
         }
@@ -708,11 +708,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 139689,
+          "elapsed_ns_median": 150005,
           "elapsed_ns_samples": [
-            144861,
-            136066,
-            139689
+            161210,
+            150005,
+            138259
           ],
           "peak_traced_bytes": 14697
         }
@@ -744,11 +744,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 299637,
+          "elapsed_ns_median": 148101,
           "elapsed_ns_samples": [
-            161331,
-            310905,
-            299637
+            164119,
+            148101,
+            125808
           ],
           "peak_traced_bytes": 14697
         }
@@ -780,11 +780,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 184075,
+          "elapsed_ns_median": 173932,
           "elapsed_ns_samples": [
-            191894,
-            184075,
-            182851
+            173932,
+            206957,
+            152846
           ],
           "peak_traced_bytes": 14697
         }
@@ -816,11 +816,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 236394,
+          "elapsed_ns_median": 188169,
           "elapsed_ns_samples": [
-            238801,
-            150736,
-            236394
+            162392,
+            222380,
+            188169
           ],
           "peak_traced_bytes": 14697
         }
@@ -852,11 +852,11 @@
       "kind": "real-graph",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 164415,
+          "elapsed_ns_median": 162365,
           "elapsed_ns_samples": [
-            164415,
-            165959,
-            160231
+            162365,
+            158209,
+            167728
           ],
           "peak_traced_bytes": 14697
         }
@@ -888,11 +888,11 @@
       "kind": "synthetic-stress",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 134221493,
+          "elapsed_ns_median": 132874333,
           "elapsed_ns_samples": [
-            130932709,
-            146589956,
-            134221493
+            136301267,
+            129971610,
+            132874333
           ],
           "peak_traced_bytes": 3891324
         }
@@ -922,11 +922,11 @@
       "kind": "synthetic-stress",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 9829675,
+          "elapsed_ns_median": 9122892,
           "elapsed_ns_samples": [
-            9829675,
-            9751974,
-            10247499
+            9134983,
+            9122892,
+            9122687
           ],
           "peak_traced_bytes": 205590
         }
@@ -956,11 +956,11 @@
       "kind": "synthetic-stress",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 114085,
+          "elapsed_ns_median": 98865,
           "elapsed_ns_samples": [
-            116183,
-            114085,
-            107555
+            107749,
+            98865,
+            94310
           ],
           "peak_traced_bytes": 6296
         }
@@ -990,11 +990,11 @@
       "kind": "synthetic-stress",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 60993,
+          "elapsed_ns_median": 61789,
           "elapsed_ns_samples": [
-            60432,
-            60993,
-            61683
+            61789,
+            58893,
+            84465
           ],
           "peak_traced_bytes": 5072
         }
@@ -1024,11 +1024,11 @@
       "kind": "synthetic-stress",
       "measurements": {
         "current": {
-          "elapsed_ns_median": 5703928,
+          "elapsed_ns_median": 4877297,
           "elapsed_ns_samples": [
-            6234436,
-            5703928,
-            5457765
+            4877297,
+            4864905,
+            4917362
           ],
           "peak_traced_bytes": 113244
         }
@@ -1077,6 +1077,6 @@
   "package_version": "0.38.0",
   "real_graph_runs": 25,
   "real_graph_truncated_runs": 20,
-  "recorded_at": "2026-10-15T15:07:38.239576+00:00",
-  "source_sha256": "711d563e50917e046c64482ab53551f1bd781a0c13948f1e0b682b51eea1cf56"
+  "recorded_at": "2026-10-15T17:26:22.083135+00:00",
+  "source_sha256": "d797cef8481d06e4d3091cb05b4b8dc0ba5e6c36af589278fc95247019a178cd"
 }

@@ -42,8 +42,8 @@ S <= 1 + T + T² + ... + Tᴰ
 ```
 
 The [maximum-headroom argument](headroom-abstraction.md) explains when that
-single monetary choice preserves the bounded maximum and breach result. It
-does not equate the greedy and exhaustive searches' state sets or truncation.
+single quantity amount choice preserves the bounded maxima and budget-breach
+results. It does not equate the greedy and exhaustive searches' state sets or truncation.
 
 This bounds distinct discovered states, including the start and cutoff states.
 It is a worst-case ceiling, not an estimate of practical work. Canonicalization,
@@ -132,11 +132,11 @@ At the default depth eight in this run:
 
 | Graph | States | Peak frontier | Median ms | Peak KiB | Witness calls | Truncated |
 |---|---:|---:|---:|---:|---|---|
-| agentkit | 4,537 | 2,045 | 212.652 | 2723.0 | 3 | yes |
-| github-mcp-server | 9 | 1 | 0.504 | 18.3 | none | yes |
-| aws-postgres-mcp | 9 | 1 | 0.242 | 12.8 | 3 | yes |
-| sentry-mcp | 9 | 1 | 0.246 | 13.0 | 2 | yes |
-| initiative-mcp | 1 | 1 | 0.236 | 14.4 | 1 | no |
+| agentkit | 4,537 | 2,045 | 172.053 | 2723.0 | 3 | yes |
+| github-mcp-server | 9 | 1 | 0.520 | 18.3 | none | yes |
+| aws-postgres-mcp | 9 | 1 | 0.234 | 12.8 | 3 | yes |
+| sentry-mcp | 9 | 1 | 0.288 | 13.0 | 2 | yes |
+| initiative-mcp | 1 | 1 | 0.188 | 14.4 | 1 | no |
 
 Four of five graphs truncate at depth eight; 20 of 25 graph/depth runs truncate
 overall. This is a frequency over the fixed sweep, not a production probability.

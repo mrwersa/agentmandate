@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal
 
 import pytest
@@ -194,7 +195,34 @@ def test_value_on_a_tool_without_a_declared_ceiling_is_a_violation():
     assert kinds(
         '{"tool": "open_case", "scope": "c1", "principal": "caller", "val'
         'ue": "10", "unit": "GBP", "quantity": "value"}'
-    ) == ["unexpected_value"]
+    ) == ["unexpected_value", "unexpected_quantity", "unexpected_unit"]
+
+
+@pytest.mark.parametrize(
+    "fields, expected",
+    [
+        ({"quantity": "records"}, ["unexpected_quantity"]),
+        ({"unit": "record"}, ["unexpected_unit"]),
+        ({"quantity": "records", "unit": "record"},
+         ["unexpected_quantity", "unexpected_unit"]),
+    ],
+)
+def test_measurement_labels_on_a_non_spending_call_are_violations(fields, expected):
+    assert kinds(json.dumps({"tool": "open_case", "principal": "caller", **fields})) == expected
+
+
+@pytest.mark.parametrize("fields", [{"quantity": "records"}, {"unit": "record"}])
+def test_verify_cli_blocks_measurement_labels_on_a_non_spending_call(tmp_path, capsys, fields):
+    from agentmandate.cli import main
+
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text('{"agent":"reader","tools":[{"name":"read","effect":"read"}]}')
+    trace = tmp_path / "calls.jsonl"
+    trace.write_text(json.dumps({"tool": "read", "principal": "caller", **fields}) + "\n")
+    assert main(["verify", str(manifest), "--traces", str(trace), "--json"]) == 1
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert json.loads(captured.out)["conformant"] is False
 
 
 def test_a_blank_scope_is_rejected_rather_than_treated_as_absent():

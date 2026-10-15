@@ -51,6 +51,41 @@ def model(*, shared=False, same_unit=False, unbounded=True, cap="3", budget="4",
     )
 
 
+@pytest.mark.parametrize("conflict", ["budget", "tool"])
+@pytest.mark.parametrize("json_output", [False, True])
+def test_ir_structure_can_preserve_unit_conflicts_but_analysis_refuses_them(
+    tmp_path, capsys, conflict, json_output
+):
+    source = model(shared=True)
+    if conflict == "budget":
+        source = replace(
+            source,
+            limits=replace(source.limits, quantities={"records": Quantity(Decimal(4), "USD")}),
+        )
+    else:
+        source = replace(
+            source,
+            limits=replace(source.limits, quantities={}),
+            tools=source.tools[:-1] + (
+                replace(source.tools[-1], ceiling=Quantity(Decimal(3), "token")),
+            ),
+        )
+    path = tmp_path / "conflicting-units.json"
+    path.write_text(_from_mandate(source).to_json())
+    flags = ["--json"] if json_output else []
+    assert main(["ir", "validate", str(path), *flags]) == 0
+    validated = capsys.readouterr()
+    assert validated.err == ""
+    if json_output:
+        assert json.loads(validated.out)["status"] == "valid"
+    else:
+        assert validated.out == "valid authority IR v2\n"
+    assert main(["reach", "--ir", str(path), *flags]) == 2
+    refused = capsys.readouterr()
+    assert refused.out == ""
+    assert "incompatible units" in refused.err
+
+
 @pytest.mark.parametrize("same_unit", [False, True])
 def test_independent_named_pools_never_merge_even_with_matching_units(same_unit):
     source = model(same_unit=same_unit, unbounded=False)

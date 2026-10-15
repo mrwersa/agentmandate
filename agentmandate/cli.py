@@ -285,7 +285,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         metavar="TOOL=AMOUNT",
-        help="include this lower monetary ceiling in the edit domain; repeat for alternatives",
+        help="include this lower quantity ceiling in the edit domain; repeat for alternatives",
     )
     remediation_parser.add_argument(
         "--required-workflows",
@@ -309,7 +309,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         metavar="TOOL=STEP",
-        help="discover exact ceiling repairs on this monetary lattice, retaining all tools",
+        help="discover exact ceiling repairs on this quantity lattice, retaining all tools",
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
 

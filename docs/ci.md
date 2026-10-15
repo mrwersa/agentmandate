@@ -19,7 +19,7 @@ the measured costs and the resource limits a CI wrapper must enforce.
 
 Use [repair candidates](remediation.md) to investigate a breached manifest.
 Use [automatic ceiling discovery](ceiling-discovery.md) with a declared
-granularity and required workflows to derive usable monetary proposals. Its
+granularity and required workflows to derive usable quantity proposals. Its
 domain-frontier completeness does not extend the reachability depth or accept
 the original widening; successful proposals still require human selection.
 `mandate remediate` reports the original breach and still exits 1 when a
@@ -79,7 +79,7 @@ flowchart LR
   s1 --> s2
   s3["issue_refund<br/>case#2 · 500 GBP"]
   s2 --> s3
-  breach["cumulative value 1000 GBP exceeds limit 500 GBP"]
+  breach["quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP"]
   s3 --> breach
 ```
 
@@ -306,7 +306,7 @@ continuity baseline and always exits 1: eligible scoped comparison and issuer
 treatment are not a global safe-continuation gate.
 
 The separate [scalar handover](scalar-handover.md) gate checks conformance to
-a closed monetary model at cutover. Supply both reviewed bindings in the
+a closed integer quantity model at cutover. Supply both reviewed bindings in the
 artifact and map every declared source:
 
 ```yaml

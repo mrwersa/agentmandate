@@ -678,6 +678,7 @@ def test_scan_source_renders_the_notes_before_the_manifest(tmp_path: Path) -> No
     notes_end = rendered.index("version: 2")
     assert "Declared but not given to this agent: draft_email" in rendered[:notes_end]
     assert rendered.index("REVIEW") < notes_end
+    assert "spends a measured quantity" in " ".join(rendered[:notes_end].split())
     assert 'agent: "refunds"' in rendered
 
 

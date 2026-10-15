@@ -16,8 +16,8 @@ state continuity and safe continuation unresolved.
 
 For two reviewed bindings and explicit cutover state, the separate
 [scalar handover verifier](scalar-handover.md) checks retained consumption,
-pending reservations, fencing, and next-request capacity in a closed monetary
-model. Its model-conformance result does not replace the provider continuity
+pending reservations, fencing, and next-request capacity in a closed integer
+quantity model. Its model-conformance result does not replace the provider continuity
 verdict below.
 
 ## Question and invariant

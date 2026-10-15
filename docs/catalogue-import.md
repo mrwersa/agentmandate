@@ -160,7 +160,7 @@ An Agent Card advertises skills and a remote agent interface. Skills are not
 independent callable tools. The importer requires `--dispatch-tool NAME` and
 emits **one** candidate: the application's tool that delegates to this agent.
 Skill IDs stay in review notes; they are not relabelled as tools or used to
-infer scope production, monetary limits, or per-skill permissions.
+infer scope production, quantity budgets, or per-skill permissions.
 
 Review the actual wrapper, routing/input mapping, registration in the selected
 agent, and delegated authority before accepting membership. A card with no

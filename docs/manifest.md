@@ -124,8 +124,8 @@ case separately; it does not itself bound the aggregate across cases.
 
 `reach` can find a sequence that exceeds a separately declared `limits.quantities`
 while respecting every per-case ceiling. Exploration remains bounded by
-`limits.depth`. Without a declared total, repetition alone is not a
-cumulative-value breach of the manifest.
+`limits.depth`. Without a budget for a named quantity, repetition alone is not
+a `quantity_budget` breach of the manifest.
 
 ## `roles`
 
@@ -209,6 +209,8 @@ real runs. Handle the file as you would the traces it was derived from.
 
 `verify` fails closed when evidence needed by a declared control is absent. A
 spending call without its scope, value, quantity or unit is non-conformant. A call
+on a tool without a measured quantity must omit value, quantity and unit; any
+of these fields makes that record non-conformant. A call
 without its principal is also non-conformant. Malformed field types are usage
 errors rather than values the verifier guesses or coerces. An empty trace
 cannot establish conformance.

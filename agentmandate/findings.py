@@ -37,8 +37,8 @@ RULES = {
     "quantity_budget": (
         "Cumulative quantity budget",
         "A sequence of individually permitted calls consumes more of a named quantity than "
-        "the run limit allows. Each call is within its own ceiling; the total "
-        "is not.",
+        "its cumulative budget allows. Each call is within its own ceiling; "
+        "their consumption of this pool exceeds its budget.",
     ),
     "ungated_irreversible": (
         "Reachable irreversible effect with no approval",

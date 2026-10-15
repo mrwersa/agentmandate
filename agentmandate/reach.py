@@ -268,7 +268,7 @@ def _analyse_with_trace(
 ) -> tuple[Authority, _ReachTrace]:
     """Walk the graph and retain shortest enabling paths for provenance.
 
-    Returns the effective authority summary plus any cumulative-value breach
+    Returns the effective authority summary plus any quantity-budget breach
     found within the depth bound, shortest counterexample first.
     """
     limit = depth if depth is not None else mandate.limits.depth

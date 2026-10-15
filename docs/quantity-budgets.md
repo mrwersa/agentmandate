@@ -79,6 +79,7 @@ cumulative-budget finding is invented for it. Zero is a real budget.
   it. Reassigning a tool to another pool or changing a unit requires review.
 - `verify` checks recorded `quantity`, `unit`, value and scope, then accumulates
   each pool separately. Missing identity or units cannot establish conformance.
+  Calls on tools without a measured quantity must omit value, quantity and unit.
 - IR export and analysis preserve quantity assignments, units and budgets.
 - Required workflows check each amount against its per-binding ceiling and
   named budget. Remediation and ceiling discovery recheck every pool, keep the

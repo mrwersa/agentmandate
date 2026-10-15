@@ -9,7 +9,7 @@
         "issue_refund=0.01"
       ],
       "domain_points": 50001,
-      "elapsed_ns": 5145241,
+      "elapsed_ns": 4613545,
       "frontier_complete_within_domain": true,
       "input_sha256": {
         "examples/dispute-resolver-v2.yaml": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
@@ -31,7 +31,7 @@
         "issue_refund=0.000001"
       ],
       "domain_points": 500000001,
-      "elapsed_ns": 3264376,
+      "elapsed_ns": 3137458,
       "frontier_complete_within_domain": true,
       "input_sha256": {
         "examples/dispute-resolver-v2.yaml": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
@@ -53,7 +53,7 @@
         "issue_refund=0.03"
       ],
       "domain_points": 16668,
-      "elapsed_ns": 3228717,
+      "elapsed_ns": 3043484,
       "frontier_complete_within_domain": true,
       "input_sha256": {
         "examples/dispute-resolver-v2.yaml": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
@@ -79,7 +79,7 @@
         "other=1"
       ],
       "domain_points": 25,
-      "elapsed_ns": 2972425,
+      "elapsed_ns": 2619436,
       "frontier_complete_within_domain": true,
       "input_sha256": {
         "examples/ceiling-discovery/required-two-tools.json": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36",
@@ -100,7 +100,7 @@
         "other=1"
       ],
       "domain_points": 25,
-      "elapsed_ns": 739865,
+      "elapsed_ns": 857393,
       "frontier_complete_within_domain": false,
       "input_sha256": {
         "examples/ceiling-discovery/required-two-tools.json": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36",
@@ -123,7 +123,7 @@
     "agentmandate/_remediation.py": "048f9cbc36893562543d4901f19eca04c7be4546f9a8002ce450ad9efcfe32d6",
     "agentmandate/_required_workflows.py": "0de21ecbd20a9b05833ad5b94ec8b67709dc38d2edcc4d1e33fb587a6186477b",
     "agentmandate/manifest.py": "f2492c839f7960427c6d021be02a2e087798436cf04df51e36c1e01f90cd1146",
-    "agentmandate/reach.py": "711d563e50917e046c64482ab53551f1bd781a0c13948f1e0b682b51eea1cf56",
+    "agentmandate/reach.py": "d797cef8481d06e4d3091cb05b4b8dc0ba5e6c36af589278fc95247019a178cd",
     "scripts/benchmark_ceiling_discovery.py": "23e55c9a6502f4897675e2b632be31d9543eae5857d53a69f4861c18684faccf"
   }
 }

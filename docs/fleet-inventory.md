@@ -89,7 +89,7 @@ are different properties.
 
 The result is `agentmandate.fleet-inventory/v2`. `summary` counts the whole
 index and separately counts selected entries. Tool occurrences are counted per
-eligible entry, without summing monetary limits or composing mandates.
+eligible entry, without summing quantity budgets or composing mandates.
 `inventory_complete_within_declared_index` requires a current, complete
 membership declaration, eligible pairs and no ambiguous deployments. It says
 nothing about unlisted real repositories or authenticated review.

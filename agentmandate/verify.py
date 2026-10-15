@@ -30,6 +30,8 @@ VIOLATION_KINDS = (
     "missing_quantity",
     "quantity_mismatch",
     "unexpected_value",
+    "unexpected_quantity",
+    "unexpected_unit",
     "ceiling_exceeded",
     "missing_approval",
     "wrong_principal",
@@ -309,6 +311,23 @@ def _replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 )
             )
 
+        if not tool.spends_value and observation.quantity is not None:
+            violations.append(
+                Violation(
+                    "unexpected_quantity",
+                    observation,
+                    "the call names a quantity but the tool declares no measured quantity",
+                )
+            )
+        if not tool.spends_value and observation.unit is not None:
+            violations.append(
+                Violation(
+                    "unexpected_unit",
+                    observation,
+                    "the call names a unit but the tool declares no measured quantity",
+                )
+            )
+
         if tool.spends_value and observation.quantity is None:
             violations.append(
                 Violation("missing_quantity", observation, "the record omits the named quantity")
@@ -342,7 +361,7 @@ def _replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
         )
         if complete_spend:
             if tool.ceiling is not None and observation.unit != tool.ceiling.unit:
-                # Summing across units would make the run total a
+                # Summing across units would make this pool's total a
                 # meaningless number, so this is reported rather than converted.
                 violations.append(
                     Violation(

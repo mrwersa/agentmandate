@@ -1,7 +1,7 @@
 # Verify a scalar handover
 
 Use this experimental verifier when both sides of a handover use the same
-declared integer monetary accounting model. It checks successor binding,
+declared integer quantity accounting model. It checks successor binding,
 retained completed spend, retained pending reservations, and available capacity.
 The [synthetic walkthrough](../examples/scalar-handover/README.md) includes a
 useful tightening and a reset that the verifier refuses.
@@ -24,7 +24,7 @@ Both captured policies must use this closed JSON contract:
 
 Requests have nonnegative integer amounts. At cutover, a request `q` is
 admissible exactly when `completed + sum(pending) + q <= limit`.
-The tool, argument, unit, accounting, and comparison must agree on both sides
+The tool, argument, quantity dimension, unit, accounting, and comparison must agree on both sides
 and with the manifest's sole value-spending tool. The predecessor limit equals
 the named manifest quantity budget; the successor may tighten it. There is no unit
 conversion, rolling window, compensation, or amended mandate in this model.

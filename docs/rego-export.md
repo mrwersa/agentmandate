@@ -58,9 +58,9 @@ does not authenticate it or discover live deployment identities.
 
 ## Keep sequence controls visible
 
-The supported subset is stateless permission and approval. Accumulated monetary
-spend, effect counts, per-binding tool ceilings, produced-binding prerequisites,
-binding cardinality and role views remain explicit losses. Both exporters use
+The supported subset is stateless permission and approval. Accumulated quantity
+consumption, effect counts, per-binding tool ceilings, produced-binding
+prerequisites, binding cardinality and role views remain explicit losses. Both exporters use
 the same [loss categories](cedar-export.md#stateful-constraints-block-export).
 A tool ceiling cannot safely become a per-request amount check. `limits.depth`
 is an analysis horizon and does not become an enforcement budget.
