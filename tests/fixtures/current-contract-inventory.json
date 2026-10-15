@@ -1642,6 +1642,18 @@
           ],
           "required": false,
           "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "required_workflows",
+          "nargs": null,
+          "options": [
+            "--required-workflows"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -3297,6 +3309,18 @@
           "type": "_positive_int"
         },
         {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "required_workflows",
+          "nargs": null,
+          "options": [
+            "--required-workflows"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
           "action": "_StoreTrueAction",
           "choices": null,
           "default": false,
@@ -3608,7 +3632,7 @@
       ]
     }
   },
-  "coverage_sha256": "0ea0ff701b3291aec1f6eaac7960c79f33874f0415f08ce2351c21645fd7312e",
+  "coverage_sha256": "25c9133901490f155765ebbf28bc464ef56e8706d76c98b7025897d17b9ff9c7",
   "fixture_sha256": {
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
@@ -3690,6 +3714,8 @@
     "examples/rego-export/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/rego-export/mapping.json": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3",
     "examples/rego-export/opa-target.json": "4a9205cdd27169aeb4ee8ccae877345c4303ea8aeeb047f30a7f5df088d58b1d",
+    "examples/release-workflows/released.json": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+    "examples/release-workflows/required-export.json": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9",
     "examples/remediation/normal-refund.jsonl": "a29bef9d55bea45836f4339de810e98901b832fd54d736dea0e094116e07530b",
     "examples/remediation/required-joint.json": "5e2396636f2df2079dbb9325572e211d998d57e255ef428f5b1554cdf7d3f972",
     "examples/remediation/required-refund.json": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325",
@@ -3799,6 +3825,7 @@
     "tests/fixtures/producer-result-v2-truncated.json": "7057330849d00e0185a1eca641a41b2da786c64140e57b8969d52816c315a129",
     "tests/fixtures/producer-result-v2-unresolved.json": "0e078b474ace2421c70188694025c42aa5233ad6b244815b422ee068c6abc13c",
     "tests/fixtures/rego-effective-diff-v2.json": "ee9360ca2e14e32e6d6dd305eda785723d2f90dbb5d26cd9a28ef4334bd99ca1",
+    "tests/fixtures/release-workflows-v1.json": "13114d05b74cf8217a11240f50d55122b0bc5dd4d63ab83c5cd7bb047e5c594e",
     "tests/fixtures/remediation-breached-v6.json": "ca69b5e04a75cdf64c964ddd202e38ff5fc61b0e465008b2c200a97eb2be9fa9",
     "tests/fixtures/remediation-ceiling-clean-v6.json": "30f8ed38e0796cfa8c022f492a563370880255d29d83b015386a13a2365cd8c6",
     "tests/fixtures/remediation-ceiling-joint-v6.json": "683225bddde42d696e6a77b4ba77f6a83990059e583ec3baaaa9e2c78f5ea9f9",
@@ -3945,9 +3972,13 @@
         "widened": {
           "kind": "property",
           "signature": "(self) -> 'bool'"
+        },
+        "workflow_regressions": {
+          "kind": "property",
+          "signature": "(self) -> 'tuple[str, ...]'"
         }
       },
-      "signature": "(before: 'Authority', after: 'Authority', changes: 'tuple[Change, ...]', after_agent: 'str' = 'agent') -> None"
+      "signature": "(before: 'Authority', after: 'Authority', changes: 'tuple[Change, ...]', after_agent: 'str' = 'agent', required_workflows: 'tuple[dict[str, Any], ...]' = ()) -> None"
     },
     "Drift": {
       "bases": [
@@ -4290,7 +4321,7 @@
     },
     "compare": {
       "kind": "function",
-      "signature": "(before: 'Mandate', after: 'Mandate', depth: 'int | None' = None) -> 'Delta'"
+      "signature": "(before: 'Mandate', after: 'Mandate', depth: 'int | None' = None, required_workflows: '_Requirements | None' = None) -> 'Delta'"
     },
     "compare_source": {
       "kind": "function",

@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.38.0
+agentmandate~=0.39.0
 ```
 
 ## Current quantity model
@@ -73,6 +73,14 @@ Historical captures keep their native transport and profile formats. A native
 artifact whose version is still supported is not an alias for an obsolete
 manifest or result. Evidence-only historical projections live in repository
 scripts, outside the runtime package.
+
+The `agentmandate.required-workflows/v2` input also gates a release: `remediate`,
+`diff` and `review` all consume it. `diff` and `review` recheck each supplied
+path against both manifests and report a `preserved` or `regressed` relation with
+the first failing call. Omitting `--required-workflows` keeps their previous
+output bytes and exit codes. A change-review record's pinned comparison digest
+covers the rechecked paths, so a record written without the check cannot accept a
+comparison that includes it.
 
 ## Repair and bounded-search claims
 

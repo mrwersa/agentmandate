@@ -63,6 +63,16 @@ external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
 
+**Required workflows gate a release — 15 October 2026:**
+`mandate diff` and `mandate review` reconsume the existing
+[required-workflow](docs/required-workflows.md#check-a-release-instead-of-a-repair)
+input and recheck every supplied path against both manifests. A release that
+narrows authority below a required export is reported as a workflow regression
+with its failing step and blocks the release, while widening authority and
+reachable breaches stay separately reported. This closes a gap between
+narrowing authority and breaking declared work; it does not establish business
+success or deployment approval, so the 50% ledger does not advance.
+
 **Named quantity budgets — 15 October 2026:**
 The [quantity model](docs/quantity-budgets.md) replaces money-only ceilings with
 separate named cumulative pools. Reach, diff, replay, IR, positive paths and

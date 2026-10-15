@@ -100,7 +100,7 @@
           "title": "Explainable counterfactual remediation",
           "status": "partial",
           "evidence": "docs/remediation.md",
-          "reason": "Removal, approval, named-quantity ceilings/grids, required paths and finite-lattice discovery with bounded approval combinations are delivered. Domain completeness remains distinct from reach-depth truncation; condition/delegation repairs and global synthesis remain open."
+          "reason": "Removal, approval, named-quantity ceilings/grids, required paths, finite-lattice discovery and release-side required-path rechecks are delivered. Domain completeness remains distinct from reach-depth truncation; condition/delegation repairs and global synthesis remain open."
         },
         {
           "title": "Named-review CI workflow",

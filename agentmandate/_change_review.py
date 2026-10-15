@@ -112,12 +112,21 @@ def _decision(content):
     return raw
 
 
-def evaluate(before_content, after_content, *, as_of, depth=None, decision=None, sources=None):
+def evaluate(
+    before_content,
+    after_content,
+    *,
+    as_of,
+    depth=None,
+    decision=None,
+    sources=None,
+    required_workflows=None,
+):
     """Recompute the diff; a record can satisfy only its separate review gate."""
     today = _date(as_of)
     before = loads(before_content.decode("utf-8"))
     after = loads(after_content.decode("utf-8"))
-    delta = compare(before, after, depth=depth)
+    delta = compare(before, after, depth=depth, required_workflows=required_workflows)
     comparison = delta.as_dict()
     comparison_bytes = json.dumps(comparison, sort_keys=True, separators=(",", ":")).encode()
     inputs = {
@@ -140,11 +149,18 @@ def evaluate(before_content, after_content, *, as_of, depth=None, decision=None,
         "review": None,
         "findings": findings,
     }
+    if required_workflows is not None:
+        report["required_workflows"] = [dict(row) for row in delta.required_workflows]
 
     def finding(rule, detail):
         findings.append({"rule": rule, "detail": detail})
 
     sources = {} if sources is None else sources
+    for name in delta.workflow_regressions:
+        finding(
+            "review.required-workflow-regressed",
+            f"required workflow {name!r} no longer conforms in the proposed release",
+        )
     if decision is None:
         if sources:
             raise ValueError("review sources require a decision record")
@@ -219,6 +235,15 @@ def render(report):
     lines.extend(
         f"BREACH {row['kind']}: {row['detail']}" for row in comparison["after"]["breaches"]
     )
+    for row in report.get("required_workflows", []):
+        lines.append(f"REQUIRED {row['name']}: {row['relation']} "
+                     f"in the proposed release ({row['candidate']})")
+        if row["failure"] is not None:
+            failure = row["failure"]
+            lines.append(
+                f"REQUIRED {row['name']} fails at step {failure['step']} "
+                f"{failure['rule']}: {failure['detail']}"
+            )
     lines.extend(f"FINDING {row['rule']}: {row['detail']}" for row in report["findings"])
     lines.append("Authority findings remain unchanged; run lint/reach separately before release.")
     return "\n".join(lines)

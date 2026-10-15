@@ -1,0 +1,28 @@
+{
+  "schema": "agentmandate.required-workflows/v2",
+  "agent": "release-agent",
+  "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+  "reviewer": "synthetic-reviewer",
+  "reason": "Synthetic required export; not live or business-success evidence.",
+  "workflows": [
+    {
+      "name": "bulk-export",
+      "steps": [
+        {
+          "tool": "open_batch",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "export_records",
+          "principal": "caller",
+          "approved": true,
+          "binding": 0,
+          "value": "100",
+          "unit": "record",
+          "quantity": "exported_records"
+        }
+      ]
+    }
+  ]
+}

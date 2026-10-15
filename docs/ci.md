@@ -106,6 +106,29 @@ This assumes AgentMandate is installed in the job and `main` is your default
 branch. The fetched manifest must exist and be the baseline you intend to
 review; change the branch or use a reviewed release ref when appropriate.
 
+### Keep required work working
+
+A release can narrow authority and still break work the caller declared
+necessary. Add the same required-workflow input `mandate remediate` uses:
+
+```yaml
+- uses: actions/checkout@v4
+- name: Authority diff and required workflows
+  run: |
+    git fetch origin main
+    git show origin/main:mandate.yaml > /tmp/released.yaml
+    git show origin/main:required-export.json > /tmp/required-export.json
+    mandate diff /tmp/released.yaml mandate.yaml \
+      --required-workflows /tmp/required-export.json
+```
+
+Exit 1 now covers both directions: widening authority, and a supplied path that
+no longer conforms in the proposed release. Without the flag the command is the
+plain authority diff above, byte for byte. `mandate review` accepts the same
+input and reports the same path check beside its acceptance findings. See
+[required workflows](required-workflows.md#check-a-release-instead-of-a-repair)
+for the matching rules and the report shape.
+
 ## Named review records
 
 `mandate review` adds a separate gate for recorded acceptance of the exact

@@ -1,0 +1,36 @@
+{
+  "agent": "release-agent",
+  "identity": "spiffe://bank/agents/release-agent",
+  "limits": {
+    "depth": 4,
+    "quantities": {
+      "exported_records": {
+        "amount": "90",
+        "unit": "record"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "open_batch",
+      "effect": "read",
+      "produces": "batch",
+      "unbounded": true
+    },
+    {
+      "name": "export_records",
+      "effect": "irreversible",
+      "requires": [
+        "batch"
+      ],
+      "scope_key": "batch",
+      "value_arg": "records",
+      "quantity": "exported_records",
+      "requires_approval": true,
+      "ceiling": {
+        "amount": "300",
+        "unit": "record"
+      }
+    }
+  ]
+}
