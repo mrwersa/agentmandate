@@ -1,0 +1,42 @@
+{
+  "schema": "agentmandate.required-workflows/v2",
+  "agent": "synthetic-conditional-export",
+  "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
+  "reviewer": "synthetic-workflow-reviewer",
+  "reason": "Synthetic two independent two-row exports; not business-outcome evidence.",
+  "workflows": [
+    {
+      "name": "two-batch-export",
+      "steps": [
+        {
+          "tool": "run_query",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "run_query",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": true,
+          "binding": 0,
+          "value": "2",
+          "unit": "record",
+          "quantity": "exported_rows"
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": true,
+          "binding": 1,
+          "value": "2",
+          "unit": "record",
+          "quantity": "exported_rows"
+        }
+      ]
+    }
+  ]
+}

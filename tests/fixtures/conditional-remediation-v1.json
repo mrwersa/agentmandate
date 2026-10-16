@@ -1,0 +1,1329 @@
+[
+  {
+    "argv": [
+      "remediate",
+      "examples/conditional-remediation/manifest.json",
+      "--condition",
+      "examples/conditional-remediation/condition.json",
+      "--condition-context",
+      "examples/conditional-remediation/context.json",
+      "--condition-capture",
+      "examples/conditional-remediation/capture.sql",
+      "--condition-as-of",
+      "2026-10-16",
+      "--required-workflows",
+      "examples/conditional-remediation/required-export.json",
+      "--keep-tool",
+      "run_query",
+      "--keep-tool",
+      "export_rows",
+      "--ceiling-grid",
+      "export_rows=0:2:1",
+      "--pareto",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "grid",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_rows' reaches 6 record, above its cumulative budget of 4 record",
+            "kind": "quantity_budget",
+            "path": [
+              "run_query(rows#1)",
+              "run_query(rows#2)",
+              "export_rows(rows#1, 3 record)",
+              "export_rows(rows#2, 3 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "rows"
+          ],
+          [
+            "read",
+            "rows"
+          ]
+        ],
+        "max_quantities": {
+          "exported_rows": {
+            "amount": "6",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_rows",
+          "run_query"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 4,
+            "effects": [
+              [
+                "irreversible",
+                "rows"
+              ],
+              [
+                "read",
+                "rows"
+              ]
+            ],
+            "max_quantities": {
+              "exported_rows": {
+                "amount": "4",
+                "unit": "record"
+              }
+            },
+            "reachable_tools": [
+              "export_rows",
+              "run_query"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "conditions": {
+            "applied": [
+              {
+                "condition": "conditions/synthetic/select-only",
+                "context": "contexts/synthetic/select-only",
+                "default_effect": "irreversible",
+                "effective_effect": "read",
+                "support": [
+                  "context:contexts/synthetic/select-only#/completeness",
+                  "context:contexts/synthetic/select-only#/domain/classes",
+                  "context:contexts/synthetic/select-only#/evidence",
+                  "context:contexts/synthetic/select-only#/source/content_sha256",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:arg",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:class",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:context",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:effect",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:predicate",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:review_expires",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:reviewer",
+                  "fact:tool:run_query:target",
+                  "source:tool-condition%3Aconditions%2Fsynthetic%2Fselect-only"
+                ],
+                "tool": "run_query"
+              }
+            ],
+            "as_of": "2026-10-16",
+            "findings": [],
+            "inactive_conditions": [],
+            "inputs": {
+              "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
+              "captures": {
+                "contexts/synthetic/select-only": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd"
+              },
+              "conditions": [
+                "4af737c7c1c49cc3eeb9e1cb915ddf235543f526120d6bc20f51270b8355c673"
+              ],
+              "contexts": [
+                "ab7fcab282636ac19fbaec72a4b334b4fbfc28c0eea40df9907ae5018b46e5c4"
+              ]
+            },
+            "schema": "agentmandate.conditions/v2",
+            "scope": "reviewed conditional effects only; source enforcement is not verified",
+            "unconditional_authority": {
+              "breaches": [
+                {
+                  "detail": "run_query is irreversible and needs no approval, reachable in 1 call(s)",
+                  "kind": "ungated_effect",
+                  "path": [
+                    "run_query"
+                  ]
+                },
+                {
+                  "detail": "irreversible calls reach 4, above the declared budget of 3 in one run",
+                  "kind": "effect_count",
+                  "path": [
+                    "run_query(rows#1)",
+                    "run_query(rows#2)",
+                    "run_query(rows#3)",
+                    "run_query(rows#4)"
+                  ]
+                }
+              ],
+              "depth": 4,
+              "effects": [
+                [
+                  "irreversible",
+                  "rows"
+                ]
+              ],
+              "max_quantities": {
+                "exported_rows": {
+                  "amount": "4",
+                  "unit": "record"
+                }
+              },
+              "reachable_tools": [
+                "export_rows",
+                "run_query"
+              ],
+              "service_principal_tools": [],
+              "truncated": true,
+              "ungated_irreversible": [
+                "run_query"
+              ]
+            },
+            "unconditional_lint": [
+              {
+                "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+                "rule": "effect.ungated-irreversible",
+                "severity": "error",
+                "subject": "run_query"
+              }
+            ]
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "2",
+                "unit": "record"
+              },
+              "before": {
+                "amount": "3",
+                "unit": "record"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "exported_rows",
+              "tool": "export_rows"
+            }
+          ],
+          "impact": {
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "synthetic-conditional-export",
+            "identity": null,
+            "limits": {
+              "depth": 4,
+              "effects": {
+                "irreversible": 3
+              },
+              "quantities": {
+                "exported_rows": {
+                  "amount": "4",
+                  "unit": "record"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "irreversible",
+                "name": "run_query",
+                "principal": "caller",
+                "produces": "rows",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "2",
+                  "unit": "record"
+                },
+                "effect": "irreversible",
+                "name": "export_rows",
+                "principal": "caller",
+                "quantity": "exported_rows",
+                "requires": [
+                  "rows"
+                ],
+                "requires_approval": true,
+                "scope_key": "rows",
+                "unbounded": false,
+                "value_arg": "count"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "export_rows": {
+                "amount": "2",
+                "unit": "record"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-batch-export",
+              "status": "conformant_within_manifest_model",
+              "steps": 4
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        }
+      ],
+      "ceiling_grids": [
+        {
+          "maximum": "2",
+          "minimum": "0",
+          "points_generated": 3,
+          "step": "1",
+          "tool": "export_rows",
+          "unit": "record"
+        }
+      ],
+      "ceiling_options": [
+        {
+          "ceiling": {
+            "amount": "0",
+            "unit": "record"
+          },
+          "quantity": "exported_rows",
+          "tool": "export_rows"
+        },
+        {
+          "ceiling": {
+            "amount": "1",
+            "unit": "record"
+          },
+          "quantity": "exported_rows",
+          "tool": "export_rows"
+        },
+        {
+          "ceiling": {
+            "amount": "2",
+            "unit": "record"
+          },
+          "quantity": "exported_rows",
+          "tool": "export_rows"
+        }
+      ],
+      "conditions": {
+        "applied": [
+          {
+            "condition": "conditions/synthetic/select-only",
+            "context": "contexts/synthetic/select-only",
+            "default_effect": "irreversible",
+            "effective_effect": "read",
+            "support": [
+              "context:contexts/synthetic/select-only#/completeness",
+              "context:contexts/synthetic/select-only#/domain/classes",
+              "context:contexts/synthetic/select-only#/evidence",
+              "context:contexts/synthetic/select-only#/source/content_sha256",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:arg",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:class",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:context",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:effect",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:predicate",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:review_expires",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:reviewer",
+              "fact:tool:run_query:target",
+              "source:tool-condition%3Aconditions%2Fsynthetic%2Fselect-only"
+            ],
+            "tool": "run_query"
+          }
+        ],
+        "as_of": "2026-10-16",
+        "findings": [],
+        "inactive_conditions": [],
+        "inputs": {
+          "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
+          "captures": {
+            "contexts/synthetic/select-only": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd"
+          },
+          "conditions": [
+            "4af737c7c1c49cc3eeb9e1cb915ddf235543f526120d6bc20f51270b8355c673"
+          ],
+          "contexts": [
+            "ab7fcab282636ac19fbaec72a4b334b4fbfc28c0eea40df9907ae5018b46e5c4"
+          ]
+        },
+        "schema": "agentmandate.conditions/v2",
+        "scope": "reviewed conditional effects only; source enforcement is not verified",
+        "unconditional_authority": {
+          "breaches": [
+            {
+              "detail": "run_query is irreversible and needs no approval, reachable in 1 call(s)",
+              "kind": "ungated_effect",
+              "path": [
+                "run_query"
+              ]
+            },
+            {
+              "detail": "irreversible calls reach 4, above the declared budget of 3 in one run",
+              "kind": "effect_count",
+              "path": [
+                "run_query(rows#1)",
+                "run_query(rows#2)",
+                "run_query(rows#3)",
+                "run_query(rows#4)"
+              ]
+            },
+            {
+              "detail": "quantity 'exported_rows' reaches 6 record, above its cumulative budget of 4 record",
+              "kind": "quantity_budget",
+              "path": [
+                "run_query(rows#1)",
+                "run_query(rows#2)",
+                "export_rows(rows#1, 3 record)",
+                "export_rows(rows#2, 3 record)"
+              ]
+            }
+          ],
+          "depth": 4,
+          "effects": [
+            [
+              "irreversible",
+              "rows"
+            ]
+          ],
+          "max_quantities": {
+            "exported_rows": {
+              "amount": "6",
+              "unit": "record"
+            }
+          },
+          "reachable_tools": [
+            "export_rows",
+            "run_query"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": [
+            "run_query"
+          ]
+        },
+        "unconditional_lint": [
+          {
+            "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+            "rule": "effect.ungated-irreversible",
+            "severity": "error",
+            "subject": "run_query"
+          }
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": 1,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 1
+      },
+      "input": {
+        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729"
+      },
+      "keep_tools": [
+        "export_rows",
+        "run_query"
+      ],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "two-batch-export",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 4
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "record"
+              },
+              "before": {
+                "amount": "3",
+                "unit": "record"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "exported_rows",
+              "tool": "export_rows"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        },
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "two-batch-export",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 4
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "1",
+                "unit": "record"
+              },
+              "before": {
+                "amount": "3",
+                "unit": "record"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "exported_rows",
+              "tool": "export_rows"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "synthetic-conditional-export",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "two-batch-export",
+            "status": "conformant_within_manifest_model",
+            "steps": 4
+          }
+        ],
+        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
+        "reason": "Synthetic two independent two-row exports; not business-outcome evidence.",
+        "reviewer": "synthetic-workflow-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "9d76ad47ce3d596eb1773474d2bfdd9b28ba27e89aea5406efbdb3f092eb0137"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 with reviewed conditional effects; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 1,
+        "candidates_found": 1,
+        "combinations_examined": 6,
+        "combinations_total": 6,
+        "depth": 4,
+        "exhaustive_point_enumeration": true,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "required_workflow_rejections": 2,
+        "truncated_by_limit": false
+      },
+      "status": "candidates_found"
+    }
+  },
+  {
+    "argv": [
+      "remediate",
+      "examples/conditional-remediation/manifest.json",
+      "--condition",
+      "examples/conditional-remediation/condition.json",
+      "--condition-context",
+      "examples/conditional-remediation/context.json",
+      "--condition-capture",
+      "examples/conditional-remediation/capture.sql",
+      "--condition-as-of",
+      "2026-10-16",
+      "--required-workflows",
+      "examples/conditional-remediation/required-export.json",
+      "--keep-tool",
+      "run_query",
+      "--keep-tool",
+      "export_rows",
+      "--discover-ceiling",
+      "export_rows=1",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "discovery",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_rows' reaches 6 record, above its cumulative budget of 4 record",
+            "kind": "quantity_budget",
+            "path": [
+              "run_query(rows#1)",
+              "run_query(rows#2)",
+              "export_rows(rows#1, 3 record)",
+              "export_rows(rows#2, 3 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "rows"
+          ],
+          [
+            "read",
+            "rows"
+          ]
+        ],
+        "max_quantities": {
+          "exported_rows": {
+            "amount": "6",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_rows",
+          "run_query"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "baseline_lint": [],
+      "candidates": [
+        {
+          "authority": {
+            "breaches": [],
+            "depth": 4,
+            "effects": [
+              [
+                "irreversible",
+                "rows"
+              ],
+              [
+                "read",
+                "rows"
+              ]
+            ],
+            "max_quantities": {
+              "exported_rows": {
+                "amount": "4",
+                "unit": "record"
+              }
+            },
+            "reachable_tools": [
+              "export_rows",
+              "run_query"
+            ],
+            "service_principal_tools": [],
+            "truncated": true,
+            "ungated_irreversible": []
+          },
+          "conditions": {
+            "applied": [
+              {
+                "condition": "conditions/synthetic/select-only",
+                "context": "contexts/synthetic/select-only",
+                "default_effect": "irreversible",
+                "effective_effect": "read",
+                "support": [
+                  "context:contexts/synthetic/select-only#/completeness",
+                  "context:contexts/synthetic/select-only#/domain/classes",
+                  "context:contexts/synthetic/select-only#/evidence",
+                  "context:contexts/synthetic/select-only#/source/content_sha256",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:arg",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:class",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:context",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:effect",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:predicate",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:review_expires",
+                  "fact:condition:conditions%2Fsynthetic%2Fselect-only:reviewer",
+                  "fact:tool:run_query:target",
+                  "source:tool-condition%3Aconditions%2Fsynthetic%2Fselect-only"
+                ],
+                "tool": "run_query"
+              }
+            ],
+            "as_of": "2026-10-16",
+            "findings": [],
+            "inactive_conditions": [],
+            "inputs": {
+              "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
+              "captures": {
+                "contexts/synthetic/select-only": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd"
+              },
+              "conditions": [
+                "4af737c7c1c49cc3eeb9e1cb915ddf235543f526120d6bc20f51270b8355c673"
+              ],
+              "contexts": [
+                "ab7fcab282636ac19fbaec72a4b334b4fbfc28c0eea40df9907ae5018b46e5c4"
+              ]
+            },
+            "schema": "agentmandate.conditions/v2",
+            "scope": "reviewed conditional effects only; source enforcement is not verified",
+            "unconditional_authority": {
+              "breaches": [
+                {
+                  "detail": "run_query is irreversible and needs no approval, reachable in 1 call(s)",
+                  "kind": "ungated_effect",
+                  "path": [
+                    "run_query"
+                  ]
+                },
+                {
+                  "detail": "irreversible calls reach 4, above the declared budget of 3 in one run",
+                  "kind": "effect_count",
+                  "path": [
+                    "run_query(rows#1)",
+                    "run_query(rows#2)",
+                    "run_query(rows#3)",
+                    "run_query(rows#4)"
+                  ]
+                }
+              ],
+              "depth": 4,
+              "effects": [
+                [
+                  "irreversible",
+                  "rows"
+                ]
+              ],
+              "max_quantities": {
+                "exported_rows": {
+                  "amount": "4",
+                  "unit": "record"
+                }
+              },
+              "reachable_tools": [
+                "export_rows",
+                "run_query"
+              ],
+              "service_principal_tools": [],
+              "truncated": true,
+              "ungated_irreversible": [
+                "run_query"
+              ]
+            },
+            "unconditional_lint": [
+              {
+                "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+                "rule": "effect.ungated-irreversible",
+                "severity": "error",
+                "subject": "run_query"
+              }
+            ]
+          },
+          "edits": [
+            {
+              "after": {
+                "amount": "2",
+                "unit": "record"
+              },
+              "before": {
+                "amount": "3",
+                "unit": "record"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "exported_rows",
+              "tool": "export_rows"
+            }
+          ],
+          "impact": {
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "removed_role_members": {}
+          },
+          "lint": [],
+          "manifest": {
+            "agent": "synthetic-conditional-export",
+            "identity": null,
+            "limits": {
+              "depth": 4,
+              "effects": {
+                "irreversible": 3
+              },
+              "quantities": {
+                "exported_rows": {
+                  "amount": "4",
+                  "unit": "record"
+                }
+              }
+            },
+            "roles": {},
+            "tools": [
+              {
+                "effect": "irreversible",
+                "name": "run_query",
+                "principal": "caller",
+                "produces": "rows",
+                "requires": [],
+                "requires_approval": false,
+                "unbounded": true
+              },
+              {
+                "ceiling": {
+                  "amount": "2",
+                  "unit": "record"
+                },
+                "effect": "irreversible",
+                "name": "export_rows",
+                "principal": "caller",
+                "quantity": "exported_rows",
+                "requires": [
+                  "rows"
+                ],
+                "requires_approval": true,
+                "scope_key": "rows",
+                "unbounded": false,
+                "value_arg": "count"
+              }
+            ],
+            "version": 2
+          },
+          "repair_cost": {
+            "added_approval_tools": [],
+            "edit_count": 1,
+            "lost_reachable_tools": [],
+            "retained_ceilings": {
+              "export_rows": {
+                "amount": "2",
+                "unit": "record"
+              }
+            }
+          },
+          "required_workflows": [
+            {
+              "failure": null,
+              "name": "two-batch-export",
+              "status": "conformant_within_manifest_model",
+              "steps": 4
+            }
+          ],
+          "status": "no_reachable_breach_within_bound"
+        }
+      ],
+      "conditions": {
+        "applied": [
+          {
+            "condition": "conditions/synthetic/select-only",
+            "context": "contexts/synthetic/select-only",
+            "default_effect": "irreversible",
+            "effective_effect": "read",
+            "support": [
+              "context:contexts/synthetic/select-only#/completeness",
+              "context:contexts/synthetic/select-only#/domain/classes",
+              "context:contexts/synthetic/select-only#/evidence",
+              "context:contexts/synthetic/select-only#/source/content_sha256",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:arg",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:class",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:context",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:effect",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:predicate",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:review_expires",
+              "fact:condition:conditions%2Fsynthetic%2Fselect-only:reviewer",
+              "fact:tool:run_query:target",
+              "source:tool-condition%3Aconditions%2Fsynthetic%2Fselect-only"
+            ],
+            "tool": "run_query"
+          }
+        ],
+        "as_of": "2026-10-16",
+        "findings": [],
+        "inactive_conditions": [],
+        "inputs": {
+          "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
+          "captures": {
+            "contexts/synthetic/select-only": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd"
+          },
+          "conditions": [
+            "4af737c7c1c49cc3eeb9e1cb915ddf235543f526120d6bc20f51270b8355c673"
+          ],
+          "contexts": [
+            "ab7fcab282636ac19fbaec72a4b334b4fbfc28c0eea40df9907ae5018b46e5c4"
+          ]
+        },
+        "schema": "agentmandate.conditions/v2",
+        "scope": "reviewed conditional effects only; source enforcement is not verified",
+        "unconditional_authority": {
+          "breaches": [
+            {
+              "detail": "run_query is irreversible and needs no approval, reachable in 1 call(s)",
+              "kind": "ungated_effect",
+              "path": [
+                "run_query"
+              ]
+            },
+            {
+              "detail": "irreversible calls reach 4, above the declared budget of 3 in one run",
+              "kind": "effect_count",
+              "path": [
+                "run_query(rows#1)",
+                "run_query(rows#2)",
+                "run_query(rows#3)",
+                "run_query(rows#4)"
+              ]
+            },
+            {
+              "detail": "quantity 'exported_rows' reaches 6 record, above its cumulative budget of 4 record",
+              "kind": "quantity_budget",
+              "path": [
+                "run_query(rows#1)",
+                "run_query(rows#2)",
+                "export_rows(rows#1, 3 record)",
+                "export_rows(rows#2, 3 record)"
+              ]
+            }
+          ],
+          "depth": 4,
+          "effects": [
+            [
+              "irreversible",
+              "rows"
+            ]
+          ],
+          "max_quantities": {
+            "exported_rows": {
+              "amount": "6",
+              "unit": "record"
+            }
+          },
+          "reachable_tools": [
+            "export_rows",
+            "run_query"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": [
+            "run_query"
+          ]
+        },
+        "unconditional_lint": [
+          {
+            "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+            "rule": "effect.ungated-irreversible",
+            "severity": "error",
+            "subject": "run_query"
+          }
+        ]
+      },
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 1,
+        "approval_tools": [],
+        "domain_points": 4,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "3",
+              "unit": "record"
+            },
+            "minimum": "0",
+            "points": 4,
+            "quantity": "exported_rows",
+            "step": {
+              "amount": "1",
+              "unit": "record"
+            },
+            "tool": "export_rows"
+          }
+        ],
+        "frontier_complete_within_domain": true,
+        "probes": [
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [
+              "quantity_budget"
+            ],
+            "ceilings": {
+              "export_rows": {
+                "amount": "3",
+                "unit": "record"
+              }
+            },
+            "edit_count": 0,
+            "status": "breached"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": null,
+            "breach_kinds": [],
+            "ceilings": {
+              "export_rows": {
+                "amount": "0",
+                "unit": "record"
+              }
+            },
+            "edit_count": 1,
+            "status": "required_workflow_rejected"
+          },
+          {
+            "added_approvals": [],
+            "authority_truncated": true,
+            "breach_kinds": [],
+            "ceilings": {
+              "export_rows": {
+                "amount": "2",
+                "unit": "record"
+              }
+            },
+            "edit_count": 1,
+            "status": "candidate"
+          }
+        ],
+        "remaining_points": 0,
+        "resolved_points": 4,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "complete",
+        "tools_retained": [
+          "export_rows",
+          "run_query"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": 1,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "computed",
+        "successful_candidates": 1
+      },
+      "input": {
+        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729"
+      },
+      "keep_tools": [
+        "export_rows",
+        "run_query"
+      ],
+      "requirement_rejections": [
+        {
+          "assessments": [
+            {
+              "failure": {
+                "detail": "cumulative value exceeds the per-binding ceiling",
+                "rule": "workflow.ceiling-exceeded",
+                "step": 3
+              },
+              "name": "two-batch-export",
+              "status": "not_conformant_within_manifest_model",
+              "steps": 4
+            }
+          ],
+          "edits": [
+            {
+              "after": {
+                "amount": "0",
+                "unit": "record"
+              },
+              "before": {
+                "amount": "3",
+                "unit": "record"
+              },
+              "kind": "tighten_ceiling",
+              "quantity": "exported_rows",
+              "tool": "export_rows"
+            }
+          ],
+          "stage": "required_workflow_screen"
+        }
+      ],
+      "requirements": {
+        "agent": "synthetic-conditional-export",
+        "baseline": [
+          {
+            "failure": null,
+            "name": "two-batch-export",
+            "status": "conformant_within_manifest_model",
+            "steps": 4
+          }
+        ],
+        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
+        "reason": "Synthetic two independent two-row exports; not business-outcome evidence.",
+        "reviewer": "synthetic-workflow-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "9d76ad47ce3d596eb1773474d2bfdd9b28ba27e89aea5406efbdb3f092eb0137"
+      },
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 with reviewed conditional effects; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 1,
+        "candidates_found": 1,
+        "combinations_examined": 3,
+        "combinations_total": 4,
+        "depth": 4,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "required_workflow_rejections": 1,
+        "truncated_by_limit": false
+      },
+      "status": "candidates_found"
+    }
+  },
+  {
+    "argv": [
+      "remediate",
+      "examples/conditional-remediation/manifest.json",
+      "--condition",
+      "examples/conditional-remediation/condition.json",
+      "--condition-context",
+      "examples/conditional-remediation/context.json",
+      "--condition-capture",
+      "examples/conditional-remediation/capture.sql",
+      "--condition-as-of",
+      "2026-10-16",
+      "--required-workflows",
+      "examples/conditional-remediation/required-export.json",
+      "--keep-tool",
+      "run_query",
+      "--keep-tool",
+      "export_rows",
+      "--discover-ceiling",
+      "export_rows=1",
+      "--condition-as-of",
+      "2027-08-02",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "expired",
+    "result": {
+      "baseline": {
+        "breaches": [
+          {
+            "detail": "run_query is irreversible and needs no approval, reachable in 1 call(s)",
+            "kind": "ungated_effect",
+            "path": [
+              "run_query"
+            ]
+          },
+          {
+            "detail": "irreversible calls reach 4, above the declared budget of 3 in one run",
+            "kind": "effect_count",
+            "path": [
+              "run_query(rows#1)",
+              "run_query(rows#2)",
+              "run_query(rows#3)",
+              "run_query(rows#4)"
+            ]
+          },
+          {
+            "detail": "quantity 'exported_rows' reaches 6 record, above its cumulative budget of 4 record",
+            "kind": "quantity_budget",
+            "path": [
+              "run_query(rows#1)",
+              "run_query(rows#2)",
+              "export_rows(rows#1, 3 record)",
+              "export_rows(rows#2, 3 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "rows"
+          ]
+        ],
+        "max_quantities": {
+          "exported_rows": {
+            "amount": "6",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_rows",
+          "run_query"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": [
+          "run_query"
+        ]
+      },
+      "baseline_lint": [
+        {
+          "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+          "rule": "effect.ungated-irreversible",
+          "severity": "error",
+          "subject": "run_query"
+        }
+      ],
+      "candidates": [],
+      "conditions": {
+        "applied": [],
+        "as_of": "2027-08-02",
+        "findings": [
+          {
+            "condition": "conditions/synthetic/select-only",
+            "message": "condition or context review is expired",
+            "tool": "run_query"
+          }
+        ],
+        "inactive_conditions": [],
+        "inputs": {
+          "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
+          "captures": {
+            "contexts/synthetic/select-only": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd"
+          },
+          "conditions": [
+            "4af737c7c1c49cc3eeb9e1cb915ddf235543f526120d6bc20f51270b8355c673"
+          ],
+          "contexts": [
+            "ab7fcab282636ac19fbaec72a4b334b4fbfc28c0eea40df9907ae5018b46e5c4"
+          ]
+        },
+        "schema": "agentmandate.conditions/v2",
+        "scope": "reviewed conditional effects only; source enforcement is not verified",
+        "unconditional_authority": {
+          "breaches": [
+            {
+              "detail": "run_query is irreversible and needs no approval, reachable in 1 call(s)",
+              "kind": "ungated_effect",
+              "path": [
+                "run_query"
+              ]
+            },
+            {
+              "detail": "irreversible calls reach 4, above the declared budget of 3 in one run",
+              "kind": "effect_count",
+              "path": [
+                "run_query(rows#1)",
+                "run_query(rows#2)",
+                "run_query(rows#3)",
+                "run_query(rows#4)"
+              ]
+            },
+            {
+              "detail": "quantity 'exported_rows' reaches 6 record, above its cumulative budget of 4 record",
+              "kind": "quantity_budget",
+              "path": [
+                "run_query(rows#1)",
+                "run_query(rows#2)",
+                "export_rows(rows#1, 3 record)",
+                "export_rows(rows#2, 3 record)"
+              ]
+            }
+          ],
+          "depth": 4,
+          "effects": [
+            [
+              "irreversible",
+              "rows"
+            ]
+          ],
+          "max_quantities": {
+            "exported_rows": {
+              "amount": "6",
+              "unit": "record"
+            }
+          },
+          "reachable_tools": [
+            "export_rows",
+            "run_query"
+          ],
+          "service_principal_tools": [],
+          "truncated": true,
+          "ungated_irreversible": [
+            "run_query"
+          ]
+        },
+        "unconditional_lint": [
+          {
+            "message": "an irreversible effect with no approval requirement. Reversibility, not confidence, decides where a gate belongs",
+            "rule": "effect.ungated-irreversible",
+            "severity": "error",
+            "subject": "run_query"
+          }
+        ]
+      },
+      "discovery": {
+        "algorithm": "monotone_box_search",
+        "approval_configurations": 2,
+        "approval_tools": [
+          "run_query"
+        ],
+        "domain_points": 8,
+        "domains": [
+          {
+            "includes_unchanged_ceiling": true,
+            "maximum": {
+              "amount": "3",
+              "unit": "record"
+            },
+            "minimum": "0",
+            "points": 4,
+            "quantity": "exported_rows",
+            "step": {
+              "amount": "1",
+              "unit": "record"
+            },
+            "tool": "export_rows"
+          }
+        ],
+        "frontier_complete_within_domain": false,
+        "probes": [],
+        "remaining_points": 8,
+        "resolved_points": 0,
+        "scope": "complete frontier only within the discrete domain and fixed reachability bound",
+        "status": "not_run",
+        "tools_retained": [
+          "export_rows",
+          "run_query"
+        ]
+      },
+      "frontier": {
+        "display_complete": true,
+        "enabled": true,
+        "non_dominated": null,
+        "objectives": {
+          "added_approval_tools": "set inclusion",
+          "edit_count": "minimize",
+          "lost_reachable_tools": "set inclusion",
+          "retained_ceilings": "maximize each declared tool ceiling"
+        },
+        "scope": "repair trade-offs among examined, rechecked candidates only",
+        "status": "not_computed",
+        "successful_candidates": 0
+      },
+      "input": {
+        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729"
+      },
+      "keep_tools": [
+        "export_rows",
+        "run_query"
+      ],
+      "schema": "agentmandate.remediation/v6",
+      "scope": "manifest-v2 with reviewed conditional effects; candidates require human selection",
+      "search": {
+        "candidates_analyzed": 0,
+        "candidates_found": 0,
+        "combinations_examined": 0,
+        "combinations_total": 8,
+        "depth": 4,
+        "exhaustive_point_enumeration": false,
+        "max_candidates": 5,
+        "max_edits": 2,
+        "max_evaluations": 128,
+        "truncated_by_limit": false
+      },
+      "status": "input_requires_review"
+    }
+  }
+]

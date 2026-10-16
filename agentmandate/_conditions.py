@@ -758,6 +758,22 @@ def analyse_conditions(
     at this consumption boundary. Any trust or context uncertainty retains the
     manifest's strongest declared effect and becomes a named finding.
     """
+    adjusted, findings, applied, evaluated_on = _resolve_conditions(
+        mandate, conditions, contexts, source_bytes, as_of=as_of,
+    )
+    authority, _ = _analyse_with_trace(adjusted, depth=depth)
+    return ConditionalAnalysis(authority, findings, applied, evaluated_on)
+
+
+def _resolve_conditions(
+    mandate: Mandate,
+    conditions: Sequence[ToolCondition],
+    contexts: Sequence[ConditionContext],
+    source_bytes: Mapping[str, bytes],
+    *,
+    as_of: date,
+) -> tuple[Mandate, tuple[ConditionFinding, ...], tuple[AppliedCondition, ...], str]:
+    """Resolve eligible effects without running graph search or inventing restrictions."""
     if isinstance(as_of, datetime) or not isinstance(as_of, date):
         raise ConditionFormatError("conditional analysis as_of must be a date")
     evaluated_on = as_of.isoformat()
@@ -898,13 +914,7 @@ def analyse_conditions(
         mandate,
         tools=tuple(effective[tool.name] for tool in mandate.tools),
     )
-    authority, _ = _analyse_with_trace(adjusted, depth=depth)
-    return ConditionalAnalysis(
-        authority=authority,
-        findings=tuple(findings),
-        applied=tuple(applied),
-        as_of=evaluated_on,
-    )
+    return adjusted, tuple(findings), tuple(applied), evaluated_on
 
 
 def reconcile_condition_drift(
@@ -1114,3 +1124,31 @@ def _validate_projected_evidence(
     if expires is not None:
         raw["expires"] = expires
     _evidence(raw, "IR")
+
+
+def _condition_payload(
+    as_of: str, applied: Sequence[AppliedCondition], findings: Sequence[ConditionFinding],
+) -> dict[str, Any]:
+    return {
+        "schema": "agentmandate.conditions/v2",
+        "as_of": as_of,
+        "applied": [
+            {
+                "condition": item.condition,
+                "context": item.context,
+                "tool": item.tool,
+                "default_effect": item.default_effect,
+                "effective_effect": item.effective_effect,
+                "support": list(item.support),
+            }
+            for item in applied
+        ],
+        "findings": [
+            {
+                "condition": item.condition,
+                "tool": item.tool,
+                "message": item.message,
+            }
+            for item in findings
+        ],
+    }

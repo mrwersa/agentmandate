@@ -22,6 +22,7 @@ from ._conditions import (
     ConditionContext,
     ConditionFormatError,
     ToolCondition,
+    _condition_payload,
     analyse_conditions,
     reconcile_condition_drift,
 )
@@ -87,6 +88,7 @@ from ._rego_export import export as export_rego
 from ._rego_export import render as render_rego_export
 from ._rego_export import write_bundle as write_rego_bundle
 from ._remediation import plan as plan_remediation
+from ._remediation_conditions import _ConditionScope
 from ._required_workflows import _Requirements
 from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
 from ._scalar_handover import ScalarHandover, analyse_scalar_handover, render_scalar_handover
@@ -312,6 +314,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="discover exact ceiling repairs on this quantity lattice, retaining all tools",
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
+    _add_condition_options(remediation_parser)
 
     review_parser = subparsers.add_parser(
         "review",
@@ -973,6 +976,7 @@ def _run_change_review(args: argparse.Namespace) -> int:
 
 def _run_remediation(args: argparse.Namespace) -> int:
     try:
+        condition_inputs = _condition_inputs(args)
         content = Path(args.manifest).read_bytes()
         mandate = loads(content.decode("utf-8"), source=args.manifest)
         requirements = None
@@ -994,6 +998,9 @@ def _run_remediation(args: argparse.Namespace) -> int:
             ceiling_grids=tuple(args.ceiling_grid),
             pareto=args.pareto,
             discover_ceilings=tuple(args.discover_ceiling),
+            condition_scope=(
+                None if condition_inputs is None else _ConditionScope.from_inputs(*condition_inputs)
+            ),
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -1005,6 +1012,21 @@ def _run_remediation(args: argparse.Namespace) -> int:
         f"SCOPE {result['scope']}",
         f"BASELINE depth={baseline['depth']} truncated={baseline['truncated']}",
     ]
+    if "conditions" in result:
+        condition_report = result["conditions"]
+        lines.append(
+            f"CONDITIONS as_of={condition_report['as_of']} "
+            f"applied={len(condition_report['applied'])} "
+            f"unresolved={len(condition_report['findings'])}"
+        )
+        lines.append(
+            "UNCONDITIONAL baseline retained: "
+            f"{len(condition_report['unconditional_authority']['breaches'])} reachable breach(es)"
+        )
+        lines.extend(
+            f"UNRESOLVED CONDITION {row['condition']} ({row['tool']}): {row['message']}"
+            for row in condition_report["findings"]
+        )
     lines.extend(
         f"CEILING OPTION {option['tool']}: "
         f"{option['ceiling']['amount']} {option['ceiling']['unit']}"
@@ -1065,6 +1087,13 @@ def _run_remediation(args: argparse.Namespace) -> int:
             f"          REQUIRED {row['name']}: {row['status']}"
             for row in candidate.get("required_workflows", [])
         )
+        if "conditions" in candidate:
+            lines.append(
+                "          conditional recheck: "
+                f"applied={len(candidate['conditions']['applied'])} "
+                f"inactive={candidate['conditions']['inactive_conditions']}; "
+                "manifest retains declared effects; reuse the pinned condition inputs"
+            )
     for rejected in result.get("requirement_rejections", []):
         lines.extend(
             f"REJECTED {row['name']}: {row['failure']['rule']} "
@@ -1082,6 +1111,7 @@ def _run_remediation(args: argparse.Namespace) -> int:
     return (
         EXIT_FINDING
         if baseline["breaches"] or any(f["severity"] == ERROR for f in result["baseline_lint"])
+        or result.get("conditions", {}).get("findings")
         else EXIT_OK
     )
 
@@ -2173,32 +2203,6 @@ def _condition_inputs(
     return conditions, tuple(contexts), source_bytes, as_of
 
 
-def _condition_payload(analysis: ConditionalAnalysis) -> dict[str, Any]:
-    return {
-        "schema": "agentmandate.conditions/v2",
-        "as_of": analysis.as_of,
-        "applied": [
-            {
-                "condition": item.condition,
-                "context": item.context,
-                "tool": item.tool,
-                "default_effect": item.default_effect,
-                "effective_effect": item.effective_effect,
-                "support": list(item.support),
-            }
-            for item in analysis.applied
-        ],
-        "findings": [
-            {
-                "condition": item.condition,
-                "tool": item.tool,
-                "message": item.message,
-            }
-            for item in analysis.findings
-        ],
-    }
-
-
 def _render_conditions(analysis: ConditionalAnalysis) -> str:
     lines = [f"conditions  evaluated as of {analysis.as_of}"]
     for item in analysis.applied:
@@ -2489,7 +2493,10 @@ def _main(argv: Sequence[str] | None = None) -> int:
         if args.json:
             payload = drift.as_dict()
             if conditional_drift is not None:
-                payload["conditions"] = _condition_payload(conditional_drift.analysis)
+                payload["conditions"] = _condition_payload(
+                    conditional_drift.analysis.as_of, conditional_drift.analysis.applied,
+                    conditional_drift.analysis.findings,
+                )
                 payload["source_drift_clean"] = drift.clean
                 payload["clean"] = conditional_drift.clean
             print(json.dumps(payload, indent=2))
@@ -2651,7 +2658,10 @@ def _main(argv: Sequence[str] | None = None) -> int:
         else:
             payload = authority.as_dict()
             if conditional_analysis is not None:
-                payload["conditions"] = _condition_payload(conditional_analysis)
+                payload["conditions"] = _condition_payload(
+                    conditional_analysis.as_of, conditional_analysis.applied,
+                    conditional_analysis.findings,
+                )
                 text = f"{_render_conditions(conditional_analysis)}\n\n{text}"
             if delegation_analysis is not None:
                 payload["delegations"] = _delegation_payload(delegation_analysis)

@@ -140,3 +140,10 @@ no proposal means the declared lattice and constraints have no feasible repair;
 finer steps may change it. Evaluation cutoffs have the explicit
 `search.truncated_by_limit` flag. The result authenticates no decision and
 supplies no runtime enforcement.
+
+The [condition-aware repair mode](remediation.md#recheck-repairs-within-reviewed-conditional-effects)
+also supports discovery. Classification evidence stays fixed across the domain;
+only ceilings and approval requirements vary. Each probe reruns the condition
+reader and workflow checks. The report retains ordinary findings separately,
+and unresolved condition evidence prevents discovery. Exit codes apply to the
+selected scope; a discovered repair never clears its breached baseline.

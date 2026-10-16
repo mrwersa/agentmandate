@@ -247,7 +247,10 @@ with an explicit evaluation date:
     --condition-as-of 2027-01-01
 ```
 
-The same four flags apply to `mandate drift`. Repeat condition inputs as
+The same four flags apply to `mandate drift` and
+[condition-aware `mandate remediate`](remediation.md#recheck-repairs-within-reviewed-conditional-effects).
+Remediation retains ordinary findings separately and blocks recommendations
+when any condition is unresolved. Repeat condition inputs as
 needed; pair every context with one capture in the same argument order. SARIF,
 Mermaid, and `reach --ir` composition are intentionally refused until those
 formats can carry unresolved condition evidence without implying a clean run.

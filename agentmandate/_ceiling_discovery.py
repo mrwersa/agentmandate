@@ -89,6 +89,7 @@ def discover(
     max_candidates,
     keep_tools,
     required_workflows,
+    condition_scope=None,
 ):
     for name, value in (
         ("max_edits", max_edits),
@@ -102,12 +103,14 @@ def discover(
     if any(not isinstance(name, str) or name not in mandate.tool_names for name in keep_tools):
         raise ValueError("keep_tools must name declared tools")
     axes = _axes(mandate, options)
-    baseline = analyse(mandate, depth=depth)
+    evaluation = None if condition_scope is None else condition_scope.resolve(mandate)
+    effective = mandate if evaluation is None else evaluation.effective
+    baseline = analyse(effective, depth=depth)
     if set(keep_tools) - baseline.reachable_tools:
         raise ValueError("kept tools must be reachable in the baseline at the selected depth")
-    lint = check(mandate)
+    lint = check(effective)
     approvals = sorted(
-        t.name for t in mandate.tools if t.effect == IRREVERSIBLE and not t.requires_approval
+        t.name for t in effective.tools if t.effect == IRREVERSIBLE and not t.requires_approval
     )
     configuration_count = sum(
         comb(len(approvals), size) for size in range(min(len(approvals), max_edits) + 1)
@@ -175,8 +178,16 @@ def discover(
             "display_complete": True,
         },
     }
+    if evaluation is not None:
+        report["scope"] = (
+            "manifest-v2 with reviewed conditional effects; candidates require human selection"
+        )
+        report["conditions"] = evaluation.record(mandate, baseline.depth)
+        if evaluation.findings:
+            report["status"] = "input_requires_review"
+            return report
     if required_workflows is not None:
-        assessments = required_workflows.assess(mandate, baseline.depth)
+        assessments = required_workflows.assess(effective, baseline.depth)
         invalid = next((a for a in assessments if a["failure"] is not None), None)
         if invalid is not None:
             raise ValueError(f"required workflow {invalid['name']!r} is invalid in the baseline")
@@ -217,8 +228,16 @@ def discover(
         if len(edits) > max_edits:
             return record
         changed = _changed(mandate, edits)
+        scoped = (
+            None if condition_scope is None
+            else condition_scope.resolve(changed, candidate=True)
+        )
+        if scoped is not None and scoped.findings:
+            raise ValueError("condition eligibility changed during repair recheck")
+        projected = changed if scoped is None else scoped.effective
         assessments = (
-            [] if required_workflows is None else required_workflows.assess(changed, baseline.depth)
+            [] if required_workflows is None
+            else required_workflows.assess(projected, baseline.depth)
         )
         if any(a["failure"] is not None for a in assessments):
             record["status"] = "required_workflow_rejected"
@@ -231,7 +250,7 @@ def discover(
                 }
             )
             return record
-        authority = baseline if not edits else analyse(changed, depth=baseline.depth)
+        authority = baseline if not edits else analyse(projected, depth=baseline.depth)
         search["candidates_analyzed"] += bool(edits)
         if not baseline.reachable_tools <= authority.reachable_tools:
             raise ValueError("discovery requires ceiling-independent tool reachability")
@@ -250,11 +269,13 @@ def discover(
                     "removed_role_members": {},
                 },
                 "authority": authority.as_dict(),
-                "lint": [asdict(f) for f in check(changed)],
+                "lint": [asdict(f) for f in check(projected)],
                 "manifest": _manifest(changed),
             }
             if required_workflows is not None:
                 candidate["required_workflows"] = assessments
+            if scoped is not None:
+                candidate["conditions"] = scoped.record(changed, baseline.depth)
             candidate["repair_cost"] = _repair_cost(mandate, candidate)
             candidates.append(candidate)
         return record

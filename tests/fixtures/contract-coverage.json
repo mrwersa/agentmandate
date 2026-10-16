@@ -747,5 +747,25 @@
       "tests/test_action_gate.py",
       "tests/test_action_workflows.py"
     ]
+  },
+  {
+    "doc": "docs/remediation.md",
+    "fixtures": [
+      "examples/conditional-remediation/manifest.json",
+      "examples/conditional-remediation/condition.json",
+      "examples/conditional-remediation/context.json",
+      "examples/conditional-remediation/capture.sql",
+      "examples/conditional-remediation/required-export.json",
+      "tests/fixtures/conditional-remediation-v1.json"
+    ],
+    "id": "conditional-remediation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v6",
+      "agentmandate.conditions/v2"
+    ],
+    "tests": [
+      "tests/test_conditional_remediation.py"
+    ]
   }
 ]

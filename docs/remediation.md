@@ -53,6 +53,57 @@ depth-eight graph recheck, which is truncated; at depth ten it breaches again.
 Required paths establish model conformance, not business success or live
 resource identity. Their author/reviewer annotations are caller-supplied.
 
+## Recheck repairs within reviewed conditional effects
+
+Supply the same four condition flags accepted by `reach` to repair a manifest
+within an existing reviewed input domain:
+
+```bash
+mandate remediate examples/conditional-remediation/manifest.json \
+  --condition examples/conditional-remediation/condition.json \
+  --condition-context examples/conditional-remediation/context.json \
+  --condition-capture examples/conditional-remediation/capture.sql \
+  --condition-as-of 2026-10-16 \
+  --required-workflows examples/conditional-remediation/required-export.json \
+  --discover-ceiling export_rows=1 --keep-tool run_query --keep-tool export_rows
+```
+
+This synthetic example finds a two-record ceiling that preserves two required
+exports within depth four. The query tool's declared effect remains
+`irreversible`; only the separately reviewed select-only context permits a
+`read` interpretation. The scoped baseline still has a quantity breach, so the
+command exits 1. Explicit ceilings, grids, approval/removal edits and Pareto
+ranking support the same flags.
+
+The existing [condition reader](conditions-delegation.md#gate-3-conditional-trust-semantics)
+reruns for the baseline and every candidate it analyzes. Conditions and contexts
+are snapshotted as canonical JSON, and captures as bytes. Dates, review status,
+completeness, operand joins and capture digests retain their existing checks.
+Any unresolved baseline condition returns `input_requires_review` with no
+recommendations. It cannot be repaired by deleting the disputed tool.
+
+`baseline`, `baseline_lint`, candidate `authority`, workflow checks and ranking
+use the reviewed conditional effects. Each `conditions` record also retains the
+complete `unconditional_authority` and `unconditional_lint`, applied conditions,
+findings and input identities. Artifact hashes identify canonical JSON rather
+than original file whitespace; capture hashes identify exact bytes. They do
+not authenticate reviewers or independently verify source enforcement.
+
+Candidate manifests retain their declared effects, budgets and identities.
+Reproduce a candidate's scoped result with the same condition inputs and date;
+running its manifest alone can still report ordinary breaches. Removing a tool
+makes only its already-validated attachments inactive, with their IDs reported
+in `inactive_conditions`; the original input identities remain visible.
+An unexpected eligibility change during rechecking is an error, not a clean
+candidate. Discovery's pruning remains scoped to the fixed classification and
+unchanged evidence; it does not search condition domains.
+
+Required paths still pin the original manifest. Their calls are assessed under
+the selected effect domain, including effect-count budgets. They carry no SQL
+or dispatch arguments, so they do not prove that a particular live call belongs
+to that domain. This mode consumes existing restrictions; it does not propose
+new predicates, edit captures, create review acceptance or change grants.
+
 ## Quantity accounting and trade-offs
 
 Ceilings inherit the tool's named quantity and unit. Proposals do not change
@@ -97,8 +148,10 @@ those steps and constraints. Finer steps or different constraints may change it.
 an exhausted explicit edit search. Neither establishes that no useful repair exists.
 
 Malformed domains, incompatible units within one quantity or unsupported
-arithmetic exit 2 without a partial result. Exit 1 retains original breaches or
-lint errors. Exit 0 means the original baseline is clean.
+arithmetic exit 2 without a partial result. Exit 1 retains baseline breaches,
+lint errors or unresolved conditions. Exit 0 means the baseline is clean within
+the selected analysis scope. Conditional reports retain the ordinary findings
+separately; finding a repair never clears a breached baseline.
 
 ## Apply a selected proposal
 
@@ -111,6 +164,7 @@ mandate reach /tmp/candidate.json --depth 8
 mandate diff examples/dispute-resolver-v2.yaml /tmp/candidate.json --depth 8
 ```
 
-Application-level tests and deployment controls remain necessary. Conditions,
-delegation bounds, timed quotas, multiple simultaneous charges on one call and
-global policy synthesis are outside this repair family.
+Application-level tests and deployment controls remain necessary. Generating
+new condition restrictions, delegation bounds, timed quotas, multiple
+simultaneous charges on one call and global policy synthesis remain outside
+this repair family.

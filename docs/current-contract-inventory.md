@@ -18,6 +18,15 @@ version markers and fixture hashes. The
 family to its guide, boundary tests and executable fixtures. Semantic tests
 remain necessary: a matching signature or digest cannot establish correct behavior.
 
+Condition-aware remediation adds the existing four condition flags to
+`mandate remediate`. The current remediation result gains condition decisions,
+canonical artifact identities, capture digests and unconditional reports when
+those inputs are supplied. The same result schema and condition readers serve
+all repair modes; no compatibility branch or new acceptance format is added.
+The [repair example](../examples/conditional-remediation/README.md) and exact
+grid/discovery/expiry results are pinned with their replay tests.
+
+
 ## Breaking alpha changes
 
 The named-quantity release replaces the money-only model. The current surface
