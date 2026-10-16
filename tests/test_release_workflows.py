@@ -124,8 +124,11 @@ def test_render_and_change_record_name_the_failing_step():
     assert "preserved" not in text
     record = compare_pair(after="narrowed.json").record("released", "narrowed")
     assert "## Required workflows" in record and "bulk-export: preserved" in record
+    assert f"**Workflow annotation SHA-256:** `{requirements().source_sha256}`" in record
+    assert f"**Baseline manifest SHA-256:** `{requirements().manifest_sha256}`" in record
     plain_record = compare_pair(after="narrowed.json", workflows=False)
     assert "## Required workflows" not in plain_record.record("released", "narrowed")
+    assert "SHA-256" not in plain_record.record("released", "narrowed")
 
 
 def test_an_unreadable_manifest_and_a_wrong_baseline_are_usage_errors(tmp_path, capsys):
@@ -168,6 +171,51 @@ def test_a_preserved_workflow_does_not_require_an_acceptance_record(capsys):
     assert main(argv) == 0
     output = capsys.readouterr()
     assert "REQUIRED bulk-export: preserved in the proposed release" in output.out
+
+
+@pytest.mark.parametrize("widening", [False, True])
+def test_a_matched_acceptance_cannot_waive_a_regressed_workflow(widening, tmp_path, capsys):
+    before = released()
+    raw_after = json.loads(
+        (EXAMPLE / ("proposed.json" if widening else "breaking.json")).read_text()
+    )
+    export = next(tool for tool in raw_after["tools"] if tool["name"] == "export_records")
+    export["ceiling"]["amount"] = "75"
+    after = json.dumps(raw_after).encode()
+    checked = evaluate_review(before, after, as_of=AS_OF, required_workflows=requirements())
+    assert checked["comparison"]["direction"] == ("widening" if widening else "narrowing")
+    note = b"Synthetic matched decision; required work must still conform.\n"
+    decision = {
+        "schema": "agentmandate.change-review/v1", **checked["inputs"],
+        "scope": "all_widening_changes_in_pinned_comparison", "owner": "synthetic-owner",
+        "reviewer": "synthetic-reviewer", "reason": "Synthetic acceptance of this comparison",
+        "decision": "accept", "reviewed_at": AS_OF, "expires": "2026-11-30",
+        "evidence": [{"locator": "note", "sha256": hashlib.sha256(note).hexdigest(),
+                      "purpose": "decision"}],
+        "target_policy": {"status": "not_applicable", "reason": "synthetic only"},
+    }
+    report = evaluate_review(
+        before, after, as_of=AS_OF, required_workflows=requirements(),
+        decision=json.dumps(decision).encode(), sources={"note": note},
+    )
+    assert report["review"]["comparison_sha256"] == report["inputs"]["comparison_sha256"]
+    assert all(row["matches"] for row in report["review"]["evidence_checks"])
+    assert [row["rule"] for row in report["findings"]] == ["review.required-workflow-regressed"]
+    assert not report["gate_satisfied"] and not report["review"]["eligible"]
+    candidate = tmp_path / "candidate.json"
+    record = tmp_path / "review.json"
+    source = tmp_path / "note.txt"
+    candidate.write_bytes(after)
+    record.write_text(json.dumps(decision))
+    source.write_bytes(note)
+    assert main([
+        "review", str(EXAMPLE / RELEASED), str(candidate),
+        "--required-workflows", str(EXAMPLE / ANNOTATION), "--decision", str(record),
+        "--source", f"note={source}", "--as-of", AS_OF, "--json",
+    ]) == 1
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert json.loads(captured.out) == report
 
 
 def test_a_decision_record_covers_the_compared_workflows():

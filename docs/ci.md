@@ -396,7 +396,7 @@ Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with
 | Exit code | Meaning |
 |---|---|
 | `0` | Clean |
-| `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, or a non-conformant replay |
+| `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, required-workflow regression, or a non-conformant replay |
 | `2` | Usage or I/O error, malformed manifest/IR/attachment, unsupported composition, version, or analysis profile |
 
 ## Compare Rego revisions

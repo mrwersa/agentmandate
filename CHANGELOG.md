@@ -21,6 +21,8 @@ All notable changes to this project are documented here. The format follows
   the rechecked paths and their input metadata. The exact annotation source
   digest prevents a recorded acceptance from transferring to different calls,
   amounts, approval annotations or reviewer metadata with identical outcomes.
+- Markdown change records with required workflows show the annotation and
+  baseline manifest SHA-256 values beside the path assessments.
 
 ## 0.38.0 - 2026-10-15
 

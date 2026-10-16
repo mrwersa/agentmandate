@@ -120,6 +120,13 @@ class Delta:
         )
         if self.required_workflows:
             lines.extend(["", "## Required workflows", ""])
+            if self.required_workflows_metadata is not None:
+                lines.extend([
+                    "- **Workflow annotation SHA-256:** "
+                    f"`{self.required_workflows_metadata['source_sha256']}`",
+                    "- **Baseline manifest SHA-256:** "
+                    f"`{self.required_workflows_metadata['manifest_sha256']}`",
+                ])
             lines.extend(
                 [f"- {row['name']}: {row['relation']} in the proposed release"
                  for row in self.required_workflows]

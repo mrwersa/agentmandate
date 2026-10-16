@@ -184,6 +184,8 @@ calls and amounts, not just their names, step counts and outcomes. Changing any
 annotation bytes, including formatting, requires a newly pinned review record
 even when the rechecked outcomes remain the same. This identifies the supplied
 bytes; it does not authenticate the annotation author or grant deployment approval.
+`mandate diff --record` also prints the workflow annotation and baseline manifest
+SHA-256 values in its Markdown record so a reader can identify the supplied bytes.
 
 Without either flag, `diff` and `review` keep their exact output bytes and exit
 codes, and the workflow rows are absent from the result.
