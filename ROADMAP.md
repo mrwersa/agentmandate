@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 15 October 2026
+### Measured planning progress — 16 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,16 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Required workflows in the GitHub Action — 16 October 2026:**
+The [Action gate](docs/action-workflows.md) loads an annotation from a selected
+local Git commit and shares its snapshot across diff and review. Workflow
+regressions contribute findings even on narrowing releases; summaries, reports
+and SARIF identify failures and pinned inputs. Composite Action jobs exercise
+preservation, regression, candidate substitution and report-only mode. The caller
+still protects input refs and the workflow; this does not authenticate reviewers
+or establish deployment approval. It extends the existing release-gate initiative
+without changing the 50% ledger.
 
 **Required workflows gate a release — 15 October 2026:**
 `mandate diff` and `mandate review` reconsume the existing

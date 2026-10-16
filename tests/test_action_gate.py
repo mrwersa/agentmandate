@@ -228,6 +228,8 @@ def test_a_usage_error_is_reported_rather_than_crashing(
 
     assert report["verdict"] == "findings"
     assert all(c["ok"] is False for c in report["checks"])
+    assert all(c["findings"] > 0 for c in report["checks"])
+    assert int(outputs(workspace)["findings"]) > 0
 
 
 def test_the_action_declares_every_input_the_body_reads() -> None:
@@ -550,7 +552,7 @@ def test_invalid_or_incomplete_source_maps_fail_closed(
 )
 def test_review_paths_are_literal_regular_files(reviewed_workspace: Path, path: str) -> None:
     with pytest.raises(ValueError):
-        action_gate._review_blob(git(reviewed_workspace, "rev-parse", "reviews"), path)
+        action_gate._git_blob(git(reviewed_workspace, "rev-parse", "reviews"), path)
 
 
 def test_symlink_decision_is_not_followed(reviewed_workspace: Path) -> None:
@@ -558,7 +560,7 @@ def test_symlink_decision_is_not_followed(reviewed_workspace: Path) -> None:
     path.symlink_to("decision.json")
     commit = commit_review(reviewed_workspace)
     with pytest.raises(ValueError, match="not a regular file"):
-        action_gate._review_blob(commit, "reviews/link.json")
+        action_gate._git_blob(commit, "reviews/link.json")
 
 
 @pytest.mark.parametrize("ref", ["nonexistent-ref", "--all"])

@@ -730,5 +730,22 @@
     "tests": [
       "tests/test_release_workflows.py"
     ]
+  },
+  {
+    "doc": "docs/action-workflows.md",
+    "fixtures": [
+      "action.yml",
+      ".github/workflows/action.yml",
+      "scripts/action_gate.py",
+      "examples/action-workflows/preserved.json",
+      "examples/action-workflows/widened.json"
+    ],
+    "id": "action-workflow-gate",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_action_gate.py",
+      "tests/test_action_workflows.py"
+    ]
   }
 ]

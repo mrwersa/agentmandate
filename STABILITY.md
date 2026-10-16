@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.39.0
+agentmandate~=0.40.0
 ```
 
 ## Current quantity model
@@ -85,6 +85,14 @@ reason and scope. Changing annotation bytes invalidates the old review record
 even when the workflow outcomes are unchanged. A record written without the
 check cannot accept a comparison that includes it. Digests identify bytes;
 they do not authenticate the annotation author.
+
+The GitHub Action consumes these annotations through `required-workflows` and
+`required-workflows-ref`, alongside a baseline. It pins a regular Git blob once
+and shares those bytes between diff and review. Its combined report identifies
+the selected commit and source digests; SARIF includes reachability and workflow
+failures. Ref protection and reviewer authentication remain the caller's
+responsibility. The Action's success/failure and report-only conventions are
+distinct from the CLI exit codes retained in individual check records.
 
 ## Repair and bounded-search claims
 

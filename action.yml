@@ -25,7 +25,20 @@ inputs:
   baseline:
     description: >-
       The manifest as it stood at the last release. When set, `diff` runs and
-      reports whether this change widened reachable authority.
+      reports whether this change widened reachable authority. Add both
+      required-workflow inputs to check path preservation as well.
+    required: false
+    default: ""
+  required-workflows:
+    description: >-
+      Relative regular-file path to required-workflows/v2 in required-workflows-ref.
+      Requires baseline. Never read from the candidate working tree.
+    required: false
+    default: ""
+  required-workflows-ref:
+    description: >-
+      Locally available baseline or protected Git ref containing the workflow annotation.
+      Pinned to one commit; the caller protects and authenticates its selection.
     required: false
     default: ""
   traces:
@@ -129,6 +142,8 @@ runs:
         INPUT_MANIFEST: ${{ inputs.manifest }}
         INPUT_SOURCE: ${{ inputs.source }}
         INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_REQUIRED_WORKFLOWS: ${{ inputs.required-workflows }}
+        INPUT_REQUIRED_WORKFLOWS_REF: ${{ inputs.required-workflows-ref }}
         INPUT_REVIEW_REF: ${{ inputs.review-ref }}
         INPUT_REVIEW_DECISION: ${{ inputs.review-decision }}
         INPUT_REVIEW_SOURCES: ${{ inputs.review-sources }}

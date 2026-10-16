@@ -54,10 +54,15 @@ or a transfer of historical acceptance. Synthetic evidence remains labelled as
 synthetic. The external security review and accountable evidence decisions stay
 separate from this inventory check.
 
-The latest inventory adds `--required-workflows` to `mandate diff` and
+The release comparison inventory includes `--required-workflows` on `mandate diff` and
 `mandate review`, the `Delta.required_workflows`, `required_workflows_metadata`
 and `workflow_regressions` public members, and release-side required-path rechecks.
 Metadata binds the exact workflow annotation bytes into the comparison digest.
 Fixtures from the preceding release, root exports and earlier command arguments
 are unchanged. The workflow input format and remediation surface are unchanged;
 omitting the flag keeps the previous diff/review output bytes and exit codes.
+
+The Action integration also pins `action.yml`, its wrapper script and live CI
+matrix, plus two current candidate manifests. The coverage map links them to
+the [Action guide](action-workflows.md) and executable wrapper tests. Root Python
+exports and CLI command paths are unchanged by this integration.

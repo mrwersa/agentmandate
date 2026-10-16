@@ -25,6 +25,7 @@ adopt incrementally is a gate that gets removed rather than fixed.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -32,7 +33,9 @@ import subprocess
 import sys
 from pathlib import Path, PurePosixPath
 from tempfile import TemporaryDirectory
+from urllib.parse import quote
 
+from agentmandate import __version__
 from agentmandate._change_review import render as render_review
 
 STEP_SUMMARY = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -122,13 +125,13 @@ def _git(*args: str) -> bytes:
     )
     if result.returncode:
         raise ValueError(
-            "cannot read configured review ref: "
+            "cannot read configured Git ref: "
             + result.stderr.decode("utf-8", errors="replace").strip()
         )
     return result.stdout
 
 
-def _review_blob(commit: str, path: str) -> bytes:
+def _git_blob(commit: str, path: str) -> bytes:
     normalized = PurePosixPath(path)
     if (
         not path
@@ -138,29 +141,34 @@ def _review_blob(commit: str, path: str) -> bytes:
         or "\\" in path
         or any(c in path for c in "\r\n\x00")
     ):
-        raise ValueError("review paths must be canonical relative Git paths")
+        raise ValueError("material paths must be canonical relative Git paths")
     entries = _git("--literal-pathspecs", "ls-tree", "-z", commit, "--", path).split(b"\0")
     entries = [entry for entry in entries if entry]
     if len(entries) != 1:
-        raise ValueError(f"review ref has no regular file at {path!r}")
+        raise ValueError(f"selected Git ref has no regular file at {path!r}")
     metadata, name = entries[0].split(b"\t", 1)
     mode, kind, oid = metadata.split()
     if name != path.encode() or kind != b"blob" or mode not in (b"100644", b"100755"):
-        raise ValueError(f"review ref path {path!r} is not a regular file")
+        raise ValueError(f"selected Git ref path {path!r} is not a regular file")
     return _git("cat-file", "blob", oid.decode("ascii"))
 
 
-def _review_check(baseline: str, manifest: str, depth: str) -> dict:
+def _commit(ref: str) -> str:
+    commit = _git("rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}")
+    commit = commit.decode("ascii").strip()
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+        raise ValueError("Git ref did not resolve to a commit digest")
+    return commit
+
+
+def _review_check(baseline: str, manifest: str, depth: str, workflows: str = "") -> dict:
     try:
         ref = os.environ.get("INPUT_REVIEW_REF", "").strip()
         decision = os.environ.get("INPUT_REVIEW_DECISION", "").strip()
         as_of = os.environ.get("INPUT_REVIEW_AS_OF", "").strip()
         if not baseline or not ref or not decision or not as_of:
             raise ValueError("review needs baseline, review-ref, review-decision and review-as-of")
-        commit = _git("rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}")
-        commit = commit.decode("ascii").strip()
-        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
-            raise ValueError("review ref did not resolve to a commit digest")
+        commit = _commit(ref)
         mappings = {}
         for line in os.environ.get("INPUT_REVIEW_SOURCES", "").splitlines():
             if not line.strip():
@@ -172,7 +180,7 @@ def _review_check(baseline: str, manifest: str, depth: str) -> dict:
         with TemporaryDirectory(prefix="agentmandate-review-", dir=ARTEFACTS) as temporary:
             directory = Path(temporary)
             record = directory / "decision.json"
-            record.write_bytes(_review_blob(commit, decision))
+            record.write_bytes(_git_blob(commit, decision))
             args = [
                 "review",
                 baseline,
@@ -184,9 +192,11 @@ def _review_check(baseline: str, manifest: str, depth: str) -> dict:
                 "--as-of",
                 as_of,
             ]
+            if workflows:
+                args.extend(["--required-workflows", workflows])
             for index, (locator, path) in enumerate(mappings.items()):
                 capture = directory / f"source-{index}"
-                capture.write_bytes(_review_blob(commit, path))
+                capture.write_bytes(_git_blob(commit, path))
                 args.extend(["--source", f"{locator}={capture}"])
             code, result = run_json(args)
         detail = (
@@ -214,6 +224,125 @@ def _review_check(baseline: str, manifest: str, depth: str) -> dict:
         }
 
 
+def _diff_check(baseline: str, manifest: str, depth: str, workflows: str = "") -> dict:
+    args = ["diff", baseline, manifest, "--depth", depth]
+    if workflows:
+        args.extend(["--required-workflows", workflows])
+    code, delta = run_json(args)
+    widening = [row for row in delta.get("changes", []) if row.get("direction") == "widening"]
+    regressed = [row for row in delta.get("required_workflows", [])
+                 if row["relation"] == "regressed"]
+    check = {
+        "name": "diff", "ok": code == 0, "exit": code, "result": delta,
+        "findings": max(int(code != 0), len(widening) + len(regressed)),
+        "widening_findings": len(widening), "workflow_regressions": len(regressed),
+    }
+    detail_for(check, args)
+    return check
+
+
+def _release_checks(baseline: str, manifest: str, depth: str) -> list[dict]:
+    path = os.environ.get("INPUT_REQUIRED_WORKFLOWS", "").strip()
+    ref = os.environ.get("INPUT_REQUIRED_WORKFLOWS_REF", "").strip()
+    review_configured = any(
+        os.environ.get(f"INPUT_REVIEW_{name}", "").strip()
+        for name in ("REF", "DECISION", "SOURCES", "AS_OF")
+    )
+    try:
+        with TemporaryDirectory(prefix="agentmandate-workflows-", dir=ARTEFACTS) as temporary:
+            workflows = ""
+            selection = None
+            if path or ref:
+                if not baseline or not path or not ref:
+                    raise ValueError(
+                        "required workflows need baseline, required-workflows and "
+                        "required-workflows-ref"
+                    )
+                commit = _commit(ref)
+                content = _git_blob(commit, path)
+                workflows = str(Path(temporary) / "required.json")
+                Path(workflows).write_bytes(content)
+                selection = {
+                    "ref": ref, "commit": commit, "path": path,
+                    "source_sha256": hashlib.sha256(content).hexdigest(),
+                }
+            checks = []
+            diff = _diff_check(baseline, manifest, depth, workflows) if baseline else None
+            if diff is not None:
+                if selection is not None:
+                    diff["workflow_selection"] = selection
+                checks.append(diff)
+            if review_configured:
+                review = _review_check(baseline, manifest, depth, workflows)
+                checks.append(review)
+                if review["ok"] and diff is not None and not diff["ok"]:
+                    result = review["result"]
+                    if (
+                        result.get("status") == "eligible_recorded_acceptance"
+                        and result.get("gate_satisfied") is True
+                        and result.get("comparison") == diff["result"]
+                        and not diff["workflow_regressions"]
+                    ):
+                        diff["blocking_findings"] = 0
+                        diff["blocks_gate"] = False
+                        diff["accepted_widenings"] = diff["widening_findings"]
+                    else:
+                        review["ok"] = False
+                        review["findings"] += 1
+                        review["detail"] += "\nAction diff and review comparison do not match."
+            return checks
+    except (OSError, ValueError, UnicodeError) as exc:
+        # Keep the ordinary authority comparison visible when annotation selection fails.
+        checks = [_diff_check(baseline, manifest, depth)] if baseline else []
+        checks.append({
+            "name": "required-workflows", "ok": False, "exit": 2, "findings": 1,
+            "detail": str(exc), "result": {"error": str(exc)},
+        })
+        return checks
+
+
+def _workflow_sarif(log: dict, checks: list[dict], manifest: str) -> dict:
+    results = []
+    rules = {
+        "workflow.regressed": "A required workflow no longer conforms in this release.",
+        "workflow.invalid": "Required workflows could not be selected or checked.",
+    }
+    for check in checks:
+        if check["name"] == "required-workflows" or (
+            check["name"] == "diff" and check.get("workflow_selection") and check["exit"] == 2
+        ):
+            results.append({
+                "ruleId": "workflow.invalid", "level": "error",
+                "message": {"text": check["detail"]},
+            })
+        if check["name"] != "diff":
+            continue
+        delta = check["result"]
+        for row in delta.get("required_workflows", []):
+            if row["relation"] != "regressed":
+                continue
+            failure = row["failure"]
+            results.append({
+                "ruleId": "workflow.regressed", "level": "error",
+                "message": {"text": f"{row['name']}: step {failure['step']} "
+                            f"{failure['rule']}: {failure['detail']}"},
+                "properties": {"workflow": row["name"], "failure": failure,
+                               "inputs": delta["required_workflows_metadata"]},
+            })
+    if results:
+        uri = (Path(manifest).as_uri() if Path(manifest).is_absolute()
+               else quote(Path(manifest).as_posix(), safe="/"))
+        for result in results:
+            result["locations"] = [{"physicalLocation": {"artifactLocation": {"uri": uri}}}]
+        log["runs"].append({
+            "tool": {"driver": {"name": "AgentMandate workflows", "version": __version__,
+                               "rules": [{"id": key, "shortDescription": {"text": text}}
+                                         for key, text in rules.items()]}},
+            "results": results,
+        })
+    return log
+
+
 def main() -> int:
     manifest = os.environ["INPUT_MANIFEST"]
     depth = os.environ.get("INPUT_DEPTH", "8")
@@ -221,13 +350,15 @@ def main() -> int:
 
     code, payload = run_json(["lint", manifest])
     blocking, advisory = by_severity(payload)
-    check = {"name": "lint", "ok": code == 0, "findings": blocking, "notes": advisory}
+    check = {"name": "lint", "ok": code == 0,
+             "findings": max(int(code != 0), blocking), "notes": advisory}
     detail_for(check, ["lint", manifest])
     checks.append(check)
 
     args = ["reach", manifest, "--depth", depth]
     code, reach = run_json(args)
-    check = {"name": "reach", "ok": code == 0, "findings": count(reach, "breaches")}
+    check = {"name": "reach", "ok": code == 0,
+             "findings": max(int(code != 0), count(reach, "breaches"))}
     detail_for(check, args)
     checks.append(check)
 
@@ -235,49 +366,13 @@ def main() -> int:
     if source:
         args = ["drift", manifest, "--source", source]
         code, drift = run_json(args)
-        check = {"name": "drift", "ok": code == 0, "findings": count(drift, "findings")}
+        check = {"name": "drift", "ok": code == 0,
+                 "findings": max(int(code != 0), count(drift, "findings"))}
         detail_for(check, args)
         checks.append(check)
 
     baseline = os.environ.get("INPUT_BASELINE", "").strip()
-    if baseline:
-        args = ["diff", baseline, manifest, "--depth", depth]
-        code, delta = run_json(args)
-        # `diff` reports `direction`, and the widening changes are the
-        # findings. Counting the whole change list would count a removal as a
-        # finding, which is the opposite of what a gate is for.
-        widening = [
-            change
-            for change in (delta.get("changes", []) if isinstance(delta, dict) else [])
-            if isinstance(change, dict) and change.get("direction") == "widening"
-        ]
-        check = {"name": "diff", "ok": code == 0, "findings": len(widening)}
-        detail_for(check, args)
-        checks.append(check)
-
-    review_configured = any(
-        os.environ.get(f"INPUT_REVIEW_{name}", "").strip()
-        for name in ("REF", "DECISION", "SOURCES", "AS_OF")
-    )
-    if review_configured:
-        review = _review_check(baseline, manifest, depth)
-        checks.append(review)
-        diff = next((c for c in checks if c["name"] == "diff"), None)
-        result = review["result"]
-        if review["ok"] and diff is not None and not diff["ok"]:
-            if (
-                result.get("status") == "eligible_recorded_acceptance"
-                and result.get("gate_satisfied") is True
-                and result.get("comparison") == delta
-            ):
-                # Retain raw diff failure/count. Only its review blocker is resolved.
-                diff["blocking_findings"] = 0
-                diff["blocks_gate"] = False
-                diff["accepted_widenings"] = diff["findings"]
-            else:
-                review["ok"] = False
-                review["findings"] += 1
-                review["detail"] += "\nAction diff and review comparison do not match."
+    checks.extend(_release_checks(baseline, manifest, depth))
 
     traces = os.environ.get("INPUT_TRACES", "").strip()
     if traces:
@@ -290,7 +385,7 @@ def main() -> int:
         check = {
             "name": "verify",
             "ok": code == 0,
-            "findings": count(conformance, "violations"),
+            "findings": max(int(code != 0), count(conformance, "violations")),
         }
         detail_for(check, args)
         checks.append(check)
@@ -317,6 +412,10 @@ def main() -> int:
     if os.environ.get("INPUT_SARIF", "true").lower() == "true":
         code, sarif = run(["reach", manifest, "--depth", depth, "--sarif"])
         target = ARTEFACTS / "agentmandate.sarif"
+        if code in (0, 1) and any(
+            check["name"] in {"diff", "required-workflows"} for check in checks
+        ):
+            sarif = json.dumps(_workflow_sarif(json.loads(sarif), checks, manifest), indent=2)
         target.write_text(sarif, encoding="utf-8")
         sarif_path = str(target)
 
@@ -374,7 +473,8 @@ def summary(checks: list[dict], verdict: str, total: int, advisory: int, graph: 
         "lint": "Is any single tool declared wrongly?",
         "reach": "Can permitted calls combine into a breach?",
         "drift": "Does the manifest still describe the code?",
-        "diff": "Did this change widen reachable authority?",
+        "diff": "Did authority widen or a required workflow regress?",
+        "required-workflows": "Could the pinned workflow annotation be selected?",
         "review": "Is the recorded acceptance eligible for this exact diff?",
         "verify": "Did the recorded run stay inside the mandate?",
     }
@@ -388,6 +488,23 @@ def summary(checks: list[dict], verdict: str, total: int, advisory: int, graph: 
             else ("❌" if not check["ok"] else ("⚠️" if check.get("notes") else "✅"))
         )
         lines.append(f"| {mark} | `{check['name']}` | {questions.get(check['name'], '')} |")
+
+    for check in checks:
+        selection = check.get("workflow_selection")
+        if selection is None:
+            continue
+        metadata = check["result"].get("required_workflows_metadata", {})
+        lines += ["", "### Required workflows (pinned input)", "", "```",
+                  f"commit: {selection['commit']}", f"path: {selection['path']}",
+                  f"source_sha256: {selection['source_sha256']}",
+                  f"manifest_sha256: {metadata.get('manifest_sha256', 'unresolved')}"]
+        lines.extend(
+            f"{row['name']}: {row['relation']}" + (
+                f"; step {row['failure']['step']} {row['failure']['rule']}: "
+                f"{row['failure']['detail']}" if row['failure'] is not None else ""
+            ) for row in check["result"].get("required_workflows", [])
+        )
+        lines += ["```", ""]
 
     failing = [check for check in checks if not check["ok"]]
     if failing:
