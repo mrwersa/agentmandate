@@ -10,3 +10,5 @@ private-*/
 build/
 dist/
 node_modules/
+# The repository root is a Python project; Node projects keep their own locks.
+/package-lock.json
