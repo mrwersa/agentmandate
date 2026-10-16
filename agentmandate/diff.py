@@ -46,6 +46,7 @@ class Delta:
     # Caller-authored paths rechecked against both releases. Empty unless the
     # caller supplied them, so the default result keeps its shape.
     required_workflows: tuple[dict[str, Any], ...] = ()
+    required_workflows_metadata: Mapping[str, Any] | None = None
 
     @property
     def direction(self) -> str:
@@ -155,6 +156,8 @@ class Delta:
         }
         if self.required_workflows:
             result["required_workflows"] = [dict(row) for row in self.required_workflows]
+        if self.required_workflows_metadata is not None:
+            result["required_workflows_metadata"] = dict(self.required_workflows_metadata)
         return result
 
 
@@ -453,4 +456,7 @@ def compare(
         changes=tuple(changes),
         after_agent=after.agent,
         required_workflows=workflows,
+        required_workflows_metadata=(
+            None if required_workflows is None else required_workflows.metadata()
+        ),
     )

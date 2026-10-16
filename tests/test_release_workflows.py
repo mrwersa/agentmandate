@@ -1,5 +1,6 @@
 """Release comparisons recheck caller-authored paths against both manifests."""
 
+import copy
 import hashlib
 import json
 from dataclasses import replace
@@ -79,8 +80,12 @@ def test_a_preserved_path_does_not_block_an_otherwise_clean_release():
     delta = compare_pair(after="narrowed.json")
     assert not delta.widened and not delta.workflow_regressions
     assert main(command(after="narrowed.json")) == 0
+    assert "required_workflows" in delta.as_dict()
+    assert delta.as_dict()["required_workflows_metadata"] == requirements().metadata()
     # The default result keeps its shape and its exit code.
-    assert "required_workflows" not in delta.as_dict() is False or True
+    plain = compare_pair(after="narrowed.json", workflows=False).as_dict()
+    assert "required_workflows" not in plain
+    assert "required_workflows_metadata" not in plain
     assert compare_pair(after="narrowed.json", workflows=False).as_dict() == (
         compare_authority(
             loads((EXAMPLE / RELEASED).read_text()),
@@ -125,8 +130,7 @@ def test_render_and_change_record_name_the_failing_step():
 
 def test_an_unreadable_manifest_and_a_wrong_baseline_are_usage_errors(tmp_path, capsys):
     missing = tmp_path / "absent.json"
-    assert main(command(workflows=None) + ["--depth", "4"] and
-                ["diff", str(missing), str(EXAMPLE / RELEASED)]) == 2
+    assert main(["diff", str(missing), str(EXAMPLE / RELEASED)]) == 2
     assert capsys.readouterr().err.startswith("error: cannot read manifest")
     for name in ("impossible-export.json", "other-agent.json", "other-baseline.json"):
         assert main(command(after="narrowed.json", workflows=name)) == 2
@@ -201,6 +205,71 @@ def test_a_decision_record_covers_the_compared_workflows():
         sources={"note": note},
     )
     assert accepted["gate_satisfied"] and accepted["status"] == "review_not_required_within_bound"
+
+
+@pytest.mark.parametrize("change", ["amount", "calls", "reviewer", "reason", "approval", "format"])
+def test_an_acceptance_cannot_transfer_to_different_workflow_bytes(change, tmp_path, capsys):
+    before, after = released(), (EXAMPLE / "proposed.json").read_bytes()
+    original = requirements()
+    checked = evaluate_review(before, after, as_of=AS_OF, required_workflows=original)
+    note = b"Synthetic acceptance of these exact workflow annotations.\n"
+    record = {
+        "schema": "agentmandate.change-review/v1", **checked["inputs"],
+        "scope": "all_widening_changes_in_pinned_comparison", "owner": "synthetic-owner",
+        "reviewer": "synthetic-reviewer", "reason": "Accept the pinned widening comparison",
+        "decision": "accept", "reviewed_at": AS_OF, "expires": "2026-11-30",
+        "evidence": [{"locator": "note", "sha256": hashlib.sha256(note).hexdigest(),
+                      "purpose": "decision"}],
+        "target_policy": {"status": "not_applicable", "reason": "synthetic only"},
+    }
+    accepted = evaluate_review(
+        before, after, as_of=AS_OF, required_workflows=original,
+        decision=json.dumps(record).encode(), sources={"note": note},
+    )
+    assert accepted["gate_satisfied"] and accepted["status"] == "eligible_recorded_acceptance"
+
+    raw = json.loads((EXAMPLE / ANNOTATION).read_bytes())
+    changed = copy.deepcopy(raw)
+    if change == "amount":
+        changed["workflows"][0]["steps"][1]["value"] = "101"
+    elif change == "calls":
+        changed["workflows"][0]["steps"][1] = {
+            "tool": "open_batch", "principal": "caller", "approved": False,
+        }
+    elif change in {"reviewer", "reason"}:
+        changed[change] = "different synthetic annotation"
+    elif change == "approval":
+        changed["workflows"][0]["steps"][0]["approved"] = True
+    content = ((EXAMPLE / ANNOTATION).read_bytes() + b"\n" if change == "format"
+               else json.dumps(changed).encode())
+    revised = _Requirements.load(
+        content, loads(before.decode()), hashlib.sha256(before).hexdigest()
+    )
+    rejected = evaluate_review(
+        before, after, as_of=AS_OF, required_workflows=revised,
+        decision=json.dumps(record).encode(), sources={"note": note},
+    )
+    assert rejected["required_workflows"] == checked["required_workflows"]
+    assert revised.source_sha256 != original.source_sha256
+    assert rejected["comparison"]["required_workflows_metadata"] == revised.metadata()
+    assert rejected["inputs"]["comparison_sha256"] != checked["inputs"]["comparison_sha256"]
+    assert not rejected["gate_satisfied"] and not rejected["review"]["eligible"]
+    assert {row["rule"] for row in rejected["findings"]} == {"review.comparison-mismatch"}
+
+    annotation = tmp_path / "required.json"
+    decision = tmp_path / "decision.json"
+    source = tmp_path / "note.txt"
+    annotation.write_bytes(content)
+    decision.write_text(json.dumps(record))
+    source.write_bytes(note)
+    assert main([
+        "review", str(EXAMPLE / RELEASED), str(EXAMPLE / "proposed.json"),
+        "--required-workflows", str(annotation), "--decision", str(decision),
+        "--source", f"note={source}", "--as-of", AS_OF, "--json",
+    ]) == 1
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert json.loads(captured.out) == rejected
 
 
 def test_an_annotated_tool_keeps_its_identity_across_the_comparison():

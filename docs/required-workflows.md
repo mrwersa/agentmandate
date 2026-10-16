@@ -177,6 +177,14 @@ authority; it does not accept a broken required path. Because the comparison
 digest now covers the rechecked paths, a record pinned without the workflow
 check is rejected as a comparison mismatch when the check is added.
 
+The comparison includes `required_workflows_metadata`, using the same metadata
+as remediation: the annotation file's exact `source_sha256`, baseline manifest
+digest, agent, reviewer, reason and scope. The source digest binds the actual
+calls and amounts, not just their names, step counts and outcomes. Changing any
+annotation bytes, including formatting, requires a newly pinned review record
+even when the rechecked outcomes remain the same. This identifies the supplied
+bytes; it does not authenticate the annotation author or grant deployment approval.
+
 Without either flag, `diff` and `review` keep their exact output bytes and exit
 codes, and the workflow rows are absent from the result.
 

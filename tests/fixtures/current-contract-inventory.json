@@ -3825,7 +3825,7 @@
     "tests/fixtures/producer-result-v2-truncated.json": "7057330849d00e0185a1eca641a41b2da786c64140e57b8969d52816c315a129",
     "tests/fixtures/producer-result-v2-unresolved.json": "0e078b474ace2421c70188694025c42aa5233ad6b244815b422ee068c6abc13c",
     "tests/fixtures/rego-effective-diff-v2.json": "ee9360ca2e14e32e6d6dd305eda785723d2f90dbb5d26cd9a28ef4334bd99ca1",
-    "tests/fixtures/release-workflows-v1.json": "13114d05b74cf8217a11240f50d55122b0bc5dd4d63ab83c5cd7bb047e5c594e",
+    "tests/fixtures/release-workflows-v1.json": "07026c97b7d6df2e92ba7049966eac099bf0da59a1d40c3abceb710a221fdbec",
     "tests/fixtures/remediation-breached-v6.json": "ca69b5e04a75cdf64c964ddd202e38ff5fc61b0e465008b2c200a97eb2be9fa9",
     "tests/fixtures/remediation-ceiling-clean-v6.json": "30f8ed38e0796cfa8c022f492a563370880255d29d83b015386a13a2365cd8c6",
     "tests/fixtures/remediation-ceiling-joint-v6.json": "683225bddde42d696e6a77b4ba77f6a83990059e583ec3baaaa9e2c78f5ea9f9",
@@ -3978,7 +3978,7 @@
           "signature": "(self) -> 'tuple[str, ...]'"
         }
       },
-      "signature": "(before: 'Authority', after: 'Authority', changes: 'tuple[Change, ...]', after_agent: 'str' = 'agent', required_workflows: 'tuple[dict[str, Any], ...]' = ()) -> None"
+      "signature": "(before: 'Authority', after: 'Authority', changes: 'tuple[Change, ...]', after_agent: 'str' = 'agent', required_workflows: 'tuple[dict[str, Any], ...]' = (), required_workflows_metadata: 'Mapping[str, Any] | None' = None) -> None"
     },
     "Drift": {
       "bases": [

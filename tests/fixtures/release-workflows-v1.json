@@ -114,7 +114,16 @@
           "relation": "preserved",
           "steps": 2
         }
-      ]
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
     }
   },
   {
@@ -225,7 +234,16 @@
           "relation": "regressed",
           "steps": 2
         }
-      ]
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
     }
   },
   {
@@ -334,7 +352,16 @@
           "relation": "preserved",
           "steps": 2
         }
-      ]
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
     }
   },
   {
@@ -444,7 +471,16 @@
           "relation": "regressed",
           "steps": 2
         }
-      ]
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
     }
   },
   {
@@ -558,7 +594,16 @@
           "relation": "regressed",
           "steps": 2
         }
-      ]
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
     }
   },
   {
@@ -670,7 +715,16 @@
           "relation": "regressed",
           "steps": 2
         }
-      ]
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
     }
   }
 ]

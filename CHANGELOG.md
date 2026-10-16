@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.39.0 - 2026-10-15
+## 0.39.0 - 2026-10-16
 
 ### Changed
 
@@ -18,7 +18,9 @@ All notable changes to this project are documented here. The format follows
   as `review.required-workflow-regressed` separately from widening and from
   reachable breaches. Omitting the flag preserves the previous output bytes and
   exit codes, and the comparison digest a change-review record pins now covers
-  the rechecked paths.
+  the rechecked paths and their input metadata. The exact annotation source
+  digest prevents a recorded acceptance from transferring to different calls,
+  amounts, approval annotations or reviewer metadata with identical outcomes.
 
 ## 0.38.0 - 2026-10-15
 
