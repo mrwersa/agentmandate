@@ -3632,8 +3632,10 @@
       ]
     }
   },
-  "coverage_sha256": "25c9133901490f155765ebbf28bc464ef56e8706d76c98b7025897d17b9ff9c7",
+  "coverage_sha256": "d678a5dd855654a7b9f29ccc50a71e5be89dd592753e10df54ae147afd95be97",
   "fixture_sha256": {
+    ".github/workflows/action.yml": "958927e3eff3a9891b00577e65f51c49bf03e9a4490ee32c679600a9e063b65a",
+    "action.yml": "444f560ceeb4bfc80468f55429f7c5c0388b43c813f5001b1e5ce7aa99a5e229",
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
     "docs/evidence/agentcore-refund-policy/managed-oracle-v1.json": "0dbe5ea25cab0dbf362eddaa8215c1ae7dcc8f73acfcd5b492a64e10866f6d46",
@@ -3651,6 +3653,8 @@
     "docs/evidence/sentry-mcp/mandate.yaml": "f9f9dbdb17040ea498bb0fdfe25739c159d774b594178b01634c561e833aa75c",
     "docs/evidence/sentry-mcp/scan-skeleton.yaml": "95d4ee414513a7c037432e00b45470af9d17e7ca1f934b2c33cb17d574965bf6",
     "docs/pre-1.0-consolidation-audit.md": "f55e1d04949e4a1dbb772e7126f12319299332824820798644ad1d7fb8ce02aa",
+    "examples/action-workflows/preserved.json": "5d9cb91cab10934e821072335ca9ea973c63fce171bd4a6791cf07bd374b6205",
+    "examples/action-workflows/widened.json": "9aaa99779e04711ba72bdebb7eec95c343eccc6c372f056681d3e03ff34ad4d0",
     "examples/catalogue-import/a2a-1.0.json": "3a4b5a24c0fe5f76a00abc1d783919e7e67bdb01a0701cb29cd321b6c3de236e",
     "examples/catalogue-import/a2a.json": "c03a965e329d57d506cc14c8f52101c5e3e13e79dc96bc789e93d7da17abcaeb",
     "examples/catalogue-import/manifest.json": "bfe25ad6c3a109fb3a6318feb3a5ad116eceb536273bd36bb318ae0f9b010332",
@@ -3728,6 +3732,7 @@
     "examples/scalar-handover/handover-lost-reservation.json": "8feae6b3220dadf50388c5838c2a30826d0be7ba671c747fca175eef3114467b",
     "examples/scalar-handover/handover-reset.json": "01a8032233885d9ac0fac9b7e3645d41a2ec3d6c38fa99c1a4dca036b3fa5944",
     "examples/scalar-handover/handover.json": "338aebb0809f3b48ac000ac95857e1590d8043536a3d2f61c06c00f235de8d63",
+    "scripts/action_gate.py": "5b5d4c5cd8fdb0ca45cb87115cfb78f672918635a2c7958dea9d454d477ffe93",
     "tests/fixtures/agentcore-continuation-v1.json": "b22f056132e838aadaa7b5191b28f4a5c2fcc1ec8508d332c3d5f1f1df35c254",
     "tests/fixtures/agentcore-continuity-v1.json": "35b4f6e6a2fbe6996a05562cc91cf6b83da2442fae92a77f07006934c2d6de8f",
     "tests/fixtures/agentcore-principal-continuity-v1.json": "d84ca855f1096fd956d6a8389844e084d1df4fde38ac55a32c1c1522333d2b5a",

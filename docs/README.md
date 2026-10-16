@@ -26,6 +26,7 @@ commands; historical captures and acceptance records keep their original bytes.
 | Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
 | Keep a release from breaking required work | [Required workflows](required-workflows.md#check-a-release-instead-of-a-repair) |
+| Run workflow-preserving release checks in GitHub Actions | [Pinned Action workflows](action-workflows.md) |
 | Check artifact structure before evidence analysis | [Structural validation](structural-validation.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
@@ -51,6 +52,8 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Protocol catalogue imports](catalogue-import.md): extract local JSON into
   review-marked skeletons or unreviewed inventory/IR, keeping adapter gaps explicit.
 - [CI integration](ci.md): exit codes, GitHub Actions, pinned-ref review decisions, SARIF, and rollout.
+- [Pinned Action workflows](action-workflows.md): preserve required paths from a
+  selected baseline commit and combine them with recorded review.
 - [Repair candidates](remediation.md): rank rechecked tool removals, approval changes
   and explicitly supplied lower ceilings while keeping named tools reachable and search limits visible.
 - [Required workflows](required-workflows.md): screen repairs against caller-authored

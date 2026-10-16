@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-15",
+  "as_of": "2026-10-16",
   "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
   "phases": [
     {
@@ -106,7 +106,7 @@
           "title": "Named-review CI workflow",
           "status": "partial",
           "evidence": "docs/change-review.md",
-          "reason": "Record eligibility is delivered; authenticated organizational integration and deployment evidence remain open."
+          "reason": "Record eligibility and pinned-ref GitHub Action workflow-preservation checks are delivered. The caller authenticates reviewers and protects refs; organizational integration and deployment evidence remain open."
         }
       ]
     },

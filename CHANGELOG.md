@@ -4,6 +4,28 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.40.0 - 2026-10-16
+
+### Added
+
+- GitHub Action `required-workflows` and `required-workflows-ref` inputs select
+  one regular-file annotation from a pinned local Git commit. Diff and named
+  review share its snapshot; candidate checkout edits and moving refs cannot
+  substitute different workflow bytes during the checks.
+- Action reports count narrowing workflow regressions separately from widening,
+  show failing steps and source pins, and add workflow failures to SARIF beside
+  the independent reachability results. Report-only mode retains findings.
+- Composite Action CI exercises preserved work, a narrowing regression,
+  working-tree substitution and report-only mode.
+
+### Fixed
+
+- Action checks count CLI usage errors as at least one finding, keeping failed
+  checks visible in the `findings` output. A configured review skipped because
+  workflow selection failed is reported explicitly with exit 2.
+- Preserve the original reachability SARIF bytes when no workflow findings are
+  appended, and report unexpected diff result shapes as failures.
+
 ## 0.39.0 - 2026-10-16
 
 ### Changed
