@@ -218,7 +218,8 @@ source drift or trace-conformance failures. A reachable breach still fails even
 when its widening was accepted.
 The standalone `mandate diff` exit code is unchanged. `fail-on: never` remains
 an explicit report-only choice and can succeed with an overall findings verdict.
-With no review inputs, the Action retains its previous checks and gate behavior.
+With neither review nor required-workflow inputs, the Action retains its ordinary
+checks and gate behavior.
 
 ## Pinning the analyzed authority artifact
 
