@@ -3732,7 +3732,7 @@
     "examples/scalar-handover/handover-lost-reservation.json": "8feae6b3220dadf50388c5838c2a30826d0be7ba671c747fca175eef3114467b",
     "examples/scalar-handover/handover-reset.json": "01a8032233885d9ac0fac9b7e3645d41a2ec3d6c38fa99c1a4dca036b3fa5944",
     "examples/scalar-handover/handover.json": "338aebb0809f3b48ac000ac95857e1590d8043536a3d2f61c06c00f235de8d63",
-    "scripts/action_gate.py": "8b2c40652c4dd990d1336e5e60b9e84a183f6da60ed27feca4fd894c6092c106",
+    "scripts/action_gate.py": "5b5d4c5cd8fdb0ca45cb87115cfb78f672918635a2c7958dea9d454d477ffe93",
     "tests/fixtures/agentcore-continuation-v1.json": "b22f056132e838aadaa7b5191b28f4a5c2fcc1ec8508d332c3d5f1f1df35c254",
     "tests/fixtures/agentcore-continuity-v1.json": "35b4f6e6a2fbe6996a05562cc91cf6b83da2442fae92a77f07006934c2d6de8f",
     "tests/fixtures/agentcore-principal-continuity-v1.json": "d84ca855f1096fd956d6a8389844e084d1df4fde38ac55a32c1c1522333d2b5a",

@@ -229,9 +229,20 @@ def _diff_check(baseline: str, manifest: str, depth: str, workflows: str = "") -
     if workflows:
         args.extend(["--required-workflows", workflows])
     code, delta = run_json(args)
+    if not isinstance(delta, dict) or any(
+        not isinstance(delta.get(key, []), list)
+        or any(not isinstance(row, dict) for row in delta[key])
+        for key in ("changes", "required_workflows") if key in delta
+    ):
+        error = "diff returned an unexpected JSON result shape"
+        return {
+            "name": "diff", "ok": False, "exit": 2, "result": {"error": error},
+            "detail": error, "findings": 1, "widening_findings": 0,
+            "workflow_regressions": 0,
+        }
     widening = [row for row in delta.get("changes", []) if row.get("direction") == "widening"]
     regressed = [row for row in delta.get("required_workflows", [])
-                 if row["relation"] == "regressed"]
+                 if row.get("relation") == "regressed"]
     check = {
         "name": "diff", "ok": code == 0, "exit": code, "result": delta,
         "findings": max(int(code != 0), len(widening) + len(regressed)),
@@ -298,10 +309,18 @@ def _release_checks(baseline: str, manifest: str, depth: str) -> list[dict]:
             "name": "required-workflows", "ok": False, "exit": 2, "findings": 1,
             "detail": str(exc), "result": {"error": str(exc)},
         })
+        if review_configured:
+            error = "Review was not evaluated because required workflows could not be selected: "
+            error += str(exc)
+            checks.append({
+                "name": "review", "ok": False, "exit": 2, "findings": 1, "skipped": True,
+                "detail": error, "result": {"error": error},
+            })
         return checks
 
 
-def _workflow_sarif(log: dict, checks: list[dict], manifest: str) -> dict:
+def _workflow_sarif(log: dict, checks: list[dict], manifest: str) -> bool:
+    """Append workflow findings and report whether the log changed."""
     results = []
     rules = {
         "workflow.regressed": "A required workflow no longer conforms in this release.",
@@ -319,7 +338,7 @@ def _workflow_sarif(log: dict, checks: list[dict], manifest: str) -> dict:
             continue
         delta = check["result"]
         for row in delta.get("required_workflows", []):
-            if row["relation"] != "regressed":
+            if row.get("relation") != "regressed":
                 continue
             failure = row["failure"]
             results.append({
@@ -340,7 +359,7 @@ def _workflow_sarif(log: dict, checks: list[dict], manifest: str) -> dict:
                                          for key, text in rules.items()]}},
             "results": results,
         })
-    return log
+    return bool(results)
 
 
 def main() -> int:
@@ -415,7 +434,9 @@ def main() -> int:
         if code in (0, 1) and any(
             check["name"] in {"diff", "required-workflows"} for check in checks
         ):
-            sarif = json.dumps(_workflow_sarif(json.loads(sarif), checks, manifest), indent=2)
+            log = json.loads(sarif)
+            if _workflow_sarif(log, checks, manifest):
+                sarif = json.dumps(log, indent=2) + "\n"
         target.write_text(sarif, encoding="utf-8")
         sarif_path = str(target)
 

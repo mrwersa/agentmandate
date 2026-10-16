@@ -111,6 +111,61 @@ def test_preserved_narrowing_passes_and_still_reports_pins(workflow_workspace):
     assert sarif_results(workflow_workspace) == []
 
 
+@pytest.mark.parametrize("with_workflows", [False, True])
+def test_no_workflow_findings_preserves_cli_sarif_bytes(
+    workflow_workspace, monkeypatch, with_workflows,
+):
+    shutil.copy(EXAMPLES / "action-workflows/preserved.json", workflow_workspace / "candidate.json")
+    if not with_workflows:
+        monkeypatch.delenv("INPUT_REQUIRED_WORKFLOWS")
+        monkeypatch.delenv("INPUT_REQUIRED_WORKFLOWS_REF")
+    code, raw = action_gate.run(["reach", "candidate.json", "--depth", "4", "--sarif"])
+    assert code == 0 and raw.endswith("\n")
+    assert action_gate.main() == 0
+    assert Path(outputs(workflow_workspace)["sarif-file"]).read_bytes() == raw.encode("utf-8")
+
+
+@pytest.mark.parametrize("payload", [
+    [], None, {"changes": None}, {"changes": ["widening"]},
+    {"required_workflows": {}}, {"required_workflows": [None]},
+])
+def test_unexpected_diff_shapes_are_reported_without_crashing(
+    workflow_workspace, monkeypatch, payload,
+):
+    original = action_gate.run_json
+
+    def unexpected_diff(args):
+        return (0, payload) if args[0] == "diff" else original(args)
+
+    monkeypatch.setattr(action_gate, "run_json", unexpected_diff)
+    assert action_gate.main() == 1
+    check = action_check(workflow_workspace, "diff")
+    assert check["exit"] == 2 and check["findings"] == 1
+    assert check["ok"] is False
+    assert "unexpected JSON result shape" in check["detail"]
+    assert sarif_results(workflow_workspace)[0]["ruleId"] == "workflow.invalid"
+
+
+def test_failed_workflow_selection_reports_configured_review_as_skipped(
+    workflow_workspace, monkeypatch,
+):
+    add_review(workflow_workspace, monkeypatch)
+    monkeypatch.setenv("INPUT_REQUIRED_WORKFLOWS", "missing.json")
+
+    def forbid_review(*args):
+        pytest.fail("a configured review must not run against fallback workflows")
+
+    monkeypatch.setattr(action_gate, "_review_check", forbid_review)
+    assert action_gate.main() == 1
+    review = action_check(workflow_workspace, "review")
+    assert review["skipped"] is True and review["exit"] == 2
+    assert review["findings"] == 1 and review["ok"] is False
+    assert "could not be selected" in review["detail"] and "missing.json" in review["detail"]
+    assert "Review was not evaluated" in (workflow_workspace / "summary.md").read_text()
+    assert action_check(workflow_workspace, "required-workflows")["exit"] == 2
+    assert action_check(workflow_workspace, "diff")["result"]["direction"] == "narrowing"
+
+
 def test_report_only_retains_workflow_regression(workflow_workspace, monkeypatch):
     monkeypatch.setenv("INPUT_FAIL_ON", "never")
     assert action_gate.main() == 0

@@ -63,13 +63,18 @@ and adds `workflow.regressed` results with the failing step and input metadata.
 Invalid workflow inputs produce `workflow.invalid` instead. SARIF is not a
 complete representation of every check: use the combined report and verdict
 for named review, drift and trace-conformance results.
+When no workflow findings are appended, the reachability SARIF bytes are preserved.
 
 Missing configuration or an unreadable ref/file retains an ordinary authority
 comparison, when a baseline is available, beside a workflow-input failure.
-Review is not evaluated using a fallback annotation. Malformed, mismatched or
-baseline-infeasible annotations retain the CLI's exit-2 diagnostic in the diff
-check. The Action itself reports a failed step with `findings`; its step exit
-convention remains success/failure, distinct from each CLI check's 0/1/2 result.
+If review was configured, its check reports `skipped: true` with exit 2 and the
+selection failure as its reason; no fallback annotation is evaluated.
+Malformed, mismatched or baseline-infeasible annotations retain the CLI's exit-2
+diagnostic in the diff check. The Action itself reports a failed step with
+`findings`; its step exit convention remains success/failure, distinct from
+each CLI check's 0/1/2 result.
+Every failed CLI check contributes at least one finding, including usage errors
+that return no analysis findings.
 
 `fail-on: never` deliberately lets the step succeed while retaining its findings
 verdict, counts, summary and SARIF. It does not convert the analysis to clean.
