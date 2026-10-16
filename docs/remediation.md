@@ -94,9 +94,11 @@ Reproduce a candidate's scoped result with the same condition inputs and date;
 running its manifest alone can still report ordinary breaches. Removing a tool
 makes only its already-validated attachments inactive, with their IDs reported
 in `inactive_conditions`; the original input identities remain visible.
-An unexpected eligibility change during rechecking is an error, not a clean
-candidate. Discovery's pruning remains scoped to the fixed classification and
-unchanged evidence; it does not search condition domains.
+Ordinary unresolved evidence produces exit 1 and `input_requires_review`.
+The current edits cannot change condition eligibility; a violation of that
+invariant aborts analysis with exit 2 and no partial report, as an unsupported
+internal repair state. Discovery's pruning remains scoped to the fixed
+classification and unchanged evidence; it does not search condition domains.
 
 Required paths still pin the original manifest. Their calls are assessed under
 the selected effect domain, including effect-count budgets. They carry no SQL

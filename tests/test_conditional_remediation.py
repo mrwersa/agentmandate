@@ -165,15 +165,17 @@ def test_removed_tools_deactivate_only_their_validated_attachments():
     assert removed["conditions"]["inputs"] == result["conditions"]["inputs"]
 
 
-def test_snapshot_identity_is_canonical_and_capture_mapping_cannot_change_it():
+def test_snapshot_owns_records_and_captures_without_changing_canonical_identity():
     records = inputs()
+    identity = hashlib.sha256(records[0][0].to_json().encode()).hexdigest()
     scope = _ConditionScope.from_inputs(*records)
     records[2].clear()
+    # Even a caller bypassing frozen dataclasses cannot alter the owned snapshot.
+    object.__setattr__(records[0][0].target, "tool", "absent")
+    object.__setattr__(records[1][0].evidence, "review", "rejected")
     result = scope.resolve(load(EXAMPLE / "manifest.json"))
     assert not result.findings
-    assert result.report["inputs"]["conditions"] == [
-        hashlib.sha256(records[0][0].to_json().encode()).hexdigest(),
-    ]
+    assert result.report["inputs"]["conditions"] == [identity]
     assert "not original file bytes" in result.report["inputs"]["artifact_identity"]
 
 

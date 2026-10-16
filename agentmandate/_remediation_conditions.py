@@ -34,8 +34,8 @@ class _ConditionEvaluation:
 
 @dataclass(frozen=True)
 class _ConditionScope:
-    conditions: tuple[str, ...]
-    contexts: tuple[str, ...]
+    conditions: tuple[ToolCondition, ...]
+    contexts: tuple[ConditionContext, ...]
     captures: tuple[tuple[str, bytes], ...]
     as_of: date
 
@@ -44,32 +44,33 @@ class _ConditionScope:
         if not conditions or not contexts:
             raise ValueError("condition-aware remediation requires conditions and contexts")
         return cls(
-            tuple(item.to_json() for item in conditions),
-            tuple(item.to_json() for item in contexts),
+            tuple(ToolCondition.from_json(item.to_json()) for item in conditions),
+            tuple(ConditionContext.from_json(item.to_json()) for item in contexts),
             tuple(sorted(captures.items())),
             as_of,
         )
 
     def resolve(self, mandate: Mandate, *, candidate=False):
-        # Re-read the same canonical records on every recheck. Removed tools make
-        # their already-validated attachments inactive, never newly accepted.
-        conditions = tuple(ToolCondition.from_json(text) for text in self.conditions)
-        contexts = tuple(ConditionContext.from_json(text) for text in self.contexts)
+        # Snapshot owned, immutable records once; the shared resolver still
+        # revalidates them at every consumption boundary. Removed tools make
+        # only their already-validated attachments inactive.
         inactive = tuple(
-            item for item in conditions if candidate and item.target.tool not in mandate.tool_names
+            item for item in self.conditions
+            if candidate and item.target.tool not in mandate.tool_names
         )
-        active = tuple(item for item in conditions if item not in inactive)
+        active = tuple(item for item in self.conditions if item not in inactive)
         effective, findings, applied, as_of = _resolve_conditions(
-            mandate, active, contexts, dict(self.captures), as_of=self.as_of,
+            mandate, active, self.contexts, dict(self.captures), as_of=self.as_of,
         )
         report = {
             **_condition_payload(as_of, applied, findings),
             "scope": "reviewed conditional effects only; source enforcement is not verified",
             "inputs": {
                 "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
-                "conditions": [hashlib.sha256(text.encode()).hexdigest()
-                               for text in self.conditions],
-                "contexts": [hashlib.sha256(text.encode()).hexdigest() for text in self.contexts],
+                "conditions": [hashlib.sha256(item.to_json().encode()).hexdigest()
+                               for item in self.conditions],
+                "contexts": [hashlib.sha256(item.to_json().encode()).hexdigest()
+                             for item in self.contexts],
                 "captures": {name: hashlib.sha256(content).hexdigest()
                              for name, content in self.captures},
             },
