@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.41.0 - 2026-10-16
+
+### Added
+
+- `mandate remediate` accepts the existing condition/context/capture/date
+  inputs for removals, approval changes, quantity ceilings, grids, Pareto
+  ranking and automatic discovery. It reuses the condition reader for each
+  baseline and candidate and checks required paths under the same effects.
+- Condition reports retain complete unconditional Authority and lint beside
+  scoped results, canonical artifact identities and exact capture hashes.
+  Candidate manifests retain declared effects and budgets. Removed tools make
+  only their validated attachments inactive; unresolved baseline evidence
+  blocks recommendations, and unexpected eligibility changes abort rechecks.
+- A synthetic two-batch export example, exact CLI baselines and exhaustive
+  finite-domain comparisons cover condition-aware repairs. This consumes
+  existing reviewed restrictions; condition authoring, delegation-bound edits
+  and independent verification of source enforcement remain outside the slice.
+
 ## 0.40.0 - 2026-10-16
 
 ### Added

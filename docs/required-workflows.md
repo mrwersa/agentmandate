@@ -111,8 +111,8 @@ amounts; see the [search guide](search-performance.md).
 ## Read the result
 
 Every repair mode uses `agentmandate.remediation/v6`, with or
-without ceiling options. The unchanged `baseline`, lint, source digest, edit
-semantics and original exit remain separate from requirements:
+without ceiling options. Baseline authority, lint, source digest and edit
+semantics remain separate from requirements:
 
 - `requirements` records the exact source and manifest digests, caller-supplied
   reviewer/reason, scope, and baseline path assessments.
@@ -141,6 +141,12 @@ Malformed files, wrong joins, arithmetic exhaustion or baseline paths that do
 not conform exit 2 with empty stdout. Valid requests keep the baseline's exit:
 1 for its reachable breach or lint error, 0 for a clean baseline. A valid
 requirement never turns original findings into a green result.
+With [condition-aware remediation](remediation.md#recheck-repairs-within-reviewed-conditional-effects),
+the path's effect counts use the reviewed conditional interpretation. Its input
+still pins the declared baseline manifest, and ordinary Authority and lint are
+retained in the condition report. Paths do not supply or verify classifier
+arguments. Unresolved conditions block all recommendations and exit 1, even
+when the conservative baseline has no other finding.
 
 ## Check a release instead of a repair
 

@@ -31,6 +31,7 @@ commands; historical captures and acceptance records keep their original bytes.
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
 | Find quantity repair ceilings without guessing amounts | [Automatic ceiling discovery](ceiling-discovery.md) |
+| Repair within an existing reviewed effect domain | [Condition-aware remediation](remediation.md#recheck-repairs-within-reviewed-conditional-effects) |
 | Preserve required ordered calls during repair | [Required workflows](required-workflows.md) |
 | Check recorded calls against a mandate | [Trace verification](traces.md) |
 | Turn reachable authority into tests | [Evaluation loop](evaluation-loop.md) |

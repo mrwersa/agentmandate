@@ -58,7 +58,9 @@
         "TOOL_CONDITION_VERSION": 1
       },
       "inline_versions": {},
-      "schemas": [],
+      "schemas": [
+        "agentmandate.conditions/v2"
+      ],
       "version_fields": [
         "classifier_version",
         "condition_version",
@@ -362,7 +364,6 @@
       "schemas": [
         "agentmandate.cedar-alignment/v2",
         "agentmandate.cedar-effective-diff/v2",
-        "agentmandate.conditions/v2",
         "agentmandate.delegations/v2",
         "agentmandate.validation/v1",
         "agentmandate.verify/v2"
@@ -3221,6 +3222,54 @@
           ],
           "required": false,
           "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition",
+          "nargs": null,
+          "options": [
+            "--condition"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_context",
+          "nargs": null,
+          "options": [
+            "--condition-context"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_capture",
+          "nargs": null,
+          "options": [
+            "--condition-capture"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "condition_as_of",
+          "nargs": null,
+          "options": [
+            "--condition-as-of"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -3632,7 +3681,7 @@
       ]
     }
   },
-  "coverage_sha256": "d678a5dd855654a7b9f29ccc50a71e5be89dd592753e10df54ae147afd95be97",
+  "coverage_sha256": "288e760744128325ac1c09eb47b0f53af567fd616b529bbe083776459cabc4ce",
   "fixture_sha256": {
     ".github/workflows/action.yml": "958927e3eff3a9891b00577e65f51c49bf03e9a4490ee32c679600a9e063b65a",
     "action.yml": "444f560ceeb4bfc80468f55429f7c5c0388b43c813f5001b1e5ce7aa99a5e229",
@@ -3675,6 +3724,11 @@
     "examples/change-review/before.json": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
     "examples/change-review/decision-note.txt": "f1171ee3503ee35535b5e492d21a8e40b3dcacff92454fef2f3b7f0702c6b23f",
     "examples/change-review/deferred.json": "2810cb4d01daef4be3fe10280a4d3abbdb11d3e85699d393f9ddddcc7f670948",
+    "examples/conditional-remediation/capture.sql": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd",
+    "examples/conditional-remediation/condition.json": "8a7e2103f75b4a3f916e4130b49ef6f4809dd81c72c9f98cd1b8a3381f41369a",
+    "examples/conditional-remediation/context.json": "800c9e534a6c70eda6842af895603a85b3988670ffb789add6ec55fddb25f72d",
+    "examples/conditional-remediation/manifest.json": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
+    "examples/conditional-remediation/required-export.json": "9d76ad47ce3d596eb1773474d2bfdd9b28ba27e89aea5406efbdb3f092eb0137",
     "examples/deployment-drift/cedar-aligned.json": "857bd4c4848b7b54292ff40ee49193fd86ded5b59d98efd0d27f9989975f2f69",
     "examples/deployment-drift/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/deployment-drift/rego-aligned.json": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
@@ -3778,6 +3832,7 @@
     "tests/fixtures/conditional-drift-result-v2.json": "60e1ac5d27a4dd9bb805d0d874a3092c17d4d8f2f9a74952605a2eb18b1f6c49",
     "tests/fixtures/conditional-mandate-v2.yaml": "af408a8a456e0e0ee7d74f7903b33c759345b8d01d029f28792cb470203e5cf0",
     "tests/fixtures/conditional-reach-result-v2.json": "0f12ddf274494bcb06ea0310de0f82b94742b8975e4196324849643f5b08a407",
+    "tests/fixtures/conditional-remediation-v1.json": "333a1c19723fb27303042dc71b075c77fb7bf5966883eaed89adf63424782cba",
     "tests/fixtures/continuity-accepted-synthetic/binding-verification.json": "8bf6cadc7d062b4576208003677941f1225b32bbdc096d8fc083a7c3e5b0301c",
     "tests/fixtures/continuity-accepted-synthetic/binding.json": "2513f29b0da396a337e53e578667fd27b99be098a97efc03881540f7ffed5d29",
     "tests/fixtures/continuity-accepted-synthetic/manifest.json": "8af455a841f3fc4115f7467e43333da8ef806f369df23d1d93a61982efeba280",

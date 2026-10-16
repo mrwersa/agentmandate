@@ -8,6 +8,7 @@ from itertools import chain, combinations, islice
 from math import comb
 from typing import Any
 
+from ._remediation_conditions import _ConditionScope
 from ._required_workflows import _Requirements
 from .lint import Finding, check
 from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Quantity
@@ -226,6 +227,7 @@ def plan(
     ceiling_grids: tuple[str, ...] = (),
     pareto: bool = False,
     discover_ceilings: tuple[str, ...] = (),
+    condition_scope: _ConditionScope | None = None,
 ) -> dict[str, Any]:
     """Enumerate edits, recheck the full graph, and rank scoped candidates.
 
@@ -250,6 +252,7 @@ def plan(
             max_candidates=max_candidates,
             keep_tools=keep_tools,
             required_workflows=required_workflows,
+            condition_scope=condition_scope,
         )
     for name, value in (
         ("max_edits", max_edits),
@@ -266,10 +269,12 @@ def plan(
         raise ValueError("ceiling grids must use TOOL=MIN:MAX:STEP")
     grid_options, grids = _grid_domain(mandate, ceiling_grids)
     ceiling_edits = _ceiling_domain(mandate, ceiling_options + grid_options)
-    baseline = analyse(mandate, depth=depth)
+    evaluation = None if condition_scope is None else condition_scope.resolve(mandate)
+    effective = mandate if evaluation is None else evaluation.effective
+    baseline = analyse(effective, depth=depth)
     if set(keep_tools) - baseline.reachable_tools:
         raise ValueError("kept tools must be reachable in the baseline at the selected depth")
-    findings = check(mandate)
+    findings = check(effective)
     report = {
         "schema": REMEDIATION_SCHEMA,
         "scope": "manifest-v2 reachability only; candidates require human selection",
@@ -291,8 +296,16 @@ def plan(
         "status": "no_reachable_breach_within_bound",
         "candidates": [],
     }
+    if evaluation is not None:
+        report["scope"] = (
+            "manifest-v2 with reviewed conditional effects; candidates require human selection"
+        )
+        report["conditions"] = evaluation.record(mandate, baseline.depth)
+        if evaluation.findings:
+            report["status"] = "input_requires_review"
+            return report
     if required_workflows is not None:
-        assessments = required_workflows.assess(mandate, baseline.depth)
+        assessments = required_workflows.assess(effective, baseline.depth)
         invalid = next((row for row in assessments if row["failure"] is not None), None)
         if invalid is not None:
             failure = invalid["failure"]
@@ -336,7 +349,7 @@ def plan(
     actions = (
         tuple(
             _Edit(tool.name, kind)
-            for tool in sorted(mandate.tools, key=lambda t: t.name)
+            for tool in sorted(effective.tools, key=lambda t: t.name)
             for kind in (
                 (["remove_tool"] if tool.name not in keep_tools else [])
                 + (
@@ -361,9 +374,17 @@ def plan(
         lint = check(candidate)
         if _structural(lint):
             continue  # Losing a producer must not manufacture a clean graph.
+        scoped = (
+            None if condition_scope is None
+            else condition_scope.resolve(candidate, candidate=True)
+        )
+        if scoped is not None and scoped.findings:
+            raise ValueError("condition eligibility changed during repair recheck")
+        projected = candidate if scoped is None else scoped.effective
+        lint = check(projected)
         assessments = []
         if required_workflows is not None:
-            assessments = required_workflows.assess(candidate, baseline.depth)
+            assessments = required_workflows.assess(projected, baseline.depth)
             if any(row["failure"] is not None for row in assessments):
                 search["required_workflow_rejections"] += 1
                 report["requirement_rejections"].append(
@@ -374,7 +395,7 @@ def plan(
                     }
                 )
                 continue
-        authority = analyse(candidate, depth=baseline.depth)
+        authority = analyse(projected, depth=baseline.depth)
         search["candidates_analyzed"] += 1
         if authority.breaches or set(keep_tools) - authority.reachable_tools:
             continue
@@ -399,8 +420,10 @@ def plan(
         }
         if required_workflows is not None:
             record["required_workflows"] = assessments
+        if scoped is not None:
+            record["conditions"] = scoped.record(candidate, baseline.depth)
         candidates.append(record)
-    effect_ranks = {tool.name: EFFECT_RANK[tool.effect] for tool in mandate.tools}
+    effect_ranks = {tool.name: EFFECT_RANK[tool.effect] for tool in effective.tools}
     candidates.sort(
         key=lambda c: (
             c["impact"]["edit_count"],

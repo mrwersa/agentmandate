@@ -11,7 +11,11 @@ The condition and context records below are exposed through
 `mandate conditions validate` and manifest-mode `reach` and `drift`. Use
 [conditional trust semantics](#gate-3-conditional-trust-semantics) for the
 current eligibility rules and the [CLI review](conditional-authority-gate-4-review.md)
-for command syntax. The original grant-v1 and structured-principal examples
+for reach/drift syntax. [Condition-aware remediation](remediation.md#recheck-repairs-within-reviewed-conditional-effects)
+uses the same inputs for baseline, candidate and required-path rechecks while
+retaining declared effects and unconditional findings. It consumes existing
+reviewed domains; it does not author restrictions or acceptance.
+The original grant-v1 and structured-principal examples
 are retained as design history, not accepted manifest syntax. Real Authorizer
 evidence invalidated the original delegation shape; the implemented
 [delegation-chain contract](delegation-v2.md) now preserves ordered actors,

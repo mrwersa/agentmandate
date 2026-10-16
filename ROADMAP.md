@@ -63,6 +63,15 @@ external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
 
+**Condition-aware remediation — 16 October 2026:**
+Existing condition inputs now feed [repair rechecks](docs/remediation.md#recheck-repairs-within-reviewed-conditional-effects),
+including grids, discovery and required paths. Every analyzed candidate reruns
+the condition reader; declared effects, original budgets and unconditional
+findings remain visible. Unresolved evidence blocks recommendations. This
+consumes existing reviewed domains rather than generating tighter conditions
+or editing delegation bounds, so remediation stays partial and the ledger
+remains 50%.
+
 **Required workflows in the GitHub Action — 16 October 2026:**
 The [Action gate](docs/action-workflows.md) loads an annotation from a selected
 local Git commit and shares its snapshot across diff and review. Workflow

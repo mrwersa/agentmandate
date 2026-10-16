@@ -1,0 +1,20 @@
+{
+  "arg": "sql",
+  "class": "select-only",
+  "condition_version": 1,
+  "context": "contexts/synthetic/select-only",
+  "effect": "read",
+  "evidence": {
+    "confidence": "exact",
+    "expires": "2027-08-01",
+    "review": "accepted",
+    "reviewer": "synthetic-condition-reviewer"
+  },
+  "id": "conditions/synthetic/select-only",
+  "predicate": "statement_class",
+  "target": {
+    "binding": "query_service",
+    "source": "src/query_service.py",
+    "tool": "run_query"
+  }
+}

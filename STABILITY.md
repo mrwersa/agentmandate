@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.40.0
+agentmandate~=0.41.0
 ```
 
 ## Current quantity model
@@ -100,6 +100,13 @@ Every repair is rechecked against the complete changed manifest. Required paths
 screen model conformance, not business success. Proposals remain unapplied;
 original budgets and named quantity assignments stay fixed. Different units
 are never added to rank a proposal.
+
+Condition-aware remediation reuses the existing reviewed condition contract.
+Its baseline and candidate results describe that conditional effect scope;
+each condition report also retains unconditional Authority and lint. Candidate
+manifests keep their declared effects and require the same inputs to reproduce
+the scoped result. Unresolved evidence blocks recommendations. This does not
+generate new conditions, authenticate review or verify source enforcement.
 
 Discovery's domain-frontier completion, exhaustive point enumeration,
 evaluation-limit truncation, frontier display cap and each Authority's call-depth

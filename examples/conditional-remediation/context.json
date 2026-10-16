@@ -1,0 +1,31 @@
+{
+  "completeness": "complete",
+  "context_version": 1,
+  "domain": {
+    "arg": "sql",
+    "classes": [
+      "select-only"
+    ],
+    "classifier": "pg-statement-classifier",
+    "classifier_version": "1.3.0",
+    "dialect": "postgresql-16",
+    "predicate": "statement_class"
+  },
+  "evidence": {
+    "confidence": "exact",
+    "expires": "2027-08-01",
+    "review": "accepted",
+    "reviewer": "synthetic-context-reviewer"
+  },
+  "id": "contexts/synthetic/select-only",
+  "source": {
+    "content_sha256": "b4e0497804e46e0a0b0b8c31975b062152d551bac49c3c2e80932567b4085dcd",
+    "kind": "argument-capture",
+    "locator": "examples/conditional-remediation/capture.sql",
+    "producer_version": "2026.08"
+  },
+  "target": {
+    "binding": "query_service",
+    "source": "src/query_service.py"
+  }
+}

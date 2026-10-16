@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "agent": "synthetic-conditional-export",
+  "tools": [
+    {
+      "name": "run_query",
+      "effect": "irreversible",
+      "produces": "rows",
+      "unbounded": true
+    },
+    {
+      "name": "export_rows",
+      "effect": "irreversible",
+      "requires": [
+        "rows"
+      ],
+      "requires_approval": true,
+      "quantity": "exported_rows",
+      "scope_key": "rows",
+      "ceiling": {
+        "amount": "3",
+        "unit": "record"
+      },
+      "value_arg": "count"
+    }
+  ],
+  "limits": {
+    "depth": 4,
+    "effects": {
+      "irreversible": 3
+    },
+    "quantities": {
+      "exported_rows": {
+        "amount": "4",
+        "unit": "record"
+      }
+    }
+  }
+}
