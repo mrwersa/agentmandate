@@ -77,7 +77,8 @@ ranking support the same flags.
 
 The existing [condition reader](conditions-delegation.md#gate-3-conditional-trust-semantics)
 reruns for the baseline and every candidate it analyzes. Conditions and contexts
-are snapshotted as canonical JSON, and captures as bytes. Dates, review status,
+are copied into immutable records through canonical JSON; captures are kept as
+bytes. Dates, review status,
 completeness, operand joins and capture digests retain their existing checks.
 Any unresolved baseline condition returns `input_requires_review` with no
 recommendations. It cannot be repaired by deleting the disputed tool.
