@@ -138,6 +138,43 @@ class _Requirements:
         return [_assessment(mandate, workflow, depth) for workflow in self.workflows]
 
 
+def release_check(
+    requirements: _Requirements, before: Mandate, after: Mandate, depth: int
+) -> tuple[dict, ...]:
+    """Recheck caller-authored workflows against both releases of one agent.
+
+    A release can narrow authority and still break work the caller declared
+    necessary, so the released manifest has to conform before the proposed one
+    is asked to preserve it. Anything else would let a stale annotation stand
+    in for a review of the release actually being shipped.
+    """
+    baseline = requirements.assess(before, depth)
+    broken = next((row for row in baseline if row["failure"] is not None), None)
+    if broken is not None:
+        failure = broken["failure"]
+        raise ValueError(
+            f"required workflow {broken['name']!r} is invalid in the baseline manifest: "
+            f"step {failure['step']} {failure['rule']}: {failure['detail']}"
+        )
+    candidate = requirements.assess(after, depth)
+    return tuple(
+        {
+            "name": now["name"],
+            "steps": now["steps"],
+            "baseline": earlier["status"],
+            "candidate": now["status"],
+            "failure": now["failure"],
+            "relation": "regressed" if now["failure"] is not None else "preserved",
+        }
+        for earlier, now in zip(baseline, candidate, strict=True)
+    )
+
+
+def regressions(rows) -> tuple[str, ...]:
+    """Names of workflows the proposed release stops satisfying."""
+    return tuple(row["name"] for row in rows if row["relation"] == "regressed")
+
+
 def _failure(step, rule, detail):
     return {"step": step, "rule": rule, "detail": detail}
 

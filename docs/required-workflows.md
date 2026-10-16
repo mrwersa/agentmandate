@@ -142,6 +142,54 @@ not conform exit 2 with empty stdout. Valid requests keep the baseline's exit:
 1 for its reachable breach or lint error, 0 for a clean baseline. A valid
 requirement never turns original findings into a green result.
 
+## Check a release instead of a repair
+
+The same input format gates a release. Pass it to `mandate diff` or
+`mandate review` to recheck every supplied path against **both** manifests:
+
+```bash
+mandate diff examples/release-workflows/released.json examples/release-workflows/breaking.json \
+  --required-workflows examples/release-workflows/required-export.json
+```
+
+Each row carries the baseline status, the candidate status and a relation:
+
+| Relation | Meaning |
+|---|---|
+| `preserved` | the released manifest conformed and so does the proposed one |
+| `regressed` | the released manifest conformed and the proposed one does not |
+
+A regressed row names the first failing call with its one-based step, rule and
+detail, so a release that lowers a ceiling below a required export is reported
+as `workflow.ceiling-exceeded` at that step rather than as a permission change.
+
+Two things stay deliberately separate. A release can **narrow** authority and
+still break required work, so a regressed path blocks the release on its own and
+`diff` exits 1 even when its verdict is `NARROWING`. A release can **widen**
+authority while every supplied path still conforms; the widening is reported in
+the ordinary change list and still needs named review. Neither result reuses the
+other's exit code, and the original reachability breach or lint finding is
+reported independently of both.
+
+`review` treats a regressed path as a blocking finding of its own,
+`review.required-workflow-regressed`. A change-review record accepts widening
+authority; it does not accept a broken required path. Because the comparison
+digest now covers the rechecked paths, a record pinned without the workflow
+check is rejected as a comparison mismatch when the check is added.
+
+The comparison includes `required_workflows_metadata`, using the same metadata
+as remediation: the annotation file's exact `source_sha256`, baseline manifest
+digest, agent, reviewer, reason and scope. The source digest binds the actual
+calls and amounts, not just their names, step counts and outcomes. Changing any
+annotation bytes, including formatting, requires a newly pinned review record
+even when the rechecked outcomes remain the same. This identifies the supplied
+bytes; it does not authenticate the annotation author or grant deployment approval.
+`mandate diff --record` also prints the workflow annotation and baseline manifest
+SHA-256 values in its Markdown record so a reader can identify the supplied bytes.
+
+Without either flag, `diff` and `review` keep their exact output bytes and exit
+codes, and the workflow rows are absent from the result.
+
 ## Compatibility and limits
 
 The current workflow input is `agentmandate.required-workflows/v2`. Older

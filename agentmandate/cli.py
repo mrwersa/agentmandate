@@ -323,6 +323,10 @@ def build_parser() -> argparse.ArgumentParser:
     review_parser.add_argument("--source", action="append", default=[], metavar="LOCATOR=CAPTURE")
     review_parser.add_argument("--as-of", required=True, metavar="YYYY-MM-DD")
     review_parser.add_argument("--depth", type=_positive_int, default=None)
+    review_parser.add_argument(
+        "--required-workflows", metavar="FILE",
+        help="recheck caller-authored ordered paths against both releases",
+    )
     review_parser.add_argument("--json", action="store_true", help="machine-readable output")
 
     reach_parser = subparsers.add_parser(
@@ -706,6 +710,10 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="emit a markdown change record for a change advisory board",
     )
+    diff_parser.add_argument(
+        "--required-workflows", metavar="FILE",
+        help="recheck caller-authored ordered paths against both releases",
+    )
 
     obligations_parser = subparsers.add_parser(
         "obligations",
@@ -920,6 +928,24 @@ def _read_text(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
+def _read_manifest_bytes(path) -> bytes:
+    """Read the exact bytes of a manifest, keeping `load`'s error wording."""
+    try:
+        return Path(path).read_bytes()
+    except OSError as exc:
+        raise ManifestError(f"cannot read manifest {Path(path)}: {exc}") from exc
+
+
+def _release_requirements(path, manifest_content: bytes):
+    """Bind a required-workflow file to the exact bytes of the baseline manifest."""
+    if path is None:
+        return None
+    mandate = loads(manifest_content.decode("utf-8"))
+    return _Requirements.load(
+        Path(path).read_bytes(), mandate, hashlib.sha256(manifest_content).hexdigest()
+    )
+
+
 def _run_change_review(args: argparse.Namespace) -> int:
     try:
         sources = {}
@@ -928,13 +954,15 @@ def _run_change_review(args: argparse.Namespace) -> int:
             if not separator or not locator or not path or locator in sources:
                 raise ValueError("--source needs unique LOCATOR=CAPTURE mappings")
             sources[locator] = Path(path).read_bytes()
+        before_content = Path(args.before).read_bytes()
         report = evaluate_change_review(
-            Path(args.before).read_bytes(),
+            before_content,
             Path(args.after).read_bytes(),
             as_of=args.as_of,
             depth=args.depth,
             decision=None if args.decision is None else Path(args.decision).read_bytes(),
             sources=sources,
+            required_workflows=_release_requirements(args.required_workflows, before_content),
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -2402,8 +2430,10 @@ def _main(argv: Sequence[str] | None = None) -> int:
     producer_inputs = None
     try:
         if args.command == "diff":
-            before = load(args.before)
-            after = load(args.after)
+            before_content = _read_manifest_bytes(args.before)
+            after_content = _read_manifest_bytes(args.after)
+            before = loads(before_content.decode("utf-8"), source=args.before)
+            after = loads(after_content.decode("utf-8"), source=args.after)
         elif args.command == "reach" and args.ir_snapshot is not None:
             snapshot = AuthorityIR.from_json(_read_text(args.ir_snapshot))
             ir_result = _analyse_ir(snapshot, depth=args.depth)
@@ -2639,8 +2669,9 @@ def _main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "diff":
         try:
-            delta = compare(before, after, depth=args.depth)
-        except ValueError as exc:
+            requirements = _release_requirements(args.required_workflows, before_content)
+            delta = compare(before, after, depth=args.depth, required_workflows=requirements)
+        except (OSError, ValueError, UnicodeError, RecursionError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return EXIT_USAGE
         text = (
@@ -2649,7 +2680,8 @@ def _main(argv: Sequence[str] | None = None) -> int:
             else delta.render(args.before, args.after)
         )
         _emit(delta.as_dict(), args.json, text)
-        return EXIT_FINDING if delta.widened else EXIT_OK
+        blocked = delta.widened or delta.workflow_regressions
+        return EXIT_FINDING if blocked else EXIT_OK
 
     try:
         if args.otel:

@@ -4,7 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.39.0 - 2026-10-16
+
+### Changed
+
+- `mandate diff` and `mandate review` accept the existing
+  `agentmandate.required-workflows/v2` input and recheck every supplied path
+  against both manifests. Each row reports its baseline status, candidate status
+  and a `preserved` or `regressed` relation, naming the first failing call with
+  its one-based step, rule and detail.
+- A release that narrows authority below a required path blocks the release with
+  exit 1 even when the authority verdict is `NARROWING`, and `review` reports it
+  as `review.required-workflow-regressed` separately from widening and from
+  reachable breaches. Omitting the flag preserves the previous output bytes and
+  exit codes, and the comparison digest a change-review record pins now covers
+  the rechecked paths and their input metadata. The exact annotation source
+  digest prevents a recorded acceptance from transferring to different calls,
+  amounts, approval annotations or reviewer metadata with identical outcomes.
+- Markdown change records with required workflows show the annotation and
+  baseline manifest SHA-256 values beside the path assessments.
 
 ## 0.38.0 - 2026-10-15
 

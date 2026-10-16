@@ -8,7 +8,23 @@ and dates. It never removes a change or breach from the authority result.
 This is a **review-record gate**. Exit 0 means no named review is required within
 the comparison bound, or the supplied acceptance is eligible. It does not
 authenticate the reviewer, establish runtime enforcement or approve deployment.
+Any supplied required workflows must also remain conformant.
 Continue running `lint`, `reach` and application tests as separate checks.
+
+Add `--required-workflows FILE` to recheck the same caller-authored paths against
+both manifests. A regressed path blocks the gate independently of authority
+widening; a matching acceptance record cannot waive it. For example:
+
+```bash
+mandate review examples/release-workflows/released.json examples/release-workflows/breaking.json \
+  --required-workflows examples/release-workflows/required-export.json --as-of 2026-10-16
+```
+
+This narrowing release exits 1 with `review.required-workflow-regressed`.
+The comparison digest includes the exact workflow annotation source digest and
+its metadata. Any annotation-byte change requires a newly pinned record, even
+when the path outcomes are unchanged. A baseline that already fails a supplied
+path exits 2. See [required workflows](required-workflows.md#check-a-release-instead-of-a-repair).
 
 ## Try the synthetic release decision
 
@@ -101,12 +117,13 @@ expired record, rejected/deferred decision, wrong join, changed source bytes or
 unresolved policy disposition produces findings and exits 1. Failures remain
 separate: an expired record with changed evidence retains both findings.
 
-A neutral or narrowing comparison without a record exits 0 with
-`review_not_required_within_bound`. Supplying a record still checks it;
+With no supplied record, a neutral or narrowing comparison exits 0 with
+`review_not_required_within_bound` only when no required workflow regresses.
+Supplying a record still checks it;
 nonwidening does not excuse an expired or rejected supplied decision.
 Malformed records, I/O failures, invalid dates/depths and incomplete mappings
 exit 2 with empty stdout. Valid finding results exit 1 with complete output.
-The existing `diff` output and exit contract are unchanged.
+Without `--required-workflows`, the existing diff/review output and exits are unchanged.
 
 ## Establish trust outside the record
 
@@ -132,8 +149,9 @@ not renew itself and cannot reuse historical continuity acceptance.
 
 The CLI and input/result contracts are public; `_change_review` Python helpers
 are private. The five [result baselines](../tests/fixtures/change-review-accepted-v2.json)
-cover accepted, expired, missing, neutral and deferred decisions. These are v1
-baselines, not migrations from an earlier review-result schema. Existing CLI
-results, root Python exports and historical inventory bytes remain unchanged.
+cover accepted, expired, missing, neutral and deferred decisions without workflow
+annotations. They are current v2 baselines, not migration fixtures. Workflow
+annotations add metadata and per-path results without changing these default
+outputs. Root exports and historical evidence remain unchanged.
 Use the [CI guide](ci.md#named-review-records) for integration alongside the
 ordinary analysis gates.

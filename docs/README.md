@@ -25,6 +25,7 @@ commands; historical captures and acceptance records keep their original bytes.
 | Record a named temporary delay to an overdue fleet review | [Fleet exceptions](fleet-exceptions.md) |
 | Generate a scoped Cedar or Rego policy | [Cedar export](cedar-export.md), [Rego export](rego-export.md) |
 | Block a release that widens authority | [CI integration](ci.md) |
+| Keep a release from breaking required work | [Required workflows](required-workflows.md#check-a-release-instead-of-a-repair) |
 | Check artifact structure before evidence analysis | [Structural validation](structural-validation.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
@@ -53,7 +54,10 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Repair candidates](remediation.md): rank rechecked tool removals, approval changes
   and explicitly supplied lower ceilings while keeping named tools reachable and search limits visible.
 - [Required workflows](required-workflows.md): screen repairs against caller-authored
-  ordered paths, without treating model conformance as business success.
+  ordered paths, without treating model conformance as business success. The same
+  input also gates a release: `mandate diff --required-workflows` rechecks each path
+  against both manifests, reports the failing step, and blocks a release that
+  narrows authority into breaking required work.
 - [Runtime trace verification](traces.md): replay JSON Lines or OpenTelemetry
   evidence against a mandate.
 - [Test obligations](test-obligations.md) and the

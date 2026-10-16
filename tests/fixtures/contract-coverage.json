@@ -714,5 +714,21 @@
     "tests": [
       "tests/test_ceiling_discovery.py"
     ]
+  },
+  {
+    "doc": "docs/required-workflows.md",
+    "fixtures": [
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/required-export.json",
+      "tests/fixtures/release-workflows-v1.json"
+    ],
+    "id": "release-workflow-preservation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.required-workflows/v2"
+    ],
+    "tests": [
+      "tests/test_release_workflows.py"
+    ]
   }
 ]

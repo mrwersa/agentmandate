@@ -53,3 +53,11 @@ Current graph tests use explicitly identified manifest-v2 projections under
 or a transfer of historical acceptance. Synthetic evidence remains labelled as
 synthetic. The external security review and accountable evidence decisions stay
 separate from this inventory check.
+
+The latest inventory adds `--required-workflows` to `mandate diff` and
+`mandate review`, the `Delta.required_workflows`, `required_workflows_metadata`
+and `workflow_regressions` public members, and release-side required-path rechecks.
+Metadata binds the exact workflow annotation bytes into the comparison digest.
+Fixtures from the preceding release, root exports and earlier command arguments
+are unchanged. The workflow input format and remediation surface are unchanged;
+omitting the flag keeps the previous diff/review output bytes and exit codes.

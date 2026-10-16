@@ -15,7 +15,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Any
 
+from ._required_workflows import _Requirements, regressions, release_check
 from .manifest import EFFECT_RANK, Mandate, Quantity, Tool
 from .reach import Authority, analyse
 
@@ -41,6 +43,10 @@ class Delta:
     after: Authority
     changes: tuple[Change, ...]
     after_agent: str = "agent"
+    # Caller-authored paths rechecked against both releases. Empty unless the
+    # caller supplied them, so the default result keeps its shape.
+    required_workflows: tuple[dict[str, Any], ...] = ()
+    required_workflows_metadata: Mapping[str, Any] | None = None
 
     @property
     def direction(self) -> str:
@@ -54,6 +60,11 @@ class Delta:
     def widened(self) -> bool:
         return self.direction == WIDENING
 
+    @property
+    def workflow_regressions(self) -> tuple[str, ...]:
+        """Required paths the proposed release no longer satisfies."""
+        return regressions(self.required_workflows)
+
     def render(self, before_label: str = "before", after_label: str = "after") -> str:
         lines = [f"authority diff  {before_label} -> {after_label}"]
         if not self.changes:
@@ -64,6 +75,18 @@ class Delta:
         lines.append(f"verdict: {self.direction.upper()}")
         if self.widened:
             lines.append("a widening change needs named review before release")
+        if self.required_workflows:
+            lines.extend(
+                f"REQUIRED {row['name']}: {row['baseline']} -> {row['candidate']} "
+                f"({row['relation']})"
+                for row in self.required_workflows
+            )
+            lines.extend(
+                f"REQUIRED {row['name']} fails at step {row['failure']['step']} "
+                f"{row['failure']['rule']}: {row['failure']['detail']}"
+                for row in self.required_workflows
+                if row["failure"] is not None
+            )
         return "\n".join(lines)
 
     def record(self, before_label: str = "before", after_label: str = "after") -> str:
@@ -95,6 +118,24 @@ class Delta:
         lines.extend(
             [f"- {b.detail}" for b in self.after.breaches] or ["- none within the search depth"]
         )
+        if self.required_workflows:
+            lines.extend(["", "## Required workflows", ""])
+            if self.required_workflows_metadata is not None:
+                lines.extend([
+                    "- **Workflow annotation SHA-256:** "
+                    f"`{self.required_workflows_metadata['source_sha256']}`",
+                    "- **Baseline manifest SHA-256:** "
+                    f"`{self.required_workflows_metadata['manifest_sha256']}`",
+                ])
+            lines.extend(
+                [f"- {row['name']}: {row['relation']} in the proposed release"
+                 for row in self.required_workflows]
+            )
+            lines.extend(
+                [f"- {row['name']}: step {row['failure']['step']} {row['failure']['rule']}: "
+                 f"{row['failure']['detail']}"
+                 for row in self.required_workflows if row["failure"] is not None]
+            )
         lines.extend(["", "## Review", ""])
         if self.widened:
             lines.append(
@@ -112,7 +153,7 @@ class Delta:
         return "\n".join(lines)
 
     def as_dict(self) -> dict:
-        return {
+        result = {
             "direction": self.direction,
             "changes": [
                 {"direction": c.direction, "kind": c.kind, "detail": c.detail} for c in self.changes
@@ -120,6 +161,11 @@ class Delta:
             "before": self.before.as_dict(),
             "after": self.after.as_dict(),
         }
+        if self.required_workflows:
+            result["required_workflows"] = [dict(row) for row in self.required_workflows]
+        if self.required_workflows_metadata is not None:
+            result["required_workflows_metadata"] = dict(self.required_workflows_metadata)
+        return result
 
 
 def _set_change(kind: str, before: frozenset[str], after: frozenset[str]) -> list[Change]:
@@ -311,7 +357,12 @@ def _tool_effects(tool: Tool) -> set[str]:
     return {f"{tool.effect} on {scope}" for scope in scopes}
 
 
-def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
+def compare(
+    before: Mandate,
+    after: Mandate,
+    depth: int | None = None,
+    required_workflows: _Requirements | None = None,
+) -> Delta:
     """Diff the reachable authority of two mandates."""
     if before.agent != after.agent:
         raise ValueError(f"cannot compare different agents: {before.agent!r} and {after.agent!r}")
@@ -319,6 +370,9 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
     comparison_depth = depth if depth is not None else max(before.limits.depth, after.limits.depth)
     lhs = analyse(before, depth=comparison_depth)
     rhs = analyse(after, depth=comparison_depth)
+    workflows: tuple[dict[str, Any], ...] = ()
+    if required_workflows is not None:
+        workflows = release_check(required_workflows, before, after, comparison_depth)
     changes: list[Change] = []
 
     if after.limits.depth < before.limits.depth:
@@ -403,4 +457,13 @@ def compare(before: Mandate, after: Mandate, depth: int | None = None) -> Delta:
     after_breaches = frozenset(b.kind for b in rhs.breaches)
     changes.extend(_set_change("reachable breach", before_breaches, after_breaches))
 
-    return Delta(before=lhs, after=rhs, changes=tuple(changes), after_agent=after.agent)
+    return Delta(
+        before=lhs,
+        after=rhs,
+        changes=tuple(changes),
+        after_agent=after.agent,
+        required_workflows=workflows,
+        required_workflows_metadata=(
+            None if required_workflows is None else required_workflows.metadata()
+        ),
+    )

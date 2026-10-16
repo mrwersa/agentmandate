@@ -1,0 +1,730 @@
+[
+  {
+    "argv": [
+      "diff",
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/narrowed.json",
+      "--required-workflows",
+      "examples/release-workflows/required-export.json",
+      "--json"
+    ],
+    "exit": 0,
+    "name": "narrowing-preserved",
+    "result": {
+      "after": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 500 record, above its cumulative budget of 400 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 250 record)",
+              "export_records(batch#2, 250 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "500",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "300 -> 250 record",
+          "direction": "narrowing",
+          "kind": "ceiling on export_records"
+        },
+        {
+          "detail": "600 -> 500 record",
+          "direction": "narrowing",
+          "kind": "reachable quantity exported_records"
+        },
+        {
+          "detail": "500 -> 400 record",
+          "direction": "narrowing",
+          "kind": "quantity budget exported_records"
+        }
+      ],
+      "direction": "narrowing",
+      "required_workflows": [
+        {
+          "baseline": "conformant_within_manifest_model",
+          "candidate": "conformant_within_manifest_model",
+          "failure": null,
+          "name": "bulk-export",
+          "relation": "preserved",
+          "steps": 2
+        }
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
+    }
+  },
+  {
+    "argv": [
+      "diff",
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/breaking.json",
+      "--required-workflows",
+      "examples/release-workflows/required-export.json",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "breaking-regressed",
+    "result": {
+      "after": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "150",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "300 -> 75 record",
+          "direction": "narrowing",
+          "kind": "ceiling on export_records"
+        },
+        {
+          "detail": "600 -> 150 record",
+          "direction": "narrowing",
+          "kind": "reachable quantity exported_records"
+        },
+        {
+          "detail": "lost quantity_budget",
+          "direction": "narrowing",
+          "kind": "reachable breach"
+        }
+      ],
+      "direction": "narrowing",
+      "required_workflows": [
+        {
+          "baseline": "conformant_within_manifest_model",
+          "candidate": "not_conformant_within_manifest_model",
+          "failure": {
+            "detail": "cumulative value exceeds the per-binding ceiling",
+            "rule": "workflow.ceiling-exceeded",
+            "step": 2
+          },
+          "name": "bulk-export",
+          "relation": "regressed",
+          "steps": 2
+        }
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
+    }
+  },
+  {
+    "argv": [
+      "diff",
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/proposed.json",
+      "--required-workflows",
+      "examples/release-workflows/required-export.json",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "widening-preserved",
+    "result": {
+      "after": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch",
+          "summarise_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "gained summarise_batch",
+          "direction": "widening",
+          "kind": "tool"
+        }
+      ],
+      "direction": "widening",
+      "required_workflows": [
+        {
+          "baseline": "conformant_within_manifest_model",
+          "candidate": "conformant_within_manifest_model",
+          "failure": null,
+          "name": "bulk-export",
+          "relation": "preserved",
+          "steps": 2
+        }
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
+    }
+  },
+  {
+    "argv": [
+      "diff",
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/budget-shortfall.json",
+      "--required-workflows",
+      "examples/release-workflows/required-export.json",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "budget-shortfall",
+    "result": {
+      "after": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 300 record, above its cumulative budget of 90 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "export_records(batch#1, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "500 -> 90 record",
+          "direction": "narrowing",
+          "kind": "quantity budget exported_records"
+        }
+      ],
+      "direction": "narrowing",
+      "required_workflows": [
+        {
+          "baseline": "conformant_within_manifest_model",
+          "candidate": "not_conformant_within_manifest_model",
+          "failure": {
+            "detail": "cumulative quantity 'exported_records' exceeds its budget",
+            "rule": "workflow.quantity-exceeded",
+            "step": 2
+          },
+          "name": "bulk-export",
+          "relation": "regressed",
+          "steps": 2
+        }
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
+    }
+  },
+  {
+    "argv": [
+      "diff",
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/dropped-producer.json",
+      "--required-workflows",
+      "examples/release-workflows/required-export.json",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "dropped-producer",
+    "result": {
+      "after": {
+        "breaches": [],
+        "depth": 4,
+        "effects": [],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "0",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [],
+        "service_principal_tools": [],
+        "truncated": false,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "lost export_records",
+          "direction": "narrowing",
+          "kind": "tool"
+        },
+        {
+          "detail": "lost open_batch",
+          "direction": "narrowing",
+          "kind": "tool"
+        },
+        {
+          "detail": "lost irreversible on batch",
+          "direction": "narrowing",
+          "kind": "effect"
+        },
+        {
+          "detail": "lost read on batch",
+          "direction": "narrowing",
+          "kind": "effect"
+        },
+        {
+          "detail": "600 -> 0 record",
+          "direction": "narrowing",
+          "kind": "reachable quantity exported_records"
+        },
+        {
+          "detail": "lost quantity_budget",
+          "direction": "narrowing",
+          "kind": "reachable breach"
+        }
+      ],
+      "direction": "narrowing",
+      "required_workflows": [
+        {
+          "baseline": "conformant_within_manifest_model",
+          "candidate": "not_conformant_within_manifest_model",
+          "failure": {
+            "detail": "tool 'open_batch' is absent",
+            "rule": "workflow.undeclared-tool",
+            "step": 1
+          },
+          "name": "bulk-export",
+          "relation": "regressed",
+          "steps": 2
+        }
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
+    }
+  },
+  {
+    "argv": [
+      "diff",
+      "examples/release-workflows/released.json",
+      "examples/release-workflows/gated-producer.json",
+      "--required-workflows",
+      "examples/release-workflows/required-export.json",
+      "--json"
+    ],
+    "exit": 1,
+    "name": "gated-producer",
+    "result": {
+      "after": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "before": {
+        "breaches": [
+          {
+            "detail": "quantity 'exported_records' reaches 600 record, above its cumulative budget of 500 record",
+            "kind": "quantity_budget",
+            "path": [
+              "open_batch(batch#1)",
+              "open_batch(batch#2)",
+              "export_records(batch#1, 300 record)",
+              "export_records(batch#2, 300 record)"
+            ]
+          }
+        ],
+        "depth": 4,
+        "effects": [
+          [
+            "irreversible",
+            "batch"
+          ],
+          [
+            "read",
+            "batch"
+          ]
+        ],
+        "max_quantities": {
+          "exported_records": {
+            "amount": "600",
+            "unit": "record"
+          }
+        },
+        "reachable_tools": [
+          "export_records",
+          "open_batch"
+        ],
+        "service_principal_tools": [],
+        "truncated": true,
+        "ungated_irreversible": []
+      },
+      "changes": [
+        {
+          "detail": "open_batch: approval added",
+          "direction": "narrowing",
+          "kind": "approval"
+        }
+      ],
+      "direction": "narrowing",
+      "required_workflows": [
+        {
+          "baseline": "conformant_within_manifest_model",
+          "candidate": "not_conformant_within_manifest_model",
+          "failure": {
+            "detail": "call lacks required approval",
+            "rule": "workflow.approval-missing",
+            "step": 1
+          },
+          "name": "bulk-export",
+          "relation": "regressed",
+          "steps": 2
+        }
+      ],
+      "required_workflows_metadata": {
+        "agent": "release-agent",
+        "manifest_sha256": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
+        "reason": "Synthetic required export; not live or business-success evidence.",
+        "reviewer": "synthetic-reviewer",
+        "schema": "agentmandate.required-workflows/v2",
+        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
+      }
+    }
+  }
+]
