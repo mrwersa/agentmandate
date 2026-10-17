@@ -147,3 +147,9 @@ only ceilings and approval requirements vary. Each probe reruns the condition
 reader and workflow checks. The report retains ordinary findings separately,
 and unresolved condition evidence prevents discovery. Exit codes apply to the
 selected scope; a discovered repair never clears its breached baseline.
+
+[Delegation-aware discovery](delegation-remediation.md) also rechecks fixed
+grant surfaces. Because it retains all tools and changes neither required scopes
+nor effects, a tool's known excess cannot be repaired anywhere in that domain.
+The report distinguishes this fixed constraint from an insufficiently fine
+ceiling lattice. Chain or trust defects stop discovery with review required.

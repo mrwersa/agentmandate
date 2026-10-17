@@ -26,6 +26,12 @@ all repair modes; no compatibility branch or new acceptance format is added.
 The [repair example](../examples/conditional-remediation/README.md) and exact
 grid/discovery/expiry results are pinned with their replay tests.
 
+Delegation-aware remediation adds the existing six delegation options to the
+same command. Its shared reader distinguishes repairable tool excess from
+chain/trust defects, and result reports retain input identities and rejected
+edits. The worked example and complete CLI output hashes are pinned; semantic
+assertions and full-domain comparisons live in `tests/test_delegated_remediation.py`.
+
 
 ## Breaking alpha changes
 

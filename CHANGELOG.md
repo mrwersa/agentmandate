@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.42.0 - 2026-10-17
+
+### Added
+
+- `mandate remediate` accepts existing delegation attachment, chain, capture,
+  timestamp and source-binding inputs. All repair modes recheck fixed grants
+  without changing manifest Authority, tool effects or accepted evidence.
+- A tool's excess against a trusted grant can motivate a removal proposal,
+  alongside quantity and approval repairs. Chain widening, incomplete history,
+  expired review and other trust defects stop recommendations before enumeration.
+  Candidates must pass delegation and required-workflow screens before search.
+- Reports retain baseline findings, original artifact/capture identities,
+  inactive attachment IDs and per-edit delegation rejections. Discovery reports
+  a fixed grant excess as infeasible within its ceiling/approval domain.
+  Condition/delegation composition is refused before input reads.
+- A synthetic joint grant/quantity repair, exact CLI output hashes and committed
+  full-domain reference comparisons cover the new mode. Grant-bound editing,
+  issuer authentication and verification of live enforcement remain outside it.
+
 ## 0.41.0 - 2026-10-16
 
 ### Added

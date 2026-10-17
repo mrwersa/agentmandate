@@ -96,7 +96,9 @@
         "DELEGATION_VERSION": 1
       },
       "inline_versions": {},
-      "schemas": [],
+      "schemas": [
+        "agentmandate.delegations/v2"
+      ],
       "version_fields": [
         "delegation_version",
         "principal_version"
@@ -364,7 +366,6 @@
       "schemas": [
         "agentmandate.cedar-alignment/v2",
         "agentmandate.cedar-effective-diff/v2",
-        "agentmandate.delegations/v2",
         "agentmandate.validation/v1",
         "agentmandate.verify/v2"
       ],
@@ -3270,6 +3271,78 @@
           ],
           "required": false,
           "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_attachment",
+          "nargs": null,
+          "options": [
+            "--delegation-attachment"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_chain",
+          "nargs": null,
+          "options": [
+            "--delegation-chain"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_AppendAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_capture",
+          "nargs": null,
+          "options": [
+            "--delegation-capture"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_as_of",
+          "nargs": null,
+          "options": [
+            "--delegation-as-of"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_target_source",
+          "nargs": null,
+          "options": [
+            "--delegation-target-source"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
+          "dest": "delegation_target_binding",
+          "nargs": null,
+          "options": [
+            "--delegation-target-binding"
+          ],
+          "required": false,
+          "type": null
         }
       ],
       "exclusive_groups": []
@@ -3681,7 +3754,7 @@
       ]
     }
   },
-  "coverage_sha256": "288e760744128325ac1c09eb47b0f53af567fd616b529bbe083776459cabc4ce",
+  "coverage_sha256": "759932353aa293e49f99d4d03ed00b34e0fdd4d6daf2be37975df00fbbf17d66",
   "fixture_sha256": {
     ".github/workflows/action.yml": "958927e3eff3a9891b00577e65f51c49bf03e9a4490ee32c679600a9e063b65a",
     "action.yml": "444f560ceeb4bfc80468f55429f7c5c0388b43c813f5001b1e5ce7aa99a5e229",
@@ -3729,6 +3802,13 @@
     "examples/conditional-remediation/context.json": "800c9e534a6c70eda6842af895603a85b3988670ffb789add6ec55fddb25f72d",
     "examples/conditional-remediation/manifest.json": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
     "examples/conditional-remediation/required-export.json": "9d76ad47ce3d596eb1773474d2bfdd9b28ba27e89aea5406efbdb3f092eb0137",
+    "examples/delegated-remediation/capture.json": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f",
+    "examples/delegated-remediation/chain.json": "d612df98e99d78fd5b073f0d8c96437f3d36b0c125fca89cd7ed7cbe7487b4a3",
+    "examples/delegated-remediation/export_rows-attachment.json": "10393f156b6eaea3c76e1839c2f56837163b752b9e03b15417a312dd1b642a09",
+    "examples/delegated-remediation/manifest.json": "7a2a839f8beb337ad585388dc93b81425f831b9c1e247900e37496d7f121e01b",
+    "examples/delegated-remediation/purge_rows-attachment.json": "84c320ba60f261c88cc022534fa3c6c8ee51b5183b354efc263649ed6130d17c",
+    "examples/delegated-remediation/required-export.json": "c4a3601989f7467955752c6952f5201d60823cea8b0140283799200d3814f868",
+    "examples/delegated-remediation/select_rows-attachment.json": "f6c9a6953d2bd11f411d784484af824227279a20ff74e3f1e2ea8d2ace5c2189",
     "examples/deployment-drift/cedar-aligned.json": "857bd4c4848b7b54292ff40ee49193fd86ded5b59d98efd0d27f9989975f2f69",
     "examples/deployment-drift/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/deployment-drift/rego-aligned.json": "8ccaaa41d64b1e7c9d612dfe51d6a526be50c1ec13b137c2932be81aa06ca7d7",
@@ -3849,6 +3929,7 @@
     "tests/fixtures/continuity-result-v2-untrusted.json": "d1d195aa2b16f9095b904ac82deb49d2c915a74946a27d23404b1c5a3e1d5d8e",
     "tests/fixtures/continuity-result-v2-widened.json": "d2ad225c64db3b4f5b932304cd34926efe17ba1b61ef57035042a8d86c2c8b23",
     "tests/fixtures/current-cli-results.json": "38c4d5e3f600aa5cbbb25fbbae7d8e39413695b4c3449cd009c3a63b2a51ed94",
+    "tests/fixtures/delegated-remediation-v1.json": "9ceaf160f965c1c77f266cf5bfe9059c2bf418ea5ff1658c848709e92c5856cf",
     "tests/fixtures/delegation-attachment-v2.json": "41990995ed030df2e11c7f28eceb621bcb1fce55955b783b1f16366c6b1f7766",
     "tests/fixtures/delegation-chain-authorizer-v1.json": "62a8df5f204a3ec665ecc7d1d00f2f6945a0e52c8c8afeb26d67188b3f4be764",
     "tests/fixtures/delegation-chain-migrated-v1.json": "84cc430d1da690efab376ef55e3c663d39e5eafa246e492f5ceab9703fca872b",
