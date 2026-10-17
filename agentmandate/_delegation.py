@@ -1114,6 +1114,27 @@ def analyse_delegations(
     target_binding: str | None = None,
 ) -> DelegationAnalysis:
     """Consume only re-read and profile-validated delegation evidence."""
+    findings, decisions, _, evaluated_at = _resolve_delegations(
+        mandate, attachments, chains, source_bytes, as_of=as_of,
+        target_source=target_source, target_binding=target_binding,
+    )
+    return DelegationAnalysis(analyse(mandate, depth=depth), findings, decisions, evaluated_at)
+
+
+def _resolve_delegations(
+    mandate: Mandate,
+    attachments: Sequence[DelegationAttachment],
+    chains: Sequence[DelegationChain],
+    source_bytes: Mapping[str, bytes],
+    *,
+    as_of: str,
+    target_source: str | None = None,
+    target_binding: str | None = None,
+) -> tuple[
+    tuple[DelegationFinding, ...], tuple[DelegationDecision, ...],
+    tuple[DelegationFinding, ...], str,
+]:
+    """Check fixed grants and distinguish tool excess from chain or trust defects."""
     evaluated_at = _timestamp({"as_of": as_of}, "as_of", "analysis")
     canonical_attachments = tuple(
         DelegationAttachment.from_json(item.to_json()) for item in attachments
@@ -1126,7 +1147,6 @@ def analyse_delegations(
     for graph in chain_graphs.values():
         _validate_delegation_profile(graph)
 
-    authority = analyse(mandate, depth=depth)
     tools = {tool.name: tool for tool in mandate.tools}
     attachment_counts: dict[str, int] = {}
     chain_groups: dict[str, list[DelegationChain]] = {}
@@ -1136,6 +1156,7 @@ def analyse_delegations(
         chain_groups.setdefault(chain.id, []).append(chain)
     findings: list[DelegationFinding] = []
     decisions: list[DelegationDecision] = []
+    tool_excesses: list[DelegationFinding] = []
 
     def finding(
         code: str,
@@ -1144,6 +1165,7 @@ def analyse_delegations(
         *,
         hop: str | None = None,
         dimension: str | None = None,
+        repairable: bool = False,
     ) -> None:
         support: set[str] = set()
         attachment_graph = attachment_graphs.get(attachment.id)
@@ -1167,6 +1189,8 @@ def analyse_delegations(
                 tuple(sorted(support)),
             )
         )
+        if repairable:
+            tool_excesses.append(findings[-1])
 
     for attachment in sorted(canonical_attachments, key=lambda item: item.id):
         start = len(findings)
@@ -1344,6 +1368,7 @@ def analyse_delegations(
                     "tool authority exceeds the referenced hop surface",
                     hop=referenced.id,
                     dimension=dimension,
+                    repairable=True,
                 )
         if len(findings) == start:
             graph = attachment_graphs[attachment.id]
@@ -1367,9 +1392,38 @@ def analyse_delegations(
                     ),
                 )
             )
-    return DelegationAnalysis(
-        authority,
-        tuple(dict.fromkeys(findings)),
-        tuple(decisions),
-        evaluated_at,
+    return (
+        tuple(dict.fromkeys(findings)), tuple(decisions),
+        tuple(dict.fromkeys(tool_excesses)), evaluated_at,
     )
+
+
+def _delegation_payload(
+    as_of: str, attenuated: Sequence[DelegationDecision], findings: Sequence[DelegationFinding],
+) -> dict[str, Any]:
+    return {
+        "schema": "agentmandate.delegations/v2",
+        "as_of": as_of,
+        "attenuated": [
+            {
+                "attachment": item.attachment,
+                "tool": item.tool,
+                "delegation": item.delegation,
+                "hop": item.hop,
+                "support": list(item.support),
+            }
+            for item in attenuated
+        ],
+        "findings": [
+            {
+                "code": item.code,
+                "attachment": item.attachment,
+                "tool": item.tool,
+                "hop": item.hop,
+                "dimension": item.dimension,
+                "message": item.message,
+                "support": list(item.support),
+            }
+            for item in findings
+        ],
+    }

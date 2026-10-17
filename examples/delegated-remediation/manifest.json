@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "agent": "synthetic-delegated-export",
+  "tools": [
+    {
+      "name": "select_rows",
+      "effect": "read",
+      "produces": "rows",
+      "unbounded": true
+    },
+    {
+      "name": "export_rows",
+      "effect": "write",
+      "requires": [
+        "rows"
+      ],
+      "quantity": "exported_rows",
+      "value_arg": "count",
+      "scope_key": "rows",
+      "ceiling": {
+        "amount": "3",
+        "unit": "record"
+      }
+    },
+    {
+      "name": "purge_rows",
+      "effect": "irreversible",
+      "requires": [
+        "rows"
+      ],
+      "requires_approval": true
+    }
+  ],
+  "roles": {
+    "exporter": [
+      "export_rows",
+      "purge_rows"
+    ]
+  },
+  "limits": {
+    "depth": 4,
+    "quantities": {
+      "exported_rows": {
+        "amount": "4",
+        "unit": "record"
+      }
+    }
+  }
+}

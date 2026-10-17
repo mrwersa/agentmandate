@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-16",
+  "as_of": "2026-10-17",
   "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
   "phases": [
     {
@@ -100,7 +100,7 @@
           "title": "Explainable counterfactual remediation",
           "status": "partial",
           "evidence": "docs/remediation.md",
-          "reason": "Removal, approval, named-quantity ceilings/grids, required paths, finite-lattice discovery and release-side path rechecks are delivered. Existing reviewed conditions now feed candidate and workflow rechecks with unconditional findings retained. Generating condition restrictions, delegation-bound repairs and global synthesis remain open; domain completeness stays distinct from reach-depth truncation."
+          "reason": "Removal, approval, named-quantity ceilings/grids, required paths, finite-lattice discovery and release-side path rechecks are delivered. Condition and fixed-delegation rechecks preserve evidence, separate tool excess from chain/trust defects and retain ordinary findings. Generating condition restrictions, editing delegation bounds and global synthesis remain open; domain completeness stays distinct from reach-depth truncation."
         },
         {
           "title": "Named-review CI workflow",

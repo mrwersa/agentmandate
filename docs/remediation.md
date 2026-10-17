@@ -107,6 +107,14 @@ or dispatch arguments, so they do not prove that a particular live call belongs
 to that domain. This mode consumes existing restrictions; it does not propose
 new predicates, edit captures, create review acceptance or change grants.
 
+## Recheck fixed delegation grants
+
+For fixed grant constraints, use [delegation-aware remediation](delegation-remediation.md).
+It rechecks the existing delegation records alongside ordinary reachability
+and required paths. It can propose removing an excessive tool without editing
+the grant; unresolved evidence and chain widening stop recommendations.
+Conditional and delegation modes cannot be combined.
+
 ## Quantity accounting and trade-offs
 
 Ceilings inherit the tool's named quantity and unit. Proposals do not change
@@ -152,7 +160,8 @@ an exhausted explicit edit search. Neither establishes that no useful repair exi
 
 Malformed domains, incompatible units within one quantity or unsupported
 arithmetic exit 2 without a partial result. Exit 1 retains baseline breaches,
-lint errors or unresolved conditions. Exit 0 means the baseline is clean within
+lint errors, unresolved conditions or delegation findings. Exit 0 means the
+baseline is clean within
 the selected analysis scope. Conditional reports retain the ordinary findings
 separately; finding a repair never clears a breached baseline.
 
@@ -168,6 +177,6 @@ mandate diff examples/dispute-resolver-v2.yaml /tmp/candidate.json --depth 8
 ```
 
 Application-level tests and deployment controls remain necessary. Generating
-new condition restrictions, delegation bounds, timed quotas, multiple
+new condition restrictions, editing delegation grants, timed quotas, multiple
 simultaneous charges on one call and global policy synthesis remain outside
 this repair family.

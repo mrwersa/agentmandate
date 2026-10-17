@@ -1,0 +1,190 @@
+{
+  "delegation_version": 1,
+  "id": "delegations/synthetic-export",
+  "subject": "subject:synthetic-exporter",
+  "hops": [
+    {
+      "id": "hop-1",
+      "grantor": "issuer:synthetic",
+      "actors": [
+        "agent:synthetic-parent"
+      ],
+      "actor_history": "complete",
+      "audience": "service:synthetic-0",
+      "validity": {
+        "kind": "window",
+        "issued_at": "2026-10-01T00:00:00Z",
+        "expires_at": "2026-11-01T00:00:00Z"
+      },
+      "surface": {
+        "scopes": {
+          "domain": "synthetic-export",
+          "basis": "deployment_policy",
+          "completeness": "complete",
+          "members": [
+            "rows"
+          ],
+          "evidence": {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "synthetic-grant-reviewer",
+            "expires": "2026-12-31"
+          },
+          "source": {
+            "kind": "synthetic-grant-capture",
+            "locator": "examples/delegated-remediation/capture.json",
+            "location": "/hops/0/surface/scopes",
+            "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+          }
+        },
+        "tools": {
+          "domain": "synthetic-export",
+          "basis": "deployment_policy",
+          "completeness": "complete",
+          "members": [
+            "export_rows",
+            "purge_rows",
+            "select_rows"
+          ],
+          "evidence": {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "synthetic-grant-reviewer",
+            "expires": "2026-12-31"
+          },
+          "source": {
+            "kind": "synthetic-grant-capture",
+            "locator": "examples/delegated-remediation/capture.json",
+            "location": "/hops/0/surface/tools",
+            "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+          }
+        },
+        "effects": {
+          "domain": "synthetic-export",
+          "basis": "deployment_policy",
+          "completeness": "complete",
+          "members": [
+            "read",
+            "write"
+          ],
+          "evidence": {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "synthetic-grant-reviewer",
+            "expires": "2026-12-31"
+          },
+          "source": {
+            "kind": "synthetic-grant-capture",
+            "locator": "examples/delegated-remediation/capture.json",
+            "location": "/hops/0/surface/effects",
+            "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+          }
+        }
+      },
+      "evidence": {
+        "confidence": "exact",
+        "review": "accepted",
+        "reviewer": "synthetic-grant-reviewer",
+        "expires": "2026-12-31"
+      },
+      "source": {
+        "kind": "synthetic-grant-capture",
+        "locator": "examples/delegated-remediation/capture.json",
+        "location": "/hops/0",
+        "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+      }
+    },
+    {
+      "id": "hop-2",
+      "grantor": "agent:synthetic-parent",
+      "actors": [
+        "agent:synthetic-worker",
+        "agent:synthetic-parent"
+      ],
+      "actor_history": "complete",
+      "audience": "service:synthetic-1",
+      "validity": {
+        "kind": "window",
+        "issued_at": "2026-10-01T00:00:00Z",
+        "expires_at": "2026-11-01T00:00:00Z"
+      },
+      "surface": {
+        "scopes": {
+          "domain": "synthetic-export",
+          "basis": "deployment_policy",
+          "completeness": "complete",
+          "members": [
+            "rows"
+          ],
+          "evidence": {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "synthetic-grant-reviewer",
+            "expires": "2026-12-31"
+          },
+          "source": {
+            "kind": "synthetic-grant-capture",
+            "locator": "examples/delegated-remediation/capture.json",
+            "location": "/hops/1/surface/scopes",
+            "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+          }
+        },
+        "tools": {
+          "domain": "synthetic-export",
+          "basis": "deployment_policy",
+          "completeness": "complete",
+          "members": [
+            "export_rows",
+            "purge_rows",
+            "select_rows"
+          ],
+          "evidence": {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "synthetic-grant-reviewer",
+            "expires": "2026-12-31"
+          },
+          "source": {
+            "kind": "synthetic-grant-capture",
+            "locator": "examples/delegated-remediation/capture.json",
+            "location": "/hops/1/surface/tools",
+            "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+          }
+        },
+        "effects": {
+          "domain": "synthetic-export",
+          "basis": "deployment_policy",
+          "completeness": "complete",
+          "members": [
+            "read",
+            "write"
+          ],
+          "evidence": {
+            "confidence": "exact",
+            "review": "accepted",
+            "reviewer": "synthetic-grant-reviewer",
+            "expires": "2026-12-31"
+          },
+          "source": {
+            "kind": "synthetic-grant-capture",
+            "locator": "examples/delegated-remediation/capture.json",
+            "location": "/hops/1/surface/effects",
+            "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+          }
+        }
+      },
+      "evidence": {
+        "confidence": "exact",
+        "review": "accepted",
+        "reviewer": "synthetic-grant-reviewer",
+        "expires": "2026-12-31"
+      },
+      "source": {
+        "kind": "synthetic-grant-capture",
+        "locator": "examples/delegated-remediation/capture.json",
+        "location": "/hops/1",
+        "content_sha256": "88038e830a79e95f57aaf553183ec72dd77ba7e5535f0c9b1986d9be3c7da68f"
+      }
+    }
+  ]
+}

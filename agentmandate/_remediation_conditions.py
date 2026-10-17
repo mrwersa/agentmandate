@@ -24,6 +24,10 @@ class _ConditionEvaluation:
     findings: tuple[ConditionFinding, ...]
     report: dict
 
+    @property
+    def repairable_findings(self):
+        return ()  # Condition trust failures cannot be repaired by changing a manifest.
+
     def record(self, mandate, depth):
         return {
             **self.report,
@@ -38,6 +42,12 @@ class _ConditionScope:
     contexts: tuple[ConditionContext, ...]
     captures: tuple[tuple[str, bytes], ...]
     as_of: date
+
+    kind = "conditions"
+    description = (
+        "manifest-v2 with reviewed conditional effects; candidates require human selection"
+    )
+    invariant_error = "condition eligibility changed during repair recheck"
 
     @classmethod
     def from_inputs(cls, conditions, contexts, captures, as_of):

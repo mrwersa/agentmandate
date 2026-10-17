@@ -276,6 +276,11 @@ Repeat attachment, chain, and locator mappings as needed. Delegation findings
 support human and JSON output; SARIF, Mermaid, `reach --ir`, and conditional
 composition fail before output rather than dropping uncertainty.
 
+`mandate remediate` accepts the same six delegation options for
+[fixed-grant repair rechecks](delegation-remediation.md). Chain and trust defects
+block recommendations; a candidate's ordinary Authority remains unchanged by
+grant checks. Condition/delegation composition is refused before input reads.
+
 Finite-producer evidence follows the same boundary. Validation proves record
 structure only. Reachability separately checks the exact deployment selection,
 all caller-mapped source bytes, complete monotone run, accepted review, expiry,

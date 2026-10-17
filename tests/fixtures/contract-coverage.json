@@ -767,5 +767,27 @@
     "tests": [
       "tests/test_conditional_remediation.py"
     ]
+  },
+  {
+    "doc": "docs/delegation-remediation.md",
+    "fixtures": [
+      "examples/delegated-remediation/manifest.json",
+      "examples/delegated-remediation/chain.json",
+      "examples/delegated-remediation/capture.json",
+      "examples/delegated-remediation/select_rows-attachment.json",
+      "examples/delegated-remediation/export_rows-attachment.json",
+      "examples/delegated-remediation/purge_rows-attachment.json",
+      "examples/delegated-remediation/required-export.json",
+      "tests/fixtures/delegated-remediation-v1.json"
+    ],
+    "id": "delegated-remediation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v6",
+      "agentmandate.delegations/v2"
+    ],
+    "tests": [
+      "tests/test_delegated_remediation.py"
+    ]
   }
 ]
