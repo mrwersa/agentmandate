@@ -32,6 +32,14 @@ chain/trust defects, and result reports retain input identities and rejected
 edits. The worked example and complete CLI output hashes are pinned; semantic
 assertions and full-domain comparisons live in `tests/test_delegated_remediation.py`.
 
+Release-aware remediation adds `--released` to the same command. Its optional
+`release` records preserve ordinary comparisons and workflow regressions;
+the input record pins both manifest files. Workflow annotations pin the released
+reference. Current examples and complete-output replays are covered by
+`tests/test_release_remediation.py`, including full edit-domain frontier checks.
+The remediation and required-workflow schemas, root exports and earlier pinned
+material bytes remain unchanged.
+
 
 ## Breaking alpha changes
 

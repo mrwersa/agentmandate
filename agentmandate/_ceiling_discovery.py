@@ -16,6 +16,8 @@ from ._remediation import (
     _edit_record,
     _manifest,
     _quantity,
+    _release_baseline,
+    _release_rejected,
     _repair_cost,
     _structural,
 )
@@ -91,6 +93,7 @@ def discover(
     keep_tools,
     required_workflows,
     scope=None,
+    released=None,
 ):
     for name, value in (
         ("max_edits", max_edits),
@@ -191,15 +194,17 @@ def discover(
     if required_workflows is not None:
         assessments = required_workflows.assess(effective, baseline.depth)
         invalid = next((a for a in assessments if a["failure"] is not None), None)
-        if invalid is not None:
+        if invalid is not None and released is None:
             raise ValueError(f"required workflow {invalid['name']!r} is invalid in the baseline")
         report["requirements"] = {**required_workflows.metadata(), "baseline": assessments}
         report["requirement_rejections"] = []
         search["required_workflow_rejections"] = 0
+    _release_baseline(report, released, mandate, required_workflows)
     if _structural(lint):
         report["status"] = "input_requires_review"
         return report
-    if not baseline.breaches and not (evaluation and evaluation.repairable_findings):
+    if (not baseline.breaches and not (evaluation and evaluation.repairable_findings)
+            and report.get("release", {}).get("gate_passed", True)):
         discovery["status"] = "not_needed_baseline_clean"
         return report
 
@@ -264,6 +269,14 @@ def discover(
             breach_kinds=sorted({b.kind for b in authority.breaches}),
         )
         if not authority.breaches:
+            release = _release_rejected(
+                report, released, changed, required_workflows,
+                [_edit_record(mandate, edit) for edit in edits],
+            )
+            if release is not None and not release["gate_passed"]:
+                # No ordering assumption about release comparisons: split the box as usual.
+                record["status"] = "release_rejected"
+                return record
             candidate = {
                 "status": "no_reachable_breach_within_bound",
                 "edits": [_edit_record(mandate, e) for e in edits],
@@ -278,6 +291,9 @@ def discover(
             }
             if required_workflows is not None:
                 candidate["required_workflows"] = assessments
+            if release is not None:
+                candidate["release"] = release
+                candidate["status"] = "no_widening_or_reachable_breach_within_bound"
             if scoped is not None:
                 candidate[scope.kind] = scoped.record(changed, baseline.depth)
             candidate["repair_cost"] = _repair_cost(mandate, candidate)

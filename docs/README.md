@@ -30,6 +30,7 @@ commands; historical captures and acceptance records keep their original bytes.
 | Check artifact structure before evidence analysis | [Structural validation](structural-validation.md) |
 | Check recorded acceptance of widening | [Named change review](change-review.md) |
 | Find concrete changes for a reachable breach | [Repair candidates](remediation.md) |
+| Find repairs for a release that widens authority | [Release-aware remediation](release-remediation.md) |
 | Find quantity repair ceilings without guessing amounts | [Automatic ceiling discovery](ceiling-discovery.md) |
 | Repair within an existing reviewed effect domain | [Condition-aware remediation](remediation.md#recheck-repairs-within-reviewed-conditional-effects) |
 | Repair a manifest against fixed delegated grants | [Delegation-aware remediation](delegation-remediation.md) |

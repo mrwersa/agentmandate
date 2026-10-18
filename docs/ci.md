@@ -27,6 +27,13 @@ candidate is found. It never edits the policy or turns a failing baseline into
 a passing CI result. Exit 0 also requires baseline lint to have no errors;
 candidate reachability and remaining lint are reported separately.
 
+For a release rejected by `diff`, use
+[`remediate --released FILE`](release-remediation.md). It searches for candidates
+with no widening, reachable breach, lint error or required-path regression.
+The original release finding still exits 1, even when a candidate is returned.
+With this flag, workflow annotations pin the released file rather than the
+proposed file. The Action does not apply repair proposals automatically.
+
 ## The action
 
 ```yaml

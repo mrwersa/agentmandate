@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.43.0 - 2026-10-18
+
+### Added
+
+- `mandate remediate --released FILE` proposes manifest edits that remove
+  authority widening against a released manifest as well as reachable breaches
+  and lint errors. Explicit ceilings, grids, approval/removal edits, Pareto
+  ranking and ceiling discovery use the existing full comparison reader.
+- Required workflows pin the released file's exact bytes in this mode. A broken
+  proposed workflow remains a finding; an invalid released requirement is a
+  usage error. Every candidate must preserve the paths and pass its own checks.
+- Reports retain the original release comparison, both input digests, rejected
+  comparisons and per-candidate results at one explicit depth. Finding a repair
+  does not clear the original exit 1. Release/condition/delegation composition
+  is refused; fixed budgets, identities and other unsupported edits stay fixed.
+- A synthetic breach-free widening example, CLI replay baselines and committed
+  exhaustive edit-domain comparisons cover the release repair workflow.
+
 ## 0.42.0 - 2026-10-17
 
 ### Added

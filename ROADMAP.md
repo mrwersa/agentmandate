@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 17 October 2026
+### Measured planning progress — 18 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,17 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Release-aware remediation — 18 October 2026:**
+[Release repairs](docs/release-remediation.md) connect the existing authority
+comparison to candidate generation. A breach-free proposal can motivate repair
+through widening; every returned candidate must remove widening and pass ordinary
+breach, lint and released-workflow checks at one fixed depth. Input identities,
+original findings and rejected comparisons remain visible. Explicit enumeration
+and discovery retain their separate limits; comparison failures introduce no
+new pruning assumption. Conditions/delegations cannot compose with this mode.
+This extends partial remediation; condition authoring, grant editing and global
+synthesis remain open, so the initiative ledger stays at 50%.
 
 **Delegation-aware remediation — 17 October 2026:**
 [Fixed-grant repair checks](docs/delegation-remediation.md) distinguish a tool's

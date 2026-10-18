@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "agent": "synthetic-release-export",
+  "tools": [
+    {
+      "name": "select_rows",
+      "effect": "read",
+      "produces": "rows",
+      "unbounded": true
+    },
+    {
+      "name": "export_rows",
+      "effect": "write",
+      "requires": [
+        "rows"
+      ],
+      "scope_key": "rows",
+      "quantity": "exported_rows",
+      "value_arg": "count",
+      "ceiling": {
+        "amount": "2",
+        "unit": "record"
+      }
+    }
+  ],
+  "limits": {
+    "depth": 4,
+    "quantities": {
+      "exported_rows": {
+        "amount": "20",
+        "unit": "record"
+      }
+    }
+  }
+}
