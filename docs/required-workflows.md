@@ -41,7 +41,7 @@ The strict UTF-8 JSON root has exactly these fields:
 |---|---|
 | `schema` | `agentmandate.required-workflows/v2` |
 | `agent` | The baseline manifest's agent name |
-| `manifest_sha256` | Lowercase SHA-256 of the exact baseline file bytes |
+| `manifest_sha256` | Lowercase SHA-256 of the exact baseline bytes; with `remediate --released`, the released file |
 | `reviewer` | Caller-supplied name identifying who chose these requirements |
 | `reason` | Caller-supplied explanation of why these paths are required |
 | `workflows` | Nonempty list of named ordered paths |
@@ -89,7 +89,7 @@ call can select only a binding already held at that point.
 
 Spend is cumulative per **tool, scope and binding**. Two tools sharing one
 scope do not share a ceiling. Each named pool accumulates every call assigned to that quantity.
-Currency, principal and required approval must match their declarations.
+Unit, principal and required approval must match their declarations.
 Every call counts against its declared effect budget, including pure reads,
 zero-spend calls and calls with no new quantity headroom. No-change calls remain
 in the supplied path and count toward its full length.
@@ -100,6 +100,9 @@ These are conformance checks, not new guards in the reachability kernel:
 search can find. An invalid baseline requirement is a configuration error,
 not a requirement the command silently drops. Fix the path or mandate intent
 before requesting narrowing candidates.
+For [release-aware repair](release-remediation.md), this requirement applies to
+the released reference. A broken proposed path is a release finding and can
+leave no feasible repair; it is not misreported as an invalid released annotation.
 
 Arithmetic uses the same isolated exact-context sizing as the search, extended
 to include supplied amounts. Partial amounts are checked exactly; the checker

@@ -1,0 +1,42 @@
+{
+  "schema": "agentmandate.required-workflows/v2",
+  "agent": "synthetic-release-export",
+  "manifest_sha256": "884cb193313416d1d772d20975cf422fa3c50ffbe28976c0953f27d3bccae7d9",
+  "reviewer": "synthetic-example-author",
+  "reason": "Keep two one-record exports. Synthetic requirements, not live deployment evidence.",
+  "workflows": [
+    {
+      "name": "two-exports",
+      "steps": [
+        {
+          "tool": "select_rows",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": false,
+          "binding": 0,
+          "value": "1",
+          "quantity": "exported_rows",
+          "unit": "record"
+        },
+        {
+          "tool": "select_rows",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": false,
+          "binding": 1,
+          "value": "1",
+          "quantity": "exported_rows",
+          "unit": "record"
+        }
+      ]
+    }
+  ]
+}

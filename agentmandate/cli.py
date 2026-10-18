@@ -255,6 +255,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_manifest(remediation_parser)
     remediation_parser.add_argument(
+        "--released", metavar="FILE",
+        help="also remove widening against this released manifest; workflows pin its bytes",
+    )
+    remediation_parser.add_argument(
         "--depth",
         type=_positive_int,
         default=None,
@@ -294,7 +298,7 @@ def build_parser() -> argparse.ArgumentParser:
     remediation_parser.add_argument(
         "--required-workflows",
         metavar="FILE",
-        help="preserve caller-authored ordered paths bound to this manifest's exact bytes",
+        help="preserve paths pinned to --released when supplied, otherwise to the input manifest",
     )
     remediation_parser.add_argument(
         "--ceiling-grid",
@@ -981,16 +985,28 @@ def _run_remediation(args: argparse.Namespace) -> int:
     try:
         if _conditions_supplied(args) and _delegations_supplied(args):
             raise ValueError("condition and delegation remediation cannot be combined")
+        if args.released is not None and (
+            _conditions_supplied(args) or _delegations_supplied(args)
+        ):
+            raise ValueError(
+                "release-aware remediation cannot be combined with conditions or delegations"
+            )
         condition_inputs = _condition_inputs(args)
         delegation_inputs = _delegation_inputs(args)
         content = Path(args.manifest).read_bytes()
         mandate = loads(content.decode("utf-8"), source=args.manifest)
+        released_content = None if args.released is None else Path(args.released).read_bytes()
+        released = (
+            None if released_content is None
+            else loads(released_content.decode("utf-8"), source=args.released)
+        )
         requirements = None
         if args.required_workflows is not None:
+            required_content = content if released_content is None else released_content
             requirements = _Requirements.load(
                 Path(args.required_workflows).read_bytes(),
-                mandate,
-                hashlib.sha256(content).hexdigest(),
+                mandate if released is None else released,
+                hashlib.sha256(required_content).hexdigest(),
             )
         result = plan_remediation(
             mandate,
@@ -1011,17 +1027,38 @@ def _run_remediation(args: argparse.Namespace) -> int:
                 None if delegation_inputs is None
                 else _DelegationScope.from_inputs(*delegation_inputs)
             ),
+            released=released,
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     result["input"] = {"manifest_sha256": hashlib.sha256(content).hexdigest()}
+    if released_content is not None:
+        result["input"]["released_sha256"] = hashlib.sha256(released_content).hexdigest()
     baseline = result["baseline"]
     lines = [
         f"STATUS {result['status']}",
         f"SCOPE {result['scope']}",
         f"BASELINE depth={baseline['depth']} truncated={baseline['truncated']}",
     ]
+    if "release" in result:
+        release = result["release"]
+        comparison = release["comparison"]
+        lines.append(
+            f"RELEASE {comparison['direction']} gate_passed={release['gate_passed']} "
+            f"depth={comparison['before']['depth']} "
+            f"released_truncated={comparison['before']['truncated']} "
+            f"proposed_truncated={comparison['after']['truncated']}: {release['scope']}"
+        )
+        lines.extend(
+            f"RELEASE CHANGE {row['direction']} {row['kind']}: {row['detail']}"
+            for row in comparison["changes"]
+        )
+        lines.extend(
+            f"RELEASE REQUIRED {row['name']} fails at step {row['failure']['step']} "
+            f"{row['failure']['rule']}: {row['failure']['detail']}"
+            for row in comparison.get("required_workflows", []) if row["failure"] is not None
+        )
     if "conditions" in result:
         condition_report = result["conditions"]
         lines.append(
@@ -1112,6 +1149,12 @@ def _run_remediation(args: argparse.Namespace) -> int:
             f"          REQUIRED {row['name']}: {row['status']}"
             for row in candidate.get("required_workflows", [])
         )
+        if "release" in candidate:
+            lines.append(
+                f"          release={candidate['release']['comparison']['direction']} "
+                f"gate_passed={candidate['release']['gate_passed']}; "
+                f"{candidate['release']['scope']}"
+            )
         if "conditions" in candidate:
             lines.append(
                 "          conditional recheck: "
@@ -1125,6 +1168,18 @@ def _run_remediation(args: argparse.Namespace) -> int:
                 f"findings={len(candidate['delegations']['findings'])} "
                 f"inactive={candidate['delegations']['inactive_attachments']}; grants unchanged"
             )
+    for rejected in result.get("release_rejections", []):
+        lines.append(
+            f"REJECTED RELEASE {rejected['comparison']['direction']}: edits={rejected['edits']}"
+        )
+        lines.extend(
+            f"          {row['kind']}: {row['detail']}"
+            for row in rejected["comparison"]["changes"] if row["direction"] == "widening"
+        )
+        lines.extend(
+            f"          LINT {row['rule']}: {row['message']}"
+            for row in rejected["lint"] if row["severity"] == ERROR
+        )
     for rejected in result.get("delegation_rejections", []):
         lines.extend(
             f"REJECTED DELEGATION {row['tool']} ({row['dimension']}): "
@@ -1150,6 +1205,7 @@ def _run_remediation(args: argparse.Namespace) -> int:
         if baseline["breaches"] or any(f["severity"] == ERROR for f in result["baseline_lint"])
         or result.get("conditions", {}).get("findings")
         or result.get("delegations", {}).get("findings")
+        or not result.get("release", {}).get("gate_passed", True)
         else EXIT_OK
     )
 

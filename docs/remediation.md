@@ -17,6 +17,7 @@ analysis result, not a declaration of safety at every depth.
 
 | Option | Meaning |
 |---|---|
+| `--released FILE` | Also remove widening against a released manifest; required workflows pin that file |
 | `--keep-tool NAME` | Preserve a named reachable tool; repeat for more tools |
 | `--ceiling TOOL=AMOUNT` | Supply a strictly lower ceiling; repeat for alternatives |
 | `--ceiling-grid TOOL=MIN:MAX:STEP` | Expand a finite exact domain, including MAX only if on-grid |
@@ -39,6 +40,11 @@ approval additions. It cannot combine with explicit ceilings or grids. See the
 [discovery guide](ceiling-discovery.md) for its domain, pruning argument and limits.
 
 ## Keep useful workflows
+
+For a release rejected by `diff`, use [release-aware remediation](release-remediation.md).
+It can start from widening without a reachable breach and requires every
+candidate to pass the released-manifest comparison, workflow and ordinary checks.
+Conditions and delegations are separate modes and cannot combine with `--released`.
 
 A reachable refund tool with a zero ceiling cannot issue a useful refund.
 `--keep-tool` preserves tool reachability; it does not invent an amount that the
@@ -143,6 +149,8 @@ Every option uses `agentmandate.remediation/v6`; there are no old presentation
 modes. The JSON includes baseline Authority and lint, search controls, proposed
 edits, complete candidate manifests, candidate Authority, lint and optional
 workflow/frontier/discovery assessments.
+With `--released`, `release` additionally retains the original comparison and
+each candidate's comparison; required-workflow annotations pin the released file.
 
 - `search.exhaustive_point_enumeration` means every Cartesian combination was
   literally examined. Discovery can resolve a complete frontier through pruning

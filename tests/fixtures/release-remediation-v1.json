@@ -1,0 +1,149 @@
+{
+  "scope": "Synthetic CLI replay hashes, not deployment or acceptance evidence.",
+  "cases": [
+    {
+      "name": "joint-grid",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/proposed.json",
+        "--released",
+        "examples/release-remediation/released.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--ceiling-grid",
+        "export_rows=0:2:1",
+        "--pareto",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_sha256": "f5bfa536225a874b10eed4ea5c280934fce4fdf0115bd427e45072df5c923708",
+      "stderr": ""
+    },
+    {
+      "name": "ceiling-discovery",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/ceiling-only.json",
+        "--released",
+        "examples/release-remediation/released.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--discover-ceiling",
+        "export_rows=1",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_sha256": "d32f2799739790dc1e0cde49813ace397735ab6d0735dfdbbbd54980dece9979",
+      "stderr": ""
+    },
+    {
+      "name": "retained-added-tool",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/proposed.json",
+        "--released",
+        "examples/release-remediation/released.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--discover-ceiling",
+        "export_rows=1",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_sha256": "ce5b235b6fdd38d2dbe6bec50de600578b1e85d15c61f92bd54492d4fb271d02",
+      "stderr": ""
+    },
+    {
+      "name": "broken-required-path",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/breaking.json",
+        "--released",
+        "examples/release-remediation/released.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_sha256": "6345d217494c2894f7f8e6c8632f50b628466c6265dff94871f20dab0d3b9260",
+      "stderr": ""
+    },
+    {
+      "name": "clean-release",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/released.json",
+        "--released",
+        "examples/release-remediation/released.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e746f5ef2771ed25e1d5632aaf1278541d9a09caf87b0a0d87dcef8a0e7d7a2b",
+      "stderr": ""
+    },
+    {
+      "name": "evaluation-cutoff",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/ceiling-only.json",
+        "--released",
+        "examples/release-remediation/released.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--discover-ceiling",
+        "export_rows=0.01",
+        "--max-evaluations",
+        "1",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_sha256": "8661240a70d72e7d646108f4acb3a25849a52bcb1b14613a7e0f1a74a4a33f94",
+      "stderr": ""
+    },
+    {
+      "name": "mismatched-annotation",
+      "argv": [
+        "remediate",
+        "examples/release-remediation/proposed.json",
+        "--released",
+        "examples/release-remediation/proposed.json",
+        "--required-workflows",
+        "examples/release-remediation/required-export.json",
+        "--keep-tool",
+        "select_rows",
+        "--keep-tool",
+        "export_rows",
+        "--json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "error: required workflows do not match the exact baseline manifest\n"
+    }
+  ]
+}

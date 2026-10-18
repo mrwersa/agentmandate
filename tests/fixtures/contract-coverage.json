@@ -789,5 +789,25 @@
     "tests": [
       "tests/test_delegated_remediation.py"
     ]
+  },
+  {
+    "doc": "docs/release-remediation.md",
+    "fixtures": [
+      "examples/release-remediation/released.json",
+      "examples/release-remediation/proposed.json",
+      "examples/release-remediation/ceiling-only.json",
+      "examples/release-remediation/breaking.json",
+      "examples/release-remediation/required-export.json",
+      "tests/fixtures/release-remediation-v1.json"
+    ],
+    "id": "release-aware-remediation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v6",
+      "agentmandate.required-workflows/v2"
+    ],
+    "tests": [
+      "tests/test_release_remediation.py"
+    ]
   }
 ]

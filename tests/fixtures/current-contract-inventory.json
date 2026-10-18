@@ -3096,6 +3096,18 @@
           "action": "_StoreAction",
           "choices": null,
           "default": null,
+          "dest": "released",
+          "nargs": null,
+          "options": [
+            "--released"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "default": null,
           "dest": "depth",
           "nargs": null,
           "options": [
@@ -3754,7 +3766,7 @@
       ]
     }
   },
-  "coverage_sha256": "759932353aa293e49f99d4d03ed00b34e0fdd4d6daf2be37975df00fbbf17d66",
+  "coverage_sha256": "a31c0bdecf8f861a2eec69f661ccde423f8b096ed5424c765547f3d5a6228814",
   "fixture_sha256": {
     ".github/workflows/action.yml": "958927e3eff3a9891b00577e65f51c49bf03e9a4490ee32c679600a9e063b65a",
     "action.yml": "444f560ceeb4bfc80468f55429f7c5c0388b43c813f5001b1e5ce7aa99a5e229",
@@ -3852,6 +3864,11 @@
     "examples/rego-export/manifest.json": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
     "examples/rego-export/mapping.json": "0e7a42fe42f68d53dda652f020b4b7075e6cf0f6d8d584ffccd0ae6229869cc3",
     "examples/rego-export/opa-target.json": "4a9205cdd27169aeb4ee8ccae877345c4303ea8aeeb047f30a7f5df088d58b1d",
+    "examples/release-remediation/breaking.json": "46994d0ba02c564599c8b096fa24d3688e10c731d1f5779b74a138e5664a5f88",
+    "examples/release-remediation/ceiling-only.json": "f4cbcdd62d4a5693b01329186c03ab377754b1bf161e26e01242040197c0ac0e",
+    "examples/release-remediation/proposed.json": "893058a763d263f8dfa1457ff6b875b9eeaaf5081a206937c997d8e8ad5e4b9a",
+    "examples/release-remediation/released.json": "884cb193313416d1d772d20975cf422fa3c50ffbe28976c0953f27d3bccae7d9",
+    "examples/release-remediation/required-export.json": "ad83efb2e724e6da2cc2670ff903f873e36dd1bc700ceecf411c4709a4a8e3d3",
     "examples/release-workflows/released.json": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
     "examples/release-workflows/required-export.json": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9",
     "examples/remediation/normal-refund.jsonl": "a29bef9d55bea45836f4339de810e98901b832fd54d736dea0e094116e07530b",
@@ -3966,6 +3983,7 @@
     "tests/fixtures/producer-result-v2-truncated.json": "7057330849d00e0185a1eca641a41b2da786c64140e57b8969d52816c315a129",
     "tests/fixtures/producer-result-v2-unresolved.json": "0e078b474ace2421c70188694025c42aa5233ad6b244815b422ee068c6abc13c",
     "tests/fixtures/rego-effective-diff-v2.json": "ee9360ca2e14e32e6d6dd305eda785723d2f90dbb5d26cd9a28ef4334bd99ca1",
+    "tests/fixtures/release-remediation-v1.json": "e42a88e4379e6e07fd3cc6a231d49ee8d3f4f304e2d93a94b8f8282fc33e2b10",
     "tests/fixtures/release-workflows-v1.json": "07026c97b7d6df2e92ba7049966eac099bf0da59a1d40c3abceb710a221fdbec",
     "tests/fixtures/remediation-breached-v6.json": "ca69b5e04a75cdf64c964ddd202e38ff5fc61b0e465008b2c200a97eb2be9fa9",
     "tests/fixtures/remediation-ceiling-clean-v6.json": "30f8ed38e0796cfa8c022f492a563370880255d29d83b015386a13a2365cd8c6",

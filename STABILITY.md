@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.42.0
+agentmandate~=0.43.0
 ```
 
 ## Current quantity model
@@ -100,6 +100,16 @@ Every repair is rechecked against the complete changed manifest. Required paths
 screen model conformance, not business success. Proposals remain unapplied;
 original budgets and named quantity assignments stay fixed. Different units
 are never added to rank a proposal.
+
+`remediate --released FILE` also requires each candidate's ordinary manifest
+comparison to have no widening or required-workflow regression, and its own
+analysis and lint to have no breach or error. Required workflows pin the
+released file, which must satisfy them. Both input digests, the original
+comparison and rejected comparisons remain visible; proposals never clear the
+original finding. Default depth is the larger declared depth and is fixed for
+both sides and all candidates. This mode cannot combine with conditions or
+delegations. It reuses remediation/v6 and the current comparison reader;
+there is no alternate legacy output mode. See [release repairs](docs/release-remediation.md).
 
 Condition-aware remediation reuses the existing reviewed condition contract.
 Its baseline and candidate results describe that conditional effect scope;

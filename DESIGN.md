@@ -188,6 +188,13 @@ truncation are separate. A candidate removes bounded reachable breaches; it
 does not prove business correctness or accept a new mandate. See the
 [repair guide](docs/remediation.md).
 
+With `--released`, the same edit search also checks the proposed release and
+each candidate against an ordinary authority comparison. A breach-free proposal
+can still require repair because it widens a tool contract or declared budget.
+Required paths pin the released manifest. Every returned candidate must remove
+widening, preserve those paths and have no breach or lint error; the original
+findings remain visible. See [release-aware remediation](docs/release-remediation.md).
+
 ## Checking observed calls
 
 `verify` replays recorded calls and reports what the mandate does not permit.
