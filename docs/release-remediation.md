@@ -59,6 +59,10 @@ requirements pin merely to obtain a clean result.
 Without `--depth`, both releases and all candidates use the larger declared
 depth. An explicit depth applies to every check. Reducing the proposal's declared
 depth remains a widening finding even when an explicit analysis depth is larger.
+To remove that finding, restore the proposal's declared `limits.depth` to at
+least the released value; increasing `--depth` alone does not change that field.
+The planner cannot propose this edit. Rejected comparisons may still appear
+when other supplied edits reach the comparison check.
 Structural defects in the released reference must be reviewed before comparison.
 
 ## Understand the checks and result
@@ -81,7 +85,9 @@ The current remediation/v6 result includes:
 | Field | Meaning |
 |---|---|
 | `baseline`, `baseline_lint` | Original proposed-manifest analysis and lint |
+| `requirements.baseline` | Original proposal's workflow assessments; the repair starting point |
 | `release.comparison` | Full released-to-proposed comparison, including both Authority results and optional workflow rows |
+| `release.comparison.required_workflows[].baseline` | Released reference's workflow status; the comparison starting point |
 | `release.gate_passed` | No widening, proposed breach, lint error or workflow regression within the reported scope |
 | `release.released_lint` | Reference lint, retained separately |
 | `candidates[].release` | The same comparison checks for that candidate |
@@ -94,6 +100,10 @@ manifest, capability losses, lint and per-side truncation. Human output includes
 the original changes, required-path failures and rejected comparisons too.
 The comparison reader reruns bounded analysis; `candidates_analyzed` counts
 candidate probes, not every internal kernel invocation.
+For candidates, the workflow screen and comparison reader assess the same
+paths under the same model. The repeated check preserves a complete comparison
+record; it is not independent corroboration. For the original proposal, the
+comparison's workflow-regression check can itself block the release.
 
 Explicit ceilings, grids, removals, approval edits and Pareto ranking are
 supported. Discovery reuses its existing reachability, workflow and dominance
