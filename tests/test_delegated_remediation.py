@@ -13,7 +13,7 @@ from agentmandate._delegation import (
     DelegationChain,
     analyse_delegations,
 )
-from agentmandate._remediation import plan
+from agentmandate._remediation import _manifest, plan
 from agentmandate._remediation_delegations import _DelegationScope
 from agentmandate._required_workflows import _Requirements
 from agentmandate.cli import main
@@ -36,11 +36,34 @@ def inputs():
 
 
 def requirements(mandate=None):
-    mandate = load(EXAMPLE / "manifest.json") if mandate is None else mandate
-    return _Requirements.load(
-        (EXAMPLE / "required-export.json").read_bytes(), mandate,
-        hashlib.sha256((EXAMPLE / "manifest.json").read_bytes()).hexdigest(),
-    )
+    manifest_bytes = (EXAMPLE / "manifest.json").read_bytes()
+    annotation_bytes = (EXAMPLE / "required-export.json").read_bytes()
+    if mandate is None:
+        mandate = load(EXAMPLE / "manifest.json")
+    else:
+        manifest_bytes = json.dumps(_manifest(mandate), sort_keys=True).encode()
+        annotation = json.loads(annotation_bytes)
+        annotation["manifest_sha256"] = hashlib.sha256(manifest_bytes).hexdigest()
+        annotation_bytes = json.dumps(annotation).encode()
+    return _Requirements.load(annotation_bytes, mandate, hashlib.sha256(manifest_bytes).hexdigest())
+
+
+def test_workflow_pin_for_a_modified_budget_cannot_be_reused_on_the_original_manifest():
+    mandate = load(EXAMPLE / "manifest.json")
+    modified = replace(mandate, limits=replace(mandate.limits, quantities={
+        "exported_rows": Quantity.parse({"amount": "6", "unit": "record"}, "budget"),
+    }))
+    reviewed = requirements(modified)
+    original_digest = hashlib.sha256((EXAMPLE / "manifest.json").read_bytes()).hexdigest()
+    assert requirements().manifest_sha256 == original_digest
+    assert reviewed.manifest_sha256 != original_digest
+    assert reviewed.manifest_sha256 == hashlib.sha256(
+        json.dumps(_manifest(modified), sort_keys=True).encode(),
+    ).hexdigest()
+    annotation = json.loads((EXAMPLE / "required-export.json").read_bytes())
+    annotation["manifest_sha256"] = reviewed.manifest_sha256
+    with pytest.raises(ValueError, match="exact baseline manifest"):
+        _Requirements.load(json.dumps(annotation).encode(), mandate, original_digest)
 
 
 def direct(mandate, records, *, candidate=False):

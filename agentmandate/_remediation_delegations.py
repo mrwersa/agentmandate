@@ -23,6 +23,7 @@ class _DelegationEvaluation:
     report: dict
 
     def record(self, mandate, depth):
+        # Unlike conditions, grants do not change Authority; the planner already reports it.
         return self.report
 
 
@@ -50,6 +51,7 @@ class _DelegationScope:
         )
 
     def resolve(self, mandate: Mandate, *, candidate=False):
+        # Inputs are owned snapshots; the shared reader revalidates them once per consumption.
         inactive = tuple(
             item for item in self.attachments
             if candidate and item.target.tool not in mandate.tool_names
@@ -59,10 +61,14 @@ class _DelegationScope:
             mandate, active, self.chains, dict(self.captures), as_of=self.as_of,
             target_source=self.target_source, target_binding=self.target_binding,
         )
+        payload = _delegation_payload(evaluated_at, decisions, findings)
         report = {
-            **_delegation_payload(evaluated_at, decisions, findings),
+            **payload,
             "scope": "fixed reviewed grant surfaces; no authentication or live enforcement claim",
-            "repairable_tool_findings": _delegation_payload(evaluated_at, (), excesses)["findings"],
+            "repairable_tool_findings": [
+                row for item, row in zip(findings, payload["findings"], strict=True)
+                if item in excesses
+            ],
             "inputs": {
                 "artifact_identity": "SHA-256 of canonical artifact JSON, not original file bytes",
                 "attachments": [hashlib.sha256(item.to_json().encode()).hexdigest()
