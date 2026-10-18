@@ -10,6 +10,7 @@ from math import comb, prod
 from ._remediation import (
     REMEDIATION_SCHEMA,
     _changed,
+    _delegation_rejected,
     _dominates,
     _Edit,
     _edit_record,
@@ -89,7 +90,7 @@ def discover(
     max_candidates,
     keep_tools,
     required_workflows,
-    condition_scope=None,
+    scope=None,
 ):
     for name, value in (
         ("max_edits", max_edits),
@@ -103,7 +104,7 @@ def discover(
     if any(not isinstance(name, str) or name not in mandate.tool_names for name in keep_tools):
         raise ValueError("keep_tools must name declared tools")
     axes = _axes(mandate, options)
-    evaluation = None if condition_scope is None else condition_scope.resolve(mandate)
+    evaluation = None if scope is None else scope.resolve(mandate)
     effective = mandate if evaluation is None else evaluation.effective
     baseline = analyse(effective, depth=depth)
     if set(keep_tools) - baseline.reachable_tools:
@@ -179,10 +180,11 @@ def discover(
         },
     }
     if evaluation is not None:
-        report["scope"] = (
-            "manifest-v2 with reviewed conditional effects; candidates require human selection"
-        )
-        report["conditions"] = evaluation.record(mandate, baseline.depth)
+        report["scope"] = scope.description
+        report[scope.kind] = evaluation.record(mandate, baseline.depth)
+        if scope.kind == "delegations":
+            report["delegation_rejections"] = []
+            search["delegation_rejections"] = 0
         if evaluation.findings:
             report["status"] = "input_requires_review"
             return report
@@ -197,7 +199,7 @@ def discover(
     if _structural(lint):
         report["status"] = "input_requires_review"
         return report
-    if not baseline.breaches:
+    if not baseline.breaches and not (evaluation and evaluation.repairable_findings):
         discovery["status"] = "not_needed_baseline_clean"
         return report
 
@@ -229,11 +231,13 @@ def discover(
             return record
         changed = _changed(mandate, edits)
         scoped = (
-            None if condition_scope is None
-            else condition_scope.resolve(changed, candidate=True)
+            None if scope is None else scope.resolve(changed, candidate=True)
         )
         if scoped is not None and scoped.findings:
-            raise ValueError("condition eligibility changed during repair recheck")
+            raise ValueError(scope.invariant_error)
+        if _delegation_rejected(report, scoped, [_edit_record(mandate, e) for e in edits]):
+            record["status"] = "delegation_rejected"
+            return record
         projected = changed if scoped is None else scoped.effective
         assessments = (
             [] if required_workflows is None
@@ -275,7 +279,7 @@ def discover(
             if required_workflows is not None:
                 candidate["required_workflows"] = assessments
             if scoped is not None:
-                candidate["conditions"] = scoped.record(changed, baseline.depth)
+                candidate[scope.kind] = scoped.record(changed, baseline.depth)
             candidate["repair_cost"] = _repair_cost(mandate, candidate)
             candidates.append(candidate)
         return record
@@ -307,7 +311,9 @@ def discover(
                     discovery["resolved_points"] += volume
                     continue
                 upper = probe(high, gates)
-                if upper["status"] in ("candidate", "edit_limit", "required_workflow_rejected"):
+                if upper["status"] in (
+                    "candidate", "edit_limit", "required_workflow_rejected", "delegation_rejected",
+                ):
                     discovery["resolved_points"] += volume
                     continue
                 if low == high or probe(low, gates)["status"] == "breached":

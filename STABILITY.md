@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.41.0
+agentmandate~=0.42.0
 ```
 
 ## Current quantity model
@@ -107,6 +107,14 @@ each condition report also retains unconditional Authority and lint. Candidate
 manifests keep their declared effects and require the same inputs to reproduce
 the scoped result. Unresolved evidence blocks recommendations. This does not
 generate new conditions, authenticate review or verify source enforcement.
+
+Delegation-aware remediation keeps reviewed chains and mappings fixed. Only a
+tool's excess against a trusted, complete grant surface may be addressed by
+manifest edits; chain widening and unresolved evidence block recommendations.
+Grant checks do not remove tools or change effects in Authority. Every returned
+candidate passes both ordinary reachability and active-attachment checks.
+Conditions and delegations cannot be combined. This does not edit grants or
+prove authentication, runtime mediation or that unannotated tools are delegated.
 
 Discovery's domain-frontier completion, exhaustive point enumeration,
 evaluation-limit truncation, frontier display cap and each Authority's call-depth

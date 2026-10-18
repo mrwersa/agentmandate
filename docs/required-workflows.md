@@ -147,6 +147,10 @@ still pins the declared baseline manifest, and ordinary Authority and lint are
 retained in the condition report. Paths do not supply or verify classifier
 arguments. Unresolved conditions block all recommendations and exit 1, even
 when the conservative baseline has no other finding.
+With [delegation-aware remediation](delegation-remediation.md), the paths use
+the unchanged manifest and candidates must also fit fixed reviewed grants.
+Keeping a required tool that exceeds its grant can leave no feasible repair;
+the command never enlarges the grant to preserve the path.
 
 ## Check a release instead of a repair
 

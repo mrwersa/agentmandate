@@ -12,6 +12,9 @@ The independent version fields are `delegation_version: 1` for a chain and
 `principal_version: 2` for its tool attachment. Neither changes manifest v2.
 For command syntax and expected outcomes, use the
 [CLI review](delegation-gate-4-review.md#closing-verdict).
+The same inputs also support [delegation-aware remediation](delegation-remediation.md),
+which rechecks manifest edits against fixed grants without modifying the chain
+or pruning ordinary Authority. Tool excess and chain defects remain distinct.
 
 ## Evidence-driven changes
 

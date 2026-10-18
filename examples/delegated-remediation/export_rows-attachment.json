@@ -1,0 +1,25 @@
+{
+  "principal_version": 2,
+  "id": "attachments/synthetic/export_rows",
+  "target": {
+    "source": "src/export_service.py",
+    "binding": "export_agent",
+    "tool": "export_rows"
+  },
+  "principal": {
+    "kind": "delegated_user",
+    "delegation": "delegations/synthetic-export",
+    "hop": "hop-2",
+    "domains": {
+      "scopes": "synthetic-export",
+      "tools": "synthetic-export",
+      "effects": "synthetic-export"
+    }
+  },
+  "evidence": {
+    "confidence": "exact",
+    "review": "accepted",
+    "reviewer": "synthetic-binding-reviewer",
+    "expires": "2026-12-31"
+  }
+}

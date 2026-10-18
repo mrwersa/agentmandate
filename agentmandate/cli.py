@@ -41,6 +41,7 @@ from ._delegation import (
     DelegationChain,
     DelegationFormatError,
     _chain_locators,
+    _delegation_payload,
     _timestamp,
     analyse_delegations,
 )
@@ -89,6 +90,7 @@ from ._rego_export import render as render_rego_export
 from ._rego_export import write_bundle as write_rego_bundle
 from ._remediation import plan as plan_remediation
 from ._remediation_conditions import _ConditionScope
+from ._remediation_delegations import _DelegationScope
 from ._required_workflows import _Requirements
 from ._revision_review import RevisionReview, analyse_revision_review, render_revision_review
 from ._scalar_handover import ScalarHandover, analyse_scalar_handover, render_scalar_handover
@@ -315,6 +317,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     remediation_parser.add_argument("--json", action="store_true", help="machine-readable output")
     _add_condition_options(remediation_parser)
+    _add_delegation_options(remediation_parser)
 
     review_parser = subparsers.add_parser(
         "review",
@@ -976,7 +979,10 @@ def _run_change_review(args: argparse.Namespace) -> int:
 
 def _run_remediation(args: argparse.Namespace) -> int:
     try:
+        if _conditions_supplied(args) and _delegations_supplied(args):
+            raise ValueError("condition and delegation remediation cannot be combined")
         condition_inputs = _condition_inputs(args)
+        delegation_inputs = _delegation_inputs(args)
         content = Path(args.manifest).read_bytes()
         mandate = loads(content.decode("utf-8"), source=args.manifest)
         requirements = None
@@ -1000,6 +1006,10 @@ def _run_remediation(args: argparse.Namespace) -> int:
             discover_ceilings=tuple(args.discover_ceiling),
             condition_scope=(
                 None if condition_inputs is None else _ConditionScope.from_inputs(*condition_inputs)
+            ),
+            delegation_scope=(
+                None if delegation_inputs is None
+                else _DelegationScope.from_inputs(*delegation_inputs)
             ),
         )
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
@@ -1027,6 +1037,18 @@ def _run_remediation(args: argparse.Namespace) -> int:
             f"UNRESOLVED CONDITION {row['condition']} ({row['tool']}): {row['message']}"
             for row in condition_report["findings"]
         )
+    if "delegations" in result:
+        delegated = result["delegations"]
+        lines.append(
+            f"DELEGATIONS as_of={delegated['as_of']} "
+            f"attenuated={len(delegated['attenuated'])} "
+            f"findings={len(delegated['findings'])} "
+            f"repairable_tool_findings={len(delegated['repairable_tool_findings'])}"
+        )
+        lines.extend(
+            f"DELEGATION {row['code']} {row['tool']}: {row['message']}"
+            for row in delegated["findings"]
+        )
     lines.extend(
         f"CEILING OPTION {option['tool']}: "
         f"{option['ceiling']['amount']} {option['ceiling']['unit']}"
@@ -1042,6 +1064,9 @@ def _run_remediation(args: argparse.Namespace) -> int:
         )
         if result["status"] == "no_feasible_candidate_in_declared_domain":
             lines.append(
+                "No candidate: fixed delegation surfaces reject the retained tools; "
+                "ceiling or approval changes cannot resolve that excess."
+                if result.get("delegations", {}).get("repairable_tool_findings") else
                 "No candidate: the declared steps and edit/workflow limits "
                 "produce no feasible ceiling; finer steps may change this result."
             )
@@ -1094,6 +1119,18 @@ def _run_remediation(args: argparse.Namespace) -> int:
                 f"inactive={candidate['conditions']['inactive_conditions']}; "
                 "manifest retains declared effects; reuse the pinned condition inputs"
             )
+        if "delegations" in candidate:
+            lines.append(
+                "          delegation recheck: "
+                f"findings={len(candidate['delegations']['findings'])} "
+                f"inactive={candidate['delegations']['inactive_attachments']}; grants unchanged"
+            )
+    for rejected in result.get("delegation_rejections", []):
+        lines.extend(
+            f"REJECTED DELEGATION {row['tool']} ({row['dimension']}): "
+            f"{row['message']} edits={rejected['edits']}"
+            for row in rejected["findings"]
+        )
     for rejected in result.get("requirement_rejections", []):
         lines.extend(
             f"REJECTED {row['name']}: {row['failure']['rule']} "
@@ -1112,6 +1149,7 @@ def _run_remediation(args: argparse.Namespace) -> int:
         EXIT_FINDING
         if baseline["breaches"] or any(f["severity"] == ERROR for f in result["baseline_lint"])
         or result.get("conditions", {}).get("findings")
+        or result.get("delegations", {}).get("findings")
         else EXIT_OK
     )
 
@@ -1994,35 +2032,6 @@ def _delegation_inputs(
     )
 
 
-def _delegation_payload(analysis: DelegationAnalysis) -> dict[str, Any]:
-    return {
-        "schema": "agentmandate.delegations/v2",
-        "as_of": analysis.as_of,
-        "attenuated": [
-            {
-                "attachment": item.attachment,
-                "tool": item.tool,
-                "delegation": item.delegation,
-                "hop": item.hop,
-                "support": list(item.support),
-            }
-            for item in analysis.attenuated
-        ],
-        "findings": [
-            {
-                "code": item.code,
-                "attachment": item.attachment,
-                "tool": item.tool,
-                "hop": item.hop,
-                "dimension": item.dimension,
-                "message": item.message,
-                "support": list(item.support),
-            }
-            for item in analysis.findings
-        ],
-    }
-
-
 def _render_delegations(analysis: DelegationAnalysis) -> str:
     lines = [f"delegations  evaluated as of {analysis.as_of}"]
     for item in analysis.attenuated:
@@ -2664,7 +2673,10 @@ def _main(argv: Sequence[str] | None = None) -> int:
                 )
                 text = f"{_render_conditions(conditional_analysis)}\n\n{text}"
             if delegation_analysis is not None:
-                payload["delegations"] = _delegation_payload(delegation_analysis)
+                payload["delegations"] = _delegation_payload(
+                    delegation_analysis.as_of, delegation_analysis.attenuated,
+                    delegation_analysis.findings,
+                )
                 text = f"{_render_delegations(delegation_analysis)}\n\n{text}"
             if producer_analysis is not None:
                 text = f"{_render_producers(producer_analysis)}\n\n{text}"

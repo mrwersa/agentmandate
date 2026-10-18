@@ -1,0 +1,47 @@
+{
+  "synthetic": true,
+  "subject": "subject:synthetic-exporter",
+  "hops": [
+    {
+      "id": "hop-1",
+      "actors": [
+        "agent:synthetic-parent"
+      ],
+      "surface": {
+        "scopes": [
+          "rows"
+        ],
+        "tools": [
+          "export_rows",
+          "purge_rows",
+          "select_rows"
+        ],
+        "effects": [
+          "read",
+          "write"
+        ]
+      }
+    },
+    {
+      "id": "hop-2",
+      "actors": [
+        "agent:synthetic-worker",
+        "agent:synthetic-parent"
+      ],
+      "surface": {
+        "scopes": [
+          "rows"
+        ],
+        "tools": [
+          "export_rows",
+          "purge_rows",
+          "select_rows"
+        ],
+        "effects": [
+          "read",
+          "write"
+        ]
+      }
+    }
+  ]
+}

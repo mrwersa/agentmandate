@@ -416,7 +416,7 @@ def test_cli_non_positive_limits_are_usage_errors(flag, capsys):
     assert not capsys.readouterr().out
 
 
-@pytest.mark.parametrize("flag", ["--delegation-attachment", "--ir", "--apply"])
+@pytest.mark.parametrize("flag", ["--graph", "--ir", "--apply"])
 def test_unsupported_composition_is_refused_before_input_read(flag, capsys):
     with pytest.raises(SystemExit) as error:
         main(["remediate", "missing-input", flag, "unsupported-input"])

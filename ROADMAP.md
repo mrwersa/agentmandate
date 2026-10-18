@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 16 October 2026
+### Measured planning progress — 17 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,16 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Delegation-aware remediation — 17 October 2026:**
+[Fixed-grant repair checks](docs/delegation-remediation.md) distinguish a tool's
+trusted surface excess from chain widening or unresolved evidence. Existing
+edits can remove an excessive tool while retaining required work; every returned
+candidate passes the unchanged grant and ordinary graph checks. Discovery
+reports fixed grant conflicts as infeasible in its retained-tool domain.
+Condition/delegation composition remains refused. This finishes the planned
+condition/delegation-aware recheck slice, without authoring restrictions or
+editing grants; the remediation initiative stays partial and the ledger at 50%.
 
 **Condition-aware remediation — 16 October 2026:**
 Existing condition inputs now feed [repair rechecks](docs/remediation.md#recheck-repairs-within-reviewed-conditional-effects),

@@ -9,6 +9,7 @@ from math import comb
 from typing import Any
 
 from ._remediation_conditions import _ConditionScope
+from ._remediation_delegations import _DelegationScope
 from ._required_workflows import _Requirements
 from .lint import Finding, check
 from .manifest import EFFECT_RANK, IRREVERSIBLE, Mandate, Quantity
@@ -214,6 +215,17 @@ def _structural(findings: list[Finding]) -> bool:
     return any(f.rule in _STRUCTURAL_RULES for f in findings)
 
 
+def _delegation_rejected(report, evaluation, edits):
+    if evaluation is None or not evaluation.repairable_findings:
+        return False
+    report["search"]["delegation_rejections"] += 1
+    report["delegation_rejections"].append({
+        "edits": edits, "stage": "delegation_surface_screen",
+        "findings": evaluation.report["repairable_tool_findings"],
+    })
+    return True
+
+
 def plan(
     mandate: Mandate,
     *,
@@ -228,12 +240,16 @@ def plan(
     pareto: bool = False,
     discover_ceilings: tuple[str, ...] = (),
     condition_scope: _ConditionScope | None = None,
+    delegation_scope: _DelegationScope | None = None,
 ) -> dict[str, Any]:
     """Enumerate edits, recheck the full graph, and rank scoped candidates.
 
     This private record is presentation, never reviewed authority or a mutation.
     Combinations examined include rejected conflicting/structural edits.
     """
+    if condition_scope is not None and delegation_scope is not None:
+        raise ValueError("condition and delegation remediation cannot be combined")
+    scope = condition_scope if condition_scope is not None else delegation_scope
     if not isinstance(discover_ceilings, (tuple, list)):
         raise ValueError("discovery options must use TOOL=STEP")
     if discover_ceilings:
@@ -252,7 +268,7 @@ def plan(
             max_candidates=max_candidates,
             keep_tools=keep_tools,
             required_workflows=required_workflows,
-            condition_scope=condition_scope,
+            scope=scope,
         )
     for name, value in (
         ("max_edits", max_edits),
@@ -269,7 +285,7 @@ def plan(
         raise ValueError("ceiling grids must use TOOL=MIN:MAX:STEP")
     grid_options, grids = _grid_domain(mandate, ceiling_grids)
     ceiling_edits = _ceiling_domain(mandate, ceiling_options + grid_options)
-    evaluation = None if condition_scope is None else condition_scope.resolve(mandate)
+    evaluation = None if scope is None else scope.resolve(mandate)
     effective = mandate if evaluation is None else evaluation.effective
     baseline = analyse(effective, depth=depth)
     if set(keep_tools) - baseline.reachable_tools:
@@ -297,10 +313,11 @@ def plan(
         "candidates": [],
     }
     if evaluation is not None:
-        report["scope"] = (
-            "manifest-v2 with reviewed conditional effects; candidates require human selection"
-        )
-        report["conditions"] = evaluation.record(mandate, baseline.depth)
+        report["scope"] = scope.description
+        report[scope.kind] = evaluation.record(mandate, baseline.depth)
+        if scope.kind == "delegations":
+            report["delegation_rejections"] = []
+            report["search"]["delegation_rejections"] = 0
         if evaluation.findings:
             report["status"] = "input_requires_review"
             return report
@@ -344,7 +361,7 @@ def plan(
     if _structural(findings):
         report["status"] = "input_requires_review"
         return report
-    if not baseline.breaches:
+    if not baseline.breaches and not (evaluation and evaluation.repairable_findings):
         return report
     actions = (
         tuple(
@@ -375,11 +392,12 @@ def plan(
         if _structural(lint):
             continue  # Losing a producer must not manufacture a clean graph.
         scoped = (
-            None if condition_scope is None
-            else condition_scope.resolve(candidate, candidate=True)
+            None if scope is None else scope.resolve(candidate, candidate=True)
         )
         if scoped is not None and scoped.findings:
-            raise ValueError("condition eligibility changed during repair recheck")
+            raise ValueError(scope.invariant_error)
+        if _delegation_rejected(report, scoped, [_edit_record(mandate, e) for e in edits]):
+            continue
         projected = candidate if scoped is None else scoped.effective
         lint = check(projected)
         assessments = []
@@ -421,7 +439,7 @@ def plan(
         if required_workflows is not None:
             record["required_workflows"] = assessments
         if scoped is not None:
-            record["conditions"] = scoped.record(candidate, baseline.depth)
+            record[scope.kind] = scoped.record(candidate, baseline.depth)
         candidates.append(record)
     effect_ranks = {tool.name: EFFECT_RANK[tool.effect] for tool in effective.tools}
     candidates.sort(
