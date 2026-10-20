@@ -33,11 +33,14 @@ with no widening, reachable breach, lint error or required-path regression.
 The original release finding still exits 1, even when a candidate is returned.
 With this flag, workflow annotations pin the released file rather than the
 proposed file. The Action does not apply repair proposals automatically.
+Enable [Action repair suggestions](action-repairs.md) to include bounded
+proposals and capability costs in the job summary and JSON while retaining the
+original checks and verdict. Repair errors and timeouts remain advisory.
 
 ## The action
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.40.0
+- uses: mrwersa/agentmandate@v0.44.0
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -183,7 +186,7 @@ For a repository with a separately protected `authority-reviews` branch:
     git show origin/main:mandate.json > "$RUNNER_TEMP/released.json"
     git fetch origin authority-reviews:refs/remotes/origin/authority-reviews
     echo "REVIEW_AS_OF=$(date -u +%F)" >> "$GITHUB_ENV"
-- uses: mrwersa/agentmandate@v0.40.0
+- uses: mrwersa/agentmandate@v0.44.0
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json

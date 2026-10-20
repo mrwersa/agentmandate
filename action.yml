@@ -76,6 +76,40 @@ inputs:
     description: Search depth for reachability.
     required: false
     default: "8"
+  repair-suggestions:
+    description: >-
+      Opt in to advisory release repairs. Requires baseline. Snapshots both manifests;
+      never applies candidates or changes the existing checks, counts or gate verdict.
+    required: false
+    default: "false"
+  repair-keep-tools:
+    description: Newline-separated reachable tool names every repair must retain.
+    required: false
+    default: ""
+  repair-ceiling-grids:
+    description: Newline-separated TOOL=MIN:MAX:STEP grids; exclusive with discovery.
+    required: false
+    default: ""
+  repair-discover-ceilings:
+    description: Newline-separated TOOL=STEP discovery domains, retaining all tools.
+    required: false
+    default: ""
+  repair-max-edits:
+    description: Maximum edits per repair (1-8).
+    required: false
+    default: "2"
+  repair-max-evaluations:
+    description: Maximum repair combinations or discovery probes (1-1024).
+    required: false
+    default: "128"
+  repair-max-candidates:
+    description: Maximum displayed repair candidates (1-20).
+    required: false
+    default: "5"
+  repair-timeout-seconds:
+    description: Repair subprocess time limit (1-300 seconds); a timeout retains no proposals.
+    required: false
+    default: "60"
   sarif:
     description: >-
       Write SARIF for code scanning. The file path is returned as an output;
@@ -120,6 +154,9 @@ outputs:
   report:
     description: Path to the combined JSON report.
     value: ${{ steps.gate.outputs.report }}
+  repair-report:
+    description: Advisory repair JSON, including input identities and errors; empty when disabled.
+    value: ${{ steps.gate.outputs.repair-report }}
 
 runs:
   using: composite
@@ -151,7 +188,15 @@ runs:
         INPUT_TRACES: ${{ inputs.traces }}
         INPUT_MAP: ${{ inputs.map }}
         INPUT_DEPTH: ${{ inputs.depth }}
+        INPUT_REPAIR_SUGGESTIONS: ${{ inputs.repair-suggestions }}
+        INPUT_REPAIR_KEEP_TOOLS: ${{ inputs.repair-keep-tools }}
+        INPUT_REPAIR_CEILING_GRIDS: ${{ inputs.repair-ceiling-grids }}
+        INPUT_REPAIR_DISCOVER_CEILINGS: ${{ inputs.repair-discover-ceilings }}
+        INPUT_REPAIR_MAX_EDITS: ${{ inputs.repair-max-edits }}
+        INPUT_REPAIR_MAX_EVALUATIONS: ${{ inputs.repair-max-evaluations }}
+        INPUT_REPAIR_MAX_CANDIDATES: ${{ inputs.repair-max-candidates }}
+        INPUT_REPAIR_TIMEOUT_SECONDS: ${{ inputs.repair-timeout-seconds }}
         INPUT_SARIF: ${{ inputs.sarif }}
         INPUT_SUMMARY: ${{ inputs.summary }}
         INPUT_FAIL_ON: ${{ inputs.fail-on }}
-      run: python "${{ github.action_path }}/scripts/action_gate.py"
+      run: python -I "${{ github.action_path }}/scripts/action_gate.py"

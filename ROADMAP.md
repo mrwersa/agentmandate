@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 18 October 2026
+### Measured planning progress — 20 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,16 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Repair suggestions in CI — 20 October 2026:**
+The [Action integration](docs/action-repairs.md) invokes release-aware repairs
+against frozen manifests and the same selected workflow annotation used by diff
+and review. Suggestions, capability losses, limits and repair errors are advisory;
+they never waive a finding, change counts or apply a candidate. Eight composite
+scenarios exercise the workflow. Isolated Python imports keep candidate checkout
+packages from replacing the installed analyzer. This extends the existing repair
+and CI initiatives; organizational adoption, restriction authoring, grant editing
+and broader synthesis remain open. The initiative ledger stays at 50%.
 
 **Release-aware remediation — 18 October 2026:**
 [Release repairs](docs/release-remediation.md) connect the existing authority

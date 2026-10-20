@@ -809,5 +809,27 @@
     "tests": [
       "tests/test_release_remediation.py"
     ]
+  },
+  {
+    "doc": "docs/action-repairs.md",
+    "fixtures": [
+      "action.yml",
+      ".github/workflows/action.yml",
+      "scripts/action_gate.py",
+      "examples/release-remediation/released.json",
+      "examples/release-remediation/proposed.json",
+      "examples/release-remediation/ceiling-only.json",
+      "examples/release-remediation/breaking.json",
+      "examples/release-remediation/required-export.json"
+    ],
+    "id": "action-release-repairs",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v6",
+      "agentmandate.required-workflows/v2"
+    ],
+    "tests": [
+      "tests/test_action_repairs.py"
+    ]
   }
 ]

@@ -109,7 +109,7 @@ Review the configuration change together with the reachable behavior it enables.
 ## Put it in CI
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.40.0
+- uses: mrwersa/agentmandate@v0.44.0
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -127,6 +127,10 @@ a protected Git ref. The [workflow gate](docs/action-workflows.md) also reads
 required paths from a pinned baseline commit and blocks releases that break
 them. Recorded acceptance retains widening findings; breaches and workflow
 regressions still block the gate.
+
+Enable [repair suggestions](docs/action-repairs.md) to show checked alternatives
+and their capability costs in the same job. Suggestions share selected inputs
+with the release checks and leave the original verdict unchanged.
 
 **See the whole thing working:**
 [agent-release-gate](https://github.com/mrwersa/agent-release-gate) takes one

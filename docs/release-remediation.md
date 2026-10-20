@@ -5,6 +5,9 @@ against a released manifest. A release can widen a ceiling or add a tool without
 having a reachable breach. Ordinary breach repair alone does not address that
 case; this mode also requires each candidate to pass the release comparison.
 
+To show proposals inside a pull-request job, use the Action's opt-in
+[repair suggestions](action-repairs.md). The original gate remains blocking.
+
 ## Run the example
 
 ```bash
