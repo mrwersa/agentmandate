@@ -9,7 +9,7 @@ python -m pip install -e ".[dev]"        # venv first; installs pyyaml+ruff for 
 python -m pytest -q                      # full suite
 python -m pytest tests/test_reach.py -q  # single file
 python -m pytest tests/test_reach.py -k test_name -q  # single case
-python -m pytest -q --cov=agentmandate --cov-report=term-missing --cov-fail-under=100
+python -m pytest -q --cov=agentmandate --cov=action_gate --cov-report=term-missing --cov-fail-under=100
 ruff check .                             # pinned rule set below; CI enforces exactly this
 python -m build && python -m twine check dist/*   # needs build+twine
 mandate --help                           # smoke-test editable install
