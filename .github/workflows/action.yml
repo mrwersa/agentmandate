@@ -13,6 +13,93 @@ permissions:
   contents: read
 
 jobs:
+  repairs:
+    name: Repair suggestions (${{ matrix.scenario }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [grid, discovery, infeasible, broken, cutoff, report-only, substituted, unavailable]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Attempt to replace the workflow annotation
+        if: matrix.scenario == 'substituted'
+        run: echo '{}' > examples/release-remediation/required-export.json
+      - id: gate
+        uses: ./
+        continue-on-error: true
+        with:
+          manifest: >-
+            ${{ (matrix.scenario == 'discovery' || matrix.scenario == 'cutoff') &&
+            'examples/release-remediation/ceiling-only.json' || matrix.scenario == 'broken' &&
+            'examples/release-remediation/breaking.json' ||
+            'examples/release-remediation/proposed.json' }}
+          baseline: examples/release-remediation/released.json
+          depth: '4'
+          required-workflows: >-
+            ${{ matrix.scenario == 'unavailable' && 'missing-workflow.json' ||
+            'examples/release-remediation/required-export.json' }}
+          required-workflows-ref: HEAD
+          repair-suggestions: 'true'
+          repair-keep-tools: |
+            select_rows
+            export_rows
+          repair-ceiling-grids: >-
+            ${{ (matrix.scenario == 'grid' || matrix.scenario == 'report-only' ||
+            matrix.scenario == 'substituted' || matrix.scenario == 'unavailable') &&
+            'export_rows=0:2:1' || '' }}
+          repair-discover-ceilings: >-
+            ${{ (matrix.scenario == 'discovery' || matrix.scenario == 'cutoff' ||
+            matrix.scenario == 'infeasible') && 'export_rows=1' || '' }}
+          repair-max-evaluations: ${{ matrix.scenario == 'cutoff' && '1' || '128' }}
+          fail-on: ${{ matrix.scenario == 'report-only' && 'never' || 'findings' }}
+      - name: Verify advisory repairs and the unchanged gate
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+          OUTCOME: ${{ steps.gate.outcome }}
+          VERDICT: ${{ steps.gate.outputs.verdict }}
+          FINDINGS: ${{ steps.gate.outputs.findings }}
+          REPORT: ${{ steps.gate.outputs.report }}
+          REPAIRS: ${{ steps.gate.outputs.repair-report }}
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+          scenario = os.environ['SCENARIO']
+          assert os.environ['OUTCOME'] == ('success' if scenario == 'report-only' else 'failure')
+          assert os.environ['VERDICT'] == 'findings'
+          report = json.loads(Path(os.environ['REPORT']).read_text())
+          repair = json.loads(Path(os.environ['REPAIRS']).read_text())
+          assert repair == report['repairs']
+          assert int(os.environ['FINDINGS']) == sum(
+              c.get('blocking_findings', c['findings']) for c in report['checks'])
+          assert all(c['name'] != 'repairs' for c in report['checks'])
+          if scenario == 'unavailable':
+              assert repair['status'] == 'skipped' and 'result' not in repair
+          else:
+              assert repair['status'] == 'completed'
+              result = repair['result']
+              diff = next(c for c in report['checks'] if c['name'] == 'diff')
+              assert result['release']['comparison'] == diff['result']
+              expected = 1 if scenario in {'grid', 'discovery', 'report-only', 'substituted'} else 0
+              assert len(result['candidates']) == expected
+              assert all(c['release']['gate_passed'] for c in result['candidates'])
+              assert all(not c['authority']['breaches'] for c in result['candidates'])
+              assert result['search']['truncated_by_limit'] == (scenario == 'cutoff')
+              if scenario in {'discovery', 'infeasible', 'cutoff'}:
+                  assert result['discovery']['frontier_complete_within_domain'] == (scenario != 'cutoff')
+              commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+              path = 'examples/release-remediation/required-export.json'
+              content = subprocess.check_output(['git', 'show', f'{commit}:{path}'])
+              assert repair['workflow_selection']['source_sha256'] == hashlib.sha256(content).hexdigest()
+              assert repair['workflow_selection']['commit'] == commit
+              if scenario == 'substituted':
+                  assert Path(path).read_bytes() != content
+          PY
+
   workflows:
     name: Required workflows (${{ matrix.scenario }})
     runs-on: ubuntu-latest

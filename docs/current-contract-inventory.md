@@ -89,3 +89,11 @@ The Action integration also pins `action.yml`, its wrapper script and live CI
 matrix, plus two current candidate manifests. The coverage map links them to
 the [Action guide](action-workflows.md) and executable wrapper tests. Root Python
 exports and CLI command paths are unchanged by this integration.
+
+The Action repair integration adds eight opt-in/configuration inputs and one
+`repair-report` output, plus an advisory `repairs` field in the combined JSON.
+It updates the three already-pinned Action materials (`action.yml`, its body
+script and its executable workflow). Their changed digests are deliberate
+contract changes, not frozen evidence edits. The planner's schema, root exports,
+CLI paths and other pinned material bytes remain unchanged. See the
+[Action repair guide](action-repairs.md) and `tests/test_action_repairs.py`.

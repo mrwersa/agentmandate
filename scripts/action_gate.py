@@ -31,8 +31,9 @@ import os
 import re
 import subprocess
 import sys
+from contextlib import suppress
 from pathlib import Path, PurePosixPath
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from urllib.parse import quote
 
 from agentmandate import __version__
@@ -54,10 +55,11 @@ def run(args: list[str]) -> tuple[int, str]:
 
     Not `mandate` on PATH. The action installs a specific version and must
     analyse with that one; resolving a name on PATH would silently use another
-    install if the runner happened to have one.
+    install if the runner happened to have one. Isolated mode also excludes
+    checkout modules and PYTHONPATH: candidate code must not replace the analyzer.
     """
     result = subprocess.run(
-        [sys.executable, "-m", "agentmandate.cli", *args],
+        [sys.executable, "-I", "-m", "agentmandate.cli", *args],
         capture_output=True,
         text=True,
         cwd=WORKSPACE,
@@ -252,7 +254,103 @@ def _diff_check(baseline: str, manifest: str, depth: str, workflows: str = "") -
     return check
 
 
-def _release_checks(baseline: str, manifest: str, depth: str) -> list[dict]:
+def _repair_configuration() -> dict | None:
+    enabled = os.environ.get("INPUT_REPAIR_SUGGESTIONS", "false").strip().lower()
+    if enabled == "false":
+        return None
+    repair = {"status": "pending", "scope": "advisory proposals; original gate unchanged"}
+    try:
+        if enabled != "true":
+            raise ValueError("repair-suggestions must be true or false")
+        configuration = {}
+        for name, default, maximum in (
+            ("max-edits", 2, 8), ("max-evaluations", 128, 1024),
+            ("max-candidates", 5, 20), ("timeout-seconds", 60, 300),
+        ):
+            raw = os.environ.get(f"INPUT_REPAIR_{name.upper().replace('-', '_')}", str(default))
+            if not re.fullmatch(r"[1-9][0-9]{0,3}", raw) or int(raw) > maximum:
+                raise ValueError(f"repair-{name} must be an integer from 1 to {maximum}")
+            configuration[name] = int(raw)
+        for name in ("keep-tools", "ceiling-grids", "discover-ceilings"):
+            configuration[name] = [
+                line.strip() for line in os.environ.get(
+                    f"INPUT_REPAIR_{name.upper().replace('-', '_')}", "",
+                ).splitlines() if line.strip()
+            ]
+        if configuration["ceiling-grids"] and configuration["discover-ceilings"]:
+            raise ValueError("repair-ceiling-grids and repair-discover-ceilings cannot be combined")
+        if not os.environ.get("INPUT_BASELINE", "").strip():
+            raise ValueError("repair suggestions require baseline")
+        repair["configuration"] = configuration
+    except ValueError as exc:
+        repair.update(status="configuration_error", error=str(exc))
+    return repair
+
+
+def _repair_suggestions(repair, checks, baseline, manifest, depth, workflows):
+    if repair is None or repair["status"] != "pending":
+        return
+    diff = next((c for c in checks if c["name"] == "diff"), None)
+    if diff is None or diff["exit"] not in (0, 1) or "error" in diff["result"]:
+        repair.update(status="skipped", error="A valid release comparison is unavailable")
+        return
+    triggers = list(repair.get("trigger_checks", []))
+    if diff.get("blocks_gate", not diff["ok"]):
+        triggers.append("diff")
+    repair["trigger_checks"] = triggers
+    if not triggers:
+        repair.update(status="not_needed", reason="No blocking manifest or release finding")
+        return
+    repair["workflow_selection"] = diff.get("workflow_selection")
+    config = repair["configuration"]
+    args = ["remediate", manifest, "--released", baseline, "--depth", depth, "--pareto", "--json"]
+    for option in ("max-edits", "max-evaluations", "max-candidates"):
+        args.extend(["--" + option, str(config[option])])
+    for key, option in (("keep-tools", "--keep-tool"), ("ceiling-grids", "--ceiling-grid"),
+                        ("discover-ceilings", "--discover-ceiling")):
+        for value in config[key]:
+            args.extend([option, value])
+    if workflows:
+        args.extend(["--required-workflows", workflows])
+    try:
+        process = subprocess.run(
+            [sys.executable, "-I", "-m", "agentmandate.cli", *args], cwd=WORKSPACE,
+            capture_output=True, text=True, timeout=config["timeout-seconds"],
+        )
+        repair["exit"] = process.returncode
+        if process.returncode not in (0, 1):
+            raise ValueError((process.stderr or process.stdout).strip() or "Repair process failed")
+        result = json.loads(process.stdout)
+        expected = {"manifest_sha256": repair["selection"]["manifest"]["sha256"],
+                    "released_sha256": repair["selection"]["released"]["sha256"]}
+        if (
+            not isinstance(result, dict) or result.get("schema") != "agentmandate.remediation/v6"
+            or result.get("input") != expected or not isinstance(result.get("candidates"), list)
+            or not isinstance(result.get("search"), dict)
+            or not isinstance(result.get("discovery", {}), dict)
+            or result.get("release", {}).get("comparison") != diff["result"]
+        ):
+            raise ValueError("Repair result does not match the gate's pinned release comparison")
+        if any(
+            not isinstance(c, dict) or not isinstance(c.get("authority"), dict)
+            or not isinstance(c.get("release"), dict) or c["release"].get("gate_passed") is not True
+            or not isinstance(c.get("impact"), dict) or not isinstance(c.get("edits"), list)
+            or not isinstance(c.get("manifest"), dict)
+            for c in result["candidates"]
+        ):
+            raise ValueError("Repair result contains an invalid candidate envelope")
+        if any(result["search"].get(key.replace("-", "_")) != config[key]
+               for key in ("max-edits", "max-evaluations", "max-candidates")):
+            raise ValueError("Repair result does not match configured search bounds")
+        json.dumps(result, allow_nan=False)
+        repair.update(status="completed", result=result)
+    except subprocess.TimeoutExpired:
+        repair.update(status="timeout", error="Repair time limit reached; no proposals retained")
+    except (OSError, ValueError, TypeError, AttributeError, UnicodeError, RecursionError) as exc:
+        repair.update(status="error", error=str(exc))
+
+
+def _release_checks(baseline: str, manifest: str, depth: str, repair=None) -> list[dict]:
     path = os.environ.get("INPUT_REQUIRED_WORKFLOWS", "").strip()
     ref = os.environ.get("INPUT_REQUIRED_WORKFLOWS_REF", "").strip()
     review_configured = any(
@@ -301,6 +399,7 @@ def _release_checks(baseline: str, manifest: str, depth: str) -> list[dict]:
                         review["ok"] = False
                         review["findings"] += 1
                         review["detail"] += "\nAction diff and review comparison do not match."
+            _repair_suggestions(repair, checks, baseline, manifest, depth, workflows)
             return checks
     except (OSError, ValueError, UnicodeError) as exc:
         # Keep the ordinary authority comparison visible when annotation selection fails.
@@ -316,6 +415,8 @@ def _release_checks(baseline: str, manifest: str, depth: str) -> list[dict]:
                 "name": "review", "ok": False, "exit": 2, "findings": 1, "skipped": True,
                 "detail": error, "result": {"error": error},
             })
+        if repair is not None and repair["status"] == "pending":
+            repair.update(status="skipped", error="Required workflow selection failed: " + str(exc))
         return checks
 
 
@@ -362,9 +463,60 @@ def _workflow_sarif(log: dict, checks: list[dict], manifest: str) -> bool:
     return bool(results)
 
 
+def _source_locations(log, manifest, original):
+    def uri(path):
+        try:
+            return Path(path).resolve().relative_to(WORKSPACE.resolve()).as_posix()
+        except ValueError:
+            return Path(path).as_posix()
+
+    changed = False
+    for run in log["runs"]:
+        for result in run.get("results", []):
+            for location in result.get("locations", []):
+                artifact = location["physicalLocation"]["artifactLocation"]
+                if artifact.get("uri") == uri(manifest):
+                    artifact["uri"] = uri(original)
+                    changed = True
+    return changed
+
+
 def main() -> int:
     manifest = os.environ["INPUT_MANIFEST"]
+    baseline = os.environ.get("INPUT_BASELINE", "").strip()
     depth = os.environ.get("INPUT_DEPTH", "8")
+    repair = _repair_configuration()
+    if repair is None:
+        return _gate(manifest, baseline, depth)
+    if repair["status"] != "pending":
+        return _gate(manifest, baseline, depth, repair)
+    try:
+        directory = TemporaryDirectory(prefix="agentmandate-analysis-", dir=ARTEFACTS)
+    except OSError as exc:
+        repair.update(status="error", error="Cannot create analysis snapshot: " + str(exc))
+        return _gate(manifest, baseline, depth, repair)
+    with directory as temporary:
+        original = manifest
+        if repair["status"] == "pending":
+            try:
+                selection = {}
+                paths = {}
+                for name, path in (("manifest", manifest), ("released", baseline)):
+                    source = Path(path) if Path(path).is_absolute() else WORKSPACE / path
+                    content = source.read_bytes()
+                    snapshot = Path(temporary) / (name + source.suffix)
+                    snapshot.write_bytes(content)
+                    paths[name] = str(snapshot)
+                    selection[name] = {"path": path, "sha256": hashlib.sha256(content).hexdigest()}
+                manifest, baseline = paths["manifest"], paths["released"]
+                repair["selection"] = selection
+            except OSError as exc:
+                repair.update(status="error", error="Cannot snapshot manifests: " + str(exc))
+        return _gate(manifest, baseline, depth, repair,
+                     original if "selection" in repair else None)
+
+
+def _gate(manifest, baseline, depth, repair=None, original=None) -> int:
     checks: list[dict] = []
 
     code, payload = run_json(["lint", manifest])
@@ -390,8 +542,11 @@ def main() -> int:
         detail_for(check, args)
         checks.append(check)
 
-    baseline = os.environ.get("INPUT_BASELINE", "").strip()
-    checks.extend(_release_checks(baseline, manifest, depth))
+    if repair is not None:
+        repair["trigger_checks"] = [
+            c["name"] for c in checks if c["name"] in {"lint", "reach"} and not c["ok"]
+        ]
+    checks.extend(_release_checks(baseline, manifest, depth, repair))
 
     traces = os.environ.get("INPUT_TRACES", "").strip()
     if traces:
@@ -412,16 +567,34 @@ def main() -> int:
     total = sum(check.get("blocking_findings", check["findings"]) for check in checks)
     advisory_total = sum(check.get("notes", 0) for check in checks)
     verdict = "findings" if any(c.get("blocks_gate", not c["ok"]) for c in checks) else "clean"
+    if repair is not None and "selection" in repair:
+        for check in checks:
+            check["detail"] = check["detail"].replace(
+                manifest, repair["selection"]["manifest"]["path"],
+            ).replace(baseline, repair["selection"]["released"]["path"])
 
+    combined = {"verdict": verdict, "findings": total, "notes": advisory_total, "checks": checks}
+    repair_path = ""
+    if repair is not None:
+        combined["repairs"] = repair
+        target = None
+        try:
+            with NamedTemporaryFile(
+                mode="w", encoding="utf-8", prefix="agentmandate-repairs-", suffix=".json",
+                dir=ARTEFACTS, delete=False,
+            ) as handle:
+                target = Path(handle.name)
+                handle.write(json.dumps(repair, indent=2) + "\n")
+            repair_path = str(target)
+        except OSError as exc:
+            if target is not None:
+                with suppress(OSError):
+                    target.unlink()
+            repair.update(status="error", error="Cannot write repair report: " + str(exc))
     report_path = ARTEFACTS / "agentmandate-report.json"
     report_path.write_text(
         json.dumps(
-            {
-                "verdict": verdict,
-                "findings": total,
-                "notes": advisory_total,
-                "checks": checks,
-            },
+            combined,
             indent=2,
         ),
         encoding="utf-8",
@@ -431,11 +604,10 @@ def main() -> int:
     if os.environ.get("INPUT_SARIF", "true").lower() == "true":
         code, sarif = run(["reach", manifest, "--depth", depth, "--sarif"])
         target = ARTEFACTS / "agentmandate.sarif"
-        if code in (0, 1) and any(
-            check["name"] in {"diff", "required-workflows"} for check in checks
-        ):
+        if code in (0, 1):
             log = json.loads(sarif)
-            if _workflow_sarif(log, checks, manifest):
+            changed = original is not None and _source_locations(log, manifest, original)
+            if _workflow_sarif(log, checks, original or manifest) or changed:
                 sarif = json.dumps(log, indent=2) + "\n"
         target.write_text(sarif, encoding="utf-8")
         sarif_path = str(target)
@@ -444,13 +616,14 @@ def main() -> int:
         _, graph = run(["reach", manifest, "--depth", depth, "--graph"])
         # Only the summary shows it, so it is fetched only when written.
         with open(STEP_SUMMARY, "a", encoding="utf-8") as handle:
-            handle.write(summary(checks, verdict, total, advisory_total, graph))
+            handle.write(summary(checks, verdict, total, advisory_total, graph, repair))
 
     emit("verdict", verdict)
     emit("findings", str(total))
     emit("notes", str(advisory_total))
     emit("sarif-file", sarif_path)
     emit("report", str(report_path))
+    emit("repair-report", repair_path)
 
     print(
         f"{len(checks)} check(s), {total} finding(s), {advisory_total} note(s), verdict {verdict}"
@@ -463,6 +636,8 @@ def main() -> int:
         )
         trailer = f"  ({check['notes']} note(s))" if check.get("notes") else ""
         print(f"  {mark}  {check['name']}{trailer}")
+    if repair is not None:
+        print(f"  ADVISORY REPAIRS {repair['status']}; original gate unchanged")
 
     if verdict == "clean":
         return 0
@@ -472,7 +647,8 @@ def main() -> int:
     return 1
 
 
-def summary(checks: list[dict], verdict: str, total: int, advisory: int, graph: str) -> str:
+def summary(checks: list[dict], verdict: str, total: int, advisory: int, graph: str,
+            repair=None) -> str:
     """Build the job summary, with the graph GitHub renders inline."""
     accepted = sum(c.get("accepted_widenings", 0) for c in checks)
     head = "No finding" if verdict == "clean" else f"{total} finding(s)"
@@ -558,6 +734,31 @@ def summary(checks: list[dict], verdict: str, total: int, advisory: int, graph: 
         ]
         for check in noted:
             lines += [f"**`{check['name']}`**", "", "```", check["detail"], "```", ""]
+
+    if repair is not None:
+        lines += ["", "### Repair suggestions (advisory; not applied)", "",
+                  "Finding a candidate does not change the checks or verdict above.", ""]
+        text = {"status": repair["status"], "selection": repair.get("selection"),
+                "configuration": repair.get("configuration"), "error": repair.get("error"),
+                "reason": repair.get("reason"), "trigger_checks": repair.get("trigger_checks")}
+        result = repair.get("result", {})
+        comparison = result.get("release", {}).get("comparison", {})
+        text.update(search=result.get("search"), frontier=result.get("frontier"),
+                    reachability={"depth": result.get("search", {}).get("depth"),
+                                "released_truncated": comparison.get("before", {}).get("truncated"),
+                                "proposed_truncated": comparison.get("after", {}).get("truncated")},
+                    discovery={k: v for k, v in result.get("discovery", {}).items()
+                               if k != "probes"},
+                    candidates=[{"status": c.get("status"), "edits": c.get("edits"),
+                                 "impact": c.get("impact"), "lint": c.get("lint"),
+                                 "truncated": c.get("authority", {}).get("truncated")}
+                                for c in result.get("candidates", []) if isinstance(c, dict)])
+        rendered = json.dumps(text, indent=2)
+        if len(rendered) > 12000:
+            rendered = rendered[:12000] + "\n[Summary shortened; see the repair-report output.]"
+        fence = "`" * max(3, 1 + max((len(s) for s in re.findall(r"`+", rendered)), default=0))
+        lines += [fence, rendered, fence, "",
+                  "Full repair data is in `report` and, when written, `repair-report`."]
 
     if graph.strip().startswith("flowchart"):
         lines += [

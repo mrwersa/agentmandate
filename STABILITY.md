@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.43.0
+agentmandate~=0.44.0
 ```
 
 ## Current quantity model
@@ -93,6 +93,14 @@ the selected commit and source digests; SARIF includes reachability and workflow
 failures. Ref protection and reviewer authentication remain the caller's
 responsibility. The Action's success/failure and report-only conventions are
 distinct from the CLI exit codes retained in individual check records.
+
+The Action's opt-in [repair suggestions](docs/action-repairs.md) are separate
+from those blocking checks. Both manifests are frozen once and the same pinned
+workflow annotation serves diff, review and repair. Repair reports, timeouts and
+configuration errors cannot waive findings or change the gate's counts or exit
+policy. No proposal is applied. Input hashes identify selected bytes, not their
+authors or live deployment. Isolated Python imports keep checkout packages and
+`PYTHONPATH` from replacing the installed analyzer.
 
 ## Repair and bounded-search claims
 

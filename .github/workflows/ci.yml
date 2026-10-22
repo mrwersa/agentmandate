@@ -67,6 +67,7 @@ jobs:
         run: >-
           python -m pytest -q
           --cov=agentmandate
+          --cov=action_gate
           --cov-report=term-missing
           --cov-fail-under=100
 

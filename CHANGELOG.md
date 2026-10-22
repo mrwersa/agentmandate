@@ -4,6 +4,28 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.44.0 - 2026-10-20
+
+### Added
+
+- The GitHub Action accepts opt-in `repair-suggestions` with retained tools,
+  explicit ceiling grids or automatic discovery, edit/evaluation/display bounds,
+  and a repair subprocess timeout. Suggestions remain advisory and unapplied;
+  finding a candidate never changes checks, counts, acceptance or the gate verdict.
+- Enabled runs snapshot both manifests and share the pinned workflow annotation
+  across diff, review and repair. Reports retain exact input identities, candidate
+  costs, lint and truncation; `repair-report` exposes the full advisory JSON.
+  Timeouts, invalid configuration and repair errors remain visible separately.
+- Executable Action cases cover repair, discovery, infeasibility, workflow
+  regression, cutoffs, report-only mode and annotation substitution. Existing
+  SARIF findings retain their original source paths and line numbers.
+
+### Fixed
+
+- Action entry and CLI subprocesses run with isolated Python imports. A package
+  named `agentmandate` in the analyzed checkout, or its `PYTHONPATH`, cannot
+  replace the analyzer installed from the selected Action version.
+
 ## 0.43.0 - 2026-10-18
 
 ### Added
