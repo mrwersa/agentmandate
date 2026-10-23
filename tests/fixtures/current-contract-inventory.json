@@ -3769,7 +3769,7 @@
   "coverage_sha256": "6d510c2bd3dc43da2bd5ad28256e212aac5bb3d9f395fa54948d2c8de435e3ef",
   "fixture_sha256": {
     ".github/workflows/action.yml": "8cf85f798895bb2b433de5bb882fc273350d217d1eed54fcbb520fa6c579c853",
-    "action.yml": "a89695d1167de6433db9cc48de06c0efd8939138bfbcaf9d19c61ae0d8a26883",
+    "action.yml": "b3b31e232d3971129b13d033d16770c601c7b5ca889835e2c9a7d04d0b828bbb",
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",
     "docs/evidence/agentcore-refund-policy/managed-oracle-v1.json": "0dbe5ea25cab0dbf362eddaa8215c1ae7dcc8f73acfcd5b492a64e10866f6d46",

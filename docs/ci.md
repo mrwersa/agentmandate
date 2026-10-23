@@ -73,6 +73,8 @@ are still attempted. JSON and SARIF files are atomically replaced, so an incompl
 write cannot publish a partial report or follow a destination symlink. Use the
 returned paths rather than guessing filenames or reusing a report from an earlier
 run. The separate advisory repair report retains its non-blocking error behavior.
+Published JSON and SARIF files use owner-only permissions (0600); same-user
+upload steps can read them.
 
 Add `required-workflows` and `required-workflows-ref` alongside `baseline` to
 keep a release from breaking declared work. The annotation is read from one
