@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 20 October 2026
+### Measured planning progress — 23 October 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,13 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Action installation and output handling — 23 October 2026:**
+Installation now uses isolated Python imports as well as analysis. Combined
+JSON and SARIF reports are replaced atomically; output-delivery failures remain
+I/O errors rather than changing analysis findings or being waived by report-only
+mode. These correct the existing CI integration without completing another
+initiative. The ledger remains at 50%.
 
 **Repair suggestions in CI — 20 October 2026:**
 The [Action integration](docs/action-repairs.md) invokes release-aware repairs

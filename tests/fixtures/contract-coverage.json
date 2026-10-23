@@ -829,7 +829,8 @@
       "agentmandate.required-workflows/v2"
     ],
     "tests": [
-      "tests/test_action_repairs.py"
+      "tests/test_action_repairs.py",
+      "tests/test_action_delivery.py"
     ]
   }
 ]

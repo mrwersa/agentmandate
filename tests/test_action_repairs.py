@@ -394,9 +394,12 @@ def test_repair_io_errors_remain_advisory(repair_workspace, monkeypatch, failure
 
         monkeypatch.setattr(Path, "read_bytes", fail_read)
     elif failure == "artifact":
+        original = action_gate.NamedTemporaryFile
 
         def fail_artifact(*args, **kwargs):
-            raise OSError("synthetic artifact creation failure")
+            if kwargs.get("prefix") == "agentmandate-repairs-":
+                raise OSError("synthetic artifact creation failure")
+            return original(*args, **kwargs)
 
         monkeypatch.setattr(action_gate, "NamedTemporaryFile", fail_artifact)
     else:
@@ -405,6 +408,9 @@ def test_repair_io_errors_remain_advisory(repair_workspace, monkeypatch, failure
         @contextmanager
         def fail_write(*args, **kwargs):
             with original(*args, **kwargs) as handle:
+                if kwargs.get("prefix") != "agentmandate-repairs-":
+                    yield handle
+                    return
 
                 class Writer:
                     name = handle.name

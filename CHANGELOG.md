@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.44.1 - 2026-10-23
+
+### Fixed
+
+- The Action also runs installation with isolated Python imports. Checkout
+  packages named `pip` and startup hooks on `PYTHONPATH` cannot replace the
+  installer before analysis begins.
+- Combined JSON and SARIF reports are replaced atomically without following
+  destination symlinks. Report, summary and step-output I/O failures produce
+  diagnostics and exit 2, including under `fail-on: never`. Analysis verdicts
+  and finding counts remain unchanged; unavailable report paths are empty.
+  Separate repair-report failures remain advisory.
+
 ## 0.44.0 - 2026-10-20
 
 ### Added

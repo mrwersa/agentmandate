@@ -40,7 +40,7 @@ original checks and verdict. Repair errors and timeouts remain advisory.
 ## The action
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.44.0
+- uses: mrwersa/agentmandate@v0.44.1
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -60,6 +60,19 @@ an existing repository without stopping everyone on the first day.
 
 Only the checks you give inputs for run. A manifest alone is enough for `lint`
 and `reach`.
+
+Installation, the Action entry and CLI subprocesses use isolated Python imports:
+checkout packages and `PYTHONPATH` cannot replace the installer or analyzer.
+This does not authenticate the Action source; pin and protect the version you run.
+
+`fail-on: never` applies to analysis findings. Failure to write the combined
+JSON report, SARIF, job summary or step outputs is an I/O error: the Action logs
+a diagnostic and exits 2 even in report-only mode. Analysis verdicts and counts
+remain unchanged. Outputs for failed reports are empty, and other deliveries
+are still attempted. JSON and SARIF files are atomically replaced, so an incomplete
+write cannot publish a partial report or follow a destination symlink. Use the
+returned paths rather than guessing filenames or reusing a report from an earlier
+run. The separate advisory repair report retains its non-blocking error behavior.
 
 Add `required-workflows` and `required-workflows-ref` alongside `baseline` to
 keep a release from breaking declared work. The annotation is read from one
@@ -186,7 +199,7 @@ For a repository with a separately protected `authority-reviews` branch:
     git show origin/main:mandate.json > "$RUNNER_TEMP/released.json"
     git fetch origin authority-reviews:refs/remotes/origin/authority-reviews
     echo "REVIEW_AS_OF=$(date -u +%F)" >> "$GITHUB_ENV"
-- uses: mrwersa/agentmandate@v0.44.0
+- uses: mrwersa/agentmandate@v0.44.1
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json

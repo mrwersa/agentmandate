@@ -68,7 +68,7 @@ documented contract is a bug fix and may ship as a patch.
 
    ```bash
    python -m pytest -q
-   python -m pytest -q --cov=agentmandate --cov-fail-under=100
+   python -m pytest -q --cov=agentmandate --cov=action_gate --cov-fail-under=100
    ruff check .
    python -m build && python -m twine check dist/*
    ```
