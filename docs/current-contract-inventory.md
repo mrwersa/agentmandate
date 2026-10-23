@@ -97,3 +97,9 @@ script and its executable workflow). Their changed digests are deliberate
 contract changes, not frozen evidence edits. The planner's schema, root exports,
 CLI paths and other pinned material bytes remain unchanged. See the
 [Action repair guide](action-repairs.md) and `tests/test_action_repairs.py`.
+
+The install/output correction changes only `action.yml` and the wrapper's pinned
+bytes, plus the coverage map linking `tests/test_action_delivery.py`. It keeps
+all root exports, CLI paths and 240 other material digests unchanged. Successful
+report content is unchanged; delivery errors return 2 without changing the
+analysis verdict or counts, and failed report paths are empty.

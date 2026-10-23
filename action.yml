@@ -124,9 +124,8 @@ inputs:
     default: "true"
   fail-on:
     description: >-
-      `findings` fails the step on any finding. `never` reports and always
-      succeeds, which is how to adopt this on an existing repository without
-      blocking everyone on day one.
+      `findings` fails the step on any finding. `never` reports analysis
+      findings without failing the step. Output-delivery I/O errors still fail.
     required: false
     default: "findings"
   python-version:
@@ -149,13 +148,15 @@ outputs:
       Reported separately so a clean verdict never means nothing was found.
     value: ${{ steps.gate.outputs.notes }}
   sarif-file:
-    description: Path to the SARIF file, empty when `sarif` is false.
+    description: Path to the SARIF file; empty when disabled or the file cannot be written.
     value: ${{ steps.gate.outputs.sarif-file }}
   report:
-    description: Path to the combined JSON report.
+    description: Path to the combined JSON report; empty when the file cannot be written.
     value: ${{ steps.gate.outputs.report }}
   repair-report:
-    description: Advisory repair JSON, including input identities and errors; empty when disabled.
+    description: >-
+      Advisory repair JSON, including input identities and errors;
+      empty when disabled or the file cannot be written.
     value: ${{ steps.gate.outputs.repair-report }}
 
 runs:
@@ -170,7 +171,7 @@ runs:
       # From the action's own checkout, so the version that runs is the version
       # the caller pinned. Resolving a release from PyPI here would let the
       # analysis drift from the tag in their workflow file.
-      run: python -m pip install --quiet "${{ github.action_path }}[yaml]"
+      run: python -I -m pip install --quiet "${{ github.action_path }}[yaml]"
 
     - name: Analyse
       id: gate

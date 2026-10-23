@@ -101,6 +101,12 @@ configuration errors cannot waive findings or change the gate's counts or exit
 policy. No proposal is applied. Input hashes identify selected bytes, not their
 authors or live deployment. Isolated Python imports keep checkout packages and
 `PYTHONPATH` from replacing the installed analyzer.
+Installation uses the same isolated interpreter mode. Combined JSON and SARIF
+files are published by atomic replacement; their destination symlinks are not
+followed. Failures writing these files, the job summary or step outputs return
+2 even with `fail-on: never`. They do not change analysis verdicts or finding
+counts. Failed report outputs are empty; other outputs are attempted. A failure
+of the separate advisory repair report retains its existing non-blocking behavior.
 
 ## Repair and bounded-search claims
 

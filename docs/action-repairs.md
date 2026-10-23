@@ -21,7 +21,7 @@ request's base commit:
   run: |
     git show "$BASE_COMMIT:mandate.json" > "$RUNNER_TEMP/released.json"
 - id: authority
-  uses: mrwersa/agentmandate@v0.44.0
+  uses: mrwersa/agentmandate@v0.44.1
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json
@@ -100,7 +100,10 @@ package named `agentmandate`, or `PYTHONPATH`, from replacing the installed anal
 Suggestions appear in the job summary and the combined report's `repairs`
 field. `repair-report` points to a separate JSON copy, or is empty when disabled
 or when that artifact could not be written. The combined report retains repair
-errors even when the separate artifact is unavailable. SARIF keeps ordinary
+errors even when the separate artifact is unavailable, provided the combined
+report itself can be written. Failure of the combined report, SARIF, job summary
+or step outputs exits 2; see the [Action I/O contract](ci.md#the-action). These
+delivery failures are distinct from advisory repair errors. SARIF keeps ordinary
 findings and original manifest paths and lines; proposals are not applied fixes.
 
 | Repair status | Meaning |

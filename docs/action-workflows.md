@@ -22,7 +22,7 @@ annotation from that same commit:
     test -n "$BASE_COMMIT"
     git show "$BASE_COMMIT:mandate.json" > "$RUNNER_TEMP/released.json"
 - id: authority
-  uses: mrwersa/agentmandate@v0.44.0
+  uses: mrwersa/agentmandate@v0.44.1
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json
@@ -78,6 +78,8 @@ that return no analysis findings.
 
 `fail-on: never` deliberately lets the step succeed while retaining its findings
 verdict, counts, summary and SARIF. It does not convert the analysis to clean.
+Output-delivery failures remain I/O errors and exit 2; see the
+[Action I/O contract](ci.md#the-action).
 
 Opt-in [repair suggestions](action-repairs.md) reuse the same pinned annotation
 and frozen manifest inputs. They appear beside these checks and do not change

@@ -97,6 +97,32 @@ def emit(name: str, value: str) -> None:
             handle.write(f"{name}={value}\n")
 
 
+def _io_error(errors, label, exc):
+    message = f"Cannot write {label}: {exc}"
+    errors.append(message)
+    print(f"error: {message}", file=sys.stderr)
+
+
+def _publish(path, content, errors):
+    """Replace a report only after a complete write; never follow its symlink."""
+    temporary = None
+    try:
+        with NamedTemporaryFile(
+            mode="w", encoding="utf-8", prefix="agentmandate-output-",
+            dir=path.parent, delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(content)
+        temporary.replace(path)
+    except OSError as exc:
+        if temporary is not None:
+            with suppress(OSError):
+                temporary.unlink()
+        _io_error(errors, path.name, exc)
+        return ""
+    return str(path)
+
+
 def count(payload: object, key: str) -> int:
     if isinstance(payload, dict) and isinstance(payload.get(key), list):
         return len(payload[key])
@@ -591,13 +617,9 @@ def _gate(manifest, baseline, depth, repair=None, original=None) -> int:
                 with suppress(OSError):
                     target.unlink()
             repair.update(status="error", error="Cannot write repair report: " + str(exc))
-    report_path = ARTEFACTS / "agentmandate-report.json"
-    report_path.write_text(
-        json.dumps(
-            combined,
-            indent=2,
-        ),
-        encoding="utf-8",
+    io_errors = []
+    report_path = _publish(
+        ARTEFACTS / "agentmandate-report.json", json.dumps(combined, indent=2), io_errors,
     )
 
     sarif_path = ""
@@ -609,21 +631,25 @@ def _gate(manifest, baseline, depth, repair=None, original=None) -> int:
             changed = original is not None and _source_locations(log, manifest, original)
             if _workflow_sarif(log, checks, original or manifest) or changed:
                 sarif = json.dumps(log, indent=2) + "\n"
-        target.write_text(sarif, encoding="utf-8")
-        sarif_path = str(target)
+        sarif_path = _publish(target, sarif, io_errors)
 
     if os.environ.get("INPUT_SUMMARY", "true").lower() == "true" and STEP_SUMMARY:
         _, graph = run(["reach", manifest, "--depth", depth, "--graph"])
         # Only the summary shows it, so it is fetched only when written.
-        with open(STEP_SUMMARY, "a", encoding="utf-8") as handle:
-            handle.write(summary(checks, verdict, total, advisory_total, graph, repair))
+        try:
+            with open(STEP_SUMMARY, "a", encoding="utf-8") as handle:
+                handle.write(summary(checks, verdict, total, advisory_total, graph, repair))
+        except OSError as exc:
+            _io_error(io_errors, "job summary", exc)
 
-    emit("verdict", verdict)
-    emit("findings", str(total))
-    emit("notes", str(advisory_total))
-    emit("sarif-file", sarif_path)
-    emit("report", str(report_path))
-    emit("repair-report", repair_path)
+    for name, value in (
+        ("verdict", verdict), ("findings", str(total)), ("notes", str(advisory_total)),
+        ("sarif-file", sarif_path), ("report", report_path), ("repair-report", repair_path),
+    ):
+        try:
+            emit(name, value)
+        except OSError as exc:
+            _io_error(io_errors, f"step output {name}", exc)
 
     print(
         f"{len(checks)} check(s), {total} finding(s), {advisory_total} note(s), verdict {verdict}"
@@ -639,6 +665,8 @@ def _gate(manifest, baseline, depth, repair=None, original=None) -> int:
     if repair is not None:
         print(f"  ADVISORY REPAIRS {repair['status']}; original gate unchanged")
 
+    if io_errors:
+        return 2
     if verdict == "clean":
         return 0
     if os.environ.get("INPUT_FAIL_ON", "findings").lower() == "never":
