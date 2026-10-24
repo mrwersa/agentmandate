@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.45.0 - 2026-10-24
+
+### Added
+
+- Release-aware remediation accepts reviewed condition inputs or fixed
+  delegation inputs in enumeration, grids and discovery. Evidence is consumed
+  for the proposal and its candidates, without applying it to the released
+  reference or changing declared manifest effects, budgets or grant material.
+- Every candidate must still remove declared widening and preserve ordinary
+  released workflows. Release records retain the full unconditional comparison
+  and gate result beside explicitly scoped proposal analysis and evidence.
+  Candidate claim names identify the reviewed scope; no proposal is applied.
+- Ineligible evidence retains the original release comparison and findings
+  while stopping recommendations before enumeration. Conditions and delegations
+  remain mutually exclusive; the Action does not acquire new evidence inputs.
+
 ## 0.44.1 - 2026-10-23
 
 ### Fixed

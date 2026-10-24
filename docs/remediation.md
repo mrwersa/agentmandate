@@ -44,7 +44,10 @@ approval additions. It cannot combine with explicit ceilings or grids. See the
 For a release rejected by `diff`, use [release-aware remediation](release-remediation.md).
 It can start from widening without a reachable breach and requires every
 candidate to pass the released-manifest comparison, workflow and ordinary checks.
-Conditions and delegations are separate modes and cannot combine with `--released`.
+`--released` can use reviewed conditions or fixed delegation grants for proposal
+checks; [release scope](release-remediation.md#use-reviewed-proposal-evidence)
+explains the independent declared comparison. Conditions and delegations remain
+mutually exclusive.
 
 A reachable refund tool with a zero ceiling cannot issue a useful refund.
 `--keep-tool` preserves tool reachability; it does not invent an amount that the

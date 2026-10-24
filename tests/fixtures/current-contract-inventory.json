@@ -3766,7 +3766,7 @@
       ]
     }
   },
-  "coverage_sha256": "6d510c2bd3dc43da2bd5ad28256e212aac5bb3d9f395fa54948d2c8de435e3ef",
+  "coverage_sha256": "5b2ea603a76f5f563836f85cf6fb3557e2565a3de27de0ef7165c40ec21b1cab",
   "fixture_sha256": {
     ".github/workflows/action.yml": "8cf85f798895bb2b433de5bb882fc273350d217d1eed54fcbb520fa6c579c853",
     "action.yml": "b3b31e232d3971129b13d033d16770c601c7b5ca889835e2c9a7d04d0b828bbb",
@@ -3869,6 +3869,10 @@
     "examples/release-remediation/proposed.json": "893058a763d263f8dfa1457ff6b875b9eeaaf5081a206937c997d8e8ad5e4b9a",
     "examples/release-remediation/released.json": "884cb193313416d1d772d20975cf422fa3c50ffbe28976c0953f27d3bccae7d9",
     "examples/release-remediation/required-export.json": "ad83efb2e724e6da2cc2670ff903f873e36dd1bc700ceecf411c4709a4a8e3d3",
+    "examples/release-scoped-remediation/condition-released.json": "cd3a65e5c5247f8fb46c01abd593e5b53b624457606e299c0c66bd1daa0301b2",
+    "examples/release-scoped-remediation/condition-required.json": "92fc50036852a11ae3dff183868da248db67cefbb9cc2d5523cc4820c6247bb4",
+    "examples/release-scoped-remediation/delegation-released.json": "dc0a76c322770a2fbdaa20f96c86647c552d6799f7701fc983ba0bccfae2b9e4",
+    "examples/release-scoped-remediation/delegation-required.json": "4feac405720a1b5cbcf3ac7802a67852a8cc63094987b3704f16f3b7ad9b211b",
     "examples/release-workflows/released.json": "7592964baea583a58a0cd9d0a8512606bc54668c94ab6f67b4f1f5e8708e18ab",
     "examples/release-workflows/required-export.json": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9",
     "examples/remediation/normal-refund.jsonl": "a29bef9d55bea45836f4339de810e98901b832fd54d736dea0e094116e07530b",
@@ -3984,6 +3988,7 @@
     "tests/fixtures/producer-result-v2-unresolved.json": "0e078b474ace2421c70188694025c42aa5233ad6b244815b422ee068c6abc13c",
     "tests/fixtures/rego-effective-diff-v2.json": "ee9360ca2e14e32e6d6dd305eda785723d2f90dbb5d26cd9a28ef4334bd99ca1",
     "tests/fixtures/release-remediation-v1.json": "e42a88e4379e6e07fd3cc6a231d49ee8d3f4f304e2d93a94b8f8282fc33e2b10",
+    "tests/fixtures/release-scoped-remediation-v1.json": "4f48cce70ff36a2e3ef3bc766e24c2c02d86e0f85161d2a6c9053e95e5140a06",
     "tests/fixtures/release-workflows-v1.json": "07026c97b7d6df2e92ba7049966eac099bf0da59a1d40c3abceb710a221fdbec",
     "tests/fixtures/remediation-breached-v6.json": "ca69b5e04a75cdf64c964ddd202e38ff5fc61b0e465008b2c200a97eb2be9fa9",
     "tests/fixtures/remediation-ceiling-clean-v6.json": "30f8ed38e0796cfa8c022f492a563370880255d29d83b015386a13a2365cd8c6",
