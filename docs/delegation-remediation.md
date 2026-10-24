@@ -34,6 +34,10 @@ All six delegation flags have the same meaning as in `reach`. Repeat attachments
 chains and locator/capture mappings as needed. The timestamp and source binding
 are explicit; the command does not follow locators, fetch grants or read a clock.
 Conditions and delegations cannot be combined, even in discovery mode.
+Add `--released FILE` to also remove declared widening against a released
+manifest. Required workflows then pin that reference. Grants still apply only
+to the proposal and its candidates; they do not establish delegation for the
+released deployment. See [release scope](release-remediation.md#use-reviewed-proposal-evidence).
 
 ## Separate tool excess from a defective chain
 

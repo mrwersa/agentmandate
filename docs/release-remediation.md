@@ -78,6 +78,10 @@ Each returned candidate has:
   visible. An existing breach in the released version is not an allowance.
 - Every supplied required path preserved within the manifest model.
 
+With reviewed proposal evidence, the breach and lint claims are limited to that
+scope, as described below. Declared widening and ordinary released-workflow
+checks remain binding.
+
 This is not general policy equivalence, business success, runtime enforcement
 or deployment approval. `compare` is conservative: its widening rules also govern
 which repairs qualify. The reference's findings remain visible, and no accepted
@@ -87,7 +91,7 @@ The current remediation/v6 result includes:
 
 | Field | Meaning |
 |---|---|
-| `baseline`, `baseline_lint` | Original proposed-manifest analysis and lint |
+| `baseline`, `baseline_lint` | Original proposal's analysis and lint within the selected analysis scope |
 | `requirements.baseline` | Original proposal's workflow assessments; the repair starting point |
 | `release.comparison` | Full released-to-proposed comparison, including both Authority results and optional workflow rows |
 | `release.comparison.required_workflows[].baseline` | Released reference's workflow status; the comparison starting point |
@@ -98,14 +102,72 @@ The current remediation/v6 result includes:
 | `search.release_rejections` | Number of those rejection records |
 | `input.manifest_sha256`, `input.released_sha256` | Exact proposed and released file identities |
 
-Candidates carry `no_widening_or_reachable_breach_within_bound`, their changed
+## Use reviewed proposal evidence
+
+Combine `--released` with the existing condition flags or delegation flags to
+recheck repairs within that reviewed proposal scope. Conditions and delegations
+remain mutually exclusive. All supported edits, grids, discovery, required paths
+and Pareto ranking use the same rules. The
+[worked examples](../examples/release-scoped-remediation/README.md) reuse the
+existing synthetic condition and delegation materials with separately pinned
+released manifests and workflows.
+
+Evidence applies to the **proposal and each candidate only**. It is not applied
+to the released reference or treated as proof of its enforcement. No new
+restriction, grant, review or capture is generated. All baseline evidence must
+be eligible before search; expired, incomplete or mismatched inputs return
+`input_requires_review`, retain the ordinary release comparison and examine no
+edits. Removing a disputed tool cannot bypass eligibility.
+
+Every candidate must pass the unchanged ordinary `compare` rules for declared
+widening and workflow preservation. A reviewed condition cannot excuse a raised
+declared budget, a broader tool effect or a broken ordinary released path.
+The required workflow must conform to the released manifest **without borrowing
+the proposal's condition evidence**. If it does not, the input is a usage error;
+this mode does not support a separately conditioned reference. Scoped workflow
+checks are additional to those ordinary comparisons.
+
+Conditions qualify proposal breach and lint analysis. Fixed grants do not
+project Authority; candidates must satisfy their unchanged tool surfaces as
+well as ordinary breach and lint checks. Only a previously validated attachment
+for a removed candidate tool becomes inactive. No supplied attachment means
+no delegation claim for that tool, as in the existing delegation reader.
+
+Scoped release records add:
+
+| Field | Meaning |
+|---|---|
+| `unconditional_gate_passed` | Original declared comparison, breach, lint and workflow gate result, retained unchanged |
+| `reviewed_analysis.kind` | `conditions` or `delegations` |
+| `reviewed_analysis.authority`, `lint` | Proposal/candidate analysis within the selected scope |
+| `reviewed_analysis.evidence` | Reader findings, input identities and scope limits |
+| `gate_passed` | No declared widening or ordinary workflow regression, and eligible, breach-free, lint-clean proposal analysis within the reviewed scope; fixed-grant findings must also be absent |
+
+The full unconditional `comparison` and `lint` remain present. A conditional
+candidate can have `gate_passed: true` and `unconditional_gate_passed: false`;
+its ordinary Authority may still contain breaches. This is an explicitly scoped
+model result, not a clean ordinary release gate. The candidate status is
+`no_declared_widening_or_breach_within_reviewed_scope`, and human output prints
+the unconditional gate result and evidence boundary. The original proposal's
+findings still determine exit 1 when a repair is found. If the proposal already
+passes within the reviewed scope, no edits are suggested.
+
+The GitHub Action's repair inputs remain unchanged: it does not pass conditions
+or grants into the planner. Choosing a scoped CLI proposal does not waive any
+ordinary Action finding or recorded-review requirement.
+
+## Keep the search limits visible
+
+Ordinary release candidates carry `no_widening_or_reachable_breach_within_bound`;
+reviewed candidates use the scoped status above. Both retain their changed
 manifest, capability losses, lint and per-side truncation. Human output includes
 the original changes, required-path failures and rejected comparisons too.
 The comparison reader reruns bounded analysis; `candidates_analyzed` counts
 candidate probes, not every internal kernel invocation.
-For candidates, the workflow screen and comparison reader assess the same
-paths under the same model. The repeated check preserves a complete comparison
-record; it is not independent corroboration. For the original proposal, the
+For unscoped candidates, the workflow screen and comparison reader assess the
+same paths under the same model. With conditions, the workflow screen also
+checks the projected effects while the comparison keeps the declared model;
+both must pass. Repeated checks are not independent corroboration. For the original proposal, the
 comparison's workflow-regression check can itself block the release.
 
 Explicit ceilings, grids, removals, approval edits and Pareto ranking are
@@ -118,11 +180,14 @@ retain their [separate meanings](ceiling-discovery.md).
 
 Original budgets, quantity assignments, identities, tool effects and scope
 relationships stay fixed. Widening in those fixed dimensions may leave no repair.
-Release mode cannot combine with condition or delegation inputs; those have
-separate evidence scopes and are refused before input reads.
+Condition evidence and delegation grants stay fixed; they are consumed rather
+than edited. Scope eligibility and all original release findings remain visible.
 
 Exit 0 means the original proposal passes these scoped checks. Exit 1 retains
 its findings even when a repair exists. Exit 2 means malformed, unsupported,
 unreadable or mismatched inputs. Proposals remain unapplied. After choosing a
 candidate, save its `manifest` and rerun lint, reach and diff with the same
-released reference, depth and required workflows before further review.
+released reference, depth and required workflows before further review. Also
+rerun the selected condition or delegation reader with the same evidence if
+using that scope. An ordinary gate may still refuse a condition-scoped proposal;
+the repair report does not accept it on the gate's behalf.

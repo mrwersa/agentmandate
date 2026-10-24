@@ -21,7 +21,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.44.0
+agentmandate~=0.45.0
 ```
 
 ## Current quantity model
@@ -121,8 +121,13 @@ analysis and lint to have no breach or error. Required workflows pin the
 released file, which must satisfy them. Both input digests, the original
 comparison and rejected comparisons remain visible; proposals never clear the
 original finding. Default depth is the larger declared depth and is fixed for
-both sides and all candidates. This mode cannot combine with conditions or
-delegations. It reuses remediation/v6 and the current comparison reader;
+both sides and all candidates. Conditions or fixed grants can qualify proposal
+checks, while declared widening and ordinary workflow comparisons remain binding.
+Evidence is not applied to the released reference. Scoped records retain
+`unconditional_gate_passed` beside `reviewed_analysis`; a scoped pass does not
+waive an ordinary gate. Ineligible evidence retains the comparison and stops
+recommendations before enumeration. Conditions and delegations remain mutually
+exclusive. It reuses remediation/v6 and the current comparison reader;
 there is no alternate legacy output mode. See [release repairs](docs/release-remediation.md).
 
 Condition-aware remediation reuses the existing reviewed condition contract.

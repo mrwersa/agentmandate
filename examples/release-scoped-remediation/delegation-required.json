@@ -1,0 +1,42 @@
+{
+  "schema": "agentmandate.required-workflows/v2",
+  "agent": "synthetic-delegated-export",
+  "manifest_sha256": "dc0a76c322770a2fbdaa20f96c86647c552d6799f7701fc983ba0bccfae2b9e4",
+  "reviewer": "synthetic-workflow-reviewer",
+  "reason": "Synthetic released paths for scoped repair; not business-outcome evidence.",
+  "workflows": [
+    {
+      "name": "two-batch-export",
+      "steps": [
+        {
+          "tool": "select_rows",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "select_rows",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": false,
+          "binding": 0,
+          "quantity": "exported_rows",
+          "unit": "record",
+          "value": "2"
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": false,
+          "binding": 1,
+          "quantity": "exported_rows",
+          "unit": "record",
+          "value": "2"
+        }
+      ]
+    }
+  ]
+}

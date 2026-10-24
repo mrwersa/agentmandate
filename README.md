@@ -109,7 +109,7 @@ Review the configuration change together with the reachable behavior it enables.
 ## Put it in CI
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.44.1
+- uses: mrwersa/agentmandate@v0.45.0
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -293,7 +293,7 @@ all.
 | `mandate drift` | Compares the declared mandate against the agent's source and fails when the two have separated |
 | `mandate lint` | Single-manifest checks: separation of duties, ungated irreversible effects, service-account principals, invalid ceilings, and required scopes with no producer |
 | `mandate reach` | Bounded search over a manifest or reviewed `--ir` snapshot for a legal call sequence that breaches a limit, reported as a counterexample |
-| `mandate remediate` | Proposes rechecked repairs for breaches or a widening release while preserving supplied workflows. Also supports reviewed conditions or fixed delegation grants. Reports capability costs and search limits. [Repair guide](docs/remediation.md), [release repairs](docs/release-remediation.md) |
+| `mandate remediate` | Proposes rechecked repairs for breaches or a widening release while preserving supplied workflows. Release repairs can use reviewed conditions or fixed delegation grants for proposal checks. Reports capability costs and search limits. [Repair guide](docs/remediation.md), [release repairs](docs/release-remediation.md) |
 | `mandate ir` | Exports a manifest as canonical Authority IR or structurally validates a snapshot without accepting its evidence as authority |
 | `mandate inventory` | Imports local protocol catalogues as unreviewed declarations/IR, or validates declaration structure |
 | `mandate conditions` | Structurally validates a tool-condition or condition-context artifact without accepting it as authority |

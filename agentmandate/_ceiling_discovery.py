@@ -189,6 +189,7 @@ def discover(
             report["delegation_rejections"] = []
             search["delegation_rejections"] = 0
         if evaluation.findings:
+            _release_baseline(report, released, mandate, required_workflows, scope, evaluation)
             report["status"] = "input_requires_review"
             return report
     if required_workflows is not None:
@@ -199,7 +200,7 @@ def discover(
         report["requirements"] = {**required_workflows.metadata(), "baseline": assessments}
         report["requirement_rejections"] = []
         search["required_workflow_rejections"] = 0
-    _release_baseline(report, released, mandate, required_workflows)
+    _release_baseline(report, released, mandate, required_workflows, scope, evaluation)
     if _structural(lint):
         report["status"] = "input_requires_review"
         return report
@@ -272,6 +273,7 @@ def discover(
             release = _release_rejected(
                 report, released, changed, required_workflows,
                 [_edit_record(mandate, edit) for edit in edits],
+                scope, scoped,
             )
             if release is not None and not release["gate_passed"]:
                 # No ordering assumption about release comparisons: split the box as usual.
@@ -294,6 +296,8 @@ def discover(
             if release is not None:
                 candidate["release"] = release
                 candidate["status"] = "no_widening_or_reachable_breach_within_bound"
+                if scoped is not None:
+                    candidate["status"] = "no_declared_widening_or_breach_within_reviewed_scope"
             if scoped is not None:
                 candidate[scope.kind] = scoped.record(changed, baseline.depth)
             candidate["repair_cost"] = _repair_cost(mandate, candidate)
