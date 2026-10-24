@@ -103,3 +103,10 @@ bytes, plus the coverage map linking `tests/test_action_delivery.py`. It keeps
 all root exports, CLI paths and 240 other material digests unchanged. Successful
 report content is unchanged; delivery errors return 2 without changing the
 analysis verdict or counts, and failed report paths are empty.
+
+Release-scoped remediation combines existing flags and input contracts without
+adding a CLI path, root export or schema version. The current coverage map adds
+four synthetic released-manifest/workflow files and six CLI replay cases, reusing
+the unchanged condition and delegation materials. Existing 242 material pins
+remain unchanged. New scoped release records retain the unconditional gate
+beside reviewed proposal analysis; ordinary unscoped output is unchanged.

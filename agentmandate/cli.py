@@ -985,12 +985,6 @@ def _run_remediation(args: argparse.Namespace) -> int:
     try:
         if _conditions_supplied(args) and _delegations_supplied(args):
             raise ValueError("condition and delegation remediation cannot be combined")
-        if args.released is not None and (
-            _conditions_supplied(args) or _delegations_supplied(args)
-        ):
-            raise ValueError(
-                "release-aware remediation cannot be combined with conditions or delegations"
-            )
         condition_inputs = _condition_inputs(args)
         delegation_inputs = _delegation_inputs(args)
         content = Path(args.manifest).read_bytes()
@@ -1050,6 +1044,15 @@ def _run_remediation(args: argparse.Namespace) -> int:
             f"released_truncated={comparison['before']['truncated']} "
             f"proposed_truncated={comparison['after']['truncated']}: {release['scope']}"
         )
+        if "reviewed_analysis" in release:
+            scoped = release["reviewed_analysis"]
+            lines.append(
+                f"RELEASE REVIEWED {scoped['kind']} "
+                f"unconditional_gate_passed={release['unconditional_gate_passed']} "
+                f"truncated={scoped['authority']['truncated']}: {scoped['scope']}"
+            )
+            if release["gate_passed"] and not release["unconditional_gate_passed"]:
+                lines.append("WARNING scoped analysis passes; ordinary release gate still fails.")
         lines.extend(
             f"RELEASE CHANGE {row['direction']} {row['kind']}: {row['detail']}"
             for row in comparison["changes"]
@@ -1150,10 +1153,15 @@ def _run_remediation(args: argparse.Namespace) -> int:
             for row in candidate.get("required_workflows", [])
         )
         if "release" in candidate:
+            release = candidate["release"]
+            unconditional = (
+                f" unconditional_gate_passed={release['unconditional_gate_passed']}"
+                if "unconditional_gate_passed" in release else ""
+            )
             lines.append(
-                f"          release={candidate['release']['comparison']['direction']} "
-                f"gate_passed={candidate['release']['gate_passed']}; "
-                f"{candidate['release']['scope']}"
+                f"          release={release['comparison']['direction']} "
+                f"gate_passed={release['gate_passed']}{unconditional}; "
+                f"{release['scope']}"
             )
         if "conditions" in candidate:
             lines.append(

@@ -227,13 +227,9 @@ def _delegation_rejected(report, evaluation, edits):
     return True
 
 
-def _release_depth(released, mandate, scope, depth):
+def _release_depth(released, mandate, depth):
     if released is None:
         return depth
-    if scope is not None:
-        raise ValueError(
-            "release-aware remediation cannot be combined with conditions or delegations"
-        )
     if released.agent != mandate.agent:
         raise ValueError("released and proposed manifests must name the same agent")
     if _structural(check(released)):
@@ -241,10 +237,10 @@ def _release_depth(released, mandate, scope, depth):
     return max(released.limits.depth, mandate.limits.depth) if depth is None else depth
 
 
-def _release_record(released, mandate, depth, requirements):
+def _release_record(released, mandate, depth, requirements, scope=None, evaluation=None):
     delta = compare(released, mandate, depth=depth, required_workflows=requirements)
     lint = check(mandate)
-    return {
+    record = {
         "scope": "declared manifest-v2 comparison at fixed depth; not deployment approval",
         "comparison": delta.as_dict(),
         "workflow_regressions": list(delta.workflow_regressions),
@@ -254,23 +250,58 @@ def _release_record(released, mandate, depth, requirements):
             or any(f.severity == ERROR for f in lint)
         ),
     }
+    if evaluation is not None:
+        # Evidence is consumed for the proposal only. Never project it onto
+        # the reference or use it to erase declared widening/workflow regressions.
+        authority = analyse(evaluation.effective, depth=depth)
+        scoped_lint = check(evaluation.effective)
+        qualification = (
+            "conditions qualify proposal breach/lint checks only"
+            if scope.kind == "conditions" else
+            "delegations add fixed grant-surface checks; proposal Authority and lint are unchanged"
+        )
+        record["scope"] = (
+            f"declared manifest-v2 widening and workflows; {qualification}, "
+            "at fixed depth; not deployment approval"
+        )
+        record["unconditional_gate_passed"] = record["gate_passed"]
+        record["reviewed_analysis"] = {
+            "kind": scope.kind,
+            "scope": evaluation.report["scope"],
+            "authority": authority.as_dict(),
+            "lint": [asdict(f) for f in scoped_lint],
+            "evidence": evaluation.report,
+        }
+        record["gate_passed"] = not (
+            delta.widened or delta.workflow_regressions or authority.breaches
+            or any(f.severity == ERROR for f in scoped_lint)
+            or evaluation.findings or evaluation.repairable_findings
+        )
+    return record
 
 
-def _release_baseline(report, released, mandate, requirements):
+def _release_baseline(report, released, mandate, requirements, scope=None, evaluation=None):
     if released is not None:
         report["scope"] = "manifest-v2 release repair; candidates require human selection"
+        if scope is not None:
+            report["scope"] = (
+                f"manifest-v2 release repair with reviewed {scope.kind}; "
+                "no declared widening; proposal analysis within reviewed scope only"
+            )
         report["release"] = _release_record(
-            released, mandate, report["search"]["depth"], requirements,
+            released, mandate, report["search"]["depth"], requirements, scope, evaluation,
         )
         report["release"]["released_lint"] = [asdict(f) for f in check(released)]
         report["release_rejections"] = []
         report["search"]["release_rejections"] = 0
 
 
-def _release_rejected(report, released, mandate, requirements, edits):
+def _release_rejected(report, released, mandate, requirements, edits, scope=None, evaluation=None):
     if released is None:
         return None
-    record = _release_record(released, mandate, report["search"]["depth"], requirements)
+    record = _release_record(
+        released, mandate, report["search"]["depth"], requirements, scope, evaluation,
+    )
     if not record["gate_passed"]:
         report["search"]["release_rejections"] += 1
         report["release_rejections"].append({"edits": edits, **record})
@@ -302,7 +333,7 @@ def plan(
     if condition_scope is not None and delegation_scope is not None:
         raise ValueError("condition and delegation remediation cannot be combined")
     scope = condition_scope if condition_scope is not None else delegation_scope
-    depth = _release_depth(released, mandate, scope, depth)
+    depth = _release_depth(released, mandate, depth)
     if not isinstance(discover_ceilings, (tuple, list)):
         raise ValueError("discovery options must use TOOL=STEP")
     if discover_ceilings:
@@ -373,6 +404,7 @@ def plan(
             report["delegation_rejections"] = []
             report["search"]["delegation_rejections"] = 0
         if evaluation.findings:
+            _release_baseline(report, released, mandate, required_workflows, scope, evaluation)
             report["status"] = "input_requires_review"
             return report
     if required_workflows is not None:
@@ -387,7 +419,7 @@ def plan(
         report["requirements"] = {**required_workflows.metadata(), "baseline": assessments}
         report["requirement_rejections"] = []
         report["search"]["required_workflow_rejections"] = 0
-    _release_baseline(report, released, mandate, required_workflows)
+    _release_baseline(report, released, mandate, required_workflows, scope, evaluation)
     if ceiling_edits:
         report["ceiling_options"] = [
             {
@@ -476,6 +508,7 @@ def plan(
         release = _release_rejected(
             report, released, candidate, required_workflows,
             [_edit_record(mandate, edit) for edit in edits],
+            scope, scoped,
         )
         if release is not None and not release["gate_passed"]:
             continue
@@ -503,6 +536,8 @@ def plan(
         if release is not None:
             record["release"] = release
             record["status"] = "no_widening_or_reachable_breach_within_bound"
+            if scoped is not None:
+                record["status"] = "no_declared_widening_or_breach_within_reviewed_scope"
         if scoped is not None:
             record[scope.kind] = scoped.record(candidate, baseline.depth)
         candidates.append(record)

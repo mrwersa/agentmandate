@@ -31,6 +31,10 @@ For a release rejected by `diff`, use
 [`remediate --released FILE`](release-remediation.md). It searches for candidates
 with no widening, reachable breach, lint error or required-path regression.
 The original release finding still exits 1, even when a candidate is returned.
+The CLI can consume conditions or fixed grants for proposal checks; declared
+widening and ordinary workflows remain binding. Scoped passes retain the
+unconditional result and do not waive an ordinary CI gate. The Action does not
+pass these evidence inputs into its repair planner.
 With this flag, workflow annotations pin the released file rather than the
 proposed file. The Action does not apply repair proposals automatically.
 Enable [Action repair suggestions](action-repairs.md) to include bounded
@@ -40,7 +44,7 @@ original checks and verdict. Repair errors and timeouts remain advisory.
 ## The action
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.44.1
+- uses: mrwersa/agentmandate@v0.45.0
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -201,7 +205,7 @@ For a repository with a separately protected `authority-reviews` branch:
     git show origin/main:mandate.json > "$RUNNER_TEMP/released.json"
     git fetch origin authority-reviews:refs/remotes/origin/authority-reviews
     echo "REVIEW_AS_OF=$(date -u +%F)" >> "$GITHUB_ENV"
-- uses: mrwersa/agentmandate@v0.44.1
+- uses: mrwersa/agentmandate@v0.45.0
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json
@@ -435,9 +439,15 @@ Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with
 
 | Exit code | Meaning |
 |---|---|
-| `0` | Clean |
+| `0` | Clean within the selected analysis scope |
 | `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, required-workflow regression, or a non-conformant replay |
 | `2` | Usage or I/O error, malformed manifest/IR/attachment, unsupported composition, version, or analysis profile |
+
+For condition-scoped release remediation, exit 0 can coexist with
+`unconditional_gate_passed: false`. It means the original proposal passes
+within the reviewed scope, not that ordinary `reach`, `diff` or the Action
+would pass. Human output warns when that scoped-clean run still fails the
+ordinary gate; keep both results when building a CI decision.
 
 ## Compare Rego revisions
 

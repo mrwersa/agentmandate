@@ -832,5 +832,36 @@
       "tests/test_action_repairs.py",
       "tests/test_action_delivery.py"
     ]
+  },
+  {
+    "doc": "docs/release-remediation.md",
+    "fixtures": [
+      "examples/release-scoped-remediation/condition-released.json",
+      "examples/release-scoped-remediation/condition-required.json",
+      "examples/release-scoped-remediation/delegation-released.json",
+      "examples/release-scoped-remediation/delegation-required.json",
+      "tests/fixtures/release-scoped-remediation-v1.json",
+      "examples/conditional-remediation/manifest.json",
+      "examples/conditional-remediation/condition.json",
+      "examples/conditional-remediation/context.json",
+      "examples/conditional-remediation/capture.sql",
+      "examples/delegated-remediation/manifest.json",
+      "examples/delegated-remediation/chain.json",
+      "examples/delegated-remediation/capture.json",
+      "examples/delegated-remediation/select_rows-attachment.json",
+      "examples/delegated-remediation/export_rows-attachment.json",
+      "examples/delegated-remediation/purge_rows-attachment.json"
+    ],
+    "id": "release-scoped-remediation",
+    "kind": "baseline",
+    "schemas": [
+      "agentmandate.remediation/v6",
+      "agentmandate.required-workflows/v2",
+      "agentmandate.conditions/v2",
+      "agentmandate.delegations/v2"
+    ],
+    "tests": [
+      "tests/test_release_scoped_remediation.py"
+    ]
   }
 ]

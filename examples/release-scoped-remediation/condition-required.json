@@ -1,0 +1,37 @@
+{
+  "schema": "agentmandate.required-workflows/v2",
+  "agent": "synthetic-conditional-export",
+  "manifest_sha256": "cd3a65e5c5247f8fb46c01abd593e5b53b624457606e299c0c66bd1daa0301b2",
+  "reviewer": "synthetic-workflow-reviewer",
+  "reason": "Synthetic released paths for scoped repair; not business-outcome evidence.",
+  "workflows": [
+    {
+      "name": "two-exports-one-binding",
+      "steps": [
+        {
+          "tool": "run_query",
+          "principal": "caller",
+          "approved": false
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": true,
+          "binding": 0,
+          "value": "1",
+          "unit": "record",
+          "quantity": "exported_rows"
+        },
+        {
+          "tool": "export_rows",
+          "principal": "caller",
+          "approved": true,
+          "binding": 0,
+          "value": "1",
+          "unit": "record",
+          "quantity": "exported_rows"
+        }
+      ]
+    }
+  ]
+}

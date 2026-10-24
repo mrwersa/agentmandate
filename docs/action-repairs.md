@@ -21,7 +21,7 @@ request's base commit:
   run: |
     git show "$BASE_COMMIT:mandate.json" > "$RUNNER_TEMP/released.json"
 - id: authority
-  uses: mrwersa/agentmandate@v0.44.1
+  uses: mrwersa/agentmandate@v0.45.0
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json

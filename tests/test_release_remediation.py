@@ -262,15 +262,12 @@ def test_unusable_released_reference_is_refused(defect):
         plan(proposed, released=released)
 
 
-@pytest.mark.parametrize("flag,scope", [("--condition", "condition_scope"),
-                                      ("--delegation-attachment", "delegation_scope")])
-def test_scoped_composition_is_refused_before_input_reads(flag, scope, capsys):
+@pytest.mark.parametrize("flag", ["--condition", "--delegation-attachment"])
+def test_release_evidence_still_requires_complete_inputs(flag, capsys):
     assert main(["remediate", "absent", "--released", "absent", flag, "absent"]) == 2
     captured = capsys.readouterr()
-    assert not captured.out and "cannot be combined" in captured.err
-    released, proposed = inputs()
-    with pytest.raises(ValueError, match="cannot be combined"):
-        plan(proposed, released=released, **{scope: object()})
+    assert not captured.out and "error:" in captured.err
+    assert "cannot be combined" not in captured.err
 
 
 def test_cli_retains_failing_release_exit_and_pins_both_inputs(capsys):

@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-23",
+  "as_of": "2026-10-24",
   "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
   "phases": [
     {
@@ -100,7 +100,7 @@
           "title": "Explainable counterfactual remediation",
           "status": "partial",
           "evidence": "docs/remediation.md",
-          "reason": "Removal, approval, named-quantity ceilings/grids, required paths, discovery, release-aware repair and advisory Action suggestions are implemented. Candidates remove widening and pass ordinary breach, lint and released-workflow checks. Separate condition and fixed-delegation modes preserve evidence. Restriction authoring, grant edits and global synthesis remain open; domain completeness stays distinct from reach-depth truncation."
+          "reason": "Removal, approval, named-quantity ceilings/grids, required paths, discovery, release-aware repair and advisory Action suggestions are implemented. Release repairs can consume conditions or fixed grants for proposal checks while retaining unconditional findings, declared widening and ordinary workflows. Restriction authoring, grant edits and global synthesis remain open; domain completeness stays distinct from reach-depth truncation."
         },
         {
           "title": "Named-review CI workflow",
