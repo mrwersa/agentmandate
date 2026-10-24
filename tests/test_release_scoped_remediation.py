@@ -293,9 +293,33 @@ def test_cli_scope_counts_input_pins_and_original_exit(kind, discovery, machine,
         assert "reviewed_analysis" in result["release"]
     else:
         assert f"RELEASE REVIEWED {kind}s" in output.out
-        assert "proposal breach/lint checks only" in output.out
+        assert ("conditions qualify proposal breach/lint checks only" if kind == "condition"
+                else "delegations add fixed grant-surface checks; "
+                     "proposal Authority and lint are unchanged") in output.out
+        if not (discovery and kind == "delegation"):
+            assert ("gate_passed=True unconditional_gate_passed="
+                    + str(kind == "delegation") + ";") in output.out
         if kind == "condition":
             assert "UNCONDITIONAL baseline retained" in output.out
+
+
+@pytest.mark.parametrize("machine", [False, True])
+@pytest.mark.parametrize("discovery", [False, True])
+def test_scoped_clean_cli_warns_without_changing_exit(machine, discovery, capsys):
+    args = argv("condition", discovery)
+    args[1] = str(EXAMPLE / "condition-released.json")
+    if not discovery:
+        args[args.index("--ceiling-grid") + 1] = "export_rows=0:1:1"
+    assert main(args + (["--json"] if machine else [])) == 0
+    output = capsys.readouterr()
+    assert not output.err
+    if machine:
+        result = json.loads(output.out)
+        assert result["release"]["gate_passed"]
+        assert not result["release"]["unconditional_gate_passed"]
+        assert result["candidates"] == []
+    else:
+        assert "WARNING scoped analysis passes; ordinary release gate still fails." in output.out
 
 
 def test_conditions_and_grants_still_cannot_compose_with_release(capsys):

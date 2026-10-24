@@ -439,9 +439,15 @@ Use the reviewed [dynamic-inventory workflow](dynamic-inventory.md) with
 
 | Exit code | Meaning |
 |---|---|
-| `0` | Clean |
+| `0` | Clean within the selected analysis scope |
 | `1` | A finding: lint error, reachable breach, unresolved producer evidence, widening diff, required-workflow regression, or a non-conformant replay |
 | `2` | Usage or I/O error, malformed manifest/IR/attachment, unsupported composition, version, or analysis profile |
+
+For condition-scoped release remediation, exit 0 can coexist with
+`unconditional_gate_passed: false`. It means the original proposal passes
+within the reviewed scope, not that ordinary `reach`, `diff` or the Action
+would pass. Human output warns when that scoped-clean run still fails the
+ordinary gate; keep both results when building a CI decision.
 
 ## Compare Rego revisions
 

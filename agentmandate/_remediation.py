@@ -255,9 +255,14 @@ def _release_record(released, mandate, depth, requirements, scope=None, evaluati
         # the reference or use it to erase declared widening/workflow regressions.
         authority = analyse(evaluation.effective, depth=depth)
         scoped_lint = check(evaluation.effective)
+        qualification = (
+            "conditions qualify proposal breach/lint checks only"
+            if scope.kind == "conditions" else
+            "delegations add fixed grant-surface checks; proposal Authority and lint are unchanged"
+        )
         record["scope"] = (
-            f"declared manifest-v2 widening and workflows; {scope.kind} qualify proposal "
-            "breach/lint checks only, at fixed depth; not deployment approval"
+            f"declared manifest-v2 widening and workflows; {qualification}, "
+            "at fixed depth; not deployment approval"
         )
         record["unconditional_gate_passed"] = record["gate_passed"]
         record["reviewed_analysis"] = {

@@ -3988,7 +3988,7 @@
     "tests/fixtures/producer-result-v2-unresolved.json": "0e078b474ace2421c70188694025c42aa5233ad6b244815b422ee068c6abc13c",
     "tests/fixtures/rego-effective-diff-v2.json": "ee9360ca2e14e32e6d6dd305eda785723d2f90dbb5d26cd9a28ef4334bd99ca1",
     "tests/fixtures/release-remediation-v1.json": "e42a88e4379e6e07fd3cc6a231d49ee8d3f4f304e2d93a94b8f8282fc33e2b10",
-    "tests/fixtures/release-scoped-remediation-v1.json": "4f48cce70ff36a2e3ef3bc766e24c2c02d86e0f85161d2a6c9053e95e5140a06",
+    "tests/fixtures/release-scoped-remediation-v1.json": "fa7cfc76fe21c9dde2c8def10c6b145826fc5d615b767ae8b34a477ea7f198c5",
     "tests/fixtures/release-workflows-v1.json": "07026c97b7d6df2e92ba7049966eac099bf0da59a1d40c3abceb710a221fdbec",
     "tests/fixtures/remediation-breached-v6.json": "ca69b5e04a75cdf64c964ddd202e38ff5fc61b0e465008b2c200a97eb2be9fa9",
     "tests/fixtures/remediation-ceiling-clean-v6.json": "30f8ed38e0796cfa8c022f492a563370880255d29d83b015386a13a2365cd8c6",

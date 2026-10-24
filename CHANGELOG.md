@@ -16,6 +16,9 @@ All notable changes to this project are documented here. The format follows
   released workflows. Release records retain the full unconditional comparison
   and gate result beside explicitly scoped proposal analysis and evidence.
   Candidate claim names identify the reviewed scope; no proposal is applied.
+  Human output includes each candidate's unconditional result and warns when
+  a scoped-clean run still fails the ordinary gate. Grants are described as
+  additional surface checks, without implying a projection of Authority.
 - Ineligible evidence retains the original release comparison and findings
   while stopping recommendations before enumeration. Conditions and delegations
   remain mutually exclusive; the Action does not acquire new evidence inputs.

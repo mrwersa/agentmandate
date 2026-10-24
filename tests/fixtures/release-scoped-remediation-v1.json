@@ -125,7 +125,7 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "3e503daf75d0baaff4b21d7b79a2277f3f58eb7ba8e104d3ae16873d27756954",
+      "stdout_sha256": "424a63a219f85d2d43949cab7ad9f915c49f6fae8191fad5e8ac5525f636d09f",
       "stderr": ""
     },
     {
@@ -162,7 +162,7 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "ab4f5e94563a52f0441312c0e1f64a66f48be1a0932d593a1d876185d444a698",
+      "stdout_sha256": "53eab247db7b28d779204d01a6e9fd9ad352bd28755351e73f748c4b429d3be7",
       "stderr": ""
     },
     {
@@ -200,7 +200,7 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "f3fbe2b1f7e893479111614dd67530827e11cac3ee09b4669535111a716ff19d",
+      "stdout_sha256": "4f44bf025408a3a72a9bb265a2868f45633fc86e4a124be5e3951549d6435e06",
       "stderr": ""
     }
   ]

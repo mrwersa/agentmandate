@@ -150,7 +150,9 @@ model result, not a clean ordinary release gate. The candidate status is
 `no_declared_widening_or_breach_within_reviewed_scope`, and human output prints
 the unconditional gate result and evidence boundary. The original proposal's
 findings still determine exit 1 when a repair is found. If the proposal already
-passes within the reviewed scope, no edits are suggested.
+passes within the reviewed scope, no edits are suggested. A human-readable
+warning identifies a scoped-clean run whose unconditional gate still fails.
+Every scoped candidate line also prints its unconditional gate result.
 
 The GitHub Action's repair inputs remain unchanged: it does not pass conditions
 or grants into the planner. Choosing a scoped CLI proposal does not waive any
