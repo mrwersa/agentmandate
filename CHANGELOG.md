@@ -12,10 +12,16 @@ All notable changes to this project are documented here. The format follows
   fixed-charge declarations require explicit `version: 3` so older builds
   cannot silently discard them. Unknown fields, duplicate JSON/YAML keys and
   non-integer schema versions are rejected. There is no legacy reader.
+  YAML merge defaults and explicit overrides remain supported; only duplicate
+  authored keys are refused.
+- `Tool` is no longer hashable because it owns a copied, mutable charge mapping,
+  including when empty. Frozen dataclasses do not freeze nested mappings;
+  declarations must remain unchanged during analysis.
 - The manifest IR adapter is now 4 and its defaults adapter is 3. Current
   profiles include a fixed-charge fact for each tool and validate units across
   all contributions to a pool. Generic IR and result envelope versions remain 2.
   Scenario witnesses use `agentmandate.scenarios/v3` to preserve structured costs.
+  Default-evidence locations name the current manifest schema as well.
 - Current synthetic manifests, workflow pins, captures and result baselines are
   regenerated for the new model. Original captured evidence and acceptance
   records retain their bytes; no historical acceptance covers new charges.
@@ -29,6 +35,8 @@ All notable changes to this project are documented here. The format follows
 - Reachability, replay, required paths and IR account for every pool separately,
   including fixed and variable contributions to the same pool. Witnesses show
   the fixed costs. Decimal arithmetic remains independent of caller precision.
+  Direct workflow checks refuse incompatible fixed/variable units before
+  accumulation, including shared pools without a declared budget.
 - Release comparison reports fixed-cost changes even for unreachable tools.
   Removing accounting from a retained tool requires review; deleting the whole
   tool remains an authority reduction. Repairs retain fixed rates and recheck

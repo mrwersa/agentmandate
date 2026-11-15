@@ -432,10 +432,21 @@ def loads(text: str, source: str | None = None) -> Mandate:
             "A JSON manifest works with no extra dependency."
         ) from exc
     class UniqueLoader(yaml.SafeLoader):
-        def construct_mapping(self, node, deep=False):
-            mapping = super().construct_mapping(node, deep=deep)
-            _unique_fields((self.construct_object(k, deep=deep), None) for k, _ in node.value)
-            return mapping
+        def __init__(self, stream):
+            super().__init__(stream)
+            self._authored_mappings = set()
+
+        def flatten_mapping(self, node):
+            # Merge expansion mutates anchor nodes too. Check their authored
+            # keys once, before inherited keys and legal overrides are combined.
+            if node not in self._authored_mappings:
+                self._authored_mappings.add(node)
+                _unique_fields(
+                    (key.value if key.tag == "tag:yaml.org,2002:merge"
+                     else self.construct_object(key), None)
+                    for key, _ in node.value if isinstance(key, yaml.ScalarNode)
+                )
+            super().flatten_mapping(node)
 
     try:
         raw = yaml.load(text, Loader=UniqueLoader)

@@ -24,8 +24,8 @@
   "findings": [],
   "gate_passed": true,
   "inputs": {
-    "exceptions_sha256": "9b25ab11acf1d46a6b017c9a9fbf6bcc752c806bd85ab9b2591a617fca03442a",
-    "index_sha256": "ae4f7e96e31e8f18a9572f33768079082c6d6c747afa7d70896cb91bdbd62853"
+    "exceptions_sha256": "b1fcb8614a48e14a3f03de187f45fd6c3d1f83fb364260010946472415ff11d1",
+    "index_sha256": "3478cb439920ef1feea21c6ae5a5fffa072dd7234fdf68d8ccf367754f36956b"
   },
   "inventory": {
     "as_of": "2026-10-11",
@@ -35,8 +35,8 @@
         "agent": "billing-agent",
         "artifacts": {
           "ir": {
-            "expected_sha256": "c52d0dc73877530c246766f8b10d32cad9823ff4b1635a653ceddf4c8a07ba53",
-            "observed_sha256": "c52d0dc73877530c246766f8b10d32cad9823ff4b1635a653ceddf4c8a07ba53",
+            "expected_sha256": "bc5d6ff86793de14c275776f10d9a5835b78aab6e3f1f7aa1a033bf528d5a3f7",
+            "observed_sha256": "bc5d6ff86793de14c275776f10d9a5835b78aab6e3f1f7aa1a033bf528d5a3f7",
             "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
             "status": "verified"
           },
@@ -80,8 +80,8 @@
         "agent": "release-agent",
         "artifacts": {
           "ir": {
-            "expected_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
-            "observed_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
+            "expected_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
+            "observed_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
             "path": "examples/fleet-inventory/release-repo/authority-ir.json",
             "status": "verified"
           },
@@ -131,8 +131,8 @@
         "agent": "release-agent",
         "artifacts": {
           "ir": {
-            "expected_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
-            "observed_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
+            "expected_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
+            "observed_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
             "path": "examples/fleet-inventory/release-repo/authority-ir.json",
             "status": "verified"
           },
@@ -187,7 +187,7 @@
       }
     ],
     "fleet": "example-platform",
-    "index_sha256": "ae4f7e96e31e8f18a9572f33768079082c6d6c747afa7d70896cb91bdbd62853",
+    "index_sha256": "3478cb439920ef1feea21c6ae5a5fffa072dd7234fdf68d8ccf367754f36956b",
     "inventory_complete_within_declared_index": true,
     "query": {
       "environment": null,

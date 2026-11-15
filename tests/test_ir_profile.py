@@ -237,7 +237,7 @@ def test_profile_rejects_missing_or_false_default_provenance() -> None:
     with pytest.raises(IRFormatError, match="evidence is empty"):
         _to_mandate(without_evidence)
 
-    schema_evidence = Evidence("source:manifest-v3", "manifest:v1#/defaults/tool.effect")
+    schema_evidence = Evidence("source:manifest-v3", "manifest:v3#/defaults/tool.effect")
     false_default = replace_fact(
         value,
         effect.subject,

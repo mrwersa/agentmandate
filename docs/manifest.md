@@ -31,6 +31,8 @@ pip install agentmandate           # JSON only, no dependencies
 Unknown top-level, tool and limit fields are errors. Duplicate JSON and YAML
 keys are rejected instead of choosing one value. This includes duplicate charge
 pool names. Quote decimal amounts to preserve digits through YAML parsing.
+YAML merge keys and explicit overrides are supported: duplicate detection applies
+to keys authored in a mapping, before inherited defaults are expanded.
 
 ## `limits`
 

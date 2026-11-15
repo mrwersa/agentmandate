@@ -877,7 +877,8 @@
     "tests": [
       "tests/test_fixed_charges.py",
       "tests/test_principal_accounting.py",
-      "tests/test_scalar_handover.py"
+      "tests/test_scalar_handover.py",
+      "tests/test_fixed_charge_review.py"
     ]
   }
 ]

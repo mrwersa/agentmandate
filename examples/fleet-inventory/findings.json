@@ -6,7 +6,7 @@
       "id": "release/prod",
       "ir": {
         "path": "examples/fleet-inventory/release-repo/authority-ir.json",
-        "sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8"
+        "sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c"
       },
       "manifest": {
         "path": "examples/fleet-inventory/release-repo/manifest.json",
@@ -27,7 +27,7 @@
       "id": "release/staging",
       "ir": {
         "path": "examples/fleet-inventory/release-repo/authority-ir.json",
-        "sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8"
+        "sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c"
       },
       "manifest": {
         "path": "examples/fleet-inventory/release-repo/manifest.json",

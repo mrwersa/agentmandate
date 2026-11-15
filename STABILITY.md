@@ -48,6 +48,12 @@ are separate. The model does not cover multiple variable amount arguments,
 timed rates, concurrent gauges,
 negative consumption, replenishment or argument-dependent production.
 
+`Tool` is no longer hashable: its copied `fixed_charges` mapping is mutable,
+even when empty. Dataclass freezing is shallow; it prevents field reassignment,
+not edits inside mappings. Witness charge mappings are also copied. Use tool
+names as lookup keys and keep declarations unchanged during analysis. For a
+complete contract identity, use the canonical IR digest rather than Python's hash.
+
 ## Current artifact boundaries
 
 | Family | Current contract |

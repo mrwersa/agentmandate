@@ -133,6 +133,8 @@ the semantic projection and the manifest-version default. A future raw-syntax
 importer may additionally record explicitness and a raw source location, but
 must not rewrite this semantic fact. Default-definition locations point to the
 manifest-version source, never to a raw key that may not exist.
+Current default locations use `manifest:v3#/defaults/...`: the numeral names
+the manifest schema, independently of the generic IR version.
 Every semantic digest records the adapter identifier and adapter version that
 produced the projection. Projection changes require a new adapter version even
 when `ir_version` is unchanged, so consumers can distinguish changed source

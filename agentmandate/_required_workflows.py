@@ -207,6 +207,7 @@ def _check(mandate, steps, depth):
     spend = {}
     effects = {}
     totals = {}
+    units = {name: cap.unit for name, cap in mandate.limits.quantities.items()}
     for index, step in enumerate(steps, 1):
         tool = mandate.tool(step.tool)
         if tool is None:
@@ -233,6 +234,12 @@ def _check(mandate, steps, depth):
                 index, "workflow.effect-budget-exceeded", "call count exceeds its effect budget"
             )
         for name, charge in tool.fixed_charges.items():
+            if name in units and charge.unit != units[name]:
+                return _failure(
+                    index, "workflow.unit-mismatch",
+                    f"fixed charge and quantity {name!r} use different units",
+                )
+            units[name] = charge.unit
             totals[name] = totals.get(name, Decimal(0)) + charge.amount
             cap = mandate.limits.quantities.get(name)
             if cap is not None and totals[name] > cap.amount:
@@ -256,17 +263,17 @@ def _check(mandate, steps, depth):
             return _failure(
                 index, "workflow.binding-unavailable", "the selected binding has not been produced"
             )
-        cap = mandate.limits.quantities.get(tool.quantity)
         if (
             step.quantity != tool.quantity
             or step.value.unit != tool.ceiling.unit
-            or (cap is not None and step.value.unit != cap.unit)
+            or (tool.quantity in units and step.value.unit != units[tool.quantity])
         ):
             return _failure(
                 index,
                 "workflow.unit-mismatch",
                 "call and ceiling use different quantities or units",
             )
+        units[tool.quantity] = step.value.unit
         key = (tool.name, tool.scope_key, step.binding)
         spend[key] = spend.get(key, Decimal(0)) + step.value.amount
         if spend[key] > tool.ceiling.amount:

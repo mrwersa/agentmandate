@@ -6,8 +6,8 @@
       "agent": "billing-agent",
       "artifacts": {
         "ir": {
-          "expected_sha256": "c52d0dc73877530c246766f8b10d32cad9823ff4b1635a653ceddf4c8a07ba53",
-          "observed_sha256": "c52d0dc73877530c246766f8b10d32cad9823ff4b1635a653ceddf4c8a07ba53",
+          "expected_sha256": "bc5d6ff86793de14c275776f10d9a5835b78aab6e3f1f7aa1a033bf528d5a3f7",
+          "observed_sha256": "bc5d6ff86793de14c275776f10d9a5835b78aab6e3f1f7aa1a033bf528d5a3f7",
           "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
           "status": "verified"
         },
@@ -51,8 +51,8 @@
       "agent": "release-agent",
       "artifacts": {
         "ir": {
-          "expected_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
-          "observed_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
+          "expected_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
+          "observed_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
           "path": "examples/fleet-inventory/release-repo/authority-ir.json",
           "status": "verified"
         },
@@ -102,8 +102,8 @@
       "agent": "release-agent",
       "artifacts": {
         "ir": {
-          "expected_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
-          "observed_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
+          "expected_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
+          "observed_sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c",
           "path": "examples/fleet-inventory/release-repo/authority-ir.json",
           "status": "verified"
         },
@@ -152,7 +152,7 @@
   ],
   "findings": [],
   "fleet": "example-platform",
-  "index_sha256": "3ee5bb6f4bdb8da7f7476fba5f08c7c03d15e6e45e938c24cb4506f566fe5a2f",
+  "index_sha256": "22ccee5bd75baedb933b67001f51668a2d9ca2e968d1ff98c73821a1eb75da7f",
   "inventory_complete_within_declared_index": true,
   "query": {
     "environment": null,

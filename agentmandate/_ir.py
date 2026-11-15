@@ -829,7 +829,7 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
             evidence_items.append(
                 Evidence(
                     source=defaults_source_id,
-                    location=f"manifest:v1#/defaults/{default_name}",
+                    location=f"manifest:v{SCHEMA_VERSION}#/defaults/{default_name}",
                 )
             )
         candidate = Fact(

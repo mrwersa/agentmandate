@@ -360,13 +360,21 @@ def _fixed_charge_changes(before: Tool | None, after: Tool | None) -> list[Chang
         old, new = old_charges.get(pool), new_charges.get(pool)
         if old == new:
             continue
-        direction = NARROWING if after is None or (
-            old is not None and new is not None and old.unit == new.unit and new.amount < old.amount
-        ) else WIDENING
+        if after is None:
+            direction, reason = NARROWING, "tool removed with its fixed accounting"
+        elif new is None:
+            direction, reason = WIDENING, "accounting removed on a retained tool; review required"
+        elif old is None:
+            direction, reason = WIDENING, "fixed charge added"
+        elif old.unit != new.unit:
+            direction, reason = WIDENING, "charge unit changed; amounts are not comparable"
+        elif new.amount < old.amount:
+            direction, reason = NARROWING, "fixed charge decreased"
+        else:
+            direction, reason = WIDENING, "fixed charge increased"
         changes.append(Change(
             direction, "fixed charge",
-            f"tool {tool.name}, pool {pool!r}: {old or 'none'} -> {new or 'none'}; "
-            "deleting or reassigning accounting on a retained tool requires review",
+            f"tool {tool.name}, pool {pool!r}: {old or 'none'} -> {new or 'none'}; {reason}",
         ))
     return changes
 
