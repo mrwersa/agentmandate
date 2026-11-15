@@ -6,14 +6,14 @@
       "agent": "billing-agent",
       "artifacts": {
         "ir": {
-          "expected_sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d",
-          "observed_sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d",
+          "expected_sha256": "c52d0dc73877530c246766f8b10d32cad9823ff4b1635a653ceddf4c8a07ba53",
+          "observed_sha256": "c52d0dc73877530c246766f8b10d32cad9823ff4b1635a653ceddf4c8a07ba53",
           "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
           "status": "verified"
         },
         "manifest": {
-          "expected_sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810",
-          "observed_sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810",
+          "expected_sha256": "1ced5e23f2a5165226b34238b729c2f080a034f05238a7af01d9afc4107adb6a",
+          "observed_sha256": "1ced5e23f2a5165226b34238b729c2f080a034f05238a7af01d9afc4107adb6a",
           "path": "examples/fleet-inventory/billing-repo/manifest.json",
           "status": "verified"
         }
@@ -51,14 +51,14 @@
       "agent": "release-agent",
       "artifacts": {
         "ir": {
-          "expected_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
-          "observed_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+          "expected_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
+          "observed_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
           "path": "examples/fleet-inventory/release-repo/authority-ir.json",
           "status": "verified"
         },
         "manifest": {
-          "expected_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
-          "observed_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+          "expected_sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad",
+          "observed_sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad",
           "path": "examples/fleet-inventory/release-repo/manifest.json",
           "status": "verified"
         }
@@ -102,14 +102,14 @@
       "agent": "release-agent",
       "artifacts": {
         "ir": {
-          "expected_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
-          "observed_sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb",
+          "expected_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
+          "observed_sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8",
           "path": "examples/fleet-inventory/release-repo/authority-ir.json",
           "status": "verified"
         },
         "manifest": {
-          "expected_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
-          "observed_sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e",
+          "expected_sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad",
+          "observed_sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad",
           "path": "examples/fleet-inventory/release-repo/manifest.json",
           "status": "verified"
         }
@@ -152,7 +152,7 @@
   ],
   "findings": [],
   "fleet": "example-platform",
-  "index_sha256": "e2058a916c47f11b2ede16256ba1d9ff52ae9aca100f002ab5958ed53e1a1b6f",
+  "index_sha256": "3ee5bb6f4bdb8da7f7476fba5f08c7c03d15e6e45e938c24cb4506f566fe5a2f",
   "inventory_complete_within_declared_index": true,
   "query": {
     "environment": null,

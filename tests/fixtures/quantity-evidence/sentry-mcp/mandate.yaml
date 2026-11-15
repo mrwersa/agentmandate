@@ -1,4 +1,4 @@
-version: 2
+version: 3
 agent: sentry-operations-agent
 identity: spiffe://example/agents/sentry-operations-agent
 limits:

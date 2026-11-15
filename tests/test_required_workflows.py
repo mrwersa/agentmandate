@@ -587,7 +587,7 @@ def test_cli_text_names_conformant_paths_and_rejection_reasons(capsys):
         == 1
     )
     text = capsys.readouterr().out
-    assert "caller-supplied annotations; manifest-v2 model only" in text
+    assert "caller-supplied annotations; manifest-v3 model only" in text
     assert "REQUIRED normal-refund: conformant_within_manifest_model" in text
     assert "REJECTED normal-refund: workflow.ceiling-exceeded at step 2" in text
     assert "BREACH quantity_budget" in text

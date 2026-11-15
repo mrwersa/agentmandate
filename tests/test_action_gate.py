@@ -270,7 +270,7 @@ def test_a_lint_warning_is_reported_without_blocking(
     finding, which is the failure this package is about.
     """
     (workspace / "warned.yaml").write_text(
-        """version: 2
+        """version: 3
 agent: warner
 limits: { quantities: {value: { amount: 500, unit: GBP }}, depth: 8 }
 tools:
@@ -299,7 +299,7 @@ def test_an_error_still_blocks_and_is_not_a_note(
     workspace: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     (workspace / "broken.yaml").write_text(
-        """version: 2
+        """version: 3
 agent: broken
 limits: { quantities: {value: { amount: 500, unit: GBP }}, depth: 8 }
 tools:

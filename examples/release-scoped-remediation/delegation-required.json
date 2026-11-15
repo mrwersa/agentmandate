@@ -1,7 +1,7 @@
 {
   "schema": "agentmandate.required-workflows/v2",
   "agent": "synthetic-delegated-export",
-  "manifest_sha256": "dc0a76c322770a2fbdaa20f96c86647c552d6799f7701fc983ba0bccfae2b9e4",
+  "manifest_sha256": "a25535e5e56b7d1762fe62dc299d0d162a580f3554e15cfbb1d7dcea266c681e",
   "reviewer": "synthetic-workflow-reviewer",
   "reason": "Synthetic released paths for scoped repair; not business-outcome evidence.",
   "workflows": [

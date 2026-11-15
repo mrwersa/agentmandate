@@ -269,7 +269,7 @@ def study():
         if result["mismatches"]:
             failures.append({"case": case["name"], "fields": result["mismatches"]})
     return {
-        "scope": "synthetic manifest-v2 checks; exhaustive integer amounts and binding choices",
+        "scope": "synthetic manifest-v3 checks; exhaustive integer amounts and binding choices",
         "cases": len(inputs),
         "failures": failures,
         "reference_states": states,

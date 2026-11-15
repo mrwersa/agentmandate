@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "agent": "billing-agent",
   "identity": "billing-operator",
   "tools": [

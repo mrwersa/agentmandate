@@ -125,6 +125,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "open_case",
               "principal": "caller",
               "produces": "case",
@@ -134,6 +135,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "search_cases",
               "principal": "caller",
               "produces": "case",
@@ -143,6 +145,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "fetch_case",
               "principal": "caller",
               "requires": [
@@ -157,6 +160,7 @@
                 "unit": "GBP"
               },
               "effect": "irreversible",
+              "fixed_charges": {},
               "name": "issue_refund",
               "principal": "caller",
               "quantity": "value",
@@ -169,7 +173,7 @@
               "value_arg": "amount"
             }
           ],
-          "version": 2
+          "version": 3
         },
         "repair_cost": {
           "added_approval_tools": [],
@@ -292,7 +296,7 @@
       "successful_candidates": 6
     },
     "input": {
-      "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+      "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05"
     },
     "keep_tools": [
       "issue_refund",
@@ -702,15 +706,15 @@
           "steps": 2
         }
       ],
-      "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
+      "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05",
       "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
       "reviewer": "synthetic-example-reviewer",
       "schema": "agentmandate.required-workflows/v2",
-      "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-      "source_sha256": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325"
+      "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+      "source_sha256": "8135ad11bdc5579b041485495ed9c92b87d0560c19aa6efa7e06c8a9cae1300f"
     },
     "schema": "agentmandate.remediation/v6",
-    "scope": "manifest-v2 reachability only; candidates require human selection",
+    "scope": "manifest-v3 reachability only; candidates require human selection",
     "search": {
       "candidates_analyzed": 18,
       "candidates_found": 6,

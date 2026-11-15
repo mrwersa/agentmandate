@@ -36,7 +36,7 @@ constraint depends on both its configured limit and the runtime's consumed
 state. Even correct per-request enforcement does not bound one mandate if a
 fresh session, handoff, or policy revision restores capacity the mandate has
 already spent. The experimental continuity profile reconciles that lifecycle
-question without changing manifest-v2 reachability or turning AgentMandate into
+question without changing manifest-v3 reachability or turning AgentMandate into
 a session broker or distributed counter.
 
 A **scope** is a type of resource the agent can hold a binding to, such as
@@ -81,7 +81,8 @@ reachability; it is not a runtime reservation or enforcement mechanism.
 ## The search
 
 The search is breadth-first over states containing held bindings, value already
-spent per (tool, scope, binding), and counts for declared effect budgets.
+spent per (tool, scope, binding), cumulative fixed consumption per pool, and
+counts for declared effect budgets.
 
 Breadth-first search produces a shortest call sequence witnessing each reported
 breach. Short counterexamples are easier to reproduce and review.
@@ -90,14 +91,17 @@ Equivalent states are canonicalised and visited once. A transition that changes
 no tracked state is not enqueued. This avoids repeatedly exploring read-only
 calls that add no bindings or budget consumption.
 
-Monetary transitions spend all available headroom on an interchangeable binding.
-Within manifest v2, spending cannot change tool enablement, and ceilings are
+Variable quantity transitions spend all available headroom on an interchangeable binding.
+Within manifest v3, spending cannot change tool enablement, and ceilings are
 cumulative and independent per tool/binding. Greedy fills therefore preserve
 the bounded maximum and shortest cumulative-breach length; the
 [prefix argument and independent amount-choice checks](docs/headroom-abstraction.md)
 state the assumptions and counterexample outside them. Search arithmetic uses
 an isolated, sufficiently precise Decimal context rather than the caller's
-precision. These properties do not extend to arbitrary request constraints.
+precision. Constant per-call charges preserve the argument: the same call
+sequence adds the same fixed vector to both walks. Charged calls remain in the
+search even after variable headroom is exhausted, including zero-amount calls.
+These properties do not extend to arbitrary request constraints.
 
 The search is bounded by `limits.depth`. Results are a lower bound: no breach at
 depth 8 is not proof that none exists at depth 20, and the report says so when
@@ -143,7 +147,7 @@ the entire argument for the command:
 
 Tool names are comparison identities. A rename is reported as a removal and
 an addition; the current diff does not infer that two differently named tools
-are equivalent. General input-schema constraints are outside manifest v2.
+are equivalent. General input-schema constraints are outside manifest v3.
 
 Effective authority is summarised as reachable tools, effect-on-scope pairs,
 ungated irreversible effects, service-principal tools, maximum extractable
@@ -164,12 +168,16 @@ independently of their breach witnesses. Tools sharing one quantity must use
 exactly the same unit. Different quantity names stay independent even when
 units match; GBP and USD pools can coexist without being summed. A unit or
 quantity-assignment change requires review because accounting is not comparable.
+Fixed-charge changes are compared for every declared tool, even an unreachable
+one. Adding or raising a charge widens; reducing a positive charge in the same
+unit narrows. Removing accounting on a retained tool requires review as widening,
+while deleting the whole tool narrows.
 
 Effect claims use required scopes, falling back to a produced scope only when
 there are no requirements, consistently with reach and IR. Adding a new
 effect/scope pair remains conservative widening even if a stronger effect was
 already reachable on that scope; the diff compares declared pairs rather than
-collapsing them into one maximum effect. Changing a monetary scope key also
+collapsing them into one maximum effect. Changing a variable-quantity scope key also
 requires review as non-comparable, including when added with a ceiling. Neither
 rule supplies a mapping between old and new resource/accounting boundaries.
 

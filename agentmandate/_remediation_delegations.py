@@ -37,7 +37,7 @@ class _DelegationScope:
     target_binding: str
 
     kind = "delegations"
-    description = "manifest-v2 with fixed reviewed delegation surfaces; human selection required"
+    description = "manifest-v3 with fixed reviewed delegation surfaces; human selection required"
     invariant_error = "delegation eligibility changed during repair recheck"
 
     @classmethod

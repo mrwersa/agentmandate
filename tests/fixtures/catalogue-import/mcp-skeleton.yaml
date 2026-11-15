@@ -13,7 +13,7 @@
 #         approvals, identity, ceilings, or deployment completeness. Review
 #         every tool, including reads.
 #
-version: 2
+version: 3
 agent: "refunds"
 
 # REVIEW: set the workload identity this agent runs as.

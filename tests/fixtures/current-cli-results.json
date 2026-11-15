@@ -7,7 +7,7 @@
     ],
     "exit": 0,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba"
     },
     "name": "lint-reviewed",
     "stderr": "",
@@ -21,7 +21,7 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver-v2.yaml": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+      "examples/dispute-resolver-v2.yaml": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05"
     },
     "name": "reach-breached",
     "stderr": "",
@@ -35,7 +35,7 @@
     ],
     "exit": 0,
     "inputs": {
-      "probes/search/pure-read.json": "c0abdce84fd6b25d5a9ec1dbd39212442b43e3b5cef2430b2a1f635e531c5673"
+      "probes/search/pure-read.json": "951d94d586296450b4e43c4b318740f4c0b4582bc6ba8164146e11cc04f3db06"
     },
     "name": "reach-clean",
     "stderr": "",
@@ -50,8 +50,8 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver-v2.yaml": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+      "examples/dispute-resolver-v2.yaml": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05",
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba"
     },
     "name": "diff-widened",
     "stderr": "",
@@ -67,7 +67,7 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f",
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba",
       "examples/observed-calls.jsonl": "dbc243f5638bde7b675c6316f68bd8e3610a1496376f5274f8bceb346195f00d"
     },
     "name": "verify-recorded",
@@ -84,7 +84,7 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f",
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba",
       "examples/otel-trace.json": "b12fbc64574743fbfe3caed67e58cae29f47bed73b362e35709a6a51153d0cf2"
     },
     "name": "verify-otel",
@@ -101,7 +101,7 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f",
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba",
       "examples/refund_agent.py": "21a305160360a4503b4be29e9893d11fca926f4d8c73612a5ccec1c4dab95503"
     },
     "name": "drift-source",
@@ -116,7 +116,7 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba"
     },
     "name": "obligations",
     "stderr": "",
@@ -133,7 +133,7 @@
     ],
     "exit": 0,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f",
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba",
       "examples/reviewed-obligations.json": "cb91e47a05ded04e40f74e52f7379bbbf6c7b0e2be06bf218e158eff4f872066"
     },
     "name": "decision-suite",
@@ -149,7 +149,7 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver.yaml": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+      "examples/dispute-resolver.yaml": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba"
     },
     "name": "unreviewed-suite-refused",
     "stderr": "error: these obligations are not fully reviewed yet: irreversible:issue_refund, approval-required:issue_refund, value-bearing:issue_refund. Each needs the decision your agent returns and at least one probe that reaches it. A suite generated from placeholders would run and measure nothing.\n",
@@ -163,11 +163,11 @@
     ],
     "exit": 1,
     "inputs": {
-      "examples/dispute-resolver-v2.yaml": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+      "examples/dispute-resolver-v2.yaml": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05"
     },
     "name": "scenarios",
     "stderr": "",
-    "stdout": "{\n  \"agent\": \"dispute-resolver\",\n  \"depth\": 8,\n  \"scenarios\": [\n    {\n      \"agent_input\": \"\",\n      \"detail\": \"quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP\",\n      \"environment\": [],\n      \"expected_control\": \"\",\n      \"id\": \"quantity_budget:open_case>search_cases>issue_refund>issue_refund:dbb6d85d9fb7\",\n      \"kind\": \"quantity_budget\",\n      \"path\": [\n        {\n          \"binding\": \"case#1\",\n          \"tool\": \"open_case\"\n        },\n        {\n          \"binding\": \"case#2\",\n          \"tool\": \"search_cases\"\n        },\n        {\n          \"binding\": \"case#1\",\n          \"quantity\": \"value\",\n          \"spent\": \"500\",\n          \"tool\": \"issue_refund\",\n          \"unit\": \"GBP\"\n        },\n        {\n          \"binding\": \"case#2\",\n          \"quantity\": \"value\",\n          \"spent\": \"500\",\n          \"tool\": \"issue_refund\",\n          \"unit\": \"GBP\"\n        }\n      ]\n    }\n  ],\n  \"schema\": \"agentmandate.scenarios/v2\",\n  \"truncated\": true\n}\n"
+    "stdout": "{\n  \"agent\": \"dispute-resolver\",\n  \"depth\": 8,\n  \"scenarios\": [\n    {\n      \"agent_input\": \"\",\n      \"detail\": \"quantity 'value' reaches 1000 GBP, above its cumulative budget of 500 GBP\",\n      \"environment\": [],\n      \"expected_control\": \"\",\n      \"id\": \"quantity_budget:open_case>search_cases>issue_refund>issue_refund:dbb6d85d9fb7\",\n      \"kind\": \"quantity_budget\",\n      \"path\": [\n        {\n          \"binding\": \"case#1\",\n          \"tool\": \"open_case\"\n        },\n        {\n          \"binding\": \"case#2\",\n          \"tool\": \"search_cases\"\n        },\n        {\n          \"binding\": \"case#1\",\n          \"quantity\": \"value\",\n          \"spent\": \"500\",\n          \"tool\": \"issue_refund\",\n          \"unit\": \"GBP\"\n        },\n        {\n          \"binding\": \"case#2\",\n          \"quantity\": \"value\",\n          \"spent\": \"500\",\n          \"tool\": \"issue_refund\",\n          \"unit\": \"GBP\"\n        }\n      ]\n    }\n  ],\n  \"schema\": \"agentmandate.scenarios/v3\",\n  \"truncated\": true\n}\n"
   },
   {
     "argv": [

@@ -155,6 +155,8 @@ def check(mandate: Mandate) -> list[Finding]:
 
     units = {name: {q.unit} for name, q in mandate.limits.quantities.items()}
     for tool in mandate.tools:
+        for pool, value in tool.fixed_charges.items():
+            units.setdefault(pool, set()).add(value.unit)
         if tool.ceiling is not None:
             units.setdefault(tool.quantity, set()).add(tool.ceiling.unit)
     for name, declared in units.items():

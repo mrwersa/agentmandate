@@ -22,7 +22,7 @@
 #         callbacks, webhooks, and links are not expanded; internal calls
 #         and delegated authority remain unknown.
 #
-version: 2
+version: 3
 agent: "refunds"
 
 # REVIEW: set the workload identity this agent runs as.

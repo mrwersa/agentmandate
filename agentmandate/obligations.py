@@ -233,12 +233,16 @@ def derive(mandate: Mandate, depth: int | None = None) -> ObligationSet:
                     ),
                 )
             )
-        if tool.spends_value:
+        if tool.spends_value or tool.fixed_charges:
             obligations.append(
                 Obligation(
                     kind="value-bearing",
                     subject=name,
                     reason=(
+                        "this call consumes fixed quantities from "
+                        + ", ".join(sorted(tool.fixed_charges))
+                        + "; review its quantities, budgets and any variable amount"
+                        if tool.fixed_charges else
                         f"this call spends value up to {tool.ceiling}, so the "
                         "decision that authorises it deserves reviewed cases"
                     ),

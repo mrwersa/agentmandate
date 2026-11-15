@@ -74,7 +74,7 @@ def test_imported_baselines_keep_existing_contracts_and_do_not_authorize_analysi
     _validate_inventory_profile(graph)
     assert graph.to_json() == (FIXTURES / f"{format}-inventory-ir-v2.json").read_text()
     assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
-    with pytest.raises(ValueError, match="manifest-v2"):
+    with pytest.raises(ValueError, match="manifest-v3"):
         _analyse_ir(graph)
 
 
@@ -135,7 +135,7 @@ def test_scan_and_import_commands_emit_pinned_reviewable_outputs(format, tmp_pat
     capsys.readouterr()
     assert main(["reach", "--ir", str(path), "--json"]) == EXIT_USAGE
     refusal = capsys.readouterr()
-    assert refusal.out == "" and "manifest-v2" in refusal.err
+    assert refusal.out == "" and "manifest-v3" in refusal.err
 
 
 def test_reviewed_example_has_identical_direct_and_ir_authority():

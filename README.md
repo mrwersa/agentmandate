@@ -28,7 +28,8 @@ Named cumulative quantities include money, exported records, generated tokens,
 and compute consumed. Each pool has an exact amount and explicit unit; different
 pools are never summed. Effect-class call counts are separate limits. See the
 [records-and-tokens example](docs/quantity-budgets.md) and
-[manifest reference](docs/manifest.md).
+[manifest reference](docs/manifest.md). A call can consume one variable amount
+and several fixed quantities together: see [fixed call charges](docs/fixed-call-charges.md).
 
 ## Run the example
 
@@ -109,7 +110,7 @@ Review the configuration change together with the reachable behavior it enables.
 ## Put it in CI
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.45.0
+- uses: mrwersa/agentmandate@v0.46.0
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -248,7 +249,7 @@ carry: the effect class, which argument spends value, and which scope the limit
 is measured against.
 
 ```yaml
-version: 2
+version: 3
 agent: dispute-resolver
 identity: spiffe://bank/agents/dispute-resolver
 
@@ -279,8 +280,9 @@ do not model arbitrary preconditions, postconditions, or tool implementations.
 
 A **cumulative constraint** makes a decision depend on qualifying earlier
 actions. Its **limit** is the configured bound; its consumed state is what the
-runtime has already counted. In manifest v2, a `ceiling` is the maximum
-cumulative value one tool may spend against one binding of its `scope_key`.
+runtime has already counted. In manifest v3, a `ceiling` is the maximum
+cumulative variable amount one tool may consume against one binding of its
+`scope_key`. Fixed charges apply separately on every completed call.
 `unbounded: true` marks a tool that can be called repeatedly to mint fresh
 bindings, which is what turns a per-scope limit into no mandate-wide bound at
 all.

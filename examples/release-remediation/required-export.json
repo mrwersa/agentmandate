@@ -1,7 +1,7 @@
 {
   "schema": "agentmandate.required-workflows/v2",
   "agent": "synthetic-release-export",
-  "manifest_sha256": "884cb193313416d1d772d20975cf422fa3c50ffbe28976c0953f27d3bccae7d9",
+  "manifest_sha256": "46575d6dfa4d76f8a28e25ffdc8a7ace450986070e54edd687a5fa966c399b19",
   "reviewer": "synthetic-example-author",
   "reason": "Keep two one-record exports. Synthetic requirements, not live deployment evidence.",
   "workflows": [

@@ -121,7 +121,7 @@
         "reason": "Synthetic required export; not live or business-success evidence.",
         "reviewer": "synthetic-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
       }
     }
@@ -241,7 +241,7 @@
         "reason": "Synthetic required export; not live or business-success evidence.",
         "reviewer": "synthetic-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
       }
     }
@@ -359,7 +359,7 @@
         "reason": "Synthetic required export; not live or business-success evidence.",
         "reviewer": "synthetic-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
       }
     }
@@ -478,7 +478,7 @@
         "reason": "Synthetic required export; not live or business-success evidence.",
         "reviewer": "synthetic-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
       }
     }
@@ -601,7 +601,7 @@
         "reason": "Synthetic required export; not live or business-success evidence.",
         "reviewer": "synthetic-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
       }
     }
@@ -722,7 +722,7 @@
         "reason": "Synthetic required export; not live or business-success evidence.",
         "reviewer": "synthetic-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         "source_sha256": "02d38d16a6f98627be42ed598b06327498abf61bf43562114a0ec44ee58d61f9"
       }
     }

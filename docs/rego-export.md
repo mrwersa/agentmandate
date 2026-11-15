@@ -58,7 +58,9 @@ does not authenticate it or discover live deployment identities.
 
 ## Keep sequence controls visible
 
-The supported subset is stateless permission and approval. Accumulated quantity
+The supported subset is stateless permission and approval. Fixed per-call charges
+are reported as `tool.fixed_charges` losses; the policy does not account for them.
+Accumulated quantity
 consumption, effect counts, per-binding tool ceilings, produced-binding
 prerequisites, binding cardinality and role views remain explicit losses. Both exporters use
 the same [loss categories](cedar-export.md#stateful-constraints-block-export).

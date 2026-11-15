@@ -6,7 +6,7 @@
 #
 # Delete each REVIEW comment once you have confirmed the line under it.
 
-version: 2
+version: 3
 agent: "aws-postgres-agent"
 
 # REVIEW: set the workload identity this agent runs as.

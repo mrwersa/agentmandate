@@ -1,4 +1,4 @@
-"""Bounded monotone-box search over exact manifest-v2 repair ceilings."""
+"""Bounded monotone-box search over exact manifest-v3 repair ceilings."""
 
 from __future__ import annotations
 
@@ -159,7 +159,7 @@ def discover(
     }
     report = {
         "schema": RESULT_SCHEMA,
-        "scope": "manifest-v2 reachability only; candidates require human selection",
+        "scope": "manifest-v3 reachability only; candidates require human selection",
         "baseline": baseline.as_dict(),
         "baseline_lint": [asdict(f) for f in lint],
         "keep_tools": sorted(set(keep_tools)),

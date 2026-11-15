@@ -770,5 +770,6 @@ def notes_for(inventory: Inventory) -> list[str]:
         "Source declares what a tool is called and what it takes. It does not "
         "declare whether the effect can be undone, which argument spends "
         "a measured quantity, or what a ceiling counts against. Those are below, guessed."
+        " Fixed per-call charges also require explicit review; the scanner does not infer them."
     )
     return notes

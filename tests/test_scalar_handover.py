@@ -244,7 +244,8 @@ def test_policies_must_share_the_complete_tool_contract(changes):
 
 @pytest.mark.parametrize(
     "change",
-    ["total", "tool", "value_arg", "tool_unit", "total_unit", "multiple_tools", "consistent_unit"],
+    ["total", "tool", "value_arg", "tool_unit", "total_unit", "multiple_tools", "consistent_unit",
+     "fixed_charges"],
 )
 def test_manifest_semantics_are_checked_after_matching_all_digests(change):
     raw = _raw()
@@ -264,6 +265,10 @@ def test_manifest_semantics_are_checked_after_matching_all_digests(change):
     elif change == "consistent_unit":
         manifest["limits"]["quantities"]["value"]["unit"] = "USD"
         manifest["tools"][1]["ceiling"]["unit"] = "USD"
+    elif change == "fixed_charges":
+        manifest["tools"][0]["fixed_charges"] = {
+            "requests": {"amount": "1", "unit": "request"},
+        }
     else:
         tool = copy.deepcopy(manifest["tools"][1])
         tool["name"] = "another_refund"

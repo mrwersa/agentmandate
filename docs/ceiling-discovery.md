@@ -79,7 +79,7 @@ claim a computed frontier.
 
 ## Why pruning preserves the frontier
 
-For fixed manifest-v2 tools, scopes and approval choices, lower ceilings cannot
+For fixed manifest-v3 tools, scopes and approval choices, lower ceilings cannot
 introduce a reachable breach. Enablement and production do not depend on amounts;
 effect-budgeted calls count even at zero spend. The
 [headroom argument](headroom-abstraction.md) states the quantity model. Adding

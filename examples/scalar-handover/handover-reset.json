@@ -31,7 +31,7 @@
       "id": "synthetic-after-binding",
       "mandate": {
         "principal": "caller",
-        "sha256": "7b4433fec3cd9ba85441472fca0e531d9d71981833b17ee5fe09b91c4cd18d9a"
+        "sha256": "9a2c1523396aca53949bb29f10e97220f4c36a9edbc477bc2af5cd6d4b7469c6"
       },
       "mediation": {
         "kind": "platform_verified"
@@ -83,7 +83,7 @@
       "id": "synthetic-before-binding",
       "mandate": {
         "principal": "caller",
-        "sha256": "7b4433fec3cd9ba85441472fca0e531d9d71981833b17ee5fe09b91c4cd18d9a"
+        "sha256": "9a2c1523396aca53949bb29f10e97220f4c36a9edbc477bc2af5cd6d4b7469c6"
       },
       "mediation": {
         "kind": "platform_verified"
@@ -123,7 +123,7 @@
     "successor_exclusive": true
   },
   "id": "synthetic-reset",
-  "manifest_sha256": "7b4433fec3cd9ba85441472fca0e531d9d71981833b17ee5fe09b91c4cd18d9a",
+  "manifest_sha256": "9a2c1523396aca53949bb29f10e97220f4c36a9edbc477bc2af5cd6d4b7469c6",
   "policies": {
     "after": "after-policy",
     "before": "before-policy"

@@ -131,3 +131,8 @@ Later settlement, cancellation, new admissions, crash recovery, distributed
 atomicity, and other tools need their own evidence. Historical captures and
 binding approval retain their existing status. The design is tracked in
 [#224](https://github.com/mrwersa/agentmandate/issues/224).
+
+The scalar reader refuses manifests with `fixed_charges`, including charges on
+other tools. Its evidence domain measures one variable quantity; it cannot
+prove retention or admission for additional fixed consumption. The independent
+manifest Authority remains available, with the handover proof unresolved.

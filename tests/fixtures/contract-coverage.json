@@ -2,8 +2,8 @@
   {
     "doc": "docs/manifest.md",
     "fixtures": [
-      "tests/fixtures/manifest-v2-all-defaults.yaml",
-      "tests/fixtures/manifest-v2-shorthand-defaults.yaml",
+      "tests/fixtures/manifest-v3-all-defaults.yaml",
+      "tests/fixtures/manifest-v3-shorthand-defaults.yaml",
       "examples/quantity-budgets/manifest.json",
       "tests/fixtures/archived-study-manifest-v1.json"
     ],
@@ -273,7 +273,7 @@
     "id": "scenarios",
     "kind": "baseline",
     "schemas": [
-      "agentmandate.scenarios/v2"
+      "agentmandate.scenarios/v3"
     ],
     "tests": [
       "tests/test_scenarios.py",
@@ -862,6 +862,21 @@
     ],
     "tests": [
       "tests/test_release_scoped_remediation.py"
+    ]
+  },
+  {
+    "doc": "docs/fixed-call-charges.md",
+    "fixtures": [
+      "examples/fixed-call-charges/manifest.json",
+      "examples/fixed-call-charges/trace.jsonl"
+    ],
+    "id": "fixed-call-charges",
+    "kind": "baseline",
+    "schemas": [],
+    "tests": [
+      "tests/test_fixed_charges.py",
+      "tests/test_principal_accounting.py",
+      "tests/test_scalar_handover.py"
     ]
   }
 ]

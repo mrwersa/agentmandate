@@ -1,4 +1,4 @@
-"""Report-only repair candidates over the existing manifest-v2 model."""
+"""Report-only repair candidates over the existing manifest-v3 model."""
 
 from __future__ import annotations
 
@@ -34,11 +34,12 @@ def _manifest(mandate: Mandate) -> dict:
         row = asdict(tool)
         row["requires"] = list(tool.requires)
         row["ceiling"] = _quantity(tool.ceiling)
+        row["fixed_charges"] = {name: _quantity(q) for name, q in tool.fixed_charges.items()}
         tools.append({key: value for key, value in row.items() if value is not None})
     limits = {"depth": mandate.limits.depth, "effects": dict(mandate.limits.effects)}
     limits["quantities"] = {name: _quantity(q) for name, q in mandate.limits.quantities.items()}
     return {
-        "version": 2,
+        "version": 3,
         "agent": mandate.agent,
         "identity": mandate.identity,
         "tools": tools,
@@ -187,7 +188,7 @@ def _changed(mandate: Mandate, edits: tuple[_Edit, ...]) -> Mandate | None:
         if tool.name not in removed
     )
     if not tools:
-        return None  # An empty tool list is not a loadable manifest-v2 policy.
+        return None  # An empty tool list is not a loadable manifest-v3 policy.
     roles = {
         role: tuple(name for name in members if name not in removed)
         for role, members in mandate.roles.items()
@@ -241,7 +242,7 @@ def _release_record(released, mandate, depth, requirements, scope=None, evaluati
     delta = compare(released, mandate, depth=depth, required_workflows=requirements)
     lint = check(mandate)
     record = {
-        "scope": "declared manifest-v2 comparison at fixed depth; not deployment approval",
+        "scope": "declared manifest-v3 comparison at fixed depth; not deployment approval",
         "comparison": delta.as_dict(),
         "workflow_regressions": list(delta.workflow_regressions),
         "lint": [asdict(f) for f in lint],
@@ -261,7 +262,7 @@ def _release_record(released, mandate, depth, requirements, scope=None, evaluati
             "delegations add fixed grant-surface checks; proposal Authority and lint are unchanged"
         )
         record["scope"] = (
-            f"declared manifest-v2 widening and workflows; {qualification}, "
+            f"declared manifest-v3 widening and workflows; {qualification}, "
             "at fixed depth; not deployment approval"
         )
         record["unconditional_gate_passed"] = record["gate_passed"]
@@ -282,10 +283,10 @@ def _release_record(released, mandate, depth, requirements, scope=None, evaluati
 
 def _release_baseline(report, released, mandate, requirements, scope=None, evaluation=None):
     if released is not None:
-        report["scope"] = "manifest-v2 release repair; candidates require human selection"
+        report["scope"] = "manifest-v3 release repair; candidates require human selection"
         if scope is not None:
             report["scope"] = (
-                f"manifest-v2 release repair with reviewed {scope.kind}; "
+                f"manifest-v3 release repair with reviewed {scope.kind}; "
                 "no declared widening; proposal analysis within reviewed scope only"
             )
         report["release"] = _release_record(
@@ -378,7 +379,7 @@ def plan(
     findings = check(effective)
     report = {
         "schema": REMEDIATION_SCHEMA,
-        "scope": "manifest-v2 reachability only; candidates require human selection",
+        "scope": "manifest-v3 reachability only; candidates require human selection",
         "baseline": baseline.as_dict(),
         "baseline_lint": [asdict(f) for f in findings],
         "keep_tools": sorted(set(keep_tools)),

@@ -45,7 +45,7 @@ class _ConditionScope:
 
     kind = "conditions"
     description = (
-        "manifest-v2 with reviewed conditional effects; candidates require human selection"
+        "manifest-v3 with reviewed conditional effects; candidates require human selection"
     )
     invariant_error = "condition eligibility changed during repair recheck"
 

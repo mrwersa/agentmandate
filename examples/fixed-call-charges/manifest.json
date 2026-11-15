@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "agent": "batch-export",
+  "limits": {
+    "depth": 4,
+    "quantities": {
+      "exported_records": {"amount": "5", "unit": "record"},
+      "requests": {"amount": "2", "unit": "request"},
+      "compute": {"amount": "5", "unit": "compute_unit"}
+    }
+  },
+  "tools": [
+    {"name": "open_batch", "effect": "read", "produces": "batch", "unbounded": true},
+    {
+      "name": "export_records", "effect": "irreversible", "requires_approval": true,
+      "requires": ["batch"], "scope_key": "batch", "value_arg": "records",
+      "quantity": "exported_records", "ceiling": {"amount": "4", "unit": "record"},
+      "fixed_charges": {
+        "requests": {"amount": "1", "unit": "request"},
+        "compute": {"amount": "2", "unit": "compute_unit"}
+      }
+    }
+  ]
+}

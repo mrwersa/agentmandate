@@ -1,4 +1,4 @@
-version: 2
+version: 3
 agent: aws-postgres-agent
 identity: spiffe://example/agents/aws-postgres-agent
 limits:

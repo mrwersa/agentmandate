@@ -1,4 +1,4 @@
-"""Caller-authored positive paths, checked only against the manifest-v2 model."""
+"""Caller-authored positive paths, checked only against the manifest-v3 model."""
 
 from __future__ import annotations
 
@@ -131,7 +131,7 @@ class _Requirements:
             "agent": self.agent,
             "reviewer": self.reviewer,
             "reason": self.reason,
-            "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
+            "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
         }
 
     def assess(self, mandate: Mandate, depth: int):
@@ -181,9 +181,10 @@ def _failure(step, rule, detail):
 
 def _assessment(mandate, workflow, depth):
     amounts = [t.ceiling.amount for t in mandate.tools if t.ceiling]
+    amounts.extend(q.amount for t in mandate.tools for q in t.fixed_charges.values())
     amounts.extend(step.value.amount for step in workflow.steps if step.value is not None)
     try:
-        with localcontext(_arithmetic_context(amounts, len(workflow.steps))):
+        with localcontext(_arithmetic_context(amounts, 2 * len(workflow.steps))):
             failure = _check(mandate, workflow.steps, depth)
     except (DecimalException, ValueError) as exc:
         raise ValueError(
@@ -231,6 +232,14 @@ def _check(mandate, steps, depth):
             return _failure(
                 index, "workflow.effect-budget-exceeded", "call count exceeds its effect budget"
             )
+        for name, charge in tool.fixed_charges.items():
+            totals[name] = totals.get(name, Decimal(0)) + charge.amount
+            cap = mandate.limits.quantities.get(name)
+            if cap is not None and totals[name] > cap.amount:
+                return _failure(
+                    index, "workflow.quantity-exceeded",
+                    f"fixed charges exceed quantity {name!r} budget",
+                )
         if not tool.spends_value:
             if step.value is not None or step.binding is not None:
                 return _failure(

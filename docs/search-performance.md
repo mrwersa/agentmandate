@@ -5,7 +5,7 @@ elapsed time, memory, or the number of states. Independent tools and fresh
 resource bindings can make the state space grow quickly even at a small depth.
 The measured corpus below makes that distinction concrete.
 
-This guide covers the manifest-v2 search kernel, including the private finite
+This guide covers the manifest-v3 search kernel, including the private finite
 producer-cap input. Attachment validation, file parsing, Authority IR
 construction, and multiple searches performed by `diff` or other consumers add
 their own costs. It does not certify a whole command pipeline or provider run.
@@ -52,14 +52,16 @@ than the actual state count.
 
 A second conservative ceiling follows from the representation. Let `R` be
 distinct produced scope types, `E` declared effect-budget classes, and `V`
-value-spending tools. Scope and effect counts each have at most `D+1` values.
+variable-spending tools. Let `F` count tools with fixed charges. Scope and effect
+counts each have at most `D+1` values.
 There are at most `V*D` tool/binding spend slots; the value in each slot follows
 the deterministic greedy-fill rule, with at most `D` updates. Under the fixed
 numeric context of one search, each slot therefore has at most `D+1` values
-including absence. Thus:
+including absence. Fixed totals are determined by each charged tool's call
+count, each at most D; their image has at most `(D+1)^F` possibilities. Thus:
 
 ```text
-S <= min(sum(Tᵏ, k=0..D), (D+1)^(R + E + V*D))
+S <= min(sum(Tᵏ, k=0..D), (D+1)^(R + E + V*D + F))
 ```
 
 The study checks observed states against this bound. The bound relies on the
@@ -69,14 +71,15 @@ allocate this ceiling in advance.
 
 ## Memory and time costs
 
-Let `B` be reported breaches and `S` visited states. Each state stores at most
-`O(D)` count/spend records: one call can add at most one scope, one spend slot,
-and one effect count. The seen set retains these states. Frontier nodes share
+Let `B` be reported breaches, `S` visited states, and `P` the number of pools
+with fixed charges. Each state stores at most `O(D+P)` count/spend records:
+one call can add at most one scope, one variable spend slot, one effect count
+and up to P fixed totals. Each witness step retains its tool's fixed vector. The seen set retains these states. Frontier nodes share
 parent links, and paths are materialized only for enabling paths and findings.
 Storage in record units is therefore:
 
 ```text
-O(S*D + S + (T+B)*D)
+O(S*(D+P+1) + (T+B)*D*(P+1) + T*P)
 ```
 
 Earlier search code stored a full path tuple in every queue entry. With peak
@@ -89,11 +92,11 @@ records retain their existing representation.
 For time, there are at most `S*T` tool checks. Let `A` be the maximum number of
 required scopes on one tool. Requirements scan held scope counts; binding
 selection can scan up to `D` bindings and `D` spend records; updates sort at
-most `O(D)` records; finding de-duplication scans up to `B` breaches. A
+most `O(D+P)` records; finding de-duplication scans up to `B` breaches. A
 conservative unit-cost bound is:
 
 ```text
-O(S*T*(A*D + D² + D*log(D+1) + B) + (T+B)*D)
+O(S*T*(A*D + D² + (D+P)*log(D+P+1) + B) + (T+B)*D*(P+1))
 ```
 
 Numeric precision, integer sizes, tool names, and Python object overhead affect
@@ -115,10 +118,12 @@ It does not load a historical kernel or need Git. `--case agentkit` selects
 that graph's five depths; `--case wide-mint` selects a synthetic stress case.
 
 The corpus has 25 graph/depth runs: AgentKit, GitHub MCP, AWS PostgreSQL,
-Sentry and Initiative at depths 1, 2, 4, 8 and 12. Their manifest-v2 annotations
+Sentry and Initiative at depths 1, 2, 4, 8 and 12. Their manifest-v3 annotations
 are labelled test projections of the preserved source graphs, not new captures
-or transferred evidence acceptance. Five synthetic cases cover a broad frontier,
-a 64-call chain, duplicate bindings, pure reads and finite producer capacity.
+or transferred evidence acceptance. Six synthetic cases cover a broad frontier,
+a 64-call chain, duplicate bindings, pure reads, finite producer capacity and
+fixed charges alongside variable consumption. The no-charge Authority hashes
+remain identical to the preceding kernel's pinned results.
 
 The [current report](search-performance-results.json) records input, kernel,
 harness and baseline digests, environment, work counters, witness lengths,
@@ -132,11 +137,11 @@ At the default depth eight in this run:
 
 | Graph | States | Peak frontier | Median ms | Peak KiB | Witness calls | Truncated |
 |---|---:|---:|---:|---:|---|---|
-| agentkit | 4,537 | 2,045 | 172.053 | 2723.0 | 3 | yes |
-| github-mcp-server | 9 | 1 | 0.520 | 18.3 | none | yes |
-| aws-postgres-mcp | 9 | 1 | 0.234 | 12.8 | 3 | yes |
-| sentry-mcp | 9 | 1 | 0.288 | 13.0 | 2 | yes |
-| initiative-mcp | 1 | 1 | 0.188 | 14.4 | 1 | no |
+| agentkit | 4,537 | 2,045 | 191.551 | 3280.9 | 3 | yes |
+| github-mcp-server | 9 | 1 | 0.514 | 25.6 | none | yes |
+| aws-postgres-mcp | 9 | 1 | 0.358 | 18.1 | 3 | yes |
+| sentry-mcp | 9 | 1 | 0.260 | 18.6 | 2 | yes |
+| initiative-mcp | 1 | 1 | 0.162 | 19.9 | 1 | no |
 
 Four of five graphs truncate at depth eight; 20 of 25 graph/depth runs truncate
 overall. This is a frequency over the fixed sweep, not a production probability.

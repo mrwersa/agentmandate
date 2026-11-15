@@ -6,11 +6,11 @@
       "id": "release/prod",
       "ir": {
         "path": "examples/fleet-inventory/release-repo/authority-ir.json",
-        "sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb"
+        "sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8"
       },
       "manifest": {
         "path": "examples/fleet-inventory/release-repo/manifest.json",
-        "sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e"
+        "sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad"
       },
       "owner": "release-security",
       "repository": "release-repo",
@@ -27,11 +27,11 @@
       "id": "release/staging",
       "ir": {
         "path": "examples/fleet-inventory/release-repo/authority-ir.json",
-        "sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb"
+        "sha256": "39f3330fe92d2370ce778af61d51cbc532d12198c2501e01f3a6a701e1a7aba8"
       },
       "manifest": {
         "path": "examples/fleet-inventory/release-repo/manifest.json",
-        "sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e"
+        "sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad"
       },
       "owner": null,
       "repository": "release-repo",
@@ -52,7 +52,7 @@
       },
       "manifest": {
         "path": "examples/fleet-inventory/billing-repo/manifest.json",
-        "sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810"
+        "sha256": "1ced5e23f2a5165226b34238b729c2f080a034f05238a7af01d9afc4107adb6a"
       },
       "owner": "billing-security",
       "repository": "billing-repo",

@@ -108,6 +108,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "open_case",
               "principal": "caller",
               "produces": "case",
@@ -117,6 +118,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "fetch_case",
               "principal": "caller",
               "requires": [
@@ -131,6 +133,7 @@
                 "unit": "GBP"
               },
               "effect": "irreversible",
+              "fixed_charges": {},
               "name": "issue_refund",
               "principal": "caller",
               "quantity": "value",
@@ -143,7 +146,7 @@
               "value_arg": "amount"
             }
           ],
-          "version": 2
+          "version": 3
         },
         "status": "no_reachable_breach_within_bound"
       },
@@ -203,6 +206,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "open_case",
               "principal": "caller",
               "produces": "case",
@@ -212,6 +216,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "search_cases",
               "principal": "caller",
               "produces": "case",
@@ -221,6 +226,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "fetch_case",
               "principal": "caller",
               "requires": [
@@ -230,7 +236,7 @@
               "unbounded": false
             }
           ],
-          "version": 2
+          "version": 3
         },
         "status": "no_reachable_breach_within_bound"
       },
@@ -298,6 +304,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "open_case",
               "principal": "caller",
               "produces": "case",
@@ -311,6 +318,7 @@
                 "unit": "GBP"
               },
               "effect": "irreversible",
+              "fixed_charges": {},
               "name": "issue_refund",
               "principal": "caller",
               "quantity": "value",
@@ -323,7 +331,7 @@
               "value_arg": "amount"
             }
           ],
-          "version": 2
+          "version": 3
         },
         "status": "no_reachable_breach_within_bound"
       },
@@ -387,6 +395,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "open_case",
               "principal": "caller",
               "produces": "case",
@@ -396,6 +405,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "search_cases",
               "principal": "caller",
               "produces": "case",
@@ -404,7 +414,7 @@
               "unbounded": true
             }
           ],
-          "version": 2
+          "version": 3
         },
         "status": "no_reachable_breach_within_bound"
       },
@@ -468,6 +478,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "search_cases",
               "principal": "caller",
               "produces": "case",
@@ -477,6 +488,7 @@
             },
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "fetch_case",
               "principal": "caller",
               "requires": [
@@ -486,17 +498,17 @@
               "unbounded": false
             }
           ],
-          "version": 2
+          "version": 3
         },
         "status": "no_reachable_breach_within_bound"
       }
     ],
     "input": {
-      "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+      "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05"
     },
     "keep_tools": [],
     "schema": "agentmandate.remediation/v6",
-    "scope": "manifest-v2 reachability only; candidates require human selection",
+    "scope": "manifest-v3 reachability only; candidates require human selection",
     "search": {
       "candidates_analyzed": 9,
       "candidates_found": 6,

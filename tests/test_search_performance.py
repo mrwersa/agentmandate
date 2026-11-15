@@ -52,7 +52,7 @@ def test_no_progress_calls_and_duplicate_states_are_not_new_work():
     }
     assert trace.path_for("read")[0].tool == "first"
     _analyse_with_trace(
-        loads('{"agent": "a", "tools": [{"name": "read", "effect": "read"}], "version": 2}'),
+        loads('{"agent": "a", "tools": [{"name": "read", "effect": "read"}], "version": 3}'),
         _metrics=metrics,
     )
     assert metrics["states_discovered"] == 1

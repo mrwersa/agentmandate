@@ -23,7 +23,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 READ = "read"
 WRITE = "write"
@@ -112,6 +112,16 @@ class Quantity:
         return f"{self.amount} {self.unit}"
 
 
+def _fixed_charge_map(charges: Any, where: str) -> dict[str, Quantity]:
+    if not isinstance(charges, Mapping):
+        raise ManifestError(f"{where}: fixed_charges must be a mapping")
+    for pool, value in charges.items():
+        _quantity_name(pool, f"{where}: fixed charge pool")
+        if not isinstance(value, Quantity) or value.amount <= 0:
+            raise ManifestError(f"{where}: fixed charges must be positive Quantity values")
+    return dict(charges)
+
+
 @dataclass(frozen=True)
 class Tool:
     """One callable capability and the authority it carries."""
@@ -130,6 +140,10 @@ class Tool:
     quantity: str | None = None
     scope_key: str | None = None
     requires_approval: bool = False
+    fixed_charges: Mapping[str, Quantity] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "fixed_charges", _fixed_charge_map(self.fixed_charges, self.name))
 
     @property
     def spends_value(self) -> bool:
@@ -142,6 +156,12 @@ class Tool:
             raise ManifestError(f"{where}: expected a mapping")
         name = _required_name(raw.get("name"), f"{where}: name")
         where = f"tool {name!r}"
+        unknown = set(raw) - {
+            "name", "effect", "principal", "requires", "produces", "unbounded",
+            "value_arg", "ceiling", "quantity", "scope_key", "requires_approval", "fixed_charges",
+        }
+        if unknown:
+            raise ManifestError(f"{where}: unknown fields {sorted(unknown, key=repr)!r}")
 
         effect = raw.get("effect")
         if effect not in EFFECTS:
@@ -197,6 +217,15 @@ class Tool:
         requires_approval = raw.get("requires_approval", False)
         if not isinstance(requires_approval, bool):
             raise ManifestError(f"{where}: requires_approval must be true or false")
+        charges = raw.get("fixed_charges", {})
+        if not isinstance(charges, dict):
+            raise ManifestError(f"{where}: fixed_charges must be a mapping")
+        fixed_charges = {
+            _quantity_name(pool, f"{where}: fixed charge pool"): Quantity.parse(
+                value, f"{where}.fixed_charges.{pool}",
+            )
+            for pool, value in charges.items()
+        }
 
         return cls(
             name=name,
@@ -210,6 +239,7 @@ class Tool:
             quantity=quantity,
             scope_key=scope_key,
             requires_approval=requires_approval,
+            fixed_charges=fixed_charges,
         )
 
 
@@ -299,13 +329,20 @@ class Mandate:
             raise ManifestError("manifest: expected a mapping at the top level")
 
         version = raw.get("version", SCHEMA_VERSION)
-        if isinstance(version, bool) or version != SCHEMA_VERSION:
+        if type(version) is not int or version != SCHEMA_VERSION:
             raise ManifestError(
                 f"manifest: unsupported schema version {version!r}, "
                 f"this build reads version {SCHEMA_VERSION}"
             )
+        if "version" not in raw and isinstance(raw.get("tools"), list) and any(
+            isinstance(tool, dict) and "fixed_charges" in tool for tool in raw["tools"]
+        ):
+            raise ManifestError("fixed_charges require explicit manifest version 3")
 
         agent = _required_name(raw.get("agent"), "manifest: agent")
+        unknown = set(raw) - {"version", "agent", "identity", "tools", "limits", "roles"}
+        if unknown:
+            raise ManifestError(f"manifest: unknown fields {sorted(unknown, key=repr)!r}")
 
         raw_tools = raw.get("tools")
         if not isinstance(raw_tools, list) or not raw_tools:
@@ -353,6 +390,15 @@ class Mandate:
         )
 
 
+def _unique_fields(pairs):
+    result = {}
+    for name, value in pairs:
+        if name in result:
+            raise ManifestError(f"manifest: duplicate field {name!r}")
+        result[name] = value
+    return result
+
+
 def loads(text: str, source: str | None = None) -> Mandate:
     """Parse a manifest from JSON or YAML text.
 
@@ -364,7 +410,7 @@ def loads(text: str, source: str | None = None) -> Mandate:
     json_error = None
     if stripped.startswith("{"):
         try:
-            raw = json.loads(text, parse_float=Decimal)
+            raw = json.loads(text, parse_float=Decimal, object_pairs_hook=_unique_fields)
         except json.JSONDecodeError as exc:
             # A quoted first key selects JSON. Never reinterpret malformed
             # JSON numbers or tags using YAML's implicit scalar conversions.
@@ -385,8 +431,14 @@ def loads(text: str, source: str | None = None) -> Mandate:
             "reading a YAML manifest needs PyYAML: pip install 'agentmandate[yaml]'. "
             "A JSON manifest works with no extra dependency."
         ) from exc
+    class UniqueLoader(yaml.SafeLoader):
+        def construct_mapping(self, node, deep=False):
+            mapping = super().construct_mapping(node, deep=deep)
+            _unique_fields((self.construct_object(k, deep=deep), None) for k, _ in node.value)
+            return mapping
+
     try:
-        raw = yaml.safe_load(text)
+        raw = yaml.load(text, Loader=UniqueLoader)
     except yaml.YAMLError as exc:
         if json_error is not None:
             raise ManifestError(f"manifest: invalid JSON: {json_error}") from exc
@@ -416,15 +468,20 @@ def _quantity_units(mandate: Mandate) -> dict[str, str]:
         for name, value in mandate.limits.quantities.items()
     }
     for tool in mandate.tools:
+        declarations = _fixed_charge_map(tool.fixed_charges, f"tool {tool.name!r}")
         if tool.ceiling is None:
             if tool.quantity is not None:
                 raise ManifestError(f"tool {tool.name!r}: quantity requires a ceiling")
-            continue
-        name = _quantity_name(tool.quantity, f"tool {tool.name!r}: quantity")
-        if name in units and units[name] != tool.ceiling.unit:
-            raise ManifestError(
-                f"quantity {name!r} has incompatible units: "
-                f"{units[name]!r} and {tool.ceiling.unit!r}"
-            )
-        units[name] = tool.ceiling.unit
+        else:
+            name = _quantity_name(tool.quantity, f"tool {tool.name!r}: quantity")
+            if name in declarations and declarations[name].unit != tool.ceiling.unit:
+                raise ManifestError(f"quantity {name!r} has incompatible units in one tool")
+            declarations[name] = tool.ceiling
+        for pool, value in declarations.items():
+            name = _quantity_name(pool, f"tool {tool.name!r}: quantity")
+            if name in units and units[name] != value.unit:
+                raise ManifestError(
+                    f"quantity {name!r} has incompatible units: {units[name]!r} and {value.unit!r}"
+                )
+            units[name] = value.unit
     return units

@@ -33,6 +33,10 @@ def fingerprint(authority, trace):
                     "spent": None if step.spent is None else str(step.spent),
                     "unit": step.unit,
                     "quantity": step.quantity,
+                    "fixed_charges": {
+                        pool: {"amount": str(q.amount), "unit": q.unit}
+                        for pool, q in sorted(step.fixed_charges.items())
+                    },
                 }
                 for step in path
             ],
@@ -111,9 +115,10 @@ def benchmark(*, repeat=3, names=None):
         scopes = len({tool.produces for tool in mandate.tools if tool.produces})
         effects = len(mandate.limits.effects)
         spenders = sum(tool.spends_value for tool in mandate.tools)
+        charged_tools = sum(bool(tool.fixed_charges) for tool in mandate.tools)
         depth = case["depth"]
         tree_bound = sum(tools**level for level in range(depth + 1))
-        representation_bound = (depth + 1) ** (scopes + effects + spenders * depth)
+        representation_bound = (depth + 1) ** (scopes + effects + spenders * depth + charged_tools)
         state_bound = min(tree_bound, representation_bound)
         if metrics["states_discovered"] > state_bound:
             raise ValueError("observed states exceed the documented conservative bound")
@@ -143,7 +148,7 @@ def benchmark(*, repeat=3, names=None):
         "source_sha256": hashlib.sha256((ROOT / "agentmandate/reach.py").read_bytes()).hexdigest(),
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "baselines_sha256": hashlib.sha256(BASELINES.read_bytes()).hexdigest(),
-        "model": "manifest-v2",
+        "model": "manifest-v3",
         "real_graph_runs": len(real),
         "real_graph_truncated_runs": sum(row["truncated"] for row in real),
         "cases": rows,

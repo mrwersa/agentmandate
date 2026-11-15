@@ -351,6 +351,26 @@ def _tool_contract_changes(before: Tool, after: Tool) -> list[Change]:
     return changes
 
 
+def _fixed_charge_changes(before: Tool | None, after: Tool | None) -> list[Change]:
+    old_charges = {} if before is None else before.fixed_charges
+    new_charges = {} if after is None else after.fixed_charges
+    tool = before if before is not None else after
+    changes = []
+    for pool in sorted(set(old_charges) | set(new_charges)):
+        old, new = old_charges.get(pool), new_charges.get(pool)
+        if old == new:
+            continue
+        direction = NARROWING if after is None or (
+            old is not None and new is not None and old.unit == new.unit and new.amount < old.amount
+        ) else WIDENING
+        changes.append(Change(
+            direction, "fixed charge",
+            f"tool {tool.name}, pool {pool!r}: {old or 'none'} -> {new or 'none'}; "
+            "deleting or reassigning accounting on a retained tool requires review",
+        ))
+    return changes
+
+
 def _tool_effects(tool: Tool) -> set[str]:
     # Use the same consumed-scope fallback as reach and IR provenance.
     scopes = tool.requires or ((tool.produces,) if tool.produces else ())
@@ -434,6 +454,8 @@ def compare(
         after_tool = after.tool(name)
         if before_tool is not None and after_tool is not None:
             changes.extend(_tool_contract_changes(before_tool, after_tool))
+    for name in sorted(set(before.tool_names) | set(after.tool_names)):
+        changes.extend(_fixed_charge_changes(before.tool(name), after.tool(name)))
 
     for name in sorted(set(lhs.max_quantities) | set(rhs.max_quantities)):
         changes.extend(

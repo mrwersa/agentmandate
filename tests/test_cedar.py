@@ -155,7 +155,7 @@ def test_official_bundle_projects_observed_policy_decisions_without_claiming_com
     } == {False}
     assert AuthorityIR.from_json(graph.to_json()).to_json() == graph.to_json()
     _validate_cedar_profile(AuthorityIR.from_json(graph.to_json()))
-    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v3 profile"):
         _analyse_ir(graph, depth=8)
 
 

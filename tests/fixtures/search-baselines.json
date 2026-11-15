@@ -3,36 +3,36 @@
     {
       "authority_sha256": "5133e2cced594fcd7c0943f81ce7c379bb3425cec1a06aee8362e860a4a8629e",
       "depth": 1,
-      "input_sha256": "0002d51c3246958dbb7f0a4c5d45f3a2ab547689aa7ed8f3e6c6df81318b64e2",
+      "input_sha256": "eec26e21581a980de2eeaec0d9633ec52f1a871fb940bf5a01386e2f8a3fdf86",
       "kind": "real-graph",
       "name": "agentkit",
       "path": "tests/fixtures/quantity-evidence/agentkit/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "4e1a7a0bc56bd706f066f3fa32608ed20a476f06f002854a7e265837a43caa86",
+      "trace_sha256": "ca4bc70e245c0ebb905c3c1722913e8718479b9c868b1046736fab37d39d38dd",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "fe6648742d568921f11c596e53f181baa4819e5a36b656ce7a0a79762736014f",
       "depth": 2,
-      "input_sha256": "0002d51c3246958dbb7f0a4c5d45f3a2ab547689aa7ed8f3e6c6df81318b64e2",
+      "input_sha256": "eec26e21581a980de2eeaec0d9633ec52f1a871fb940bf5a01386e2f8a3fdf86",
       "kind": "real-graph",
       "name": "agentkit",
       "path": "tests/fixtures/quantity-evidence/agentkit/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "ef944f9066a6ab6e8c25dadfcf93668fb8a44763902cb47a9563441157d1660f",
+      "trace_sha256": "6d2a62672ab92106f7cdf0bd795ecb6ea34407f02234f67e8415ee26834ea05c",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "07ec0664b28c0a77d305104a890afe0f27c5f8ba3518aafad617ae11b0ebae0d",
       "depth": 4,
-      "input_sha256": "0002d51c3246958dbb7f0a4c5d45f3a2ab547689aa7ed8f3e6c6df81318b64e2",
+      "input_sha256": "eec26e21581a980de2eeaec0d9633ec52f1a871fb940bf5a01386e2f8a3fdf86",
       "kind": "real-graph",
       "name": "agentkit",
       "path": "tests/fixtures/quantity-evidence/agentkit/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "ef944f9066a6ab6e8c25dadfcf93668fb8a44763902cb47a9563441157d1660f",
+      "trace_sha256": "6d2a62672ab92106f7cdf0bd795ecb6ea34407f02234f67e8415ee26834ea05c",
       "truncated": true,
       "witness_lengths": [
         3
@@ -41,12 +41,12 @@
     {
       "authority_sha256": "14d3ede082ee85a0fb9027cb0908ff9849098c6d9f934b94fb31ef8bff7c866c",
       "depth": 8,
-      "input_sha256": "0002d51c3246958dbb7f0a4c5d45f3a2ab547689aa7ed8f3e6c6df81318b64e2",
+      "input_sha256": "eec26e21581a980de2eeaec0d9633ec52f1a871fb940bf5a01386e2f8a3fdf86",
       "kind": "real-graph",
       "name": "agentkit",
       "path": "tests/fixtures/quantity-evidence/agentkit/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "ef944f9066a6ab6e8c25dadfcf93668fb8a44763902cb47a9563441157d1660f",
+      "trace_sha256": "6d2a62672ab92106f7cdf0bd795ecb6ea34407f02234f67e8415ee26834ea05c",
       "truncated": true,
       "witness_lengths": [
         3
@@ -55,12 +55,12 @@
     {
       "authority_sha256": "fd4b07190ebba017902531e14796d8e466735748ce3746b2215b6b2dd6ce1012",
       "depth": 12,
-      "input_sha256": "0002d51c3246958dbb7f0a4c5d45f3a2ab547689aa7ed8f3e6c6df81318b64e2",
+      "input_sha256": "eec26e21581a980de2eeaec0d9633ec52f1a871fb940bf5a01386e2f8a3fdf86",
       "kind": "real-graph",
       "name": "agentkit",
       "path": "tests/fixtures/quantity-evidence/agentkit/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "ef944f9066a6ab6e8c25dadfcf93668fb8a44763902cb47a9563441157d1660f",
+      "trace_sha256": "6d2a62672ab92106f7cdf0bd795ecb6ea34407f02234f67e8415ee26834ea05c",
       "truncated": true,
       "witness_lengths": [
         3
@@ -69,96 +69,96 @@
     {
       "authority_sha256": "0f757a383c30d901070882a9f06d0e60db04d5db1dbfb0dde03090aef4a90756",
       "depth": 1,
-      "input_sha256": "deb494d8fba979a49721d19db9e37a4942865cd02185b5815e44ecb29792fb60",
+      "input_sha256": "83c046e9142768f60aec5674c0b7c881ba4b2da67cd61e79e4d1ed996a7c2986",
       "kind": "real-graph",
       "name": "github-mcp-server",
       "path": "tests/fixtures/quantity-evidence/github-mcp-server/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "ff60d651c4494e3b1c3ee44b30c1325e27edcc2da79b971b6a19148295ac950e",
+      "trace_sha256": "016d5bf6caea59474050c256eaf2f80409e0ad7443b3a994cb6920a885a1b8e4",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "abf10dacd91438dc98253eba615eb6f191225883c4e7f6c3fe8bc45dba4611e1",
       "depth": 2,
-      "input_sha256": "deb494d8fba979a49721d19db9e37a4942865cd02185b5815e44ecb29792fb60",
+      "input_sha256": "83c046e9142768f60aec5674c0b7c881ba4b2da67cd61e79e4d1ed996a7c2986",
       "kind": "real-graph",
       "name": "github-mcp-server",
       "path": "tests/fixtures/quantity-evidence/github-mcp-server/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "09db5375c46e97c16c21bbd2939b3b5a615242fa85657850cdabc82ab50c35a7",
+      "trace_sha256": "eaedd214aed8a823f42cb46c23257828183707d1cc6531a24e48ea88aff00f09",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "5cc75a2e32cb5ab0cff1049bd828a890a02ca5d6dd5ffe122ab9f55763e75b71",
       "depth": 4,
-      "input_sha256": "deb494d8fba979a49721d19db9e37a4942865cd02185b5815e44ecb29792fb60",
+      "input_sha256": "83c046e9142768f60aec5674c0b7c881ba4b2da67cd61e79e4d1ed996a7c2986",
       "kind": "real-graph",
       "name": "github-mcp-server",
       "path": "tests/fixtures/quantity-evidence/github-mcp-server/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "09db5375c46e97c16c21bbd2939b3b5a615242fa85657850cdabc82ab50c35a7",
+      "trace_sha256": "eaedd214aed8a823f42cb46c23257828183707d1cc6531a24e48ea88aff00f09",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "d6e8d697d35fbbe4f90e0e545f12575f80a1fb9e0f774d16822da92bc7d31851",
       "depth": 8,
-      "input_sha256": "deb494d8fba979a49721d19db9e37a4942865cd02185b5815e44ecb29792fb60",
+      "input_sha256": "83c046e9142768f60aec5674c0b7c881ba4b2da67cd61e79e4d1ed996a7c2986",
       "kind": "real-graph",
       "name": "github-mcp-server",
       "path": "tests/fixtures/quantity-evidence/github-mcp-server/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "09db5375c46e97c16c21bbd2939b3b5a615242fa85657850cdabc82ab50c35a7",
+      "trace_sha256": "eaedd214aed8a823f42cb46c23257828183707d1cc6531a24e48ea88aff00f09",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "332d4a2f68c0073f5c764f445e0f584aa22f451fb94fc42c2f24ac05ab430a89",
       "depth": 12,
-      "input_sha256": "deb494d8fba979a49721d19db9e37a4942865cd02185b5815e44ecb29792fb60",
+      "input_sha256": "83c046e9142768f60aec5674c0b7c881ba4b2da67cd61e79e4d1ed996a7c2986",
       "kind": "real-graph",
       "name": "github-mcp-server",
       "path": "tests/fixtures/quantity-evidence/github-mcp-server/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "09db5375c46e97c16c21bbd2939b3b5a615242fa85657850cdabc82ab50c35a7",
+      "trace_sha256": "eaedd214aed8a823f42cb46c23257828183707d1cc6531a24e48ea88aff00f09",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "907801f14df1ed778b87e4b0e8a0c515696a476f848a889b62fd4a42c683e1a2",
       "depth": 1,
-      "input_sha256": "c615e492548b25688814cbb1e2ee95a54d93d0acbc359f223cc1fcd29a193b7e",
+      "input_sha256": "dfa5063aef786eb3e4fad24b041c2161006c5818bc73a0d7a8a7ed52175ebe6b",
       "kind": "real-graph",
       "name": "aws-postgres-mcp",
       "path": "tests/fixtures/quantity-evidence/aws-postgres-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "bf0cada73ff478ed003e13f8c3d25818118bffab29f53d94cf3c21ff7e8635b6",
+      "trace_sha256": "7af93f62a655f31801fe5ab17d7e66ba2742b1a24dd213bb3568c0e00b244adb",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "cad7f11c9dcb1cfc6cca184e0ad3236ef98323303a4332bc0b58874b15d07da6",
       "depth": 2,
-      "input_sha256": "c615e492548b25688814cbb1e2ee95a54d93d0acbc359f223cc1fcd29a193b7e",
+      "input_sha256": "dfa5063aef786eb3e4fad24b041c2161006c5818bc73a0d7a8a7ed52175ebe6b",
       "kind": "real-graph",
       "name": "aws-postgres-mcp",
       "path": "tests/fixtures/quantity-evidence/aws-postgres-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "10dad794b94c778183e21ae48814e2f924442dd7c3129d07391e0c853a280a8f",
+      "trace_sha256": "33dbfed1a69aef72b4cf2259dfa74b0a8c3a9c2cf83f1440adf53a54210a7418",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "95c8e9c7f6dae46ebe9c237e41f541cd0916b0c274c0015672d710844200cc2d",
       "depth": 4,
-      "input_sha256": "c615e492548b25688814cbb1e2ee95a54d93d0acbc359f223cc1fcd29a193b7e",
+      "input_sha256": "dfa5063aef786eb3e4fad24b041c2161006c5818bc73a0d7a8a7ed52175ebe6b",
       "kind": "real-graph",
       "name": "aws-postgres-mcp",
       "path": "tests/fixtures/quantity-evidence/aws-postgres-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "10dad794b94c778183e21ae48814e2f924442dd7c3129d07391e0c853a280a8f",
+      "trace_sha256": "33dbfed1a69aef72b4cf2259dfa74b0a8c3a9c2cf83f1440adf53a54210a7418",
       "truncated": true,
       "witness_lengths": [
         3
@@ -167,12 +167,12 @@
     {
       "authority_sha256": "c6e7be76966550da0dbee04f4f1fad6aa411325322b482d11236b2ebaaf0b1cb",
       "depth": 8,
-      "input_sha256": "c615e492548b25688814cbb1e2ee95a54d93d0acbc359f223cc1fcd29a193b7e",
+      "input_sha256": "dfa5063aef786eb3e4fad24b041c2161006c5818bc73a0d7a8a7ed52175ebe6b",
       "kind": "real-graph",
       "name": "aws-postgres-mcp",
       "path": "tests/fixtures/quantity-evidence/aws-postgres-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "10dad794b94c778183e21ae48814e2f924442dd7c3129d07391e0c853a280a8f",
+      "trace_sha256": "33dbfed1a69aef72b4cf2259dfa74b0a8c3a9c2cf83f1440adf53a54210a7418",
       "truncated": true,
       "witness_lengths": [
         3
@@ -181,12 +181,12 @@
     {
       "authority_sha256": "42cd1030d966fba1563f8d58ebf58f2d41a51b4f3da058bec244a4212014ef4e",
       "depth": 12,
-      "input_sha256": "c615e492548b25688814cbb1e2ee95a54d93d0acbc359f223cc1fcd29a193b7e",
+      "input_sha256": "dfa5063aef786eb3e4fad24b041c2161006c5818bc73a0d7a8a7ed52175ebe6b",
       "kind": "real-graph",
       "name": "aws-postgres-mcp",
       "path": "tests/fixtures/quantity-evidence/aws-postgres-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "10dad794b94c778183e21ae48814e2f924442dd7c3129d07391e0c853a280a8f",
+      "trace_sha256": "33dbfed1a69aef72b4cf2259dfa74b0a8c3a9c2cf83f1440adf53a54210a7418",
       "truncated": true,
       "witness_lengths": [
         3
@@ -195,24 +195,24 @@
     {
       "authority_sha256": "a7a0b267a165c257d207f0c6583c55ee05e5855c0600ca2bfa0cf5f59c33a5d5",
       "depth": 1,
-      "input_sha256": "5864906b6beb5bc5f39d50de4061001c2c7533dd366efdf1dc89f36d8ef705e1",
+      "input_sha256": "54f599e0479c6f55cf00aac67fc2f039ae8295a406701f986ae27d12fa601b11",
       "kind": "real-graph",
       "name": "sentry-mcp",
       "path": "tests/fixtures/quantity-evidence/sentry-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "33d465afaf428e0773a436b7eac590aeb7328b79b260464813089c0c4ade6b69",
+      "trace_sha256": "2100adcea9c24201d79dcdfdd9f733706d8b47a35bec00db320185e1811d5c53",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "d5e02dc0682726d618c5b62f247b56de4270cc671989d2e31b1ebd15b287e28f",
       "depth": 2,
-      "input_sha256": "5864906b6beb5bc5f39d50de4061001c2c7533dd366efdf1dc89f36d8ef705e1",
+      "input_sha256": "54f599e0479c6f55cf00aac67fc2f039ae8295a406701f986ae27d12fa601b11",
       "kind": "real-graph",
       "name": "sentry-mcp",
       "path": "tests/fixtures/quantity-evidence/sentry-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "33d465afaf428e0773a436b7eac590aeb7328b79b260464813089c0c4ade6b69",
+      "trace_sha256": "2100adcea9c24201d79dcdfdd9f733706d8b47a35bec00db320185e1811d5c53",
       "truncated": true,
       "witness_lengths": [
         2
@@ -221,12 +221,12 @@
     {
       "authority_sha256": "bccc040880ca89adf50eb5f53b5c5695a7d112efde98a120aaecea91be0224d7",
       "depth": 4,
-      "input_sha256": "5864906b6beb5bc5f39d50de4061001c2c7533dd366efdf1dc89f36d8ef705e1",
+      "input_sha256": "54f599e0479c6f55cf00aac67fc2f039ae8295a406701f986ae27d12fa601b11",
       "kind": "real-graph",
       "name": "sentry-mcp",
       "path": "tests/fixtures/quantity-evidence/sentry-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "33d465afaf428e0773a436b7eac590aeb7328b79b260464813089c0c4ade6b69",
+      "trace_sha256": "2100adcea9c24201d79dcdfdd9f733706d8b47a35bec00db320185e1811d5c53",
       "truncated": true,
       "witness_lengths": [
         2
@@ -235,12 +235,12 @@
     {
       "authority_sha256": "aab7d6d2b7782eecb744964c308b4c3e22d9a64043bc96611876eed1af89f720",
       "depth": 8,
-      "input_sha256": "5864906b6beb5bc5f39d50de4061001c2c7533dd366efdf1dc89f36d8ef705e1",
+      "input_sha256": "54f599e0479c6f55cf00aac67fc2f039ae8295a406701f986ae27d12fa601b11",
       "kind": "real-graph",
       "name": "sentry-mcp",
       "path": "tests/fixtures/quantity-evidence/sentry-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "33d465afaf428e0773a436b7eac590aeb7328b79b260464813089c0c4ade6b69",
+      "trace_sha256": "2100adcea9c24201d79dcdfdd9f733706d8b47a35bec00db320185e1811d5c53",
       "truncated": true,
       "witness_lengths": [
         2
@@ -249,12 +249,12 @@
     {
       "authority_sha256": "7d065436154631af73f0e4e45842f5a7c04a17bcdcab94fa0e66f302b799bcfb",
       "depth": 12,
-      "input_sha256": "5864906b6beb5bc5f39d50de4061001c2c7533dd366efdf1dc89f36d8ef705e1",
+      "input_sha256": "54f599e0479c6f55cf00aac67fc2f039ae8295a406701f986ae27d12fa601b11",
       "kind": "real-graph",
       "name": "sentry-mcp",
       "path": "tests/fixtures/quantity-evidence/sentry-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "33d465afaf428e0773a436b7eac590aeb7328b79b260464813089c0c4ade6b69",
+      "trace_sha256": "2100adcea9c24201d79dcdfdd9f733706d8b47a35bec00db320185e1811d5c53",
       "truncated": true,
       "witness_lengths": [
         2
@@ -263,12 +263,12 @@
     {
       "authority_sha256": "7792e91a06a5cacd98b475e39e772311c5e710c7d652224ec37767b8f812ec37",
       "depth": 1,
-      "input_sha256": "99b6817e3730cb28ff88c4b0db7a5dabedfa13543c8d9bd8ca66272101ffedde",
+      "input_sha256": "91cd18fd0c766d18d396359428b9edc4f71a649aec0a731f2c8f22905d0b4656",
       "kind": "real-graph",
       "name": "initiative-mcp",
       "path": "tests/fixtures/quantity-evidence/initiative-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "013705259cac9d73b6dff9ceb33c758e433a9486db44a087f3969e40871f8979",
+      "trace_sha256": "c77083cac37ca4cae8c63d8ee5866311496f51b2040d9150522b943b112e890e",
       "truncated": false,
       "witness_lengths": [
         1
@@ -277,12 +277,12 @@
     {
       "authority_sha256": "89b77f0b5ef5722ef2a744686c80c9da58eb1aea0d4ac7fd50f3031fd3e3e812",
       "depth": 2,
-      "input_sha256": "99b6817e3730cb28ff88c4b0db7a5dabedfa13543c8d9bd8ca66272101ffedde",
+      "input_sha256": "91cd18fd0c766d18d396359428b9edc4f71a649aec0a731f2c8f22905d0b4656",
       "kind": "real-graph",
       "name": "initiative-mcp",
       "path": "tests/fixtures/quantity-evidence/initiative-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "013705259cac9d73b6dff9ceb33c758e433a9486db44a087f3969e40871f8979",
+      "trace_sha256": "c77083cac37ca4cae8c63d8ee5866311496f51b2040d9150522b943b112e890e",
       "truncated": false,
       "witness_lengths": [
         1
@@ -291,12 +291,12 @@
     {
       "authority_sha256": "3f75ff078f7e429434ce681ba958d990c8a7ab8d4f0dc6ec05a97476554f2da3",
       "depth": 4,
-      "input_sha256": "99b6817e3730cb28ff88c4b0db7a5dabedfa13543c8d9bd8ca66272101ffedde",
+      "input_sha256": "91cd18fd0c766d18d396359428b9edc4f71a649aec0a731f2c8f22905d0b4656",
       "kind": "real-graph",
       "name": "initiative-mcp",
       "path": "tests/fixtures/quantity-evidence/initiative-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "013705259cac9d73b6dff9ceb33c758e433a9486db44a087f3969e40871f8979",
+      "trace_sha256": "c77083cac37ca4cae8c63d8ee5866311496f51b2040d9150522b943b112e890e",
       "truncated": false,
       "witness_lengths": [
         1
@@ -305,12 +305,12 @@
     {
       "authority_sha256": "0808b6498aa8110c9b700035284776cecd73962845da256a1e40068eec976faf",
       "depth": 8,
-      "input_sha256": "99b6817e3730cb28ff88c4b0db7a5dabedfa13543c8d9bd8ca66272101ffedde",
+      "input_sha256": "91cd18fd0c766d18d396359428b9edc4f71a649aec0a731f2c8f22905d0b4656",
       "kind": "real-graph",
       "name": "initiative-mcp",
       "path": "tests/fixtures/quantity-evidence/initiative-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "013705259cac9d73b6dff9ceb33c758e433a9486db44a087f3969e40871f8979",
+      "trace_sha256": "c77083cac37ca4cae8c63d8ee5866311496f51b2040d9150522b943b112e890e",
       "truncated": false,
       "witness_lengths": [
         1
@@ -319,12 +319,12 @@
     {
       "authority_sha256": "377b71add9131894ce67d0106fd976aa9b9c257b8e25a2725ae72888ce44d4e6",
       "depth": 12,
-      "input_sha256": "99b6817e3730cb28ff88c4b0db7a5dabedfa13543c8d9bd8ca66272101ffedde",
+      "input_sha256": "91cd18fd0c766d18d396359428b9edc4f71a649aec0a731f2c8f22905d0b4656",
       "kind": "real-graph",
       "name": "initiative-mcp",
       "path": "tests/fixtures/quantity-evidence/initiative-mcp/mandate.yaml",
       "producer_caps": null,
-      "trace_sha256": "013705259cac9d73b6dff9ceb33c758e433a9486db44a087f3969e40871f8979",
+      "trace_sha256": "c77083cac37ca4cae8c63d8ee5866311496f51b2040d9150522b943b112e890e",
       "truncated": false,
       "witness_lengths": [
         1
@@ -333,55 +333,55 @@
     {
       "authority_sha256": "84fa6513bcc70a42d191099448c175233a3e7d755c6a4fa33403f4f6467dd3bd",
       "depth": 12,
-      "input_sha256": "0ed0d177f6facd9630610806c31c025d63b96d4737b7b947637a8e9dfee4534c",
+      "input_sha256": "19398ff33bfae77f9e64581ab962167934fca79b8c27d1ea0c28d2b988d4bd55",
       "kind": "synthetic-stress",
       "name": "wide-mint",
       "path": "probes/search/wide-mint.json",
       "producer_caps": null,
-      "trace_sha256": "1ecdd734e227645d0c0ee3b9abfe56da5a15961839504095dea0b41ec44ec8d8",
+      "trace_sha256": "e6c928c16e81b70a08764fd4c528ede499733c5782e1c0ee4c4dfbf912900f9c",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "c94321fd1765bb7a9653c634aca6ec81997c00cd0efeb04247a2ad282049c21e",
       "depth": 64,
-      "input_sha256": "5ab8a589725a8ef266198abcc36c0e5c68fffc39b17526154b8b531367469f40",
+      "input_sha256": "7db6a1b181946265a53fcdbb5e89007df54735ba6afe681427c16521794d9190",
       "kind": "synthetic-stress",
       "name": "deep-chain",
       "path": "probes/search/deep-chain.json",
       "producer_caps": null,
-      "trace_sha256": "82ea36820a17ce50424e3cddda9a94c791692a05651ecb11aaea41997abbf3ba",
+      "trace_sha256": "991badf4029e162d9fb58c3e65018116daae1c4c3199cfc05ab3bcaa3c1de78d",
       "truncated": true,
       "witness_lengths": []
     },
     {
       "authority_sha256": "b83ebdb46f6889a0601ac79c2232ef45caafc3691a0da7c94c2dd2f3ebfe0e65",
       "depth": 8,
-      "input_sha256": "7be3d49bfcf1dd90493691c51bced573b29ce24c86d18c3994838cce188889ac",
+      "input_sha256": "abcdf82b31f3a81920cd79bbd2d14acdab878a8740a35bea005a5808c77b9132",
       "kind": "synthetic-stress",
       "name": "duplicate-binding",
       "path": "probes/search/duplicate-binding.json",
       "producer_caps": null,
-      "trace_sha256": "51ce132fab2b17a623e2d5552db2f68c6b708fa70a28aef74a621e86dcf1fe78",
+      "trace_sha256": "ee9818d97e1d55bf58ed6fcf8b6f1995514e04cf4eb5b75d0ba8ad909aee6ecc",
       "truncated": false,
       "witness_lengths": []
     },
     {
       "authority_sha256": "44db2862b8bd2795313cd8a57a27e8b3cf66fb60c587ce14bb72016b645eeaf6",
       "depth": 8,
-      "input_sha256": "c0abdce84fd6b25d5a9ec1dbd39212442b43e3b5cef2430b2a1f635e531c5673",
+      "input_sha256": "951d94d586296450b4e43c4b318740f4c0b4582bc6ba8164146e11cc04f3db06",
       "kind": "synthetic-stress",
       "name": "pure-read",
       "path": "probes/search/pure-read.json",
       "producer_caps": null,
-      "trace_sha256": "e816cefaab10877e85392a647c8c82189eae0b4677b37b5ca6eb7ad2365b32c9",
+      "trace_sha256": "2c5355e2a24703d4778f70164786f0cd5546baa0bd116b00a75dd2ddc9efd8cf",
       "truncated": false,
       "witness_lengths": []
     },
     {
       "authority_sha256": "9ffec6db7081c1611e451feef37b8ddfa5c7b16524290c270015cc08a6186786",
       "depth": 12,
-      "input_sha256": "0ed0d177f6facd9630610806c31c025d63b96d4737b7b947637a8e9dfee4534c",
+      "input_sha256": "19398ff33bfae77f9e64581ab962167934fca79b8c27d1ea0c28d2b988d4bd55",
       "kind": "synthetic-stress",
       "name": "wide-mint-capped",
       "path": "probes/search/wide-mint.json",
@@ -392,10 +392,26 @@
         "mint_3": 2,
         "mint_4": 2
       },
-      "trace_sha256": "1ecdd734e227645d0c0ee3b9abfe56da5a15961839504095dea0b41ec44ec8d8",
+      "trace_sha256": "e6c928c16e81b70a08764fd4c528ede499733c5782e1c0ee4c4dfbf912900f9c",
       "truncated": false,
       "witness_lengths": []
+    },
+    {
+      "authority_sha256": "2938ce3753207e19a9f5dcc5f5952c4c62e0b9f4e28a18749768eea719e0bd32",
+      "depth": 4,
+      "input_sha256": "3c0d9c7d20c5897c2c7482e532970e93d1ce75e0440c8c3fb0b4ed4b06f59307",
+      "kind": "synthetic",
+      "name": "fixed-charges",
+      "path": "examples/fixed-call-charges/manifest.json",
+      "producer_caps": null,
+      "trace_sha256": "c11d2559d565c75c1de6ecc96c6ca8ec25632e3d450c5d9034650b33b50f0ded",
+      "truncated": true,
+      "witness_lengths": [
+        4,
+        4,
+        4
+      ]
     }
   ],
-  "model": "manifest-v2"
+  "model": "manifest-v3"
 }

@@ -247,7 +247,7 @@ def test_continuity_profiles_project_registered_relations_and_round_trip():
         decoded = AuthorityIR.from_json(encoded)
         assert decoded.to_json() == encoded
         assert {item.review for fact in graph.facts for item in fact.evidence} == {"unreviewed"}
-        with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
+        with pytest.raises(IRFormatError, match="analyzable manifest-v3 profile"):
             _analyse_ir(graph)
 
 

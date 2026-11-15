@@ -158,7 +158,7 @@ def write_delegation_manifest(tmp_path: Path) -> Path:
     path.write_text(
         json.dumps(
             {
-                "version": 2,
+                "version": 3,
                 "agent": "export-agent",
                 "tools": [
                     {
@@ -1418,7 +1418,7 @@ def test_obligations_emit_parseable_json(capsys):
 
 def test_lint_json_reports_the_full_service_principal_finding(tmp_path, capsys):
     text = """
-version: 2
+version: 3
 agent: a
 limits: {depth: 4}
 tools:
@@ -1454,7 +1454,7 @@ def test_scenarios_emit_parseable_json(capsys):
     assert main(["scenarios", V2, "--json"]) == EXIT_FINDING
     payload = json.loads(capsys.readouterr().out)
 
-    assert payload["schema"] == "agentmandate.scenarios/v2"
+    assert payload["schema"] == "agentmandate.scenarios/v3"
     assert payload["scenarios"][0]["agent_input"] == ""
 
 

@@ -119,6 +119,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "open_case",
                 "principal": "caller",
                 "produces": "case",
@@ -128,6 +129,7 @@
               },
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "search_cases",
                 "principal": "caller",
                 "produces": "case",
@@ -137,6 +139,7 @@
               },
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "fetch_case",
                 "principal": "caller",
                 "requires": [
@@ -151,6 +154,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "issue_refund",
                 "principal": "caller",
                 "quantity": "value",
@@ -163,7 +167,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -324,7 +328,7 @@
         "successful_candidates": 1
       },
       "input": {
-        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+        "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05"
       },
       "keep_tools": [],
       "requirement_rejections": [
@@ -369,15 +373,15 @@
             "steps": 2
           }
         ],
-        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
+        "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05",
         "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
         "reviewer": "synthetic-example-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "8135ad11bdc5579b041485495ed9c92b87d0560c19aa6efa7e06c8a9cae1300f"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "scope": "manifest-v3 reachability only; candidates require human selection",
       "search": {
         "candidates_analyzed": 4,
         "candidates_found": 1,
@@ -527,7 +531,7 @@
         "successful_candidates": 0
       },
       "input": {
-        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603"
+        "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05"
       },
       "keep_tools": [],
       "requirement_rejections": [
@@ -572,15 +576,15 @@
             "steps": 2
           }
         ],
-        "manifest_sha256": "d75291a498e8a3236d262105c0caad020ac9749d535890664f53a0b5331eb603",
+        "manifest_sha256": "ea7d1e0821389370450218a904853573a2521151b372e69103154ba871e73c05",
         "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
         "reviewer": "synthetic-example-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "942b9af0ccf7269ba68b07ac323e6b27fb130cb9b74b19235dbf95fd39432325"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "8135ad11bdc5579b041485495ed9c92b87d0560c19aa6efa7e06c8a9cae1300f"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "scope": "manifest-v3 reachability only; candidates require human selection",
       "search": {
         "candidates_analyzed": 0,
         "candidates_found": 0,
@@ -739,6 +743,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "seed",
                 "principal": "caller",
                 "produces": "item",
@@ -752,6 +757,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "pay",
                 "principal": "caller",
                 "quantity": "value",
@@ -764,7 +770,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [
@@ -1159,7 +1165,7 @@
         "successful_candidates": 1
       },
       "input": {
-        "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792"
+        "manifest_sha256": "56b6fede5f982a4ff1394f566f96f3d5604f9b014281a49eaaaf3376be995aca"
       },
       "keep_tools": [],
       "requirement_rejections": [
@@ -1478,15 +1484,15 @@
             "steps": 3
           }
         ],
-        "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792",
+        "manifest_sha256": "56b6fede5f982a4ff1394f566f96f3d5604f9b014281a49eaaaf3376be995aca",
         "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
         "reviewer": "synthetic-example-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "5e2396636f2df2079dbb9325572e211d998d57e255ef428f5b1554cdf7d3f972"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "b14d2b58a986c5e02eb5bd0a8c93b33861f08f0e13a821fbdc0f70f8fb03ba00"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "scope": "manifest-v3 reachability only; candidates require human selection",
       "search": {
         "candidates_analyzed": 11,
         "candidates_found": 1,
@@ -1621,6 +1627,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "seed",
                 "principal": "caller",
                 "produces": "item",
@@ -1634,6 +1641,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "pay",
                 "principal": "caller",
                 "quantity": "value",
@@ -1651,6 +1659,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "other",
                 "principal": "caller",
                 "quantity": "value",
@@ -1663,7 +1672,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -1757,6 +1766,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "seed",
                 "principal": "caller",
                 "produces": "item",
@@ -1770,6 +1780,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "pay",
                 "principal": "caller",
                 "quantity": "value",
@@ -1787,6 +1798,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "other",
                 "principal": "caller",
                 "quantity": "value",
@@ -1799,7 +1811,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -1906,6 +1918,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "seed",
                 "principal": "caller",
                 "produces": "item",
@@ -1919,6 +1932,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "pay",
                 "principal": "caller",
                 "quantity": "value",
@@ -1936,6 +1950,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "other",
                 "principal": "caller",
                 "quantity": "value",
@@ -1948,7 +1963,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -2055,6 +2070,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "seed",
                 "principal": "caller",
                 "produces": "item",
@@ -2068,6 +2084,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "pay",
                 "principal": "caller",
                 "quantity": "value",
@@ -2085,6 +2102,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "other",
                 "principal": "caller",
                 "quantity": "value",
@@ -2097,7 +2115,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -2385,7 +2403,7 @@
         "successful_candidates": 4
       },
       "input": {
-        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1"
+        "manifest_sha256": "3473f57896659309161e169254caee0b3e4c4af6be70d2e0572f5ae574611918"
       },
       "keep_tools": [],
       "requirement_rejections": [
@@ -2529,15 +2547,15 @@
             "steps": 3
           }
         ],
-        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1",
+        "manifest_sha256": "3473f57896659309161e169254caee0b3e4c4af6be70d2e0572f5ae574611918",
         "reason": "Synthetic required payments; not live or business-success evidence.",
         "reviewer": "synthetic-example-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "8821fde118de57af3cefdcffe562b1a411b00b0ca7f736ecc5b0c7b9e32d921d"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "scope": "manifest-v3 reachability only; candidates require human selection",
       "search": {
         "candidates_analyzed": 7,
         "candidates_found": 4,
@@ -2674,6 +2692,7 @@
             "tools": [
               {
                 "effect": "read",
+                "fixed_charges": {},
                 "name": "seed",
                 "principal": "caller",
                 "produces": "item",
@@ -2687,6 +2706,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "pay",
                 "principal": "caller",
                 "quantity": "value",
@@ -2704,6 +2724,7 @@
                   "unit": "GBP"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "other",
                 "principal": "caller",
                 "quantity": "value",
@@ -2716,7 +2737,7 @@
                 "value_arg": "amount"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -3004,7 +3025,7 @@
         "successful_candidates": 4
       },
       "input": {
-        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1"
+        "manifest_sha256": "3473f57896659309161e169254caee0b3e4c4af6be70d2e0572f5ae574611918"
       },
       "keep_tools": [],
       "requirement_rejections": [
@@ -3148,15 +3169,15 @@
             "steps": 3
           }
         ],
-        "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1",
+        "manifest_sha256": "3473f57896659309161e169254caee0b3e4c4af6be70d2e0572f5ae574611918",
         "reason": "Synthetic required payments; not live or business-success evidence.",
         "reviewer": "synthetic-example-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "f08a88030b88db79b96446d3d808741af0413b604d7155b963011249412f1f36"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "8821fde118de57af3cefdcffe562b1a411b00b0ca7f736ecc5b0c7b9e32d921d"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "scope": "manifest-v3 reachability only; candidates require human selection",
       "search": {
         "candidates_analyzed": 7,
         "candidates_found": 4,
@@ -3262,11 +3283,11 @@
         "successful_candidates": 0
       },
       "input": {
-        "manifest_sha256": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+        "manifest_sha256": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba"
       },
       "keep_tools": [],
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 reachability only; candidates require human selection",
+      "scope": "manifest-v3 reachability only; candidates require human selection",
       "search": {
         "candidates_analyzed": 0,
         "candidates_found": 0,

@@ -44,7 +44,7 @@ original checks and verdict. Repair errors and timeouts remain advisory.
 ## The action
 
 ```yaml
-- uses: mrwersa/agentmandate@v0.45.0
+- uses: mrwersa/agentmandate@v0.46.0
   with:
     manifest: mandate.yaml
     baseline: mandate-released.yaml   # optional: did this widen authority?
@@ -205,7 +205,7 @@ For a repository with a separately protected `authority-reviews` branch:
     git show origin/main:mandate.json > "$RUNNER_TEMP/released.json"
     git fetch origin authority-reviews:refs/remotes/origin/authority-reviews
     echo "REVIEW_AS_OF=$(date -u +%F)" >> "$GITHUB_ENV"
-- uses: mrwersa/agentmandate@v0.45.0
+- uses: mrwersa/agentmandate@v0.46.0
   with:
     manifest: mandate.json
     baseline: ${{ runner.temp }}/released.json

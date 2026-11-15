@@ -37,9 +37,9 @@ from .reach import (
 IR_VERSION = 2
 RESULT_VERSION = 2
 MANIFEST_ADAPTER = "agentmandate.manifest"
-MANIFEST_ADAPTER_VERSION = 3
+MANIFEST_ADAPTER_VERSION = 4
 MANIFEST_DEFAULTS_ADAPTER = "agentmandate.manifest-defaults"
-MANIFEST_DEFAULTS_ADAPTER_VERSION = 2
+MANIFEST_DEFAULTS_ADAPTER_VERSION = 3
 _NO_DEFAULT = object()
 _RecordT = TypeVar("_RecordT")
 _MANIFEST_DEFAULTS = {
@@ -50,6 +50,7 @@ _MANIFEST_DEFAULTS = {
     "limits.quantities": {},
     "tool.ceiling": None,
     "tool.quantity": None,
+    "tool.fixed_charges": {},
     "tool.principal": "caller",
     "tool.produces": None,
     "tool.requires": [],
@@ -95,6 +96,7 @@ MANIFEST_PREDICATES = {
     ("role", "name"): ManifestPredicate("role", "entity_name"),
     ("scope", "name"): ManifestPredicate("scope", "entity_name"),
     ("tool", "ceiling"): ManifestPredicate("tool", "nullable_quantity"),
+    ("tool", "fixed_charges"): ManifestPredicate("tool", "fixed_charge_map"),
     ("tool", "quantity"): ManifestPredicate("tool", "nullable_quantity_name"),
     ("tool", "effect"): ManifestPredicate("tool", "effect"),
     ("tool", "name"): ManifestPredicate("tool", "entity_name"),
@@ -799,9 +801,9 @@ def _semantic_payload(
 
 
 def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR:
-    """Project a parsed v1 mandate into the experimental canonical records."""
+    """Project a current mandate into the canonical records."""
     source_id = "source:mandate"
-    defaults_source_id = "source:manifest-v2"
+    defaults_source_id = "source:manifest-v3"
     entities: dict[str, Entity] = {}
     facts: list[Fact] = []
     edges: dict[str, Edge] = {}
@@ -914,6 +916,11 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
             "tool.value_arg",
         )
         fact(tool_id, "quantity", tool.quantity, f"{base}/quantity", None, "tool.quantity")
+        charges = {
+            pool: {"amount": str(q.amount), "unit": q.unit}
+            for pool, q in sorted(tool.fixed_charges.items())
+        }
+        fact(tool_id, "fixed_charges", charges, f"{base}/fixed_charges", {}, "tool.fixed_charges")
         ceiling_value = (
             None
             if tool.ceiling is None
@@ -989,7 +996,7 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
     defaults_source = Source(
         id=defaults_source_id,
         kind="manifest-schema",
-        locator="agentmandate:manifest/v1",
+        locator="agentmandate:manifest/v3",
         format_version=SCHEMA_VERSION,
         producer_version=None,
         semantic_sha256=hashlib.sha256(_canonical_bytes(_MANIFEST_DEFAULTS)).hexdigest(),
@@ -1008,14 +1015,14 @@ def _from_mandate(mandate: Mandate, content: bytes | None = None) -> AuthorityIR
 
 
 def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
-    """Require the closed, trusted manifest-v2 subset eligible for analysis."""
+    """Require the closed, trusted manifest-v3 subset eligible for analysis."""
     expected_sources = {
         "source:mandate": (
             "mandate-semantic",
             MANIFEST_ADAPTER,
             MANIFEST_ADAPTER_VERSION,
         ),
-        "source:manifest-v2": (
+        "source:manifest-v3": (
             "manifest-schema",
             MANIFEST_DEFAULTS_ADAPTER,
             MANIFEST_DEFAULTS_ADAPTER_VERSION,
@@ -1023,7 +1030,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     }
     sources = {source.id: source for source in snapshot.sources}
     if set(sources) != set(expected_sources):
-        raise IRFormatError("authority IR sources do not match the analyzable manifest-v2 profile")
+        raise IRFormatError("authority IR sources do not match the analyzable manifest-v3 profile")
     for index, source in enumerate(snapshot.sources):
         kind, adapter, adapter_version = expected_sources[source.id]
         if (
@@ -1033,7 +1040,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
             or source.adapter_version != adapter_version
         ):
             raise IRFormatError(
-                f"authority IR sources[{index}] is outside the analyzable manifest-v2 profile"
+                f"authority IR sources[{index}] is outside the analyzable manifest-v3 profile"
             )
 
     entities = {entity.id: entity for entity in snapshot.entities}
@@ -1045,7 +1052,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     for index, entity in enumerate(snapshot.entities):
         if entity.kind not in allowed_kinds:
             raise IRFormatError(
-                f"authority IR entities[{index}].kind is outside the analyzable manifest-v2 profile"
+                f"authority IR entities[{index}].kind is outside the analyzable manifest-v3 profile"
             )
 
     facts: dict[tuple[str, str], Fact] = {}
@@ -1056,7 +1063,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
         if specification is None:
             raise IRFormatError(
                 f"authority IR facts[{index}].predicate is unsupported by the "
-                "analyzable manifest-v2 profile"
+                "analyzable manifest-v3 profile"
             )
         if not fact.evidence:
             raise IRFormatError(
@@ -1080,7 +1087,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
                 raise IRFormatError(f"authority IR {path}.review is not accepted for analysis")
             if evidence.confidence != "exact":
                 raise IRFormatError(f"authority IR {path}.confidence is not exact for analysis")
-            if evidence.source == "source:manifest-v2" and (
+            if evidence.source == "source:manifest-v3" and (
                 (entity.kind, fact.predicate) not in _PROFILE_DEFAULTS
                 or fact.value != _PROFILE_DEFAULTS[(entity.kind, fact.predicate)]
             ):
@@ -1098,7 +1105,7 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
         if actual != expected:
             raise IRFormatError(
                 f"authority IR entities[{entity_indexes[entity.id]}] does not have the "
-                "complete analyzable manifest-v2 predicate set"
+                "complete analyzable manifest-v3 predicate set"
             )
 
     def fact_value(subject: str, predicate: str) -> Any:
@@ -1122,6 +1129,9 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
     if set(declared_roles) != role_ids or len(declared_roles) != len(role_ids):
         raise IRFormatError("authority IR agent roles do not cover the analyzable role entities")
 
+    quantity_units = {
+        name: q["unit"] for name, q in fact_value(constraints[0].id, "quantities").items()
+    }
     referenced_scopes: set[str] = set()
     referenced_principals: set[str] = set()
     for tool_id in tool_ids:
@@ -1141,6 +1151,13 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
             raise IRFormatError("authority IR quantity and ceiling must be declared together")
         if ceiling is not None and scope_key is None:
             raise IRFormatError("authority IR tool scope_key is required with a ceiling")
+        declarations = list(fact_value(tool_id, "fixed_charges").items())
+        if ceiling is not None:
+            declarations.append((fact_value(tool_id, "quantity"), ceiling))
+        for pool, value in declarations:
+            if pool in quantity_units and quantity_units[pool] != value["unit"]:
+                raise IRFormatError("authority IR quantity has incompatible units")
+            quantity_units[pool] = value["unit"]
     if referenced_scopes != scope_ids:
         raise IRFormatError(
             "authority IR scope entities do not match the analyzable tool references"
@@ -1171,9 +1188,9 @@ def _validate_manifest_profile(snapshot: AuthorityIR) -> None:
             "authority IR source:mandate semantic_sha256 does not match the profile"
         )
     defaults_digest = hashlib.sha256(_canonical_bytes(_MANIFEST_DEFAULTS)).hexdigest()
-    if sources["source:manifest-v2"].semantic_sha256 != defaults_digest:
+    if sources["source:manifest-v3"].semantic_sha256 != defaults_digest:
         raise IRFormatError(
-            "authority IR source:manifest-v2 semantic_sha256 does not match the profile"
+            "authority IR source:manifest-v3 semantic_sha256 does not match the profile"
         )
 
 
@@ -1244,7 +1261,7 @@ def _validate_profile_value(
         ):
             reject()
         return
-    if schema == "quantity_limits":
+    if schema in {"quantity_limits", "fixed_charge_map"}:
         if not isinstance(value, dict):
             reject()
         for name, limit in value.items():
@@ -1258,6 +1275,8 @@ def _validate_profile_value(
             if limit is None:
                 reject()
             _validate_profile_value(limit, "nullable_quantity", path, entity, entities)
+            if schema == "fixed_charge_map" and Decimal(limit["amount"]) <= 0:
+                reject()
         return
     if schema == "nullable_quantity":
         if value is None:
@@ -1290,7 +1309,7 @@ def _validate_profile_value(
 
 
 def _to_mandate(snapshot: AuthorityIR) -> Mandate:
-    """Rebuild a mandate from records emitted by the v1 manifest adapter."""
+    """Rebuild a mandate from records emitted by the current manifest adapter."""
     snapshot.validate()
     _validate_manifest_profile(snapshot)
     entities = {item.id: item for item in snapshot.entities}
@@ -1325,6 +1344,10 @@ def _to_mandate(snapshot: AuthorityIR) -> Mandate:
                 value_arg=value(tool_id, "value_arg"),
                 ceiling=ceiling,
                 quantity=value(tool_id, "quantity"),
+                fixed_charges={
+                    pool: Quantity(Decimal(q["amount"]), q["unit"])
+                    for pool, q in value(tool_id, "fixed_charges").items()
+                },
                 scope_key=(
                     None
                     if value(tool_id, "scope_key") is None
@@ -1615,6 +1638,7 @@ def _analyse_ir(snapshot: AuthorityIR, depth: int | None = None) -> _IRAnalysis:
                         _fact_id(tool_id, "unbounded"),
                         _fact_id(tool_id, "value_arg"),
                         _fact_id(tool_id, "quantity"),
+                        _fact_id(tool_id, "fixed_charges"),
                     }
                 )
         elif breach.kind == "effect_count":

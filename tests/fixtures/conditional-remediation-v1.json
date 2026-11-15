@@ -227,6 +227,7 @@
             "tools": [
               {
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "run_query",
                 "principal": "caller",
                 "produces": "rows",
@@ -240,6 +241,7 @@
                   "unit": "record"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "export_rows",
                 "principal": "caller",
                 "quantity": "exported_rows",
@@ -252,7 +254,7 @@
                 "value_arg": "count"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -431,7 +433,7 @@
         "successful_candidates": 1
       },
       "input": {
-        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729"
+        "manifest_sha256": "381a70458603bff7b45df2b182d70a1ad343fae9f11375c2ce8fa48281ab45ba"
       },
       "keep_tools": [
         "export_rows",
@@ -509,15 +511,15 @@
             "steps": 4
           }
         ],
-        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
+        "manifest_sha256": "381a70458603bff7b45df2b182d70a1ad343fae9f11375c2ce8fa48281ab45ba",
         "reason": "Synthetic two independent two-row exports; not business-outcome evidence.",
         "reviewer": "synthetic-workflow-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "9d76ad47ce3d596eb1773474d2bfdd9b28ba27e89aea5406efbdb3f092eb0137"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "2970433a8d85b4f4019bbeaf2f2e9540dda8854ad687200600c30bef6c4e1665"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 with reviewed conditional effects; candidates require human selection",
+      "scope": "manifest-v3 with reviewed conditional effects; candidates require human selection",
       "search": {
         "candidates_analyzed": 1,
         "candidates_found": 1,
@@ -761,6 +763,7 @@
             "tools": [
               {
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "run_query",
                 "principal": "caller",
                 "produces": "rows",
@@ -774,6 +777,7 @@
                   "unit": "record"
                 },
                 "effect": "irreversible",
+                "fixed_charges": {},
                 "name": "export_rows",
                 "principal": "caller",
                 "quantity": "exported_rows",
@@ -786,7 +790,7 @@
                 "value_arg": "count"
               }
             ],
-            "version": 2
+            "version": 3
           },
           "repair_cost": {
             "added_approval_tools": [],
@@ -1004,7 +1008,7 @@
         "successful_candidates": 1
       },
       "input": {
-        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729"
+        "manifest_sha256": "381a70458603bff7b45df2b182d70a1ad343fae9f11375c2ce8fa48281ab45ba"
       },
       "keep_tools": [
         "export_rows",
@@ -1052,15 +1056,15 @@
             "steps": 4
           }
         ],
-        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729",
+        "manifest_sha256": "381a70458603bff7b45df2b182d70a1ad343fae9f11375c2ce8fa48281ab45ba",
         "reason": "Synthetic two independent two-row exports; not business-outcome evidence.",
         "reviewer": "synthetic-workflow-reviewer",
         "schema": "agentmandate.required-workflows/v2",
-        "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-        "source_sha256": "9d76ad47ce3d596eb1773474d2bfdd9b28ba27e89aea5406efbdb3f092eb0137"
+        "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+        "source_sha256": "2970433a8d85b4f4019bbeaf2f2e9540dda8854ad687200600c30bef6c4e1665"
       },
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 with reviewed conditional effects; candidates require human selection",
+      "scope": "manifest-v3 with reviewed conditional effects; candidates require human selection",
       "search": {
         "candidates_analyzed": 1,
         "candidates_found": 1,
@@ -1303,14 +1307,14 @@
         "successful_candidates": 0
       },
       "input": {
-        "manifest_sha256": "b8795ece731afa599a837b978f608e9bec85c5e3d8847953e34920da01ed5729"
+        "manifest_sha256": "381a70458603bff7b45df2b182d70a1ad343fae9f11375c2ce8fa48281ab45ba"
       },
       "keep_tools": [
         "export_rows",
         "run_query"
       ],
       "schema": "agentmandate.remediation/v6",
-      "scope": "manifest-v2 with reviewed conditional effects; candidates require human selection",
+      "scope": "manifest-v3 with reviewed conditional effects; candidates require human selection",
       "search": {
         "candidates_analyzed": 0,
         "candidates_found": 0,

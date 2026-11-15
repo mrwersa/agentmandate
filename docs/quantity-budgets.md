@@ -5,7 +5,7 @@ exported records, generated tokens, storage written and compute consumed use the
 same model. Each quantity has its own name, unit and optional cumulative budget.
 
 ```yaml
-version: 2
+version: 3
 agent: batch-assistant
 limits:
   depth: 4
@@ -64,8 +64,10 @@ A tool consuming this pool declares `quantity: refund_value` and a ceiling with
 are never added or compared to each other.
 
 Amounts are finite, non-negative exact decimals. Use quoted decimal strings to
-preserve the digits supplied by your application. One tool declares one measured
-quantity and one amount argument; several tools may consume the same quantity.
+preserve the digits supplied by your application. One tool declares at most one
+variable quantity and amount argument, plus optional positive fixed charges in
+any named pools. Several tools may consume the same pool. Fixed and variable
+contributions to a shared pool are added; units must agree.
 A quantity without a mandate budget is still tracked and reported, but no
 cumulative-budget finding is invented for it. Zero is a real budget.
 
@@ -80,6 +82,9 @@ cumulative-budget finding is invented for it. Zero is a real budget.
 - `verify` checks recorded `quantity`, `unit`, value and scope, then accumulates
   each pool separately. Missing identity or units cannot establish conformance.
   Calls on tools without a measured quantity must omit value, quantity and unit.
+- [Fixed per-call charges](fixed-call-charges.md) are derived from the declared
+  tool and each completed trace record; they are not a second amount field in
+  the trace. Repeated and zero-variable calls still incur these costs.
 - IR export and analysis preserve quantity assignments, units and budgets.
 - Required workflows check each amount against its per-binding ceiling and
   named budget. Remediation and ceiling discovery recheck every pool, keep the
@@ -95,13 +100,16 @@ ceilings; it does not make runtime amounts indivisible.
 
 This is additive consumption in one modeled mandate. It does not model timed
 rates, renewal windows, concurrent gauges, negative refunds, recovery of quota,
-conversion between pools, argument-dependent production or several simultaneous
-quantity charges on one tool call. Declare those semantics only when a future
+conversion between pools, argument-dependent production or multiple variable
+amount arguments on one tool call. Declare those semantics only when a future
 contract can check them. Effect-class call budgets remain available separately
 through `limits.effects`.
 
 This alpha model replaces the money-only manifest: current inputs use manifest
-version 2, `Quantity(amount, unit)`, `limits.quantities` and `max_quantities`.
+version 3, `Quantity(amount, unit)`, `limits.quantities` and `max_quantities`.
+Fixed-charge declarations require explicit `version: 3`. Older manifest versions
+are refused; current synthetic examples are model projections, not a migration
+of historical acceptance.
 There is no `Money` alias, `limits.total` fallback, currency-field alias in
 manifests or replay, or legacy remediation output mode. Historical captures retain their original bytes
 and native currency fields; they do not become current manifests or acquire new

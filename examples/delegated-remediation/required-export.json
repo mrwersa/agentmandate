@@ -1,7 +1,7 @@
 {
   "schema": "agentmandate.required-workflows/v2",
   "agent": "synthetic-delegated-export",
-  "manifest_sha256": "7a2a839f8beb337ad585388dc93b81425f831b9c1e247900e37496d7f121e01b",
+  "manifest_sha256": "08b32c510fe884b979e122396d0dc52904149179203a3c21016cb16118ae0400",
   "reviewer": "synthetic-workflow-reviewer",
   "reason": "Synthetic two-batch export; not business-outcome or live enforcement evidence.",
   "workflows": [

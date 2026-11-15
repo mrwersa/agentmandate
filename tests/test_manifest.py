@@ -5,7 +5,7 @@ import pytest
 from agentmandate import Mandate, ManifestError, loads
 from agentmandate.manifest import CALLER, IRREVERSIBLE, Quantity, load
 
-MINIMAL = '{"agent": "a", "tools": [{"name": "t", "effect": "read"}], "version": 2}'
+MINIMAL = '{"agent": "a", "tools": [{"name": "t", "effect": "read"}], "version": 3}'
 
 
 def test_json_manifest_parses_without_yaml():
@@ -37,83 +37,83 @@ def test_load_reports_a_missing_file(tmp_path):
     "body, message",
     [
         ("[]", "expected a mapping"),
-        ('{"agent": "a", "tools": [], "version": 2}', "non-empty list"),
+        ('{"agent": "a", "tools": [], "version": 3}', "non-empty list"),
         ('{"tools": [{"name": "t", "effect": "read"}]}', "agent must be a non-empty string"),
         ('{"agent": "a", "version": 99, "tools": [{"name": "t"}]}', "schema version"),
         (
-            '{"agent": "a", "tools": [{"effect": "read"}], "version": 2}',
+            '{"agent": "a", "tools": [{"effect": "read"}], "version": 3}',
             "name must be a non-empty string",
         ),
         (
-            '{"agent": "a", "tools": [{"name": "t", "effect": "nope"}], "version": 2}',
+            '{"agent": "a", "tools": [{"name": "t", "effect": "nope"}], "version": 3}',
             "effect must be",
         ),
         (
             (
                 '{"agent": "a", "tools": [{"name": "t", "effect": "read", "princi'
-                'pal": "x"}], "version": 2}'
+                'pal": "x"}], "version": 3}'
             ),
             "principal must be",
         ),
         (
             (
                 '{"agent": "a", "tools": [{"name": "t", "effect": "read"}, {"name'
-                '": "t", "effect": "read"}], "version": 2}'
+                '": "t", "effect": "read"}], "version": 3}'
             ),
             "duplicate tool",
         ),
         (
             (
                 '{"agent": "a", "tools": [{"name": "t", "effect": "read", "requir'
-                'es": 5}], "version": 2}'
+                'es": 5}], "version": 3}'
             ),
             "requires must be",
         ),
         (
             (
                 '{"agent": "a", "tools": [{"name": "t", "effect": "read", "produc'
-                'es": 5}], "version": 2}'
+                'es": 5}], "version": 3}'
             ),
             "produces must be",
         ),
-        ('{"agent": "a", "tools": ["t"], "version": 2}', "expected a mapping"),
+        ('{"agent": "a", "tools": ["t"], "version": 3}', "expected a mapping"),
         (
             (
                 '{"agent": "a", "identity": 5, "tools": [{"name": "t", "effect": '
-                '"read"}], "version": 2}'
+                '"read"}], "version": 3}'
             ),
             "identity",
         ),
         (
             (
                 '{"agent": "a", "limits": {"depth": 0}, "tools": [{"name": "t", "'
-                'effect": "read"}], "version": 2}'
+                'effect": "read"}], "version": 3}'
             ),
             "positive integer",
         ),
         (
             (
                 '{"agent": "a", "limits": [], "tools": [{"name": "t", "effect": "'
-                'read"}], "version": 2}'
+                'read"}], "version": 3}'
             ),
             "limits: expected a mapping",
         ),
         (
             (
                 '{"agent": "a", "roles": {"proposer": ["nope"]}, "tools": [{"name'
-                '": "t", "effect": "read"}], "version": 2}'
+                '": "t", "effect": "read"}], "version": 3}'
             ),
             "unknown tool",
         ),
         (
             (
                 '{"agent": "a", "roles": {"proposer": 5}, "tools": [{"name": "t",'
-                ' "effect": "read"}], "version": 2}'
+                ' "effect": "read"}], "version": 3}'
             ),
             "expected a list",
         ),
         (
-            '{"agent": "a", "roles": [], "tools": [{"name": "t", "effect": "read"}], "version": 2}',
+            '{"agent": "a", "roles": [], "tools": [{"name": "t", "effect": "read"}], "version": 3}',
             "roles: expected a mapping",
         ),
     ],
@@ -128,7 +128,7 @@ def test_ceiling_requires_a_value_argument():
         loads(
             '{"agent": "a", "tools": [{"name": "t", "effect": "write", "ceili'
             'ng": {"amount": 1, "unit": "GBP"}, "quantity": "value"}], "versi'
-            'on": 2}'
+            'on": 3}'
         )
 
 
@@ -137,7 +137,7 @@ def test_ceiling_requires_a_scope_key():
         loads(
             '{"agent": "a", "tools": [{"name": "t", "effect": "write", "value'
             '_arg": "amount", "ceiling": {"amount": 1, "unit": "GBP"}, "quant'
-            'ity": "value"}], "version": 2}'
+            'ity": "value"}], "version": 3}'
         )
 
 
@@ -146,7 +146,7 @@ def test_value_arg_must_be_a_string():
         loads(
             '{"agent": "a", "tools": [{"name": "t", "effect": "write", "value'
             '_arg": 5, "ceiling": {"amount": 1, "unit": "GBP"}, "quantity": "'
-            'value"}], "version": 2}'
+            'value"}], "version": 3}'
         )
 
 
@@ -155,7 +155,7 @@ def test_scope_key_must_be_a_string():
         loads(
             '{"agent": "a", "tools": [{"name": "t", "effect": "write", "value'
             '_arg": "amount", "scope_key": 5, "ceiling": {"amount": 1, "unit"'
-            ': "GBP"}, "quantity": "value"}], "version": 2}'
+            ': "GBP"}, "quantity": "value"}], "version": 3}'
         )
 
 
@@ -188,7 +188,7 @@ def test_quantity_uses_decimal_so_sums_are_exact():
 def test_requires_accepts_a_bare_string():
     mandate = loads(
         '{"agent": "a", "tools": [{"name": "t", "effect": "read", "requir'
-        'es": "case"}], "version": 2}'
+        'es": "case"}], "version": 3}'
     )
     assert mandate.tool("t").requires == ("case",)
 
@@ -196,7 +196,7 @@ def test_requires_accepts_a_bare_string():
 def test_roles_accept_a_bare_string():
     mandate = loads(
         '{"agent": "a", "roles": {"proposer": "t"}, "tools": [{"name": "t'
-        '", "effect": "read"}], "version": 2}'
+        '", "effect": "read"}], "version": 3}'
     )
     assert mandate.roles["proposer"] == ("t",)
 
@@ -244,7 +244,7 @@ def test_boolean_depth_is_not_an_integer():
     with pytest.raises(ManifestError, match="positive integer"):
         loads(
             '{"agent": "a", "limits": {"depth": true}, "tools": [{"name": "t"'
-            ', "effect": "read"}], "version": 2}'
+            ', "effect": "read"}], "version": 3}'
         )
 
 
@@ -252,7 +252,7 @@ def test_empty_scope_names_are_rejected():
     with pytest.raises(ManifestError, match="requires must be"):
         loads(
             '{"agent": "a", "tools": [{"name": "t", "effect": "read", "requir'
-            'es": [""]}], "version": 2}'
+            'es": [""]}], "version": 3}'
         )
 
 
@@ -264,4 +264,4 @@ def test_parser_errors_are_wrapped_as_manifest_errors(body, message):
 
 def test_a_tool_name_with_a_control_character_is_rejected():
     with pytest.raises(ManifestError, match="must not contain control characters"):
-        loads('{"agent": "a", "tools": [{"name": "t\\nx", "effect": "read"}], "version": 2}')
+        loads('{"agent": "a", "tools": [{"name": "t\\nx", "effect": "read"}], "version": 3}')
