@@ -868,7 +868,8 @@
     "doc": "docs/fixed-call-charges.md",
     "fixtures": [
       "examples/fixed-call-charges/manifest.json",
-      "examples/fixed-call-charges/trace.jsonl"
+      "examples/fixed-call-charges/trace.jsonl",
+      ".github/workflows/ci.yml"
     ],
     "id": "fixed-call-charges",
     "kind": "baseline",

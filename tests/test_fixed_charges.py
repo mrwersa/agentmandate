@@ -3,6 +3,9 @@
 import copy
 import hashlib
 import json
+import os
+import subprocess
+import sys
 from collections import deque
 from dataclasses import replace
 from decimal import Decimal, Inexact, localcontext
@@ -244,6 +247,19 @@ def test_documented_completed_call_example_crosses_the_cli(capsys):
     replayed = json.loads(capsys.readouterr().out)
     assert not replayed["conformant"]
     assert {v["kind"] for v in replayed["violations"]} == {"quantity_exceeded"}
+
+
+def test_dependency_free_ci_step_uses_a_current_executable_example(tmp_path):
+    import yaml
+
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    step = next(s for s in workflow["jobs"]["no-dependency-install"]["steps"]
+                if s.get("name") == "Analyse a JSON manifest with no extras present")
+    env = {**os.environ, "RUNNER_TEMP": str(tmp_path), "GITHUB_WORKSPACE": str(ROOT),
+           "PATH": str(Path(sys.executable).parent) + os.pathsep + os.environ["PATH"]}
+    result = subprocess.run(["bash", "-e", "-o", "pipefail", "-c", step["run"]],
+                            env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_failed_reads_with_fixed_costs_do_not_claim_conformance_or_known_consumption():

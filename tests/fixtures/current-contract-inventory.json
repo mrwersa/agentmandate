@@ -3766,9 +3766,10 @@
       ]
     }
   },
-  "coverage_sha256": "f340e0ebff1a026773b6e60d4fd1f1abe3d612274fd0afded3affff1cf53775f",
+  "coverage_sha256": "277c22a93ac59e5160db61f9f3480910fb10f354efdd699f7e90f50065c3a6ef",
   "fixture_sha256": {
     ".github/workflows/action.yml": "8cf85f798895bb2b433de5bb882fc273350d217d1eed54fcbb520fa6c579c853",
+    ".github/workflows/ci.yml": "b03417e40a1041c4b74369e56bfb473f53871988da5be514509c3c5911f8dd04",
     "action.yml": "b3b31e232d3971129b13d033d16770c601c7b5ca889835e2c9a7d04d0b828bbb",
     "docs/continuity-reviews/agentcore-continuation-2026-10-09.json": "aa04561c7d2cd0bd0bd9184cefb9868c5be1c470a4f4880eba532c0160eb3ace",
     "docs/evidence/agentcore-refund-policy/controls-result.json": "5fb697aeadac887ade26ce68831f6fdf3c731856e81e2ac50f2b01d098502b0c",

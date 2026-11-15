@@ -136,3 +136,9 @@ Current synthetic fixtures were rebuilt for this model. Original captures,
 signed historical materials and acceptance records remain unchanged. After
 updating a current declaration, rerun its checks and review new pins; do not edit
 archived evidence to make it pass the current reader.
+
+Both released and proposed inputs must use the current model in `diff`, `review`
+and the Action. Prepare reviewed v3 annotations for the selected baseline commit
+as well as the proposal; changing only the proposal cannot make a v2 baseline
+readable. Regenerate their IR and workflow pins from the exact new bytes. This
+is a new model annotation, not a renewal or conversion of historical acceptance.
