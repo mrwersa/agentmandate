@@ -126,8 +126,8 @@
   "inputs": {
     "baseline": {
       "mapping_sha256": "4ca3fda73b398e4ff7a5d6449026dacb60b9859a07696ad914ea5b7402349314",
-      "oracle_sha256": "24d2753cc07d6df3a0cc8abc4c5087e38b6dacd7e740bca91e86c812c03e31fa",
-      "profile_sha256": "96d223e67a8f8b7118bb5988ac41286116e4ce73d4341cc96a9442e92b8e2503",
+      "oracle_sha256": "2d454c497a29a86356273e4dd46e5feaa50b3b790770e6ae7c194f9a7af49d50",
+      "profile_sha256": "31a1374a610fdcc74f1079640924f90aade781d34e3936c99aa056ab88ec4448",
       "source_sha256": {
         "allow-request.json": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
         "allow-response.json": "c5f32b9669f4f72b97813f18543f12aad5af8d4645fe19a657a6d07e50898a02",
@@ -135,7 +135,7 @@
         "deny-response.json": "f429fb2674ad34701ba88d53dead7369fa9942ec01386d2b1a2083f6336bf264",
         "lambda.py.txt": "f05e7a43cedca12eb885a65662ed2c480149e06f9dbc7804d094cfb2c0831f8c",
         "managed-state.json": "13746d27b0921ba00f829d4a73dbfb07a8238d5980f3f2e635d0f5311ef9572c",
-        "mandate.yaml": "b720252f25adcf645106804c74347a7bc4c600db14a349a0f62b2c81f814394a",
+        "mandate.yaml": "1e7268dd408abd6c15c79b8cfcab1384aa3441bfefaa5cce9c26438ade07c2d4",
         "mapping.json": "4ca3fda73b398e4ff7a5d6449026dacb60b9859a07696ad914ea5b7402349314",
         "policy.cedar": "15c72a22e99a087de583cc631a3545c738b54190b70fb34ebe70233302a16acf",
         "protocol-refusal.json": "eb162cb7d3b0c165aa551d8832f2f7b6579a49e17ea2f1a7129c999b92a02b53",
@@ -146,8 +146,8 @@
     },
     "candidate": {
       "mapping_sha256": "4ca3fda73b398e4ff7a5d6449026dacb60b9859a07696ad914ea5b7402349314",
-      "oracle_sha256": "c81f188704677a832c3b08f1bc4466e8659fce0de9eead270809ca0b3cb1f4a2",
-      "profile_sha256": "ae9e71a58e40dda95c723a9b261d487f17da3e3fcb01521c2ac22d85b147c37a",
+      "oracle_sha256": "e99b0c23bbadc70986f2bf8bfcab438e15af2d61d7e825ca945c6973385b04de",
+      "profile_sha256": "eb69b63971679652711310f5d690d2d80ff40ac16d2c0fb7ad83f3e5c8e102bb",
       "source_sha256": {
         "candidate-allow-request.json": "a3aca50d33e9999fc44ac1ec18324ab7cf9b39e49ece3bfb523329e6fada7146",
         "candidate-allow-response.json": "4c4903d38757abf73f05f1ee6cd863258b412ec86f6f1e93cdc5cf7afa7a12b0",
@@ -158,12 +158,12 @@
         "candidate-widen-request.json": "d2ea8c976d5e290c7b3bab6854cb397a7173d69b67c0e7caf994e4f1ed1dbe44",
         "candidate-widen-response.json": "27a11b736c35db7ea9abf5c948718ca66ca7b22f86f63d907575264abde43861",
         "lambda.py.txt": "f05e7a43cedca12eb885a65662ed2c480149e06f9dbc7804d094cfb2c0831f8c",
-        "mandate.yaml": "b720252f25adcf645106804c74347a7bc4c600db14a349a0f62b2c81f814394a",
+        "mandate.yaml": "1e7268dd408abd6c15c79b8cfcab1384aa3441bfefaa5cce9c26438ade07c2d4",
         "mapping.json": "4ca3fda73b398e4ff7a5d6449026dacb60b9859a07696ad914ea5b7402349314",
         "tool-schema.json": "d8e9381038ac4ba1ccd0f2db8c76422bcb9d3a563c302bbfe5a599821e3b3797"
       }
     },
-    "manifest_sha256": "b720252f25adcf645106804c74347a7bc4c600db14a349a0f62b2c81f814394a"
+    "manifest_sha256": "1e7268dd408abd6c15c79b8cfcab1384aa3441bfefaa5cce9c26438ade07c2d4"
   },
   "schema": "agentmandate.cedar-effective-diff/v2"
 }

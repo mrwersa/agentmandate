@@ -7,7 +7,7 @@ The checker rejects candidates that break the supplied path and still runs the
 full bounded breach search on every candidate that passes.
 
 The file describes **caller-supplied requirements**, not observations from a
-live run. The library checks their conformance within manifest v2. It does not
+live run. The library checks their conformance within manifest v3. It does not
 execute the application, authenticate the reviewer, or prove business success.
 Use the [trace guide](traces.md) for observed calls and the
 [repair guide](remediation.md) for candidate generation and ranking.
@@ -88,7 +88,9 @@ search, production occurs before spending for a tool that does both. A spending
 call can select only a binding already held at that point.
 
 Spend is cumulative per **tool, scope and binding**. Two tools sharing one
-scope do not share a ceiling. Each named pool accumulates every call assigned to that quantity.
+scope do not share a variable ceiling. Each pool accumulates its variable amounts
+and fixed charges. Fixed costs apply to every retained call, including zero-amount
+calls; they do not consume the variable per-binding allowance.
 Unit, principal and required approval must match their declarations.
 Every call counts against its declared effect budget, including pure reads,
 zero-spend calls and calls with no new quantity headroom. No-change calls remain

@@ -3,4 +3,4 @@ tools:
 - name: run_query
   effect: irreversible
   produces: rows
-version: 2
+version: 3

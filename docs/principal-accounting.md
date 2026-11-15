@@ -98,7 +98,9 @@ The binding supports nonnegative integer observations for one manifest tool
 and named quantity. `measurement.dimension` selects the tool's quantity and
 its budget in `limits.quantities`; measurement and budget units must agree
 exactly. That budget applies inclusively to each independent trial run. It
-does not support cost conversion, multiple mandates in one trial, effect counts,
+refuses any manifest with fixed call charges: these observations do not account
+for that additional consumption. It does not support cost conversion, multiple
+mandates in one trial, effect counts,
 policy amendments, rolling windows, or reconstructing an initial balance.
 
 ## Result contract

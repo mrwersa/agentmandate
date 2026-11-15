@@ -24,9 +24,9 @@
   "observed_at": "2026-10-12",
   "pins": {
     "configuration": "58cc9f18fcba96027160eb35a8d616eef08eabbea2b1ab145bed5404e6c69fc6",
-    "decisions": "8d62f3a7b60cb9d482397208df0b85a2f428bd07e92fea5194381ee8d3c9fda1",
-    "manifest": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6",
-    "telemetry": "44392cd079495b928b1a16c2ac9af66a63710d4050dc2ede1a813aed8a800c4e"
+    "decisions": "d96a4170c85fbbe7c58755d850c01e103d7850251df17a061909301f9fcb8701",
+    "manifest": "1468ef8583a5696629bfe518907c7d8d93c99632c5bfe08c62bad5f23ca1ee77",
+    "telemetry": "2dd9ea234245f161a25606633e56c9a6fa3d907d121238c59905c41adabe53e7"
   },
   "reconcile_version": 1
 }

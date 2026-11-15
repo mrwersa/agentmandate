@@ -1,4 +1,4 @@
-version: 2
+version: 3
 agent: refund-evidence-agent
 tools:
 - name: process_refund

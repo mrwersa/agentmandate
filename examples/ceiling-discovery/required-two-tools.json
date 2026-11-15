@@ -1,7 +1,7 @@
 {
   "schema": "agentmandate.required-workflows/v2",
   "agent": "two-payments",
-  "manifest_sha256": "9db69edf12c745bb15b7224c45489399e757319642493241ec0df56b623d40e1",
+  "manifest_sha256": "3473f57896659309161e169254caee0b3e4c4af6be70d2e0572f5ae574611918",
   "reviewer": "synthetic-example-reviewer",
   "reason": "Synthetic required payments; not live or business-success evidence.",
   "workflows": [

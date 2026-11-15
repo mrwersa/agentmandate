@@ -236,6 +236,7 @@ def analyse_scalar_handover(
             contract_before != contract_after
             or tool is None
             or not tool.spends_value
+            or any(t.fixed_charges for t in mandate.tools)
             or sum(tool.spends_value for tool in mandate.tools) != 1
             or tool.value_arg != before_policy["value_arg"]
             or tool.quantity != before_policy["dimension"]

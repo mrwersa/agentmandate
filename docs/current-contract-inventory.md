@@ -41,10 +41,13 @@ The remediation and required-workflow schemas, root exports and earlier pinned
 material bytes remain unchanged.
 
 
+The release notes below record successive inventory additions. Statements about
+unchanged pins apply to their respective release, not to later model changes.
+
 ## Breaking alpha changes
 
 The named-quantity release replaces the money-only model. The current surface
-uses `Quantity`, manifest version 2, named `limits.quantities`, Authority
+uses `Quantity`, manifest version 3, named `limits.quantities`, Authority
 `max_quantities` and one remediation result schema. Unsupported old schemas
 fail closed. There are no compatibility aliases, old remediation presentation
 branches or historical inventory-replay chains in the active suite.
@@ -71,7 +74,7 @@ retain their original bytes under `docs/evidence/` and the dated evidence notes.
 They describe historical contracts and may use unsupported manifest versions.
 Do not edit them to make current lint or analysis pass.
 
-Current graph tests use explicitly identified manifest-v2 projections under
+Current graph tests use explicitly identified manifest-v3 projections under
 `tests/fixtures/quantity-evidence/`. These are model annotations, not new captures
 or a transfer of historical acceptance. Synthetic evidence remains labelled as
 synthetic. The external security review and accountable evidence decisions stay
@@ -110,3 +113,15 @@ four synthetic released-manifest/workflow files and six CLI replay cases, reusin
 the unchanged condition and delegation materials. Existing 242 material pins
 remain unchanged. New scoped release records retain the unconditional gate
 beside reviewed proposal analysis; ordinary unscoped output is unchanged.
+
+## Fixed-charge model
+
+Manifest v3 replaces v2, including current synthetic manifests and dependent
+workflow, exporter, correlation and result fixtures. Root exports and CLI paths
+are unchanged; `Tool`, `Step` and `ScenarioStep` gain fixed-charge mappings.
+The generic IR envelope stays at 2, with manifest adapter 4/defaults adapter 3.
+Scenario witnesses use v3 so old readers cannot discard their structured charges.
+Current fixtures pin the new contracts; no prior manifest reader is retained.
+The fixed-charge family links a three-budget example, completed-call trace,
+guide and independent search/replay/repair boundary tests. Historical captures
+and accepted evidence remain byte-identical and gain no new acceptance.

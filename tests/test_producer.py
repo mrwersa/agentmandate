@@ -238,7 +238,7 @@ def test_generic_reachability_refuses_the_standalone_producer_profile() -> None:
     graph = ProducerBoundary.from_json(FIXTURE.read_text()).to_ir()
 
     with pytest.raises(
-        IRFormatError, match="sources do not match the analyzable manifest-v2 profile"
+        IRFormatError, match="sources do not match the analyzable manifest-v3 profile"
     ):
         _analyse_ir(graph)
 

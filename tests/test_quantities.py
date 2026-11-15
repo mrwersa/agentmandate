@@ -23,7 +23,7 @@ def model(*, shared=False, same_unit=False, unbounded=True, cap="3", budget="4",
     units = ("record", "record" if shared or same_unit else "token")
     return Mandate.parse(
         {
-            "version": 2,
+            "version": 3,
             "agent": "generic",
             "limits": {
                 "depth": depth,

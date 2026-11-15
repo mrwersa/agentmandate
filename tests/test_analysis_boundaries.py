@@ -302,7 +302,7 @@ def test_malformed_json_numbers_never_fall_back_to_yaml(literal, leading, tmp_pa
 
 def test_yaml_flow_mappings_and_json_have_identical_semantics():
     flow = "{agent: a, tools: [{name: t, effect: read}]}"
-    strict_json = '{"agent": "a", "tools": [{"name": "t", "effect": "read"}], "version": 2}'
+    strict_json = '{"agent": "a", "tools": [{"name": "t", "effect": "read"}], "version": 3}'
     assert loads(flow) == loads(strict_json)
 
 
@@ -316,7 +316,7 @@ def test_bare_json_still_works_and_flow_yaml_reports_the_optional_dependency(mon
 
     monkeypatch.setattr(builtins, "__import__", without_yaml)
     assert (
-        loads('{"agent": "a", "tools": [{"name": "t", "effect": "read"}], "version": 2}').agent
+        loads('{"agent": "a", "tools": [{"name": "t", "effect": "read"}], "version": 3}').agent
         == "a"
     )
     with pytest.raises(ManifestError, match="Reading YAML flow mappings needs PyYAML"):

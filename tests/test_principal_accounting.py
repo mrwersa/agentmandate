@@ -249,6 +249,7 @@ def test_each_binding_join_gap_withholds_all_shared_totals(mutate):
         "unit",
         "tool_unit",
         "consistent_unit",
+        "fixed_charges",
     ],
 )
 def test_actual_manifest_contract_is_checked_not_only_binding_digest(mutation):
@@ -262,6 +263,10 @@ def test_actual_manifest_contract_is_checked_not_only_binding_digest(mutation):
     elif mutation == "consistent_unit":
         manifest["limits"]["quantities"]["value"]["unit"] = "USD"
         manifest["tools"][1]["ceiling"]["unit"] = "USD"
+    elif mutation == "fixed_charges":
+        manifest["tools"][0]["fixed_charges"] = {
+            "requests": {"amount": "1", "unit": "request"},
+        }
     else:
         manifest["tools"][1]["ceiling"]["unit"] = "USD"
     data = json.dumps(manifest).encode()

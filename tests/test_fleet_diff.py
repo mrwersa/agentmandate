@@ -645,7 +645,7 @@ def test_symlink_escape_is_rejected_without_partial_output(artifacts, capsys):
     assert not capsys.readouterr().out
 
 
-def test_unsupported_unit_arithmetic_is_usage_2_and_not_a_partial_fleet_verdict(artifacts, capsys):
+def test_unit_incompatible_snapshot_is_ineligible_before_fleet_arithmetic(artifacts, capsys):
     value = index()
 
     def monetary(m):
@@ -667,9 +667,12 @@ def test_unsupported_unit_arithmetic_is_usage_2_and_not_a_partial_fleet_verdict(
     snapshot(value, artifacts, monetary)
     path = artifacts / "input.json"
     path.write_bytes(encoded(value))
-    assert main(command(path, path, artifacts) + ["--json"]) == 2
+    assert main(command(path, path, artifacts) + ["--json"]) == 1
     output = capsys.readouterr()
-    assert not output.out and "incompatible units" in output.err
+    report = json.loads(output.out)
+    assert not output.err and not report["gate_passed"]
+    assert any(f["code"] == "fleet.snapshot-ineligible" and "incompatible units" in f["detail"]
+               for f in report["baseline"]["findings"])
 
 
 def test_pinned_v1_cases_replay_complete_results_and_exit_codes(capsys):

@@ -21,11 +21,11 @@
     "baseline_lint": [],
     "candidates": [],
     "input": {
-      "manifest_sha256": "c0abdce84fd6b25d5a9ec1dbd39212442b43e3b5cef2430b2a1f635e531c5673"
+      "manifest_sha256": "951d94d586296450b4e43c4b318740f4c0b4582bc6ba8164146e11cc04f3db06"
     },
     "keep_tools": [],
     "schema": "agentmandate.remediation/v6",
-    "scope": "manifest-v2 reachability only; candidates require human selection",
+    "scope": "manifest-v3 reachability only; candidates require human selection",
     "search": {
       "candidates_analyzed": 0,
       "candidates_found": 0,

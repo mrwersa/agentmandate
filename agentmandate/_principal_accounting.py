@@ -168,6 +168,7 @@ def _join_gaps(
     if (
         tool is None
         or not tool.spends_value
+        or any(t.fixed_charges for t in mandate.tools)
         or tool.value_arg != measurement["value_arg"]
         or tool.quantity != measurement["dimension"]
         or tool.ceiling.unit != measurement["unit"]

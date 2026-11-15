@@ -9,10 +9,10 @@
   ],
   "failures": [],
   "inputs_sha256": "a012f59d9085066421736ded8a1af2e7eadcbb687ab75aa8e547d76328bd56b2",
-  "kernel_sha256": "d797cef8481d06e4d3091cb05b4b8dc0ba5e6c36af589278fc95247019a178cd",
+  "kernel_sha256": "c0238a688586535e0b49501371e3b86d0885a8794b650b4ced643f0a56ffdc36",
   "positive_amount_choices": 14454,
-  "reference_sha256": "1346cc3f53ee6c857e438bb729cc329e580bc4c50f4b2bed07262949ef852f5c",
+  "reference_sha256": "8f558b774cc64fb2696b3d8d7509e871333638b26d251b268c94b8b66259d531",
   "reference_states": 15404,
   "reference_transitions": 27403,
-  "scope": "synthetic manifest-v2 checks; exhaustive integer amounts and binding choices"
+  "scope": "synthetic manifest-v3 checks; exhaustive integer amounts and binding choices"
 }

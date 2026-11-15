@@ -1,8 +1,6 @@
 {
-  "scope": "Exact UTF-8 CLI output identities; semantic contents are asserted in test_delegated_remediation.py.",
   "cases": [
     {
-      "name": "joint-grid",
       "argv": [
         "remediate",
         "examples/delegated-remediation/manifest.json",
@@ -34,11 +32,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "1b47928996cb70b2e9186b6d81f67817a7e102003f60174fdada8bb7f9e35e6d",
-      "stderr": ""
+      "name": "joint-grid",
+      "stderr": "",
+      "stdout_sha256": "817782aa43d9f3e3dffeb1d9f600557ffa211ef41a5e40e94ef2773ef0c58a12"
     },
     {
-      "name": "fixed-grant-discovery",
       "argv": [
         "remediate",
         "examples/delegated-remediation/manifest.json",
@@ -63,11 +61,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "c090581280c0ec96ed7df67e0e2acf963bb02bbbf331994db65d73bd5abccde5",
-      "stderr": ""
+      "name": "fixed-grant-discovery",
+      "stderr": "",
+      "stdout_sha256": "d49b28c3890d18c3c8e0f0970a5fead1d6832bbc0e75716b2a39d60265230d6f"
     },
     {
-      "name": "expired",
       "argv": [
         "remediate",
         "examples/delegated-remediation/manifest.json",
@@ -92,8 +90,10 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "2916f67251fb2e3d660b318e7fd5592ef6c9d5f1cca548f90fb8f0615e3c47e8",
-      "stderr": ""
+      "name": "expired",
+      "stderr": "",
+      "stdout_sha256": "1d2e316744a293be21b74f0e1a6f55418bcf796fe1bfe976b503473b63289ff5"
     }
-  ]
+  ],
+  "scope": "Exact UTF-8 CLI output identities; semantic contents are asserted in test_delegated_remediation.py."
 }

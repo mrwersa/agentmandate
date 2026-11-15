@@ -176,6 +176,11 @@ baseline is clean within
 the selected analysis scope. Conditional reports retain the ordinary findings
 separately; finding a repair never clears a breached baseline.
 
+Fixed per-call charges are retained in every candidate that keeps the tool.
+Lowering its variable ceiling does not lower those charges. Discovery can report
+no feasible candidate when fixed consumption alone exceeds a budget; removing a
+whole tool remains available in explicit enumeration. See [fixed charges](fixed-call-charges.md).
+
 ## Apply a selected proposal
 
 After reviewing its lost capabilities, workflows, lint and truncation, save the
@@ -189,5 +194,5 @@ mandate diff examples/dispute-resolver-v2.yaml /tmp/candidate.json --depth 8
 
 Application-level tests and deployment controls remain necessary. Generating
 new condition restrictions, editing delegation grants, timed quotas, multiple
-simultaneous charges on one call and global policy synthesis remain outside
+variable amount arguments and global policy synthesis remain outside
 this repair family.

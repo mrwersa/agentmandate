@@ -356,7 +356,7 @@ def test_managed_oracle_projects_a_closed_standalone_ir_profile() -> None:
     restored = AuthorityIR.from_json(graph.to_json())
     assert restored.to_json() == graph.to_json()
     _validate_managed_profile(restored)
-    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v3 profile"):
         _analyse_ir(restored)
 
 

@@ -1,8 +1,6 @@
 {
-  "scope": "Synthetic current-contract CLI baselines; no deployment evidence",
   "cases": [
     {
-      "name": "condition-grid",
       "argv": [
         "remediate",
         "examples/conditional-remediation/manifest.json",
@@ -28,11 +26,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "7e7c69929be08c6d853eb6bd2f2fa4e52ae0529474e9227f985dd3876e9949a5",
-      "stderr": ""
+      "name": "condition-grid",
+      "stderr": "",
+      "stdout_sha256": "825687490c8730f3b49f4d5e46968a309ddd64a31c0c587207346c4bf4de9002"
     },
     {
-      "name": "condition-discovery",
       "argv": [
         "remediate",
         "examples/conditional-remediation/manifest.json",
@@ -57,11 +55,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "5e38e3ce9a807a4302f2d95d3c6f6c40ce9f7e8ba041d814212841d84aa6345f",
-      "stderr": ""
+      "name": "condition-discovery",
+      "stderr": "",
+      "stdout_sha256": "6940fcebaa7a87492dff9b6af60f3eb2a3cb9ccf62476ec2569112f93732cd57"
     },
     {
-      "name": "condition-expired",
       "argv": [
         "remediate",
         "examples/conditional-remediation/manifest.json",
@@ -87,11 +85,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "e4a9f34186da8371ecb97d7837c415d946af3e29f5c228678f7d723765b9961b",
-      "stderr": ""
+      "name": "condition-expired",
+      "stderr": "",
+      "stdout_sha256": "d6fe28a4cb7e682e00a1a8cf3de897ef1edc28ade5dad54321a1abffe61b411d"
     },
     {
-      "name": "delegation-grid",
       "argv": [
         "remediate",
         "examples/delegated-remediation/manifest.json",
@@ -125,11 +123,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "424a63a219f85d2d43949cab7ad9f915c49f6fae8191fad5e8ac5525f636d09f",
-      "stderr": ""
+      "name": "delegation-grid",
+      "stderr": "",
+      "stdout_sha256": "bad53e4236e81bc7ec75e0a348f886b6ac9a39e3d7741dc4242ddd3a53f8ea7b"
     },
     {
-      "name": "delegation-discovery",
       "argv": [
         "remediate",
         "examples/delegated-remediation/manifest.json",
@@ -162,11 +160,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "53eab247db7b28d779204d01a6e9fd9ad352bd28755351e73f748c4b429d3be7",
-      "stderr": ""
+      "name": "delegation-discovery",
+      "stderr": "",
+      "stdout_sha256": "80599e48b0b952c7c918edc7748b9fef5f1a6b7ff415104b941e2c691258f3a4"
     },
     {
-      "name": "delegation-expired",
       "argv": [
         "remediate",
         "examples/delegated-remediation/manifest.json",
@@ -200,8 +198,10 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "4f44bf025408a3a72a9bb265a2868f45633fc86e4a124be5e3951549d6435e06",
-      "stderr": ""
+      "name": "delegation-expired",
+      "stderr": "",
+      "stdout_sha256": "8bf8919d0b988fcc5700663eccb1983fb20558f06537ec72ff02037f8e07a3c6"
     }
-  ]
+  ],
+  "scope": "Synthetic current-contract CLI baselines; no deployment evidence"
 }

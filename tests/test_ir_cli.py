@@ -167,7 +167,7 @@ def test_reach_ir_rejects_unknown_semantics_and_malformed_input(tmp_path: Path, 
     assert main(["reach", "--ir", str(path)]) == EXIT_USAGE
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "outside the analyzable manifest-v2 profile" in captured.err
+    assert "outside the analyzable manifest-v3 profile" in captured.err
 
 
 def test_ir_cli_rejects_future_versions_without_partial_output(tmp_path: Path, capsys) -> None:

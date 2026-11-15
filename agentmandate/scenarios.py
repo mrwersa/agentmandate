@@ -12,15 +12,15 @@ expected control boundary. The library never invents those facts.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
-from .manifest import Mandate
+from .manifest import Mandate, Quantity, _fixed_charge_map
 from .reach import Breach, Step, analyse
 
-SCENARIOS_SCHEMA = "agentmandate.scenarios/v2"
+SCENARIOS_SCHEMA = "agentmandate.scenarios/v3"
 
 
 def _required_string(value: Any, field: str, *, allow_blank: bool = False) -> str:
@@ -42,6 +42,7 @@ class ScenarioStep:
     spent: str | None = None
     unit: str | None = None
     quantity: str | None = None
+    fixed_charges: dict[str, Quantity] = field(default_factory=dict)
 
     @classmethod
     def from_step(cls, step: Step) -> ScenarioStep:
@@ -51,6 +52,7 @@ class ScenarioStep:
             spent=str(step.spent) if step.spent is not None else None,
             unit=step.unit,
             quantity=step.quantity,
+            fixed_charges=dict(step.fixed_charges),
         )
 
     @classmethod
@@ -62,22 +64,37 @@ class ScenarioStep:
         spent = value.get("spent")
         unit = value.get("unit")
         quantity = value.get("quantity")
-        for field, item in (
+        for field_name, item in (
             ("step binding", binding),
             ("step spent", spent),
             ("step unit", unit),
             ("step quantity", quantity),
         ):
             if item is not None:
-                _required_string(item, field)
+                _required_string(item, field_name)
         if (spent is None) != (unit is None) or (spent is None) != (quantity is None):
             raise ValueError("scenario step spent, quantity and unit must be supplied together")
-        return cls(tool=tool, binding=binding, spent=spent, unit=unit, quantity=quantity)
+        raw = value.get("fixed_charges", {})
+        if not isinstance(raw, dict):
+            raise ValueError("scenario fixed_charges must be a mapping")
+        if any(not isinstance(q, dict) or not isinstance(q.get("amount"), str)
+               for q in raw.values()):
+            raise ValueError("scenario fixed charge amounts must be decimal strings")
+        charges = _fixed_charge_map({
+            pool: Quantity.parse(q, "scenario fixed charge") for pool, q in raw.items()
+        }, "scenario")
+        return cls(tool=tool, binding=binding, spent=spent, unit=unit, quantity=quantity,
+                   fixed_charges=charges)
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, Any]:
         payload = {"tool": self.tool}
         if self.binding is not None:
             payload["binding"] = self.binding
+        if self.fixed_charges:
+            payload["fixed_charges"] = {
+                pool: {"amount": str(q.amount), "unit": q.unit}
+                for pool, q in sorted(self.fixed_charges.items())
+            }
         if self.spent is not None:
             payload["spent"] = self.spent
             payload["unit"] = self.unit or ""

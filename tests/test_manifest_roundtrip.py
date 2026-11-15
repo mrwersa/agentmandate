@@ -13,8 +13,8 @@ EXAMPLE_MANIFESTS = tuple(sorted((ROOT / "examples").glob("*.yaml")))
 EVIDENCE_MANIFESTS = tuple(
     sorted((ROOT / "tests/fixtures/quantity-evidence").glob("*/mandate.yaml"))
 )
-COMPATIBILITY = ROOT / "tests" / "fixtures" / "manifest-v2-shorthand-defaults.yaml"
-ALL_DEFAULTS = ROOT / "tests" / "fixtures" / "manifest-v2-all-defaults.yaml"
+COMPATIBILITY = ROOT / "tests" / "fixtures" / "manifest-v3-shorthand-defaults.yaml"
+ALL_DEFAULTS = ROOT / "tests" / "fixtures" / "manifest-v3-all-defaults.yaml"
 MIGRATION = ROOT / "tests" / "fixtures" / "authority-ir-v2.json"
 
 
@@ -51,7 +51,7 @@ def test_the_matrix_is_all_examples_and_seven_independent_graphs() -> None:
 
 def test_shorthands_and_omitted_defaults_have_schema_provenance() -> None:
     content = COMPATIBILITY.read_bytes()
-    source = "tests/fixtures/manifest-v2-shorthand-defaults.yaml"
+    source = "tests/fixtures/manifest-v3-shorthand-defaults.yaml"
     mandate = loads(content.decode(), source=source)
     snapshot = _from_mandate(mandate, content)
     restored = _to_mandate(AuthorityIR.from_json(snapshot.to_json()))
@@ -65,8 +65,8 @@ def test_shorthands_and_omitted_defaults_have_schema_provenance() -> None:
     assert mandate.limits.depth == 8
     assert mandate.limits.quantities == {}
     assert mandate.limits.effects == {}
-    defaults_source = next(item for item in snapshot.sources if item.id == "source:manifest-v2")
-    assert defaults_source.format_version == 2
+    defaults_source = next(item for item in snapshot.sources if item.id == "source:manifest-v3")
+    assert defaults_source.format_version == 3
 
     defaulted = {
         ("agent:compatibility%2Fdefaults", "identity"),
@@ -83,13 +83,13 @@ def test_shorthands_and_omitted_defaults_have_schema_provenance() -> None:
         ("tool:get_status", "value_arg"),
     }
     assert all(
-        any(evidence.source == "source:manifest-v2" for evidence in facts[key].evidence)
+        any(evidence.source == "source:manifest-v3" for evidence in facts[key].evidence)
         for key in defaulted
     )
 
     defaults_content = ALL_DEFAULTS.read_bytes()
     defaults = _from_mandate(
-        loads(defaults_content.decode(), source="tests/fixtures/manifest-v2-all-defaults.yaml"),
+        loads(defaults_content.decode(), source="tests/fixtures/manifest-v3-all-defaults.yaml"),
         defaults_content,
     )
     roles = next(
@@ -98,12 +98,12 @@ def test_shorthands_and_omitted_defaults_have_schema_provenance() -> None:
         if item.subject == "agent:all-defaults" and item.predicate == "roles"
     )
     assert roles.value == []
-    assert any(evidence.source == "source:manifest-v2" for evidence in roles.evidence)
+    assert any(evidence.source == "source:manifest-v3" for evidence in roles.evidence)
 
 
-def test_canonical_v1_migration_fixture_remains_readable_and_reproducible() -> None:
+def test_current_manifest_baseline_remains_readable_and_reproducible() -> None:
     content = COMPATIBILITY.read_bytes()
-    mandate = loads(content.decode(), source="tests/fixtures/manifest-v2-shorthand-defaults.yaml")
+    mandate = loads(content.decode(), source="tests/fixtures/manifest-v3-shorthand-defaults.yaml")
     committed = MIGRATION.read_text(encoding="utf-8")
 
     assert _from_mandate(mandate, content).to_json() == committed

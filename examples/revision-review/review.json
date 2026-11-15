@@ -1,9 +1,9 @@
 {
   "revision_review_version": 1,
   "id": "synthetic-revision-review",
-  "manifest_sha256": "7b4433fec3cd9ba85441472fca0e531d9d71981833b17ee5fe09b91c4cd18d9a",
+  "manifest_sha256": "9a2c1523396aca53949bb29f10e97220f4c36a9edbc477bc2af5cd6d4b7469c6",
   "provider_sha256": "55135e07310f91c49dce41b2c6b228d5bd5c519b8ed5a4647df81e76721021e5",
-  "binding_sha256": "3d6404084c15139824fe0da5bf7d243fa3e2b50a562cdc933852e0a73f8c0e3f",
+  "binding_sha256": "48376159797dc91cec53fcce44aea91a531e25783016dcae7696f4fd66215e13",
   "sources": [
     {
       "id": "before",

@@ -107,17 +107,17 @@
     ],
     "gate_satisfied": false,
     "inputs": {
-      "after_sha256": "866dd9fcc1e0b5a068a8941fce165e643d4d1ce0da1326ee8eee6d1210b7318d",
+      "after_sha256": "2495eda5c3638f905b19d9f11d912b7113bb093919af56ecc04ff04069dc5bf1",
       "agent": "synthetic-release",
-      "before_sha256": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
+      "before_sha256": "da667c6dbe8fbaefcb50b5860d9b6c43a8d82e8227cf836d1212f5c880cf4c6e",
       "comparison_sha256": "e94b9b33786b646370e4777957eadbd376d75d45b955d900ff893a03797b8b72",
       "depth": 4
     },
     "review": {
-      "after_sha256": "866dd9fcc1e0b5a068a8941fce165e643d4d1ce0da1326ee8eee6d1210b7318d",
+      "after_sha256": "2495eda5c3638f905b19d9f11d912b7113bb093919af56ecc04ff04069dc5bf1",
       "agent": "synthetic-release",
       "attestation": "caller-supplied annotations and pinned bytes; author identity and enforcement not verified",
-      "before_sha256": "50026cde01ecb53118fd85c0495a5d28fa76f54a7a91cab102dd030099cd6a0c",
+      "before_sha256": "da667c6dbe8fbaefcb50b5860d9b6c43a8d82e8227cf836d1212f5c880cf4c6e",
       "comparison_sha256": "e94b9b33786b646370e4777957eadbd376d75d45b955d900ff893a03797b8b72",
       "decision": "defer",
       "depth": 4,
@@ -145,7 +145,7 @@
       "reviewer": "synthetic-reviewer",
       "schema": "agentmandate.change-review/v1",
       "scope": "all_widening_changes_in_pinned_comparison",
-      "source_sha256": "2810cb4d01daef4be3fe10280a4d3abbdb11d3e85699d393f9ddddcc7f670948",
+      "source_sha256": "54bbdd73b9bb425d1b633aec9d936cbc1954b1c832eb2fd6a0898a88c4cc74f6",
       "target_policy": {
         "reason": "No deployed policy in this example.",
         "status": "not_applicable"

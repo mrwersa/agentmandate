@@ -14,6 +14,7 @@ commands; historical captures and acceptance records keep their original bytes.
 | What you want to do | Start here |
 |---|---|
 | Bound money, records, tokens or compute | [Named quantity budgets](quantity-budgets.md) |
+| Charge requests and compute alongside a variable amount | [Fixed call charges](fixed-call-charges.md) |
 | Run a complete example | [README quickstart](../README.md#run-the-example) |
 | Review an existing agent's tools | [Scan and inventory](inventory.md), then [manifest fields](manifest.md) |
 | Start from MCP, OpenAPI, or A2A JSON | [Catalogue imports](catalogue-import.md) |
@@ -79,7 +80,7 @@ specific evidence gaps and have additional review and source-byte requirements.
 - [Search bounds and performance](search-performance.md): depth semantics,
   worst-case growth, reproducible measurements, and CI resource limits.
 - [Authority IR](authority-ir.md): canonical provenance and the reviewed
-  manifest-v2 analysis profile.
+  manifest-v3 analysis profile.
 - [Stability](../STABILITY.md): supported public surfaces and versioning.
   Python callers can use `load`, `analyse`, and `compare` from `agentmandate`;
   the complete public export list is `agentmandate.__all__`. Private attachment

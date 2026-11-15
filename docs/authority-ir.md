@@ -2,7 +2,7 @@
 
 Status: **public CLI and v2 artifact contract; Python records private**. The
 reviewed CLI exposes canonical export, structural validation, and a closed
-manifest-v2 analysis profile. This format does not change manifest schema
+manifest-v3 analysis profile. This format does not change manifest schema
 version 2. Current-contract rules follow `STABILITY.md`.
 
 ## Why a separate IR
@@ -74,7 +74,7 @@ collisions rather than silently suffixing them.
 Missing, false, and unknown are different states. Importers must emit an
 explicit unknown observation when the source claims a concept but its meaning
 cannot be represented. They must not invent `caller`, `read`, zero, or an empty
-set. Defaults required by manifest version 2 are facts supported by the
+set. Defaults required by manifest version 3 are facts supported by the
 manifest-version source, so their origin remains visible.
 
 Multiple active facts for a single-valued predicate are a conflict. Analysis
@@ -97,7 +97,7 @@ relations are `acts_as`, `ceiling_on`, `produces`, `requires`, and
 `role_contains`. `contains_tool` belongs to the dynamic-inventory profile.
 The reviewed condition and delegation attachment profiles add `has_condition`,
 `uses_context`, `narrows_to`, `constrained_by`, and `under_grant`. None makes a
-standalone graph eligible for manifest-v2 `reach --ir` analysis. Derived
+standalone graph eligible for manifest-v3 `reach --ir` analysis. Derived
 relations are closed and purpose-specific:
 
 | Relation | Endpoints | Required support |
@@ -127,21 +127,23 @@ as the original artifact. Supplying source bytes adds the content digest; it
 does not recover syntax that parsing already discarded.
 
 For a parsed `Mandate`, schema-default evidence means that the normalized value
-equals the manifest v2 default. It does not claim the source key was omitted:
+equals the manifest v3 default. It does not claim the source key was omitted:
 an explicit `principal: caller` and an omitted `principal` therefore both cite
 the semantic projection and the manifest-version default. A future raw-syntax
 importer may additionally record explicitness and a raw source location, but
 must not rewrite this semantic fact. Default-definition locations point to the
 manifest-version source, never to a raw key that may not exist.
+Current default locations use `manifest:v3#/defaults/...`: the numeral names
+the manifest schema, independently of the generic IR version.
 Every semantic digest records the adapter identifier and adapter version that
 produced the projection. Projection changes require a new adapter version even
 when `ir_version` is unchanged, so consumers can distinguish changed source
 semantics from changed importer logic.
 
-The first adapter must satisfy semantic round-trip compatibility:
+The current manifest adapter must preserve its semantic round trip:
 
 ```text
-Mandate v2 -> Authority IR v2 -> Mandate v2
+Mandate v3 -> Authority IR v2 -> Mandate v3
 ```
 
 The result must compare equal for agent, identity, tools, roles, and limits and
@@ -164,23 +166,27 @@ the table, record index, and field but never repeat the rejected value.
 
 Structural validity is deliberately weaker than eligibility for analysis. A
 valid snapshot may preserve contested evidence, unknown predicates, or future
-entity kinds for archival and transport. The private manifest-v2 analysis
+entity kinds for archival and transport. The private manifest-v3 analysis
 profile accepts only snapshots produced by the exact supported manifest and
 schema-default adapters, with their semantic digests intact.
 
 The profile has a closed registry of predicates and value schemas for agents,
 constraints, principals, roles, scopes, and tools. It requires the complete
-manifest-v2 predicate set, one agent, the `run` constraint, and exact agreement
+manifest-v3 predicate set, one agent, the `run` constraint, and exact agreement
 between declared and referenced entity sets. Quantities, effects, principals,
 references, limits, and tool ceiling fields are type- and relationship-checked
 before projection.
 
-`ir validate` checks graph structure, not whether its accounting is usable. For
-example, a snapshot may preserve a tool ceiling in EUR and a budget in USD for
-the same quantity. Structural validation succeeds; `reach --ir` rejects that
-unit disagreement at analysis time with exit 2 and no partial result. The same
-check rejects conflicting units across tools sharing a quantity, even without
-a declared budget. Use manifest `lint` to find these disagreements before export.
+The current manifest profile includes a `fixed_charges` fact for every tool,
+including an empty map. Manifest adapter 4 and defaults adapter 3 preserve those
+facts. Profile validation checks one exact unit across every fixed charge,
+variable ceiling and budget sharing a pool, even without a declared budget.
+A EUR ceiling and USD budget for the same pool fail the analysis profile:
+`reach --ir` exits 2 with no partial result. `ir validate` checks generic graph
+structure, so it can accept a transported snapshot with that disagreement.
+Structural validity remains separate from accounting usability, evidence trust
+and approval.
+Use manifest `lint` to find unit disagreements before export.
 
 Every consumed fact must cite the reviewed manifest source, and every evidence
 reference on that fact must be both `exact` and `accepted`. This conservative
@@ -199,7 +205,7 @@ edge in its shortest counterexample plus the limit it violates. Search depth
 and truncation are analysis parameters in the result envelope, not source
 facts.
 
-The private IR entry point validates the snapshot, projects its exact v2 facts
+The private IR entry point validates the snapshot, projects its current manifest-profile facts
 into the existing search kernel, and returns the unchanged `Authority` beside
 an augmented IR graph. The graph does not absorb depth or truncation as facts.
 Repeated calls remain explicit in the counterexample path; their canonical
@@ -248,7 +254,7 @@ Implementation is deliberately split so review can stop a bad format early:
 1. Add private typed records, canonical JSON, and a lossless manifest adapter.
 2. Validate exact round-trips on every example and all four real evidence
    graphs; commit one canonical v2 baseline. A separate round-trip
-   fixture must exercise every manifest v2 shorthand and every omitted default,
+   fixture must exercise every manifest v3 shorthand and every omitted default,
    including omitted version, identity, limits, principal, and boolean fields,
    plus string forms of `requires` and role membership.
 3. Move reachability to the IR and make every derived edge cite its support.
@@ -262,7 +268,7 @@ the four real evidence graphs. Retained paths are replayed against the same
 enabling semantics before provenance is derived, and each derived relation has
 a registry-enforced support shape.
 
-Gate 4 reader hardening, the manifest-v2 analysis profile, and the
+Gate 4 reader hardening, the manifest-v3 analysis profile, and the
 versioned result envelope are complete. Committed canonical result fixtures
 cover clean, truncated, and breached analysis, while adversarial fixtures cover
 trust, predicate, value-shape, adapter, digest, parameter, graph, and

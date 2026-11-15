@@ -148,6 +148,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "seed",
               "principal": "caller",
               "produces": "item",
@@ -161,6 +162,7 @@
                 "unit": "GBP"
               },
               "effect": "irreversible",
+              "fixed_charges": {},
               "name": "pay",
               "principal": "caller",
               "quantity": "value",
@@ -173,7 +175,7 @@
               "value_arg": "amount"
             }
           ],
-          "version": 2
+          "version": 3
         },
         "required_workflows": [
           {
@@ -205,7 +207,7 @@
       }
     ],
     "input": {
-      "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792"
+      "manifest_sha256": "56b6fede5f982a4ff1394f566f96f3d5604f9b014281a49eaaaf3376be995aca"
     },
     "keep_tools": [
       "pay",
@@ -287,15 +289,15 @@
           "steps": 3
         }
       ],
-      "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792",
+      "manifest_sha256": "56b6fede5f982a4ff1394f566f96f3d5604f9b014281a49eaaaf3376be995aca",
       "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
       "reviewer": "synthetic-example-reviewer",
       "schema": "agentmandate.required-workflows/v2",
-      "scope": "caller-supplied annotations; manifest-v2 model only, not business success",
-      "source_sha256": "5e2396636f2df2079dbb9325572e211d998d57e255ef428f5b1554cdf7d3f972"
+      "scope": "caller-supplied annotations; manifest-v3 model only, not business success",
+      "source_sha256": "b14d2b58a986c5e02eb5bd0a8c93b33861f08f0e13a821fbdc0f70f8fb03ba00"
     },
     "schema": "agentmandate.remediation/v6",
-    "scope": "manifest-v2 reachability only; candidates require human selection",
+    "scope": "manifest-v3 reachability only; candidates require human selection",
     "search": {
       "candidates_analyzed": 3,
       "candidates_found": 1,

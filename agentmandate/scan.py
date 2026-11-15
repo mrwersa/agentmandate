@@ -205,7 +205,7 @@ def render(
         lines.append("#")
 
     lines += [
-        "version: 2",
+        "version: 3",
         f"agent: {_yaml_scalar(agent)}",
         "",
         "# REVIEW: set the workload identity this agent runs as.",

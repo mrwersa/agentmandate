@@ -73,7 +73,7 @@ def mandate():
     return loads(
         json.dumps(
             {
-                "version": 2,
+                "version": 3,
                 "agent": "export-agent",
                 "tools": [
                     {
@@ -388,7 +388,7 @@ def test_delegation_ir_projection_is_structural_and_byte_stable(chain, projectio
     assert [edge.relation for edge in graph.edges].count("previous_hop") == len(chain.hops) - 1
     assert [edge.relation for edge in graph.edges].count("has_surface") == 3 * len(chain.hops)
 
-    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v3 profile"):
         _analyse_ir(graph)
 
 
@@ -611,7 +611,7 @@ def test_attachment_reader_and_profile_are_canonical_and_standalone():
         "at_hop",
         "uses_delegation",
     }
-    with pytest.raises(IRFormatError, match="analyzable manifest-v2 profile"):
+    with pytest.raises(IRFormatError, match="analyzable manifest-v3 profile"):
         _analyse_ir(graph)
 
 

@@ -178,7 +178,7 @@ facts, comparable mapping facts, and policy/source identities.
 
 The generic IR reader establishes structure only. The managed profile validator
 establishes its closed semantics. `_analyse_ir` continues to reject the profile
-at the manifest-v2 boundary; only the explicit effective-diff consumer may
+at the manifest-v3 boundary; only the explicit effective-diff consumer may
 combine it with reviewed authority.
 
 ## Delivery gates

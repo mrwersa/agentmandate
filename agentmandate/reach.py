@@ -57,6 +57,7 @@ class Step:
     spent: Decimal | None = None
     unit: str | None = None
     quantity: str | None = None
+    fixed_charges: Mapping[str, Quantity] = field(default_factory=dict)
 
     def render(self) -> str:
         parts = [self.tool]
@@ -65,6 +66,7 @@ class Step:
             detail.append(self.binding)
         if self.spent is not None:
             detail.append(f"{self.spent} {self.unit}")
+        detail.extend(f"{pool}={value}" for pool, value in sorted(self.fixed_charges.items()))
         if detail:
             parts.append("(" + ", ".join(detail) + ")")
         return "".join(parts)
@@ -152,6 +154,7 @@ class _State:
     spend: tuple[tuple[tuple[str, str, int], Decimal], ...] = ()
     # effect class -> calls made so far, tracked only for declared budgets
     effect_calls: tuple[tuple[str, int], ...] = ()
+    fixed_totals: tuple[tuple[str, Decimal], ...] = ()
 
     def count(self, scope: str) -> int:
         for name, value in self.counts:
@@ -166,7 +169,7 @@ class _State:
         return Decimal(0)
 
     def totals(self, tool_quantities: Mapping[str, str]) -> dict[str, Decimal]:
-        totals: dict[str, Decimal] = {}
+        totals: dict[str, Decimal] = dict(self.fixed_totals)
         for (tool, _, _), value in self.spend:
             name = tool_quantities[tool]
             totals[name] = totals.get(name, Decimal(0)) + value
@@ -179,6 +182,7 @@ class _State:
             counts=_freeze_counts(counts),
             spend=self.spend,
             effect_calls=self.effect_calls,
+            fixed_totals=self.fixed_totals,
         )
 
     def calls(self, effect: str) -> int:
@@ -191,6 +195,7 @@ class _State:
             counts=self.counts,
             spend=self.spend,
             effect_calls=tuple(sorted(calls.items())),
+            fixed_totals=self.fixed_totals,
         )
 
     def with_spend(self, tool: str, scope: str, index: int, amount: Decimal) -> _State:
@@ -201,7 +206,14 @@ class _State:
             counts=self.counts,
             spend=_freeze_spend(spend),
             effect_calls=self.effect_calls,
+            fixed_totals=self.fixed_totals,
         )
+
+    def with_fixed_charges(self, charges: Mapping[str, Quantity]) -> _State:
+        totals = dict(self.fixed_totals)
+        for name, value in charges.items():
+            totals[name] = totals.get(name, Decimal(0)) + value.amount
+        return _State(self.counts, self.spend, self.effect_calls, tuple(sorted(totals.items())))
 
 
 def _freeze_counts(counts: dict[str, int]) -> tuple[tuple[str, int], ...]:
@@ -236,7 +248,9 @@ def _best_binding(tool: Tool, state: _State) -> tuple[int, Decimal] | None:
     for index in range(held):
         spent = state.spent_on(tool.name, tool.scope_key, index)
         headroom = tool.ceiling.amount - spent
-        if headroom > 0 and (best is None or headroom > best[1]):
+        if (headroom > 0 or (headroom == 0 and tool.fixed_charges)) and (
+            best is None or headroom > best[1]
+        ):
             best = (index, headroom)
     return best
 
@@ -282,8 +296,9 @@ def _analyse_with_trace(
     # and reserve enough carry digits for at most `limit` additions. Search
     # arithmetic must not inherit a caller's precision, exponent range or traps.
     amounts = [t.ceiling.amount for t in mandate.tools if t.ceiling and t.ceiling.amount]
+    amounts.extend(q.amount for t in mandate.tools for q in t.fixed_charges.values())
     try:
-        with localcontext(_arithmetic_context(amounts, limit)):
+        with localcontext(_arithmetic_context(amounts, 2 * limit)):
             return _walk(mandate, limit, producer_caps=producer_caps, _metrics=_metrics)
     except (DecimalException, ValueError) as exc:
         raise _SearchArithmeticError(
@@ -394,7 +409,8 @@ def _walk(
                                 f"{tool.name} is irreversible and needs no approval, "
                                 f"reachable in {node.depth + 1} call(s)"
                             ),
-                            path=node.path() + (Step(tool=tool.name),),
+                            path=node.path() + (Step(tool=tool.name,
+                                                     fixed_charges=dict(tool.fixed_charges)),),
                         )
                     )
             if tool.principal == "service":
@@ -405,6 +421,9 @@ def _walk(
             step_spent = None
             step_unit = None
             progressed = False
+            if tool.fixed_charges:
+                next_state = next_state.with_fixed_charges(tool.fixed_charges)
+                progressed = True
 
             # A budgeted call moves the walk forward the way spending does.
             # Without this, an irreversible tool that neither mints nor spends
@@ -440,6 +459,7 @@ def _walk(
                 spent=step_spent,
                 unit=step_unit,
                 quantity=tool.quantity if step_spent is not None else None,
+                fixed_charges=dict(tool.fixed_charges),
             )
             if first_reach:
                 reachable_paths[tool.name] = node.path() + (step,)

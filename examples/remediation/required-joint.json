@@ -1,6 +1,6 @@
 {
   "agent": "ceiling-repair",
-  "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792",
+  "manifest_sha256": "56b6fede5f982a4ff1394f566f96f3d5604f9b014281a49eaaaf3376be995aca",
   "reason": "Synthetic requirement for this declared example; no live or business-success evidence.",
   "reviewer": "synthetic-example-reviewer",
   "schema": "agentmandate.required-workflows/v2",

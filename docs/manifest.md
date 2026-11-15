@@ -21,12 +21,18 @@ pip install agentmandate           # JSON only, no dependencies
 
 | Key | Required | Meaning |
 |---|---|---|
-| `version` | no | Schema version. Defaults to `2`. A build rejects a version it does not understand rather than guessing |
+| `version` | with fixed charges | Current schema is integer `3`. It defaults when fixed charges are absent; any `fixed_charges` declaration requires explicit `version: 3`. Older versions are refused |
 | `agent` | yes | The agent this mandate describes |
 | `identity` | no | The workload identity the agent runs as, such as a SPIFFE ID. Recorded, not verified |
 | `limits` | no | Bounds that apply to a whole run |
 | `roles` | no | Role assignments, used by the separation-of-duties check |
 | `tools` | yes | The tools the agent may call. At least one |
+
+Unknown top-level, tool and limit fields are errors. Duplicate JSON and YAML
+keys are rejected instead of choosing one value. This includes duplicate charge
+pool names. Quote decimal amounts to preserve digits through YAML parsing.
+YAML merge keys and explicit overrides are supported: duplicate detection applies
+to keys authored in a mapping, before inherited defaults are expanded.
 
 ## `limits`
 
@@ -73,11 +79,18 @@ tools:
 | `requires` | no | Scopes the agent must already hold to call this. A bare string is accepted |
 | `produces` | no | A scope this call mints a binding to |
 | `unbounded` | no | Whether this tool can be called repeatedly to mint fresh bindings. Defaults to `false` |
-| `quantity` | with a ceiling | Named accounting pool consumed by this tool |
-| `value_arg` | no | Which argument supplies the consumed amount |
+| `quantity` | with a ceiling | Named accounting pool for the variable amount |
+| `value_arg` | no | Which argument supplies the variable consumed amount |
 | `scope_key` | no | What the ceiling is measured against. Required whenever a ceiling is declared |
-| `ceiling` | no | The most this tool may cumulatively spend against one binding of `scope_key` |
+| `ceiling` | no | Cumulative variable amount permitted against one binding of `scope_key`; fixed overhead is separate |
+| `fixed_charges` | no | Named positive `Quantity` values added on each modeled completed call, even when the variable amount is zero |
 | `requires_approval` | no | Whether a human or independent authority must approve. Defaults to `false` |
+
+For example, `fixed_charges: {requests: {amount: "1", unit: request}}`
+adds one request per call. Fixed-only tools need no `value_arg`, `quantity`,
+`ceiling` or `scope_key`. A fixed charge may share the variable pool when its
+unit matches; both amounts count toward the pool's cumulative budget. See the
+[multi-budget example](fixed-call-charges.md) for search, replay and repair rules.
 
 `value_arg` and `ceiling` must be declared together. A ceiling with no value
 argument bounds nothing, and a value argument with no ceiling is unbounded
@@ -156,7 +169,7 @@ is not a reason to skip an approval on something that cannot be undone.
 ## A complete example
 
 ```yaml
-version: 2
+version: 3
 agent: dispute-resolver
 identity: spiffe://bank/agents/dispute-resolver
 

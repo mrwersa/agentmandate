@@ -17,7 +17,7 @@ from agentmandate._ir import (
 )
 
 RICH = """
-version: 2
+version: 3
 agent: operations/team
 identity: spiffe://example/agents/operations
 limits:
@@ -92,9 +92,9 @@ def test_records_preserve_entity_fact_edge_and_source_provenance() -> None:
     assert role_name.evidence[0].location == "/roles/operator~1team"
     assert source.content_sha256 == hashlib.sha256(RICH.encode()).hexdigest()
     assert source.adapter == "agentmandate.manifest"
-    assert source.adapter_version == 3
-    assert sources["source:manifest-v2"].adapter == "agentmandate.manifest-defaults"
-    assert sources["source:manifest-v2"].adapter_version == 2
+    assert source.adapter_version == 4
+    assert sources["source:manifest-v3"].adapter == "agentmandate.manifest-defaults"
+    assert sources["source:manifest-v3"].adapter_version == 3
 
 
 def test_canonical_json_orders_tables_evidence_and_edge_support() -> None:
@@ -158,7 +158,7 @@ def test_mandate_adapter_requires_one_agent_and_every_required_fact() -> None:
 
     with pytest.raises(IRFormatError, match="exactly one agent"):
         _to_mandate(without_agent)
-    with pytest.raises(IRFormatError, match="complete analyzable manifest-v2 predicate set"):
+    with pytest.raises(IRFormatError, match="complete analyzable manifest-v3 predicate set"):
         _to_mandate(without_identity)
 
 

@@ -32,7 +32,7 @@ the choices is in [the agentic AI landscape](docs/agentic-ai-landscape.md).
 
 ## Current delivery snapshot
 
-### Measured planning progress — 24 October 2026
+### Measured planning progress — 15 November 2026
 
 The [initiative ledger](docs/roadmap-progress.json) assigns equal weight to
 all 24 initiatives: delivered = 1, partial = 0.5, and blocked or not started = 0.
@@ -62,6 +62,15 @@ trace-retention review remains deferred. Calling the prepared review brief
 external review has passed. Further agent review cannot close that gate.
 
 ### Delivery decisions and current frontier
+
+**Fixed per-call quantity charges — 15 November 2026:**
+[Fixed charges](docs/fixed-call-charges.md) let one completed call consume
+several named pools alongside its variable amount. Search, replay, IR, workflows,
+release comparison and repair rechecks share that accounting; deleting a charge
+from a retained tool requires review. Manifest v3 and current synthetic fixtures
+replace v2, while original evidence bytes remain unchanged. This expands the
+partial quantities initiative; conversion, collateral, gross/net relations and
+input-dependent rates remain open. The ledger stays at 50%.
 
 **Release repairs with reviewed proposal evidence — 24 October 2026:**
 [Release-aware repairs](docs/release-remediation.md#use-reviewed-proposal-evidence)

@@ -72,7 +72,7 @@ record; it is not a signature.
 
 ## Read the integrity and review results separately
 
-The command checks file digests, validates the existing closed manifest-v2 IR
+The command checks file digests, validates the existing closed manifest-v3 IR
 profile, joins its source digest to the exact manifest bytes, and reconstructs
 the mandate to compare its meaning with the manifest. It accepts the profile
 already used by `reach --ir`, including its accepted, exact fact requirements.

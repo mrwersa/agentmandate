@@ -144,6 +144,7 @@
           "tools": [
             {
               "effect": "read",
+              "fixed_charges": {},
               "name": "seed",
               "principal": "caller",
               "produces": "item",
@@ -157,6 +158,7 @@
                 "unit": "GBP"
               },
               "effect": "irreversible",
+              "fixed_charges": {},
               "name": "pay",
               "principal": "caller",
               "quantity": "value",
@@ -169,7 +171,7 @@
               "value_arg": "amount"
             }
           ],
-          "version": 2
+          "version": 3
         },
         "status": "no_reachable_breach_within_bound"
       }
@@ -185,14 +187,14 @@
       }
     ],
     "input": {
-      "manifest_sha256": "d2842848fa6ec9aea1fe36491e45a5e4aa603c79d60b6a2191d624cfc060d792"
+      "manifest_sha256": "56b6fede5f982a4ff1394f566f96f3d5604f9b014281a49eaaaf3376be995aca"
     },
     "keep_tools": [
       "pay",
       "seed"
     ],
     "schema": "agentmandate.remediation/v6",
-    "scope": "manifest-v2 reachability only; candidates require human selection",
+    "scope": "manifest-v3 reachability only; candidates require human selection",
     "search": {
       "candidates_analyzed": 3,
       "candidates_found": 1,

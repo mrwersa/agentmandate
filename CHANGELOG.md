@@ -4,6 +4,48 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.46.0 - 2026-11-15
+
+### Changed
+
+- Manifest version 3 replaces version 2. Older explicit versions are refused;
+  fixed-charge declarations require explicit `version: 3` so older builds
+  cannot silently discard them. Unknown fields, duplicate JSON/YAML keys and
+  non-integer schema versions are rejected. There is no legacy reader.
+  YAML merge defaults and explicit overrides remain supported; only duplicate
+  authored keys are refused.
+- `Tool` is no longer hashable because it owns a copied, mutable charge mapping,
+  including when empty. Frozen dataclasses do not freeze nested mappings;
+  declarations must remain unchanged during analysis.
+- The manifest IR adapter is now 4 and its defaults adapter is 3. Current
+  profiles include a fixed-charge fact for each tool and validate units across
+  all contributions to a pool. Generic IR and result envelope versions remain 2.
+  Scenario witnesses use `agentmandate.scenarios/v3` to preserve structured costs.
+  Default-evidence locations name the current manifest schema as well.
+- Current synthetic manifests, workflow pins, captures and result baselines are
+  regenerated for the new model. Original captured evidence and acceptance
+  records retain their bytes; no historical acceptance covers new charges.
+
+### Added
+
+- `Tool.fixed_charges` declares positive exact quantities consumed on every
+  modeled completed call, alongside its existing variable quantity. A call
+  can consume request, record and compute pools together. Zero variable amount
+  and exhausted variable headroom do not remove those fixed charges.
+- Reachability, replay, required paths and IR account for every pool separately,
+  including fixed and variable contributions to the same pool. Witnesses show
+  the fixed costs. Decimal arithmetic remains independent of caller precision.
+  Direct workflow checks refuse incompatible fixed/variable units before
+  accumulation, including shared pools without a declared budget.
+- Release comparison reports fixed-cost changes even for unreachable tools.
+  Removing accounting from a retained tool requires review; deleting the whole
+  tool remains an authority reduction. Repairs retain fixed rates and recheck
+  every budget; lowering a variable ceiling does not erase a fixed-cost breach.
+- Stateless exporters explicitly disclose fixed-cost losses. Scalar accounting
+  and handover readers refuse additional fixed-cost models outside their evidence
+  domains. An exhaustive amount/binding oracle and a three-budget example cover
+  the new search behavior.
+
 ## 0.45.0 - 2026-10-24
 
 ### Added

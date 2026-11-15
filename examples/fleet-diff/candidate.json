@@ -6,11 +6,11 @@
       "id": "release/prod",
       "ir": {
         "path": "examples/fleet-diff/candidate-release/authority-ir.json",
-        "sha256": "beeeac5db5d995b07d53dbb63ef2b6001147756cd10adfb40fe1e5e13e99ed9d"
+        "sha256": "4a20bfd95c10c8f645a9b9e9aee740683caa266736d54e8125cd6f07d17d4f5f"
       },
       "manifest": {
         "path": "examples/fleet-diff/candidate-release/manifest.json",
-        "sha256": "cc7827af7eeaf0bf1a0f81e22e1320e5b76bbc13ff2dee39447d2af1c65e88f6"
+        "sha256": "1468ef8583a5696629bfe518907c7d8d93c99632c5bfe08c62bad5f23ca1ee77"
       },
       "owner": "release-security",
       "repository": "release-repo",
@@ -27,11 +27,11 @@
       "id": "release/staging",
       "ir": {
         "path": "examples/fleet-inventory/release-repo/authority-ir.json",
-        "sha256": "bfa60aba12d40217fef73e90d83dc9f8470edbb59482c9330aafd1f2625367cb"
+        "sha256": "b8cde40efd9c2e7afbe3716d9faf3a814e62021a094c16f6a4426594edcf057c"
       },
       "manifest": {
         "path": "examples/fleet-inventory/release-repo/manifest.json",
-        "sha256": "f3b87c9c8291f1908199172015a6c87ef6229d4dd29951ec0417023d8456ea3e"
+        "sha256": "c1df5b9b54546255a0e579019db74e8d43406fb31e11d651111be24195942dad"
       },
       "owner": "release-security",
       "repository": "release-repo",
@@ -48,11 +48,11 @@
       "id": "billing/prod",
       "ir": {
         "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
-        "sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d"
+        "sha256": "bc5d6ff86793de14c275776f10d9a5835b78aab6e3f1f7aa1a033bf528d5a3f7"
       },
       "manifest": {
         "path": "examples/fleet-inventory/billing-repo/manifest.json",
-        "sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810"
+        "sha256": "1ced5e23f2a5165226b34238b729c2f080a034f05238a7af01d9afc4107adb6a"
       },
       "owner": "billing-security",
       "repository": "billing-repo",
@@ -69,11 +69,11 @@
       "id": "billing/staging",
       "ir": {
         "path": "examples/fleet-inventory/billing-repo/authority-ir.json",
-        "sha256": "aabbfa3c3dcc9280cfa819fe1c5f1fafe428c68de53bf22b837da712e80ce95d"
+        "sha256": "bc5d6ff86793de14c275776f10d9a5835b78aab6e3f1f7aa1a033bf528d5a3f7"
       },
       "manifest": {
         "path": "examples/fleet-inventory/billing-repo/manifest.json",
-        "sha256": "f1cd7753597482ce0c74da527da413e7c04fbe5be569b61ff1bfbc3dc6657810"
+        "sha256": "1ced5e23f2a5165226b34238b729c2f080a034f05238a7af01d9afc4107adb6a"
       },
       "owner": "billing-security",
       "repository": "billing-repo",

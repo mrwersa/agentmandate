@@ -195,9 +195,10 @@ def replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
     ):
         raise ValueError("observed quantity amounts must be finite non-negative Decimal values")
     amounts = [t.ceiling.amount for t in mandate.tools if t.ceiling is not None]
+    amounts.extend(q.amount for t in mandate.tools for q in t.fixed_charges.values())
     amounts.extend(o.value for o in observations if o.value is not None)
     try:
-        with localcontext(_arithmetic_context(amounts, len(observations))):
+        with localcontext(_arithmetic_context(amounts, 2 * len(observations))):
             return _replay(mandate, observations)
     except DecimalException as exc:
         raise ValueError("replay quantities exceed supported exact decimal arithmetic") from exc
@@ -250,7 +251,9 @@ def _replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 )
             )
 
-        if observation.errored and (tool.effect in {WRITE, IRREVERSIBLE} or tool.spends_value):
+        if observation.errored and (
+            tool.effect in {WRITE, IRREVERSIBLE} or tool.spends_value or tool.fixed_charges
+        ):
             violations.append(
                 Violation(
                     "errored_effect",
@@ -341,6 +344,8 @@ def _replay(mandate: Mandate, observations: list[Observation]) -> Conformance:
                 )
             )
 
+        for name, charge in tool.fixed_charges.items():
+            totals[name] = totals.get(name, Decimal(0)) + charge.amount
         effect_counts[tool.effect] = effect_counts.get(tool.effect, 0) + 1
         effect_cap = mandate.limits.effects.get(tool.effect)
         if effect_cap is not None and effect_counts[tool.effect] > effect_cap:

@@ -8,8 +8,10 @@ modes are removed rather than carried as compatibility code.
 
 - Patch releases preserve supported public Python and CLI contracts. Breaking
   changes require a minor release and explicit changelog notes.
-- Manifest version 2 is current and is the default when omitted. Unsupported
-  versions fail closed; there is no version-1 conversion in the package.
+- Manifest version 3 is current and defaults when omitted for declarations
+  without fixed charges. `fixed_charges` requires explicit `version: 3`.
+  Versions 1 and 2, unknown fields and duplicate keys are refused; there is no
+  compatibility reader or automatic conversion in the package.
 - Exit codes remain `0` clean, `1` finding and `2` usage, I/O or malformed or
   unsupported input. A repair proposal or recorded acceptance does not erase
   the original analysis finding.
@@ -21,7 +23,7 @@ modes are removed rather than carried as compatibility code.
 Pin the current minor series when integrating it:
 
 ```text
-agentmandate~=0.45.0
+agentmandate~=0.46.0
 ```
 
 ## Current quantity model
@@ -38,22 +40,31 @@ manifest/replay inputs and remediation v1–v5 presentation modes are unsupporte
 There are no aliases or compatibility readers. See the
 [quantity contract](docs/quantity-budgets.md) for examples and exclusions.
 
-The model covers one quantity per tool call, per-tool/per-binding ceilings,
-mandate-wide named budgets and effect-class call counts. It does not cover
-several simultaneous charges on one call, timed rates, concurrent gauges,
+The model covers one variable quantity per tool plus positive `fixed_charges`
+in any named pools on each modeled completed call. Per-tool/per-binding ceilings
+bound variable consumption only; mandate-wide budgets add fixed and variable
+amounts. Fixed charges remain on zero-variable calls. Effect-class call counts
+are separate. The model does not cover multiple variable amount arguments,
+timed rates, concurrent gauges,
 negative consumption, replenishment or argument-dependent production.
+
+`Tool` is no longer hashable: its copied `fixed_charges` mapping is mutable,
+even when empty. Dataclass freezing is shallow; it prevents field reassignment,
+not edits inside mappings. Witness charge mappings are also copied. Use tool
+names as lookup keys and keep declarations unchanged during analysis. For a
+complete contract identity, use the canonical IR digest rather than Python's hash.
 
 ## Current artifact boundaries
 
 | Family | Current contract |
 |---|---|
-| Manifest | `version: 2`; public `Mandate`, `Tool`, `Limits`, `Quantity` |
+| Manifest | `version: 3`; public `Mandate`, `Tool`, `Limits`, `Quantity` |
 | Authority IR and hashed result | `ir_version: 2`, `result_version: 2`; private Python records |
-| Manifest adapters | Manifest adapter 3, defaults adapter 2 |
+| Manifest adapters | Manifest adapter 4, defaults adapter 3; fixed-charge facts and pool unit checks |
 | Structural validation | `agentmandate.validation/v1`; structure only, not accepted evidence |
 | Remediation | `agentmandate.remediation/v6` for every repair option |
 | Required workflows | `agentmandate.required-workflows/v2` |
-| Scenarios and verify presentation | `agentmandate.scenarios/v2`, `agentmandate.verify/v2` |
+| Scenarios and verify presentation | `agentmandate.scenarios/v3`, `agentmandate.verify/v2` |
 | Conditions and delegations | Current input versions retain independent lifecycles; result presentations use `/v2` |
 | Producer and continuity results | `agentmandate.producers/v2`, `agentmandate.continuity/v2`, hashed result version 2 |
 | Principal, revision and scalar handover results | Current `/v2` presentations; scalar policy version 2 includes its dimension |

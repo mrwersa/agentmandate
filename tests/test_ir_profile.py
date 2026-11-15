@@ -87,6 +87,7 @@ def test_manifest_predicate_registry_is_closed_and_profile_round_trips() -> None
         ("scope", "name"),
         ("tool", "ceiling"),
         ("tool", "quantity"),
+        ("tool", "fixed_charges"),
         ("tool", "effect"),
         ("tool", "name"),
         ("tool", "principal"),
@@ -215,7 +216,7 @@ def test_profile_requires_supported_adapters_and_exact_source_digests() -> None:
         ),
     )
     changed.validate()
-    with pytest.raises(IRFormatError, match="outside the analyzable manifest-v2 profile"):
+    with pytest.raises(IRFormatError, match="outside the analyzable manifest-v3 profile"):
         _to_mandate(changed)
 
     wrong_digest = replace(mandate_source, semantic_sha256="0" * 64)
@@ -236,7 +237,7 @@ def test_profile_rejects_missing_or_false_default_provenance() -> None:
     with pytest.raises(IRFormatError, match="evidence is empty"):
         _to_mandate(without_evidence)
 
-    schema_evidence = Evidence("source:manifest-v2", "manifest:v1#/defaults/tool.effect")
+    schema_evidence = Evidence("source:manifest-v3", "manifest:v3#/defaults/tool.effect")
     false_default = replace_fact(
         value,
         effect.subject,
@@ -283,7 +284,7 @@ def test_profile_requires_exact_sources_and_reviewed_manifest_support() -> None:
         value,
         effect.subject,
         "effect",
-        evidence=(Evidence("source:manifest-v2", "/defaults/effect"),),
+        evidence=(Evidence("source:manifest-v3", "/defaults/effect"),),
     )
     with pytest.raises(IRFormatError, match="lacks reviewed manifest support"):
         _to_mandate(schema_only)
@@ -387,13 +388,13 @@ def test_profile_requires_the_run_constraint_and_default_digest() -> None:
     with pytest.raises(IRFormatError, match="requires the run constraint"):
         _to_mandate(changed)
 
-    defaults = next(source for source in value.sources if source.id == "source:manifest-v2")
+    defaults = next(source for source in value.sources if source.id == "source:manifest-v3")
     wrong_digest = replace(defaults, semantic_sha256="0" * 64)
     changed = replace(
         value,
         sources=tuple(wrong_digest if source == defaults else source for source in value.sources),
     )
-    with pytest.raises(IRFormatError, match="source:manifest-v2 semantic_sha256"):
+    with pytest.raises(IRFormatError, match="source:manifest-v3 semantic_sha256"):
         _to_mandate(changed)
 
 

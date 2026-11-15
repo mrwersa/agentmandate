@@ -1,8 +1,6 @@
 {
-  "scope": "Synthetic CLI replay hashes, not deployment or acceptance evidence.",
   "cases": [
     {
-      "name": "joint-grid",
       "argv": [
         "remediate",
         "examples/release-remediation/proposed.json",
@@ -20,11 +18,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "f5bfa536225a874b10eed4ea5c280934fce4fdf0115bd427e45072df5c923708",
-      "stderr": ""
+      "name": "joint-grid",
+      "stderr": "",
+      "stdout_sha256": "265510c02c6aadcfb5cd30ae28fa17de417772697f57de904fc2b2b39532b517"
     },
     {
-      "name": "ceiling-discovery",
       "argv": [
         "remediate",
         "examples/release-remediation/ceiling-only.json",
@@ -41,11 +39,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "d32f2799739790dc1e0cde49813ace397735ab6d0735dfdbbbd54980dece9979",
-      "stderr": ""
+      "name": "ceiling-discovery",
+      "stderr": "",
+      "stdout_sha256": "ed9769418013919cafa8d9cb45737ab75318ec3ed68152ad07234ed7b0ac16ba"
     },
     {
-      "name": "retained-added-tool",
       "argv": [
         "remediate",
         "examples/release-remediation/proposed.json",
@@ -62,11 +60,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "ce5b235b6fdd38d2dbe6bec50de600578b1e85d15c61f92bd54492d4fb271d02",
-      "stderr": ""
+      "name": "retained-added-tool",
+      "stderr": "",
+      "stdout_sha256": "ff3deaffbd225ded7f15aa8d93943d219552cce2034a9b4df4b722c8312f10d0"
     },
     {
-      "name": "broken-required-path",
       "argv": [
         "remediate",
         "examples/release-remediation/breaking.json",
@@ -81,11 +79,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "6345d217494c2894f7f8e6c8632f50b628466c6265dff94871f20dab0d3b9260",
-      "stderr": ""
+      "name": "broken-required-path",
+      "stderr": "",
+      "stdout_sha256": "788a150d9d76f4c41baf74e52d5a6b4d04a51fabaa4e0c458db17755bc0c37e6"
     },
     {
-      "name": "clean-release",
       "argv": [
         "remediate",
         "examples/release-remediation/released.json",
@@ -100,11 +98,11 @@
         "--json"
       ],
       "exit": 0,
-      "stdout_sha256": "e746f5ef2771ed25e1d5632aaf1278541d9a09caf87b0a0d87dcef8a0e7d7a2b",
-      "stderr": ""
+      "name": "clean-release",
+      "stderr": "",
+      "stdout_sha256": "d7b14d6eb8ae17c009812db7b03307da8932f67dae0e8f718c667fb3015ed6c9"
     },
     {
-      "name": "evaluation-cutoff",
       "argv": [
         "remediate",
         "examples/release-remediation/ceiling-only.json",
@@ -123,11 +121,11 @@
         "--json"
       ],
       "exit": 1,
-      "stdout_sha256": "8661240a70d72e7d646108f4acb3a25849a52bcb1b14613a7e0f1a74a4a33f94",
-      "stderr": ""
+      "name": "evaluation-cutoff",
+      "stderr": "",
+      "stdout_sha256": "8ed0a3d718587749f649388a0357a4f255e0e58b9310b76c08339a8583b3a90f"
     },
     {
-      "name": "mismatched-annotation",
       "argv": [
         "remediate",
         "examples/release-remediation/proposed.json",
@@ -142,8 +140,10 @@
         "--json"
       ],
       "exit": 2,
-      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stderr": "error: required workflows do not match the exact baseline manifest\n"
+      "name": "mismatched-annotation",
+      "stderr": "error: required workflows do not match the exact baseline manifest\n",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
-  ]
+  ],
+  "scope": "Synthetic CLI replay hashes, not deployment or acceptance evidence."
 }

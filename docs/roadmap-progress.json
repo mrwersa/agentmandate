@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-24",
+  "as_of": "2026-11-15",
   "method": "Equal initiative weights: delivered=1, partial=0.5, blocked/not_started=0. No estimate of effort or elapsed time.",
   "phases": [
     {
@@ -64,7 +64,7 @@
           "title": "Bounded producers and quantities",
           "status": "partial",
           "evidence": "docs/bounded-producer-gate-4-review.md",
-          "reason": "Finite cardinality and named additive quantity budgets are delivered. Conversion, collateral and gross/net quantity relations still lack a reviewed operational input domain."
+          "reason": "Finite cardinality, named additive budgets and multiple fixed charges alongside one variable amount per call are delivered. Conversion, collateral and gross/net quantity relations still lack a reviewed operational input domain."
         },
         {
           "title": "Reviewed data-flow labels",

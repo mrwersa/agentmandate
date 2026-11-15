@@ -53,11 +53,11 @@
       "successful_candidates": 0
     },
     "input": {
-      "manifest_sha256": "94f31bf0d2f2a2ea3cd28510dd1cddbb3ce7e1f55a61bff01d86c591fde09d0f"
+      "manifest_sha256": "b4351f2f02ed5a6be4544f49ba4cf49a2a7ccb41a443897c1328f429982865ba"
     },
     "keep_tools": [],
     "schema": "agentmandate.remediation/v6",
-    "scope": "manifest-v2 reachability only; candidates require human selection",
+    "scope": "manifest-v3 reachability only; candidates require human selection",
     "search": {
       "candidates_analyzed": 0,
       "candidates_found": 0,

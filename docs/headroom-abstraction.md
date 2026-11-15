@@ -1,7 +1,7 @@
 # Why the search spends the available headroom
 
 `reach` does not try every possible consumption amount. It chooses the binding
-with the largest remaining ceiling and spends that headroom. For manifest v2, this
+with the largest remaining ceiling and spends that headroom. For manifest v3, this
 preserves each named quantity's greatest reachable consumption and the existence
 and shortest call length of its `quantity_budget` breach within the selected
 depth. The argument depends on the model below; it is not a claim about arbitrary
@@ -10,7 +10,9 @@ tool input schemas or provider behavior.
 For example, one case has a £5 cumulative refund ceiling. Refunding £2 and then
 £3 cannot exceed what one £5 refund already reaches, and uses an extra call.
 Repeated refunds matter when a producer can create another case, not because
-splitting one case's allowance creates more value.
+splitting one case's allowance creates more variable value. A fixed charge
+can make the extra call consume more requests or compute; those calls remain
+explicit in the search.
 
 ## Assumptions in the current model
 
@@ -30,8 +32,8 @@ validated consumer, depends on binding count rather than spending.
 
 `limits.quantities` and `limits.effects` are properties the search checks for a
 breach, not guards that stop exploration. Approval and principal labels do not
-alter which spending calls the kernel explores. Budgeted calls still count when
-they spend zero or have no remaining quantity headroom. Each named quantity
+alter which spending calls the kernel explores. Effect-budgeted and fixed-charge calls still count when
+they spend zero or have no remaining variable quantity headroom. Each named quantity
 requires one consistent unit; resolve structural and per-quantity unit errors
 before relying on the model.
 The argument concerns exact arithmetic on parsed non-negative quantities.
@@ -54,6 +56,11 @@ Calls to other tools leave this tool's account unchanged. A zero ceiling adds
 zero in either walk. This establishes the inequality separately for every tool
 at every prefix, including calls that produce a binding before spending.
 
+On the same call sequence, each tool adds exactly the same constant vector of
+fixed charges in both walks, regardless of amount or selected binding. Adding
+these equal fixed totals preserves every prefix inequality. Charged calls
+remain transitions even when the chosen variable amount is zero.
+
 Within each named pool, summing the inequalities for tools assigned to that
 pool shows that greedy consumption is at least the original sequence's
 consumption at each prefix. Amounts in different pools are never summed.
@@ -66,7 +73,8 @@ the full amount-choice model lacks. The bounded maximum and minimum breach
 length agree in both directions.
 
 No-change calls may be omitted from a queued path. They cannot enable a later
-call or add spend; an effect-budgeted call changes its counter and is retained.
+call or add consumption; effect-budgeted and fixed-charge calls change tracked
+state and are retained.
 Visiting an identical state at its shortest depth also leaves at least as much
 of the remaining call budget as visiting it later. These reductions preserve
 the existential result, not every concrete trace or allocation of amounts.
@@ -75,11 +83,12 @@ the existential result, not every concrete trace or allocation of amounts.
 
 Suppose paying **exactly £1** unlocks a second tool that can spend £4, while the
 first tool's ceiling is £2. A greedy £2 payment does not unlock that tool; a £1
-payment can reach £5. This amount-dependent example falls outside manifest v2
+payment can reach £5. This amount-dependent example falls outside manifest v3
 and demonstrates why the enablement assumption matters. Do not translate such
 a workflow into unconditional scope production and then apply this argument.
 
-Fixed request amounts, shared cross-tool per-binding ceilings, binding-specific
+Minimum or exact variable request amounts, input-dependent charges, shared
+cross-tool per-binding ceilings, binding-specific
 permissions, value conversion, negative/net spending and arbitrary conditions
 need their own models and arguments. The result here does not establish
 business-scenario preservation, live enforcement, state continuity, or general
@@ -90,8 +99,9 @@ flags. A clean bounded result retains the [ordinary depth limit](search-performa
 ## Exact search arithmetic
 
 The search uses an isolated Decimal context sized from the nonzero tool
-ceilings and call depth. Aligning the ceiling digits gives a width w; at most D
-calls add at most D ceilings. Reserving w plus the bit length of D is a
+ceilings, fixed charges and call depth. Aligning these amounts gives a width w.
+Within any one pool, at most D calls contribute at most 2D terms: one fixed
+charge and one variable amount per call. Reserving w plus the bit length of 2D is a
 conservative allowance for the sum's carry digits, with a minimum precision of
 28 digits. Subtraction and accumulation are exact within Decimal's representable
 range; inexact arithmetic is trapped. The caller's precision, rounding, exponent
@@ -132,7 +142,7 @@ exit 2 reports invalid reference inputs or I/O errors.
 The report is maintenance data, not an authority artifact.
 
 The [recorded run](headroom-abstraction-results.json) checks **879 synthetic
-cases**, with **15,404 reference states**, **27,403 examined transitions** and
+cases without fixed charges**, with **15,404 reference states**, **27,403 examined transitions** and
 **14,454 positive amount choices**; it finds no mismatches. The Cartesian grid
 covers eight graph shapes, three ceilings, three quantity budgets, three budget
 settings and four depths. Fifteen additional cases cover finite producer caps.
@@ -156,3 +166,20 @@ paths; the report makes no claim that all maxima are jointly attainable.
 `tests/test_quantities.py` checks this extension against an independent Fraction
 sequence oracle over separate/shared pools, matching/different units, bounded
 and unbounded production, zero/fractional amounts and three depths.
+
+## Constant charges alongside variable amounts
+
+The same argument permits a fixed positive vector on every completed call.
+The vector can share a pool with the variable amount or charge separate pools;
+its entries do not consume variable per-binding headroom. A call with no variable
+headroom can still increase fixed totals, so removing it as a no-change read
+would be unsound. Producer-cap rejection occurs before the modeled completed
+call and adds no charge.
+
+`tests/test_fixed_charges.py` adds 96 independent Fraction-oracle comparisons.
+They enumerate every integer amount, including zero, on every held binding,
+across four depths, bounded/unbounded producers, zero/positive ceilings, shared/
+separate pools and producer/consumer/both charge placement. The oracle imports
+no greedy helpers and compares componentwise maxima and shortest pool-breach
+lengths. These checks are separate from the recorded 879-case no-fixed-charge
+study. Neither check establishes input-dependent rates or runtime accounting.

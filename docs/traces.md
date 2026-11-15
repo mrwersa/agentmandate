@@ -71,6 +71,11 @@ That is the correct outcome rather than an inconvenience. The trace genuinely
 does not establish that the approval held, so reporting a pass would be a
 claim the evidence never supported.
 
+For completed calls, fixed charges are derived from the selected manifest once
+per retained execution row. Do not add separate charge rows or encode fixed
+overhead as the variable amount. Zero-amount calls still incur their fixed
+costs. See [fixed call charges](fixed-call-charges.md).
+
 ## Trace grouping and execution identity
 
 Spans are partitioned by `traceId` and each trace is verified independently.
@@ -92,7 +97,8 @@ call format; the replay cannot recover an execution that the importer deduplicat
 | `gen_ai.operation.name` is not `execute_tool` | excluded | Instrumentations often attach `gen_ai.tool.name` to the **chat** span that requested the call. Counting it doubles the value of one refund |
 | A repeat of a `gen_ai.tool.call.id` within one trace | excluded | One call instrumented at both client and server is one call |
 | Status is an error, on an **effect-bearing** tool | **carried as `errored`** | see below |
-| Status is an error, on a read | carried, no finding | A read that failed changed nothing |
+| Status is an error, on a charged read | carried as `errored` | Consumption is unresolved |
+| Status is an error, on a read with no quantity consumption | carried, no finding | No modeled charge or write is in dispute |
 
 Every exclusion is counted and reported rather than silently dropped.
 
@@ -102,7 +108,7 @@ OpenTelemetry's error status means the **operation** ended with an error. It
 does not establish that an irreversible effect failed to commit, and a timeout
 is precisely the case where the write may already have landed.
 
-So an errored write or value-bearing call produces an `errored_effect` finding
+So an errored write, variable-consuming call or fixed-charge call produces an `errored_effect` finding
 and a non-zero exit:
 
 ```text
@@ -113,7 +119,8 @@ VIOLATION  errored_effect   issue_refund   line 2
            authoritative effect log.
 ```
 
-Its value is not accumulated either, because whether it was spent is exactly
+Its variable amount and fixed charges are not accumulated, because whether
+they were consumed is exactly
 what the evidence fails to establish. Retain authoritative evidence of whether
 the effect committed. The current OTel adapter has no `committed` mapping;
 adding an application attribute alone does not resolve `errored_effect`.

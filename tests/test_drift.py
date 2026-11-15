@@ -10,7 +10,7 @@ from agentmandate.drift import compare_source
 from agentmandate.inventory import InventoryError
 
 MANIFEST = """
-version: 2
+version: 3
 agent: dispute-resolver
 limits:
   quantities: {value: { amount: 500, unit: GBP }}

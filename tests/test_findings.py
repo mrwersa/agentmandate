@@ -185,7 +185,7 @@ def test_more_than_one_breach_is_summarised_rather_than_drawn() -> None:
     # Confirm the summary line rather than assuming a fixture has two.
     mandate = loads(
         """
-        version: 2
+        version: 3
         agent: multi
         limits:
           quantities: {value: { amount: 100, unit: GBP }}
@@ -219,7 +219,7 @@ def test_a_hostile_tool_name_cannot_inject_graph_syntax() -> None:
     # for exactly this reason; a Mermaid label is the same exposure.
     mandate = loads(
         """
-        version: 2
+        version: 3
         agent: victim
         limits: { quantities: {value: { amount: 100, unit: GBP }}, depth: 6 }
         tools:
@@ -243,7 +243,7 @@ def test_a_hostile_tool_name_cannot_inject_graph_syntax() -> None:
 def test_the_breach_detail_is_escaped_too() -> None:
     mandate = loads(
         """
-        version: 2
+        version: 3
         agent: victim
         limits: { quantities: {value: { amount: 10, unit: GBP }}, depth: 4 }
         tools:
@@ -340,7 +340,7 @@ def test_every_manifest_spelling_anchors_at_the_tool(tmp_path: Path, style: str)
                 + " }\n"
             )
         text = (
-            "version: 2\nagent: dispute-resolver\n"
+            "version: 3\nagent: dispute-resolver\n"
             "limits: { quantities: {value: { amount: 500, unit: GBP }}, depth: 8 }\n"
             f"tools:\n{rows}"
         )
@@ -368,7 +368,7 @@ def test_a_comma_inside_a_quoted_value_does_not_invent_a_tool(
 
     path = tmp_path / "mandate.yaml"
     path.write_text(
-        "version: 2\n"
+        "version: 3\n"
         "tools:\n"
         "  - { name: seed, effect: read,\n"
         '      description: "raises a case, name: bogus" }\n'

@@ -51,6 +51,11 @@ def stateful_losses(mandate, target):
     if mandate.roles:
         loss("roles", mandate.agent, "Role views and maker-checker analysis are not compiled.")
     for tool in sorted(mandate.tools, key=lambda t: t.name):
+        if tool.fixed_charges:
+            loss(
+                "tool.fixed_charges", tool.name,
+                "Fixed per-call consumption requires execution history and accounting.",
+            )
         if tool.requires:
             loss(
                 "tool.requires",
